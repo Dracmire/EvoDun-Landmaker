@@ -203,11 +203,14 @@
     cx.imageSmoothingEnabled = false;
     cx.drawImage(img, 0, 0, W, H);
     const d = cx.getImageData(0, 0, W, H).data, el = [];
+    let semi = 0;
+    for (let i = 0; i < W * H; i++) if (d[i * 4 + 3] !== 255) semi++;
+    const warnings = semi ? [`${semi} pixels have alpha < 255: canvas premultiplies alpha, so their RGB values are not read exactly.`] : [];
     for (let i = 0; i < W * H; i++) {
       const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2];
       const v = channel === 'r' ? r : channel === 'g' ? g : channel === 'b' ? b : 0.299 * r + 0.587 * g + 0.114 * b;
       el.push(v / 255 * 9 + 1);
     }
-    return { format: 'evodun-pack/0.1', name: name || 'Image', width: W, height: H, elevation: el, masks: {}, markers: [] };
+    return { format: 'evodun-pack/0.1', name: name || 'Image', width: W, height: H, elevation: el, masks: {}, markers: [], warnings };
   };
 })(window.EVO = window.EVO || {});
