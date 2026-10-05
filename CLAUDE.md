@@ -44,14 +44,16 @@ incursion border; stake and way-back path visible.
 4. Technique B rounds the outer corners of the slice.
 5. In compare mode the three panels are narrow in isometric views.
 6. Only two sources: Snake Mountain and filler noise. Missing: Shrine-Pier pack and real 256x256 maps.
-7. Unverified: image loading, mouse drag/zoom, the noise pack. Only checked: render of the three
-   techniques, two presets, overlays, mobile width.
+7. Verified in headless Chromium (point 1): image loading, mouse drag/zoom/pan, the noise pack. Not
+   verified: touch input, non-Chromium browsers, GPU timings. Measurements are in `docs/measurements.md`.
+8. Box technique: light vertical stripes along the front edge of the slice (seen on the noise pack).
+   Cause not investigated; to be fixed in point 3.
 
 ## Pending, in this order
-1. Verify item 7 and fix what fails.
+1. (Done, PR #1) Verify item 7 and fix what fails.
 2. Channel input: a pack or image can supply zone/terrace ids and masks (path, vegetation, POIs) in
    addition to elevation.
-3. Fix items 1, 2 and 4.
+3. Fix items 1, 2, 4 and 8.
 4. Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.
    Parked: RuleTile skin and modular kits.
 
