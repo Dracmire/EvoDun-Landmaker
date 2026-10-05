@@ -1,6 +1,6 @@
 # Measurements
 
-Both measurements were taken in headless Chromium 141-era (Playwright 1.56, `chromium-1194`) on `file://`,
+Both measurements were taken in headless Chromium 141 (Playwright 1.56, `chromium-1194`) on `file://`,
 software rasteriser (no GPU), on the state of the repo at PR #1. Treat timings as ±30 %.
 
 ## 1. Timing (ms)
