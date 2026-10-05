@@ -22,7 +22,13 @@
   const st = { pack: 'snake', mode: 'compare', tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0;
 
-  function addPack(id, label, pack) { packs[id] = { label, pack }; const o = document.createElement('option'); o.value = id; o.textContent = label; $('#src').appendChild(o); }
+  function setPack(id, label, pack) {
+    packs[id] = { label, pack };
+    let o = [...$('#src').options].find((x) => x.value === id);
+    if (!o) { o = document.createElement('option'); o.value = id; $('#src').appendChild(o); }
+    o.textContent = label;
+  }
+  function message(text) { const m = $('#msg'); m.textContent = text || ''; m.hidden = !text; }
 
   function build() {
     const sl = $('#sliders');
@@ -58,7 +64,7 @@
       tb.appendChild(b);
     }
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
-    $('#src').addEventListener('change', (e) => { st.pack = e.target.value; invalidate(true); });
+    $('#src').addEventListener('change', (e) => { st.pack = e.target.value; message((packs[st.pack].pack.warnings || []).join(' ')); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadImage(e.target.files[0]));
     $('#chan').addEventListener('change', () => { if (lastImg) useImage(); });
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
@@ -81,15 +87,15 @@
   let lastImg = null;
   function loadImage(f) {
     if (!f) return;
-    const img = new Image();
-    img.onload = () => { lastImg = { img, name: f.name }; useImage(); };
-    img.src = URL.createObjectURL(f);
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); lastImg = { img, name: f.name }; useImage(); };
+    img.onerror = () => { URL.revokeObjectURL(url); message(`Could not read "${f.name}" as an image.`); };
+    img.src = url;
   }
   function useImage() {
     const pack = E.imagePack(lastImg.img, $('#chan').value, 96, lastImg.name);
-    packs.image = { label: 'Image: ' + lastImg.name, pack };
-    if (![...$('#src').options].some((o) => o.value === 'image')) { const o = document.createElement('option'); o.value = 'image'; $('#src').appendChild(o); }
-    [...$('#src').options].find((o) => o.value === 'image').textContent = packs.image.label;
+    setPack('image', 'Image: ' + lastImg.name, pack);
+    message(pack.warnings.join(' '));
     $('#src').value = 'image'; st.pack = 'image'; invalidate(true);
   }
 
@@ -123,8 +129,8 @@
   }
 
   function init() {
-    addPack('snake', 'Snake Mountain (macroform)', window.EVO_PACKS.snake_mountain);
-    addPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
+    setPack('snake', 'Snake Mountain (macroform)', window.EVO_PACKS.snake_mountain);
+    setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
     window.__evo = { P, O, st, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };

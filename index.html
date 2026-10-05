@@ -46,7 +46,8 @@ figcaption span{color:var(--mut);font-size:11px}
   <div><h3>Source</h3>
    <div class="row"><select id="src"></select></div>
    <div class="row" style="margin-top:6px"><input type="file" id="file" accept="image/*" style="max-width:150px"><select id="chan"><option value="l">luma</option><option value="r">R</option><option value="g">G</option><option value="b">B</option></select></div>
-   <div class="hint">Image = height field, 1 pixel = 1 tile (resampled to ≤96).</div></div>
+   <div class="hint">Image = height field, 1 pixel = 1 tile (resampled to ≤96).</div>
+   <div class="hint" id="msg" role="status" hidden style="color:var(--acc)"></div></div>
   <div id="sliders"></div>
   <div><h3>Display</h3><div id="toggles"></div></div>
   <div class="hint">Drag: small angle variation · Shift/right-drag: pan · wheel: zoom · double-click: reset</div>
