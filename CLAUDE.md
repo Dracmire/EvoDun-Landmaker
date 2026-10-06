@@ -87,7 +87,14 @@ old pipeline (Unity, C#) are reference only.
   viewer; heroes return to it at the end, sometimes as an escape race. One or more objectives (resistance
   points) are also placed by click. The viewer draws the shortest walkable route from each objective to the
   stake inside the slice, using the stairs; if there is none the info says so. Same in all three techniques.
-  Everything is saved in the manifest. Landmarks are manifest markers; POI stays a mask.
+  Everything is saved in the manifest (`evodun-pack/0.3`: `stake {x,y}`, `objectives [{x,y,label?}]`, tiles of the whole map).
+  Landmarks are manifest markers; POI stays a mask. Viewer: buttons Place stake / Add objective / Remove / Clear, Esc
+  cancels; the click resolves to the VISIBLE tile with the same renderer (`E.pickTile`: an id render where every surface
+  has a code colour; A/B caps are level codes turned into a tile by unprojecting onto the plane of their level), so
+  heights, occlusion and ramps are respected in Box, A and B in every preset (`tools/ui/test_pick_ui.js` against a
+  per-pixel z-buffer: 99.2-100 % of cap/ramp points, naive picker 4-25 %). Route = BFS over the same edges as the regions
+  (`E.route`, `tools/test_route.js`); with no route the info names both regions (R1 = id 0...), their tile counts, the
+  closest approach between them (`E.regionGap`) and how many gates touch both without a ramp.
 - Visual target: Sea of Stars / 2D-HD readability, Unexplored 2 style stage modelling. Flat colour per
   level, gradient on cliffs, outlines. Orthographic camera with predefined angles and zoom, no free rotation.
 - Same style pass for every technique so the comparison is fair.
@@ -101,7 +108,7 @@ incursion border; stake and way-back path visible.
 - `src/shape.js`: slice (zones and/or crop, window = bbox + scenery margin), terrace quantization with the global
   elevation range + sub-terraces, minimal-plateau cleanup, stair sites, carved stairs (levels are a ranking by
   height with bridge levels), walkable regions (only inside the slice, connected only by stairs).
-  `node tools/test_slice.js`, `node tools/test_stairs.js`, `node tools/test_gates.js`, `node tools/test_ramp.js`, `node tools/test_spread.js`.
+  `node tools/test_slice.js`, `node tools/test_stairs.js`, `node tools/test_gates.js`, `node tools/test_ramp.js`, `node tools/test_spread.js`, `node tools/test_border.js`, `node tools/test_route.js`.
 - `src/tech.js`: technique A (per-level tile outline -> simplify -> Chaikin) and B (signed distance field ->
   blur -> marching squares).
 - `src/render.js`: camera, extruded walls, caps, overlays, markers. Stairs (steps) are terrain; ramps have their own surface renderer. Includes Box technique (one
@@ -167,7 +174,7 @@ incursion border; stake and way-back path visible.
    `EncodeToPNG` sample in `data/samples/`.
 3. Base solid before anything new. In this order: (1) carved stairs on a level ranking by height, sub-terraces
    renamed and up to 6, stair width, survival check in A and B (done); gate placement, rigid stair footprint and ramp (done, to be reviewed); (2) visual slice border from the edge map (done);
-   (3) stake, objectives and shortest route (click, manifest); (4) compare mode; (5) overlays that follow the
+   (3) stake, objectives and shortest route (click, manifest) (done, to be reviewed); (4) compare mode; (5) overlays that follow the
    smoothed A/B shapes; (6) outer corners of B; (7) Box line and stripes. Test scripts live in `tools/ui/`.
 4. Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.
    Parked: RuleTile skin and modular kits, room types.

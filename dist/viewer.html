@@ -22,6 +22,8 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0}
 #bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
 #info{color:var(--mut);padding:6px 12px;border-bottom:1px solid var(--line);font-size:12px}
 #info b{color:var(--fg)}
+#stage.picking{cursor:crosshair}
+#incursion button.on{background:var(--acc);color:#111}
 #stage{flex:1;min-height:0;display:grid;gap:1px;background:var(--line);touch-action:none;cursor:grab}
 #stage[data-n="1"]{grid-template-columns:1fr}
 #stage[data-n="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -70,6 +72,11 @@ figcaption span{color:var(--mut);font-size:11px}
    <div class="hint" style="margin-top:6px">Crop in tiles (x1, y1 exclusive; blank = no limit)</div>
    <div class="crop"><input type="number" id="cx0" min="0" placeholder="x0"><input type="number" id="cy0" min="0" placeholder="y0"><input type="number" id="cx1" min="0" placeholder="x1"><input type="number" id="cy1" min="0" placeholder="y1"></div>
    <div class="hint" id="sliceInfo"></div>
+  </div>
+  <div id="incursion"><h3>Incursion</h3>
+   <div class="row"><button id="m-stake">Place stake</button><button id="m-obj">Add objective</button><button id="m-rm">Remove</button><button id="m-clear">Clear</button></div>
+   <div class="hint" id="incHint">Pick a mode, then click the map (Esc cancels). The route runs from each objective to the stake over the walkable tiles, ramps included.</div>
+   <div class="hint" id="incInfo"></div>
   </div>
   <div id="sliders"></div>
   <div class="hint" id="subHnote" hidden style="color:var(--acc)"></div>
@@ -439,9 +446,9 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return out;
   };
 
-  /* ---- manifest (evodun-pack/0.2 json: roles by image name) ---- */
+  /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
   E.parseManifest = function (json) {
-    if (!json || json.format !== 'evodun-pack/0.2') throw new Error('Manifest: expected format "evodun-pack/0.2".');
+    if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
     const known = new Set([...E.ROLES.map((r) => r[0]), ...E.RESERVED_ROLES]), roles = {}, notes = [];
     for (const [role, r] of Object.entries(json.roles || {})) {
       if (!known.has(role)) throw new Error('Manifest: unknown role "' + role + '".');
@@ -457,12 +464,16 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       if (m !== undefined && !(Number.isInteger(m) && m >= 0)) throw new Error('Manifest: slice.margin must be a non-negative integer.');
       slice = { zones: z || [], rect: r || null, margin: m };
     }
-    return { name: json.name || '', flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, slice, markers: json.markers || [], notes };
+    const pt = (v, what) => { if (!v || !Number.isInteger(v.x) || !Number.isInteger(v.y) || v.x < 0 || v.y < 0) throw new Error(`Manifest: ${what} needs integer { x, y } (tile of the whole map).`); return { x: v.x, y: v.y }; };
+    const stake = json.stake === undefined || json.stake === null ? null : pt(json.stake, 'stake');
+    if (json.objectives !== undefined && !Array.isArray(json.objectives)) throw new Error('Manifest: objectives must be a list of { x, y }.');
+    const objectives = (json.objectives || []).map((o, k) => Object.assign(pt(o, `objective ${k + 1}`), typeof o.label === 'string' ? { label: o.label } : {}));
+    return { name: json.name || '', stake, objectives, flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, slice, markers: json.markers || [], notes };
   };
   E.buildManifest = function (m) {
     const roles = {};
     for (const [role, r] of Object.entries(m.roles)) roles[role] = { image: r.image, channel: r.channel };
-    const out = { format: 'evodun-pack/0.2', name: m.name, flipY: !!m.flipY };
+    const out = { format: 'evodun-pack/0.3', name: m.name, flipY: !!m.flipY };
     if (m.maxnode) out.maxnode = m.maxnode;
     out.roles = roles;
     if (m.slice) {
@@ -473,6 +484,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       if (Object.keys(sl).length) out.slice = sl;
     }
     if (m.markers && m.markers.length) out.markers = m.markers;
+    if (m.stake) out.stake = { x: m.stake.x, y: m.stake.y };
+    if (m.objectives && m.objectives.length) out.objectives = m.objectives.map((o) => Object.assign({ x: o.x, y: o.y }, o.label ? { label: o.label } : {}));
     return out;
   };
 })(window.EVO = window.EVO || {});
@@ -1024,6 +1037,62 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     }
     S.region = region; S.regionSizes = sizes;
   }
+
+  /* ---- walking graph: the same edges as computeRegions (so a route exists exactly when two tiles share a region) ---- */
+  function walkGraph(S, P) {
+    if (S._walk) return S._walk;
+    const extra = new Map(), link = (a, b) => { (extra.get(a) || extra.set(a, []).get(a)).push(b); (extra.get(b) || extra.set(b, []).get(b)).push(a); };
+    for (const st of S.stairs) for (let ci = 0; ci < st.cols.length; ci++) {
+      let prev = st.bottom[ci];
+      for (const step of st.steps) { link(prev, step.tiles[ci]); prev = step.tiles[ci]; }
+      link(prev, st.top[ci]);
+      if (ci > 0) for (const step of st.steps) link(step.tiles[ci - 1], step.tiles[ci]);
+    }
+    const W = S.W, H = S.H, out = [];
+    const neighbors = (i) => {
+      out.length = 0;
+      if (S.block[i]) return out;
+      const x = i % W, y = (i / W) | 0;
+      if (!S.carved[i]) for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) {
+        if (j < 0 || S.block[j] || S.carved[j]) continue;   // carved tiles only connect along their stair
+        if (S.ter[i] === S.ter[j] && Math.abs(S.sub[i] - S.sub[j]) <= P.climb) out.push(j);
+      }
+      const e = extra.get(i); if (e) for (const j of e) if (!S.block[j]) out.push(j);
+      return out;
+    };
+    return (S._walk = neighbors);
+  }
+  /* Shortest route (fewest tiles) from tile a to tile b over the walking graph, or null. Tiles are window indices. */
+  E.route = function (S, P, a, b) {
+    if (a === b) return [a];
+    if (S.block[a] || S.block[b]) return null;
+    const nb = walkGraph(S, P), prev = new Int32Array(S.n).fill(-2), q = [a]; prev[a] = -1;
+    for (let h = 0; h < q.length; h++) {
+      const i = q[h];
+      for (const j of nb(i).slice()) if (prev[j] === -2) { prev[j] = i; if (j === b) { const r = [b]; for (let k = i; k !== -1; k = prev[k]) r.push(k); return r.reverse(); } q.push(j); }
+    }
+    return null;
+  };
+  /* Why there is no route between a and b: their regions (id, tiles), the closest approach between the two regions through any
+     unblocked tile (tiles between them, the two end tiles) and the gates that touch both regions but got no stair. */
+  E.regionGap = function (S, a, b) {
+    const ra = S.region[a], rb = S.region[b], W = S.W, H = S.H;
+    const res = { ra, rb, sizeA: S.regionSizes[ra], sizeB: S.regionSizes[rb], dist: -1, from: -1, to: -1, droppedGates: 0 };
+    const dist = new Int32Array(S.n).fill(-1), from = new Int32Array(S.n).fill(-1), q = [];
+    for (let i = 0; i < S.n; i++) if (S.region[i] === ra) { dist[i] = 0; from[i] = i; q.push(i); }
+    for (let h = 0; h < q.length && res.dist < 0; h++) {
+      const i = q[h], x = i % W, y = (i / W) | 0;
+      for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) {
+        if (j < 0 || dist[j] >= 0 || (S.slice && !S.slice[j])) continue;
+        dist[j] = dist[i] + 1; from[j] = from[i];
+        if (S.region[j] === rb) { res.dist = dist[j] - 1; res.from = from[j]; res.to = j; break; }
+        q.push(j);
+      }
+    }
+    const placed = new Set(S.stairs.map((r) => r.site.gate));
+    S.gates.forEach((g, gi) => { if (placed.has(gi)) return; if (g.tiles.some((t) => (S.region[t.a] === ra && S.region[t.b] === rb) || (S.region[t.a] === rb && S.region[t.b] === ra))) res.droppedGates++; });
+    return res;
+  };
 
   E._carve = carveStairs; E._regions = computeRegions; // test hooks (hand-built shaping objects)
 
@@ -1908,6 +1977,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field']];
 
   const packs = {};
+  const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
   const st = { pack: 'snake', mode: 'compare', tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0;
 
@@ -1959,6 +2029,9 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
     for (const id of cropIds) $('#' + id).addEventListener('change', () => { refreshMessage(); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadFiles(e.target.files));
+    for (const [id, k] of [['m-stake', 'stake'], ['m-obj', 'obj'], ['m-rm', 'rm']]) document.getElementById(id).addEventListener('click', () => setIncMode(inc.mode === k ? null : k));
+    document.getElementById('m-clear').addEventListener('click', () => { inc.stake = null; inc.objectives = []; setIncMode(null); invalidate(false); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && inc.mode) setIncMode(null); });
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
     window.addEventListener('resize', () => invalidate(false));
     $('#stage').addEventListener('wheel', (e) => { e.preventDefault(); st.zoom = Math.max(0.5, Math.min(4, st.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); invalidate(false); }, { passive: false });
@@ -1971,9 +2044,64 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       else { st.yawOff = Math.max(-20, Math.min(20, drag.yo + dx * 0.15)); st.pitchOff = Math.max(-15, Math.min(15, drag.po - dy * 0.15)); }
       invalidate(false);
     });
-    $('#stage').addEventListener('pointerup', () => { drag = null; });
+    $('#stage').addEventListener('pointerup', (e) => {
+      const moved = drag ? Math.hypot(e.clientX - drag.x, e.clientY - drag.y) : 99, was = drag; drag = null;
+      if (inc.mode && was && !was.shift && e.button === 0 && moved < 4) clickMap(e);
+    });
     $('#stage').addEventListener('dblclick', () => $('#reset').click());
     $('#stage').addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  /* ---- incursion: stake, objectives, routes ---- */
+  const incIdx = (m) => { // a mark (tile of the whole map) as a tile of the built window, or -1 when it is outside the window or the slice
+    const x = m.x - S.ox, y = m.y - S.oy; if (x < 0 || y < 0 || x >= S.W || y >= S.H) return -1;
+    const i = y * S.W + x; return S.block[i] ? -1 : i;
+  };
+  const regionName = (r) => `R${r + 1}`;
+  function computeIncursion() {
+    const out = { stake: null, objectives: [], lines: [] };
+    if (!S) return out;
+    const stake = inc.stake ? incIdx(inc.stake) : -1;
+    if (inc.stake) { if (stake >= 0) out.stake = stake; else out.lines.push('Stake: outside the slice (kept in the pack, not shown).'); }
+    inc.objectives.forEach((o, k) => {
+      const i = incIdx(o), name = o.label || `Objective ${k + 1}`;
+      if (i < 0) { out.lines.push(`${name}: outside the slice (kept in the pack, not shown).`); return; }
+      const ob = { i, route: null }; out.objectives.push(ob);
+      if (stake < 0) { out.lines.push(`${name} at (${o.x}, ${o.y}): no stake yet.`); return; }
+      ob.route = E.route(S, P, i, stake);
+      if (ob.route) { out.lines.push(`${name}: route of ${ob.route.length} tiles to the stake.`); return; }
+      const g = E.regionGap(S, i, stake), xy = (t) => `(${S.ox + (t % S.W)}, ${S.oy + ((t / S.W) | 0)})`;
+      out.lines.push(`${name}: <b>no route</b>. Region ${regionName(g.ra)} (${g.sizeA} tiles) is not connected to the stake region ${regionName(g.rb)} (${g.sizeB} tiles)` + (g.dist >= 0 ? `; closest approach ${g.dist} tile${g.dist === 1 ? '' : 's'} between ${xy(g.from)} and ${xy(g.to)}` : '') + (g.droppedGates ? `; ${g.droppedGates} gate${g.droppedGates === 1 ? '' : 's'} touch${g.droppedGates === 1 ? 'es' : ''} both without a ramp.` : '; no gate touches both.'));
+    });
+    return out;
+  }
+  function setIncMode(m) {
+    inc.mode = m;
+    for (const [id, k] of [['m-stake', 'stake'], ['m-obj', 'obj'], ['m-rm', 'rm']]) { const b = document.getElementById(id); if (b) b.classList.toggle('on', m === k); }
+    const stage = document.getElementById('stage'); if (stage) stage.classList.toggle('picking', !!m);
+  }
+  function clickMap(e) {
+    const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
+    for (let k = 0; k < figs.length; k++) {
+      const cv = figs[k].querySelector('canvas'), r = cv.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
+      const hit = E.pickTile(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top);
+      return placeMark(hit.tile);
+    }
+  }
+  function placeMark(tile) {
+    const note = (t) => { $('#incInfo').innerHTML = t; };
+    if (tile < 0) return note('Nothing under the cursor.');
+    const x = S.ox + (tile % S.W), y = S.oy + ((tile / S.W) | 0);
+    if (inc.mode === 'rm') {
+      const near = (m) => Math.hypot(m.x - x, m.y - y) <= 1.5;
+      if (inc.stake && near(inc.stake)) inc.stake = null; else { const k = inc.objectives.findIndex(near); if (k >= 0) inc.objectives.splice(k, 1); else return note('No mark there.'); }
+    } else {
+      if (S.slice && !S.slice[tile]) return note(`(${x}, ${y}) is outside the slice: movement is limited to the slice.`);
+      if (S.block[tile]) return note(`(${x}, ${y}) is not walkable (water).`);
+      if (inc.mode === 'stake') inc.stake = { x, y }; else inc.objectives.push({ x, y });
+    }
+    invalidate(false);
   }
 
   /* ---- slice ---- */
@@ -2014,7 +2142,11 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     $('#wholeMap').classList.toggle('on', sliceSel.whole);
   }
   function refreshMessage() { const p = packs[st.pack] && packs[st.pack].pack; message(p && p.warnings ? p.warnings.join(' ') : ''); }
-  function onPackChanged() { buildChips(packs[st.pack].pack); }
+  function onPackChanged() {
+    buildChips(packs[st.pack].pack);
+    inc.stake = null; inc.objectives = []; setIncMode(null);
+    if (st.pack === 'image' && manifest) { inc.stake = manifest.stake ? Object.assign({}, manifest.stake) : null; inc.objectives = manifest.objectives.map((o) => Object.assign({}, o)); }
+  }
 
   /* ---- images and channel roles ---- */
   const imgs = [];      // { name, dec, width, height, max, ch } (ch = R,G,B,A,H,S,V planes)
@@ -2140,7 +2272,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   function saveManifest() {
     const roles = {};
     for (const [role, r] of Object.entries(currentRoles())) roles[role] = { image: imgs[r.image].name, channel: r.channel };
-    const json = E.buildManifest({ name: imgs.map((i) => i.name).join(' + '), flipY: $('#flipy').checked, maxnode: maxnode(), roles, markers: manifest ? manifest.markers : [], slice: manifestSlice() });
+    const json = E.buildManifest({ name: imgs.map((i) => i.name).join(' + '), flipY: $('#flipy').checked, maxnode: maxnode(), roles, markers: manifest ? manifest.markers : [], slice: manifestSlice(), stake: inc.stake, objectives: inc.objectives });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(json, null, 2) + '\n'], { type: 'application/json' }));
     a.download = 'pack.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -2165,6 +2297,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
     }
+    const incursion = computeIncursion(); O.incursion = incursion;
+    $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');
     const techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
     while (stage.children.length < techs.length) {
@@ -2200,7 +2334,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

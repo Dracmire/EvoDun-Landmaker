@@ -229,9 +229,9 @@
     return out;
   };
 
-  /* ---- manifest (evodun-pack/0.2 json: roles by image name) ---- */
+  /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
   E.parseManifest = function (json) {
-    if (!json || json.format !== 'evodun-pack/0.2') throw new Error('Manifest: expected format "evodun-pack/0.2".');
+    if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
     const known = new Set([...E.ROLES.map((r) => r[0]), ...E.RESERVED_ROLES]), roles = {}, notes = [];
     for (const [role, r] of Object.entries(json.roles || {})) {
       if (!known.has(role)) throw new Error('Manifest: unknown role "' + role + '".');
@@ -247,12 +247,16 @@
       if (m !== undefined && !(Number.isInteger(m) && m >= 0)) throw new Error('Manifest: slice.margin must be a non-negative integer.');
       slice = { zones: z || [], rect: r || null, margin: m };
     }
-    return { name: json.name || '', flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, slice, markers: json.markers || [], notes };
+    const pt = (v, what) => { if (!v || !Number.isInteger(v.x) || !Number.isInteger(v.y) || v.x < 0 || v.y < 0) throw new Error(`Manifest: ${what} needs integer { x, y } (tile of the whole map).`); return { x: v.x, y: v.y }; };
+    const stake = json.stake === undefined || json.stake === null ? null : pt(json.stake, 'stake');
+    if (json.objectives !== undefined && !Array.isArray(json.objectives)) throw new Error('Manifest: objectives must be a list of { x, y }.');
+    const objectives = (json.objectives || []).map((o, k) => Object.assign(pt(o, `objective ${k + 1}`), typeof o.label === 'string' ? { label: o.label } : {}));
+    return { name: json.name || '', stake, objectives, flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, slice, markers: json.markers || [], notes };
   };
   E.buildManifest = function (m) {
     const roles = {};
     for (const [role, r] of Object.entries(m.roles)) roles[role] = { image: r.image, channel: r.channel };
-    const out = { format: 'evodun-pack/0.2', name: m.name, flipY: !!m.flipY };
+    const out = { format: 'evodun-pack/0.3', name: m.name, flipY: !!m.flipY };
     if (m.maxnode) out.maxnode = m.maxnode;
     out.roles = roles;
     if (m.slice) {
@@ -263,6 +267,8 @@
       if (Object.keys(sl).length) out.slice = sl;
     }
     if (m.markers && m.markers.length) out.markers = m.markers;
+    if (m.stake) out.stake = { x: m.stake.x, y: m.stake.y };
+    if (m.objectives && m.objectives.length) out.objectives = m.objectives.map((o) => Object.assign({ x: o.x, y: o.y }, o.label ? { label: o.label } : {}));
     return out;
   };
 })(window.EVO = window.EVO || {});

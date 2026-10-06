@@ -546,6 +546,62 @@
     S.region = region; S.regionSizes = sizes;
   }
 
+  /* ---- walking graph: the same edges as computeRegions (so a route exists exactly when two tiles share a region) ---- */
+  function walkGraph(S, P) {
+    if (S._walk) return S._walk;
+    const extra = new Map(), link = (a, b) => { (extra.get(a) || extra.set(a, []).get(a)).push(b); (extra.get(b) || extra.set(b, []).get(b)).push(a); };
+    for (const st of S.stairs) for (let ci = 0; ci < st.cols.length; ci++) {
+      let prev = st.bottom[ci];
+      for (const step of st.steps) { link(prev, step.tiles[ci]); prev = step.tiles[ci]; }
+      link(prev, st.top[ci]);
+      if (ci > 0) for (const step of st.steps) link(step.tiles[ci - 1], step.tiles[ci]);
+    }
+    const W = S.W, H = S.H, out = [];
+    const neighbors = (i) => {
+      out.length = 0;
+      if (S.block[i]) return out;
+      const x = i % W, y = (i / W) | 0;
+      if (!S.carved[i]) for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) {
+        if (j < 0 || S.block[j] || S.carved[j]) continue;   // carved tiles only connect along their stair
+        if (S.ter[i] === S.ter[j] && Math.abs(S.sub[i] - S.sub[j]) <= P.climb) out.push(j);
+      }
+      const e = extra.get(i); if (e) for (const j of e) if (!S.block[j]) out.push(j);
+      return out;
+    };
+    return (S._walk = neighbors);
+  }
+  /* Shortest route (fewest tiles) from tile a to tile b over the walking graph, or null. Tiles are window indices. */
+  E.route = function (S, P, a, b) {
+    if (a === b) return [a];
+    if (S.block[a] || S.block[b]) return null;
+    const nb = walkGraph(S, P), prev = new Int32Array(S.n).fill(-2), q = [a]; prev[a] = -1;
+    for (let h = 0; h < q.length; h++) {
+      const i = q[h];
+      for (const j of nb(i).slice()) if (prev[j] === -2) { prev[j] = i; if (j === b) { const r = [b]; for (let k = i; k !== -1; k = prev[k]) r.push(k); return r.reverse(); } q.push(j); }
+    }
+    return null;
+  };
+  /* Why there is no route between a and b: their regions (id, tiles), the closest approach between the two regions through any
+     unblocked tile (tiles between them, the two end tiles) and the gates that touch both regions but got no stair. */
+  E.regionGap = function (S, a, b) {
+    const ra = S.region[a], rb = S.region[b], W = S.W, H = S.H;
+    const res = { ra, rb, sizeA: S.regionSizes[ra], sizeB: S.regionSizes[rb], dist: -1, from: -1, to: -1, droppedGates: 0 };
+    const dist = new Int32Array(S.n).fill(-1), from = new Int32Array(S.n).fill(-1), q = [];
+    for (let i = 0; i < S.n; i++) if (S.region[i] === ra) { dist[i] = 0; from[i] = i; q.push(i); }
+    for (let h = 0; h < q.length && res.dist < 0; h++) {
+      const i = q[h], x = i % W, y = (i / W) | 0;
+      for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) {
+        if (j < 0 || dist[j] >= 0 || (S.slice && !S.slice[j])) continue;
+        dist[j] = dist[i] + 1; from[j] = from[i];
+        if (S.region[j] === rb) { res.dist = dist[j] - 1; res.from = from[j]; res.to = j; break; }
+        q.push(j);
+      }
+    }
+    const placed = new Set(S.stairs.map((r) => r.site.gate));
+    S.gates.forEach((g, gi) => { if (placed.has(gi)) return; if (g.tiles.some((t) => (S.region[t.a] === ra && S.region[t.b] === rb) || (S.region[t.a] === rb && S.region[t.b] === ra))) res.droppedGates++; });
+    return res;
+  };
+
   E._carve = carveStairs; E._regions = computeRegions; // test hooks (hand-built shaping objects)
 
   /* demo packs */

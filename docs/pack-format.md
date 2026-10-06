@@ -3,6 +3,18 @@
 ## 0.1 (still loadable)
 `{ format, name, width, height, elevation[], masks{}, markers[] }`: row-major arrays, x east, y south.
 
+## 0.3 (0.2 + stake and objectives)
+Same as 0.2 (0.2 is still read), with two optional members written by "Save pack.json":
+
+```json
+{ "format": "evodun-pack/0.3", "...": "as 0.2",
+  "stake": { "x": 96, "y": 117 },
+  "objectives": [ { "x": 117, "y": 158, "label": "tower" }, { "x": 40, "y": 20 } ] }
+```
+- `stake`: the entry point of the incursion; `objectives`: resistance points. Coordinates are tiles of the WHOLE map (not
+  of the slice window), integers >= 0; `label` is optional. The viewer draws the shortest walkable route from each
+  objective to the stake inside the slice; marks outside the slice are kept but not shown.
+
 ## 0.2 (channels as fields)
 A pack is a small JSON manifest plus PNG images that are selected together in the viewer. Images are decoded
 by our own decoder (`src/png.js`): raw samples, no colour management, no alpha premultiplication, 8 or 16 bit,
