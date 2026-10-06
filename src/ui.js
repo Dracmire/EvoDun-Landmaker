@@ -1,8 +1,8 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, micro: 3, terH: 1.0, microH: 0.22, minPlateau: 5, minMicro: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2 };
-  const O = { outlines: true, gradient: true, features: true, regions: false, veil: false, markers: true, passes: false, zones: false, edges: false, masks: false };
+  const P = { terraces: 5, micro: 3, terH: 1.0, microH: 0.22, minPlateau: 5, minMicro: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, margin: 24 };
+  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, passes: false, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
     { id: 'low', label: 'Low 28°', yaw: 0, pitch: 28 },
@@ -13,9 +13,10 @@
   const SLIDERS = [
     ['Shaping', [['terraces', 'Terraces', 2, 9, 1], ['micro', 'Micro steps / terrace', 1, 3, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['microH', 'Micro step height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minMicro', 'Min micro patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
-    ['Passes', [['passGap', 'Stair spacing', 3, 20, 1]]]
+    ['Passes', [['passGap', 'Stair spacing', 3, 20, 1]]],
+    ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
-  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Incursion veil'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
+  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
   const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field']];
 
   const packs = {};
@@ -40,7 +41,8 @@
         sl.appendChild(row);
         const inp = row.querySelector('input'), out = row.querySelector('output');
         inp.value = P[k]; out.textContent = P[k];
-        inp.addEventListener('input', () => { P[k] = +inp.value; out.textContent = P[k]; invalidate(true); });
+        inp.addEventListener('input', () => { out.textContent = inp.value; }); // label only while dragging
+        inp.addEventListener('change', () => { P[k] = +inp.value; out.textContent = P[k]; refreshMessage(); invalidate(true); }); // recompute on release
       }
     }
     const tg = $('#toggles');
@@ -64,8 +66,10 @@
       tb.appendChild(b);
     }
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
-    $('#src').addEventListener('change', (e) => { st.pack = e.target.value; message((packs[st.pack].pack.warnings || []).join(' ')); invalidate(true); });
+    $('#src').addEventListener('change', (e) => { st.pack = e.target.value; for (const id of cropIds) $('#' + id).value = ''; onPackChanged(); refreshMessage(); invalidate(true); }); // a crop belongs to one map
     buildRoles();
+    $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
+    for (const id of cropIds) $('#' + id).addEventListener('change', () => { refreshMessage(); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadFiles(e.target.files));
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
     window.addEventListener('resize', () => invalidate(false));
@@ -83,6 +87,46 @@
     $('#stage').addEventListener('dblclick', () => $('#reset').click());
     $('#stage').addEventListener('contextmenu', (e) => e.preventDefault());
   }
+
+  /* ---- slice ---- */
+  const sliceSel = { zones: new Set(), whole: false };
+  const cropIds = ['cx0', 'cy0', 'cx1', 'cy1'];
+  function sliceSpec() {
+    const pack = packs[st.pack].pack, spec = { margin: P.margin };
+    if (pack.fields && pack.fields.zone && sliceSel.zones.size && !sliceSel.whole) spec.zones = [...sliceSel.zones].sort((a, b) => a - b);
+    const v = cropIds.map((id) => $('#' + id).value.trim());
+    if (v.some((x) => x !== '')) {
+      const d = [0, 0, pack.width, pack.height];
+      spec.rect = v.map((x, k) => (x === '' ? d[k] : Math.max(0, Math.round(+x) || 0)));
+    }
+    return spec.zones || spec.rect ? spec : null;
+  }
+  const hueOf = (c) => (c.hue !== undefined ? c.hue * 360 : (c.id * 137.5) % 360);
+  function buildChips(pack) {
+    const box = $('#zoneChips'), z = pack.fields && pack.fields.zone;
+    box.innerHTML = ''; $('#zoneHint').hidden = $('#zoneBtns').hidden = !z;
+    if (!z) { sliceSel.zones.clear(); return; }
+    const ids = z.info.classes.map((c) => c.id);
+    for (const id of [...sliceSel.zones]) if (!ids.includes(id)) sliceSel.zones.delete(id);
+    if (!sliceSel.zones.size && !sliceSel.whole && ids.length) sliceSel.zones.add(Math.min(...ids)); // default: one zone, the lowest id
+    for (const c of z.info.classes) {
+      const b = document.createElement('button'); b.className = 'chip'; b.dataset.id = c.id;
+      b.innerHTML = `<i style="background:hsl(${hueOf(c).toFixed(0)},80%,55%)"></i>${c.id} <small>${c.count}</small>`;
+      b.addEventListener('click', (e) => {
+        sliceSel.whole = false;
+        if (e.ctrlKey || e.shiftKey || e.metaKey) { sliceSel.zones.has(c.id) ? sliceSel.zones.delete(c.id) : sliceSel.zones.add(c.id); } else { sliceSel.zones.clear(); sliceSel.zones.add(c.id); }
+        syncChips(); refreshMessage(); invalidate(true);
+      });
+      box.appendChild(b);
+    }
+    syncChips();
+  }
+  function syncChips() {
+    document.querySelectorAll('#zoneChips .chip').forEach((b) => b.classList.toggle('on', !sliceSel.whole && sliceSel.zones.has(+b.dataset.id)));
+    $('#wholeMap').classList.toggle('on', sliceSel.whole);
+  }
+  function refreshMessage() { const p = packs[st.pack] && packs[st.pack].pack; message(p && p.warnings ? p.warnings.join(' ') : ''); }
+  function onPackChanged() { buildChips(packs[st.pack].pack); }
 
   /* ---- images and channel roles ---- */
   const imgs = [];      // { name, dec, width, height, max, ch } (ch = R,G,B,A,H,S,V planes)
@@ -158,6 +202,12 @@
       } else values = defaultRoles(next);
       imgs.splice(0, imgs.length, ...next); // everything decoded and consistent: replace the previous state
       manifest = man;
+      sliceSel.zones.clear(); sliceSel.whole = false; for (const id of cropIds) $('#' + id).value = '';
+      if (man && man.slice) {
+        for (const z of man.slice.zones) sliceSel.zones.add(z);
+        if (man.slice.rect) cropIds.forEach((id, k) => { $('#' + id).value = man.slice.rect[k]; });
+        if (man.slice.margin !== undefined) { P.margin = man.slice.margin; $('#s-margin').value = P.margin; $('#o-margin').textContent = P.margin; }
+      }
       $('#flipy').checked = useFlip;
       $('#maxnode').value = man && man.maxnode ? man.maxnode : '';
       $('#roles').hidden = false; $('#rolesBtns').hidden = false;
@@ -191,20 +241,27 @@
       setPack('image', 'Images: ' + pack.name, pack);
       message([typeof note === 'string' ? note : '', ...pack.warnings].filter(Boolean).join(' '));
       $('#rolesInfo').innerHTML = describe(pack); $('#rolesInfo').hidden = false;
-      $('#src').value = 'image'; st.pack = 'image'; invalidate(true);
+      $('#src').value = 'image'; st.pack = 'image'; onPackChanged(); invalidate(true);
     } catch (e) { message(e.message); $('#rolesInfo').hidden = true; }
   }
 
+  function manifestSlice() {
+    const spec = sliceSpec(); if (!spec) return null;
+    return { zones: spec.zones || [], rect: spec.rect || null, margin: P.margin };
+  }
   function saveManifest() {
     const roles = {};
     for (const [role, r] of Object.entries(currentRoles())) roles[role] = { image: imgs[r.image].name, channel: r.channel };
-    const json = E.buildManifest({ name: imgs.map((i) => i.name).join(' + '), flipY: $('#flipy').checked, maxnode: maxnode(), roles, markers: manifest ? manifest.markers : [] });
+    const json = E.buildManifest({ name: imgs.map((i) => i.name).join(' + '), flipY: $('#flipy').checked, maxnode: maxnode(), roles, markers: manifest ? manifest.markers : [], slice: manifestSlice() });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(json, null, 2) + '\n'], { type: 'application/json' }));
     a.download = 'pack.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
-  function invalidate(reshape) { if (reshape) S = null; if (!raf) raf = requestAnimationFrame(draw); }
+  function invalidate(reshape) {
+    if (reshape) { S = null; $('#busy').hidden = false; } // painted before the (possibly slow) recompute starts
+    if (!raf) raf = requestAnimationFrame(() => setTimeout(draw, 0));
+  }
 
   function view() {
     const p = PRESETS.find((x) => x.id === st.preset);
@@ -213,7 +270,11 @@
 
   function draw() {
     raf = 0;
-    if (!S) S = E.shape(packs[st.pack].pack, P);
+    if (!S) {
+      const pack = packs[st.pack].pack;
+      try { S = E.shape(pack, P, sliceSpec()); }
+      catch (e) { message(e.message); S = E.shape(pack, P, null); }
+    }
     const techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
     while (stage.children.length < techs.length) {
@@ -231,7 +292,10 @@
     $('#mode').classList.toggle('on', st.mode === 'compare');
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.W}×${S.H} · ${S.maxFine + 1} levels${zn} · ${S.passes.length} stair passes · ${rs.length} walkable regions, largest ${(big / tot * 100).toFixed(0)}%`;
+    const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
+    $('#sliceInfo').textContent = sinfo;
+    $('#busy').hidden = true;
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.maxFine + 1} levels · ${S.passes.length} stair passes · ${rs.length} walkable regions in the ${si ? 'slice' : 'map'}, largest ${(big / tot * 100).toFixed(0)}%`;
   }
 
   function init() {
@@ -239,7 +303,7 @@
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { P, O, st, packs, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { P, O, st, packs, sliceSel, S: () => S, sliceSpec, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

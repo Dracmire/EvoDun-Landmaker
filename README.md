@@ -17,6 +17,6 @@ size) whose channels are assigned to roles (elevation, zone, edge map, path, veg
 Pack formats: `evodun-pack/0.1` (`width`, `height`, row-major `elevation`, optional `masks`, `markers`) and
 `evodun-pack/0.2` (images + channel roles, `docs/pack-format.md`).
 
-Tests: `node tools/test_png.js` (PNG decoder exactness), `node tools/test_fields.js` (channel roles). No dependencies.
+Tests: `node tools/test_png.js` (PNG decoder exactness), `node tools/test_fields.js` (channel roles), `node tools/test_slice.js` (slice). No dependencies.
 
 Rebuild after editing `src/` or `data/`: `python3 tools/build.py` (writes `data/packs.js`, `index.html`, `dist/viewer.html`).

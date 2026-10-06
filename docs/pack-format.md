@@ -33,14 +33,23 @@ non-interlaced only. 1 pixel = 1 tile, native resolution (no resampling). All im
     - Channel `H`: V = 0 is outside. With `maxnode`, `id = round(H * (maxnode + 1))` (ids 1..maxnode). Without
       it the hues present are clustered (gap > 4 degrees) and each pixel goes to the nearest centre (ids 1..K in
       hue order; these ids are cluster indices, not necessarily your own ids).
-    - Hues that are not reliable are never assigned silently: no hue (grey), hue uncertainty above the tolerance
+    - Unreliable hues are never hidden: no hue (grey), hue uncertainty above the tolerance
       (`60 degrees / chroma counts`, tolerance = min(1/4 of the id spacing, 5 degrees)), far from every id/centre, or
-      the reserved ids 0 and maxnode+1. They get id -1, are counted in a warning and drawn magenta.
+      the reserved ids 0 and maxnode+1. They are counted in a warning and drawn magenta.
+      With `maxnode` they keep the id of the formula (only the reserved ids 0 / maxnode+1 become -1, since red is
+      not a zone). In deduced mode they get id -1.
     - Any other channel: every distinct non-zero value is an id.
     - `edge` labels from hue: red = `barrier`, cyan = `pass`.
   - `path`, `vegetation`, `poi` (graded): any channel as a 0..1 mask.
   - `area`, `room`: reserved categorical roles. Accepted in a manifest and ignored.
 - A zone is a biome/country meant as one incursion. It is NOT a terrace and gives no level.
+- **slice** (optional): `{ "zones": [6], "rect": [x0, y0, x1, y1], "margin": 24 }`. The slice is the tiles of the listed
+  zones (default in the viewer: the lowest id) intersected with `rect` (x1, y1 exclusive). Only the slice bounding box
+  plus `margin` tiles of scenery is built. Pixels with id -1 take the majority id of their 8 neighbours for this
+  purpose (they never open holes) but stay marked in the zones overlay. Outside the slice: drawn under a one-band veil,
+  no stairs, not walkable. A yellow line follows the slice border at the height of each cap (also on the map edge).
+- Terraces are quantized with the raw global elevation range of the whole map (`elevRange`), so they do not change
+  with the slice or the window, and they ignore zones completely (a zone border is not a terrace edge).
 - `maxnode` and `elevation` scale are optional; images alone (no manifest) work through the role selectors.
 
 ## Porting to Unity
