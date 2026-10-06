@@ -27,6 +27,8 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0}
 #stage{flex:1;min-height:0;display:grid;gap:1px;background:var(--line);touch-action:none;cursor:grab}
 #stage[data-n="1"]{grid-template-columns:1fr}
 #stage[data-n="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+#stage[data-n="3"][data-layout="rows"]{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr))}
+.pending{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--acc);font-weight:600;background:#171424cc}
 #roles .role{display:grid;grid-template-columns:78px minmax(0,1fr);gap:6px;align-items:center;margin:3px 0}
 #roles .role select,#roles .role input{width:100%;min-width:0;padding:4px 6px}
 #rolesInfo{line-height:1.5}
@@ -84,7 +86,7 @@ figcaption span{color:var(--mut);font-size:11px}
   <div class="hint">Drag: small angle variation · Shift/right-drag: pan · wheel: zoom · double-click: reset</div>
  </aside>
  <main>
-  <div id="bar"><div class="row" id="presets"></div><div class="row" id="techs"></div><button id="mode">Compare</button><button id="reset">Reset view</button><span id="busy" hidden>computing…</span></div>
+  <div id="bar"><div class="row" id="presets"></div><div class="row" id="techs"></div><button id="mode">Compare</button><select id="layout" title="Layout of the compare panels"><option value="auto">Layout: auto</option><option value="columns">Layout: columns</option><option value="rows">Layout: rows</option></select><button id="reset">Reset view</button><span id="busy" hidden>computing…</span></div>
   <div id="info"></div>
   <div id="stage"></div>
  </main>
@@ -1490,10 +1492,10 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of [base, top + 1.5]) {
       const [a, b] = raw(x, y, hh); x0 = Math.min(x0, a); x1 = Math.max(x1, a); y0 = Math.min(y0, b); y1 = Math.max(y1, b);
     }
-    const sc = Math.min((w - 20) / (x1 - x0), (h - 20) / (y1 - y0)) * view.zoom;
+    const fit = Math.min((w - 20) / (x1 - x0), (h - 20) / (y1 - y0)), sc = (view.fitSc || fit) * view.zoom; // view.fitSc: the scale of the first panel, shared by all panels
     const ox = w / 2 - (x0 + x1) / 2 * sc + view.panX, oy = h / 2 - (y0 + y1) / 2 * sc + view.panY;
     return {
-      sc, base,
+      sc, base, fit,
       p: (x, y, hh) => { const [a, b] = raw(x, y, hh); return [a * sc + ox, b * sc + oy]; },
       unp: (px, py, hh) => { const a = (px - ox) / sc, b = (py - oy) / sc + hh * cp, c = b / sp; return [cy * a + sy * c + S.W / 2, -sy * a + cy * c + S.H / 2]; }, // screen point -> ground point on the plane at height hh
       ry: (x, y) => sy * (x - S.W / 2) + cy * (y - S.H / 2),
@@ -1935,7 +1937,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   }
 
   E.levelColor = levelColor; // exposed for the tests
-    E.makeCam = makeCam; // exposed for the UI tests (screen position of a tile)
+    E.makeCam = makeCam;
+  E.fitScale = (S, P, view, w, h) => makeCam(S, P, Object.assign({}, view, { fitSc: 0, zoom: 1, panX: 0, panY: 0 }), w, h).fit; // px per tile at zoom 1 for a panel of w x h // exposed for the UI tests (screen position of a tile)
 
   function drawScene(ctx, w, h, S, P, tech, view, o) {
     DBG = !!o.debug; PICK = !!o.pick;
@@ -2019,8 +2022,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
-  const st = { pack: 'snake', mode: 'compare', tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
-  let S = null, raf = 0;
+  const st = { pack: 'snake', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
     packs[id] = { label, pack };
@@ -2064,6 +2067,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       b.addEventListener('click', () => { st.tech = id; st.mode = 'single'; invalidate(false); });
       tb.appendChild(b);
     }
+    $('#layout').addEventListener('change', (e) => { st.layout = e.target.value; invalidate(false); });
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
     $('#src').addEventListener('change', (e) => { st.pack = e.target.value; for (const id of cropIds) $('#' + id).value = ''; onPackChanged(); refreshMessage(); invalidate(true); }); // a crop belongs to one map
     buildRoles();
@@ -2321,12 +2325,13 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   function invalidate(reshape) {
     if (reshape) { S = null; $('#busy').hidden = false; } // painted before the (possibly slow) recompute starts
+    st.t0 = performance.now(); st.cold = !!reshape; drawToken++; // a pending panel (B computing) of an older state is dropped
     if (!raf) raf = requestAnimationFrame(() => setTimeout(draw, 0));
   }
 
   function view() {
     const p = PRESETS.find((x) => x.id === st.preset);
-    return { yaw: p.yaw + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY };
+    return { yaw: p.yaw + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc };
   }
 
   function draw() {
@@ -2342,15 +2347,43 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');
     const techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
+    const layout = st.layout === 'auto' ? (st.preset.startsWith('iso') ? 'rows' : 'columns') : st.layout; // rows in isometric: the diamond is twice as wide as tall
+    stage.dataset.layout = layout; $('#layout').hidden = st.mode !== 'compare';
     while (stage.children.length < techs.length) {
       const f = document.createElement('figure'); f.innerHTML = '<canvas></canvas><figcaption></figcaption>'; stage.appendChild(f);
     }
     [...stage.children].forEach((f, i) => { f.hidden = i >= techs.length; });
-    techs.forEach((t, i) => {
-      const f = stage.children[i], cv = f.querySelector('canvas');
-      const r = E.render(cv, S, P, t, view(), O);
+    // one camera for every panel: the same scale (px per tile, fitted to the first panel) around the same point of the map
+    const f0 = stage.children[0]; st.fitSc = E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight);
+    const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
+    const bKey = 'Bready:' + P.radius + ':' + P.anchor, needB = techs.includes('B') && !S.cache[bKey];
+    const paint = (t, i) => {
+      const f = stage.children[i], cv = f.querySelector('canvas'), pend = f.querySelector('.pending');
+      if (pend) pend.remove();
+      const r = E.render(cv, S, P, t, v, O);
       f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ms.toFixed(0)} ms</span>`;
+      if (t === 'B') S.cache[bKey] = true;
+    };
+    const surv = {}, survOf = (t, late) => { if (t !== 'box' && techs.includes(t) && (late || !(t === 'B' && needB))) surv[t] = E.stairSurvival(S, P, t); };
+    techs.forEach((t, i) => {
+      if (t === 'B' && needB) { // painted after the other panels: the first draw of B is the slow one
+        const f = stage.children[i], cv = f.querySelector('canvas'), ctx = cv.getContext('2d'), dpr = window.devicePixelRatio || 1;
+        cv.width = f.clientWidth * dpr | 0; cv.height = f.clientHeight * dpr | 0; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#171424'; ctx.fillRect(0, 0, cv.width, cv.height);
+        if (!f.querySelector('.pending')) { const d = document.createElement('div'); d.className = 'pending'; d.textContent = 'computing…'; f.appendChild(d); }
+        f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>computing…</span>`;
+      } else paint(t, i);
     });
+    for (const t of techs) survOf(t);
+    const firstMs = performance.now() - t0;
+    st.timing = { cold: !!st.cold, first: firstMs, all: needB ? null : firstMs, layout, techs: techs.slice() };
+    const finish = () => {
+      if (token !== drawToken || !S) return;
+      if (needB) { techs.forEach((t, i) => { if (t === 'B') paint(t, i); }); survOf('B', true); st.timing.all = performance.now() - t0; }
+      info(surv, techs); $('#busy').hidden = true;
+    };
+    if (needB) { info(surv, techs); requestAnimationFrame(() => setTimeout(finish, 0)); } else finish();
+  }
+  function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
     document.querySelectorAll('#techs button').forEach((b) => b.classList.toggle('on', st.mode === 'single' && b.dataset.id === st.tech));
     $('#mode').textContent = st.mode === 'compare' ? 'Compare: on' : 'Compare: off';
@@ -2358,15 +2391,13 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const eff = E.subHeight(P), note = $('#subHnote');
     note.hidden = eff >= P.subH - 1e-9;
     note.textContent = `Sub-terrace height limited to ${eff.toFixed(3)} (set ${P.subH}) so the gap to the next terrace stays above the climb limit.`;
-    const surv = {}; for (const t of techs) if (t !== 'box') surv[t] = E.stairSurvival(S, P, t);
-    const sv = (t) => (surv[t] ? `${(surv[t].coverage * 100).toFixed(1)}%` + (surv[t].lost ? `, ${surv[t].lost}/${surv[t].n} lost` : '') + (surv[t].degraded ? `, ${surv[t].degraded} degraded` : '') : '–');
+    const sv = (t) => (!surv[t] && techs.includes(t) ? '…' : surv[t] ? `${(surv[t].coverage * 100).toFixed(1)}%` + (surv[t].lost ? `, ${surv[t].lost}/${surv[t].n} lost` : '') + (surv[t].degraded ? `, ${surv[t].degraded} degraded` : '') : '–');
     const sinf = S.stairInfo, stairText = `${sinf.gates} gates · ${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · stair coverage A ${sv('A')} · B ${sv('B')}`;
     const bi = S.borderInfo, borderText = bi ? ` · slice border faces: ${bi.barrier} barrier (red) · ${bi.pass} pass (cyan) · ${bi.none} unmarked (yellow) · ${bi.mapEdge} map edge (white)` : '';
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#busy').hidden = true;
     $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%`;
   }
 
@@ -2375,7 +2406,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { timing: () => st.timing, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

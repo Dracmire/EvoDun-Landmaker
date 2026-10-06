@@ -105,7 +105,7 @@ const PAGE = async ({ nPts }) => {
 };
 
 (async () => {
-  const ni = process.argv.indexOf('--n'), nPts = ni > 0 ? +process.argv[ni + 1] : 60;
+  const ni = process.argv.indexOf('--n'), nPts = ni > 0 ? +process.argv[ni + 1] : 120;
   const a = await open({ w: 900, h: 700 });
   const r = await a.page.evaluate(PAGE, { nPts });
   console.log('| configuration | technique | cap/ramp points | correct | naive picker (control) | hidden tile centres: correct / naive | wall points: correct |\n|---|---|---:|---:|---:|---|---|');

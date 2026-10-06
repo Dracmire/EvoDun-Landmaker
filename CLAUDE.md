@@ -172,7 +172,13 @@ incursion border; stake and way-back path visible.
    same measurement on the previous code gave 93-97 % for A and B, so the cause was never isolated. Stairs outside the slice
    are not generated (scenery has no stairs).
 5. Technique B rounds the outer corners of the slice.
-6. In compare mode the three panels are narrow in isometric views.
+6. Compare mode (Box | A | B, on by default): ONE camera for all panels (same px per tile, fitted to the first panel, same point of the map; wheel zoom,
+   pan and presets move all of them), two layouts, Columns and Rows, chosen automatically (Rows in isometric presets) with a manual selector;
+   Box and A are painted as soon as they are ready and B afterwards, with "computing…" in its panel (`tools/ui/test_compare_ui.js`). At zoom 1 Rows is
+   NOT larger than Columns in Iso (2.64 vs 3.14 px per tile: the panel is 219 px tall); its advantage is the wide strip when zooming in. Cold time to
+   the first panels / to all three (`tools/ui/measure_compare.js`, 5x3, 12x3, 24x3 terraces): zone 6: 0.17 / 0.60 s, 0.22 / 1.24 s, 0.34 / 2.2 s; whole
+   map: 0.78 / 2.8 s, 1.3 / 6.0 s, 1.7 / 10.2 s. Moving the camera does not recompute (cached contours). POSSIBLE IMPROVEMENT (not done, user's call):
+   a cursor synchronised across panels (hover resolves the visible tile with `E.pickTile` and marks it in the others). B is not split by levels.
 7. Only two built-in sources: Snake Mountain and filler noise. Missing: Shrine-Pier pack and real 256x256 maps. Roles
    were tested with synthetic images; no real Unity `EncodeToPNG` file yet (to be added under `data/samples/`).
 8. Verified in headless Chromium only: image loading, mouse drag/zoom/pan, roles, slice. Not

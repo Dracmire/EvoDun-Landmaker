@@ -27,6 +27,8 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0}
 #stage{flex:1;min-height:0;display:grid;gap:1px;background:var(--line);touch-action:none;cursor:grab}
 #stage[data-n="1"]{grid-template-columns:1fr}
 #stage[data-n="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+#stage[data-n="3"][data-layout="rows"]{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr))}
+.pending{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--acc);font-weight:600;background:#171424cc}
 #roles .role{display:grid;grid-template-columns:78px minmax(0,1fr);gap:6px;align-items:center;margin:3px 0}
 #roles .role select,#roles .role input{width:100%;min-width:0;padding:4px 6px}
 #rolesInfo{line-height:1.5}
@@ -84,7 +86,7 @@ figcaption span{color:var(--mut);font-size:11px}
   <div class="hint">Drag: small angle variation · Shift/right-drag: pan · wheel: zoom · double-click: reset</div>
  </aside>
  <main>
-  <div id="bar"><div class="row" id="presets"></div><div class="row" id="techs"></div><button id="mode">Compare</button><button id="reset">Reset view</button><span id="busy" hidden>computing…</span></div>
+  <div id="bar"><div class="row" id="presets"></div><div class="row" id="techs"></div><button id="mode">Compare</button><select id="layout" title="Layout of the compare panels"><option value="auto">Layout: auto</option><option value="columns">Layout: columns</option><option value="rows">Layout: rows</option></select><button id="reset">Reset view</button><span id="busy" hidden>computing…</span></div>
   <div id="info"></div>
   <div id="stage"></div>
  </main>
