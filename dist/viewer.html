@@ -257,12 +257,15 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   const circ = (a, b) => { const d = Math.abs(a - b) % 1; return Math.min(d, 1 - d) * 360; }; // degrees between hues 0..1
 
-  /* Categorical ids from hue. V = 0 is "outside" (id 0). With o.maxnode, id = round(H * (maxnode + 1)).
-     Otherwise hue clusters are found and every pixel goes to its nearest centre (ids 1..K in hue order).
-     Pixels whose hue is not reliable are NOT assigned: id -1 and counted in info.ambiguous. */
+  /* Categorical ids from hue. V = 0 is "outside" (id 0).
+     With o.maxnode the id is always id = round(H * (maxnode + 1)) (valid ids 1..maxnode; 0 and maxnode+1 are
+     reserved, so those pixels get -1). Otherwise hue clusters are found and every pixel goes to its nearest
+     centre (ids 1..K in hue order); there, pixels whose hue is not reliable get -1.
+     Pixels with an unreliable hue are counted in info.ambiguous and flagged in the returned `amb` mask
+     (1 = ambiguous); with maxnode they keep their id unless it is reserved. */
   E.categoricalFromHue = function (img, o = {}) {
-    const { H, S, V } = img.ch, n = H.length, mx = img.max, ids = new Int32Array(n);
-    const amb = { total: 0, noHue: 0, lowChroma: 0, far: 0, reserved: 0 };
+    const { H, S, V } = img.ch, n = H.length, mx = img.max, ids = new Int32Array(n), amb = new Uint8Array(n);
+    const stat = { total: 0, kept: 0, noHue: 0, lowChroma: 0, far: 0, reserved: 0 };
     const chroma = new Float32Array(n);
     for (let i = 0; i < n; i++) chroma[i] = Math.round(S[i] * V[i] * mx); // raw counts, exact for 8/16-bit
     const maxnode = o.maxnode > 0 ? Math.round(o.maxnode) : 0;
@@ -278,13 +281,13 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       }
       const occ = []; for (let b = 0; b < BINS; b++) if (cnt[b]) occ.push(b);
       const binGap = (a, b) => ((b - a + BINS) % BINS) * 360 / BINS;
-      let groups = [];
+      const groups = [];
       if (occ.length) {
         let start = 0; // first occupied bin whose predecessor is further than HUE_GAP
         for (let k = 0; k < occ.length; k++) if (binGap(occ[(k + occ.length - 1) % occ.length], occ[k]) > HUE_GAP) { start = k; break; }
         let cur = [occ[start]];
-        for (let s = 1; s < occ.length; s++) {
-          const a = occ[(start + s - 1) % occ.length], b = occ[(start + s) % occ.length];
+        for (let q = 1; q < occ.length; q++) {
+          const a = occ[(start + q - 1) % occ.length], b = occ[(start + q) % occ.length];
           if (binGap(a, b) > HUE_GAP) { groups.push(cur); cur = []; }
           cur.push(b);
         }
@@ -303,23 +306,24 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const count = new Map(); let outside = 0;
     for (let i = 0; i < n; i++) {
       if (V[i] === 0) { outside++; continue; }
-      let id = -1, why = '';
+      let why = '', id = -1;
       if (chroma[i] < 1) why = 'noHue';
       else if (60 / chroma[i] > tol) why = 'lowChroma';
-      else if (maxnode) {
-        const x = H[i] * (maxnode + 1); id = Math.round(x);
-        if (id < 1 || id > maxnode) { why = 'reserved'; id = -1; }
-        else if (Math.abs(x - id) * 360 / (maxnode + 1) > tol) { why = 'far'; id = -1; }
-      } else {
+      if (maxnode) {
+        const x = H[i] * (maxnode + 1), r = Math.round(x);
+        if (r >= 1 && r <= maxnode) { id = r; if (!why && Math.abs(x - r) * 360 / (maxnode + 1) > tol) why = 'far'; }
+        else if (!why) why = 'reserved';
+      } else if (!why) {
         let best = -1, bd = 1e9;
         for (let k = 0; k < centres.length; k++) { const d = circ(H[i], centres[k]); if (d < bd) { bd = d; best = k; } }
         if (best < 0 || bd > tol) why = 'far'; else id = best + 1;
       }
-      if (id < 0) { amb[why]++; amb.total++; ids[i] = -1; continue; }
-      ids[i] = id; count.set(id, (count.get(id) || 0) + 1);
+      if (why) { stat[why]++; stat.total++; amb[i] = 1; if (id > 0) stat.kept++; }
+      ids[i] = id;
+      if (id > 0) count.set(id, (count.get(id) || 0) + 1);
     }
     const classes = [...count].sort((p, q) => p[0] - q[0]).map(([id, c]) => ({ id, count: c, hue: maxnode ? id / (maxnode + 1) : centres[id - 1] }));
-    return { ids, info: { mode: maxnode ? 'maxnode' : 'deduced', maxnode, tolDeg: tol, classes, outside, ambiguous: amb } };
+    return { ids, amb, info: { mode: maxnode ? 'maxnode' : 'deduced', maxnode, tolDeg: tol, classes, outside, ambiguous: stat } };
   };
 
   /* Categorical ids from a plain channel: every distinct non-zero value is an id, 0 = outside. */
@@ -332,7 +336,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       if (count.size > MAX_IDS) throw new Error(`Channel ${chan} has more than ${MAX_IDS} distinct values; this does not look like a categorical image.`);
     }
     const classes = [...count].sort((p, q) => p[0] - q[0]).map(([id, c]) => ({ id, count: c }));
-    return { ids, info: { mode: 'value', maxnode: 0, tolDeg: 0, classes, outside, ambiguous: { total: 0, noHue: 0, lowChroma: 0, far: 0, reserved: 0 } } };
+    return { ids, amb: new Uint8Array(n), info: { mode: 'value', maxnode: 0, tolDeg: 0, classes, outside, ambiguous: { total: 0, kept: 0, noHue: 0, lowChroma: 0, far: 0, reserved: 0 } } };
   };
 
   /* Edge map labels from hue: red = barrier, cyan = border with a pass. */
@@ -350,7 +354,9 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     if (a.noHue + a.lowChroma) parts.push(`${a.noHue + a.lowChroma} with grey or very low chroma (hue imprecise)`);
     if (a.far) parts.push(`${a.far} far from any ${info.mode === 'maxnode' ? 'id' : 'hue centre'}`);
     if (a.reserved) parts.push(`${a.reserved} on reserved id 0 / maxnode+1`);
-    return `${role}: ${a.total} px (${(a.total / n * 100).toFixed(2)}%) have an ambiguous hue (${parts.join(', ')}); left unassigned (id -1, shown magenta).`;
+    const left = a.total - a.kept;
+    return `${role}: ${a.total} px (${(a.total / n * 100).toFixed(2)}%) have an ambiguous hue (${parts.join(', ')}); ` +
+      `${a.kept} kept the id from the formula, ${left} left unassigned (id -1); all shown magenta.`;
   }
 
   /* images: [{ name, width, height, max, ch }]; roles: { role: { image: index, channel } };
@@ -371,7 +377,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     };
     const W = first.width, H = first.height, scale = o.elevationScale || E.ELEVATION_SCALE;
     const src = field(roles.elevation), elevation = new Float32Array(W * H);
-    for (let i = 0; i < elevation.length; i++) elevation[i] = src[i] * scale;
+    let emin = Infinity, emax = -Infinity;
+    for (let i = 0; i < elevation.length; i++) { elevation[i] = src[i] * scale; const v = elevation[i]; if (v < emin) emin = v; if (v > emax) emax = v; } // stored (float32) values
     const fields = {}, warnings = [];
     for (const role of ['zone', 'edge']) {
       const r = roles[role]; if (!r) continue;
@@ -381,7 +388,37 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const w = ambiguityWarning(role, fields[role].info); if (w) warnings.push(w);
     }
     for (const role of ['path', 'vegetation', 'poi']) if (roles[role]) fields[role] = { values: field(roles[role]) };
-    return { format: 'evodun-pack/0.2', name: o.name || 'Images', width: W, height: H, elevation, masks: {}, markers: o.markers || [], fields, warnings };
+    return { format: 'evodun-pack/0.2', name: o.name || 'Images', width: W, height: H, elevation, elevRange: [emin, emax], masks: {}, markers: o.markers || [], fields, warnings };
+  };
+
+  /* Zone ids for slicing: every id -1 pixel takes the majority id among its 8 neighbours (neighbours that are
+     themselves -1 are ignored; a tie prefers a zone over "outside", then the lowest id), so unassigned pixels
+     never open holes. Repeats so that runs of -1 are filled from their borders; what is still unresolved
+     becomes 0 (outside). The original ids are not modified. */
+  E.fillUnassigned = function (ids, W, H) {
+    const out = Int32Array.from(ids);
+    let pending = []; for (let i = 0; i < out.length; i++) if (out[i] < 0) pending.push(i);
+    for (let pass = 0; pass < 64 && pending.length; pass++) {
+      const upd = [], rest = [];
+      for (const i of pending) {
+        const x = i % W, y = (i / W) | 0, cnt = new Map();
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          if (!dx && !dy) continue;
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+          const v = out[ny * W + nx]; if (v < 0) continue;
+          cnt.set(v, (cnt.get(v) || 0) + 1);
+        }
+        if (!cnt.size) { rest.push(i); continue; }
+        let best = -1, bc = 0;
+        for (const [v, c] of cnt) if (c > bc || (c === bc && ((best === 0 && v > 0) || (v > 0 && best > 0 && v < best)))) { best = v; bc = c; }
+        upd.push(i, best);
+      }
+      for (let k = 0; k < upd.length; k += 2) out[upd[k]] = upd[k + 1];
+      pending = rest;
+    }
+    for (const i of pending) out[i] = 0;
+    return out;
   };
 
   /* ---- manifest (evodun-pack/0.2 json: roles by image name) ---- */
@@ -394,7 +431,15 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       if (!r || typeof r.image !== 'string' || !E.CHANNELS.includes(r.channel)) throw new Error(`Manifest: role "${role}" needs { image, channel } with channel in ${E.CHANNELS.join('/')}.`);
       roles[role] = { image: r.image, channel: r.channel };
     }
-    return { name: json.name || '', flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, markers: json.markers || [], notes };
+    let slice = null;
+    if (json.slice) {
+      const z = json.slice.zones, r = json.slice.rect, m = json.slice.margin;
+      if (z !== undefined && !(Array.isArray(z) && z.every((v) => Number.isInteger(v) && v > 0))) throw new Error('Manifest: slice.zones must be a list of positive integers.');
+      if (r !== undefined && !(Array.isArray(r) && r.length === 4 && r.every(Number.isInteger))) throw new Error('Manifest: slice.rect must be [x0, y0, x1, y1] (integers, x1/y1 exclusive).');
+      if (m !== undefined && !(Number.isInteger(m) && m >= 0)) throw new Error('Manifest: slice.margin must be a non-negative integer.');
+      slice = { zones: z || [], rect: r || null, margin: m };
+    }
+    return { name: json.name || '', flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, slice, markers: json.markers || [], notes };
   };
   E.buildManifest = function (m) {
     const roles = {};
@@ -402,6 +447,13 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const out = { format: 'evodun-pack/0.2', name: m.name, flipY: !!m.flipY };
     if (m.maxnode) out.maxnode = m.maxnode;
     out.roles = roles;
+    if (m.slice) {
+      const sl = {};
+      if (m.slice.zones && m.slice.zones.length) sl.zones = m.slice.zones.slice();
+      if (m.slice.rect) sl.rect = m.slice.rect.slice();
+      if (m.slice.margin !== undefined && m.slice.margin !== null) sl.margin = m.slice.margin;
+      if (Object.keys(sl).length) out.slice = sl;
+    }
     if (m.markers && m.markers.length) out.markers = m.markers;
     return out;
   };
