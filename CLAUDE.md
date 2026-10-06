@@ -135,10 +135,19 @@ incursion border; stake and way-back path visible.
 1. Overlays (snake, cave, water) are drawn as square tiles and look blocky over the smoothed A/B shapes.
 2. Carved stairs and ramps: each is cut into the upper terrace (or built up on the lower one) as 1-3 columns (ramps 1-5)
    (width default 2; in `steps` style the tread rise defaults to the climb limit, 1 is also available).
-   RAMP PAINTER ORDER: Box orders ramps by tile depth and matches a per-pixel z-buffer reference exactly (0 % in 8 view
-   directions). A and B order by level, so a ramp that spans several levels can lose slivers: a cut ramp is drawn right
-   after the slab of its low end, a built-up one right before the slab of its high end, and slab walls beside a ramp
-   are clipped to its surface. Measured with `tools/ui/test_ramp_ui.js` (`--terraces N --spread S`, mean / worst % of the ramp's pixels that differ from the z-buffer, default smoothing; 5 terraces, spread 1 is the reference): 5 terraces, spread 1: Box 0 / 0, A 0.1-0.7 / <= 3.6, B 0.2-0.8 / <= 4.1. 12 terraces, spread 1: Box 0 / <= 0.04, A 0.4-3.0 / <= 30, B 0.5-3.6 / <= 32. 12 terraces, spread 1.5: Box 0.0-0.04 / <= 3.2, A 1.8-4.0 / <= 42, B 2.8-6.3 / <= 41. The test ENFORCES only the reference (Box exact; A and B mean <= 2 %, worst <= 8 %); with more levels the level-ordered painter loses more, a limit measured here, not hidden (accepted by the user as a LIMITATION OF THE LEVEL-ORDERED PAINTER; the full solution is per-pixel depth, left for WebGL in round 2). The footprint is rigid: in A the vertices
+   RAMP PAINTER ORDER: Box orders ramps by tile depth and matches a per-pixel z-buffer reference (<= 0.04 % mean, <= 3.2 % worst).
+   A and B order by level, so the ramp is CUT BY LEVEL BANDS: every ramp tile is split where its surface crosses the height of a level,
+   and each piece is drawn in the pass of the level at the top of its band, sorted by depth together with the walls of that level and
+   before its cap; slab walls beside a ramp are clipped to its surface. (Earlier orders drew the WHOLE ramp in one pass: after the low slab,
+   before the high slab, and two variants; the banded cut is a different one and the first that is clearly better.) Measured with
+   `tools/ui/test_ramp_ui.js` (`--terraces N --spread S`; mean / worst % of the ramp's pixels that differ from the z-buffer, default smoothing):
+   5 terraces spread 1: A 0.00-0.02 / <= 0.4, B 0.03-0.14 / <= 1.0 (before the cut: 0.1-0.7 / 3.6 and 0.2-0.8 / 4.1). 5 terraces spread 1.5:
+   A <= 0.02 / <= 0.4, B 0.07-0.16 / <= 2.1. 12 terraces spread 1: A 0.00-0.19 / <= 6.2, B 0.16-0.69 / <= 6.5 (before: <= 30 / <= 32).
+   12 terraces spread 1.5: A <= 0.17 / <= 7.5, B 1.0-2.6 / <= 25 (before: 1.8-6.3 / <= 42). The 2 % / 8 % threshold is reached in every
+   configuration EXCEPT B with 12 terraces and spread 1.5; the test therefore still ENFORCES only the reference (5 terraces, spread 1:
+   Box exact, A and B mean <= 2 %, worst <= 8 %) and the rest is measured. The worst case left (B, 12 terraces, spread 1.5, `--only 51`) is a
+   B-smoothing mismatch, not an order error: the smoothed slab contour is not the tile-exact edge of the reference, so a ramp piece that the
+   reference hides is drawn (accepted; the full solution is per-pixel depth, left for WebGL in round 2). The footprint is rigid: in A the vertices
    of every contour edge that touches a carved tile are pinned through the Chaikin passes; in B the unblurred distance
    field replaces the blurred one within 0.5 tile of a carved tile (fading out by 1.5 tiles). Terrain away from the
    stairs is smoothed as before. Look (`render.js`): own cream colour with a tint per tread, light line on the top edge
