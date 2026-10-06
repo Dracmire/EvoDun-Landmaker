@@ -12,8 +12,8 @@
     }
     return RAMP[RAMP.length - 1][1];
   }
-  function levelColor(fine, P) {
-    const K = P.subs, ter = Math.floor(fine / K), mi = fine % K;
+  function levelColor(S, L, P) {
+    const K = P.subs, m = S.levelMeta[L], ter = m.ter, mi = m.sub;
     const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
     const lift = 1 + (mi - (K - 1) / 2) * 0.05;
     return c.map((v) => v * lift);
@@ -23,7 +23,7 @@
   function makeCam(S, P, view, w, h) {
     const yaw = view.yaw * Math.PI / 180, pit = view.pitch * Math.PI / 180;
     const cy = Math.cos(yaw), sy = Math.sin(yaw), sp = Math.sin(pit), cp = Math.cos(pit);
-    const base = E.hOf(0, P) - P.terH, top = E.hOf(S.maxFine, P);
+    const base = S.levelH[0] - P.terH, top = S.levelH[S.maxFine];
     const raw = (x, y, hh) => {
       const X = x - S.W / 2, Y = y - S.H / 2;
       return [cy * X - sy * Y, (sy * X + cy * Y) * sp - hh * cp];
@@ -144,14 +144,14 @@
     const xa = a % W, ya = (a / W) | 0, xb = b % W, yb = (b / W) | 0, dx = xa - xb, dy = ya - yb;
     const [rnx, rny] = cam.nrm(dx, dy);
     if (rny < -0.3) return false;
-    const hb = E.hOf(S.fine[b], P), ha = E.hOf(S.fine[a], P);
+    const hb = S.levelH[S.fine[b]], ha = S.levelH[S.fine[a]];
     let e1, e2, f1, f2;
     if (dx === 1) { e1 = [xb + 1, yb]; e2 = [xb + 1, yb + 1]; f1 = [xb + 2, yb]; f2 = [xb + 2, yb + 1]; }
     else if (dx === -1) { e1 = [xb, yb]; e2 = [xb, yb + 1]; f1 = [xb - 1, yb]; f2 = [xb - 1, yb + 1]; }
     else if (dy === 1) { e1 = [xb, yb + 1]; e2 = [xb + 1, yb + 1]; f1 = [xb, yb + 2]; f2 = [xb + 1, yb + 2]; }
     else { e1 = [xb, yb]; e2 = [xb + 1, yb]; f1 = [xb, yb - 1]; f2 = [xb + 1, yb - 1]; }
     const q = [cam.p(e1[0], e1[1], hb), cam.p(e2[0], e2[1], hb), cam.p(f2[0], f2[1], ha), cam.p(f1[0], f1[1], ha)];
-    const c = levelColor(S.fine[b], P);
+    const c = levelColor(S, S.fine[b], P);
     ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(q[k][0], q[k][1]); ctx.closePath();
     ctx.fillStyle = rgb(c, 1.18); ctx.fill();
     const n = clamp(Math.round((hb - ha) / 0.28), 2, 6);
@@ -172,7 +172,7 @@
   function drawPassMarks(ctx, cam, S, P) {
     ctx.fillStyle = 'rgba(255,214,64,0.95)'; ctx.strokeStyle = 'rgba(24,20,34,0.9)'; ctx.lineWidth = 1;
     for (const p of S.passes) {
-      const x = p.b % S.W + 0.5, y = ((p.b / S.W) | 0) + 0.5, hh = E.hOf(S.fine[p.b], P);
+      const x = p.b % S.W + 0.5, y = ((p.b / S.W) | 0) + 0.5, hh = S.levelH[S.fine[p.b]];
       const c = cam.p(x, y, hh), r = Math.max(3, cam.sc * 0.18);
       ctx.beginPath(); ctx.moveTo(c[0], c[1] - r * 1.2); ctx.lineTo(c[0] + r, c[1] + r * 0.8); ctx.lineTo(c[0] - r, c[1] + r * 0.8); ctx.closePath(); ctx.fill(); ctx.stroke();
     }
@@ -182,7 +182,7 @@
     ctx.font = `600 ${Math.max(10, Math.min(14, cam.sc * 0.5)) | 0}px system-ui, sans-serif`;
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
     for (const m of S.markers) {
-      const i = m.y * S.W + m.x, hh = E.hOf(S.fine[i], P);
+      const i = m.y * S.W + m.x, hh = S.levelH[S.fine[i]];
       const b = cam.p(m.x + 0.5, m.y + 0.5, hh), t = cam.p(m.x + 0.5, m.y + 0.5, hh + 1.1);
       ctx.strokeStyle = 'rgba(24,20,34,0.95)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(t[0], t[1]); ctx.stroke();
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.stroke();
@@ -203,13 +203,13 @@
     const passA = new Map(S.passes.map((p) => [p.a, p]));
     const dirs = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
     const rank = new Int32Array(S.n); order.forEach((t, r) => { rank[t] = r; });
-    const face = (i2, b) => { const bp = new Path2D(); borderFaces(bp, cam, i2 % W, (i2 / W) | 0, 1 << b, E.hOf(S.fine[i2], P)); strokeBorder(ctx, bp); };
+    const face = (i2, b) => { const bp = new Path2D(); borderFaces(bp, cam, i2 % W, (i2 / W) | 0, 1 << b, S.levelH[S.fine[i2]]); strokeBorder(ctx, bp); };
     for (const i of order) {
-      const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = E.hOf(f, P), c = levelColor(f, P);
+      const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = S.levelH[f], c = levelColor(S, f, P);
       const veiled = !!(o.veil && S.slice && !S.slice[i]), cc = veiled ? veilMix(c) : c;
       for (const [dx, dy, ax, ay, bx, by] of dirs) {
         const nx = x + dx, ny = y + dy;
-        const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : E.hOf(S.fine[ny * W + nx], P);
+        const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : S.levelH[S.fine[ny * W + nx]];
         if (hn >= hh - 1e-6) continue;
         const [rnx, rny] = cam.nrm(dx, dy);
         if (rny <= 0.001) continue;
@@ -222,7 +222,7 @@
       if (o.outlines) { // rim only where a lower neighbour exists
         for (const [dx, dy, ax, ay, bx, by] of dirs) {
           const nx = x + dx, ny = y + dy;
-          const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : E.hOf(S.fine[ny * W + nx], P);
+          const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : S.levelH[S.fine[ny * W + nx]];
           if (hn >= hh - 1e-6) continue;
           const terrace = hh - hn > E.subHeight(P) * 1.5;
           const A = cam.p(x + ax, y + ay, hh), B = cam.p(x + bx, y + by, hh);
@@ -256,9 +256,9 @@
     for (let L = 0; L <= S.maxFine; L++) {
       const loops = loopsOf(S, L, P);
       if (!loops.length) continue;
-      const ht = E.hOf(L, P), hb = L === 0 ? cam.base : E.hOf(L - 1, P);
+      const ht = S.levelH[L], hb = L === 0 ? cam.base : S.levelH[L - 1];
       const terraceLevel = L === 0 || L % P.subs === 0;
-      const c = levelColor(L, P), cv = veilMix(c), segs = [];
+      const c = levelColor(S, L, P), cv = veilMix(c), segs = [];
       for (const loop of loops) {
         const n = loop.length; st.verts += n;
         for (let k = 0; k < n; k++) {
@@ -301,6 +301,8 @@
       for (const p of byB.get(L) || []) if (drawRamp(ctx, cam, S, P, p, o)) st.ramps++;
     }
   }
+
+  E.makeCam = makeCam; // exposed for the UI tests (screen position of a tile)
 
   E.render = function (cv, S, P, tech, view, o) {
     const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;

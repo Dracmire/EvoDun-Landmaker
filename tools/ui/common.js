@@ -1,10 +1,11 @@
 /* Shared helpers for the headless UI tests. They need Playwright and Chromium:
      NODE_PATH=$(npm root -g) node tools/ui/<script>.js
-   CHROMIUM=<path> overrides the browser binary. Test images come from `python3 tools/ui/gen_maps.py`
+   CHROMIUM=<path> overrides the browser binary; EVO_ROOT=<dir> tests another checkout of the viewer
+   (e.g. a `git worktree` of an older commit) with these scripts. Test images come from `python3 tools/ui/gen_maps.py`
    (needs Pillow and numpy) and live in tools/ui/.cache (not committed). */
 const fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
-const ROOT = path.resolve(__dirname, '../..'), CACHE = path.join(__dirname, '.cache');
+const ROOT = process.env.EVO_ROOT || path.resolve(__dirname, '../..'), CACHE = path.join(__dirname, '.cache');
 const DEFAULT_BIN = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 exports.ROOT = ROOT; exports.CACHE = CACHE; exports.MAPS = path.join(CACHE, 'maps');
 exports.mapFile = (dir, name) => path.join(CACHE, dir, name + '.png');

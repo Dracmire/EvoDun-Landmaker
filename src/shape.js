@@ -179,9 +179,13 @@
     for (let i = 0; i < n; i++) { fine[i] = ter[i] * K + sub[i]; if (fine[i] > maxFine) maxFine = fine[i]; }
     const byLevel = Array.from({ length: maxFine + 1 }, () => []);
     for (let i = 0; i < n; i++) byLevel[fine[i]].push(i);
+    // `fine` is a level index: levels are ranked by height. levelH[L] is the height of level L and levelMeta[L]
+    // says where it comes from (terrace, sub-terrace; bridge levels are added by the stair carving).
+    const levelH = new Array(maxFine + 1), levelMeta = new Array(maxFine + 1);
+    for (let L = 0; L <= maxFine; L++) { levelH[L] = E.hOf(L, P); levelMeta[L] = { ter: Math.floor(L / K), sub: L % K, bridge: false }; }
     const masks = pack.masks || {};
     const S = {
-      W, H, n, U, ter, sub, fine, maxFine, byLevel, subs: K, N,
+      W, H, n, U, ter, sub, fine, maxFine, byLevel, levelH, levelMeta, subs: K, N,
       water: masks.water || new Array(n).fill(0),
       snake: masks.snake || null, cave: masks.cave || null, waterfall: masks.waterfall || null,
       markers: pack.markers || [], name: pack.name, fields: pack.fields || {}, cache: {},
