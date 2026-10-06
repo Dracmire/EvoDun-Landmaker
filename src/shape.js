@@ -237,6 +237,20 @@
         if (y === H - 1 || !mask[i + W]) S.border[i] |= 4;
         if (x === 0 || !mask[i - 1]) S.border[i] |= 8;
       }
+      // colour of each border face from the edge map: red if the slice tile or its partner (the tile across the face, in the
+      // whole map) is a barrier, cyan if one is a pass and none a barrier, yellow if neither is marked, white at the map edge
+      const ef = full.fields && full.fields.edge, labels = new Map(); if (ef) for (const c of ef.info.classes) labels.set(c.id, c.label);
+      const kindAt = (fx, fy) => { if (!ef) return 0; const id = ef.ids[fy * full.width + fx], l = id > 0 ? labels.get(id) : null; return l === 'barrier' ? 1 : l === 'pass' ? 2 : 0; };
+      S.borderKind = new Uint8Array(n * 4); S.borderInfo = { barrier: 0, pass: 0, none: 0, mapEdge: 0 };
+      const OFF = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+      for (let i = 0; i < n; i++) for (let b = 0; b < 4; b++) {
+        if (!(S.border[i] >> b & 1)) continue;
+        const fx = sl.x0 + (i % W), fy = sl.y0 + ((i / W) | 0), nx = fx + OFF[b][0], ny = fy + OFF[b][1];
+        let kind;
+        if (nx < 0 || ny < 0 || nx >= full.width || ny >= full.height) kind = 4;
+        else { const k1 = kindAt(fx, fy), k2 = kindAt(nx, ny); kind = k1 === 1 || k2 === 1 ? 1 : k1 === 2 || k2 === 2 ? 2 : 3; }
+        S.borderKind[i * 4 + b] = kind; S.borderInfo[['', 'barrier', 'pass', 'none', 'mapEdge'][kind]]++;
+      }
       S.sliceLoops = E.maskLoops(W, H, (x, y) => mask[y * W + x] === 1);
       const warnings = [];
       if (spec.zones && spec.zones.length) {

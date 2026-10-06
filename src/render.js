@@ -75,17 +75,29 @@
   const BORDER = 'rgba(255,226,110,0.98)', BORDER_CASE = 'rgba(24,20,34,0.95)';
   const FACE = [[0, 0, 1, 0], [1, 0, 1, 1], [1, 1, 0, 1], [0, 1, 0, 0]]; // N E S W, same bits as S.border
   const inSlice = (S, x, y) => { const ix = Math.floor(x), iy = Math.floor(y); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H && S.slice[iy * S.W + ix] === 1; };
-  function borderFaces(path, cam, x, y, bits, hh) { // adds the faces of tile (x,y) that look outside the slice, at the height of its cap
+  /* Border faces, one segment per tile face (tile-exact, the same in Box, A and B). kind: 1 barrier (red), 2 pass (cyan,
+     dashed per face), 3 not marked (yellow), 4 map edge (white); 0 = the old single colour. */
+  const BORDER_COLORS = { 0: BORDER, 1: 'rgba(240,56,56,0.98)', 2: 'rgba(56,228,244,0.98)', 3: BORDER, 4: 'rgba(255,255,255,0.98)' };
+  function borderFaces(list, S, cam, i, bits, hh) { // adds the faces of tile i that look outside the slice, at the height of its cap
+    const x = i % S.W, y = (i / S.W) | 0;
     for (let b = 0; b < 4; b++) {
       if (!(bits >> b & 1)) continue;
       const f = FACE[b], p = cam.p(x + f[0], y + f[1], hh), q = cam.p(x + f[2], y + f[3], hh);
-      path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]);
+      list.push([p, q, S.borderKind ? S.borderKind[i * 4 + b] : 0]);
     }
   }
-  function strokeBorder(ctx, path) {
+  function strokeBorder(ctx, list) {
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const path = new Path2D(); for (const [p, q] of list) { path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]); }
     ctx.strokeStyle = BORDER_CASE; ctx.lineWidth = 4.2; ctx.stroke(path);
-    ctx.strokeStyle = BORDER; ctx.lineWidth = 2; ctx.stroke(path);
+    for (const kind of [0, 1, 2, 3, 4]) {
+      const pp = new Path2D(); let any = false;
+      for (const [p, q, k] of list) if (k === kind) { pp.moveTo(p[0], p[1]); pp.lineTo(q[0], q[1]); any = true; }
+      if (!any) continue;
+      ctx.strokeStyle = BORDER_COLORS[kind]; ctx.lineWidth = 2;
+      if (kind === 2) { ctx.lineCap = 'butt'; ctx.setLineDash([4, 3]); }
+      ctx.stroke(pp); ctx.setLineDash([]); ctx.lineCap = 'round';
+    }
     ctx.restore();
   }
   function veilPath(cam, S, ht) { // the whole plane minus the slice, at cap height ht (even-odd)
@@ -276,7 +288,7 @@
     const dirs = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
     const rank = new Int32Array(S.n); order.forEach((t, r) => { rank[t] = r; });
     const ST = hasStairs(S) ? stairTiles(S) : null;
-    const face = (i2, b) => { const bp = new Path2D(); borderFaces(bp, cam, i2 % W, (i2 / W) | 0, 1 << b, S.levelH[S.fine[i2]]); strokeBorder(ctx, bp); };
+    const face = (i2, b) => { const bp = []; borderFaces(bp, S, cam, i2, 1 << b, S.levelH[S.fine[i2]]); strokeBorder(ctx, bp); };
     for (const i of order) {
       const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = S.levelH[f], si = ST && ST.get(i), c = si ? stairColor(si) : levelColor(S, f, P);
       const isRamp = !!(si && si.rec);
@@ -401,9 +413,9 @@
       if (ST) for (const i of S.byLevel[L]) drawStairEdges(ctx, cam, S, i, ht);
       if (RAMPS && RAMPS.has(L)) drawRamps(ctx, cam, S, o, RAMPS.get(L), ST, st);
       if (o.border && S.border) {
-        const bp = new Path2D(); let any = false;
-        for (const i of S.byLevel[L]) if (S.border[i]) { borderFaces(bp, cam, i % S.W, (i / S.W) | 0, S.border[i], ht); any = true; }
-        if (any) strokeBorder(ctx, bp);
+        const bp = [];
+        for (const i of S.byLevel[L]) if (S.border[i]) borderFaces(bp, S, cam, i, S.border[i], ht);
+        if (bp.length) strokeBorder(ctx, bp);
       }
     }
   }

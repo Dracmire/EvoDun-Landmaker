@@ -141,10 +141,14 @@ incursion border; stake and way-back path visible.
    start on any terrace (diagonal cliffs); a stair that fits neither as cut nor as build-up is dropped and counted.
 3. A selected zone that is not 4-contiguous only produces a warning (pieces, largest piece); it is not corrected.
    B costs about 3 s cold at 24 terraces (36 levels) on a 256x256 map; sliders recompute on release.
-4. Slice border: tile-exact for all techniques (not smoothed like A/B shapes); the veil is a single band and the border
-   line is one colour (to be coloured by the edge map, visual only). In Box, the line and veil are drawn per
-   tile and look rougher than in A/B. **The border line comes out broken (dashed) in B**: to fix in the visual-border
-   step. Stairs outside the slice are not generated (scenery has no stairs).
+4. Slice border: drawn per tile face, tile-exact and identical in Box, A and B (not smoothed like the A/B shapes), coloured
+   from the edge map, visual only: red solid if the slice tile or its partner (the tile across the face, read in the whole
+   map) is a barrier; cyan dashed (dash restarts per face) if one is a pass and none a barrier; yellow if neither is
+   marked; white at the map edge. Counts by colour in the info. The veil is a single band. In Box, the veil is drawn per
+   tile and looks rougher than in A/B. The old "dashed in B" was not reproduced after drawing by face: A and B show 95-97 %
+   of the faces that Box shows (hidden ones are covered by higher terrain), measured in `tools/ui/test_border_ui.js`; the
+   same measurement on the previous code gave 93-97 % for A and B, so the cause was never isolated. Stairs outside the slice
+   are not generated (scenery has no stairs).
 5. Technique B rounds the outer corners of the slice.
 6. In compare mode the three panels are narrow in isometric views.
 7. Only two built-in sources: Snake Mountain and filler noise. Missing: Shrine-Pier pack and real 256x256 maps. Roles
@@ -162,7 +166,7 @@ incursion border; stake and way-back path visible.
    slice by zone id and/or crop with a veil, sliders recalculating on release. Missing: a real Unity
    `EncodeToPNG` sample in `data/samples/`.
 3. Base solid before anything new. In this order: (1) carved stairs on a level ranking by height, sub-terraces
-   renamed and up to 6, stair width, survival check in A and B (done); gate placement, rigid stair footprint and ramp (done, to be reviewed); (2) visual slice border from the edge map;
+   renamed and up to 6, stair width, survival check in A and B (done); gate placement, rigid stair footprint and ramp (done, to be reviewed); (2) visual slice border from the edge map (done);
    (3) stake, objectives and shortest route (click, manifest); (4) compare mode; (5) overlays that follow the
    smoothed A/B shapes; (6) outer corners of B; (7) Box line and stripes. Test scripts live in `tools/ui/`.
 4. Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.
