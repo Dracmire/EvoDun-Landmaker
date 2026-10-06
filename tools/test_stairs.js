@@ -2,7 +2,7 @@
    Run: node tools/test_stairs.js (no dependencies). */
 const fs = require('fs'), path = require('path'), vm = require('vm');
 global.window = global;
-for (const f of ['fields', 'shape', 'tech']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
+for (const f of ['fields', 'shape', 'tech', 'render']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
 const E = window.EVO;
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { cond ? pass++ : (fail++, console.log('FAIL', name, extra === undefined ? '' : extra)); };
@@ -152,6 +152,47 @@ ok('every tile has a valid level and byLevel agrees', S.fine.every((L) => L >= 0
   const Pr = Object.assign({}, BASE, { stairW: 1, tread: 1, smooth: 4, radius: 2.5 }), Sr = E.shape(relief, Pr);
   ok('survival: stronger smoothing loses more', sv(Sr, Pr, 'B').lost >= b1.lost);
   ok('survival is cached by the loops', sv(S, BASE, 'B').lost === b.lost);
+}
+// 6. hand-built cases for guards that real maps rarely exercise
+const HP = { terraces: 2, subs: 3, terH: 1, subH: 0.22, climb: 2, stairW: 2, tread: 2 };
+{
+  // (a) region leak: a tile beside a carved stair tile must not join it sideways. Row 0: terrace 0 x<4, terrace 1 x>=4;
+  // tiles (2,0),(3,0) are the stair; (2,1) is a pocket whose other neighbours are blocked.
+  const W = 7, H = 2, n = W * H;
+  const ter = new Int16Array(n), sub = new Int16Array(n), block = new Uint8Array(n), carved = new Uint8Array(n);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) ter[y * W + x] = x >= 4 ? 1 : 0;
+  block[1 * W + 1] = 1; block[1 * W + 3] = 1; carved[2] = 1; carved[3] = 1;
+  const S0 = { W, H, n, ter, sub, block, carved, stairs: [{ cols: [0], bottom: [1], top: [4], steps: [{ tiles: [2] }, { tiles: [3] }] }] };
+  E._regions(S0, HP);
+  ok('regions: the stair joins its bottom and top', S0.region[1] === S0.region[2] && S0.region[2] === S0.region[3] && S0.region[3] === S0.region[4]);
+  ok('regions: a pocket tile beside a carved tread is not connected sideways', S0.region[1 * W + 2] !== S0.region[2], `${S0.region[1 * W + 2]} vs ${S0.region[2]}`);
+}
+{
+  // (b) lateral column check: a lateral tile that is not above the tread cannot be cut (it would have to be raised).
+  const mkS = (latSub) => {
+    const W = 7, H = 3, n = W * H, K = 3, ter = new Int16Array(n), sub = new Int16Array(n), block = new Uint8Array(n);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x; ter[i] = x >= 2 ? 1 : 0; sub[i] = x < 2 || y !== 2 ? 2 : latSub; }
+    for (let y = 0; y < H; y++) block[y * W] = 1; // x=0 blocked: building up the lower terrace is impossible
+    const fine = new Int16Array(n).map((_, i) => ter[i] * K + sub[i]);
+    const levelH = [], levelMeta = [];
+    for (let L = 0; L < 6; L++) { levelH.push(E.hOf(L, HP)); levelMeta.push({ ter: Math.floor(L / K), sub: L % K, bridge: false }); }
+    return { W, H, n, subs: K, N: 2, ter, sub, fine, maxFine: 5, levelH, levelMeta, block, water: new Array(n).fill(0), gates: [{}], passes: [{ a: 1 + W, b: 2 + W, gate: 0, kind: 'terrace', alts: [] }] };
+  };
+  const Sa = mkS(2); E._carve(Sa, HP);
+  ok('lateral: control, the lateral tile is above the treads -> width 2', Sa.stairs.length === 1 && Sa.stairs[0].cols.join() === '0,1', JSON.stringify(Sa.stairs.map((s) => s.cols)));
+  const Sb = mkS(0); E._carve(Sb, HP);
+  ok('lateral: a lateral tile level with a tread is rejected -> narrowed to the central column', Sb.stairs.length === 1 && Sb.stairs[0].cols.join() === '0' && Sb.stairInfo.narrowed === 1, JSON.stringify(Sb.stairs.map((s) => s.cols)));
+}
+{
+  // (c) bridge levels: colour is the linear mix between the last sub-terrace of terrace t and the first of t+1; base levels unchanged
+  const K = 3, levelMeta = [], levelH = [];
+  for (let L = 0; L < 6; L++) { levelMeta.push({ ter: Math.floor(L / K), sub: L % K, bridge: false }); levelH.push(L); }
+  levelMeta.splice(3, 0, { ter: 0, sub: K - 1, bridge: true, frac: 0.25 }); levelH.splice(3, 0, 2.5);
+  const SC = { levelMeta, levelH }, lc = (L) => E.levelColor(SC, L, HP);
+  const noBridge = { levelMeta: levelMeta.filter((m) => !m.bridge) };
+  ok('level colour: base levels do not depend on bridges', [0, 1, 2].every((L) => lc(L).every((v, k) => Math.abs(v - E.levelColor(noBridge, L, HP)[k]) < 1e-9)) && [4, 5, 6].every((L) => lc(L).every((v, k) => Math.abs(v - E.levelColor(noBridge, L - 1, HP)[k]) < 1e-9)));
+  const lo = lc(2), hi = lc(4), br = lc(3);
+  ok('level colour: a bridge is the mix of its two terraces by frac', br.every((v, k) => Math.abs(v - (lo[k] + (hi[k] - lo[k]) * 0.25)) < 1e-9) && br.some((v, k) => Math.abs(v - lo[k]) > 1e-6), br.join());
 }
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
