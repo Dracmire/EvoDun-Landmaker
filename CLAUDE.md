@@ -47,6 +47,8 @@ incursion border; stake and way-back path visible.
   blur -> marching squares).
 - `src/render.js`: camera, extruded walls, caps, overlays, ramps, markers. Includes Box technique (one
   column per tile) as reference.
+- `src/png.js`: own PNG decoder (`E.decodePng`, raw samples per channel, 8/16 bit). Not wired to the UI yet.
+  `node tools/test_png.js` runs its exactness test.
 - `src/ui.js`, `src/app.html`: controls, angle presets, compare mode, image loading.
 - `data/snake_mountain.json`: sample pack, format `evodun-pack/0.1` (width, height, row-major elevation,
   masks, markers).
