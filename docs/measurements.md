@@ -84,3 +84,33 @@ alpha). Interlaced files are rejected with a message. Checked in Node 22 and Chr
 - Not covered: files exported by Unity `EncodeToPNG` (none available yet), Adam7 interlacing (rejected by
   design), `tRNS` colour keys for gray/RGB images (ignored), 16-bit palette (does not exist in PNG).
 - pngjs 7's 16-bit encoder produced unusable output in my usage, so pngjs was not used as ground truth.
+
+## 4. Cold cost with carved stairs (bridge levels)
+
+`node tools/ui/measure.js 3`: median of 3 runs, Chromium 141 headless (software rasteriser, ±30 %), canvas
+1200x800, Oblique 50 degrees, synthetic 256x256 map (12 zones), default parameters except terraces and
+sub-terraces. "Cold" is the first render with an empty contour cache. Times in ms. "lost A / lost B" are the stairs
+whose slot is closed by the A / B contours (`E.stairSurvival`); stairs / sites is how many sites could be carved.
+
+| terraces | sub-terraces | slice | levels (bridges) | stairs / sites | shape | Box cold | A cold | B cold | lost A | lost B |
+|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 5 | 3 | whole map | 19 (4) | 297 / 297 | 90.4 | 341 | 162 | 1835 | 1/297 | 21/297 |
+| 5 | 3 | zone 6 | 14 (2) | 24 / 24 | 28.9 | 139 | 20.1 | 395 | 0/24 | 0/24 |
+| 5 | 6 | whole map | 34 (4) | 297 / 297 | 114 | 410 | 252 | 3369 | 1/297 | 23/297 |
+| 5 | 6 | zone 6 | 26 (2) | 24 / 24 | 13.2 | 106 | 83.6 | 754 | 0/24 | 0/24 |
+| 24 | 3 | whole map | 95 (23) | 652 / 656 | 199 | 458 | 746 | 9155 | 1/652 | 132/652 |
+| 24 | 3 | zone 6 | 70 (12) | 63 / 63 | 24.8 | 246 | 195 | 1912 | 0/63 | 12/63 |
+| 24 | 6 | whole map | 167 (23) | 830 / 916 | 303 | 481 | 1367 | 16145 | 5/830 | 253/830 |
+| 24 | 6 | zone 6 | 127 (12) | 79 / 87 | 33.8 | 163 | 356 | 3563 | 1/79 | 28/79 |
+
+Reading it:
+- B is the expensive one: its cost grows with the number of levels (one signed distance field per level) and with
+  the area. With the defaults (5 terraces x 3 sub-terraces) one zone costs ~0.4 s cold; the whole 256x256 map
+  ~1.8 s. At 24 terraces x 6 sub-terraces it is 3.6 s for one zone and 16 s for the whole map (167 levels).
+- Bridge levels are few (2 for one zone at 5 terraces, up to 23 for the whole map at 24 terraces) and are not what
+  makes B slow: levels per terrace are.
+- A and Box stay below 0.5 s except A on the whole map at 24 x 6 (1.4 s).
+- At the defaults, one zone: 0 stairs lost in A and in B. On the whole map B loses 21 of 297 (7 %), and with 24
+  terraces 20-30 % of the stairs: narrow slots do not survive the distance-field blur at that density. The
+  smoothing was deliberately not changed.
+- Shape time (the carving included) is below 0.35 s everywhere.
