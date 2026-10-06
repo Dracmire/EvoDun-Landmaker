@@ -73,5 +73,7 @@ g('vegetation', v)
 p = np.zeros((N, N))
 for x, y in [(40, 200), (128, 128), (220, 40), (70, 100), (180, 150), (30, 30)]: p[y - 1:y + 2, x - 1:x + 2] = 255
 g('poi', p)
-np.save(os.path.join(out('maps'), 'zid.npy'), zid)
+import json
+json.dump(np.where(ring, 0, zid)[128].tolist(), open(os.path.join(out('maps'), 'zid_row128.json'), 'w'))   # ground truth of zones.png, row 128
+json.dump(sorted(int(v) for v in set(zid[0]) | set(zid[-1]) | set(zid[:, 0]) | set(zid[:, -1])), open(os.path.join(out('maps_noring'), 'edge_zones.json'), 'w'))
 print('maps written to', cache)

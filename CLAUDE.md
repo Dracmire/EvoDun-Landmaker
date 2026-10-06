@@ -65,11 +65,12 @@ incursion border; stake and way-back path visible.
 ## Repo state
 - `index.html` opens from file://, no dependencies. Own canvas 2D renderer, painter's algorithm (no three.js).
 - `src/shape.js`: slice (zones and/or crop, window = bbox + scenery margin), terrace quantization with the global
-  elevation range + sub-terraces, minimal-plateau cleanup, pass selection between terraces, walkable regions (only
-  inside the slice). `node tools/test_slice.js`.
+  elevation range + sub-terraces, minimal-plateau cleanup, stair sites, carved stairs (levels are a ranking by
+  height with bridge levels), walkable regions (only inside the slice, connected only by stairs).
+  `node tools/test_slice.js`, `node tools/test_stairs.js`.
 - `src/tech.js`: technique A (per-level tile outline -> simplify -> Chaikin) and B (signed distance field ->
   blur -> marching squares).
-- `src/render.js`: camera, extruded walls, caps, overlays, ramps (to be replaced by carved stairs), markers. Includes Box technique (one
+- `src/render.js`: camera, extruded walls, caps, overlays, markers. Stairs have no special renderer: they are terrain. Includes Box technique (one
   column per tile) as reference.
 - `src/png.js`: own PNG decoder (`E.decodePng`, raw samples per channel, 8/16 bit). `node tools/test_png.js`.
 - `src/fields.js`: channels R,G,B,A,H,S,V, roles (elevation / zone / edge / path / vegetation / POI), categorical
@@ -79,15 +80,20 @@ incursion border; stake and way-back path visible.
   release. Overlays: zones, edge map, graded masks (blocky tiles, see item 1).
 - `data/snake_mountain.json`: sample pack, format `evodun-pack/0.1` (width, height, row-major elevation,
   masks, markers).
-- `tools/ui/`: headless UI tests and pixel regression (Playwright + Pillow, see `tools/ui/common.js`);
+- `tools/ui/`: headless UI tests (`test_roles.js`, `test_slice_ui.js`, `test_stairs_ui.js`), pixel regression
+  (`regress.js` + `compare.js`, `EVO_ROOT` tests an older checkout), screenshots (`stairs_shots.js`), cold-cost
+  measurement (`measure.js`). Need Playwright and Pillow, see `tools/ui/common.js`; maps from `gen_maps.py`;
   `node tools/test_heights.js` checks the effective sub-terrace height.
 - `tools/build.py` regenerates `data/packs.js`, `index.html`, `dist/viewer.html`. Run it after touching
   `src/` or `data/`.
 
 ## Known limitations
 1. Overlays (snake, cave, water) are drawn as square tiles and look blocky over the smoothed A/B shapes.
-2. Ramps are a one-tile plane leaning on the wall; they don't cut geometry and only draw if facing the
-   camera (replaced by carved stairs in point 3, step 1).
+2. Carved stairs: each stair is cut into the upper terrace (or built up on the lower one) as 1-3 columns of treads
+   (width default 2, tread rise default = climb limit, 1 is also available). A/B smoothing can close a narrow slot:
+   the info line shows how many stairs are lost in A and in B (tread = a level whose tiles are not inside its
+   contour and outside the next one). The smoothing is deliberately NOT changed to hide this. Lateral columns may
+   start on any terrace (diagonal cliffs); a stair that fits neither as cut nor as build-up is dropped and counted.
 3. A selected zone that is not 4-contiguous only produces a warning (pieces, largest piece); it is not corrected.
    B costs about 3 s cold at 24 terraces (36 levels) on a 256x256 map; sliders recompute on release.
 4. Slice border: tile-exact for all techniques (not smoothed like A/B shapes); the veil is a single band and the border
@@ -109,7 +115,7 @@ incursion border; stake and way-back path visible.
    slice by zone id and/or crop with a veil, sliders recalculating on release. Missing: a real Unity
    `EncodeToPNG` sample in `data/samples/`.
 3. Base solid before anything new. In this order: (1) carved stairs on a level ranking by height, sub-terraces
-   renamed and up to 6, stair width, survival check in A and B; (2) visual slice border from the edge map;
+   renamed and up to 6, stair width, survival check in A and B (done, to be reviewed); (2) visual slice border from the edge map;
    (3) stake, objectives and shortest route (click, manifest); (4) compare mode; (5) overlays that follow the
    smoothed A/B shapes; (6) outer corners of B; (7) Box line and stripes. Test scripts live in `tools/ui/`.
 4. Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.
