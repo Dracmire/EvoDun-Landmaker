@@ -1,7 +1,7 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 2, margin: 24 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 2, gateThr: 0.05, gateMin: 3, margin: 24 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, passes: false, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
@@ -13,7 +13,7 @@
   const SLIDERS = [
     ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
-    ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['passGap', 'Stair spacing', 3, 20, 1], ['tread', 'Tread rise, sub-terraces', 1, 5, 1], ['stairW', 'Stair width (tiles)', 1, 3, 1]]],
+    ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['tread', 'Tread rise, sub-terraces', 1, 5, 1], ['stairW', 'Stair width (tiles)', 1, 3, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
   const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
@@ -297,13 +297,13 @@
     note.textContent = `Sub-terrace height limited to ${eff.toFixed(3)} (set ${P.subH}) so the gap to the next terrace stays above the climb limit.`;
     const surv = {}; for (const t of techs) if (t !== 'box') surv[t] = E.stairSurvival(S, P, t);
     const sv = (t) => (surv[t] ? `${surv[t].lost}/${surv[t].n}` + (surv[t].degraded ? ` (+${surv[t].degraded} degraded)` : '') : '–');
-    const sinf = S.stairInfo, stairText = `${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · lost A ${sv('A')} · B ${sv('B')}`;
+    const sinf = S.stairInfo, stairText = `${sinf.gates} gates · ${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · lost A ${sv('A')} · B ${sv('B')}`;
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
     $('#busy').hidden = true;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText} · ${rs.length} walkable regions in the ${si ? 'slice' : 'map'}, largest ${(big / tot * 100).toFixed(0)}%`;
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%`;
   }
 
   function init() {

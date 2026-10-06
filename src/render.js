@@ -270,7 +270,8 @@
     }
   }
 
-  E.makeCam = makeCam; // exposed for the UI tests (screen position of a tile)
+  E.levelColor = levelColor; // exposed for the tests
+    E.makeCam = makeCam; // exposed for the UI tests (screen position of a tile)
 
   E.render = function (cv, S, P, tech, view, o) {
     const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;

@@ -151,15 +151,16 @@
     return { name: pack.name, width: w, height: h, elevation: c(pack.elevation), elevRange: pack.elevRange, masks, markers, fields };
   }
 
-  /* pack: the whole map; spec: see E.sliceOf (omit for the whole map as one slice). Terraces use the global
-     elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
-  E.shape = function (full, P, spec) {
-    const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
-    const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.subs;
-    let el = Float32Array.from(pack.elevation);
+  /* Terraces and sub-terraces of the WHOLE map (U = raw-range position after pre-smoothing), cached on the pack by the
+     shaping parameters and then cropped to the window, so a slice never changes them. */
+  function quantize(full, P) {
+    const key = [P.terraces, P.subs, P.minPlateau, P.minSub, P.pre].join('|');
+    if (full._q && full._q.key === key) return full._q;
+    const W = full.width, H = full.height, n = W * H, N = P.terraces, K = P.subs;
+    let el = Float32Array.from(full.elevation);
     for (let p = 0; p < P.pre; p++) el = blur3(el, W, H);
     let mn = Infinity, mx = -Infinity;
-    if (pack.elevRange) { mn = pack.elevRange[0]; mx = pack.elevRange[1]; }
+    if (full.elevRange) { mn = full.elevRange[0]; mx = full.elevRange[1]; }
     else for (const v of el) { if (v < mn) mn = v; if (v > mx) mx = v; }
     const U = new Float32Array(n), ter = new Int16Array(n), sub = new Int16Array(n), g0 = new Int16Array(n);
     for (let i = 0; i < n; i++) {
@@ -174,6 +175,19 @@
       else sub[i] = ter[i] > t0 ? 0 : K - 1;
     }
     cleanup(W, H, sub, ter, P.minSub);
+    return (full._q = { key, U, ter, sub, trans: {} });
+  }
+  E.quantize = quantize;
+
+  /* pack: the whole map; spec: see E.sliceOf (omit for the whole map as one slice). Terraces use the global
+     elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
+  E.shape = function (full, P, spec) {
+    const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
+    const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.subs;
+    const q = quantize(full, P);
+    const U = sl ? cropArr(q.U, full.width, sl.x0, sl.y0, W, H) : q.U;
+    const ter = sl ? cropArr(q.ter, full.width, sl.x0, sl.y0, W, H) : q.ter;
+    const sub = sl ? cropArr(q.sub, full.width, sl.x0, sl.y0, W, H) : q.sub;
     const fine = new Int16Array(n);
     let maxFine = 0;
     for (let i = 0; i < n; i++) { fine[i] = ter[i] * K + sub[i]; if (fine[i] > maxFine) maxFine = fine[i]; }
@@ -217,7 +231,7 @@
       }
       S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rect: spec.rect || null, warnings };
     }
-    computePasses(S, P);
+    computeGates(S, P, full, q);
     carveStairs(S, P);
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if (!S.slice || S.slice[i]) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
@@ -226,59 +240,92 @@
     return S;
   };
 
-  /* Stair sites. Same heuristic as before (lowest slope, one per pair of regions, then spacing). A site is a pair
-     of 4-neighbour tiles (a lower, b upper) that cannot be walked: one terrace apart, or in the same terrace with
-     more than `climb` sub-terraces of difference (the climb limit is provisional). */
-  function computePasses(S, P) {
-    const { W, H, ter, sub, U } = S, water = S.block;
-    const g0 = new Int16Array(S.n);
-    const reg = comps(W, H, ter, g0).id; // same-terrace regions
-    let wreg = null;                      // same-terrace regions split by the climb limit (only if it can matter)
-    if (P.climb < S.subs - 1) {
-      const par = new Int32Array(S.n).map((_, i) => i);
-      const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
-      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) for (const [dx, dy] of [[1, 0], [0, 1]]) {
-        const nx = x + dx, ny = y + dy; if (nx >= W || ny >= H) continue;
-        const i = y * W + x, j = ny * W + nx;
-        if (ter[i] === ter[j] && Math.abs(sub[i] - sub[j]) <= P.climb) { const ra = find(i), rb = find(j); if (ra !== rb) par[ra] = rb; }
-      }
-      wreg = new Int32Array(S.n).map((_, i) => find(i));
-    }
-    const cand = [];
+  /* Terrace transitions, a transcription of the user's EDunProcGen.cs (NormalizeHeightsPerTerrace,
+     ComputeTerraceSlopeMap, FindRankedTerraceTransitions, FilterConnectedTerraceTransitions) on the WHOLE map and the
+     RAW elevation (the "same room" condition is omitted: there are no rooms).
+       - per unit u (terrace): min/max of the raw elevation over its tiles; norm_u = (h-min)/(max-min) on u, 0 elsewhere
+         (range <= 0.0001 -> 1);
+       - slope = sqrt(dx^2 + dy^2), central differences * 0.5 on the whole norm_u (tiles of other units count 0);
+         the 1-tile frame of the map is skipped (slope 0);
+       - for every 4-neighbour pair exactly one terrace apart, pos = the LOW tile; transition if
+         slope_low[pos] - slope_high[pos] > threshold (no absolute value); each pos once;
+       - transitions are grouped by 4-connectivity (all together) and groups smaller than the minimum are dropped.
+     kind 'sub' is OUR EXTENSION: the same rule with the sub-terrace as the unit, for pairs in the same terrace that
+     differ by more than the climb limit (steps that cannot be walked); groups of their own.
+     Returns { partner: Int32Array (upper tile of each transition pos, -1 if none), groups: [{ tiles, size }] }. */
+  function transitions(full, q, P, kind) {
+    const thr = P.gateThr === undefined ? 0.05 : P.gateThr, minSize = P.gateMin === undefined ? 3 : P.gateMin, K = P.subs;
+    const key = `${kind}|${thr}|${minSize}|${P.climb}`;
+    if (q.trans[key]) return q.trans[key];
+    const W = full.width, H = full.height, n = W * H, raw = full.elevation;
+    const unit = new Int32Array(n), nU = P.terraces * (kind === 'sub' ? K : 1);
+    for (let i = 0; i < n; i++) unit[i] = kind === 'sub' ? q.ter[i] * K + q.sub[i] : q.ter[i];
+    const mn = new Float64Array(nU).fill(Infinity), mx = new Float64Array(nU).fill(-Infinity);
+    for (let i = 0; i < n; i++) { const u = unit[i]; if (raw[i] < mn[u]) mn[u] = raw[i]; if (raw[i] > mx[u]) mx[u] = raw[i]; }
+    const rg = Float64Array.from(mx, (v, u) => (v - mn[u] <= 0.0001 ? 1 : v - mn[u]));
+    const norm = (u, x, y) => { const i = y * W + x; return unit[i] === u ? (raw[i] - mn[u]) / rg[u] : 0; };
+    const slope = (u, x, y) => {
+      if (x < 1 || y < 1 || x > W - 2 || y > H - 2) return 0;
+      const dx = (norm(u, x + 1, y) - norm(u, x - 1, y)) * 0.5, dy = (norm(u, x, y + 1) - norm(u, x, y - 1)) * 0.5;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+    const partner = new Int32Array(n).fill(-1);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x;
-      for (const [dx, dy] of [[1, 0], [0, 1]]) {
-        const nx = x + dx, ny = y + dy;
-        if (nx >= W || ny >= H) continue;
+      for (const [dx, dy] of [[1, 0], [0, 1], [-1, 0], [0, -1]]) { // E, S, W, N: the first upper neighbour that qualifies
+        const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
         const j = ny * W + nx;
-        if (water[i] || water[j]) continue;
-        const dt = Math.abs(ter[i] - ter[j]);
-        if (dt === 1) {
-          const a = ter[i] < ter[j] ? i : j, b = a === i ? j : i;
-          cand.push({ a, b, g: Math.abs(U[i] - U[j]), key: reg[a] + ':' + reg[b] });
-        } else if (dt === 0 && wreg && Math.abs(sub[i] - sub[j]) > P.climb) {
-          const a = sub[i] < sub[j] ? i : j, b = a === i ? j : i;
-          cand.push({ a, b, g: Math.abs(U[i] - U[j]), key: 'w' + wreg[a] + ':' + wreg[b] });
+        const higher = kind === 'sub' ? q.ter[j] === q.ter[i] && q.sub[j] - q.sub[i] > P.climb : q.ter[j] === q.ter[i] + 1;
+        if (higher && slope(unit[i], x, y) - slope(unit[j], x, y) > thr) { partner[i] = j; break; }
+      }
+    }
+    const seen = new Uint8Array(n), groups = [];
+    for (let s0 = 0; s0 < n; s0++) {
+      if (partner[s0] < 0 || seen[s0]) continue;
+      const tiles = [], st = [s0]; seen[s0] = 1;
+      while (st.length) {
+        const i = st.pop(), x = i % W, y = (i / W) | 0; tiles.push(i);
+        for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) if (j >= 0 && partner[j] >= 0 && !seen[j]) { seen[j] = 1; st.push(j); }
+      }
+      if (tiles.length >= minSize) groups.push({ tiles: tiles.sort((a, b) => a - b), size: tiles.length });
+    }
+    return (q.trans[key] = { partner, groups });
+  }
+  E.gateTransitions = (full, P, kind) => transitions(full, quantize(full, P), P, kind);
+
+  /* Gates inside the slice and the stair sites on them: one stair per gate at the tile nearest the centroid; long gates
+     get floor(length / passGap) stairs spread along their main axis. Each site keeps the rest of its gate as fallbacks
+     (nearest first) for when the carving does not fit. S.passes = sites. */
+  function computeGates(S, P, full, q) {
+    const W = S.W, H = S.H, fw = full.width, gates = [], sites = [];
+    for (const kind of ['terrace', 'sub']) {
+      if (kind === 'sub' && !(P.climb < S.subs - 1)) continue;
+      const tr = transitions(full, q, P, kind);
+      for (const g of tr.groups) {
+        const tiles = [];
+        for (const pos of g.tiles) {
+          const x = pos % fw - S.ox, y = ((pos / fw) | 0) - S.oy, pj = tr.partner[pos], px = pj % fw - S.ox, py = ((pj / fw) | 0) - S.oy;
+          if (x < 0 || y < 0 || x >= W || y >= H || px < 0 || py < 0 || px >= W || py >= H) continue;
+          const a = y * W + x, b = py * W + px;
+          if (!S.block[a] && !S.block[b]) tiles.push({ a, b, x, y });
+        }
+        if (!tiles.length) continue;
+        const gi = gates.length; gates.push({ kind, size: g.size, tiles: tiles.map((t) => ({ a: t.a, b: t.b })) });
+        const L = tiles.length, nSt = Math.max(1, Math.floor(L / P.passGap));
+        let cx = 0, cy = 0; for (const t of tiles) { cx += t.x; cy += t.y; } cx /= L; cy /= L;
+        let sxx = 0, syy = 0, sxy = 0; for (const t of tiles) { sxx += (t.x - cx) ** 2; syy += (t.y - cy) ** 2; sxy += (t.x - cx) * (t.y - cy); }
+        const ang = 0.5 * Math.atan2(2 * sxy, sxx - syy), ux = Math.cos(ang), uy = Math.sin(ang);
+        const order = tiles.slice().sort((p, q2) => ((p.x - cx) * ux + (p.y - cy) * uy) - ((q2.x - cx) * ux + (q2.y - cy) * uy) || p.a - q2.a);
+        const targets = nSt === 1
+          ? [tiles.reduce((best, t) => (Math.hypot(t.x - cx, t.y - cy) < Math.hypot(best.x - cx, best.y - cy) ? t : best), tiles[0])]
+          : Array.from({ length: nSt }, (_, k) => order[Math.floor((k + 0.5) * L / nSt)]);
+        for (const t of targets) {
+          const alts = tiles.filter((o) => o !== t).sort((p, q2) => Math.hypot(p.x - t.x, p.y - t.y) - Math.hypot(q2.x - t.x, q2.y - t.y) || p.a - q2.a).map((o) => ({ a: o.a, b: o.b }));
+          sites.push({ a: t.a, b: t.b, gate: gi, kind, alts });
         }
       }
     }
-    cand.sort((p, q) => p.g - q.g);
-    const chosen = [], pair = new Set(), usedA = new Set(), usedB = new Set();
-    const bx = (c) => c.b % W, by = (c) => (c.b / W) | 0;
-    const take = (c) => { chosen.push(c); usedA.add(c.a); usedB.add(c.b); };
-    for (const c of cand) { // best pass per region pair keeps regions connectable
-      if (pair.has(c.key) || usedA.has(c.a) || usedB.has(c.b)) continue;
-      pair.add(c.key); take(c);
-    }
-    for (const c of cand) {
-      if (usedA.has(c.a) || usedB.has(c.b)) continue;
-      let ok = true;
-      for (const o of chosen) {
-        if (Math.hypot(bx(c) - bx(o), by(c) - by(o)) < P.passGap) { ok = false; break; }
-      }
-      if (ok) take(c);
-    }
-    S.passes = chosen;
+    S.gates = gates; S.passes = sites;
   }
 
   /* Stairs are carved into the terrain. Each tread rises at most `tread` sub-terraces (default: the climb limit; never more). A stair is cut into the upper
@@ -290,7 +337,7 @@
     const { W, H, n } = S, K = S.subs, N = S.N, s = E.subHeight(P), EPS = 1e-9;
     const tread = Math.max(1, Math.min(P.climb, Math.round(P.tread === undefined ? P.climb : P.tread))), reachPlain = tread * s, reach = reachPlain + EPS; // each tread rises at most `tread` sub-terraces
     if (P.stairW === 0) { // diagnostic: no carving at all (stair sites stay unconnected)
-      S.carved = new Uint8Array(n); S.stairs = []; S.stairInfo = { sites: S.passes.length, placed: 0, dropped: 0, narrowed: 0, fills: 0, width: 0 }; return;
+      S.carved = new Uint8Array(n); S.stairs = []; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: 0, dropped: 0, narrowed: 0, fills: 0, width: 0 }; return;
     }
     const width = Math.max(1, Math.min(3, Math.round(P.stairW === undefined ? 2 : P.stairW)));
     const cands = [];
@@ -350,7 +397,10 @@
     };
     for (const pass of S.passes) {
       let rec = null;   // cut into the upper terrace, or build up the lower one: the wider result wins (ties: cut)
-      for (const mode of ['cut', 'fill']) { const r = plan(pass, mode); if (r && (!rec || r.cols.length > rec.cols.length)) rec = r; }
+      for (const site of [pass, ...pass.alts]) {   // the centred tile first, then the rest of the gate, nearest first
+        for (const mode of ['cut', 'fill']) { const r = plan(site, mode); if (r && (!rec || r.cols.length > rec.cols.length)) rec = r; }
+        if (rec) break;
+      }
       if (!rec) { dropped++; continue; }
       if (rec.mode === 'fill') fills++;
       if (rec.narrowed) narrowed++;
@@ -358,7 +408,7 @@
       for (const st of rec.steps) for (const t of st.tiles) { used[t] = 1; carved[t] = 1; carve.set(t, st.cand); }
       stairs.push(rec);
     }
-    S.carved = carved; S.stairs = stairs; S.stairInfo = { sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, width };
+    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, width };
     if (!carve.size) return;
     // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height
     const bridges = [...new Set([...carve.values()].filter((c) => c.base < 0))].sort((p, q) => p.h - q.h);
@@ -408,6 +458,8 @@
     }
     S.region = region; S.regionSizes = sizes;
   }
+
+  E._carve = carveStairs; E._regions = computeRegions; // test hooks (hand-built shaping objects)
 
   /* demo packs */
   E.noisePack = function (W, H, seed) {
