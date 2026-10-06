@@ -125,6 +125,8 @@ incursion border; stake and way-back path visible.
 - `src/ui.js`, `src/app.html`: controls, angle presets, compare mode, multi-image loading with a role selector per
   channel, flip Y, maxnode, save pack.json, slice controls (zone chips, crop, scenery margin). Sliders recompute on
   release. Overlays: zones, edge map, graded masks (blocky tiles, see item 1).
+- `reference/`: the user's C# generator `EDunProcGen.cs` (READ-ONLY, not built, not run, not edited) and `README.md` with the function index.
+- `data/samples/skeleton_heightmap_256.png`: the user's REAL height map (8-bit RGBA, grey, 32 % pure black = void; lowest terrain value 17).
 - `data/snake_mountain.json`: sample pack, format `evodun-pack/0.1` (width, height, row-major elevation,
   masks, markers).
 - `tools/ui/`: headless UI tests (`test_roles.js`, `test_slice_ui.js`, `test_stairs_ui.js`), pixel regression
@@ -199,9 +201,17 @@ incursion border; stake and way-back path visible.
    commit before it, stairW=0, 25 images, 0 differ). BASE CLOSED here. PARKED, not implemented, by the user's decision (their maps carry no
    masks and these are finishes that do not change the comparison): (5) overlays that follow the smoothed A/B shapes (known limitation 1);
    (6) outer corners of B (limitation 5); (7) Box line and stripes (limitation 9). Test scripts live in `tools/ui/`.
-4. NEXT: evaluate the techniques with the user's real maps and decide round 2 (wait for the user).
-   Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.
-   Parked: RuleTile skin and modular kits, room types.
+4. NEXT STAGE: ROOMS (user's decision). Port to the viewer the minimal chain of the user's `reference/EDunProcGen.cs` (`SequenceA`: slope
+   classes, rooms by watershed, room edges, cores, A* between cores with a spanning tree; terrace gates already exist and are reused)
+   with the connection PATCHED (a transition is an undirected PAIR of neighbouring tiles; one passability function for scan, A* and fills;
+   the two tiles of a transition pair are never forbidden; unassigned tiles go to the nearest room before edges are searched), and CHECK it on
+   the real map `data/samples/skeleton_heightmap_256.png` BEFORE building anything on top: cores joined in one tree with the original rule
+   (transcribed as is) vs the patched rule, plus an overlay (rooms, transitions, cores, tree). Value 0 is VOID (outside the terrain), never low
+   terrain. NOT in this stage: room types, platforms, render changes. Status: design proposed, waiting for the user's approval; no code yet.
+   Diagnosis of why corridors do not connect: `reference/README.md` (read from the code, not run; the viewer-side verification goes in
+   `docs/rooms.md` once the port exists).
+5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),
+   RuleTile skin and modular kits, room types, platforms.
 
 ## How to work with the user
 - Do not write code until the design is agreed. For each point: read the relevant code, propose the
