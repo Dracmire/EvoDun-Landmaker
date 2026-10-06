@@ -41,10 +41,10 @@
     for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of [base, top + 1.5]) {
       const [a, b] = raw(x, y, hh); x0 = Math.min(x0, a); x1 = Math.max(x1, a); y0 = Math.min(y0, b); y1 = Math.max(y1, b);
     }
-    const sc = Math.min((w - 20) / (x1 - x0), (h - 20) / (y1 - y0)) * view.zoom;
+    const fit = Math.min((w - 20) / (x1 - x0), (h - 20) / (y1 - y0)), sc = (view.fitSc || fit) * view.zoom; // view.fitSc: the scale of the first panel, shared by all panels
     const ox = w / 2 - (x0 + x1) / 2 * sc + view.panX, oy = h / 2 - (y0 + y1) / 2 * sc + view.panY;
     return {
-      sc, base,
+      sc, base, fit,
       p: (x, y, hh) => { const [a, b] = raw(x, y, hh); return [a * sc + ox, b * sc + oy]; },
       unp: (px, py, hh) => { const a = (px - ox) / sc, b = (py - oy) / sc + hh * cp, c = b / sp; return [cy * a + sy * c + S.W / 2, -sy * a + cy * c + S.H / 2]; }, // screen point -> ground point on the plane at height hh
       ry: (x, y) => sy * (x - S.W / 2) + cy * (y - S.H / 2),
@@ -194,7 +194,7 @@
   function stairTiles(S) { // tile -> { dir, k (tread index, 0 = lowest), m }
     if (S._stairTile) return S._stairTile;
     const map = new Map();
-    for (const st of S.stairs) st.steps.forEach((step, k) => { for (const t of step.tiles) map.set(t, { dir: st.dir, k, m: st.steps.length, rec: st.ramp ? st : null }); });
+    for (const st of S.stairs) st.steps.forEach((step, k) => { for (const t of step.tiles) map.set(t, { dir: st.dir, k, m: st.steps.length, rec: st.ramp ? st : null, t }); });
     S._stairNear = new Uint8Array(S.n); // carved tiles and their 4-neighbours: the only tiles with stair edges
     for (const t of map.keys()) { const x = t % S.W, y = (t / S.W) | 0; S._stairNear[t] = 1; if (x > 0) S._stairNear[t - 1] = 1; if (x < S.W - 1) S._stairNear[t + 1] = 1; if (y > 0) S._stairNear[t - S.W] = 1; if (y < S.H - 1) S._stairNear[t + S.W] = 1; }
     return (S._stairTile = map);
@@ -226,70 +226,91 @@
 
   /* ---- Ramp: one smooth surface per gate, same look in Box, A and B. Surface = quads with the heights of E.rampHeight, a
      gradient along the slope (lighter at the high end), a dark outline on the footprint and own side walls. ---- */
-  function rampFill(ctx, cam, R) {
+  function rampFill(ctx, cam, R, pos) {
     if (PICK) return PKC;
     if (DBG) return 'rgb(255,0,0)';
-    const p0 = cam.p(R.mx, R.my, R.h0), p1 = cam.p(R.mx + R.pdx * R.len, R.my + R.pdy * R.len, R.h1);
+    const along = R.pdx !== 0, a0 = pos(0), a1 = pos(R.len), q0 = along ? R.my : R.mx; // the gradient of this tile's column (its own cliff)
+    const p0 = along ? cam.p(a0, q0, R.h0) : cam.p(q0, a0, R.h0), p1 = along ? cam.p(a1, q0, R.h1) : cam.p(q0, a1, R.h1);
     if (Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) < 2) return rgb(STAIR_RGB);
     const g = ctx.createLinearGradient(p0[0], p0[1], p1[0], p1[1]), up = R.h1 > R.h0;
     g.addColorStop(0, rgb(STAIR_RGB, up ? 0.7 : 1.12)); g.addColorStop(1, rgb(STAIR_RGB, up ? 1.12 : 0.7));
     return g;
   }
-  function rampTile(ctx, cam, S, o, i, rec, ST, st) {
+  /* One piece of a ramp tile: the part of tile i whose path coordinate s (0 at the gate edge, len at the far end) lies in [sa, sb]
+     (default: the whole tile). Box draws whole tiles; A / B draw pieces cut at the heights of the levels (see renderLevels). */
+  function rampPiece(ctx, cam, S, o, i, rec, ST, st, sa, sb) {
     if (PICK) PKC = pcode(3, i);
-    const x = i % S.W, y = (i / S.W) | 0, hc = (px, py) => E.rampHeight(rec, px, py), R = rec.ramp;
-    const DIRS = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
-    for (const [dx, dy, ax, ay, bx, by] of DIRS) { // side walls where the surface is above the neighbour
+    const x = i % S.W, y = (i / S.W) | 0, R = rec.ramp, hc = (px, py) => E.rampHeight(rec, px, py, i), dsh = R.shift && R.shift.get(i) || 0;
+    const alongX = R.pdx !== 0, sT0 = (alongX ? (R.pdx > 0 ? x - R.mx : R.mx - (x + 1)) : (R.pdy > 0 ? y - R.my : R.my - (y + 1))) - dsh;
+    if (sa === undefined) { sa = sT0; sb = sT0 + 1; }
+    const e = 1e-7, pos = (s) => (alongX ? R.mx + R.pdx * (s + dsh) : R.my + R.pdy * (s + dsh));
+    let X0 = x, X1 = x + 1, Y0 = y, Y1 = y + 1;
+    if (alongX) { const u = pos(sa), v = pos(sb); X0 = Math.min(u, v); X1 = Math.max(u, v); } else { const u = pos(sa), v = pos(sb); Y0 = Math.min(u, v); Y1 = Math.max(u, v); }
+    const EDGES = [[0, -1, X0, Y0, X1, Y0, Math.abs(Y0 - y) < e], [1, 0, X1, Y0, X1, Y1, Math.abs(X1 - (x + 1)) < e], [0, 1, X1, Y1, X0, Y1, Math.abs(Y1 - (y + 1)) < e], [-1, 0, X0, Y1, X0, Y0, Math.abs(X0 - x) < e]];
+    for (const [dx, dy, ax, ay, bx, by, onB] of EDGES) { // side walls where the surface is above the neighbour
+      if (!onB) continue;
       const nx = x + dx, ny = y + dy, out = nx < 0 || ny < 0 || nx >= S.W || ny >= S.H, j = out ? -1 : ny * S.W + nx, nj = j >= 0 ? ST.get(j) : null;
-      if (nj && nj.rec === rec) continue;
-      const [rnx, rny] = cam.nrm(dx, dy);
+      const [rnx, rny] = cam.nrm(dx, dy);   // (a neighbour of the same ramp gets a wall only where its column is shifted and the surfaces differ)
       if (rny <= 0.001) continue;
-      const e0 = hc(x + ax, y + ay), e1 = hc(x + bx, y + by);
-      const hn0 = out ? cam.base : nj ? E.rampHeight(nj.rec, x + ax, y + ay) : S.levelH[S.fine[j]], hn1 = out ? cam.base : nj ? E.rampHeight(nj.rec, x + bx, y + by) : hn0; // beside another ramp: its surface
+      const e0 = hc(ax, ay), e1 = hc(bx, by);
+      const hn0 = out ? cam.base : nj ? E.rampHeight(nj.rec, ax, ay, j) : S.levelH[S.fine[j]], hn1 = out ? cam.base : nj ? E.rampHeight(nj.rec, bx, by, j) : hn0; // beside another ramp: its surface
       const b0 = Math.min(hn0, e0), b1 = Math.min(hn1, e1);
       if (e0 - b0 < 1e-6 && e1 - b1 < 1e-6) continue;
-      wallQuad(ctx, cam, x + ax, y + ay, x + bx, y + by, [b0, b1], [e0, e1], DBG ? [255, 0, 0] : STAIR_RGB, rnx, o, st);
+      wallQuad(ctx, cam, ax, ay, bx, by, [b0, b1], [e0, e1], DBG ? [255, 0, 0] : STAIR_RGB, rnx, o, st);
     }
-    const q = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]].map(([px, py]) => cam.p(px, py, hc(px, py)));
+    const q = [[X0, Y0], [X1, Y0], [X1, Y1], [X0, Y1]].map(([px, py]) => cam.p(px, py, hc(px, py)));
     ctx.beginPath(); q.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath();
-    ctx.fillStyle = rampFill(ctx, cam, R); ctx.fill(); if (!DBG && !PICK) { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.8; ctx.stroke(); }
+    ctx.fillStyle = rampFill(ctx, cam, R, pos); ctx.fill(); if (!DBG && !PICK) { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.8; ctx.stroke(); }
     if (DBG || PICK) return;
-    if (o.rampLines) { // thin lines across the slope, evenly spaced along the whole ramp (cut where they cross this tile)
-      const nL = R.len <= 2 ? 2 : 3;
-      for (let q = 1; q <= nL; q++) {
-        const s0 = R.len * q / (nL + 1);
-        // the line s = s0 is perpendicular to the path direction: a vertical or horizontal segment through this tile
-        const horiz = R.pdx === 0, a0 = horiz ? y : x, a1 = a0 + 1;
-        const cA = horiz ? R.my + R.pdy * s0 : R.mx + R.pdx * s0;
-        if (cA < a0 - 1e-9 || cA > a1 + 1e-9) continue;
-        const pts = horiz ? [[x, cA], [x + 1, cA]] : [[cA, y], [cA, y + 1]];
+    if (o.rampLines) { // thin lines across the slope, evenly spaced along the whole ramp (cut where they cross this piece)
+      const nL = Math.max(2, Math.min(10, Math.round(Math.abs(R.h1 - R.h0) / 0.3))); // more lines the higher the jump: a steep ramp reads as a flight of steps
+      for (let k = 1; k <= nL; k++) {
+        const s0 = R.len * k / (nL + 1), c = pos(s0);
+        if (s0 < sa - 1e-9 || s0 > sb + 1e-9) continue;
+        const pts = alongX ? [[c, Y0], [c, Y1]] : [[X0, c], [X1, c]];
         const A = cam.p(pts[0][0], pts[0][1], hc(pts[0][0], pts[0][1])), B = cam.p(pts[1][0], pts[1][1], hc(pts[1][0], pts[1][1]));
         ctx.strokeStyle = 'rgba(255,250,230,0.55)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
       }
     }
-    for (const [dx, dy, ax, ay, bx, by] of DIRS) { // outline along the footprint boundary, at the height of the surface
+    for (const [dx, dy, ax, ay, bx, by, onB] of EDGES) { // outline along the footprint boundary, at the height of the surface
+      if (!onB) continue;
       const nj = ST.get((y + dy) * S.W + x + dx);
       if ((nj && nj.rec === rec) || x + dx < 0 || y + dy < 0 || x + dx >= S.W || y + dy >= S.H) continue;
-      const A = cam.p(x + ax, y + ay, hc(x + ax, y + ay)), B = cam.p(x + bx, y + by, hc(x + bx, y + by));
+      const A = cam.p(ax, ay, hc(ax, ay)), B = cam.p(bx, by, hc(bx, by));
       ctx.strokeStyle = STAIR_EDGE; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
     }
   }
-  /* The level pass after which a ramp is drawn. Cut ramp: right after the slab of the low end (the ramp sits in the hole
-     of every slab above, which are drawn later and so cover it where they are in front). Built-up ramp: right BEFORE
-     the slab of the high end (that slab is drawn later, so its caps hide the ramp where they are in front, and its walls
-     along the ramp are clipped to the surface). Measured against a z-buffer in tools/ui/test_ramp_ui.js. */
-  function rampPassLevel(S, rec) { return rec.mode === 'cut' ? rec.level : Math.max(0, S.fine[rec.top[0]] - 1); }
-  function drawRamps(ctx, cam, S, o, recs, ST, st) {
-    const tiles = []; for (const rec of recs) for (const step of rec.steps) for (const t of step.tiles) tiles.push([t, rec]);
-    tiles.sort((p, q) => cam.ry(p[0] % S.W + 0.5, ((p[0] / S.W) | 0) + 0.5) - cam.ry(q[0] % S.W + 0.5, ((q[0] / S.W) | 0) + 0.5));
-    for (const [t, rec] of tiles) rampTile(ctx, cam, S, o, t, rec, ST, st);
+  const rampTile = (ctx, cam, S, o, i, rec, ST, st) => rampPiece(ctx, cam, S, o, i, rec, ST, st);
+  /* Pieces of a ramp cut by level band: every tile of the ramp is split where its surface crosses the height of a level, and each
+     piece is drawn in the pass of the level at the top of its band, sorted by depth together with the walls of that level and
+     before its cap. Returns Map level -> [{ rec, tile, sa, sb, d }]. */
+  function rampPieces(S, cam) {
+    const out = new Map(), LH = S.levelH;
+    for (const rec of S.stairs) {
+      if (!rec.ramp) continue;
+      const R = rec.ramp, span = R.h1 - R.h0, lo = Math.min(R.h0, R.h1), hi = Math.max(R.h0, R.h1), cuts = [];
+      for (let L = 0; L < LH.length; L++) if (LH[L] > lo + 1e-6 && LH[L] < hi - 1e-6) cuts.push((LH[L] - R.h0) / span * R.len);
+      cuts.sort((a, b) => a - b);
+      for (const step of rec.steps) for (const t of step.tiles) {
+        const x = t % S.W, y = (t / S.W) | 0, alongX = R.pdx !== 0;
+        const dsh = R.shift && R.shift.get(t) || 0, sT0 = (alongX ? (R.pdx > 0 ? x - R.mx : R.mx - (x + 1)) : (R.pdy > 0 ? y - R.my : R.my - (y + 1))) - dsh, sT1 = sT0 + 1;
+        const pts = [sT0, ...cuts.filter((c) => c > sT0 + 1e-7 && c < sT1 - 1e-7), sT1];
+        for (let k = 0; k + 1 < pts.length; k++) {
+          const sa = pts[k], sb = pts[k + 1], top = Math.max(R.h0 + span * sa / R.len, R.h0 + span * sb / R.len);
+          let L = 0; while (L < LH.length - 1 && LH[L] < top - 1e-6) L++;
+          const m = (sa + sb) / 2 + dsh, cx = alongX ? R.mx + R.pdx * m : x + 0.5, cy = alongX ? y + 0.5 : R.my + R.pdy * m;
+          (out.get(L) || out.set(L, []).get(L)).push({ rec, tile: t, sa, sb, d: cam.ry(cx, cy) });
+        }
+      }
+    }
+    return out;
   }
 
   /* ---- Incursion: stake, objectives and their routes (drawn on top, same in every technique) ---- */
   const ROUTE_COLORS = ['#ffb020', '#ff5a8a', '#6ae0ff', '#b48cff', '#a6f06a', '#ffd84a'];
   function surfaceH(S, i) {
     const t = hasStairs(S) ? stairTiles(S).get(i) : null;
-    return t && t.rec ? E.rampHeight(t.rec, i % S.W + 0.5, ((i / S.W) | 0) + 0.5) : S.levelH[S.fine[i]];
+    return t && t.rec ? E.rampHeight(t.rec, i % S.W + 0.5, ((i / S.W) | 0) + 0.5, i) : S.levelH[S.fine[i]];
   }
   function drawIncursion(ctx, cam, S, inc) {
     const pt = (i, lift = 0.06) => cam.p(i % S.W + 0.5, ((i / S.W) | 0) + 0.5, surfaceH(S, i) + lift);
@@ -337,7 +358,7 @@
         if (rny <= 0.001) continue;
         const sj = ST && (si || ST.get(ny * W + nx)); // a wall that belongs to a stair (riser or flank) takes its colour
         const inside = nx >= 0 && ny >= 0 && nx < W && ny < H, nr = inside && ST && ST.get(ny * W + nx);
-        const hbw = nr && nr.rec ? [Math.min(hh, E.rampHeight(nr.rec, x + ax, y + ay)), Math.min(hh, E.rampHeight(nr.rec, x + bx, y + by))] : hn; // beside a ramp the wall stops at its surface
+        const hbw = nr && nr.rec ? [Math.min(hh, E.rampHeight(nr.rec, x + ax, y + ay, ny * W + nx)), Math.min(hh, E.rampHeight(nr.rec, x + bx, y + by, ny * W + nx))] : hn; // beside a ramp the wall stops at its surface
         wallQuad(ctx, cam, x + ax, y + ay, x + bx, y + by, hbw, hh, sj && inside ? stairColor(sj) : cc, rnx, o, st);
       }
       const ov = isRamp ? [] : tileOverlay(S, P, o, i);
@@ -378,11 +399,11 @@
 
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
   function renderLevels(ctx, cam, S, P, o, st, loopsOf) {
-    const ST = hasStairs(S) ? stairTiles(S) : null, RAMPS = new Map(); // ramps are drawn in the pass of their level: after the slab of the low end (cut) or of the high end (built up)
-    if (ST) for (const rec of S.stairs) if (rec.ramp) { const L = rampPassLevel(S, rec); (RAMPS.get(L) || RAMPS.set(L, []).get(L)).push(rec); }
+    const ST = hasStairs(S) ? stairTiles(S) : null, PIECES = ST ? rampPieces(S, cam) : new Map(); // ramp pieces by level band
     for (let L = 0; L <= S.maxFine; L++) {
-      const loops = loopsOf(S, L, P);
-      if (!loops.length) continue;
+      const loops = loopsOf(S, L, P), pcs = PIECES.get(L) || [];
+      if (!loops.length && !pcs.length) continue;
+      if (!loops.length) { pcs.sort((p, q) => p.d - q.d); for (const pc of pcs) rampPiece(ctx, cam, S, o, pc.tile, pc.rec, ST, st, pc.sa, pc.sb); continue; }
       const ht = S.levelH[L], hb = L === 0 ? cam.base : S.levelH[L - 1];
       const terraceLevel = L === 0 || (!S.levelMeta[L].bridge && S.levelMeta[L].sub === 0);
       const c = levelColor(S, L, P), cv = veilMix(c), segs = [];
@@ -396,7 +417,7 @@
           const inn = tileOf(mx - 0.2 * dy / len, my + 0.2 * dx / len), outn = tileOf(mx + 0.2 * dy / len, my - 0.2 * dx / len);
           if (inn && inn.rec) return null;                  // the ramp draws its own side walls
           seg.stair = inn || outn || null;
-          if (outn && outn.rec) seg.clip = outn.rec;        // a wall beside a ramp stops at the ramp surface
+          if (outn && outn.rec) { seg.clip = outn.rec; seg.clipT = outn.t; }        // a wall beside a ramp stops at the ramp surface
         }
         return seg;
       };
@@ -405,6 +426,11 @@
         for (let k = 0; k < n; k++) {
           const a = loop[k], b = loop[(k + 1) % n], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
           if (len < 1e-6) continue;
+          if (PICK && len > 1.001) { // picking: every wall is cut into pieces of at most one tile, each owned by the tile it stands on
+            const nP = Math.ceil(len - 1e-6);
+            for (let q = 0; q < nP; q++) { const p0 = [a[0] + dx * q / nP, a[1] + dy * q / nP], p1 = [a[0] + dx * (q + 1) / nP, a[1] + dy * (q + 1) / nP], sg = mkSeg(p0, p1, p1[0] - p0[0], p1[1] - p0[1], len / nP); if (sg) segs.push(sg); }
+            continue;
+          }
           // a long wall that runs (nearly) along an axis next to a ramp is cut per tile: the ramp surface changes along it
           if ((ST || PICK) && len > 1.001 && (Math.abs(dx) < 0.1 * len || Math.abs(dy) < 0.1 * len)) {
             const ax = Math.abs(dx) > Math.abs(dy) ? 0 : 1, lo = Math.min(a[ax], b[ax]), hi = Math.max(a[ax], b[ax]), cuts = [];
@@ -417,10 +443,12 @@
           const seg = mkSeg(a, b, dx, dy, len); if (seg) segs.push(seg);
         }
       }
+      for (const pc of pcs) segs.push({ piece: pc, d: pc.d });
       segs.sort((p, q) => p.d - q.d);
       for (const s of segs) {
+        if (s.piece) { rampPiece(ctx, cam, S, o, s.piece.tile, s.piece.rec, ST, st, s.piece.sa, s.piece.sb); continue; }
         let hbs = hb;
-        if (s.clip) { hbs = [Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.a[0], s.a[1]))), Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.b[0], s.b[1])))]; if (hbs[0] >= ht - 1e-6 && hbs[1] >= ht - 1e-6) continue; }
+        if (s.clip) { hbs = [Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.a[0], s.a[1], s.clipT))), Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.b[0], s.b[1], s.clipT)))]; if (hbs[0] >= ht - 1e-6 && hbs[1] >= ht - 1e-6) continue; }
         if (PICK) PKC = pcode(2, Math.max(0, s.own));
         wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], hbs, ht, s.stair ? stairColor(s.stair) : s.veiled ? cv : c, s.rnx, o, st);
       }
@@ -449,7 +477,6 @@
         ctx.stroke(path);
       }
       if (ST) for (const i of S.byLevel[L]) drawStairEdges(ctx, cam, S, i, ht);
-      if (RAMPS && RAMPS.has(L)) drawRamps(ctx, cam, S, o, RAMPS.get(L), ST, st);
       if (o.border && S.border) {
         const bp = [];
         for (const i of S.byLevel[L]) if (S.border[i]) borderFaces(bp, S, cam, i, S.border[i], ht);
@@ -459,7 +486,8 @@
   }
 
   E.levelColor = levelColor; // exposed for the tests
-    E.makeCam = makeCam; // exposed for the UI tests (screen position of a tile)
+    E.makeCam = makeCam;
+  E.fitScale = (S, P, view, w, h) => makeCam(S, P, Object.assign({}, view, { fitSc: 0, zoom: 1, panX: 0, panY: 0 }), w, h).fit; // px per tile at zoom 1 for a panel of w x h // exposed for the UI tests (screen position of a tile)
 
   function drawScene(ctx, w, h, S, P, tech, view, o) {
     DBG = !!o.debug; PICK = !!o.pick;

@@ -56,13 +56,19 @@ old pipeline (Unity, C#) are reference only.
   its own colour and outline, the same in all three techniques and visible from all four sides. Survival
   is measured as the percentage of each tile area that is well covered by the drawn contours.
 - RAMP instead of treads (user's decision): terraces are general, so the transition is not quantized. Each gate is a
-  smooth ramp inside its rigid footprint, linear from the height of the lower terrace to the upper one. Default style
-  `ramp`; `steps` (treads with bridge levels) stays as an option. Ramp length = max(min length, ceil(gap / max slope)),
-  default max slope 0.4 height per tile (~22 deg) and minimum 2 tiles (sliders). With ramps there are no bridge levels and
-  no `tread` parameter (they only exist in `steps`). Movement does not change. Look: stone colour with a gradient along
-  the slope (lighter at the high end), dark outline, own side walls; same in Box, A and B. Cue 2 (approved): 2-3 thin transverse lines across the
-  slope, Display switch "Ramp cross lines" (on). `stairW = 0` (slider minimum) switches stairs off, which
-  also lets the pixel regression compare against older checkouts.
+  smooth ramp, SHORT AND WIDE, linear from the height of the lower terrace to the upper one. Default style `ramp`; `steps`
+  (treads with bridge levels) stays as an option. The depth into the terrace is FIXED (slider "Ramp depth", 1-4, default 2) and does
+  not depend on the jump, so the slope is jump / depth and can be steep (height is almost decorative); there is no maximum slope.
+  Width = "Stair / ramp width" slider (0-5, default 3; steps use up to 3), widened from the centre outwards; every column must lie
+  on the SAME border between the two terraces (fixed end on the lower one, path on the upper one); a lateral column may find the cliff of ITS OWN column up to `depth` tiles further along (or back) the path and is then placed there (shift d,
+  surface re-anchored per column, a wall between neighbouring columns where the surfaces differ), always between the same two terraces; a column that
+  does not fit stops its side, so the ramp narrows. Measured on the relief test map, 12 terraces, width 3: 93 of 108 ramps narrowed without the shift,
+  86 of 104 with it (mean columns 1.74 -> 2.01; width 5: 105 -> 99); 5 terraces: 42 -> 33 of 72. What still stops a column (diagnostic): the
+  upper-terrace tile of that column is LOWER than the ramp surface (a lower sub-level, 64 % of the stops), the end tile (16 %), another terrace (15 %),
+  or tiles already used by another stair (5 %). Relaxing the first needs the surface of a column to follow its own end height: not done. A ramp can span more wall than its gate. With ramps there are no bridge levels and no `tread`.
+  Movement does not change. Look: stone colour with a gradient along the slope (lighter at the high end), dark outline, own side
+  walls, transverse lines whose number grows with the jump (round(jump / 0.3), 2-10; Display switch "Ramp cross lines", on): a steep
+  ramp reads as a flight of steps. Same in Box, A and B. `stairW = 0` switches stairs off (also for the pixel regression).
 - Terrain edges are NOT touched (user's decision): A keeps its stepped border (more legible) and B the smooth one (more
   natural). Both techniques are kept to compare them.
 - The world continues past the incursion border as scenery under a veil; only movement is restricted.
@@ -131,13 +137,22 @@ incursion border; stake and way-back path visible.
 
 ## Known limitations
 1. Overlays (snake, cave, water) are drawn as square tiles and look blocky over the smoothed A/B shapes.
-2. Carved stairs and ramps: each is cut into the upper terrace (or built up on the lower one) as 1-3 columns
+2. Carved stairs and ramps: each is cut into the upper terrace (or built up on the lower one) as 1-3 columns (ramps 1-5)
    (width default 2; in `steps` style the tread rise defaults to the climb limit, 1 is also available).
-   RAMP PAINTER ORDER: Box orders ramps by tile depth and matches a per-pixel z-buffer reference exactly (0 % in 8 view
-   directions). A and B order by level, so a ramp that spans several levels can lose slivers: a cut ramp is drawn right
-   after the slab of its low end, a built-up one right before the slab of its high end, and slab walls beside a ramp
-   are clipped to its surface. Measured over all 73 ramps of the relief test map (`tools/ui/test_ramp_ui.js`): mean
-   0.1-1.2 % of the ramp's pixels, worst 7.8 % (two ramps that touch). Thresholds in the test: mean <= 2 %, worst <= 8 % (accepted by the user as a LIMITATION OF THE LEVEL-ORDERED PAINTER; the full solution is per-pixel depth, left for WebGL in round 2). The footprint is rigid: in A the vertices
+   RAMP PAINTER ORDER: Box orders ramps by tile depth and matches a per-pixel z-buffer reference (<= 0.04 % mean, <= 3.2 % worst).
+   A and B order by level, so the ramp is CUT BY LEVEL BANDS: every ramp tile is split where its surface crosses the height of a level,
+   and each piece is drawn in the pass of the level at the top of its band, sorted by depth together with the walls of that level and
+   before its cap; slab walls beside a ramp are clipped to its surface. (Earlier orders drew the WHOLE ramp in one pass: after the low slab,
+   before the high slab, and two variants; the banded cut is a different one and the first that is clearly better.) Measured with
+   `tools/ui/test_ramp_ui.js` (`--terraces N --spread S`; mean / worst % of the ramp's pixels that differ from the z-buffer, default smoothing):
+   (mean range over the four ramp kinds / worst %): 5 terraces spread 1: Box 0 / 0, A 0.00-0.02 / 0.4, B 0.02-0.14 / 1.0 (before the cut: A 0.1-0.7 / 3.6,
+   B 0.2-0.8 / 4.1). 5 terraces spread 1.5: Box 0 / 0.2, A <= 0.02 / 0.4, B 0.07-0.16 / 1.3. 12 terraces spread 1: Box 0 / 0, A 0.02-0.13 / 4.3,
+   B 0.16-0.61 / 5.0 (before: A <= 3.0 / 30, B <= 3.6 / 32). 12 terraces spread 1.5: Box <= 0.05 / 3.3, A 0.01-0.09 / 4.2, B 0.91-3.39 / 79
+   (before: A 1.8-4.0 / 42, B 2.8-6.3 / 41). The 2 % / 8 % threshold is reached in every configuration EXCEPT B with 12 terraces and spread 1.5,
+   so the test still ENFORCES only the reference (5 terraces, spread 1: Box exact, A and B mean <= 2 %, worst <= 8 %) and the rest is measured.
+   The worst case left (B, 12 terraces, spread 1.5, `--only 5 --px 45`) is a ramp almost hidden behind a peak: the smoothed B slab contour is not
+   the tile-exact edge of the reference, so about 1000 px of ramp that the reference hides are drawn (a smoothing mismatch, not an order error).
+   Accepted; the full solution is per-pixel depth, left for WebGL in round 2. The footprint is rigid: in A the vertices
    of every contour edge that touches a carved tile are pinned through the Chaikin passes; in B the unblurred distance
    field replaces the blurred one within 0.5 tile of a carved tile (fading out by 1.5 tiles). Terrain away from the
    stairs is smoothed as before. Look (`render.js`): own cream colour with a tint per tread, light line on the top edge
@@ -157,7 +172,13 @@ incursion border; stake and way-back path visible.
    same measurement on the previous code gave 93-97 % for A and B, so the cause was never isolated. Stairs outside the slice
    are not generated (scenery has no stairs).
 5. Technique B rounds the outer corners of the slice.
-6. In compare mode the three panels are narrow in isometric views.
+6. Compare mode (Box | A | B, on by default): ONE camera for all panels (same px per tile, fitted to the first panel, same point of the map; wheel zoom,
+   pan and presets move all of them), two layouts, Columns and Rows, chosen automatically (Rows in isometric presets) with a manual selector;
+   Box and A are painted as soon as they are ready and B afterwards, with "computing…" in its panel (`tools/ui/test_compare_ui.js`). At zoom 1 Rows is
+   NOT larger than Columns in Iso (2.64 vs 3.14 px per tile: the panel is 219 px tall); its advantage is the wide strip when zooming in. Cold time to
+   the first panels / to all three (`tools/ui/measure_compare.js`, 5x3, 12x3, 24x3 terraces): zone 6: 0.17 / 0.60 s, 0.22 / 1.24 s, 0.34 / 2.2 s; whole
+   map: 0.78 / 2.8 s, 1.3 / 6.0 s, 1.7 / 10.2 s. Moving the camera does not recompute (cached contours). POSSIBLE IMPROVEMENT (not done, user's call):
+   a cursor synchronised across panels (hover resolves the visible tile with `E.pickTile` and marks it in the others). B is not split by levels.
 7. Only two built-in sources: Snake Mountain and filler noise. Missing: Shrine-Pier pack and real 256x256 maps. Roles
    were tested with synthetic images; no real Unity `EncodeToPNG` file yet (to be added under `data/samples/`).
 8. Verified in headless Chromium only: image loading, mouse drag/zoom/pan, roles, slice. Not

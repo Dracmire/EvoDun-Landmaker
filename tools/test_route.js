@@ -5,7 +5,7 @@ for (const f of ['fields', 'shape', 'tech']) vm.runInThisContext(fs.readFileSync
 const E = window.EVO;
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { cond ? pass++ : (fail++, console.log('FAIL', name, extra === undefined ? '' : extra)); };
-const BASE = { terraces: 6, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 3 };
+const BASE = { terraces: 6, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3 };
 const mk = (W, H, f) => {
   const el = new Float32Array(W * H); let mn = Infinity, mx = -Infinity;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const v = el[y * W + x] = f(x, y); mn = Math.min(mn, v); mx = Math.max(mx, v); }
@@ -17,7 +17,7 @@ let seed = 7; const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; re
 // independent breadth-first search, written from the region rule (not from walkGraph)
 function bfsLen(S, P, a, b) {
   const W = S.W, H = S.H, adj = new Map(), add = (u, v) => { (adj.get(u) || adj.set(u, []).get(u)).push(v); (adj.get(v) || adj.set(v, []).get(v)).push(u); };
-  for (const st of S.stairs) for (let c = 0; c < st.cols.length; c++) { let p = st.bottom[c]; for (const sp of st.steps) { add(p, sp.tiles[c]); p = sp.tiles[c]; } add(p, st.top[c]); if (c > 0) for (const sp of st.steps) add(sp.tiles[c - 1], sp.tiles[c]); }
+  for (const st of S.stairs) for (let c = 0; c < st.cols.length; c++) { let p = st.bottom[c]; for (const sp of st.steps) { add(p, sp.tiles[c]); p = sp.tiles[c]; } add(p, st.top[c]); if (c > 0) for (const sp of st.steps) { const u = sp.tiles[c - 1], v = sp.tiles[c]; if (Math.abs(u - v) === W || (Math.abs(u - v) === 1 && ((u / W) | 0) === ((v / W) | 0))) add(u, v); } }
   const dist = new Map([[a, 1]]), q = [a];
   for (let h = 0; h < q.length; h++) {
     const i = q[h], x = i % W, y = (i / W) | 0, ns = [];

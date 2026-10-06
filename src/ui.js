@@ -1,7 +1,7 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 2, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 3, margin: 24 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
@@ -13,7 +13,7 @@
   const SLIDERS = [
     ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
-    ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['stairStyle', 'Style: 0 steps · 1 ramp', 0, 1, 1], ['rampSlope', 'Ramp max slope (height per tile)', 0.15, 1, 0.05], ['rampMin', 'Ramp min length, tiles', 1, 6, 1], ['tread', 'Tread rise, sub-terraces (steps only)', 1, 5, 1], ['stairW', 'Stair width, tiles (0 = none)', 0, 3, 1]]],
+    ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['stairStyle', 'Style: 0 steps · 1 ramp', 0, 1, 1], ['rampDepth', 'Ramp depth, tiles (fixed)', 1, 4, 1], ['tread', 'Tread rise, sub-terraces (steps only)', 1, 5, 1], ['stairW', 'Stair / ramp width, tiles (0 = none; steps use up to 3)', 0, 5, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
   const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
@@ -21,8 +21,8 @@
 
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
-  const st = { pack: 'snake', mode: 'compare', tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
-  let S = null, raf = 0;
+  const st = { pack: 'snake', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
     packs[id] = { label, pack };
@@ -66,6 +66,7 @@
       b.addEventListener('click', () => { st.tech = id; st.mode = 'single'; invalidate(false); });
       tb.appendChild(b);
     }
+    $('#layout').addEventListener('change', (e) => { st.layout = e.target.value; invalidate(false); });
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
     $('#src').addEventListener('change', (e) => { st.pack = e.target.value; for (const id of cropIds) $('#' + id).value = ''; onPackChanged(); refreshMessage(); invalidate(true); }); // a crop belongs to one map
     buildRoles();
@@ -323,12 +324,13 @@
 
   function invalidate(reshape) {
     if (reshape) { S = null; $('#busy').hidden = false; } // painted before the (possibly slow) recompute starts
+    st.t0 = performance.now(); st.cold = !!reshape; drawToken++; // a pending panel (B computing) of an older state is dropped
     if (!raf) raf = requestAnimationFrame(() => setTimeout(draw, 0));
   }
 
   function view() {
     const p = PRESETS.find((x) => x.id === st.preset);
-    return { yaw: p.yaw + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY };
+    return { yaw: p.yaw + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc };
   }
 
   function draw() {
@@ -344,15 +346,43 @@
     $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');
     const techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
+    const layout = st.layout === 'auto' ? (st.preset.startsWith('iso') ? 'rows' : 'columns') : st.layout; // rows in isometric: the diamond is twice as wide as tall
+    stage.dataset.layout = layout; $('#layout').hidden = st.mode !== 'compare';
     while (stage.children.length < techs.length) {
       const f = document.createElement('figure'); f.innerHTML = '<canvas></canvas><figcaption></figcaption>'; stage.appendChild(f);
     }
     [...stage.children].forEach((f, i) => { f.hidden = i >= techs.length; });
-    techs.forEach((t, i) => {
-      const f = stage.children[i], cv = f.querySelector('canvas');
-      const r = E.render(cv, S, P, t, view(), O);
+    // one camera for every panel: the same scale (px per tile, fitted to the first panel) around the same point of the map
+    const f0 = stage.children[0]; st.fitSc = E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight);
+    const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
+    const bKey = 'Bready:' + P.radius + ':' + P.anchor, needB = techs.includes('B') && !S.cache[bKey];
+    const paint = (t, i) => {
+      const f = stage.children[i], cv = f.querySelector('canvas'), pend = f.querySelector('.pending');
+      if (pend) pend.remove();
+      const r = E.render(cv, S, P, t, v, O);
       f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ms.toFixed(0)} ms</span>`;
+      if (t === 'B') S.cache[bKey] = true;
+    };
+    const surv = {}, survOf = (t, late) => { if (t !== 'box' && techs.includes(t) && (late || !(t === 'B' && needB))) surv[t] = E.stairSurvival(S, P, t); };
+    techs.forEach((t, i) => {
+      if (t === 'B' && needB) { // painted after the other panels: the first draw of B is the slow one
+        const f = stage.children[i], cv = f.querySelector('canvas'), ctx = cv.getContext('2d'), dpr = window.devicePixelRatio || 1;
+        cv.width = f.clientWidth * dpr | 0; cv.height = f.clientHeight * dpr | 0; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#171424'; ctx.fillRect(0, 0, cv.width, cv.height);
+        if (!f.querySelector('.pending')) { const d = document.createElement('div'); d.className = 'pending'; d.textContent = 'computing…'; f.appendChild(d); }
+        f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>computing…</span>`;
+      } else paint(t, i);
     });
+    for (const t of techs) survOf(t);
+    const firstMs = performance.now() - t0;
+    st.timing = { cold: !!st.cold, first: firstMs, all: needB ? null : firstMs, layout, techs: techs.slice() };
+    const finish = () => {
+      if (token !== drawToken || !S) return;
+      if (needB) { techs.forEach((t, i) => { if (t === 'B') paint(t, i); }); survOf('B', true); st.timing.all = performance.now() - t0; }
+      info(surv, techs); $('#busy').hidden = true;
+    };
+    if (needB) { info(surv, techs); requestAnimationFrame(() => setTimeout(finish, 0)); } else finish();
+  }
+  function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
     document.querySelectorAll('#techs button').forEach((b) => b.classList.toggle('on', st.mode === 'single' && b.dataset.id === st.tech));
     $('#mode').textContent = st.mode === 'compare' ? 'Compare: on' : 'Compare: off';
@@ -360,15 +390,13 @@
     const eff = E.subHeight(P), note = $('#subHnote');
     note.hidden = eff >= P.subH - 1e-9;
     note.textContent = `Sub-terrace height limited to ${eff.toFixed(3)} (set ${P.subH}) so the gap to the next terrace stays above the climb limit.`;
-    const surv = {}; for (const t of techs) if (t !== 'box') surv[t] = E.stairSurvival(S, P, t);
-    const sv = (t) => (surv[t] ? `${(surv[t].coverage * 100).toFixed(1)}%` + (surv[t].lost ? `, ${surv[t].lost}/${surv[t].n} lost` : '') + (surv[t].degraded ? `, ${surv[t].degraded} degraded` : '') : '–');
+    const sv = (t) => (!surv[t] && techs.includes(t) ? '…' : surv[t] ? `${(surv[t].coverage * 100).toFixed(1)}%` + (surv[t].lost ? `, ${surv[t].lost}/${surv[t].n} lost` : '') + (surv[t].degraded ? `, ${surv[t].degraded} degraded` : '') : '–');
     const sinf = S.stairInfo, stairText = `${sinf.gates} gates · ${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · stair coverage A ${sv('A')} · B ${sv('B')}`;
     const bi = S.borderInfo, borderText = bi ? ` · slice border faces: ${bi.barrier} barrier (red) · ${bi.pass} pass (cyan) · ${bi.none} unmarked (yellow) · ${bi.mapEdge} map edge (white)` : '';
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#busy').hidden = true;
     $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%`;
   }
 
@@ -377,7 +405,7 @@
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { timing: () => st.timing, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

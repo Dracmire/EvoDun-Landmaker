@@ -10,7 +10,7 @@ const PAGE = async ({ nPts }) => {
   const E = window.EVO;
   const mk = (W, H, f) => { const el = new Float32Array(W * H); let mn = 1e9, mx = -1e9; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const v = el[y * W + x] = f(x, y); mn = Math.min(mn, v); mx = Math.max(mx, v); } return { name: 't', width: W, height: H, elevation: el, elevRange: [mn, mx], masks: {}, markers: [], fields: {} }; };
   const relief = mk(72, 56, (x, y) => 100 + 600 * (0.5 + 0.5 * Math.sin(x / 9) * Math.cos(y / 7)) + x * 3);
-  const BASE = { terraces: 6, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 3 };
+  const BASE = { terraces: 6, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3 };
   const CW = 640, CH = 480;
   let seed = 12345; const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 
@@ -33,7 +33,7 @@ const PAGE = async ({ nPts }) => {
     };
     const V = (x, y, h) => { const p = cam.p(x, y, h); return [p[0], p[1], zOf(x, y, h)]; };
     const quad = (a, b, c, d, o, k, L) => { tri(a, b, c, o, k, L); tri(a, c, d, o, k, L); };
-    const corner = (j, x, y) => (ST.has(j) ? E.rampHeight(ST.get(j), x, y) : S.levelH[S.fine[j]]);
+    const corner = (j, x, y) => (ST.has(j) ? E.rampHeight(ST.get(j), x, y, j) : S.levelH[S.fine[j]]);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x, ramp = ST.has(i);
       quad(V(x, y, corner(i, x, y)), V(x + 1, y, corner(i, x + 1, y)), V(x + 1, y + 1, corner(i, x + 1, y + 1)), V(x, y + 1, corner(i, x, y + 1)), i, ramp ? 2 : 1, S.fine[i]);
@@ -51,7 +51,7 @@ const PAGE = async ({ nPts }) => {
   const out = {}; const cv = document.createElement('canvas'); cv.width = CW; cv.height = CH;
   const views = [['oblique', 0, 50], ['oblique', 90, 50], ['oblique', 180, 50], ['oblique', 270, 50], ['iso', 45, 35], ['iso', 135, 35], ['iso', 225, 35], ['iso', 315, 35]];
   const configs = [['ramps', BASE], ['steps', Object.assign({}, BASE, { stairStyle: 0 })], ['ramps, no smoothing', Object.assign({}, BASE, { smooth: 0, radius: 0 })]];
-  const worst = []; const fails = [];
+  const worst = []; const fails = [], wfails = [];
   for (const [cname, P] of configs) {
     const S = E.shape(relief, P);
     for (const tech of ['box', 'A', 'B']) {
@@ -70,7 +70,7 @@ const PAGE = async ({ nPts }) => {
             if (tech !== 'box' && cname !== 'ramps, no smoothing') continue;
             let same = true; for (const [dx, dy] of DIRS) { const x2 = Math.round(px + dx * 2.5), y2 = Math.round(py + dy * 2.5); if (x2 < 0 || y2 < 0 || x2 >= CW || y2 >= CH || ref.own[y2 * CW + x2] !== ref.own[q]) { same = false; break; } }
             if (!same) continue;
-            const t = E.pickTile(S, P, tech, view, CW, CH, px, py); wallTot++; if (t.tile === ref.own[q]) wallOk++; else if (fails.length < 12) fails.push(`${cname}|${tech}|${vname} wall at (${px.toFixed(1)},${py.toFixed(1)}): got ${t.tile} (${t.kind}) want ${ref.own[q]} (xy ${ref.own[q] % S.W},${(ref.own[q] / S.W) | 0}; got ${t.tile % S.W},${(t.tile / S.W) | 0}) fine ${S.fine[ref.own[q]]}/${S.fine[t.tile]}`); got++; continue;
+            const t = E.pickTile(S, P, tech, view, CW, CH, px, py); wallTot++; if (t.tile === ref.own[q]) wallOk++; else if (wfails.length < 10) wfails.push(`${cname}|${tech}|${vname} wall at (${px.toFixed(1)},${py.toFixed(1)}): got ${t.tile} (${t.kind}) want ${ref.own[q]} (xy ${ref.own[q] % S.W},${(ref.own[q] / S.W) | 0}; got ${t.tile % S.W},${(t.tile / S.W) | 0}) fine ${S.fine[ref.own[q]]}/${S.fine[t.tile]}`); got++; continue;
           }
           // keep points whose neighbourhood (0.9 tile) is the same level: the edges of A/B slabs move with the smoothing
           if (tech !== 'box' && cname !== 'ramps, no smoothing') {
@@ -100,12 +100,12 @@ const PAGE = async ({ nPts }) => {
       out[`${cname} | ${tech}`] = { tot, ok, naiveOk, hidTot, hidOk, hidNaive, wallTot, wallOk };
     }
   }
-  out.__fails = fails; out.__bf = out.__boxFails; delete out.__boxFails;
+  out.__fails = fails.concat(wfails); out.__bf = out.__boxFails; delete out.__boxFails;
   return out;
 };
 
 (async () => {
-  const ni = process.argv.indexOf('--n'), nPts = ni > 0 ? +process.argv[ni + 1] : 60;
+  const ni = process.argv.indexOf('--n'), nPts = ni > 0 ? +process.argv[ni + 1] : 120;
   const a = await open({ w: 900, h: 700 });
   const r = await a.page.evaluate(PAGE, { nPts });
   console.log('| configuration | technique | cap/ramp points | correct | naive picker (control) | hidden tile centres: correct / naive | wall points: correct |\n|---|---|---:|---:|---:|---|---|');
@@ -116,7 +116,7 @@ const PAGE = async ({ nPts }) => {
     a.ok(`${k}: >= 98 % of the cap/ramp points resolve to the tile that the reference shows (the rest are 1-2 px edge cases, see header)`, v.tot > 100 && v.ok >= 0.98 * v.tot, `${v.ok}/${v.tot}`);
     a.ok(`${k}: the naive picker (control) is clearly worse`, v.naiveOk < 0.9 * v.tot, `${v.naiveOk}/${v.tot}`);
     if (v.hidTot) a.ok(`${k}: tiles hidden behind higher terrain are not picked (>= 75 %)`, v.hidOk >= 0.75 * v.hidTot, `${v.hidOk}/${v.hidTot}`);
-    if (v.wallTot && (t === 'box' || c === 'ramps, no smoothing')) a.ok(`${k}: wall points resolve to the tile that owns the wall (Box >= 95 %, A/B without smoothing >= 80 %: their wall pieces are cut per tile only on axis-aligned runs)`, v.wallOk >= (t === 'box' ? 0.95 : 0.8) * v.wallTot, `${v.wallOk}/${v.wallTot}`);
+    if (v.wallTot && (t === 'box' || c === 'ramps, no smoothing')) a.ok(`${k}: wall points resolve to the tile that owns the wall (Box >= 95 %, A/B without smoothing >= 85 %: the rest are pixels of the lower edge of a wall that vote for the cap below)`, v.wallOk >= (t === 'box' ? 0.95 : 0.85) * v.wallTot, `${v.wallOk}/${v.wallTot}`);
   }
   console.log('errors:', a.errs); await a.browser.close();
 })();

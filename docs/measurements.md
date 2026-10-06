@@ -115,3 +115,20 @@ Reading it:
 - With the footprint every stair is 100 % covered in A and B in every row (0 lost). Without it
   (`P.anchor = false`) B loses stairs and A degrades them: see `tools/test_stairs.js`.
 - Shape time (gates and carving included) is below 0.05 s everywhere here (the whole-map quantization is cached).
+
+## 5. Compare mode: cold time to the first panels and to all three
+
+`node tools/ui/measure_compare.js 3`: median of 3 cold runs (a new shape each time, empty contour caches) from the slider release; Chromium 141
+headless (software rasteriser, +-30 %), 1500x800 window, columns layout, synthetic 256x256 map, 3 sub-terraces. "First" = shape + Box + A painted
+(B shows "computing…"); "all" = B painted and the info line complete.
+
+| slice | terraces | first panels (ms) | all three (ms) | B alone (ms) |
+|---|---:|---:|---:|---:|
+| zone 6 | 5 | 171 | 599 | 428 |
+| zone 6 | 12 | 216 | 1240 | 1024 |
+| zone 6 | 24 | 336 | 2225 | 1888 |
+| whole map | 5 | 781 | 2834 | 2053 |
+| whole map | 12 | 1295 | 5998 | 4703 |
+| whole map | 24 | 1688 | 10203 | 8515 |
+
+Moving the camera afterwards only paints (the contours of every level are cached). B dominates: one distance field per level.
