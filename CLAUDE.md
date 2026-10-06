@@ -47,9 +47,11 @@ incursion border; stake and way-back path visible.
   blur -> marching squares).
 - `src/render.js`: camera, extruded walls, caps, overlays, ramps, markers. Includes Box technique (one
   column per tile) as reference.
-- `src/png.js`: own PNG decoder (`E.decodePng`, raw samples per channel, 8/16 bit). Not wired to the UI yet.
-  `node tools/test_png.js` runs its exactness test.
-- `src/ui.js`, `src/app.html`: controls, angle presets, compare mode, image loading.
+- `src/png.js`: own PNG decoder (`E.decodePng`, raw samples per channel, 8/16 bit). `node tools/test_png.js`.
+- `src/fields.js`: channels R,G,B,A,H,S,V, roles (elevation / zone / edge / path / vegetation / POI), categorical
+  hue ids, manifest. `node tools/test_fields.js`. Format in `docs/pack-format.md`.
+- `src/ui.js`, `src/app.html`: controls, angle presets, compare mode, multi-image loading with a role selector per
+  channel, flip Y, maxnode, save pack.json. Overlays: zones, edge map, graded masks (blocky tiles, see item 1).
 - `data/snake_mountain.json`: sample pack, format `evodun-pack/0.1` (width, height, row-major elevation,
   masks, markers).
 - `tools/build.py` regenerates `data/packs.js`, `index.html`, `dist/viewer.html`. Run it after touching
@@ -59,10 +61,13 @@ incursion border; stake and way-back path visible.
 1. Overlays (snake, cave, water) are drawn as square tiles and look blocky over the smoothed A/B shapes.
 2. Ramps are a one-tile plane leaning on the wall; they don't cut geometry and only draw if facing the
    camera. Passes are chosen by lowest slope and spacing, not from pipeline data (flow, A*, terrace edges).
-3. Elevation is the only field read for terraces. Zone, edge and mask channels (H/S/V roles, categorical roles) are not readable yet.
+3. Zone, edge and mask fields are read and shown as overlays only. The slice (one zone, scenery under the veil, movement
+   restricted) is not implemented: the whole map is still one slice. Elevation is normalised after pre-smoothing
+   over the loaded image, not yet with the raw global range (matters once a slice is cropped).
 4. Technique B rounds the outer corners of the slice.
 5. In compare mode the three panels are narrow in isometric views.
-6. Only two sources: Snake Mountain and filler noise. Missing: Shrine-Pier pack and real 256x256 maps.
+6. Only two built-in sources: Snake Mountain and filler noise. Missing: Shrine-Pier pack and real 256x256 maps. Roles
+   were tested with synthetic images; no real Unity `EncodeToPNG` file yet (to be added under `data/samples/`).
 7. Verified in headless Chromium (point 1): image loading, mouse drag/zoom/pan, the noise pack. Not
    verified: touch input, non-Chromium browsers, GPU timings. Measurements are in `docs/measurements.md`.
 8. Box technique: light vertical stripes along the front edge of the slice (seen on the noise pack).
@@ -70,9 +75,10 @@ incursion border; stake and way-back path visible.
 
 ## Pending, in this order
 1. (Done, PR #1) Verify item 7 and fix what fails.
-2. Channel input: own PNG decoder (done first, with exactness test), then roles per channel (R/G/B/A/H/S/V,
-   categorical), slice by zone id with scenery under the veil, native resolution, `evodun-pack/0.2`, sliders
-   recalculating on release, edge map as overlay.
+2. Channel input. Done: own PNG decoder, roles per channel (R/G/B/A/H/S/V, categorical, graded), native resolution,
+   `evodun-pack/0.2` manifest, edge map overlay, flip Y. Left: slice by zone id with scenery under the veil (one
+   visible line on the slice border following each cap, optionally coloured by the edge map), raw global elevation
+   range, sliders recalculating on release.
 3. Fix items 1, 2, 4 and 8.
 4. Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.
    Parked: RuleTile skin and modular kits.

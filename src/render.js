@@ -59,6 +59,23 @@
     return [p0, p1];
   }
 
+  const AMBIGUOUS = 'rgba(255,0,255,0.75)';
+  const GRADED = [['path', '214,170,96'], ['vegetation', '52,170,72'], ['poi', '236,84,236']];
+  function tint(S, key, make) { const c = S.tints || (S.tints = {}); return c[key] || (c[key] = make()); }
+  function zoneTint(S, id) {
+    return tint(S, 'z' + id, () => {
+      const cl = S.fields.zone.info.classes.find((c) => c.id === id);
+      const hue = cl && cl.hue !== undefined ? cl.hue * 360 : (id * 137.5) % 360;
+      return `hsla(${hue.toFixed(0)},80%,55%,0.45)`;
+    });
+  }
+  function edgeTint(S, id) {
+    return tint(S, 'e' + id, () => {
+      const cl = S.fields.edge.info.classes.find((c) => c.id === id);
+      return cl && cl.label === 'barrier' ? 'rgba(235,48,48,0.92)' : cl && cl.label === 'pass' ? 'rgba(48,224,240,0.92)' : 'rgba(255,200,60,0.92)';
+    });
+  }
+
   function tileOverlay(S, P, o, i) {
     const out = [];
     if (o.regions && S.region[i] >= 0) {
@@ -70,6 +87,21 @@
       else if (S.waterfall && S.waterfall[i]) out.push('rgba(200,236,255,0.95)');
       else if (S.cave && S.cave[i]) out.push('rgba(34,26,44,0.88)');
       else if (S.snake && S.snake[i]) out.push('rgba(214,84,112,0.38)');
+    }
+    const F = S.fields;
+    if (o.zones && F.zone) {
+      const z = F.zone.ids[i];
+      if (z > 0) out.push(zoneTint(S, z)); else if (z < 0) out.push(AMBIGUOUS);
+    }
+    if (o.edges && F.edge) {
+      const e = F.edge.ids[i];
+      if (e > 0) out.push(edgeTint(S, e)); else if (e < 0) out.push(AMBIGUOUS);
+    }
+    if (o.masks) {
+      for (const k of GRADED) {
+        const m = F[k[0]]; if (!m) continue;
+        const v = m.values[i]; if (v > 0) out.push(`rgba(${k[1]},${(0.15 + 0.7 * v).toFixed(2)})`);
+      }
     }
     if (o.veil) {
       const x = i % S.W, y = (i / S.W) | 0, d = Math.min(x, y, S.W - 1 - x, S.H - 1 - y);

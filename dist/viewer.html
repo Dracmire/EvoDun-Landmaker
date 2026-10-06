@@ -25,6 +25,9 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0}
 #stage{flex:1;min-height:0;display:grid;gap:1px;background:var(--line);touch-action:none;cursor:grab}
 #stage[data-n="1"]{grid-template-columns:1fr}
 #stage[data-n="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+#roles .role{display:grid;grid-template-columns:78px minmax(0,1fr);gap:6px;align-items:center;margin:3px 0}
+#roles .role select,#roles .role input{width:100%;min-width:0;padding:4px 6px}
+#rolesInfo{line-height:1.5}
 figure{margin:0;position:relative;min-width:0;min-height:0;background:#171424}
 figure canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 figcaption{position:absolute;left:8px;top:6px;right:8px;display:flex;flex-direction:column;gap:1px;font-size:12px;pointer-events:none;text-shadow:0 1px 3px #000}
@@ -42,8 +45,14 @@ figcaption span{color:var(--mut);font-size:11px}
   <h1>EvoDun Crystal Viewer<small>Materialization test · same data, several crystallizations</small></h1>
   <div><h3>Source</h3>
    <div class="row"><select id="src"></select></div>
-   <div class="row" style="margin-top:6px"><input type="file" id="file" accept="image/*" style="max-width:150px"><select id="chan"><option value="l">luma</option><option value="r">R</option><option value="g">G</option><option value="b">B</option></select></div>
-   <div class="hint">Image = height field, 1 pixel = 1 tile (resampled to ≤96).</div>
+   <div class="row" style="margin-top:6px"><input type="file" id="file" accept=".png,.json,image/png,application/json" multiple style="max-width:100%"></div>
+   <div class="hint">PNG images, 1 pixel = 1 tile, native size, read as raw samples. Select several at once (height, zones, edges…); a pack .json (evodun-pack/0.2) can go with them.</div>
+   <div id="roles" hidden>
+    <h3>Channel roles</h3>
+    <label class="tg"><input type="checkbox" id="flipy"><span>Flip Y (Unity writes Y up)</span></label>
+   </div>
+   <div class="hint" id="rolesInfo" hidden></div>
+   <div class="row" id="rolesBtns" hidden style="margin-top:4px"><button id="saveManifest">Save pack.json</button></div>
    <div class="hint" id="msg" role="status" hidden style="color:var(--acc)"></div></div>
   <div id="sliders"></div>
   <div><h3>Display</h3><div id="toggles"></div></div>
@@ -181,6 +190,223 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   };
 })(window.EVO = window.EVO || {});
 
+/* Channels as fields: decoded PNG -> R,G,B,A,H,S,V planes -> roles (numeric / categorical / graded).
+   Pure functions, no DOM. */
+(function (E) {
+  const HUE_GAP = 4;    // degrees: occupied hue bins further apart than this start a new cluster
+  const TOL_CAP = 5;    // degrees: hue tolerance never exceeds this (and is 1/4 of the id spacing if smaller)
+  const MAX_IDS = 256;
+  const BINS = 720;     // hue histogram, 0.5 degree per bin
+
+  E.CHANNELS = ['R', 'G', 'B', 'A', 'H', 'S', 'V'];
+  /* [role, kind]: numeric = height-like, categorical = ids (0 = outside), graded = 0..1 mask */
+  E.ROLES = [['elevation', 'numeric'], ['zone', 'categorical'], ['edge', 'categorical'], ['path', 'graded'], ['vegetation', 'graded'], ['poi', 'graded']];
+  E.RESERVED_ROLES = ['area', 'room']; // accepted in the pack format, not used yet
+  E.ELEVATION_SCALE = 1000;            // baked convention: grey = height / 1000
+
+  /* Same algorithm as UnityEngine.Color.RGBToHSV (h, s, v in 0..1). */
+  E.rgbToHsv = function (r, g, b, out) {
+    let off, dom, c1, c2;
+    if (b > g && b > r) { off = 4; dom = b; c1 = r; c2 = g; }
+    else if (g > r) { off = 2; dom = g; c1 = b; c2 = r; }
+    else { off = 0; dom = r; c1 = g; c2 = b; }
+    let h = 0, s = 0;
+    if (dom !== 0) {
+      const diff = dom - (c1 > c2 ? c2 : c1);
+      if (diff !== 0) { s = diff / dom; h = off + (c1 - c2) / diff; } else h = off + (c1 - c2);
+      h /= 6;
+      if (h < 0) h += 1;
+    }
+    out[0] = h; out[1] = s; out[2] = dom;
+    return out;
+  };
+
+  function flipRows(a, W, H) {
+    for (let y = 0; y < H >> 1; y++) {
+      const t = a.slice(y * W, y * W + W);
+      a.copyWithin(y * W, (H - 1 - y) * W, (H - y) * W);
+      a.set(t, (H - 1 - y) * W);
+    }
+  }
+
+  /* dec: result of E.decodePng. Returns { width, height, max, ch: {R,G,B,A,H,S,V} } with planes in 0..1.
+     Grey images give R=G=B; palette images are expanded to RGBA. */
+  E.imageChannels = function (dec, flipY) {
+    const { width: W, height: H, colorType: ct, channels: c } = dec, n = W * H;
+    const mk = (src, m) => { const o = new Float32Array(n); for (let i = 0; i < n; i++) o[i] = src[i] / m; return o; };
+    const ones = () => new Float32Array(n).fill(1);
+    let R, G, B, A, max = dec.max;
+    if (ct === 0) { R = G = B = mk(c[0], max); A = ones(); }
+    else if (ct === 4) { R = G = B = mk(c[0], max); A = mk(c[1], max); }
+    else if (ct === 2) { R = mk(c[0], max); G = mk(c[1], max); B = mk(c[2], max); A = ones(); }
+    else if (ct === 6) { R = mk(c[0], max); G = mk(c[1], max); B = mk(c[2], max); A = mk(c[3], max); }
+    else { // palette
+      max = 255; R = new Float32Array(n); G = new Float32Array(n); B = new Float32Array(n); A = new Float32Array(n);
+      const { rgb, alpha } = dec.palette, np = alpha.length;
+      for (let i = 0; i < n; i++) {
+        const k = c[0][i];
+        if (k < np) { R[i] = rgb[k * 3] / 255; G[i] = rgb[k * 3 + 1] / 255; B[i] = rgb[k * 3 + 2] / 255; A[i] = alpha[k] / 255; }
+      }
+    }
+    const Hh = new Float32Array(n), S = new Float32Array(n), V = new Float32Array(n), t = [0, 0, 0];
+    for (let i = 0; i < n; i++) { E.rgbToHsv(R[i], G[i], B[i], t); Hh[i] = t[0]; S[i] = t[1]; V[i] = t[2]; }
+    const ch = { R, G, B, A, H: Hh, S, V };
+    if (flipY) for (const k of E.CHANNELS) flipRows(ch[k], W, H);
+    return { width: W, height: H, max, ch };
+  };
+
+  const circ = (a, b) => { const d = Math.abs(a - b) % 1; return Math.min(d, 1 - d) * 360; }; // degrees between hues 0..1
+
+  /* Categorical ids from hue. V = 0 is "outside" (id 0). With o.maxnode, id = round(H * (maxnode + 1)).
+     Otherwise hue clusters are found and every pixel goes to its nearest centre (ids 1..K in hue order).
+     Pixels whose hue is not reliable are NOT assigned: id -1 and counted in info.ambiguous. */
+  E.categoricalFromHue = function (img, o = {}) {
+    const { H, S, V } = img.ch, n = H.length, mx = img.max, ids = new Int32Array(n);
+    const amb = { total: 0, noHue: 0, lowChroma: 0, far: 0, reserved: 0 };
+    const chroma = new Float32Array(n);
+    for (let i = 0; i < n; i++) chroma[i] = Math.round(S[i] * V[i] * mx); // raw counts, exact for 8/16-bit
+    const maxnode = o.maxnode > 0 ? Math.round(o.maxnode) : 0;
+    let centres, tol;
+    if (maxnode) {
+      tol = Math.min(0.25 * 360 / (maxnode + 1), TOL_CAP);
+    } else {
+      const cnt = new Float64Array(BINS), sn = new Float64Array(BINS), cs = new Float64Array(BINS);
+      for (let i = 0; i < n; i++) {
+        if (V[i] === 0 || chroma[i] < 1 || 60 / chroma[i] > TOL_CAP) continue;
+        const b = Math.min(BINS - 1, Math.floor(H[i] * BINS));
+        cnt[b]++; sn[b] += Math.sin(H[i] * 2 * Math.PI); cs[b] += Math.cos(H[i] * 2 * Math.PI);
+      }
+      const occ = []; for (let b = 0; b < BINS; b++) if (cnt[b]) occ.push(b);
+      const binGap = (a, b) => ((b - a + BINS) % BINS) * 360 / BINS;
+      let groups = [];
+      if (occ.length) {
+        let start = 0; // first occupied bin whose predecessor is further than HUE_GAP
+        for (let k = 0; k < occ.length; k++) if (binGap(occ[(k + occ.length - 1) % occ.length], occ[k]) > HUE_GAP) { start = k; break; }
+        let cur = [occ[start]];
+        for (let s = 1; s < occ.length; s++) {
+          const a = occ[(start + s - 1) % occ.length], b = occ[(start + s) % occ.length];
+          if (binGap(a, b) > HUE_GAP) { groups.push(cur); cur = []; }
+          cur.push(b);
+        }
+        groups.push(cur);
+      }
+      if (groups.length > MAX_IDS) throw new Error(`Found ${groups.length} distinct hues (limit ${MAX_IDS}); this does not look like a categorical image.`);
+      centres = groups.map((g) => {
+        let a = 0, b = 0; for (const k of g) { a += sn[k]; b += cs[k]; }
+        let h = Math.atan2(a, b) / (2 * Math.PI); if (h < 0) h += 1;
+        return h;
+      }).sort((p, q) => p - q);
+      let spacing = 360;
+      for (let k = 0; k < centres.length && centres.length > 1; k++) spacing = Math.min(spacing, circ(centres[k], centres[(k + 1) % centres.length]));
+      tol = Math.min(0.25 * spacing, TOL_CAP);
+    }
+    const count = new Map(); let outside = 0;
+    for (let i = 0; i < n; i++) {
+      if (V[i] === 0) { outside++; continue; }
+      let id = -1, why = '';
+      if (chroma[i] < 1) why = 'noHue';
+      else if (60 / chroma[i] > tol) why = 'lowChroma';
+      else if (maxnode) {
+        const x = H[i] * (maxnode + 1); id = Math.round(x);
+        if (id < 1 || id > maxnode) { why = 'reserved'; id = -1; }
+        else if (Math.abs(x - id) * 360 / (maxnode + 1) > tol) { why = 'far'; id = -1; }
+      } else {
+        let best = -1, bd = 1e9;
+        for (let k = 0; k < centres.length; k++) { const d = circ(H[i], centres[k]); if (d < bd) { bd = d; best = k; } }
+        if (best < 0 || bd > tol) why = 'far'; else id = best + 1;
+      }
+      if (id < 0) { amb[why]++; amb.total++; ids[i] = -1; continue; }
+      ids[i] = id; count.set(id, (count.get(id) || 0) + 1);
+    }
+    const classes = [...count].sort((p, q) => p[0] - q[0]).map(([id, c]) => ({ id, count: c, hue: maxnode ? id / (maxnode + 1) : centres[id - 1] }));
+    return { ids, info: { mode: maxnode ? 'maxnode' : 'deduced', maxnode, tolDeg: tol, classes, outside, ambiguous: amb } };
+  };
+
+  /* Categorical ids from a plain channel: every distinct non-zero value is an id, 0 = outside. */
+  E.categoricalFromValue = function (img, chan) {
+    const v = img.ch[chan], n = v.length, ids = new Int32Array(n), count = new Map(); let outside = 0;
+    for (let i = 0; i < n; i++) {
+      const id = Math.round(v[i] * img.max);
+      if (!id) { outside++; continue; }
+      ids[i] = id; count.set(id, (count.get(id) || 0) + 1);
+      if (count.size > MAX_IDS) throw new Error(`Channel ${chan} has more than ${MAX_IDS} distinct values; this does not look like a categorical image.`);
+    }
+    const classes = [...count].sort((p, q) => p[0] - q[0]).map(([id, c]) => ({ id, count: c }));
+    return { ids, info: { mode: 'value', maxnode: 0, tolDeg: 0, classes, outside, ambiguous: { total: 0, noHue: 0, lowChroma: 0, far: 0, reserved: 0 } } };
+  };
+
+  /* Edge map labels from hue: red = barrier, cyan = border with a pass. */
+  function labelEdges(info) {
+    for (const c of info.classes) {
+      if (c.hue === undefined) { c.label = 'edge ' + c.id; continue; }
+      c.label = circ(c.hue, 0) < 20 ? 'barrier' : circ(c.hue, 0.5) < 20 ? 'pass' : 'edge ' + c.id;
+    }
+  }
+
+  function ambiguityWarning(role, info) {
+    const a = info.ambiguous; if (!a.total) return null;
+    const n = info.outside + a.total + info.classes.reduce((s, c) => s + c.count, 0);
+    const parts = [];
+    if (a.noHue + a.lowChroma) parts.push(`${a.noHue + a.lowChroma} with grey or very low chroma (hue imprecise)`);
+    if (a.far) parts.push(`${a.far} far from any ${info.mode === 'maxnode' ? 'id' : 'hue centre'}`);
+    if (a.reserved) parts.push(`${a.reserved} on reserved id 0 / maxnode+1`);
+    return `${role}: ${a.total} px (${(a.total / n * 100).toFixed(2)}%) have an ambiguous hue (${parts.join(', ')}); left unassigned (id -1, shown magenta).`;
+  }
+
+  /* images: [{ name, width, height, max, ch }]; roles: { role: { image: index, channel } };
+     o: { name, maxnode, markers, elevationScale }. Returns an evodun-pack/0.2 object (+ warnings). */
+  E.packFromRoles = function (images, roles, o = {}) {
+    if (!roles.elevation) throw new Error('Assign a channel to the elevation role.');
+    const used = [...new Set(Object.values(roles).map((r) => r.image))];
+    const first = images[used[0]];
+    for (const k of used) {
+      const im = images[k];
+      if (!im) throw new Error('A role points to an image that is not loaded.');
+      if (im.width !== first.width || im.height !== first.height)
+        throw new Error('Images differ in size: ' + used.map((j) => `${images[j].name} ${images[j].width}x${images[j].height}`).join(', ') + ' (all images of a pack must share one size).');
+    }
+    const field = (r) => {
+      if (!E.CHANNELS.includes(r.channel)) throw new Error('Unknown channel ' + r.channel);
+      return images[r.image].ch[r.channel];
+    };
+    const W = first.width, H = first.height, scale = o.elevationScale || E.ELEVATION_SCALE;
+    const src = field(roles.elevation), elevation = new Float32Array(W * H);
+    for (let i = 0; i < elevation.length; i++) elevation[i] = src[i] * scale;
+    const fields = {}, warnings = [];
+    for (const role of ['zone', 'edge']) {
+      const r = roles[role]; if (!r) continue;
+      const im = images[r.image];
+      fields[role] = r.channel === 'H' ? E.categoricalFromHue(im, { maxnode: role === 'zone' ? o.maxnode : 0 }) : E.categoricalFromValue(im, r.channel);
+      if (role === 'edge') labelEdges(fields[role].info);
+      const w = ambiguityWarning(role, fields[role].info); if (w) warnings.push(w);
+    }
+    for (const role of ['path', 'vegetation', 'poi']) if (roles[role]) fields[role] = { values: field(roles[role]) };
+    return { format: 'evodun-pack/0.2', name: o.name || 'Images', width: W, height: H, elevation, masks: {}, markers: o.markers || [], fields, warnings };
+  };
+
+  /* ---- manifest (evodun-pack/0.2 json: roles by image name) ---- */
+  E.parseManifest = function (json) {
+    if (!json || json.format !== 'evodun-pack/0.2') throw new Error('Manifest: expected format "evodun-pack/0.2".');
+    const known = new Set([...E.ROLES.map((r) => r[0]), ...E.RESERVED_ROLES]), roles = {}, notes = [];
+    for (const [role, r] of Object.entries(json.roles || {})) {
+      if (!known.has(role)) throw new Error('Manifest: unknown role "' + role + '".');
+      if (E.RESERVED_ROLES.includes(role)) { notes.push(`role "${role}" is reserved and ignored.`); continue; }
+      if (!r || typeof r.image !== 'string' || !E.CHANNELS.includes(r.channel)) throw new Error(`Manifest: role "${role}" needs { image, channel } with channel in ${E.CHANNELS.join('/')}.`);
+      roles[role] = { image: r.image, channel: r.channel };
+    }
+    return { name: json.name || '', flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, markers: json.markers || [], notes };
+  };
+  E.buildManifest = function (m) {
+    const roles = {};
+    for (const [role, r] of Object.entries(m.roles)) roles[role] = { image: r.image, channel: r.channel };
+    const out = { format: 'evodun-pack/0.2', name: m.name, flipY: !!m.flipY };
+    if (m.maxnode) out.maxnode = m.maxnode;
+    out.roles = roles;
+    if (m.markers && m.markers.length) out.markers = m.markers;
+    return out;
+  };
+})(window.EVO = window.EVO || {});
+
 /* EvoDun crystal viewer - level shaping: terraces, micro steps, passes, walk regions */
 (function (E) {
   const N4 = [[1, 0], [0, 1], [-1, 0], [0, -1]];
@@ -285,7 +511,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       W, H, n, U, ter, mic, fine, maxFine, byLevel, K, N,
       water: masks.water || new Array(n).fill(0),
       snake: masks.snake || null, cave: masks.cave || null, waterfall: masks.waterfall || null,
-      markers: pack.markers || [], name: pack.name, cache: {}
+      markers: pack.markers || [], name: pack.name, fields: pack.fields || {}, cache: {}
     };
     computePasses(S, P);
     computeRegions(S, P);
@@ -376,25 +602,6 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       el.push(+(o1(x, y) * 0.65 + o2(x, y) * 0.35).toFixed(3) * 9 + 1);
     }
     return { format: 'evodun-pack/0.1', name: 'Value noise (base pipeline stand-in)', width: W, height: H, elevation: el, masks: {}, markers: [] };
-  };
-
-  E.imagePack = function (img, channel, maxSide, name) {
-    const sc = Math.min(1, maxSide / Math.max(img.width, img.height));
-    const W = Math.max(2, Math.round(img.width * sc)), H = Math.max(2, Math.round(img.height * sc));
-    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-    const cx = cv.getContext('2d', { willReadFrequently: true });
-    cx.imageSmoothingEnabled = false;
-    cx.drawImage(img, 0, 0, W, H);
-    const d = cx.getImageData(0, 0, W, H).data, el = [];
-    let semi = 0;
-    for (let i = 0; i < W * H; i++) if (d[i * 4 + 3] !== 255) semi++;
-    const warnings = semi ? [`${semi} pixels have alpha < 255: canvas premultiplies alpha, so their RGB values are not read exactly.`] : [];
-    for (let i = 0; i < W * H; i++) {
-      const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2];
-      const v = channel === 'r' ? r : channel === 'g' ? g : channel === 'b' ? b : 0.299 * r + 0.587 * g + 0.114 * b;
-      el.push(v / 255 * 9 + 1);
-    }
-    return { format: 'evodun-pack/0.1', name: name || 'Image', width: W, height: H, elevation: el, masks: {}, markers: [], warnings };
   };
 })(window.EVO = window.EVO || {});
 
@@ -683,6 +890,23 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return [p0, p1];
   }
 
+  const AMBIGUOUS = 'rgba(255,0,255,0.75)';
+  const GRADED = [['path', '214,170,96'], ['vegetation', '52,170,72'], ['poi', '236,84,236']];
+  function tint(S, key, make) { const c = S.tints || (S.tints = {}); return c[key] || (c[key] = make()); }
+  function zoneTint(S, id) {
+    return tint(S, 'z' + id, () => {
+      const cl = S.fields.zone.info.classes.find((c) => c.id === id);
+      const hue = cl && cl.hue !== undefined ? cl.hue * 360 : (id * 137.5) % 360;
+      return `hsla(${hue.toFixed(0)},80%,55%,0.45)`;
+    });
+  }
+  function edgeTint(S, id) {
+    return tint(S, 'e' + id, () => {
+      const cl = S.fields.edge.info.classes.find((c) => c.id === id);
+      return cl && cl.label === 'barrier' ? 'rgba(235,48,48,0.92)' : cl && cl.label === 'pass' ? 'rgba(48,224,240,0.92)' : 'rgba(255,200,60,0.92)';
+    });
+  }
+
   function tileOverlay(S, P, o, i) {
     const out = [];
     if (o.regions && S.region[i] >= 0) {
@@ -694,6 +918,21 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       else if (S.waterfall && S.waterfall[i]) out.push('rgba(200,236,255,0.95)');
       else if (S.cave && S.cave[i]) out.push('rgba(34,26,44,0.88)');
       else if (S.snake && S.snake[i]) out.push('rgba(214,84,112,0.38)');
+    }
+    const F = S.fields;
+    if (o.zones && F.zone) {
+      const z = F.zone.ids[i];
+      if (z > 0) out.push(zoneTint(S, z)); else if (z < 0) out.push(AMBIGUOUS);
+    }
+    if (o.edges && F.edge) {
+      const e = F.edge.ids[i];
+      if (e > 0) out.push(edgeTint(S, e)); else if (e < 0) out.push(AMBIGUOUS);
+    }
+    if (o.masks) {
+      for (const k of GRADED) {
+        const m = F[k[0]]; if (!m) continue;
+        const v = m.values[i]; if (v > 0) out.push(`rgba(${k[1]},${(0.15 + 0.7 * v).toFixed(2)})`);
+      }
     }
     if (o.veil) {
       const x = i % S.W, y = (i / S.W) | 0, d = Math.min(x, y, S.W - 1 - x, S.H - 1 - y);
@@ -868,7 +1107,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 (function (E) {
   const $ = (s) => document.querySelector(s);
   const P = { terraces: 5, micro: 3, terH: 1.0, microH: 0.22, minPlateau: 5, minMicro: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2 };
-  const O = { outlines: true, gradient: true, features: true, regions: false, veil: false, markers: true, passes: false };
+  const O = { outlines: true, gradient: true, features: true, regions: false, veil: false, markers: true, passes: false, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
     { id: 'low', label: 'Low 28°', yaw: 0, pitch: 28 },
@@ -881,7 +1120,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
     ['Passes', [['passGap', 'Stair spacing', 3, 20, 1]]]
   ];
-  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Incursion veil']];
+  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Incursion veil'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
   const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field']];
 
   const packs = {};
@@ -931,8 +1170,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     }
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
     $('#src').addEventListener('change', (e) => { st.pack = e.target.value; message((packs[st.pack].pack.warnings || []).join(' ')); invalidate(true); });
-    $('#file').addEventListener('change', (e) => loadImage(e.target.files[0]));
-    $('#chan').addEventListener('change', () => { if (lastImg) useImage(); });
+    buildRoles();
+    $('#file').addEventListener('change', (e) => loadFiles(e.target.files));
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
     window.addEventListener('resize', () => invalidate(false));
     $('#stage').addEventListener('wheel', (e) => { e.preventDefault(); st.zoom = Math.max(0.5, Math.min(4, st.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); invalidate(false); }, { passive: false });
@@ -950,19 +1189,124 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     $('#stage').addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
-  let lastImg = null;
-  function loadImage(f) {
-    if (!f) return;
-    const url = URL.createObjectURL(f), img = new Image();
-    img.onload = () => { URL.revokeObjectURL(url); lastImg = { img, name: f.name }; useImage(); };
-    img.onerror = () => { URL.revokeObjectURL(url); message(`Could not read "${f.name}" as an image.`); };
-    img.src = url;
+  /* ---- images and channel roles ---- */
+  const imgs = [];      // { name, dec, width, height, max, ch } (ch = R,G,B,A,H,S,V planes)
+  const roleSel = {};
+  let manifest = null;
+  const KEYS = { elevation: [/height|elev|alt|dem/i, 'V'], zone: [/zone|biome|node|region|countr/i, 'H'], edge: [/edge|border/i, 'H'], path: [/path|road/i, 'V'], vegetation: [/veg|tree|forest/i, 'V'], poi: [/poi/i, 'V'] };
+
+  function buildRoles() {
+    const box = $('#roles');
+    for (const [role] of E.ROLES) {
+      const row = document.createElement('label'); row.className = 'role';
+      row.innerHTML = `<span>${role}</span><select id="r-${role}"></select>`;
+      box.appendChild(row);
+      roleSel[role] = row.querySelector('select');
+      roleSel[role].addEventListener('change', rebuildPack);
+      if (role === 'zone') {
+        const mn = document.createElement('label'); mn.className = 'role';
+        mn.innerHTML = '<span>maxnode</span><input type="number" id="maxnode" min="1" step="1" placeholder="blank = deduce hue centres">';
+        box.appendChild(mn);
+        mn.querySelector('input').addEventListener('change', rebuildPack);
+      }
+    }
+    $('#flipy').addEventListener('change', () => {
+      for (const im of imgs) Object.assign(im, E.imageChannels(im.dec, $('#flipy').checked));
+      rebuildPack();
+    });
+    $('#saveManifest').addEventListener('click', saveManifest);
   }
-  function useImage() {
-    const pack = E.imagePack(lastImg.img, $('#chan').value, 96, lastImg.name);
-    setPack('image', 'Image: ' + lastImg.name, pack);
-    message(pack.warnings.join(' '));
-    $('#src').value = 'image'; st.pack = 'image'; invalidate(true);
+
+  function fillRoleOptions(values) {
+    for (const [role] of E.ROLES) {
+      const sel = roleSel[role];
+      sel.innerHTML = '<option value="">— none —</option>' + imgs.map((im, k) =>
+        `<optgroup label="${im.name.replace(/[<&"]/g, '')}">` + E.CHANNELS.map((c) => `<option value="${k}:${c}">${im.name.replace(/[<&"]/g, '')} · ${c}</option>`).join('') + '</optgroup>').join('');
+      sel.value = values[role] || '';
+    }
+  }
+  function defaultRoles(list) {
+    const r = {};
+    for (const [role, [re, ch]] of Object.entries(KEYS)) { const k = list.findIndex((im) => re.test(im.name)); if (k >= 0) r[role] = `${k}:${ch}`; }
+    if (!r.elevation && list.length === 1) r.elevation = '0:V';
+    return r;
+  }
+  const maxnode = () => { const v = parseInt($('#maxnode').value, 10); return v > 0 ? v : 0; };
+  function currentRoles() {
+    const roles = {};
+    for (const [role] of E.ROLES) { const v = roleSel[role].value; if (v) { const [i, c] = v.split(':'); roles[role] = { image: +i, channel: c }; } }
+    return roles;
+  }
+
+  async function loadFiles(list) {
+    const files = [...list]; if (!files.length) return;
+    message('');
+    try {
+      const png = files.filter((f) => /\.png$/i.test(f.name)), js = files.filter((f) => /\.json$/i.test(f.name));
+      if (!png.length) throw new Error('Select at least one PNG file.');
+      const flip = $('#flipy').checked, next = [];
+      let man = null;
+      if (js.length) { try { man = E.parseManifest(JSON.parse(await js[0].text())); } catch (e) { throw new Error(`${js[0].name}: ${e.message}`); } }
+      const useFlip = man ? man.flipY : flip;
+      for (const f of png) {
+        let dec;
+        try { dec = await E.decodePng(await f.arrayBuffer()); } catch (e) { throw new Error(`${f.name}: ${e.message}`); }
+        next.push(Object.assign({ name: f.name, dec }, E.imageChannels(dec, useFlip)));
+      }
+      let values = {};
+      if (man) {
+        for (const [role, r] of Object.entries(man.roles)) {
+          const k = next.findIndex((im) => im.name.toLowerCase() === r.image.toLowerCase());
+          if (k < 0) throw new Error(`Manifest role "${role}" uses ${r.image}, which is not among the selected files.`);
+          values[role] = `${k}:${r.channel}`;
+        }
+      } else values = defaultRoles(next);
+      imgs.splice(0, imgs.length, ...next); // everything decoded and consistent: replace the previous state
+      manifest = man;
+      $('#flipy').checked = useFlip;
+      $('#maxnode').value = man && man.maxnode ? man.maxnode : '';
+      $('#roles').hidden = false; $('#rolesBtns').hidden = false;
+      fillRoleOptions(values);
+      rebuildPack(man && man.notes.length ? man.notes.join(' ') : '');
+    } catch (e) { message(e.message); }
+  }
+
+  function describe(pack) {
+    let mn = Infinity, mx = -Infinity;
+    for (const v of pack.elevation) { if (v < mn) mn = v; if (v > mx) mx = v; }
+    const out = [`${pack.width}×${pack.height} tiles, native size · elevation ${mn.toFixed(0)}–${mx.toFixed(0)} (channel × ${E.ELEVATION_SCALE})`];
+    for (const role of ['zone', 'edge']) {
+      const f = pack.fields[role]; if (!f) continue;
+      const i = f.info, a = i.ambiguous.total;
+      out.push(`<b>${role}</b>: ${i.classes.length} ids (${i.mode === 'maxnode' ? 'id = round(H·' + (i.maxnode + 1) + ')' : i.mode === 'deduced' ? 'hue centres deduced' : 'raw values'}) · ${i.outside} px outside · ${a} ambiguous`);
+      out.push(i.classes.map((c) => `${c.label || c.id}:${c.count}`).join(' · '));
+    }
+    for (const role of ['path', 'vegetation', 'poi']) {
+      const f = pack.fields[role]; if (!f) continue;
+      let n = 0; for (const v of f.values) if (v > 0) n++;
+      out.push(`<b>${role}</b>: ${n} tiles > 0`);
+    }
+    return out.join('<br>');
+  }
+
+  function rebuildPack(note) {
+    const roles = currentRoles();
+    try {
+      const pack = E.packFromRoles(imgs, roles, { name: imgs.map((i) => i.name).join(' + '), maxnode: maxnode(), markers: manifest ? manifest.markers : [] });
+      setPack('image', 'Images: ' + pack.name, pack);
+      message([typeof note === 'string' ? note : '', ...pack.warnings].filter(Boolean).join(' '));
+      $('#rolesInfo').innerHTML = describe(pack); $('#rolesInfo').hidden = false;
+      $('#src').value = 'image'; st.pack = 'image'; invalidate(true);
+    } catch (e) { message(e.message); $('#rolesInfo').hidden = true; }
+  }
+
+  function saveManifest() {
+    const roles = {};
+    for (const [role, r] of Object.entries(currentRoles())) roles[role] = { image: imgs[r.image].name, channel: r.channel };
+    const json = E.buildManifest({ name: imgs.map((i) => i.name).join(' + '), flipY: $('#flipy').checked, maxnode: maxnode(), roles, markers: manifest ? manifest.markers : [] });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(json, null, 2) + '\n'], { type: 'application/json' }));
+    a.download = 'pack.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
   function invalidate(reshape) { if (reshape) S = null; if (!raf) raf = requestAnimationFrame(draw); }
@@ -991,7 +1335,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     $('#mode').textContent = st.mode === 'compare' ? 'Compare: on' : 'Compare: off';
     $('#mode').classList.toggle('on', st.mode === 'compare');
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.W}×${S.H} · ${S.maxFine + 1} levels · ${S.passes.length} stair passes · ${rs.length} walkable regions, largest ${(big / tot * 100).toFixed(0)}%`;
+    const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.W}×${S.H} · ${S.maxFine + 1} levels${zn} · ${S.passes.length} stair passes · ${rs.length} walkable regions, largest ${(big / tot * 100).toFixed(0)}%`;
   }
 
   function init() {
@@ -999,7 +1344,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { P, O, st, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { P, O, st, packs, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});
