@@ -49,7 +49,7 @@ const { open } = require('./common');
         for (const st of S.stairs) if (st.ramp) for (const s of st.steps) for (const t of s.tiles) ramps.set(t, st);
         let hit = 0, tot = 0;
         for (const i of route) {
-          const h = (ramps.has(i) ? window.EVO.rampHeight(ramps.get(i), i % S.W + 0.5, ((i / S.W) | 0) + 0.5) : S.levelH[S.fine[i]]) + 0.06, p = cam.p(i % S.W + 0.5, ((i / S.W) | 0) + 0.5, h);
+          const h = (ramps.has(i) ? window.EVO.rampHeight(ramps.get(i), i % S.W + 0.5, ((i / S.W) | 0) + 0.5, i) : S.levelH[S.fine[i]]) + 0.06, p = cam.p(i % S.W + 0.5, ((i / S.W) | 0) + 0.5, h);
           if (p[0] < 3 || p[1] < 3 || p[0] > cv.clientWidth - 3 || p[1] > cv.clientHeight - 3) continue;
           tot++; const d = ctx.getImageData(Math.round(p[0] * dpr) - 1, Math.round(p[1] * dpr) - 1, 3, 3).data; let f = false;
           for (let k = 0; k < 36; k += 4) if (Math.abs(d[k] - 255) + Math.abs(d[k + 1] - 176) + Math.abs(d[k + 2] - 32) < 60) f = true;

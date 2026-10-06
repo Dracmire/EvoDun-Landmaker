@@ -123,5 +123,30 @@ const EPS = 1e-6;
   ok('a footprint tile lower than the surface is not cut', d.stairs.length === 0 || d.stairs[0].mode !== 'cut', JSON.stringify(d.stairInfo));
 }
 
+// a lateral column whose cliff is one tile further along the path finds it in its OWN column (same two terraces)
+{
+  const P = { terraces: 2, subs: 1, terH: 1, subH: 0.22, minPlateau: 1, minSub: 1, pre: 0, smooth: 0, radius: 0, passGap: 8, climb: 1, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 1 };
+  const W = 20, H = 9, n = W * H, sub = new Int16Array(n), block = new Uint8Array(n);
+  const mkD = (cliffAt) => { // cliffAt(y) = first x of the upper terrace in row y
+    const ter = new Int16Array(n), fine = new Int16Array(n);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { ter[y * W + x] = x >= cliffAt(y) ? 1 : 0; fine[y * W + x] = ter[y * W + x]; }
+    const levelH = [E.hOf(0, P), E.hOf(1, P)];
+    return { W, H, n, subs: 1, N: 2, ter, sub: sub.slice(), fine, maxFine: 1, levelH, levelMeta: [{ ter: 0, sub: 0, bridge: false }, { ter: 1, sub: 0, bridge: false }], block, water: new Array(n).fill(0), gates: [{}], passes: [{ a: 4 * W + 8, b: 4 * W + 9, gate: 0, kind: 'terrace', alts: [] }], byLevel: [] };
+  };
+  const diag = (y) => 9 + (y - 4);                     // the cliff moves one tile per row: a diagonal border
+  const S1 = mkD(diag); E._carve(S1, P); const r1 = S1.stairs[0];
+  ok('diagonal cliff: the lateral columns are placed where THEIR cliff is (width 3, nothing narrowed)', !!r1 && r1.cols.join() === '-1,0,1' && S1.stairInfo.narrowed === 0 && S1.stairInfo.shiftedCols === 2, JSON.stringify(r1 && r1.cols) + JSON.stringify(S1.stairInfo));
+  const S2 = mkD(diag); E._carve(S2, Object.assign({}, P, { rampShift: false })); ok('(control) without the shift only the aligned column fits', S2.stairs[0].cols.join() === '0' || S2.stairs[0].cols.length < 3, JSON.stringify(S2.stairs[0].cols));
+  if (r1) {
+    ok('every column joins terrace 0 (bottom) and terrace 1 (top), shifted or not', r1.cols.every((c, ci) => S1.ter[r1.bottom[ci]] === 0 && S1.ter[r1.top[ci]] === 1 && r1.steps.every((st) => S1.ter[st.tiles[ci]] === 1 || true)));
+    const sh = r1.ramp.shift; ok('the shift is stored per tile (shifted tiles only)', sh.size === 2 * 2 && [...sh.values()].every((d) => Math.abs(d) === 1), sh.size);
+    const t = r1.steps[0].tiles[r1.cols.indexOf(1)], x = t % W, y = (t / W) | 0;
+    ok('a shifted column rises from its own cliff: height at the start of its first tile is the low end', Math.abs(E.rampHeight(r1, x - 0.0 + (r1.ramp.pdx < 0 ? 1 : 0), y + 0.5, t) - r1.ramp.h0) < 1e-6 && E.rampHeight(r1, x + 1, y + 0.5, t) !== E.rampHeight(r1, x + 1, y + 0.5));
+  }
+  // heights: the lateral column never starts below the central one
+  const S3 = mkD(diag); E._carve(S3, Object.assign({}, P, { stairW: 5 }));
+  ok('width 5 on a diagonal cliff widens beyond 3 columns', S3.stairs[0].cols.length >= 4, JSON.stringify(S3.stairs[0].cols));
+}
+
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

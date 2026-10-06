@@ -52,7 +52,7 @@ const PAGE = async ({ nPer, px, only, techs, spread, terraces, width }) => {
     const V = (x, y, h) => { const p = cam.p(x, y, h); return [p[0], p[1], zOf(x, y, h)]; };
     const quad = (a, b, c, d, o) => { tri(a, b, c, o); tri(a, c, d, o); };
     const hOf = (j) => S.levelH[S.fine[j]];
-    const corner = (j, x, y) => (ST.has(j) ? E.rampHeight(ST.get(j), x, y) : hOf(j));
+    const corner = (j, x, y) => (ST.has(j) ? E.rampHeight(ST.get(j), x, y, j) : hOf(j));
     const r = 1e9, cx = rec.top[0] % W, cyy = (rec.top[0] / W) | 0;
     for (let y = Math.max(0, cyy - r); y <= Math.min(H - 1, cyy + r); y++) for (let x = Math.max(0, cx - r); x <= Math.min(W - 1, cx + r); x++) {
       const i = y * W + x, ramp = ST.has(i) ? 1 : 2;

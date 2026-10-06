@@ -368,9 +368,11 @@
      used become levels), so every technique gets the same geometry from its normal level pipeline. */
   /* Ramp surface height at ground point (x, y) (tile units): linear along the path from the gate edge (s = 0) to the far end
      (s = len); constant across the width. r = a stair record with `ramp`. */
-  E.rampHeight = (r, x, y) => {
-    const R = r.ramp, t = Math.max(0, Math.min(R.len, (x - R.mx) * R.pdx + (y - R.my) * R.pdy));
-    return R.h0 + (R.h1 - R.h0) * t / R.len;
+  E.rampHeight = (r, x, y, t) => {
+    const R = r.ramp; let s = (x - R.mx) * R.pdx + (y - R.my) * R.pdy;
+    if (t !== undefined && R.shift) { const d = R.shift.get(t); if (d) s -= d; } // a lateral column whose cliff is `d` tiles further along the path
+    s = Math.max(0, Math.min(R.len, s));
+    return R.h0 + (R.h1 - R.h0) * s / R.len;
   };
   const MAX_TREADS = 6, STAIR_COLS = { 1: [0], 2: [0, 1], 3: [-1, 0, 1] };
   function carveStairs(S, P) {
@@ -391,7 +393,7 @@
     const pickDown = (h) => { for (let k = 0; k < cands.length; k++) if (cands[k].h >= h - reach) return cands[k].h < h - EPS ? cands[k] : null; return null; };
     const hT = new Float64Array(n); for (let i = 0; i < n; i++) hT[i] = S.levelH[S.fine[i]];
     const used = new Uint8Array(n), carved = new Uint8Array(n), carve = new Map(), stairs = [];
-    let dropped = 0, narrowed = 0, fills = 0;
+    let dropped = 0, narrowed = 0, fills = 0, shiftedCols = 0;
     const idx = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x);
     const okTile = (i, terr) => i >= 0 && !S.block[i] && !used[i] && S.ter[i] === terr;
 
@@ -413,24 +415,29 @@
       const hFix = hT[fixed(0)], hEnd = hT[e], hi = cut ? hEnd : hFix, lo = cut ? hFix : hEnd;
       if (hi - lo <= EPS) return null;
       const h0 = cut ? lo : hi, h1 = cut ? hi : lo, hAt = (t) => h0 + (h1 - h0) * t / len;
-      // a column is valid when it lies on the SAME border between the two terraces: fixed end on the lower terrace, path on the
-      // upper one, and (cut: not lower than the surface / built up: not higher)
-      const valid = (c) => {
-        if (!okTile(fixed(c), terFix)) return false;
-        for (let k = 0; k < len; k++) { const t = col(c, k); if (!okTile(t, terPath) || (cut ? hT[t] < hAt(k + 1) - EPS : hT[t] > hAt(k + 1) + EPS)) return false; }
-        return okTile(col(c, len), terPath);
+      // A column is valid when it lies on the SAME border between the two terraces: fixed end on the lower one, path on the upper one,
+      // and (cut: not lower than the surface / built up: not higher). A lateral column may find the cliff of ITS OWN column up to `depth`
+      // tiles further along (d > 0) or back (d < 0) the path: it is then placed there (shift d), always between the same two terraces.
+      const validAt = (c, d) => {
+        if (!okTile(col(c, d - 1), terFix)) return false;
+        for (let k = 0; k < len; k++) { const t = col(c, d + k); if (!okTile(t, terPath) || (cut ? hT[t] < hAt(k + 1) - EPS : hT[t] > hAt(k + 1) + EPS)) return false; }
+        return okTile(col(c, d + len), terPath);
       };
-      if (!valid(0)) return null;
-      let lo2 = 0, hi2 = 0; const want = ORDER.slice(0, rwidth);   // widen from the centre outwards; a column that does not fit stops its side
-      for (const c of want) { if (c === 0) continue; if (c > 0 ? c === hi2 + 1 : c === lo2 - 1) { if (valid(c)) { if (c > 0) hi2 = c; else lo2 = c; } } }
+      const SHIFTS = [0]; for (let d = 1; d <= depth; d++) SHIFTS.push(d, -d);
+      const shiftOf = (c) => { for (const d of (c === 0 ? [0] : SHIFTS)) if (validAt(c, d)) return d; return null; };
+      if (shiftOf(0) === null) return null;
+      let lo2 = 0, hi2 = 0; const shifts = new Map([[0, 0]]), want = ORDER.slice(0, rwidth);   // widen from the centre outwards; a column that does not fit stops its side
+      for (const c of want) { if (c === 0) continue; if (c > 0 ? c === hi2 + 1 : c === lo2 - 1) { const d = P.rampShift === false ? (validAt(c, 0) ? 0 : null) : shiftOf(c); if (d !== null) { shifts.set(c, d); if (c > 0) hi2 = c; else lo2 = c; } } }
       const cols = []; for (let c = lo2; c <= hi2; c++) cols.push(c);
       const rec = { mode, dir: [dx, dy], cols, requested: rwidth, narrowed: cols.length < rwidth, site: pass, bottom: [], top: [], steps: [],
-        ramp: { mx: (ax + bx) / 2 + 0.5, my: (ay + by) / 2 + 0.5, pdx: sd * dx, pdy: sd * dy, len, h0, h1 }, level: S.fine[pass.a] };
+        ramp: { mx: (ax + bx) / 2 + 0.5, my: (ay + by) / 2 + 0.5, pdx: sd * dx, pdy: sd * dy, len, h0, h1, shift: new Map() }, level: S.fine[pass.a] };
       for (let k = 0; k < len; k++) rec.steps.push({ cand: null, tiles: [] });
       for (const c of cols) {
-        rec.bottom.push(cut ? fixed(c) : col(c, len)); rec.top.push(cut ? col(c, len) : fixed(c));
-        for (let k = 0; k < len; k++) rec.steps[cut ? k : len - 1 - k].tiles.push(col(c, k));
+        const d = shifts.get(c);
+        rec.bottom.push(cut ? col(c, d - 1) : col(c, d + len)); rec.top.push(cut ? col(c, d + len) : col(c, d - 1));
+        for (let k = 0; k < len; k++) { const t = col(c, d + k); rec.steps[cut ? k : len - 1 - k].tiles.push(t); if (d) rec.ramp.shift.set(t, d); }
       }
+      rec.shifted = cols.filter((c) => shifts.get(c) !== 0).length;
       return rec;
     };
     const plan = (pass, mode) => {
@@ -482,6 +489,7 @@
       if (!rec) { dropped++; continue; }
       if (rec.mode === 'fill') fills++;
       if (rec.narrowed) narrowed++;
+      shiftedCols += rec.shifted || 0;
       for (let ci = 0; ci < rec.cols.length; ci++) { used[rec.bottom[ci]] = 1; used[rec.top[ci]] = 1; }
       for (const st of rec.steps) for (const t of st.tiles) { used[t] = 1; carved[t] = 1; if (st.cand) carve.set(t, st.cand); }
       stairs.push(rec);
@@ -491,7 +499,7 @@
       S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
       for (let i = 0; i < n; i++) S.byLevel[S.fine[i]].push(i);
     }
-    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, width: P.stairStyle !== 0 ? rwidth : width, style: ramp ? 'ramp' : 'steps' };
+    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, shiftedCols, width: P.stairStyle !== 0 ? rwidth : width, style: ramp ? 'ramp' : 'steps' };
     if (!carve.size) return;
     // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height
     const bridges = [...new Set([...carve.values()].filter((c) => c.base < 0))].sort((p, q) => p.h - q.h);
@@ -510,7 +518,9 @@
     for (let i = 0; i < n; i++) S.byLevel[S.fine[i]].push(i);
   }
 
+  const adj4For = (W) => (a, b) => (Math.abs(a - b) === W || (Math.abs(a - b) === 1 && ((a / W) | 0) === ((b / W) | 0)));
   function computeRegions(S, P) {
+    const adj4 = adj4For(S.W);
     const { W, H, ter, sub } = S, water = S.block, n = S.n, carved = S.carved;
     const par = new Int32Array(n).map((_, i) => i);
     const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
@@ -530,7 +540,7 @@
       let prev = st.bottom[ci];
       for (const step of st.steps) { uni(prev, step.tiles[ci]); prev = step.tiles[ci]; }
       uni(prev, st.top[ci]);
-      if (ci > 0) for (const step of st.steps) uni(step.tiles[ci - 1], step.tiles[ci]);
+      if (ci > 0) for (const step of st.steps) if (adj4(step.tiles[ci - 1], step.tiles[ci])) uni(step.tiles[ci - 1], step.tiles[ci]); // columns shifted along the path are not neighbours
     }
     const idOf = new Map(), region = new Int32Array(n).fill(-1), sizes = [];
     for (let i = 0; i < n; i++) {
@@ -545,12 +555,13 @@
   /* ---- walking graph: the same edges as computeRegions (so a route exists exactly when two tiles share a region) ---- */
   function walkGraph(S, P) {
     if (S._walk) return S._walk;
+    const adj4 = adj4For(S.W);
     const extra = new Map(), link = (a, b) => { (extra.get(a) || extra.set(a, []).get(a)).push(b); (extra.get(b) || extra.set(b, []).get(b)).push(a); };
     for (const st of S.stairs) for (let ci = 0; ci < st.cols.length; ci++) {
       let prev = st.bottom[ci];
       for (const step of st.steps) { link(prev, step.tiles[ci]); prev = step.tiles[ci]; }
       link(prev, st.top[ci]);
-      if (ci > 0) for (const step of st.steps) link(step.tiles[ci - 1], step.tiles[ci]);
+      if (ci > 0) for (const step of st.steps) if (adj4(step.tiles[ci - 1], step.tiles[ci])) link(step.tiles[ci - 1], step.tiles[ci]);
     }
     const W = S.W, H = S.H, out = [];
     const neighbors = (i) => {
