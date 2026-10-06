@@ -1,8 +1,8 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, micro: 3, terH: 1.0, microH: 0.22, minPlateau: 5, minMicro: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, margin: 24 };
-  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, passes: false, zones: false, edges: false, masks: false };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 2, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 3, margin: 24 };
+  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
     { id: 'low', label: 'Low 28°', yaw: 0, pitch: 28 },
@@ -11,15 +11,16 @@
     { id: 'top', label: 'Top 80°', yaw: 0, pitch: 80 }
   ];
   const SLIDERS = [
-    ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['micro', 'Micro steps / terrace', 1, 3, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['microH', 'Micro step height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minMicro', 'Min micro patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
+    ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
-    ['Passes', [['passGap', 'Stair spacing', 3, 20, 1]]],
+    ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['stairStyle', 'Style: 0 steps · 1 ramp', 0, 1, 1], ['rampSlope', 'Ramp max slope (height per tile)', 0.15, 1, 0.05], ['rampMin', 'Ramp min length, tiles', 1, 6, 1], ['tread', 'Tread rise, sub-terraces (steps only)', 1, 5, 1], ['stairW', 'Stair width, tiles (0 = none)', 0, 3, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
-  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
+  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
   const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field']];
 
   const packs = {};
+  const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
   const st = { pack: 'snake', mode: 'compare', tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0;
 
@@ -71,6 +72,9 @@
     $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
     for (const id of cropIds) $('#' + id).addEventListener('change', () => { refreshMessage(); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadFiles(e.target.files));
+    for (const [id, k] of [['m-stake', 'stake'], ['m-obj', 'obj'], ['m-rm', 'rm']]) document.getElementById(id).addEventListener('click', () => setIncMode(inc.mode === k ? null : k));
+    document.getElementById('m-clear').addEventListener('click', () => { inc.stake = null; inc.objectives = []; setIncMode(null); invalidate(false); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && inc.mode) setIncMode(null); });
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
     window.addEventListener('resize', () => invalidate(false));
     $('#stage').addEventListener('wheel', (e) => { e.preventDefault(); st.zoom = Math.max(0.5, Math.min(4, st.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); invalidate(false); }, { passive: false });
@@ -83,9 +87,64 @@
       else { st.yawOff = Math.max(-20, Math.min(20, drag.yo + dx * 0.15)); st.pitchOff = Math.max(-15, Math.min(15, drag.po - dy * 0.15)); }
       invalidate(false);
     });
-    $('#stage').addEventListener('pointerup', () => { drag = null; });
+    $('#stage').addEventListener('pointerup', (e) => {
+      const moved = drag ? Math.hypot(e.clientX - drag.x, e.clientY - drag.y) : 99, was = drag; drag = null;
+      if (inc.mode && was && !was.shift && e.button === 0 && moved < 4) clickMap(e);
+    });
     $('#stage').addEventListener('dblclick', () => $('#reset').click());
     $('#stage').addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  /* ---- incursion: stake, objectives, routes ---- */
+  const incIdx = (m) => { // a mark (tile of the whole map) as a tile of the built window, or -1 when it is outside the window or the slice
+    const x = m.x - S.ox, y = m.y - S.oy; if (x < 0 || y < 0 || x >= S.W || y >= S.H) return -1;
+    const i = y * S.W + x; return S.block[i] ? -1 : i;
+  };
+  const regionName = (r) => `R${r + 1}`;
+  function computeIncursion() {
+    const out = { stake: null, objectives: [], lines: [] };
+    if (!S) return out;
+    const stake = inc.stake ? incIdx(inc.stake) : -1;
+    if (inc.stake) { if (stake >= 0) out.stake = stake; else out.lines.push('Stake: outside the slice (kept in the pack, not shown).'); }
+    inc.objectives.forEach((o, k) => {
+      const i = incIdx(o), name = o.label || `Objective ${k + 1}`;
+      if (i < 0) { out.lines.push(`${name}: outside the slice (kept in the pack, not shown).`); return; }
+      const ob = { i, route: null }; out.objectives.push(ob);
+      if (stake < 0) { out.lines.push(`${name} at (${o.x}, ${o.y}): no stake yet.`); return; }
+      ob.route = E.route(S, P, i, stake);
+      if (ob.route) { out.lines.push(`${name}: route of ${ob.route.length} tiles to the stake.`); return; }
+      const g = E.regionGap(S, i, stake), xy = (t) => `(${S.ox + (t % S.W)}, ${S.oy + ((t / S.W) | 0)})`;
+      out.lines.push(`${name}: <b>no route</b>. Region ${regionName(g.ra)} (${g.sizeA} tiles) is not connected to the stake region ${regionName(g.rb)} (${g.sizeB} tiles)` + (g.dist >= 0 ? `; closest approach ${g.dist} tile${g.dist === 1 ? '' : 's'} between ${xy(g.from)} and ${xy(g.to)}` : '') + (g.droppedGates ? `; ${g.droppedGates} gate${g.droppedGates === 1 ? '' : 's'} touch${g.droppedGates === 1 ? 'es' : ''} both without a ramp.` : '; no gate touches both.'));
+    });
+    return out;
+  }
+  function setIncMode(m) {
+    inc.mode = m;
+    for (const [id, k] of [['m-stake', 'stake'], ['m-obj', 'obj'], ['m-rm', 'rm']]) { const b = document.getElementById(id); if (b) b.classList.toggle('on', m === k); }
+    const stage = document.getElementById('stage'); if (stage) stage.classList.toggle('picking', !!m);
+  }
+  function clickMap(e) {
+    const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
+    for (let k = 0; k < figs.length; k++) {
+      const cv = figs[k].querySelector('canvas'), r = cv.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
+      const hit = E.pickTile(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top);
+      return placeMark(hit.tile);
+    }
+  }
+  function placeMark(tile) {
+    const note = (t) => { $('#incInfo').innerHTML = t; };
+    if (tile < 0) return note('Nothing under the cursor.');
+    const x = S.ox + (tile % S.W), y = S.oy + ((tile / S.W) | 0);
+    if (inc.mode === 'rm') {
+      const near = (m) => Math.hypot(m.x - x, m.y - y) <= 1.5;
+      if (inc.stake && near(inc.stake)) inc.stake = null; else { const k = inc.objectives.findIndex(near); if (k >= 0) inc.objectives.splice(k, 1); else return note('No mark there.'); }
+    } else {
+      if (S.slice && !S.slice[tile]) return note(`(${x}, ${y}) is outside the slice: movement is limited to the slice.`);
+      if (S.block[tile]) return note(`(${x}, ${y}) is not walkable (water).`);
+      if (inc.mode === 'stake') inc.stake = { x, y }; else inc.objectives.push({ x, y });
+    }
+    invalidate(false);
   }
 
   /* ---- slice ---- */
@@ -126,7 +185,11 @@
     $('#wholeMap').classList.toggle('on', sliceSel.whole);
   }
   function refreshMessage() { const p = packs[st.pack] && packs[st.pack].pack; message(p && p.warnings ? p.warnings.join(' ') : ''); }
-  function onPackChanged() { buildChips(packs[st.pack].pack); }
+  function onPackChanged() {
+    buildChips(packs[st.pack].pack);
+    inc.stake = null; inc.objectives = []; setIncMode(null);
+    if (st.pack === 'image' && manifest) { inc.stake = manifest.stake ? Object.assign({}, manifest.stake) : null; inc.objectives = manifest.objectives.map((o) => Object.assign({}, o)); }
+  }
 
   /* ---- images and channel roles ---- */
   const imgs = [];      // { name, dec, width, height, max, ch } (ch = R,G,B,A,H,S,V planes)
@@ -252,7 +315,7 @@
   function saveManifest() {
     const roles = {};
     for (const [role, r] of Object.entries(currentRoles())) roles[role] = { image: imgs[r.image].name, channel: r.channel };
-    const json = E.buildManifest({ name: imgs.map((i) => i.name).join(' + '), flipY: $('#flipy').checked, maxnode: maxnode(), roles, markers: manifest ? manifest.markers : [], slice: manifestSlice() });
+    const json = E.buildManifest({ name: imgs.map((i) => i.name).join(' + '), flipY: $('#flipy').checked, maxnode: maxnode(), roles, markers: manifest ? manifest.markers : [], slice: manifestSlice(), stake: inc.stake, objectives: inc.objectives });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(json, null, 2) + '\n'], { type: 'application/json' }));
     a.download = 'pack.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -277,6 +340,8 @@
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
     }
+    const incursion = computeIncursion(); O.incursion = incursion;
+    $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');
     const techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
     while (stage.children.length < techs.length) {
@@ -286,18 +351,25 @@
     techs.forEach((t, i) => {
       const f = stage.children[i], cv = f.querySelector('canvas');
       const r = E.render(cv, S, P, t, view(), O);
-      f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ramps} ramps · ${r.ms.toFixed(0)} ms</span>`;
+      f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ms.toFixed(0)} ms</span>`;
     });
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
     document.querySelectorAll('#techs button').forEach((b) => b.classList.toggle('on', st.mode === 'single' && b.dataset.id === st.tech));
     $('#mode').textContent = st.mode === 'compare' ? 'Compare: on' : 'Compare: off';
     $('#mode').classList.toggle('on', st.mode === 'compare');
+    const eff = E.subHeight(P), note = $('#subHnote');
+    note.hidden = eff >= P.subH - 1e-9;
+    note.textContent = `Sub-terrace height limited to ${eff.toFixed(3)} (set ${P.subH}) so the gap to the next terrace stays above the climb limit.`;
+    const surv = {}; for (const t of techs) if (t !== 'box') surv[t] = E.stairSurvival(S, P, t);
+    const sv = (t) => (surv[t] ? `${(surv[t].coverage * 100).toFixed(1)}%` + (surv[t].lost ? `, ${surv[t].lost}/${surv[t].n} lost` : '') + (surv[t].degraded ? `, ${surv[t].degraded} degraded` : '') : '–');
+    const sinf = S.stairInfo, stairText = `${sinf.gates} gates · ${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · stair coverage A ${sv('A')} · B ${sv('B')}`;
+    const bi = S.borderInfo, borderText = bi ? ` · slice border faces: ${bi.barrier} barrier (red) · ${bi.pass} pass (cyan) · ${bi.none} unmarked (yellow) · ${bi.mapEdge} map edge (white)` : '';
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
     $('#busy').hidden = true;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${S.passes.length} stair passes · ${rs.length} walkable regions in the ${si ? 'slice' : 'map'}, largest ${(big / tot * 100).toFixed(0)}%`;
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%`;
   }
 
   function init() {
@@ -305,7 +377,7 @@
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { P, O, st, packs, sliceSel, S: () => S, sliceSpec, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

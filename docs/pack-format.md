@@ -3,6 +3,18 @@
 ## 0.1 (still loadable)
 `{ format, name, width, height, elevation[], masks{}, markers[] }`: row-major arrays, x east, y south.
 
+## 0.3 (0.2 + stake and objectives)
+Same as 0.2 (0.2 is still read), with two optional members written by "Save pack.json":
+
+```json
+{ "format": "evodun-pack/0.3", "...": "as 0.2",
+  "stake": { "x": 96, "y": 117 },
+  "objectives": [ { "x": 117, "y": 158, "label": "tower" }, { "x": 40, "y": 20 } ] }
+```
+- `stake`: the entry point of the incursion; `objectives`: resistance points. Coordinates are tiles of the WHOLE map (not
+  of the slice window), integers >= 0; `label` is optional. The viewer draws the shortest walkable route from each
+  objective to the stake inside the slice; marks outside the slice are kept but not shown.
+
 ## 0.2 (channels as fields)
 A pack is a small JSON manifest plus PNG images that are selected together in the viewer. Images are decoded
 by our own decoder (`src/png.js`): raw samples, no colour management, no alpha premultiplication, 8 or 16 bit,
@@ -28,7 +40,7 @@ non-interlaced only. 1 pixel = 1 tile, native resolution (no resampling). All im
 - **flipY**: Unity writes Y up; flips every image of the pack equally.
 - **Roles** (one channel each):
   - `elevation` (numeric): elevation in height units = channel x 1000 (baked convention: grey = height / 1000).
-    Terraces and micro steps are always derived from it.
+    Terraces and sub-terraces are always derived from it (micro steps are a different, reserved concept).
   - `zone`, `edge` (categorical): ids, 0 = outside.
     - Channel `H`: V = 0 is outside. With `maxnode`, `id = round(H * (maxnode + 1))` (ids 1..maxnode). Without
       it the hues present are clustered (gap > 4 degrees) and each pixel goes to the nearest centre (ids 1..K in

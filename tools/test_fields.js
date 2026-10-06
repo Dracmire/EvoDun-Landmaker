@@ -180,5 +180,16 @@ const zoneImg = (extra) => rgba(W, H, (x, y) => {
     msg = ''; try { E.parseManifest(bad); } catch (e) { msg = e.message; } ok('manifest rejects ' + JSON.stringify(bad).slice(0, 50), msg.startsWith('Manifest'), msg);
   }
 }
+// stake and objectives in the manifest (evodun-pack/0.3)
+{
+  const m = E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, stake: { x: 12, y: 30 }, objectives: [{ x: 5, y: 6, label: 'tower' }, { x: 7, y: 8 }] });
+  ok('manifest 0.3: stake and objectives parsed', m.stake.x === 12 && m.stake.y === 30 && m.objectives.length === 2 && m.objectives[0].label === 'tower' && m.objectives[1].label === undefined);
+  const b = E.buildManifest({ name: 'n', roles: {}, stake: m.stake, objectives: m.objectives });
+  ok('manifest build: format 0.3 and a round trip keeps them', b.format === 'evodun-pack/0.3' && JSON.stringify(E.parseManifest(b).objectives) === JSON.stringify(m.objectives) && E.parseManifest(b).stake.y === 30);
+  ok('manifest 0.2 is still read, without stake and objectives', (() => { const o = E.parseManifest({ format: 'evodun-pack/0.2', roles: {} }); return o.stake === null && o.objectives.length === 0; })());
+  ok('no stake / objectives: not written', (() => { const o = E.buildManifest({ name: 'n', roles: {} }); return !('stake' in o) && !('objectives' in o); })());
+  let thrown = 0; for (const bad of [{ stake: { x: 1.5, y: 2 } }, { stake: { x: -1, y: 2 } }, { stake: 'a' }, { objectives: [{ x: 1 }] }, { objectives: {} }]) { try { E.parseManifest(Object.assign({ format: 'evodun-pack/0.3', roles: {} }, bad)); } catch (e) { thrown++; } }
+  ok('manifest: bad stake / objectives are rejected', thrown === 5, thrown);
+}
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

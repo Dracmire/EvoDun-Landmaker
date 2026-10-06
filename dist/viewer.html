@@ -22,6 +22,8 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0}
 #bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
 #info{color:var(--mut);padding:6px 12px;border-bottom:1px solid var(--line);font-size:12px}
 #info b{color:var(--fg)}
+#stage.picking{cursor:crosshair}
+#incursion button.on{background:var(--acc);color:#111}
 #stage{flex:1;min-height:0;display:grid;gap:1px;background:var(--line);touch-action:none;cursor:grab}
 #stage[data-n="1"]{grid-template-columns:1fr}
 #stage[data-n="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -71,7 +73,13 @@ figcaption span{color:var(--mut);font-size:11px}
    <div class="crop"><input type="number" id="cx0" min="0" placeholder="x0"><input type="number" id="cy0" min="0" placeholder="y0"><input type="number" id="cx1" min="0" placeholder="x1"><input type="number" id="cy1" min="0" placeholder="y1"></div>
    <div class="hint" id="sliceInfo"></div>
   </div>
+  <div id="incursion"><h3>Incursion</h3>
+   <div class="row"><button id="m-stake">Place stake</button><button id="m-obj">Add objective</button><button id="m-rm">Remove</button><button id="m-clear">Clear</button></div>
+   <div class="hint" id="incHint">Pick a mode, then click the map (Esc cancels). The route runs from each objective to the stake over the walkable tiles, ramps included.</div>
+   <div class="hint" id="incInfo"></div>
+  </div>
   <div id="sliders"></div>
+  <div class="hint" id="subHnote" hidden style="color:var(--acc)"></div>
   <div><h3>Display</h3><div id="toggles"></div></div>
   <div class="hint">Drag: small angle variation · Shift/right-drag: pan · wheel: zoom · double-click: reset</div>
  </aside>
@@ -438,9 +446,9 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return out;
   };
 
-  /* ---- manifest (evodun-pack/0.2 json: roles by image name) ---- */
+  /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
   E.parseManifest = function (json) {
-    if (!json || json.format !== 'evodun-pack/0.2') throw new Error('Manifest: expected format "evodun-pack/0.2".');
+    if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
     const known = new Set([...E.ROLES.map((r) => r[0]), ...E.RESERVED_ROLES]), roles = {}, notes = [];
     for (const [role, r] of Object.entries(json.roles || {})) {
       if (!known.has(role)) throw new Error('Manifest: unknown role "' + role + '".');
@@ -456,12 +464,16 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       if (m !== undefined && !(Number.isInteger(m) && m >= 0)) throw new Error('Manifest: slice.margin must be a non-negative integer.');
       slice = { zones: z || [], rect: r || null, margin: m };
     }
-    return { name: json.name || '', flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, slice, markers: json.markers || [], notes };
+    const pt = (v, what) => { if (!v || !Number.isInteger(v.x) || !Number.isInteger(v.y) || v.x < 0 || v.y < 0) throw new Error(`Manifest: ${what} needs integer { x, y } (tile of the whole map).`); return { x: v.x, y: v.y }; };
+    const stake = json.stake === undefined || json.stake === null ? null : pt(json.stake, 'stake');
+    if (json.objectives !== undefined && !Array.isArray(json.objectives)) throw new Error('Manifest: objectives must be a list of { x, y }.');
+    const objectives = (json.objectives || []).map((o, k) => Object.assign(pt(o, `objective ${k + 1}`), typeof o.label === 'string' ? { label: o.label } : {}));
+    return { name: json.name || '', stake, objectives, flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, slice, markers: json.markers || [], notes };
   };
   E.buildManifest = function (m) {
     const roles = {};
     for (const [role, r] of Object.entries(m.roles)) roles[role] = { image: r.image, channel: r.channel };
-    const out = { format: 'evodun-pack/0.2', name: m.name, flipY: !!m.flipY };
+    const out = { format: 'evodun-pack/0.3', name: m.name, flipY: !!m.flipY };
     if (m.maxnode) out.maxnode = m.maxnode;
     out.roles = roles;
     if (m.slice) {
@@ -472,11 +484,13 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       if (Object.keys(sl).length) out.slice = sl;
     }
     if (m.markers && m.markers.length) out.markers = m.markers;
+    if (m.stake) out.stake = { x: m.stake.x, y: m.stake.y };
+    if (m.objectives && m.objectives.length) out.objectives = m.objectives.map((o) => Object.assign({ x: o.x, y: o.y }, o.label ? { label: o.label } : {}));
     return out;
   };
 })(window.EVO = window.EVO || {});
 
-/* EvoDun crystal viewer - level shaping: terraces, micro steps, passes, walk regions */
+/* EvoDun crystal viewer - level shaping: terraces, sub-terraces, passes, walk regions */
 (function (E) {
   const N4 = [[1, 0], [0, 1], [-1, 0], [0, -1]];
 
@@ -546,9 +560,29 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return o;
   }
 
-  E.hOf = function (fine, P) {
-    const K = P.micro;
-    return Math.floor(fine / K) * P.terH + (fine % K) * P.microH;
+  /* Effective sub-terrace height. The gap from the last sub-terrace of a terrace to the base of the next one,
+     terH - (subs - 1) * subH, must exceed the climb limit by half a sub-step, so that a stair always has a visible
+     rise: subH_eff = min(subH, terH / (subs + climb - 0.5)). */
+  E.subHeight = function (P) { return Math.min(P.subH, P.terH / (P.subs + P.climb - 0.5)); };
+
+  /* Height of the bottom of terrace t. P.spread (Height spread, 1 = uniform) widens the jump between neighbouring terraces
+     the farther it is from the central terrace c (the one with most tiles on the whole map): the jump j -> j+1 is
+     terH * (1 + (spread - 1) * T(min(d - 1, 2))) with d = distance of that jump from c (1 = next to it) and T = 0, 1, 3, so with
+     spread 1.5 the jumps are 1, 1.5, 2.5, 2.5, ... times terH. Without c, or with spread 1, terraces are t * terH. */
+  E.terGap = function (j, P, c) {
+    const sp = P.spread === undefined ? 1 : P.spread;
+    if (!(sp > 1) || c === undefined) return P.terH;
+    const d = j >= c ? j - c + 1 : c - j, k = Math.min(d - 1, 2);
+    return P.terH * (1 + (sp - 1) * [0, 1, 3][k]);
+  };
+  E.terBase = function (t, P, c) {
+    if (!(P.spread > 1) || c === undefined) return t * P.terH;
+    let h = 0; for (let j = 0; j < t; j++) h += E.terGap(j, P, c);
+    return h;
+  };
+  E.hOf = function (fine, P, c) {
+    const K = P.subs;
+    return E.terBase(Math.floor(fine / K), P, c) + (fine % K) * E.subHeight(P);
   };
 
   /* ---- slice: the tiles of the incursion, and the window that gets built (slice + scenery margin) ---- */
@@ -624,17 +658,18 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return { name: pack.name, width: w, height: h, elevation: c(pack.elevation), elevRange: pack.elevRange, masks, markers, fields };
   }
 
-  /* pack: the whole map; spec: see E.sliceOf (omit for the whole map as one slice). Terraces use the global
-     elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
-  E.shape = function (full, P, spec) {
-    const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
-    const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.micro;
-    let el = Float32Array.from(pack.elevation);
+  /* Terraces and sub-terraces of the WHOLE map (U = raw-range position after pre-smoothing), cached on the pack by the
+     shaping parameters and then cropped to the window, so a slice never changes them. */
+  function quantize(full, P) {
+    const key = [P.terraces, P.subs, P.minPlateau, P.minSub, P.pre].join('|');
+    if (full._q && full._q.key === key) return full._q;
+    const W = full.width, H = full.height, n = W * H, N = P.terraces, K = P.subs;
+    let el = Float32Array.from(full.elevation);
     for (let p = 0; p < P.pre; p++) el = blur3(el, W, H);
     let mn = Infinity, mx = -Infinity;
-    if (pack.elevRange) { mn = pack.elevRange[0]; mx = pack.elevRange[1]; }
+    if (full.elevRange) { mn = full.elevRange[0]; mx = full.elevRange[1]; }
     else for (const v of el) { if (v < mn) mn = v; if (v > mx) mx = v; }
-    const U = new Float32Array(n), ter = new Int16Array(n), mic = new Int16Array(n), g0 = new Int16Array(n);
+    const U = new Float32Array(n), ter = new Int16Array(n), sub = new Int16Array(n), g0 = new Int16Array(n);
     for (let i = 0; i < n; i++) {
       U[i] = Math.max(0, (el[i] - mn) / (mx - mn || 1) * N);
       ter[i] = Math.min(N - 1, Math.floor(U[i]));
@@ -642,19 +677,38 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     cleanup(W, H, ter, g0, P.minPlateau);
     for (let i = 0; i < n; i++) {
       const t0 = Math.min(N - 1, Math.floor(U[i]));
-      if (K <= 1) mic[i] = 0;
-      else if (ter[i] === t0) mic[i] = Math.min(K - 1, Math.floor((U[i] - t0) * K));
-      else mic[i] = ter[i] > t0 ? 0 : K - 1;
+      if (K <= 1) sub[i] = 0;
+      else if (ter[i] === t0) sub[i] = Math.min(K - 1, Math.floor((U[i] - t0) * K));
+      else sub[i] = ter[i] > t0 ? 0 : K - 1;
     }
-    cleanup(W, H, mic, ter, P.minMicro);
+    cleanup(W, H, sub, ter, P.minSub);
+    const cnt = new Int32Array(N); for (let i = 0; i < n; i++) cnt[ter[i]]++;
+    let center = 0; for (let t = 1; t < N; t++) if (cnt[t] > cnt[center]) center = t; // the terrace with most tiles on the whole map (ties: the lower)
+    return (full._q = { key, U, ter, sub, trans: {}, range: [mn, mx], center });
+  }
+  E.quantize = quantize;
+
+  /* pack: the whole map; spec: see E.sliceOf (omit for the whole map as one slice). Terraces use the global
+     elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
+  E.shape = function (full, P, spec) {
+    const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
+    const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.subs;
+    const q = quantize(full, P);
+    const U = sl ? cropArr(q.U, full.width, sl.x0, sl.y0, W, H) : q.U;
+    const ter = sl ? cropArr(q.ter, full.width, sl.x0, sl.y0, W, H) : q.ter;
+    const sub = sl ? cropArr(q.sub, full.width, sl.x0, sl.y0, W, H) : q.sub;
     const fine = new Int16Array(n);
     let maxFine = 0;
-    for (let i = 0; i < n; i++) { fine[i] = ter[i] * K + mic[i]; if (fine[i] > maxFine) maxFine = fine[i]; }
+    for (let i = 0; i < n; i++) { fine[i] = ter[i] * K + sub[i]; if (fine[i] > maxFine) maxFine = fine[i]; }
     const byLevel = Array.from({ length: maxFine + 1 }, () => []);
     for (let i = 0; i < n; i++) byLevel[fine[i]].push(i);
+    // `fine` is a level index: levels are ranked by height. levelH[L] is the height of level L and levelMeta[L]
+    // says where it comes from (terrace, sub-terrace; bridge levels are added by the stair carving).
+    const levelH = new Array(maxFine + 1), levelMeta = new Array(maxFine + 1);
+    for (let L = 0; L <= maxFine; L++) { levelH[L] = E.hOf(L, P, q.center); levelMeta[L] = { ter: Math.floor(L / K), sub: L % K, bridge: false }; }
     const masks = pack.masks || {};
     const S = {
-      W, H, n, U, ter, mic, fine, maxFine, byLevel, K, N,
+      W, H, n, U, ter, sub, fine, maxFine, byLevel, levelH, levelMeta, subs: K, N, center: q.center,
       water: masks.water || new Array(n).fill(0),
       snake: masks.snake || null, cave: masks.cave || null, waterfall: masks.waterfall || null,
       markers: pack.markers || [], name: pack.name, fields: pack.fields || {}, cache: {},
@@ -675,6 +729,20 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         if (y === H - 1 || !mask[i + W]) S.border[i] |= 4;
         if (x === 0 || !mask[i - 1]) S.border[i] |= 8;
       }
+      // colour of each border face from the edge map: red if the slice tile or its partner (the tile across the face, in the
+      // whole map) is a barrier, cyan if one is a pass and none a barrier, yellow if neither is marked, white at the map edge
+      const ef = full.fields && full.fields.edge, labels = new Map(); if (ef) for (const c of ef.info.classes) labels.set(c.id, c.label);
+      const kindAt = (fx, fy) => { if (!ef) return 0; const id = ef.ids[fy * full.width + fx], l = id > 0 ? labels.get(id) : null; return l === 'barrier' ? 1 : l === 'pass' ? 2 : 0; };
+      S.borderKind = new Uint8Array(n * 4); S.borderInfo = { barrier: 0, pass: 0, none: 0, mapEdge: 0 };
+      const OFF = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+      for (let i = 0; i < n; i++) for (let b = 0; b < 4; b++) {
+        if (!(S.border[i] >> b & 1)) continue;
+        const fx = sl.x0 + (i % W), fy = sl.y0 + ((i / W) | 0), nx = fx + OFF[b][0], ny = fy + OFF[b][1];
+        let kind;
+        if (nx < 0 || ny < 0 || nx >= full.width || ny >= full.height) kind = 4;
+        else { const k1 = kindAt(fx, fy), k2 = kindAt(nx, ny); kind = k1 === 1 || k2 === 1 ? 1 : k1 === 2 || k2 === 2 ? 2 : 3; }
+        S.borderKind[i * 4 + b] = kind; S.borderInfo[['', 'barrier', 'pass', 'none', 'mapEdge'][kind]]++;
+      }
       S.sliceLoops = E.maskLoops(W, H, (x, y) => mask[y * W + x] === 1);
       const warnings = [];
       if (spec.zones && spec.zones.length) {
@@ -686,53 +754,260 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       }
       S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rect: spec.rect || null, warnings };
     }
+    computeGates(S, P, full, q);
+    carveStairs(S, P);
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
-    for (let i = 0; i < n; i++) if (!S.slice || S.slice[i]) { terSeen.add(ter[i]); fineSeen.add(fine[i]); }
+    for (let i = 0; i < n; i++) if (!S.slice || S.slice[i]) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
     S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
-    computePasses(S, P);
     computeRegions(S, P);
     return S;
   };
 
-  function computePasses(S, P) {
-    const { W, H, ter, U } = S, water = S.block;
-    const g0 = new Int16Array(S.n);
-    const reg = comps(W, H, ter, g0).id; // same-terrace regions
-    const cand = [];
+  /* Terrace transitions, a transcription of the user's EDunProcGen.cs (NormalizeHeightsPerTerrace,
+     ComputeTerraceSlopeMap, FindRankedTerraceTransitions, FilterConnectedTerraceTransitions) on the WHOLE map and the
+     RAW elevation (the "same room" condition is omitted: there are no rooms).
+       - per unit u (terrace): min/max of the raw elevation over its tiles; norm_u = (h-min)/(max-min) on u, 0 elsewhere
+         (range <= 0.0001 -> 1);
+       - slope = sqrt(dx^2 + dy^2), central differences * 0.5 on the whole norm_u (tiles of other units count 0);
+         the 1-tile frame of the map is skipped (slope 0);
+       - for every 4-neighbour pair exactly one terrace apart, pos = the LOW tile; transition if
+         slope_low[pos] - slope_high[pos] > threshold (no absolute value); each pos once;
+       - transitions are grouped by 4-connectivity (all together) and groups smaller than the minimum are dropped.
+     kind 'sub' is OUR EXTENSION: the same rule with the sub-terrace as the unit, for pairs in the same terrace that
+     differ by more than the climb limit (steps that cannot be walked); groups of their own.
+     Returns { partner: Int32Array (upper tile of each transition pos, -1 if none), groups: [{ tiles, size }] }. */
+  function transitions(full, q, P, kind) {
+    const thr = P.gateThr === undefined ? 0.05 : P.gateThr, minSize = P.gateMin === undefined ? 3 : P.gateMin, K = P.subs;
+    const key = `${kind}|${thr}|${minSize}|${P.climb}|band`;
+    if (q.trans[key]) return q.trans[key];
+    const W = full.width, H = full.height, n = W * H, raw = full.elevation;
+    const unit = new Int32Array(n), nU = P.terraces * (kind === 'sub' ? K : 1);
+    for (let i = 0; i < n; i++) unit[i] = kind === 'sub' ? q.ter[i] * K + q.sub[i] : q.ter[i];
+    /* DEVIATION from the user's code: each unit is normalized with its NOMINAL band of the global elevation range
+       (clamped to 0..1), not with the min/max of its tiles. Here the plateau cleanup and the pre-smoothing move a few tiles
+       into a terrace whose raw height is far outside its band; those outliers stretch min/max (3-4x on a real map) and
+       flatten the slopes, which left whole terrace borders without gates. */
+    const [g0, g1] = q.range, bandW = (g1 - g0 || 1) / nU;
+    const lo = Float64Array.from({ length: nU }, (_, u) => g0 + u * bandW);
+    const norm = (u, x, y) => { const i = y * W + x; return unit[i] === u ? Math.max(0, Math.min(1, (raw[i] - lo[u]) / bandW)) : 0; };
+    const slope = (u, x, y) => {
+      if (x < 1 || y < 1 || x > W - 2 || y > H - 2) return 0;
+      const dx = (norm(u, x + 1, y) - norm(u, x - 1, y)) * 0.5, dy = (norm(u, x, y + 1) - norm(u, x, y - 1)) * 0.5;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+    const partner = new Int32Array(n).fill(-1);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x;
-      for (const [dx, dy] of [[1, 0], [0, 1]]) {
-        const nx = x + dx, ny = y + dy;
-        if (nx >= W || ny >= H) continue;
+      for (const [dx, dy] of [[1, 0], [0, 1], [-1, 0], [0, -1]]) { // E, S, W, N: the first upper neighbour that qualifies
+        const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
         const j = ny * W + nx;
-        if (Math.abs(ter[i] - ter[j]) !== 1) continue;
-        if (water[i] || water[j]) continue;
-        const a = ter[i] < ter[j] ? i : j, b = a === i ? j : i;
-        cand.push({ a, b, g: Math.abs(U[i] - U[j]) });
+        const higher = kind === 'sub' ? q.ter[j] === q.ter[i] && q.sub[j] - q.sub[i] > P.climb : q.ter[j] === q.ter[i] + 1;
+        if (higher && slope(unit[i], x, y) - slope(unit[j], x, y) > thr) { partner[i] = j; break; }
       }
     }
-    cand.sort((p, q) => p.g - q.g);
-    const chosen = [], pair = new Set(), usedA = new Set(), usedB = new Set();
-    const bx = (c) => c.b % W, by = (c) => (c.b / W) | 0;
-    const take = (c) => { chosen.push(c); usedA.add(c.a); usedB.add(c.b); };
-    for (const c of cand) { // best pass per region pair keeps regions connectable
-      const key = reg[c.a] + ':' + reg[c.b];
-      if (pair.has(key) || usedA.has(c.a) || usedB.has(c.b)) continue;
-      pair.add(key); take(c);
-    }
-    for (const c of cand) {
-      if (usedA.has(c.a) || usedB.has(c.b)) continue;
-      let ok = true;
-      for (const o of chosen) {
-        if (Math.hypot(bx(c) - bx(o), by(c) - by(o)) < P.passGap) { ok = false; break; }
+    const seen = new Uint8Array(n), groups = [];
+    for (let s0 = 0; s0 < n; s0++) {
+      if (partner[s0] < 0 || seen[s0]) continue;
+      const tiles = [], st = [s0]; seen[s0] = 1;
+      while (st.length) {
+        const i = st.pop(), x = i % W, y = (i / W) | 0; tiles.push(i);
+        for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) if (j >= 0 && partner[j] >= 0 && !seen[j]) { seen[j] = 1; st.push(j); }
       }
-      if (ok) take(c);
+      if (tiles.length >= minSize) groups.push({ tiles: tiles.sort((a, b) => a - b), size: tiles.length });
     }
-    S.passes = chosen;
+    return (q.trans[key] = { partner, groups });
+  }
+  E.gateTransitions = (full, P, kind) => transitions(full, quantize(full, P), P, kind);
+
+  /* Gates inside the slice and the stair sites on them: one stair per gate at the tile nearest the centroid; long gates
+     get floor(length / passGap) stairs spread along their main axis. Each site keeps the rest of its gate as fallbacks
+     (nearest first) for when the carving does not fit. S.passes = sites. */
+  function computeGates(S, P, full, q) {
+    const W = S.W, H = S.H, fw = full.width, gates = [], sites = [];
+    for (const kind of ['terrace', 'sub']) {
+      if (kind === 'sub' && !(P.climb < S.subs - 1)) continue;
+      const tr = transitions(full, q, P, kind);
+      for (const g of tr.groups) {
+        const tiles = [];
+        for (const pos of g.tiles) {
+          const x = pos % fw - S.ox, y = ((pos / fw) | 0) - S.oy, pj = tr.partner[pos], px = pj % fw - S.ox, py = ((pj / fw) | 0) - S.oy;
+          if (x < 0 || y < 0 || x >= W || y >= H || px < 0 || py < 0 || px >= W || py >= H) continue;
+          const a = y * W + x, b = py * W + px;
+          if (!S.block[a] && !S.block[b]) tiles.push({ a, b, x, y });
+        }
+        if (!tiles.length) continue;
+        const gi = gates.length; gates.push({ kind, size: g.size, tiles: tiles.map((t) => ({ a: t.a, b: t.b })) });
+        const L = tiles.length, nSt = Math.max(1, Math.floor(L / P.passGap));
+        let cx = 0, cy = 0; for (const t of tiles) { cx += t.x; cy += t.y; } cx /= L; cy /= L;
+        let sxx = 0, syy = 0, sxy = 0; for (const t of tiles) { sxx += (t.x - cx) ** 2; syy += (t.y - cy) ** 2; sxy += (t.x - cx) * (t.y - cy); }
+        const ang = 0.5 * Math.atan2(2 * sxy, sxx - syy), ux = Math.cos(ang), uy = Math.sin(ang);
+        const order = tiles.slice().sort((p, q2) => ((p.x - cx) * ux + (p.y - cy) * uy) - ((q2.x - cx) * ux + (q2.y - cy) * uy) || p.a - q2.a);
+        const targets = nSt === 1
+          ? [tiles.reduce((best, t) => (Math.hypot(t.x - cx, t.y - cy) < Math.hypot(best.x - cx, best.y - cy) ? t : best), tiles[0])]
+          : Array.from({ length: nSt }, (_, k) => order[Math.floor((k + 0.5) * L / nSt)]);
+        for (const t of targets) {
+          const alts = tiles.filter((o) => o !== t).sort((p, q2) => Math.hypot(p.x - t.x, p.y - t.y) - Math.hypot(q2.x - t.x, q2.y - t.y) || p.a - q2.a).map((o) => ({ a: o.a, b: o.b }));
+          sites.push({ a: t.a, b: t.b, gate: gi, kind, alts });
+        }
+      }
+    }
+    S.gates = gates; S.passes = sites;
+  }
+
+  /* Stairs are carved into the terrain. Each tread rises at most `tread` sub-terraces (default: the climb limit; never more). A stair is cut into the upper
+     terrace (or, if that does not fit, built on the lower one) as `stairW` columns of treads; the treads take
+     heights from the existing levels plus "bridge" levels in the gap between terraces (only the ones that end up
+     used become levels), so every technique gets the same geometry from its normal level pipeline. */
+  /* Ramp surface height at ground point (x, y) (tile units): linear along the path from the gate edge (s = 0) to the far end
+     (s = len); constant across the width. r = a stair record with `ramp`. */
+  E.rampHeight = (r, x, y) => {
+    const R = r.ramp, t = Math.max(0, Math.min(R.len, (x - R.mx) * R.pdx + (y - R.my) * R.pdy));
+    return R.h0 + (R.h1 - R.h0) * t / R.len;
+  };
+  const MAX_TREADS = 6, STAIR_COLS = { 1: [0], 2: [0, 1], 3: [-1, 0, 1] };
+  function carveStairs(S, P) {
+    const { W, H, n } = S, K = S.subs, N = S.N, s = E.subHeight(P), EPS = 1e-9;
+    const tread = Math.max(1, Math.min(P.climb, Math.round(P.tread === undefined ? P.climb : P.tread))), reachPlain = tread * s, reach = reachPlain + EPS; // each tread rises at most `tread` sub-terraces
+    if (P.stairW === 0) { // diagnostic: no carving at all (stair sites stay unconnected)
+      S.carved = new Uint8Array(n); S.stairs = []; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: 0, dropped: 0, narrowed: 0, fills: 0, width: 0 }; return;
+    }
+    const width = Math.max(1, Math.min(3, Math.round(P.stairW === undefined ? 2 : P.stairW)));
+    const cands = [];
+    for (let L = 0; L <= S.maxFine; L++) cands.push({ h: S.levelH[L], base: L });
+    for (let t = 0; t + 1 < N; t++) {
+      const top = E.terBase(t, P, S.center) + (K - 1) * s, g = E.terBase(t + 1, P, S.center) - top, nb = Math.ceil(g / reachPlain - EPS) - 1;
+      for (let j = 1; j <= nb; j++) cands.push({ h: top + j * g / (nb + 1), base: -1, ter: t, frac: j / (nb + 1) });
+    }
+    cands.sort((p, q) => p.h - q.h);
+    const pickUp = (h) => { for (let k = cands.length - 1; k >= 0; k--) if (cands[k].h <= h + reach) return cands[k].h > h + EPS ? cands[k] : null; return null; };
+    const pickDown = (h) => { for (let k = 0; k < cands.length; k++) if (cands[k].h >= h - reach) return cands[k].h < h - EPS ? cands[k] : null; return null; };
+    const hT = new Float64Array(n); for (let i = 0; i < n; i++) hT[i] = S.levelH[S.fine[i]];
+    const used = new Uint8Array(n), carved = new Uint8Array(n), carve = new Map(), stairs = [];
+    let dropped = 0, narrowed = 0, fills = 0;
+    const idx = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x);
+    const okTile = (i, terr) => i >= 0 && !S.block[i] && !used[i] && S.ter[i] === terr;
+
+    const maxGap = P.terH * (1 + 3 * Math.max(0, (P.spread === undefined ? 1 : P.spread) - 1)); // the largest terrace jump (the spread caps at distance 3)
+    const ramp = P.stairStyle === 0 ? false : true, slope = Math.max(0.05, P.rampSlope === undefined ? 0.4 : P.rampSlope), minLen = Math.max(1, Math.round(P.rampMin === undefined ? 2 : P.rampMin)), maxRamp = Math.max(8, Math.ceil(maxGap / slope) + 1); // 8 is enough for spread <= 1.5 at the default slope
+    /* ramp style: the same footprint as the stair (cut into the upper terrace or built on the lower one), but one smooth
+       surface from the low height to the high one; its length comes from the maximum slope. Levels are not touched. */
+    const planRamp = (pass, mode) => {
+      const ax = pass.a % W, ay = (pass.a / W) | 0, bx = pass.b % W, by = (pass.b / W) | 0;
+      const dx = bx - ax, dy = by - ay, ex = -dy, ey = dx, cut = mode === 'cut';
+      const sx = cut ? bx : ax, sy = cut ? by : ay, sd = cut ? 1 : -1, fx = cut ? ax : bx, fy = cut ? ay : by;
+      const terPath = cut ? S.ter[pass.b] : S.ter[pass.a], terFix = cut ? S.ter[pass.a] : S.ter[pass.b];
+      const col = (c, k) => idx(sx + sd * dx * k + c * ex, sy + sd * dy * k + c * ey), fixed = (c) => idx(fx + c * ex, fy + c * ey);
+      if (!okTile(fixed(0), terFix)) return null;
+      const hFix = hT[fixed(0)];
+      let len = 0, h0 = 0, h1 = 0;
+      for (let L = 1; L <= maxRamp; L++) {
+        if (!okTile(col(0, L - 1), terPath)) return null;
+        if (L < minLen) continue;
+        const e = col(0, L); if (!okTile(e, terPath)) return null;
+        const hEnd = hT[e], hi = cut ? hEnd : hFix, lo = cut ? hFix : hEnd;
+        if (hi - lo <= EPS) return null;
+        if (L >= Math.ceil((hi - lo) / slope - 1e-9)) { len = L; h0 = cut ? lo : hi; h1 = cut ? hi : lo; break; }
+      }
+      if (!len) return null;
+      const hAt = (t) => h0 + (h1 - h0) * t / len;
+      const valid = (c) => {
+        const f = fixed(c);
+        if (c === 0 ? !okTile(f, terFix) : (f < 0 || S.block[f] || used[f])) return false; // lateral ends may sit on any terrace (diagonal cliffs)
+        for (let k = 0; k < len; k++) { const t = col(c, k); if (!okTile(t, terPath) || (cut ? hT[t] < hAt(k + 1) - EPS : hT[t] > hAt(k + 1) + EPS)) return false; }
+        return okTile(col(c, len), terPath);
+      };
+      const want = STAIR_COLS[width], ok = new Set(want.filter(valid));
+      if (!ok.has(0)) return null;
+      let cols = [0];
+      if (width === 3 && ok.has(-1) && ok.has(1)) cols = [-1, 0, 1]; else if (width === 2 && ok.has(1)) cols = [0, 1];
+      const rec = { mode, dir: [dx, dy], cols, requested: width, narrowed: cols.length < width, site: pass, bottom: [], top: [], steps: [],
+        ramp: { mx: (ax + bx) / 2 + 0.5, my: (ay + by) / 2 + 0.5, pdx: sd * dx, pdy: sd * dy, len, h0, h1 }, level: S.fine[pass.a] };
+      for (let k = 0; k < len; k++) rec.steps.push({ cand: null, tiles: [] });
+      for (const c of cols) {
+        rec.bottom.push(cut ? fixed(c) : col(c, len)); rec.top.push(cut ? col(c, len) : fixed(c));
+        for (let k = 0; k < len; k++) rec.steps[cut ? k : len - 1 - k].tiles.push(col(c, k));
+      }
+      return rec;
+    };
+    const plan = (pass, mode) => {
+      const ax = pass.a % W, ay = (pass.a / W) | 0, bx = pass.b % W, by = (pass.b / W) | 0;
+      const dx = bx - ax, dy = by - ay, ex = -dy, ey = dx, cut = mode === 'cut';
+      const sx = cut ? bx : ax, sy = cut ? by : ay, sd = cut ? 1 : -1;        // path: b, b+d, ...  (cut)  or  a, a-d, ...  (fill)
+      const fx = cut ? ax : bx, fy = cut ? ay : by;                           // fixed end: the lower tile (cut) or the upper tile (fill)
+      const terPath = cut ? S.ter[pass.b] : S.ter[pass.a], terFix = cut ? S.ter[pass.a] : S.ter[pass.b];
+      const col = (c, k) => idx(sx + sd * dx * k + c * ex, sy + sd * dy * k + c * ey), fixed = (c) => idx(fx + c * ex, fy + c * ey);
+      // heights of the treads, from the central column
+      const steps = []; let cur = hT[fixed(0)], end = -1;
+      if (!okTile(fixed(0), terFix)) return null;
+      for (let k = 0; k <= MAX_TREADS; k++) {
+        const t = col(0, k); if (!okTile(t, terPath)) return null;
+        const o = hT[t];
+        if (cut ? o - cur <= reach : cur - o <= reach) { if (cut ? o < cur - EPS : o > cur + EPS) return null; end = k; break; }
+        const c = cut ? pickUp(cur) : pickDown(cur);
+        if (!c || (cut ? c.h >= o - EPS : c.h <= o + EPS)) return null;
+        steps.push(c); cur = c.h;
+      }
+      if (end < 1) return null;
+      const m = steps.length, first = steps[0].h, last = steps[m - 1].h;
+      const valid = (c) => {
+        const f = fixed(c);
+        if (c === 0 ? !okTile(f, terFix) : (f < 0 || S.block[f] || used[f])) return false; // lateral ends may sit on any terrace (diagonal cliffs)
+        if (c === 0 && (cut ? first - hT[f] > reach : hT[f] - first > reach)) return false;
+        for (let k = 0; k < m; k++) { const t = col(c, k); if (!okTile(t, terPath) || (cut ? hT[t] <= steps[k].h + EPS : hT[t] >= steps[k].h - EPS)) return false; }
+        const e = col(c, m); if (!okTile(e, terPath)) return false;
+        return cut ? hT[e] >= last - EPS && hT[e] - last <= reach : hT[e] <= last + EPS && last - hT[e] <= reach;
+      };
+      const want = STAIR_COLS[width], ok = new Set(want.filter(valid));
+      if (!ok.has(0)) return null;
+      let cols = [0];
+      if (width === 3 && ok.has(-1) && ok.has(1)) cols = [-1, 0, 1]; else if (width === 2 && ok.has(1)) cols = [0, 1];
+      const asc = cut ? steps : steps.slice().reverse();
+      const rec = { mode, dir: [dx, dy], cols, requested: width, narrowed: cols.length < width, site: pass, bottom: [], top: [], steps: asc.map((c) => ({ cand: c, tiles: [] })) };
+      for (const c of cols) {
+        rec.bottom.push(cut ? fixed(c) : col(c, m)); rec.top.push(cut ? col(c, m) : fixed(c));
+        for (let k = 0; k < m; k++) rec.steps[cut ? k : m - 1 - k].tiles.push(col(c, k));
+      }
+      return rec;
+    };
+    for (const pass of S.passes) {
+      let rec = null;   // cut into the upper terrace, or build up the lower one: the wider result wins (ties: cut)
+      for (const site of [pass, ...pass.alts]) {   // the centred tile first, then the rest of the gate, nearest first
+        for (const mode of ['cut', 'fill']) { const r = ramp ? planRamp(site, mode) : plan(site, mode); if (r && (!rec || r.cols.length > rec.cols.length)) rec = r; }
+        if (rec) break;
+      }
+      if (!rec) { dropped++; continue; }
+      if (rec.mode === 'fill') fills++;
+      if (rec.narrowed) narrowed++;
+      for (let ci = 0; ci < rec.cols.length; ci++) { used[rec.bottom[ci]] = 1; used[rec.top[ci]] = 1; }
+      for (const st of rec.steps) for (const t of st.tiles) { used[t] = 1; carved[t] = 1; if (st.cand) carve.set(t, st.cand); }
+      stairs.push(rec);
+    }
+    if (ramp) { // a cut ramp lowers its footprint to the level of the low end (a hole in every slab above); a built-up one keeps its tiles
+      for (const rec of stairs) if (rec.mode === 'cut') for (const st of rec.steps) for (const t of st.tiles) S.fine[t] = rec.level;
+      S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
+      for (let i = 0; i < n; i++) S.byLevel[S.fine[i]].push(i);
+    }
+    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, width, style: ramp ? 'ramp' : 'steps' };
+    if (!carve.size) return;
+    // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height
+    const bridges = [...new Set([...carve.values()].filter((c) => c.base < 0))].sort((p, q) => p.h - q.h);
+    const newH = [], newMeta = [], baseIdx = new Array(S.maxFine + 1), bridgeIdx = new Map();
+    let bi = 0;
+    for (let L = 0; L <= S.maxFine; L++) {
+      while (bi < bridges.length && bridges[bi].h < S.levelH[L] - EPS) {
+        bridgeIdx.set(bridges[bi], newH.length); newH.push(bridges[bi].h);
+        newMeta.push({ ter: bridges[bi].ter, sub: K - 1, bridge: true, frac: bridges[bi].frac }); bi++;
+      }
+      baseIdx[L] = newH.length; newH.push(S.levelH[L]); newMeta.push(S.levelMeta[L]);
+    }
+    for (let i = 0; i < n; i++) { const c = carve.get(i); S.fine[i] = c ? (c.base >= 0 ? baseIdx[c.base] : bridgeIdx.get(c)) : baseIdx[S.fine[i]]; }
+    S.levelH = newH; S.levelMeta = newMeta; S.maxFine = newH.length - 1;
+    S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
+    for (let i = 0; i < n; i++) S.byLevel[S.fine[i]].push(i);
   }
 
   function computeRegions(S, P) {
-    const { W, H, ter, mic } = S, water = S.block, n = S.n;
+    const { W, H, ter, sub } = S, water = S.block, n = S.n, carved = S.carved;
     const par = new Int32Array(n).map((_, i) => i);
     const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
     const uni = (a, b) => { a = find(a); b = find(b); if (a !== b) par[a] = b; };
@@ -743,11 +1018,16 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         const nx = x + dx, ny = y + dy;
         if (nx >= W || ny >= H) continue;
         const j = ny * W + nx;
-        if (water[j]) continue;
-        if (ter[i] === ter[j] && Math.abs(mic[i] - mic[j]) <= P.climb) uni(i, j);
+        if (water[j] || carved[i] || carved[j]) continue;   // carved tiles only connect along their stair
+        if (ter[i] === ter[j] && Math.abs(sub[i] - sub[j]) <= P.climb) uni(i, j);
       }
     }
-    for (const p of S.passes) uni(p.a, p.b);
+    for (const st of S.stairs) for (let ci = 0; ci < st.cols.length; ci++) {
+      let prev = st.bottom[ci];
+      for (const step of st.steps) { uni(prev, step.tiles[ci]); prev = step.tiles[ci]; }
+      uni(prev, st.top[ci]);
+      if (ci > 0) for (const step of st.steps) uni(step.tiles[ci - 1], step.tiles[ci]);
+    }
     const idOf = new Map(), region = new Int32Array(n).fill(-1), sizes = [];
     for (let i = 0; i < n; i++) {
       if (water[i]) continue;
@@ -757,6 +1037,64 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     }
     S.region = region; S.regionSizes = sizes;
   }
+
+  /* ---- walking graph: the same edges as computeRegions (so a route exists exactly when two tiles share a region) ---- */
+  function walkGraph(S, P) {
+    if (S._walk) return S._walk;
+    const extra = new Map(), link = (a, b) => { (extra.get(a) || extra.set(a, []).get(a)).push(b); (extra.get(b) || extra.set(b, []).get(b)).push(a); };
+    for (const st of S.stairs) for (let ci = 0; ci < st.cols.length; ci++) {
+      let prev = st.bottom[ci];
+      for (const step of st.steps) { link(prev, step.tiles[ci]); prev = step.tiles[ci]; }
+      link(prev, st.top[ci]);
+      if (ci > 0) for (const step of st.steps) link(step.tiles[ci - 1], step.tiles[ci]);
+    }
+    const W = S.W, H = S.H, out = [];
+    const neighbors = (i) => {
+      out.length = 0;
+      if (S.block[i]) return out;
+      const x = i % W, y = (i / W) | 0;
+      if (!S.carved[i]) for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) {
+        if (j < 0 || S.block[j] || S.carved[j]) continue;   // carved tiles only connect along their stair
+        if (S.ter[i] === S.ter[j] && Math.abs(S.sub[i] - S.sub[j]) <= P.climb) out.push(j);
+      }
+      const e = extra.get(i); if (e) for (const j of e) if (!S.block[j]) out.push(j);
+      return out;
+    };
+    return (S._walk = neighbors);
+  }
+  /* Shortest route (fewest tiles) from tile a to tile b over the walking graph, or null. Tiles are window indices. */
+  E.route = function (S, P, a, b) {
+    if (a === b) return [a];
+    if (S.block[a] || S.block[b]) return null;
+    const nb = walkGraph(S, P), prev = new Int32Array(S.n).fill(-2), q = [a]; prev[a] = -1;
+    for (let h = 0; h < q.length; h++) {
+      const i = q[h];
+      for (const j of nb(i).slice()) if (prev[j] === -2) { prev[j] = i; if (j === b) { const r = [b]; for (let k = i; k !== -1; k = prev[k]) r.push(k); return r.reverse(); } q.push(j); }
+    }
+    return null;
+  };
+  /* Why there is no route between a and b: their regions (id, tiles), the closest approach between the two regions through any
+     unblocked tile (tiles between them, the two end tiles) and the gates that touch both regions but got no stair. */
+  E.regionGap = function (S, a, b) {
+    const ra = S.region[a], rb = S.region[b], W = S.W, H = S.H;
+    const res = { ra, rb, sizeA: S.regionSizes[ra], sizeB: S.regionSizes[rb], dist: -1, from: -1, to: -1, droppedGates: 0 };
+    const dist = new Int32Array(S.n).fill(-1), from = new Int32Array(S.n).fill(-1), q = [];
+    for (let i = 0; i < S.n; i++) if (S.region[i] === ra) { dist[i] = 0; from[i] = i; q.push(i); }
+    for (let h = 0; h < q.length && res.dist < 0; h++) {
+      const i = q[h], x = i % W, y = (i / W) | 0;
+      for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) {
+        if (j < 0 || dist[j] >= 0 || (S.slice && !S.slice[j])) continue;
+        dist[j] = dist[i] + 1; from[j] = from[i];
+        if (S.region[j] === rb) { res.dist = dist[j] - 1; res.from = from[j]; res.to = j; break; }
+        q.push(j);
+      }
+    }
+    const placed = new Set(S.stairs.map((r) => r.site.gate));
+    S.gates.forEach((g, gi) => { if (placed.has(gi)) return; if (g.tiles.some((t) => (S.region[t.a] === ra && S.region[t.b] === rb) || (S.region[t.a] === rb && S.region[t.b] === ra))) res.droppedGates++; });
+    return res;
+  };
+
+  E._carve = carveStairs; E._regions = computeRegions; // test hooks (hand-built shaping objects)
 
   /* demo packs */
   E.noisePack = function (W, H, seed) {
@@ -832,30 +1170,103 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return pts;
   }
 
+  const inLoops = (loops, x, y) => { // even-odd point in polygon
+    let c = false;
+    for (const lp of loops) for (let i = 0, j = lp.length - 1; i < lp.length; j = i++) {
+      const p = lp[i], q = lp[j];
+      if ((p[1] > y) !== (q[1] > y) && x < (q[0] - p[0]) * (y - p[1]) / (q[1] - p[1]) + p[0]) c = !c;
+    }
+    return c;
+  };
+
+  /* Does each carved stair survive the drawn contours of technique A or B? A tread tile (level L) is well drawn where
+     it is inside the contour of level L and outside the contour of level L+1: that is what makes it a step of its own.
+     Coverage of a tile = share of its area (4x4 samples) that is well drawn. A tread is closed when the mean coverage of
+     its tiles is below 0.5; a stair is lost when any tread is closed and degraded when only some tile is below 0.9. */
+  E.stairSurvival = function (S, P, tech) {
+    const loopsOf = tech === 'A' ? E.loopsA : E.loopsB, memo = new Map();
+    const get = (L) => { // loops of a level with their boxes, for a quick rejection in the point tests
+      if (L > S.maxFine) return [];
+      if (!memo.has(L)) memo.set(L, loopsOf(S, L, P).map((lp) => { let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (const q of lp) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); } return { lp, x0, y0, x1, y1 }; }));
+      return memo.get(L);
+    };
+    const inside = (boxed, x, y) => { let c = false; for (const b of boxed) { if (x < b.x0 || x > b.x1 || y < b.y0 || y > b.y1) continue; if (inLoops([b.lp], x, y)) c = !c; } return c; };
+    const SM = 4;
+    let lost = 0, degraded = 0, failed = 0, tiles = 0, area = 0, worst = 1; const lostIdx = [];
+    S.stairs.forEach((st, si) => {
+      let closed = false, bad = 0;
+      for (const step of st.steps) {
+        let sum = 0;
+        for (const t of step.tiles) {
+          const L = S.fine[t], tx = t % S.W, ty = (t / S.W) | 0, lo = get(L), hi = get(L + 1); let good = 0;
+          for (let j = 0; j < SM; j++) for (let k = 0; k < SM; k++) {
+            const x = tx + (k + 0.5) / SM + 1e-4, y = ty + (j + 0.5) / SM + 1.3e-4; // nudged so no sample sits exactly on a contour vertex
+            if (inside(lo, x, y) && !inside(hi, x, y)) good++;
+          }
+          const cov = good / (SM * SM); tiles++; area += cov; sum += cov; worst = Math.min(worst, cov);
+          if (cov < 0.9) { bad++; failed++; }
+        }
+        if (sum / step.tiles.length < 0.5) closed = true;
+      }
+      if (closed) { lost++; lostIdx.push(si); } else if (bad) degraded++;
+    });
+    return { n: S.stairs.length, lost, degraded, tilesFailed: failed, tiles, lostIdx, coverage: tiles ? area / tiles : 1, worst };
+  };
+
   /* closed tile-exact loops of a mask, collinear points dropped (used for the slice border) */
   E.maskLoops = function (W, H, inside) { return traceMask(W, H, inside).map(dropCollinear); };
 
-  function chaikin(loop, W, H, it) {
-    let pts = loop;
+  /* fixed[i] (optional): vertex i stays where it is (stair footprint, see loopsA) */
+  function chaikin(loop, W, H, it, fixed) {
+    let pts = loop, fx = fixed || null;
     const onB = (a, b) => (a[0] === 0 && b[0] === 0) || (a[0] === W && b[0] === W) || (a[1] === 0 && b[1] === 0) || (a[1] === H && b[1] === H);
     for (let t = 0; t < it; t++) {
-      const out = [], n = pts.length;
+      const out = [], of = [], n = pts.length;
       for (let i = 0; i < n; i++) {
-        const a = pts[i], b = pts[(i + 1) % n];
-        if (onB(a, b)) { out.push(a, b); continue; }
-        out.push([0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1]], [0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1]]);
+        const a = pts[i], b = pts[(i + 1) % n], fa = fx ? fx[i] : 0, fb = fx ? fx[(i + 1) % n] : 0;
+        if (onB(a, b)) { out.push(a, b); of.push(fa, fb); continue; }
+        out.push(fa ? a : [0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1]], fb ? b : [0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1]]);
+        of.push(fa, fb);
       }
-      pts = out.filter((p, i) => { const q = out[(i + out.length - 1) % out.length]; return Math.abs(p[0] - q[0]) + Math.abs(p[1] - q[1]) > 1e-6; });
+      const np = [], nf = [];
+      for (let i = 0; i < out.length; i++) {
+        const p = out[i], q = out[(i + out.length - 1) % out.length];
+        if (Math.abs(p[0] - q[0]) + Math.abs(p[1] - q[1]) > 1e-6) { np.push(p); nf.push(of[i]); }
+      }
+      pts = np; fx = fx ? nf : null;
     }
     return pts;
   }
 
+  /* Rigid stair footprint: a unit edge of the level mask that touches a carved tile (on either side) is pinned. The
+     vertices where a pinned run starts or ends, and the corners inside it, stay fixed through the smoothing, so the
+     footprint keeps its exact tile shape and the terrain around it is still smoothed. */
+  function anchored(loop, carved, W, H) {
+    const n = loop.length, pinned = new Uint8Array(n);
+    const has = (x, y) => x >= 0 && y >= 0 && x < W && y < H && carved[y * W + x] === 1;
+    for (let i = 0; i < n; i++) {
+      const a = loop[i], b = loop[(i + 1) % n], dx = b[0] - a[0], dy = b[1] - a[1];
+      const x = a[0], y = a[1];
+      pinned[i] = dx === 1 ? (has(x, y) || has(x, y - 1)) : dy === 1 ? (has(x - 1, y) || has(x, y)) : dx === -1 ? (has(x - 1, y - 1) || has(x - 1, y)) : (has(x, y - 1) || has(x - 1, y - 1)) ? 1 : 0;
+    }
+    if (!pinned.some((v) => v)) return null;
+    const pts = [], fix = [];
+    for (let j = 0; j < n; j++) {
+      const p = loop[(j + n - 1) % n], c = loop[j], q = loop[(j + 1) % n], pi = pinned[(j + n - 1) % n], po = pinned[j];
+      const turn = (c[0] - p[0]) * (q[1] - c[1]) - (c[1] - p[1]) * (q[0] - c[0]);
+      if (Math.abs(turn) > 1e-9 || pi !== po) { pts.push(c); fix.push(pi || po ? 1 : 0); }
+    }
+    return pts.length >= 3 ? { pts, fix } : null;
+  }
+
   E.loopsA = function (S, L, P) {
-    const key = 'A' + L + ':' + P.smooth;
+    const key = 'A' + L + ':' + P.smooth + (P.anchor === false ? 'n' : '');
     if (S.cache[key]) return S.cache[key];
-    const { W, H, fine } = S;
-    const loops = traceMask(W, H, (x, y) => fine[y * W + x] >= L)
-      .map((l) => chaikin(dropCollinear(l), W, H, P.smooth));
+    const { W, H, fine } = S, carved = S.stairs && S.stairs.length && P.anchor !== false ? S.carved : null; // P.anchor === false: diagnostic, no rigid footprint
+    const loops = traceMask(W, H, (x, y) => fine[y * W + x] >= L).map((l) => {
+      const an = carved && anchored(l, carved, W, H);
+      return an ? chaikin(an.pts, W, H, P.smooth, an.fix) : chaikin(dropCollinear(l), W, H, P.smooth);
+    });
     return (S.cache[key] = loops);
   };
 
@@ -977,7 +1388,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   }
 
   E.loopsB = function (S, L, P) {
-    const key = 'B' + L + ':' + P.radius;
+    const key = 'B' + L + ':' + P.radius + (P.anchor === false ? 'n' : '');
     if (S.cache[key]) return S.cache[key];
     const { W, H, fine } = S, s = 4, r = Math.round(P.radius * s), pad = r * 3 + 3;
     const w = W * s + pad * 2, h = H * s + pad * 2;
@@ -985,7 +1396,21 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     for (let y = 0; y < H * s; y++) for (let x = 0; x < W * s; x++) {
       inside[(y + pad) * w + x + pad] = fine[((y / s) | 0) * W + ((x / s) | 0)] >= L ? 1 : 0;
     }
-    const f = boxBlur(sdf(inside, w, h), w, h, r, 3);
+    const raw = sdf(inside, w, h);
+    let f = boxBlur(raw.slice(), w, h, r, 3);
+    if (S.stairs && S.stairs.length && P.anchor !== false) { // rigid stair footprint: the unblurred field wins within 0.5 tile of a carved tile, fading out by 1.5
+      const wk = 'Bw' + P.radius; // the weight depends on the stairs only, so it is shared by all levels
+      if (!S.cache[wk]) {
+        const F = new Uint8Array(w * h);
+        for (let y = 0; y < H * s; y++) for (let x = 0; x < W * s; x++) F[(y + pad) * w + x + pad] = S.carved[((y / s) | 0) * W + ((x / s) | 0)];
+        const dF = sdf(F, w, h), k = new Float32Array(w * h);
+        for (let i = 0; i < w * h; i++) { const d = dF[i] < 0 ? -dF[i] + 0.5 : 0; k[i] = Math.max(0, Math.min(1, 1 - (d - 0.5 * s) / s)); }
+        S.cache[wk] = k;
+      }
+      const k = S.cache[wk], g = new Float32Array(w * h);
+      for (let i = 0; i < w * h; i++) g[i] = f[i] * (1 - k[i]) + raw[i] * k[i];
+      f = g;
+    }
     const toXY = (i, j) => [(i - pad + 0.5) / s, (j - pad + 0.5) / s];
     const eps = 0.5 / s + 0.02;
     const snap = (p) => [p[0] < eps ? 0 : p[0] > W - eps ? W : p[0], p[1] < eps ? 0 : p[1] > H - eps ? H : p[1]];
@@ -1022,18 +1447,26 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     }
     return RAMP[RAMP.length - 1][1];
   }
-  function levelColor(fine, P) {
-    const K = P.micro, ter = Math.floor(fine / K), mi = fine % K;
-    const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
-    const lift = 1 + (mi - (K - 1) / 2) * 0.05;
-    return c.map((v) => v * lift);
+  let PICK = false, PKC = '#000'; // pick mode (E.pickTile): every surface is filled with a code colour instead of its look
+  const pcode = (kind, v) => { const n = (kind << 20) | v; return `rgb(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255})`; };
+  let DBG = false; // test mode (o.debug): flat grey terrain, pure red for everything that belongs to a ramp
+  function levelColor(S, L, P) {
+    if (DBG) return [128, 128, 128];
+    const K = P.subs, m = S.levelMeta[L];
+    const at = (ter, mi) => { // colour of terrace `ter`, sub-terrace `mi`
+      const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
+      const lift = 1 + (mi - (K - 1) / 2) * 0.05;
+      return c.map((v) => v * lift);
+    };
+    if (m.bridge) { const lo = at(m.ter, K - 1), hi = at(m.ter + 1, 0); return lo.map((v, k) => v + (hi[k] - v) * m.frac); } // between two terraces
+    return at(m.ter, m.sub);
   }
   const OUT = 'rgba(24,20,34,0.92)';
 
   function makeCam(S, P, view, w, h) {
     const yaw = view.yaw * Math.PI / 180, pit = view.pitch * Math.PI / 180;
     const cy = Math.cos(yaw), sy = Math.sin(yaw), sp = Math.sin(pit), cp = Math.cos(pit);
-    const base = E.hOf(0, P) - P.terH, top = E.hOf(S.maxFine, P);
+    const base = S.levelH[0] - P.terH, top = S.levelH[S.maxFine];
     const raw = (x, y, hh) => {
       const X = x - S.W / 2, Y = y - S.H / 2;
       return [cy * X - sy * Y, (sy * X + cy * Y) * sp - hh * cp];
@@ -1048,20 +1481,24 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return {
       sc, base,
       p: (x, y, hh) => { const [a, b] = raw(x, y, hh); return [a * sc + ox, b * sc + oy]; },
+      unp: (px, py, hh) => { const a = (px - ox) / sc, b = (py - oy) / sc + hh * cp, c = b / sp; return [cy * a + sy * c + S.W / 2, -sy * a + cy * c + S.H / 2]; }, // screen point -> ground point on the plane at height hh
       ry: (x, y) => sy * (x - S.W / 2) + cy * (y - S.H / 2),
       nrm: (nx, ny) => [cy * nx - sy * ny, sy * nx + cy * ny]
     };
   }
 
   function wallFill(ctx, c, k, y0, y1, o) {
+    if (PICK) return PKC;
     if (!o.gradient) return rgb(c, 0.62 * k);
     const g = ctx.createLinearGradient(0, y0, 0, y1);
     g.addColorStop(0, rgb(c, 0.86 * k)); g.addColorStop(1, rgb(c, 0.42 * k));
     return g;
   }
 
+  /* hb / ht: a number, or [at a, at b] for a wall whose bottom or top is sloped (ramp flanks) */
   function wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, c, rnx, o, st, strong) {
-    const p0 = cam.p(ax, ay, ht), p1 = cam.p(bx, by, ht), p2 = cam.p(bx, by, hb), p3 = cam.p(ax, ay, hb);
+    const hb0 = Array.isArray(hb) ? hb[0] : hb, hb1 = Array.isArray(hb) ? hb[1] : hb, ht0 = Array.isArray(ht) ? ht[0] : ht, ht1 = Array.isArray(ht) ? ht[1] : ht;
+    const p0 = cam.p(ax, ay, ht0), p1 = cam.p(bx, by, ht1), p2 = cam.p(bx, by, hb1), p3 = cam.p(ax, ay, hb0);
     const k = clamp(0.92 + 0.28 * -rnx, 0.65, 1.2);
     const f = wallFill(ctx, c, k, Math.min(p0[1], p1[1]), Math.max(p2[1], p3[1]), o);
     ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.lineTo(p3[0], p3[1]); ctx.closePath();
@@ -1077,17 +1514,29 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   const BORDER = 'rgba(255,226,110,0.98)', BORDER_CASE = 'rgba(24,20,34,0.95)';
   const FACE = [[0, 0, 1, 0], [1, 0, 1, 1], [1, 1, 0, 1], [0, 1, 0, 0]]; // N E S W, same bits as S.border
   const inSlice = (S, x, y) => { const ix = Math.floor(x), iy = Math.floor(y); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H && S.slice[iy * S.W + ix] === 1; };
-  function borderFaces(path, cam, x, y, bits, hh) { // adds the faces of tile (x,y) that look outside the slice, at the height of its cap
+  /* Border faces, one segment per tile face (tile-exact, the same in Box, A and B). kind: 1 barrier (red), 2 pass (cyan,
+     dashed per face), 3 not marked (yellow), 4 map edge (white); 0 = the old single colour. */
+  const BORDER_COLORS = { 0: BORDER, 1: 'rgba(240,56,56,0.98)', 2: 'rgba(56,228,244,0.98)', 3: BORDER, 4: 'rgba(255,255,255,0.98)' };
+  function borderFaces(list, S, cam, i, bits, hh) { // adds the faces of tile i that look outside the slice, at the height of its cap
+    const x = i % S.W, y = (i / S.W) | 0;
     for (let b = 0; b < 4; b++) {
       if (!(bits >> b & 1)) continue;
       const f = FACE[b], p = cam.p(x + f[0], y + f[1], hh), q = cam.p(x + f[2], y + f[3], hh);
-      path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]);
+      list.push([p, q, S.borderKind ? S.borderKind[i * 4 + b] : 0]);
     }
   }
-  function strokeBorder(ctx, path) {
+  function strokeBorder(ctx, list) {
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const path = new Path2D(); for (const [p, q] of list) { path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]); }
     ctx.strokeStyle = BORDER_CASE; ctx.lineWidth = 4.2; ctx.stroke(path);
-    ctx.strokeStyle = BORDER; ctx.lineWidth = 2; ctx.stroke(path);
+    for (const kind of [0, 1, 2, 3, 4]) {
+      const pp = new Path2D(); let any = false;
+      for (const [p, q, k] of list) if (k === kind) { pp.moveTo(p[0], p[1]); pp.lineTo(q[0], q[1]); any = true; }
+      if (!any) continue;
+      ctx.strokeStyle = BORDER_COLORS[kind]; ctx.lineWidth = 2;
+      if (kind === 2) { ctx.lineCap = 'butt'; ctx.setLineDash([4, 3]); }
+      ctx.stroke(pp); ctx.setLineDash([]); ctx.lineCap = 'round';
+    }
     ctx.restore();
   }
   function veilPath(cam, S, ht) { // the whole plane minus the slice, at cap height ht (even-odd)
@@ -1149,40 +1598,10 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath();
   }
 
-  function drawRamp(ctx, cam, S, P, pass, o) {
-    const { W } = S, a = pass.a, b = pass.b;
-    const xa = a % W, ya = (a / W) | 0, xb = b % W, yb = (b / W) | 0, dx = xa - xb, dy = ya - yb;
-    const [rnx, rny] = cam.nrm(dx, dy);
-    if (rny < -0.3) return false;
-    const hb = E.hOf(S.fine[b], P), ha = E.hOf(S.fine[a], P);
-    let e1, e2, f1, f2;
-    if (dx === 1) { e1 = [xb + 1, yb]; e2 = [xb + 1, yb + 1]; f1 = [xb + 2, yb]; f2 = [xb + 2, yb + 1]; }
-    else if (dx === -1) { e1 = [xb, yb]; e2 = [xb, yb + 1]; f1 = [xb - 1, yb]; f2 = [xb - 1, yb + 1]; }
-    else if (dy === 1) { e1 = [xb, yb + 1]; e2 = [xb + 1, yb + 1]; f1 = [xb, yb + 2]; f2 = [xb + 1, yb + 2]; }
-    else { e1 = [xb, yb]; e2 = [xb + 1, yb]; f1 = [xb, yb - 1]; f2 = [xb + 1, yb - 1]; }
-    const q = [cam.p(e1[0], e1[1], hb), cam.p(e2[0], e2[1], hb), cam.p(f2[0], f2[1], ha), cam.p(f1[0], f1[1], ha)];
-    const c = levelColor(S.fine[b], P);
-    ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(q[k][0], q[k][1]); ctx.closePath();
-    ctx.fillStyle = rgb(c, 1.18); ctx.fill();
-    const n = clamp(Math.round((hb - ha) / 0.28), 2, 6);
-    ctx.strokeStyle = rgb(c, 0.55, 0.85); ctx.lineWidth = 1;
-    for (let k = 1; k < n; k++) {
-      const t = k / n, hh = hb + (ha - hb) * t;
-      const A = cam.p(e1[0] + (f1[0] - e1[0]) * t, e1[1] + (f1[1] - e1[1]) * t, hh);
-      const B = cam.p(e2[0] + (f2[0] - e2[0]) * t, e2[1] + (f2[1] - e2[1]) * t, hh);
-      ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
-    }
-    if (o.outlines) {
-      ctx.strokeStyle = OUT; ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); ctx.lineTo(q[3][0], q[3][1]); ctx.lineTo(q[2][0], q[2][1]); ctx.lineTo(q[1][0], q[1][1]); ctx.stroke();
-    }
-    return true;
-  }
-
   function drawPassMarks(ctx, cam, S, P) {
     ctx.fillStyle = 'rgba(255,214,64,0.95)'; ctx.strokeStyle = 'rgba(24,20,34,0.9)'; ctx.lineWidth = 1;
-    for (const p of S.passes) {
-      const x = p.b % S.W + 0.5, y = ((p.b / S.W) | 0) + 0.5, hh = E.hOf(S.fine[p.b], P);
+    for (const st of S.stairs) {
+      const t = st.top[0], x = t % S.W + 0.5, y = ((t / S.W) | 0) + 0.5, hh = S.levelH[S.fine[t]]; // top of the stair
       const c = cam.p(x, y, hh), r = Math.max(3, cam.sc * 0.18);
       ctx.beginPath(); ctx.moveTo(c[0], c[1] - r * 1.2); ctx.lineTo(c[0] + r, c[1] + r * 0.8); ctx.lineTo(c[0] - r, c[1] + r * 0.8); ctx.closePath(); ctx.fill(); ctx.stroke();
     }
@@ -1192,7 +1611,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     ctx.font = `600 ${Math.max(10, Math.min(14, cam.sc * 0.5)) | 0}px system-ui, sans-serif`;
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
     for (const m of S.markers) {
-      const i = m.y * S.W + m.x, hh = E.hOf(S.fine[i], P);
+      const i = m.y * S.W + m.x, hh = S.levelH[S.fine[i]];
       const b = cam.p(m.x + 0.5, m.y + 0.5, hh), t = cam.p(m.x + 0.5, m.y + 0.5, hh + 1.1);
       ctx.strokeStyle = 'rgba(24,20,34,0.95)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(t[0], t[1]); ctx.stroke();
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.stroke();
@@ -1204,37 +1623,172 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     }
   }
 
+  /* ---- Stair look (same in Box, A and B): the footprint is rigid, so it gets its own colour, a tint per tread,
+     light lines on the top edge of each riser and a dark outline along its flanks. ---- */
+  const STAIR_RGB = [226, 212, 178];
+  function stairTiles(S) { // tile -> { dir, k (tread index, 0 = lowest), m }
+    if (S._stairTile) return S._stairTile;
+    const map = new Map();
+    for (const st of S.stairs) st.steps.forEach((step, k) => { for (const t of step.tiles) map.set(t, { dir: st.dir, k, m: st.steps.length, rec: st.ramp ? st : null }); });
+    S._stairNear = new Uint8Array(S.n); // carved tiles and their 4-neighbours: the only tiles with stair edges
+    for (const t of map.keys()) { const x = t % S.W, y = (t / S.W) | 0; S._stairNear[t] = 1; if (x > 0) S._stairNear[t - 1] = 1; if (x < S.W - 1) S._stairNear[t + 1] = 1; if (y > 0) S._stairNear[t - S.W] = 1; if (y < S.H - 1) S._stairNear[t + S.W] = 1; }
+    return (S._stairTile = map);
+  }
+  const stairColor = (info) => DBG ? [255, 0, 0] : info.rec ? STAIR_RGB : STAIR_RGB.map((v) => v * (0.78 + 0.3 * (info.m > 1 ? info.k / (info.m - 1) : 0.5)));
+  const STAIR_LINE = 'rgba(255,248,226,0.95)', STAIR_EDGE = 'rgba(24,20,34,0.9)';
+  /* edge of tile t towards neighbour n (t higher than n) that belongs to a stair: returns 'riser', 'flank' or null */
+  function stairEdge(S, t, n) {
+    const T = stairTiles(S), a = T.get(t), b = T.get(n);
+    if (!a && !b) return null;
+    if ((a && a.rec) || (b && b.rec)) return null; // ramps draw their own edges
+    const dx = Math.abs((n % S.W) - (t % S.W)), info = a || b, par = info.dir[0] !== 0 ? dx === 1 : dx === 0;
+    if (par) return 'riser';
+    return a && b ? null : 'flank';
+  }
+  function drawStairEdges(ctx, cam, S, i, hh) { // edges of tile i that face a lower neighbour, at the height of its cap
+    if (PICK || !S._stairNear[i]) return;
+    const x = i % S.W, y = (i / S.W) | 0;
+    for (const [dx, dy, ax, ay, bx, by] of [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]]) {
+      const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= S.W || ny >= S.H) continue;
+      const j = ny * S.W + nx; if (S.levelH[S.fine[j]] >= hh - 1e-6) continue;
+      const kind = stairEdge(S, i, j); if (!kind) continue;
+      const A = cam.p(x + ax, y + ay, hh), B = cam.p(x + bx, y + by, hh);
+      ctx.strokeStyle = kind === 'riser' ? STAIR_LINE : STAIR_EDGE; ctx.lineWidth = kind === 'riser' ? 1.5 : 1.8;
+      ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
+    }
+  }
+  function hasStairs(S) { return S.stairs && S.stairs.length > 0; }
+
+  /* ---- Ramp: one smooth surface per gate, same look in Box, A and B. Surface = quads with the heights of E.rampHeight, a
+     gradient along the slope (lighter at the high end), a dark outline on the footprint and own side walls. ---- */
+  function rampFill(ctx, cam, R) {
+    if (PICK) return PKC;
+    if (DBG) return 'rgb(255,0,0)';
+    const p0 = cam.p(R.mx, R.my, R.h0), p1 = cam.p(R.mx + R.pdx * R.len, R.my + R.pdy * R.len, R.h1);
+    if (Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) < 2) return rgb(STAIR_RGB);
+    const g = ctx.createLinearGradient(p0[0], p0[1], p1[0], p1[1]), up = R.h1 > R.h0;
+    g.addColorStop(0, rgb(STAIR_RGB, up ? 0.7 : 1.12)); g.addColorStop(1, rgb(STAIR_RGB, up ? 1.12 : 0.7));
+    return g;
+  }
+  function rampTile(ctx, cam, S, o, i, rec, ST, st) {
+    if (PICK) PKC = pcode(3, i);
+    const x = i % S.W, y = (i / S.W) | 0, hc = (px, py) => E.rampHeight(rec, px, py), R = rec.ramp;
+    const DIRS = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
+    for (const [dx, dy, ax, ay, bx, by] of DIRS) { // side walls where the surface is above the neighbour
+      const nx = x + dx, ny = y + dy, out = nx < 0 || ny < 0 || nx >= S.W || ny >= S.H, j = out ? -1 : ny * S.W + nx, nj = j >= 0 ? ST.get(j) : null;
+      if (nj && nj.rec === rec) continue;
+      const [rnx, rny] = cam.nrm(dx, dy);
+      if (rny <= 0.001) continue;
+      const e0 = hc(x + ax, y + ay), e1 = hc(x + bx, y + by);
+      const hn0 = out ? cam.base : nj ? E.rampHeight(nj.rec, x + ax, y + ay) : S.levelH[S.fine[j]], hn1 = out ? cam.base : nj ? E.rampHeight(nj.rec, x + bx, y + by) : hn0; // beside another ramp: its surface
+      const b0 = Math.min(hn0, e0), b1 = Math.min(hn1, e1);
+      if (e0 - b0 < 1e-6 && e1 - b1 < 1e-6) continue;
+      wallQuad(ctx, cam, x + ax, y + ay, x + bx, y + by, [b0, b1], [e0, e1], DBG ? [255, 0, 0] : STAIR_RGB, rnx, o, st);
+    }
+    const q = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]].map(([px, py]) => cam.p(px, py, hc(px, py)));
+    ctx.beginPath(); q.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath();
+    ctx.fillStyle = rampFill(ctx, cam, R); ctx.fill(); if (!DBG && !PICK) { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.8; ctx.stroke(); }
+    if (DBG || PICK) return;
+    if (o.rampLines) { // thin lines across the slope, evenly spaced along the whole ramp (cut where they cross this tile)
+      const nL = R.len <= 2 ? 2 : 3;
+      for (let q = 1; q <= nL; q++) {
+        const s0 = R.len * q / (nL + 1);
+        // the line s = s0 is perpendicular to the path direction: a vertical or horizontal segment through this tile
+        const horiz = R.pdx === 0, a0 = horiz ? y : x, a1 = a0 + 1;
+        const cA = horiz ? R.my + R.pdy * s0 : R.mx + R.pdx * s0;
+        if (cA < a0 - 1e-9 || cA > a1 + 1e-9) continue;
+        const pts = horiz ? [[x, cA], [x + 1, cA]] : [[cA, y], [cA, y + 1]];
+        const A = cam.p(pts[0][0], pts[0][1], hc(pts[0][0], pts[0][1])), B = cam.p(pts[1][0], pts[1][1], hc(pts[1][0], pts[1][1]));
+        ctx.strokeStyle = 'rgba(255,250,230,0.55)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
+      }
+    }
+    for (const [dx, dy, ax, ay, bx, by] of DIRS) { // outline along the footprint boundary, at the height of the surface
+      const nj = ST.get((y + dy) * S.W + x + dx);
+      if ((nj && nj.rec === rec) || x + dx < 0 || y + dy < 0 || x + dx >= S.W || y + dy >= S.H) continue;
+      const A = cam.p(x + ax, y + ay, hc(x + ax, y + ay)), B = cam.p(x + bx, y + by, hc(x + bx, y + by));
+      ctx.strokeStyle = STAIR_EDGE; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
+    }
+  }
+  /* The level pass after which a ramp is drawn. Cut ramp: right after the slab of the low end (the ramp sits in the hole
+     of every slab above, which are drawn later and so cover it where they are in front). Built-up ramp: right BEFORE
+     the slab of the high end (that slab is drawn later, so its caps hide the ramp where they are in front, and its walls
+     along the ramp are clipped to the surface). Measured against a z-buffer in tools/ui/test_ramp_ui.js. */
+  function rampPassLevel(S, rec) { return rec.mode === 'cut' ? rec.level : Math.max(0, S.fine[rec.top[0]] - 1); }
+  function drawRamps(ctx, cam, S, o, recs, ST, st) {
+    const tiles = []; for (const rec of recs) for (const step of rec.steps) for (const t of step.tiles) tiles.push([t, rec]);
+    tiles.sort((p, q) => cam.ry(p[0] % S.W + 0.5, ((p[0] / S.W) | 0) + 0.5) - cam.ry(q[0] % S.W + 0.5, ((q[0] / S.W) | 0) + 0.5));
+    for (const [t, rec] of tiles) rampTile(ctx, cam, S, o, t, rec, ST, st);
+  }
+
+  /* ---- Incursion: stake, objectives and their routes (drawn on top, same in every technique) ---- */
+  const ROUTE_COLORS = ['#ffb020', '#ff5a8a', '#6ae0ff', '#b48cff', '#a6f06a', '#ffd84a'];
+  function surfaceH(S, i) {
+    const t = hasStairs(S) ? stairTiles(S).get(i) : null;
+    return t && t.rec ? E.rampHeight(t.rec, i % S.W + 0.5, ((i / S.W) | 0) + 0.5) : S.levelH[S.fine[i]];
+  }
+  function drawIncursion(ctx, cam, S, inc) {
+    const pt = (i, lift = 0.06) => cam.p(i % S.W + 0.5, ((i / S.W) | 0) + 0.5, surfaceH(S, i) + lift);
+    ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    inc.objectives.forEach((ob, k) => {
+      if (!ob.route || ob.route.length < 2) return;
+      const col = ROUTE_COLORS[k % ROUTE_COLORS.length], pts = ob.route.map((i) => pt(i));
+      for (const [w, c] of [[4.6, 'rgba(24,20,34,0.9)'], [2.4, col]]) {
+        ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); pts.forEach((p, j) => (j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.stroke();
+      }
+    });
+    const pin = (i, label, fill, flag) => {
+      const b = pt(i, 0), t = cam.p(i % S.W + 0.5, ((i / S.W) | 0) + 0.5, surfaceH(S, i) + 1.3), r = 8;
+      ctx.strokeStyle = 'rgba(24,20,34,0.95)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(t[0], t[1]); ctx.stroke();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.stroke();
+      if (flag) { ctx.beginPath(); ctx.moveTo(t[0], t[1]); ctx.lineTo(t[0] + 16, t[1] + 5); ctx.lineTo(t[0], t[1] + 10); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = 'rgba(24,20,34,0.95)'; ctx.lineWidth = 1.5; ctx.stroke(); }
+      else { ctx.beginPath(); ctx.arc(t[0], t[1], r, 0, 7); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = 'rgba(24,20,34,0.95)'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.fillStyle = '#1a1624'; ctx.font = '700 11px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, t[0], t[1] + 0.5); }
+    };
+    inc.objectives.forEach((ob, k) => pin(ob.i, String(k + 1), ROUTE_COLORS[k % ROUTE_COLORS.length], false));
+    if (inc.stake) pin(inc.stake, 'S', '#4cd964', true);
+    ctx.restore();
+  }
+
   /* ---- Box reference: one column per tile ---- */
   function renderBox(ctx, cam, S, P, o, st) {
     const { W, H } = S, order = [];
     for (let i = 0; i < S.n; i++) order.push(i);
     const key = (i) => cam.ry(i % W + 0.5, ((i / W) | 0) + 0.5);
     order.sort((a, b) => key(a) - key(b) || S.fine[a] - S.fine[b]);
-    const passA = new Map(S.passes.map((p) => [p.a, p]));
     const dirs = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
     const rank = new Int32Array(S.n); order.forEach((t, r) => { rank[t] = r; });
-    const face = (i2, b) => { const bp = new Path2D(); borderFaces(bp, cam, i2 % W, (i2 / W) | 0, 1 << b, E.hOf(S.fine[i2], P)); strokeBorder(ctx, bp); };
+    const ST = hasStairs(S) ? stairTiles(S) : null;
+    const face = (i2, b) => { const bp = []; borderFaces(bp, S, cam, i2, 1 << b, S.levelH[S.fine[i2]]); strokeBorder(ctx, bp); };
     for (const i of order) {
-      const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = E.hOf(f, P), c = levelColor(f, P);
+      const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = S.levelH[f], si = ST && ST.get(i), c = si ? stairColor(si) : levelColor(S, f, P);
+      const isRamp = !!(si && si.rec);
+      if (PICK) PKC = pcode(2, i);
       const veiled = !!(o.veil && S.slice && !S.slice[i]), cc = veiled ? veilMix(c) : c;
-      for (const [dx, dy, ax, ay, bx, by] of dirs) {
+      if (isRamp) rampTile(ctx, cam, S, o, i, si.rec, ST, st);
+      else for (const [dx, dy, ax, ay, bx, by] of dirs) {
         const nx = x + dx, ny = y + dy;
-        const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : E.hOf(S.fine[ny * W + nx], P);
+        const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : S.levelH[S.fine[ny * W + nx]];
         if (hn >= hh - 1e-6) continue;
         const [rnx, rny] = cam.nrm(dx, dy);
         if (rny <= 0.001) continue;
-        wallQuad(ctx, cam, x + ax, y + ay, x + bx, y + by, hn, hh, cc, rnx, o, st);
+        const sj = ST && (si || ST.get(ny * W + nx)); // a wall that belongs to a stair (riser or flank) takes its colour
+        const inside = nx >= 0 && ny >= 0 && nx < W && ny < H, nr = inside && ST && ST.get(ny * W + nx);
+        const hbw = nr && nr.rec ? [Math.min(hh, E.rampHeight(nr.rec, x + ax, y + ay)), Math.min(hh, E.rampHeight(nr.rec, x + bx, y + by))] : hn; // beside a ramp the wall stops at its surface
+        wallQuad(ctx, cam, x + ax, y + ay, x + bx, y + by, hbw, hh, sj && inside ? stairColor(sj) : cc, rnx, o, st);
       }
-      tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = rgb(cc); ctx.fill(); ctx.strokeStyle = rgb(cc); ctx.lineWidth = 0.8; ctx.stroke();
-      const ov = tileOverlay(S, P, o, i);
-      for (const col of ov) { tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = col; ctx.fill(); }
-      if (veiled && ov.length) { tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = VEIL; ctx.fill(); }
-      if (o.outlines) { // rim only where a lower neighbour exists
+      const ov = isRamp ? [] : tileOverlay(S, P, o, i);
+      if (!isRamp) {
+        if (PICK) PKC = pcode(4, i);
+        tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = PICK ? PKC : rgb(cc); ctx.fill(); ctx.strokeStyle = PICK ? PKC : rgb(cc); ctx.lineWidth = 0.8; ctx.stroke();
+        for (const col of ov) { tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = col; ctx.fill(); }
+        if (veiled && ov.length) { tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = VEIL; ctx.fill(); }
+        if (ST) drawStairEdges(ctx, cam, S, i, hh);
+      }
+      if (o.outlines && !isRamp) { // rim only where a lower neighbour exists
         for (const [dx, dy, ax, ay, bx, by] of dirs) {
           const nx = x + dx, ny = y + dy;
-          const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : E.hOf(S.fine[ny * W + nx], P);
+          const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : S.levelH[S.fine[ny * W + nx]];
           if (hn >= hh - 1e-6) continue;
-          const terrace = hh - hn > P.microH * 1.5;
+          const terrace = hh - hn > E.subHeight(P) * 1.5;
           const A = cam.p(x + ax, y + ay, hh), B = cam.p(x + bx, y + by, hh);
           ctx.strokeStyle = terrace ? OUT : 'rgba(24,20,34,0.45)'; ctx.lineWidth = terrace ? 1.6 : 0.7;
           ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
@@ -1254,43 +1808,69 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         }
       }
       st.polys++;
-      const p = passA.get(i);
-      if (p && drawRamp(ctx, cam, S, P, p, o)) st.ramps++;
     }
   }
 
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
   function renderLevels(ctx, cam, S, P, o, st, loopsOf) {
-    const byB = new Map();
-    for (const p of S.passes) { const f = S.fine[p.b]; if (!byB.has(f)) byB.set(f, []); byB.get(f).push(p); }
+    const ST = hasStairs(S) ? stairTiles(S) : null, RAMPS = new Map(); // ramps are drawn in the pass of their level: after the slab of the low end (cut) or of the high end (built up)
+    if (ST) for (const rec of S.stairs) if (rec.ramp) { const L = rampPassLevel(S, rec); (RAMPS.get(L) || RAMPS.set(L, []).get(L)).push(rec); }
     for (let L = 0; L <= S.maxFine; L++) {
       const loops = loopsOf(S, L, P);
       if (!loops.length) continue;
-      const ht = E.hOf(L, P), hb = L === 0 ? cam.base : E.hOf(L - 1, P);
-      const terraceLevel = L === 0 || L % P.micro === 0;
-      const c = levelColor(L, P), cv = veilMix(c), segs = [];
+      const ht = S.levelH[L], hb = L === 0 ? cam.base : S.levelH[L - 1];
+      const terraceLevel = L === 0 || (!S.levelMeta[L].bridge && S.levelMeta[L].sub === 0);
+      const c = levelColor(S, L, P), cv = veilMix(c), segs = [];
+      const tileIdx = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? iy * S.W + ix : -1; };
+      const tileOf = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? ST.get(iy * S.W + ix) : undefined; };
+      const mkSeg = (a, b, dx, dy, len) => {
+        const rnxy = cam.nrm(dy / len, -dx / len), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+        if (rnxy[1] <= 0.001) return null;
+        const seg = { a, b, rnx: rnxy[0], d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)), stair: null, own: tileIdx(mx - 0.2 * dy / len, my + 0.2 * dx / len) };
+        if (ST) { // a wall touching a carved tile (also the diagonal corner cells of B): part of the rigid footprint
+          const inn = tileOf(mx - 0.2 * dy / len, my + 0.2 * dx / len), outn = tileOf(mx + 0.2 * dy / len, my - 0.2 * dx / len);
+          if (inn && inn.rec) return null;                  // the ramp draws its own side walls
+          seg.stair = inn || outn || null;
+          if (outn && outn.rec) seg.clip = outn.rec;        // a wall beside a ramp stops at the ramp surface
+        }
+        return seg;
+      };
       for (const loop of loops) {
         const n = loop.length; st.verts += n;
         for (let k = 0; k < n; k++) {
           const a = loop[k], b = loop[(k + 1) % n], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
           if (len < 1e-6) continue;
-          const [rnx, rny] = cam.nrm(dy / len, -dx / len);
-          if (rny <= 0.001) continue;
-          const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
-          // the wall belongs to the tile just inside the region (against the outward normal)
-          segs.push({ a, b, rnx, d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)) });
+          // a long wall that runs (nearly) along an axis next to a ramp is cut per tile: the ramp surface changes along it
+          if ((ST || PICK) && len > 1.001 && (Math.abs(dx) < 0.1 * len || Math.abs(dy) < 0.1 * len)) {
+            const ax = Math.abs(dx) > Math.abs(dy) ? 0 : 1, lo = Math.min(a[ax], b[ax]), hi = Math.max(a[ax], b[ax]), cuts = [];
+            for (let c = Math.floor(lo + 1e-6) + 1; c < hi - 1e-6; c++) cuts.push(c);
+            const pts = [a[ax], ...(a[ax] < b[ax] ? cuts : cuts.slice().reverse()), b[ax]], pieces = [];
+            const at = (v) => { const t = (v - a[ax]) / (b[ax] - a[ax]); return [a[0] + dx * t, a[1] + dy * t]; };
+            for (let q = 0; q + 1 < pts.length; q++) { const p0 = at(pts[q]), p1 = at(pts[q + 1]); pieces.push(mkSeg(p0, p1, p1[0] - p0[0], p1[1] - p0[1], Math.hypot(p1[0] - p0[0], p1[1] - p0[1]))); }
+            if (PICK || pieces.some((q) => q && (q.clip || q.stair))) { for (const q of pieces) if (q) segs.push(q); continue; }
+          }
+          const seg = mkSeg(a, b, dx, dy, len); if (seg) segs.push(seg);
         }
       }
       segs.sort((p, q) => p.d - q.d);
-      for (const s of segs) wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], hb, ht, s.veiled ? cv : c, s.rnx, o, st);
+      for (const s of segs) {
+        let hbs = hb;
+        if (s.clip) { hbs = [Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.a[0], s.a[1]))), Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.b[0], s.b[1])))]; if (hbs[0] >= ht - 1e-6 && hbs[1] >= ht - 1e-6) continue; }
+        if (PICK) PKC = pcode(2, Math.max(0, s.own));
+        wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], hbs, ht, s.stair ? stairColor(s.stair) : s.veiled ? cv : c, s.rnx, o, st);
+      }
       const path = new Path2D();
       for (const loop of loops) {
         loop.forEach((p, k) => { const q = cam.p(p[0], p[1], ht); k ? path.lineTo(q[0], q[1]) : path.moveTo(q[0], q[1]); });
         path.closePath();
       }
       st.polys += loops.length;
-      ctx.fillStyle = rgb(c); ctx.fill(path, 'evenodd');
+      ctx.fillStyle = PICK ? pcode(1, L) : rgb(c); ctx.fill(path, 'evenodd');
       ctx.save(); ctx.clip(path, 'evenodd');
+      if (ST && !PICK) for (const i of S.byLevel[L]) {
+        const si = ST.get(i); if (!si) continue;
+        tileQuad(ctx, cam, i % S.W, (i / S.W) | 0, ht); ctx.fillStyle = rgb(stairColor(si)); ctx.fill();
+      }
       for (const i of S.byLevel[L]) {
         const ov = tileOverlay(S, P, o, i);
         if (!ov.length) continue;
@@ -1303,13 +1883,33 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         ctx.strokeStyle = terraceLevel ? OUT : 'rgba(24,20,34,0.42)'; ctx.lineWidth = terraceLevel ? 1.7 : 0.7; ctx.lineJoin = 'round';
         ctx.stroke(path);
       }
+      if (ST) for (const i of S.byLevel[L]) drawStairEdges(ctx, cam, S, i, ht);
+      if (RAMPS && RAMPS.has(L)) drawRamps(ctx, cam, S, o, RAMPS.get(L), ST, st);
       if (o.border && S.border) {
-        const bp = new Path2D(); let any = false;
-        for (const i of S.byLevel[L]) if (S.border[i]) { borderFaces(bp, cam, i % S.W, (i / S.W) | 0, S.border[i], ht); any = true; }
-        if (any) strokeBorder(ctx, bp);
+        const bp = [];
+        for (const i of S.byLevel[L]) if (S.border[i]) borderFaces(bp, S, cam, i, S.border[i], ht);
+        if (bp.length) strokeBorder(ctx, bp);
       }
-      for (const p of byB.get(L) || []) if (drawRamp(ctx, cam, S, P, p, o)) st.ramps++;
     }
+  }
+
+  E.levelColor = levelColor; // exposed for the tests
+    E.makeCam = makeCam; // exposed for the UI tests (screen position of a tile)
+
+  function drawScene(ctx, w, h, S, P, tech, view, o) {
+    DBG = !!o.debug; PICK = !!o.pick;
+    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0 };
+    const cam = makeCam(S, P, view, w, h);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
+    else renderLevels(ctx, cam, S, P, o, st, tech === 'A' ? E.loopsA : E.loopsB);
+    if (!PICK) {
+      if (o.passes) drawPassMarks(ctx, cam, S, P);
+      if (o.markers) drawMarkers(ctx, cam, S, P);
+      if (o.incursion) drawIncursion(ctx, cam, S, o.incursion);
+    }
+    st.ms = performance.now() - t0; DBG = false; PICK = false;
+    return { st, cam };
   }
 
   E.render = function (cv, S, P, tech, view, o) {
@@ -1319,23 +1919,47 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424');
     ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, ramps: 0 };
-    const cam = makeCam(S, P, view, w, h);
-    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
-    else renderLevels(ctx, cam, S, P, o, st, tech === 'A' ? E.loopsA : E.loopsB);
-    if (o.passes) drawPassMarks(ctx, cam, S, P);
-    if (o.markers) drawMarkers(ctx, cam, S, P);
-    st.ms = performance.now() - t0;
-    return st;
+    return drawScene(ctx, w, h, S, P, tech, view, o).st;
+  };
+
+  /* The tile under a screen point, as seen: the same renderer draws every surface with a code colour (walls and ramps and
+     Box caps by tile, the caps of A / B slabs by level) and the point is read back; a cap is turned into a tile by
+     unprojecting the pixel onto the plane of its level. Returns { tile, kind } (tile = index in the window, -1 = nothing).
+     (px, py) are CSS pixels of a canvas of w x h CSS pixels. */
+  E.pickTile = function (S, P, tech, view, w, h, px, py) {
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    ctx.antialias = false;
+    const { cam } = drawScene(ctx, w, h, S, P, tech, view, { pick: true });
+    const x0 = Math.round(px), y0 = Math.round(py);
+    const valid = (code) => { const k = code >> 20, v = code & 0xfffff; return (k === 1 && v <= S.maxFine) || ((k === 2 || k === 3 || k === 4) && v < S.n); }; // blended edge pixels are not codes
+    const at = (x, y) => { if (x < 0 || y < 0 || x >= w || y >= h) return -1; const q = ctx.getImageData(x, y, 1, 1).data; return q[3] === 255 ? (q[0] << 16) | (q[1] << 8) | q[2] : -1; };
+    const cc = at(x0, y0); let best = -1;
+    if (cc >= 0 && valid(cc)) best = cc;
+    else for (const rad of [1, 2, 3]) { // the nearest valid code around the point (an edge pixel is a blend of two codes)
+      const votes = new Map();
+      for (let dy = -rad; dy <= rad; dy++) for (let dx = -rad; dx <= rad; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== rad) continue; const c = at(x0 + dx, y0 + dy); if (c >= 0 && valid(c)) votes.set(c, (votes.get(c) || 0) + 1); }
+      let bn = 0; for (const [c, n] of votes) if (n > bn) { best = c; bn = n; }
+      if (best >= 0) break;
+    }
+    if (best < 0) return { tile: -1, kind: 'none' };
+    const kind = best >> 20, v = best & 0xfffff;
+    if (kind === 2) return { tile: v < S.n ? v : -1, kind: 'wall' };
+    if (kind === 3) return { tile: v < S.n ? v : -1, kind: 'ramp' };
+    if (kind === 4) return { tile: v < S.n ? v : -1, kind: 'cap' };
+    if (kind === 1 && v <= S.maxFine) {
+      const [gx, gy] = cam.unp(px, py, S.levelH[v]), ix = Math.floor(gx), iy = Math.floor(gy);
+      return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? { tile: iy * S.W + ix, kind: 'cap' } : { tile: -1, kind: 'none' };
+    }
+    return { tile: -1, kind: 'none' };
   };
 })(window.EVO = window.EVO || {});
 
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, micro: 3, terH: 1.0, microH: 0.22, minPlateau: 5, minMicro: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, margin: 24 };
-  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, passes: false, zones: false, edges: false, masks: false };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 2, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 3, margin: 24 };
+  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
     { id: 'low', label: 'Low 28°', yaw: 0, pitch: 28 },
@@ -1344,15 +1968,16 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     { id: 'top', label: 'Top 80°', yaw: 0, pitch: 80 }
   ];
   const SLIDERS = [
-    ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['micro', 'Micro steps / terrace', 1, 3, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['microH', 'Micro step height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minMicro', 'Min micro patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
+    ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
-    ['Passes', [['passGap', 'Stair spacing', 3, 20, 1]]],
+    ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['stairStyle', 'Style: 0 steps · 1 ramp', 0, 1, 1], ['rampSlope', 'Ramp max slope (height per tile)', 0.15, 1, 0.05], ['rampMin', 'Ramp min length, tiles', 1, 6, 1], ['tread', 'Tread rise, sub-terraces (steps only)', 1, 5, 1], ['stairW', 'Stair width, tiles (0 = none)', 0, 3, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
-  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
+  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
   const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field']];
 
   const packs = {};
+  const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
   const st = { pack: 'snake', mode: 'compare', tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0;
 
@@ -1404,6 +2029,9 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
     for (const id of cropIds) $('#' + id).addEventListener('change', () => { refreshMessage(); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadFiles(e.target.files));
+    for (const [id, k] of [['m-stake', 'stake'], ['m-obj', 'obj'], ['m-rm', 'rm']]) document.getElementById(id).addEventListener('click', () => setIncMode(inc.mode === k ? null : k));
+    document.getElementById('m-clear').addEventListener('click', () => { inc.stake = null; inc.objectives = []; setIncMode(null); invalidate(false); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && inc.mode) setIncMode(null); });
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
     window.addEventListener('resize', () => invalidate(false));
     $('#stage').addEventListener('wheel', (e) => { e.preventDefault(); st.zoom = Math.max(0.5, Math.min(4, st.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); invalidate(false); }, { passive: false });
@@ -1416,9 +2044,64 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       else { st.yawOff = Math.max(-20, Math.min(20, drag.yo + dx * 0.15)); st.pitchOff = Math.max(-15, Math.min(15, drag.po - dy * 0.15)); }
       invalidate(false);
     });
-    $('#stage').addEventListener('pointerup', () => { drag = null; });
+    $('#stage').addEventListener('pointerup', (e) => {
+      const moved = drag ? Math.hypot(e.clientX - drag.x, e.clientY - drag.y) : 99, was = drag; drag = null;
+      if (inc.mode && was && !was.shift && e.button === 0 && moved < 4) clickMap(e);
+    });
     $('#stage').addEventListener('dblclick', () => $('#reset').click());
     $('#stage').addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  /* ---- incursion: stake, objectives, routes ---- */
+  const incIdx = (m) => { // a mark (tile of the whole map) as a tile of the built window, or -1 when it is outside the window or the slice
+    const x = m.x - S.ox, y = m.y - S.oy; if (x < 0 || y < 0 || x >= S.W || y >= S.H) return -1;
+    const i = y * S.W + x; return S.block[i] ? -1 : i;
+  };
+  const regionName = (r) => `R${r + 1}`;
+  function computeIncursion() {
+    const out = { stake: null, objectives: [], lines: [] };
+    if (!S) return out;
+    const stake = inc.stake ? incIdx(inc.stake) : -1;
+    if (inc.stake) { if (stake >= 0) out.stake = stake; else out.lines.push('Stake: outside the slice (kept in the pack, not shown).'); }
+    inc.objectives.forEach((o, k) => {
+      const i = incIdx(o), name = o.label || `Objective ${k + 1}`;
+      if (i < 0) { out.lines.push(`${name}: outside the slice (kept in the pack, not shown).`); return; }
+      const ob = { i, route: null }; out.objectives.push(ob);
+      if (stake < 0) { out.lines.push(`${name} at (${o.x}, ${o.y}): no stake yet.`); return; }
+      ob.route = E.route(S, P, i, stake);
+      if (ob.route) { out.lines.push(`${name}: route of ${ob.route.length} tiles to the stake.`); return; }
+      const g = E.regionGap(S, i, stake), xy = (t) => `(${S.ox + (t % S.W)}, ${S.oy + ((t / S.W) | 0)})`;
+      out.lines.push(`${name}: <b>no route</b>. Region ${regionName(g.ra)} (${g.sizeA} tiles) is not connected to the stake region ${regionName(g.rb)} (${g.sizeB} tiles)` + (g.dist >= 0 ? `; closest approach ${g.dist} tile${g.dist === 1 ? '' : 's'} between ${xy(g.from)} and ${xy(g.to)}` : '') + (g.droppedGates ? `; ${g.droppedGates} gate${g.droppedGates === 1 ? '' : 's'} touch${g.droppedGates === 1 ? 'es' : ''} both without a ramp.` : '; no gate touches both.'));
+    });
+    return out;
+  }
+  function setIncMode(m) {
+    inc.mode = m;
+    for (const [id, k] of [['m-stake', 'stake'], ['m-obj', 'obj'], ['m-rm', 'rm']]) { const b = document.getElementById(id); if (b) b.classList.toggle('on', m === k); }
+    const stage = document.getElementById('stage'); if (stage) stage.classList.toggle('picking', !!m);
+  }
+  function clickMap(e) {
+    const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
+    for (let k = 0; k < figs.length; k++) {
+      const cv = figs[k].querySelector('canvas'), r = cv.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
+      const hit = E.pickTile(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top);
+      return placeMark(hit.tile);
+    }
+  }
+  function placeMark(tile) {
+    const note = (t) => { $('#incInfo').innerHTML = t; };
+    if (tile < 0) return note('Nothing under the cursor.');
+    const x = S.ox + (tile % S.W), y = S.oy + ((tile / S.W) | 0);
+    if (inc.mode === 'rm') {
+      const near = (m) => Math.hypot(m.x - x, m.y - y) <= 1.5;
+      if (inc.stake && near(inc.stake)) inc.stake = null; else { const k = inc.objectives.findIndex(near); if (k >= 0) inc.objectives.splice(k, 1); else return note('No mark there.'); }
+    } else {
+      if (S.slice && !S.slice[tile]) return note(`(${x}, ${y}) is outside the slice: movement is limited to the slice.`);
+      if (S.block[tile]) return note(`(${x}, ${y}) is not walkable (water).`);
+      if (inc.mode === 'stake') inc.stake = { x, y }; else inc.objectives.push({ x, y });
+    }
+    invalidate(false);
   }
 
   /* ---- slice ---- */
@@ -1459,7 +2142,11 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     $('#wholeMap').classList.toggle('on', sliceSel.whole);
   }
   function refreshMessage() { const p = packs[st.pack] && packs[st.pack].pack; message(p && p.warnings ? p.warnings.join(' ') : ''); }
-  function onPackChanged() { buildChips(packs[st.pack].pack); }
+  function onPackChanged() {
+    buildChips(packs[st.pack].pack);
+    inc.stake = null; inc.objectives = []; setIncMode(null);
+    if (st.pack === 'image' && manifest) { inc.stake = manifest.stake ? Object.assign({}, manifest.stake) : null; inc.objectives = manifest.objectives.map((o) => Object.assign({}, o)); }
+  }
 
   /* ---- images and channel roles ---- */
   const imgs = [];      // { name, dec, width, height, max, ch } (ch = R,G,B,A,H,S,V planes)
@@ -1585,7 +2272,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   function saveManifest() {
     const roles = {};
     for (const [role, r] of Object.entries(currentRoles())) roles[role] = { image: imgs[r.image].name, channel: r.channel };
-    const json = E.buildManifest({ name: imgs.map((i) => i.name).join(' + '), flipY: $('#flipy').checked, maxnode: maxnode(), roles, markers: manifest ? manifest.markers : [], slice: manifestSlice() });
+    const json = E.buildManifest({ name: imgs.map((i) => i.name).join(' + '), flipY: $('#flipy').checked, maxnode: maxnode(), roles, markers: manifest ? manifest.markers : [], slice: manifestSlice(), stake: inc.stake, objectives: inc.objectives });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(json, null, 2) + '\n'], { type: 'application/json' }));
     a.download = 'pack.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -1610,6 +2297,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
     }
+    const incursion = computeIncursion(); O.incursion = incursion;
+    $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');
     const techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
     while (stage.children.length < techs.length) {
@@ -1619,18 +2308,25 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     techs.forEach((t, i) => {
       const f = stage.children[i], cv = f.querySelector('canvas');
       const r = E.render(cv, S, P, t, view(), O);
-      f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ramps} ramps · ${r.ms.toFixed(0)} ms</span>`;
+      f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ms.toFixed(0)} ms</span>`;
     });
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
     document.querySelectorAll('#techs button').forEach((b) => b.classList.toggle('on', st.mode === 'single' && b.dataset.id === st.tech));
     $('#mode').textContent = st.mode === 'compare' ? 'Compare: on' : 'Compare: off';
     $('#mode').classList.toggle('on', st.mode === 'compare');
+    const eff = E.subHeight(P), note = $('#subHnote');
+    note.hidden = eff >= P.subH - 1e-9;
+    note.textContent = `Sub-terrace height limited to ${eff.toFixed(3)} (set ${P.subH}) so the gap to the next terrace stays above the climb limit.`;
+    const surv = {}; for (const t of techs) if (t !== 'box') surv[t] = E.stairSurvival(S, P, t);
+    const sv = (t) => (surv[t] ? `${(surv[t].coverage * 100).toFixed(1)}%` + (surv[t].lost ? `, ${surv[t].lost}/${surv[t].n} lost` : '') + (surv[t].degraded ? `, ${surv[t].degraded} degraded` : '') : '–');
+    const sinf = S.stairInfo, stairText = `${sinf.gates} gates · ${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · stair coverage A ${sv('A')} · B ${sv('B')}`;
+    const bi = S.borderInfo, borderText = bi ? ` · slice border faces: ${bi.barrier} barrier (red) · ${bi.pass} pass (cyan) · ${bi.none} unmarked (yellow) · ${bi.mapEdge} map edge (white)` : '';
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
     $('#busy').hidden = true;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${S.passes.length} stair passes · ${rs.length} walkable regions in the ${si ? 'slice' : 'map'}, largest ${(big / tot * 100).toFixed(0)}%`;
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%`;
   }
 
   function init() {
@@ -1638,7 +2334,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { P, O, st, packs, sliceSel, S: () => S, sliceSpec, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

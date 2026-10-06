@@ -6,7 +6,7 @@ software rasteriser (no GPU), on the state of the repo at PR #1. Treat timings a
 ## 1. Timing (ms)
 
 Test data: 4-octave value noise (`fbm`, detail at tile scale), square maps, default `P`
-(5 terraces x 3 micro steps, 15 levels), canvas 1200x800, all display toggles at their defaults,
+(5 terraces x 3 sub-terraces, 15 levels; they were called micro steps then), canvas 1200x800, all display toggles at their defaults,
 resolution limit of 96 lifted for the test. The `noisePack` stand-in (9 cells) gives similar numbers
 (256: A 210-260, B cold 1640-1920).
 
@@ -84,3 +84,34 @@ alpha). Interlaced files are rejected with a message. Checked in Node 22 and Chr
 - Not covered: files exported by Unity `EncodeToPNG` (none available yet), Adam7 interlacing (rejected by
   design), `tRNS` colour keys for gray/RGB images (ignored), 16-bit palette (does not exist in PNG).
 - pngjs 7's 16-bit encoder produced unusable output in my usage, so pngjs was not used as ground truth.
+
+## 4. Cold cost with carved stairs (bridge levels) and rigid footprint
+
+`node tools/ui/measure.js 3`: median of 3 runs, Chromium 141 headless (software rasteriser, ±30 %), canvas
+1200x800, Oblique 50 degrees, synthetic 256x256 map (12 zones), default parameters except terraces and
+sub-terraces. "Cold" is the first render with an empty contour cache. Times in ms. Stairs are placed at gates (the
+user's criterion, default threshold 0.05 and minimum size 3), with the rigid footprint on. "coverage" is
+`E.stairSurvival`: share of each tread tile's area drawn as its own step by the A / B contours.
+
+| terraces | sub-terraces | slice | levels (bridges) | stairs / sites | shape | Box cold | A cold | B cold | coverage A | coverage B |
+|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 5 | 3 | whole map | 19 (4) | 376 / 376 | 42.5 | 425 | 232 | 2353 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 5 | 3 | zone 6 | 14 (2) | 29 / 29 | 11.7 | 157 | 21.3 | 558 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 5 | 6 | whole map | 34 (4) | 376 / 376 | 27.1 | 436 | 289 | 3989 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 5 | 6 | zone 6 | 26 (2) | 29 / 29 | 8.1 | 135 | 78.4 | 937 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 24 | 3 | whole map | 95 (23) | 1553 / 1599 | 47.3 | 627 | 883 | 11451 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 24 | 3 | zone 6 | 70 (12) | 166 / 167 | 12.9 | 167 | 203 | 2772 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 24 | 6 | whole map | 167 (23) | 1341 / 1602 | 41.5 | 677 | 1482 | 20274 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 24 | 6 | zone 6 | 127 (12) | 126 / 167 | 19.5 | 233 | 393 | 4593 | 100.0% (0 lost) | 100.0% (0 lost) |
+
+Reading it:
+- B is the expensive one: its cost grows with the number of levels (one signed distance field per level) and with
+  the area. With the defaults (5 terraces x 3 sub-terraces) one zone costs ~0.6 s cold; the whole 256x256 map
+  ~2.4 s. At 24 terraces x 6 sub-terraces it is 4.6 s for one zone and 20 s for the whole map (167 levels).
+- The rigid footprint costs B extra: one more field (shared by all levels) and a blend per level, plus more
+  contour vertices around the stairs. Before it, the same scenario (older stair placement, 297 stairs) took 1.8 s
+  for the whole map at the defaults and 16 s at 24 x 6.
+- Gates give more stairs than the old heuristic (376 vs 297 on the whole map at the defaults).
+- With the footprint every stair is 100 % covered in A and B in every row (0 lost). Without it
+  (`P.anchor = false`) B loses stairs and A degrades them: see `tools/test_stairs.js`.
+- Shape time (gates and carving included) is below 0.05 s everywhere here (the whole-map quantization is cached).
