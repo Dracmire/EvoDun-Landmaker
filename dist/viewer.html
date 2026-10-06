@@ -1378,6 +1378,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     }
     return RAMP[RAMP.length - 1][1];
   }
+  let PICK = false, PKC = '#000'; // pick mode (E.pickTile): every surface is filled with a code colour instead of its look
+  const pcode = (kind, v) => { const n = (kind << 20) | v; return `rgb(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255})`; };
   let DBG = false; // test mode (o.debug): flat grey terrain, pure red for everything that belongs to a ramp
   function levelColor(S, L, P) {
     if (DBG) return [128, 128, 128];
@@ -1410,12 +1412,14 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return {
       sc, base,
       p: (x, y, hh) => { const [a, b] = raw(x, y, hh); return [a * sc + ox, b * sc + oy]; },
+      unp: (px, py, hh) => { const a = (px - ox) / sc, b = (py - oy) / sc + hh * cp, c = b / sp; return [cy * a + sy * c + S.W / 2, -sy * a + cy * c + S.H / 2]; }, // screen point -> ground point on the plane at height hh
       ry: (x, y) => sy * (x - S.W / 2) + cy * (y - S.H / 2),
       nrm: (nx, ny) => [cy * nx - sy * ny, sy * nx + cy * ny]
     };
   }
 
   function wallFill(ctx, c, k, y0, y1, o) {
+    if (PICK) return PKC;
     if (!o.gradient) return rgb(c, 0.62 * k);
     const g = ctx.createLinearGradient(0, y0, 0, y1);
     g.addColorStop(0, rgb(c, 0.86 * k)); g.addColorStop(1, rgb(c, 0.42 * k));
@@ -1573,7 +1577,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return a && b ? null : 'flank';
   }
   function drawStairEdges(ctx, cam, S, i, hh) { // edges of tile i that face a lower neighbour, at the height of its cap
-    if (!S._stairNear[i]) return;
+    if (PICK || !S._stairNear[i]) return;
     const x = i % S.W, y = (i / S.W) | 0;
     for (const [dx, dy, ax, ay, bx, by] of [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]]) {
       const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= S.W || ny >= S.H) continue;
@@ -1589,6 +1593,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   /* ---- Ramp: one smooth surface per gate, same look in Box, A and B. Surface = quads with the heights of E.rampHeight, a
      gradient along the slope (lighter at the high end), a dark outline on the footprint and own side walls. ---- */
   function rampFill(ctx, cam, R) {
+    if (PICK) return PKC;
     if (DBG) return 'rgb(255,0,0)';
     const p0 = cam.p(R.mx, R.my, R.h0), p1 = cam.p(R.mx + R.pdx * R.len, R.my + R.pdy * R.len, R.h1);
     if (Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) < 2) return rgb(STAIR_RGB);
@@ -1597,6 +1602,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return g;
   }
   function rampTile(ctx, cam, S, o, i, rec, ST, st) {
+    if (PICK) PKC = pcode(3, i);
     const x = i % S.W, y = (i / S.W) | 0, hc = (px, py) => E.rampHeight(rec, px, py), R = rec.ramp;
     const DIRS = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
     for (const [dx, dy, ax, ay, bx, by] of DIRS) { // side walls where the surface is above the neighbour
@@ -1612,8 +1618,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     }
     const q = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]].map(([px, py]) => cam.p(px, py, hc(px, py)));
     ctx.beginPath(); q.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath();
-    ctx.fillStyle = rampFill(ctx, cam, R); ctx.fill(); if (!DBG) { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.8; ctx.stroke(); }
-    if (DBG) return;
+    ctx.fillStyle = rampFill(ctx, cam, R); ctx.fill(); if (!DBG && !PICK) { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.8; ctx.stroke(); }
+    if (DBG || PICK) return;
     if (o.rampLines) { // thin lines across the slope, evenly spaced along the whole ramp (cut where they cross this tile)
       const nL = R.len <= 2 ? 2 : 3;
       for (let q = 1; q <= nL; q++) {
@@ -1645,6 +1651,34 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     for (const [t, rec] of tiles) rampTile(ctx, cam, S, o, t, rec, ST, st);
   }
 
+  /* ---- Incursion: stake, objectives and their routes (drawn on top, same in every technique) ---- */
+  const ROUTE_COLORS = ['#ffb020', '#ff5a8a', '#6ae0ff', '#b48cff', '#a6f06a', '#ffd84a'];
+  function surfaceH(S, i) {
+    const t = hasStairs(S) ? stairTiles(S).get(i) : null;
+    return t && t.rec ? E.rampHeight(t.rec, i % S.W + 0.5, ((i / S.W) | 0) + 0.5) : S.levelH[S.fine[i]];
+  }
+  function drawIncursion(ctx, cam, S, inc) {
+    const pt = (i, lift = 0.06) => cam.p(i % S.W + 0.5, ((i / S.W) | 0) + 0.5, surfaceH(S, i) + lift);
+    ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    inc.objectives.forEach((ob, k) => {
+      if (!ob.route || ob.route.length < 2) return;
+      const col = ROUTE_COLORS[k % ROUTE_COLORS.length], pts = ob.route.map((i) => pt(i));
+      for (const [w, c] of [[4.6, 'rgba(24,20,34,0.9)'], [2.4, col]]) {
+        ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); pts.forEach((p, j) => (j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.stroke();
+      }
+    });
+    const pin = (i, label, fill, flag) => {
+      const b = pt(i, 0), t = cam.p(i % S.W + 0.5, ((i / S.W) | 0) + 0.5, surfaceH(S, i) + 1.3), r = 8;
+      ctx.strokeStyle = 'rgba(24,20,34,0.95)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(t[0], t[1]); ctx.stroke();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.stroke();
+      if (flag) { ctx.beginPath(); ctx.moveTo(t[0], t[1]); ctx.lineTo(t[0] + 16, t[1] + 5); ctx.lineTo(t[0], t[1] + 10); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = 'rgba(24,20,34,0.95)'; ctx.lineWidth = 1.5; ctx.stroke(); }
+      else { ctx.beginPath(); ctx.arc(t[0], t[1], r, 0, 7); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = 'rgba(24,20,34,0.95)'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.fillStyle = '#1a1624'; ctx.font = '700 11px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, t[0], t[1] + 0.5); }
+    };
+    inc.objectives.forEach((ob, k) => pin(ob.i, String(k + 1), ROUTE_COLORS[k % ROUTE_COLORS.length], false));
+    if (inc.stake) pin(inc.stake, 'S', '#4cd964', true);
+    ctx.restore();
+  }
+
   /* ---- Box reference: one column per tile ---- */
   function renderBox(ctx, cam, S, P, o, st) {
     const { W, H } = S, order = [];
@@ -1658,6 +1692,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     for (const i of order) {
       const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = S.levelH[f], si = ST && ST.get(i), c = si ? stairColor(si) : levelColor(S, f, P);
       const isRamp = !!(si && si.rec);
+      if (PICK) PKC = pcode(2, i);
       const veiled = !!(o.veil && S.slice && !S.slice[i]), cc = veiled ? veilMix(c) : c;
       if (isRamp) rampTile(ctx, cam, S, o, i, si.rec, ST, st);
       else for (const [dx, dy, ax, ay, bx, by] of dirs) {
@@ -1673,7 +1708,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       }
       const ov = isRamp ? [] : tileOverlay(S, P, o, i);
       if (!isRamp) {
-        tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = rgb(cc); ctx.fill(); ctx.strokeStyle = rgb(cc); ctx.lineWidth = 0.8; ctx.stroke();
+        if (PICK) PKC = pcode(4, i);
+        tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = PICK ? PKC : rgb(cc); ctx.fill(); ctx.strokeStyle = PICK ? PKC : rgb(cc); ctx.lineWidth = 0.8; ctx.stroke();
         for (const col of ov) { tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = col; ctx.fill(); }
         if (veiled && ov.length) { tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = VEIL; ctx.fill(); }
         if (ST) drawStairEdges(ctx, cam, S, i, hh);
@@ -1716,11 +1752,12 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const ht = S.levelH[L], hb = L === 0 ? cam.base : S.levelH[L - 1];
       const terraceLevel = L === 0 || (!S.levelMeta[L].bridge && S.levelMeta[L].sub === 0);
       const c = levelColor(S, L, P), cv = veilMix(c), segs = [];
+      const tileIdx = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? iy * S.W + ix : -1; };
       const tileOf = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? ST.get(iy * S.W + ix) : undefined; };
       const mkSeg = (a, b, dx, dy, len) => {
         const rnxy = cam.nrm(dy / len, -dx / len), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
         if (rnxy[1] <= 0.001) return null;
-        const seg = { a, b, rnx: rnxy[0], d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)), stair: null };
+        const seg = { a, b, rnx: rnxy[0], d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)), stair: null, own: tileIdx(mx - 0.2 * dy / len, my + 0.2 * dx / len) };
         if (ST) { // a wall touching a carved tile (also the diagonal corner cells of B): part of the rigid footprint
           const inn = tileOf(mx - 0.2 * dy / len, my + 0.2 * dx / len), outn = tileOf(mx + 0.2 * dy / len, my - 0.2 * dx / len);
           if (inn && inn.rec) return null;                  // the ramp draws its own side walls
@@ -1735,13 +1772,13 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
           const a = loop[k], b = loop[(k + 1) % n], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
           if (len < 1e-6) continue;
           // a long wall that runs (nearly) along an axis next to a ramp is cut per tile: the ramp surface changes along it
-          if (ST && len > 1.001 && (Math.abs(dx) < 0.1 * len || Math.abs(dy) < 0.1 * len)) {
+          if ((ST || PICK) && len > 1.001 && (Math.abs(dx) < 0.1 * len || Math.abs(dy) < 0.1 * len)) {
             const ax = Math.abs(dx) > Math.abs(dy) ? 0 : 1, lo = Math.min(a[ax], b[ax]), hi = Math.max(a[ax], b[ax]), cuts = [];
             for (let c = Math.floor(lo + 1e-6) + 1; c < hi - 1e-6; c++) cuts.push(c);
             const pts = [a[ax], ...(a[ax] < b[ax] ? cuts : cuts.slice().reverse()), b[ax]], pieces = [];
             const at = (v) => { const t = (v - a[ax]) / (b[ax] - a[ax]); return [a[0] + dx * t, a[1] + dy * t]; };
             for (let q = 0; q + 1 < pts.length; q++) { const p0 = at(pts[q]), p1 = at(pts[q + 1]); pieces.push(mkSeg(p0, p1, p1[0] - p0[0], p1[1] - p0[1], Math.hypot(p1[0] - p0[0], p1[1] - p0[1]))); }
-            if (pieces.some((q) => q && (q.clip || q.stair))) { for (const q of pieces) if (q) segs.push(q); continue; }
+            if (PICK || pieces.some((q) => q && (q.clip || q.stair))) { for (const q of pieces) if (q) segs.push(q); continue; }
           }
           const seg = mkSeg(a, b, dx, dy, len); if (seg) segs.push(seg);
         }
@@ -1750,6 +1787,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       for (const s of segs) {
         let hbs = hb;
         if (s.clip) { hbs = [Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.a[0], s.a[1]))), Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.b[0], s.b[1])))]; if (hbs[0] >= ht - 1e-6 && hbs[1] >= ht - 1e-6) continue; }
+        if (PICK) PKC = pcode(2, Math.max(0, s.own));
         wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], hbs, ht, s.stair ? stairColor(s.stair) : s.veiled ? cv : c, s.rnx, o, st);
       }
       const path = new Path2D();
@@ -1758,9 +1796,9 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         path.closePath();
       }
       st.polys += loops.length;
-      ctx.fillStyle = rgb(c); ctx.fill(path, 'evenodd');
+      ctx.fillStyle = PICK ? pcode(1, L) : rgb(c); ctx.fill(path, 'evenodd');
       ctx.save(); ctx.clip(path, 'evenodd');
-      if (ST) for (const i of S.byLevel[L]) {
+      if (ST && !PICK) for (const i of S.byLevel[L]) {
         const si = ST.get(i); if (!si) continue;
         tileQuad(ctx, cam, i % S.W, (i / S.W) | 0, ht); ctx.fillStyle = rgb(stairColor(si)); ctx.fill();
       }
@@ -1789,6 +1827,22 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   E.levelColor = levelColor; // exposed for the tests
     E.makeCam = makeCam; // exposed for the UI tests (screen position of a tile)
 
+  function drawScene(ctx, w, h, S, P, tech, view, o) {
+    DBG = !!o.debug; PICK = !!o.pick;
+    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0 };
+    const cam = makeCam(S, P, view, w, h);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
+    else renderLevels(ctx, cam, S, P, o, st, tech === 'A' ? E.loopsA : E.loopsB);
+    if (!PICK) {
+      if (o.passes) drawPassMarks(ctx, cam, S, P);
+      if (o.markers) drawMarkers(ctx, cam, S, P);
+      if (o.incursion) drawIncursion(ctx, cam, S, o.incursion);
+    }
+    st.ms = performance.now() - t0; DBG = false; PICK = false;
+    return { st, cam };
+  }
+
   E.render = function (cv, S, P, tech, view, o) {
     const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
     if (cv.width !== (w * dpr | 0) || cv.height !== (h * dpr | 0)) { cv.width = w * dpr; cv.height = h * dpr; }
@@ -1796,16 +1850,39 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424');
     ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-    DBG = !!o.debug;
-    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0 };
-    const cam = makeCam(S, P, view, w, h);
-    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
-    else renderLevels(ctx, cam, S, P, o, st, tech === 'A' ? E.loopsA : E.loopsB);
-    if (o.passes) drawPassMarks(ctx, cam, S, P);
-    if (o.markers) drawMarkers(ctx, cam, S, P);
-    st.ms = performance.now() - t0; DBG = false;
-    return st;
+    return drawScene(ctx, w, h, S, P, tech, view, o).st;
+  };
+
+  /* The tile under a screen point, as seen: the same renderer draws every surface with a code colour (walls and ramps and
+     Box caps by tile, the caps of A / B slabs by level) and the point is read back; a cap is turned into a tile by
+     unprojecting the pixel onto the plane of its level. Returns { tile, kind } (tile = index in the window, -1 = nothing).
+     (px, py) are CSS pixels of a canvas of w x h CSS pixels. */
+  E.pickTile = function (S, P, tech, view, w, h, px, py) {
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    ctx.antialias = false;
+    const { cam } = drawScene(ctx, w, h, S, P, tech, view, { pick: true });
+    const x0 = Math.round(px), y0 = Math.round(py);
+    const valid = (code) => { const k = code >> 20, v = code & 0xfffff; return (k === 1 && v <= S.maxFine) || ((k === 2 || k === 3 || k === 4) && v < S.n); }; // blended edge pixels are not codes
+    const at = (x, y) => { if (x < 0 || y < 0 || x >= w || y >= h) return -1; const q = ctx.getImageData(x, y, 1, 1).data; return q[3] === 255 ? (q[0] << 16) | (q[1] << 8) | q[2] : -1; };
+    const cc = at(x0, y0); let best = -1;
+    if (cc >= 0 && valid(cc)) best = cc;
+    else for (const rad of [1, 2, 3]) { // the nearest valid code around the point (an edge pixel is a blend of two codes)
+      const votes = new Map();
+      for (let dy = -rad; dy <= rad; dy++) for (let dx = -rad; dx <= rad; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== rad) continue; const c = at(x0 + dx, y0 + dy); if (c >= 0 && valid(c)) votes.set(c, (votes.get(c) || 0) + 1); }
+      let bn = 0; for (const [c, n] of votes) if (n > bn) { best = c; bn = n; }
+      if (best >= 0) break;
+    }
+    if (best < 0) return { tile: -1, kind: 'none' };
+    const kind = best >> 20, v = best & 0xfffff;
+    if (kind === 2) return { tile: v < S.n ? v : -1, kind: 'wall' };
+    if (kind === 3) return { tile: v < S.n ? v : -1, kind: 'ramp' };
+    if (kind === 4) return { tile: v < S.n ? v : -1, kind: 'cap' };
+    if (kind === 1 && v <= S.maxFine) {
+      const [gx, gy] = cam.unp(px, py, S.levelH[v]), ix = Math.floor(gx), iy = Math.floor(gy);
+      return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? { tile: iy * S.W + ix, kind: 'cap' } : { tile: -1, kind: 'none' };
+    }
+    return { tile: -1, kind: 'none' };
   };
 })(window.EVO = window.EVO || {});
 
