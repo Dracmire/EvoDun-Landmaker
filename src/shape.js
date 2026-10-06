@@ -1,4 +1,4 @@
-/* EvoDun crystal viewer - level shaping: terraces, micro steps, passes, walk regions */
+/* EvoDun crystal viewer - level shaping: terraces, sub-terraces, passes, walk regions */
 (function (E) {
   const N4 = [[1, 0], [0, 1], [-1, 0], [0, -1]];
 
@@ -68,9 +68,14 @@
     return o;
   }
 
+  /* Effective sub-terrace height. The gap from the last sub-terrace of a terrace to the base of the next one,
+     terH - (subs - 1) * subH, must exceed the climb limit by half a sub-step, so that a stair always has a visible
+     rise: subH_eff = min(subH, terH / (subs + climb - 0.5)). */
+  E.subHeight = function (P) { return Math.min(P.subH, P.terH / (P.subs + P.climb - 0.5)); };
+
   E.hOf = function (fine, P) {
-    const K = P.micro;
-    return Math.floor(fine / K) * P.terH + (fine % K) * P.microH;
+    const K = P.subs;
+    return Math.floor(fine / K) * P.terH + (fine % K) * E.subHeight(P);
   };
 
   /* ---- slice: the tiles of the incursion, and the window that gets built (slice + scenery margin) ---- */
@@ -150,13 +155,13 @@
      elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
   E.shape = function (full, P, spec) {
     const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
-    const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.micro;
+    const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.subs;
     let el = Float32Array.from(pack.elevation);
     for (let p = 0; p < P.pre; p++) el = blur3(el, W, H);
     let mn = Infinity, mx = -Infinity;
     if (pack.elevRange) { mn = pack.elevRange[0]; mx = pack.elevRange[1]; }
     else for (const v of el) { if (v < mn) mn = v; if (v > mx) mx = v; }
-    const U = new Float32Array(n), ter = new Int16Array(n), mic = new Int16Array(n), g0 = new Int16Array(n);
+    const U = new Float32Array(n), ter = new Int16Array(n), sub = new Int16Array(n), g0 = new Int16Array(n);
     for (let i = 0; i < n; i++) {
       U[i] = Math.max(0, (el[i] - mn) / (mx - mn || 1) * N);
       ter[i] = Math.min(N - 1, Math.floor(U[i]));
@@ -164,19 +169,19 @@
     cleanup(W, H, ter, g0, P.minPlateau);
     for (let i = 0; i < n; i++) {
       const t0 = Math.min(N - 1, Math.floor(U[i]));
-      if (K <= 1) mic[i] = 0;
-      else if (ter[i] === t0) mic[i] = Math.min(K - 1, Math.floor((U[i] - t0) * K));
-      else mic[i] = ter[i] > t0 ? 0 : K - 1;
+      if (K <= 1) sub[i] = 0;
+      else if (ter[i] === t0) sub[i] = Math.min(K - 1, Math.floor((U[i] - t0) * K));
+      else sub[i] = ter[i] > t0 ? 0 : K - 1;
     }
-    cleanup(W, H, mic, ter, P.minMicro);
+    cleanup(W, H, sub, ter, P.minSub);
     const fine = new Int16Array(n);
     let maxFine = 0;
-    for (let i = 0; i < n; i++) { fine[i] = ter[i] * K + mic[i]; if (fine[i] > maxFine) maxFine = fine[i]; }
+    for (let i = 0; i < n; i++) { fine[i] = ter[i] * K + sub[i]; if (fine[i] > maxFine) maxFine = fine[i]; }
     const byLevel = Array.from({ length: maxFine + 1 }, () => []);
     for (let i = 0; i < n; i++) byLevel[fine[i]].push(i);
     const masks = pack.masks || {};
     const S = {
-      W, H, n, U, ter, mic, fine, maxFine, byLevel, K, N,
+      W, H, n, U, ter, sub, fine, maxFine, byLevel, subs: K, N,
       water: masks.water || new Array(n).fill(0),
       snake: masks.snake || null, cave: masks.cave || null, waterfall: masks.waterfall || null,
       markers: pack.markers || [], name: pack.name, fields: pack.fields || {}, cache: {},
@@ -254,7 +259,7 @@
   }
 
   function computeRegions(S, P) {
-    const { W, H, ter, mic } = S, water = S.block, n = S.n;
+    const { W, H, ter, sub } = S, water = S.block, n = S.n;
     const par = new Int32Array(n).map((_, i) => i);
     const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
     const uni = (a, b) => { a = find(a); b = find(b); if (a !== b) par[a] = b; };
@@ -266,7 +271,7 @@
         if (nx >= W || ny >= H) continue;
         const j = ny * W + nx;
         if (water[j]) continue;
-        if (ter[i] === ter[j] && Math.abs(mic[i] - mic[j]) <= P.climb) uni(i, j);
+        if (ter[i] === ter[j] && Math.abs(sub[i] - sub[j]) <= P.climb) uni(i, j);
       }
     }
     for (const p of S.passes) uni(p.a, p.b);

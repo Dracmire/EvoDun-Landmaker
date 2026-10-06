@@ -28,7 +28,7 @@ non-interlaced only. 1 pixel = 1 tile, native resolution (no resampling). All im
 - **flipY**: Unity writes Y up; flips every image of the pack equally.
 - **Roles** (one channel each):
   - `elevation` (numeric): elevation in height units = channel x 1000 (baked convention: grey = height / 1000).
-    Terraces and micro steps are always derived from it.
+    Terraces and sub-terraces are always derived from it (micro steps are a different, reserved concept).
   - `zone`, `edge` (categorical): ids, 0 = outside.
     - Channel `H`: V = 0 is outside. With `maxnode`, `id = round(H * (maxnode + 1))` (ids 1..maxnode). Without
       it the hues present are clustered (gap > 4 degrees) and each pixel goes to the nearest centre (ids 1..K in

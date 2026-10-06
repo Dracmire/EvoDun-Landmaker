@@ -6,7 +6,7 @@ for (const f of ['fields', 'shape', 'tech']) vm.runInThisContext(fs.readFileSync
 const E = window.EVO;
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { cond ? pass++ : (fail++, console.log('FAIL', name, extra === undefined ? '' : extra)); };
-const P = { terraces: 5, micro: 3, terH: 1, microH: 0.22, minPlateau: 5, minMicro: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2 };
+const P = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2 };
 
 /* 72x56 map: smooth relief, 3 vertical zones (1: x<24, 2: 24..47, 3: >=48), outside ring of 2 tiles (0),
    unassigned pixels (-1): one hole inside zone 2, one on the 2|3 border, a 3x3 block in zone 3 */
@@ -55,7 +55,7 @@ const filled = E.fillUnassigned(ids, W, H);
     if (!S1.slice[y * S1.W + x]) continue; tiles++;
     if (S1.fine[y * S1.W + x] !== full.fine[(y + S1.oy) * W + x + S1.ox]) diff++;
   }
-  ok('terraces/micro steps inside the slice == full-map shaping', diff === 0, diff + ' of ' + tiles + ' differ');
+  ok('terraces/sub-terraces inside the slice == full-map shaping', diff === 0, diff + ' of ' + tiles + ' differ');
   const noRange = E.shape(mkPack(false), P, spec); let d2 = 0;
   for (let y = 0; y < noRange.H; y++) for (let x = 0; x < noRange.W; x++) if (noRange.slice[y * noRange.W + x] && noRange.fine[y * noRange.W + x] !== full.fine[(y + noRange.oy) * W + x + noRange.ox]) d2++;
   ok('control: without elevRange the window changes the terraces (what the global range fixes)', d2 > 0, d2);

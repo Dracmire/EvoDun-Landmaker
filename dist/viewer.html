@@ -72,6 +72,7 @@ figcaption span{color:var(--mut);font-size:11px}
    <div class="hint" id="sliceInfo"></div>
   </div>
   <div id="sliders"></div>
+  <div class="hint" id="subHnote" hidden style="color:var(--acc)"></div>
   <div><h3>Display</h3><div id="toggles"></div></div>
   <div class="hint">Drag: small angle variation · Shift/right-drag: pan · wheel: zoom · double-click: reset</div>
  </aside>
@@ -476,7 +477,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   };
 })(window.EVO = window.EVO || {});
 
-/* EvoDun crystal viewer - level shaping: terraces, micro steps, passes, walk regions */
+/* EvoDun crystal viewer - level shaping: terraces, sub-terraces, passes, walk regions */
 (function (E) {
   const N4 = [[1, 0], [0, 1], [-1, 0], [0, -1]];
 
@@ -546,9 +547,14 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return o;
   }
 
+  /* Effective sub-terrace height. The gap from the last sub-terrace of a terrace to the base of the next one,
+     terH - (subs - 1) * subH, must exceed the climb limit by half a sub-step, so that a stair always has a visible
+     rise: subH_eff = min(subH, terH / (subs + climb - 0.5)). */
+  E.subHeight = function (P) { return Math.min(P.subH, P.terH / (P.subs + P.climb - 0.5)); };
+
   E.hOf = function (fine, P) {
-    const K = P.micro;
-    return Math.floor(fine / K) * P.terH + (fine % K) * P.microH;
+    const K = P.subs;
+    return Math.floor(fine / K) * P.terH + (fine % K) * E.subHeight(P);
   };
 
   /* ---- slice: the tiles of the incursion, and the window that gets built (slice + scenery margin) ---- */
@@ -628,13 +634,13 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
      elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
   E.shape = function (full, P, spec) {
     const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
-    const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.micro;
+    const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.subs;
     let el = Float32Array.from(pack.elevation);
     for (let p = 0; p < P.pre; p++) el = blur3(el, W, H);
     let mn = Infinity, mx = -Infinity;
     if (pack.elevRange) { mn = pack.elevRange[0]; mx = pack.elevRange[1]; }
     else for (const v of el) { if (v < mn) mn = v; if (v > mx) mx = v; }
-    const U = new Float32Array(n), ter = new Int16Array(n), mic = new Int16Array(n), g0 = new Int16Array(n);
+    const U = new Float32Array(n), ter = new Int16Array(n), sub = new Int16Array(n), g0 = new Int16Array(n);
     for (let i = 0; i < n; i++) {
       U[i] = Math.max(0, (el[i] - mn) / (mx - mn || 1) * N);
       ter[i] = Math.min(N - 1, Math.floor(U[i]));
@@ -642,19 +648,19 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     cleanup(W, H, ter, g0, P.minPlateau);
     for (let i = 0; i < n; i++) {
       const t0 = Math.min(N - 1, Math.floor(U[i]));
-      if (K <= 1) mic[i] = 0;
-      else if (ter[i] === t0) mic[i] = Math.min(K - 1, Math.floor((U[i] - t0) * K));
-      else mic[i] = ter[i] > t0 ? 0 : K - 1;
+      if (K <= 1) sub[i] = 0;
+      else if (ter[i] === t0) sub[i] = Math.min(K - 1, Math.floor((U[i] - t0) * K));
+      else sub[i] = ter[i] > t0 ? 0 : K - 1;
     }
-    cleanup(W, H, mic, ter, P.minMicro);
+    cleanup(W, H, sub, ter, P.minSub);
     const fine = new Int16Array(n);
     let maxFine = 0;
-    for (let i = 0; i < n; i++) { fine[i] = ter[i] * K + mic[i]; if (fine[i] > maxFine) maxFine = fine[i]; }
+    for (let i = 0; i < n; i++) { fine[i] = ter[i] * K + sub[i]; if (fine[i] > maxFine) maxFine = fine[i]; }
     const byLevel = Array.from({ length: maxFine + 1 }, () => []);
     for (let i = 0; i < n; i++) byLevel[fine[i]].push(i);
     const masks = pack.masks || {};
     const S = {
-      W, H, n, U, ter, mic, fine, maxFine, byLevel, K, N,
+      W, H, n, U, ter, sub, fine, maxFine, byLevel, subs: K, N,
       water: masks.water || new Array(n).fill(0),
       snake: masks.snake || null, cave: masks.cave || null, waterfall: masks.waterfall || null,
       markers: pack.markers || [], name: pack.name, fields: pack.fields || {}, cache: {},
@@ -732,7 +738,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   }
 
   function computeRegions(S, P) {
-    const { W, H, ter, mic } = S, water = S.block, n = S.n;
+    const { W, H, ter, sub } = S, water = S.block, n = S.n;
     const par = new Int32Array(n).map((_, i) => i);
     const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
     const uni = (a, b) => { a = find(a); b = find(b); if (a !== b) par[a] = b; };
@@ -744,7 +750,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         if (nx >= W || ny >= H) continue;
         const j = ny * W + nx;
         if (water[j]) continue;
-        if (ter[i] === ter[j] && Math.abs(mic[i] - mic[j]) <= P.climb) uni(i, j);
+        if (ter[i] === ter[j] && Math.abs(sub[i] - sub[j]) <= P.climb) uni(i, j);
       }
     }
     for (const p of S.passes) uni(p.a, p.b);
@@ -1023,7 +1029,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return RAMP[RAMP.length - 1][1];
   }
   function levelColor(fine, P) {
-    const K = P.micro, ter = Math.floor(fine / K), mi = fine % K;
+    const K = P.subs, ter = Math.floor(fine / K), mi = fine % K;
     const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
     const lift = 1 + (mi - (K - 1) / 2) * 0.05;
     return c.map((v) => v * lift);
@@ -1234,7 +1240,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
           const nx = x + dx, ny = y + dy;
           const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : E.hOf(S.fine[ny * W + nx], P);
           if (hn >= hh - 1e-6) continue;
-          const terrace = hh - hn > P.microH * 1.5;
+          const terrace = hh - hn > E.subHeight(P) * 1.5;
           const A = cam.p(x + ax, y + ay, hh), B = cam.p(x + bx, y + by, hh);
           ctx.strokeStyle = terrace ? OUT : 'rgba(24,20,34,0.45)'; ctx.lineWidth = terrace ? 1.6 : 0.7;
           ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
@@ -1267,7 +1273,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const loops = loopsOf(S, L, P);
       if (!loops.length) continue;
       const ht = E.hOf(L, P), hb = L === 0 ? cam.base : E.hOf(L - 1, P);
-      const terraceLevel = L === 0 || L % P.micro === 0;
+      const terraceLevel = L === 0 || L % P.subs === 0;
       const c = levelColor(L, P), cv = veilMix(c), segs = [];
       for (const loop of loops) {
         const n = loop.length; st.verts += n;
@@ -1334,7 +1340,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, micro: 3, terH: 1.0, microH: 0.22, minPlateau: 5, minMicro: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, margin: 24 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, margin: 24 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, passes: false, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
@@ -1344,9 +1350,9 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     { id: 'top', label: 'Top 80°', yaw: 0, pitch: 80 }
   ];
   const SLIDERS = [
-    ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['micro', 'Micro steps / terrace', 1, 3, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['microH', 'Micro step height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minMicro', 'Min micro patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
+    ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
-    ['Passes', [['passGap', 'Stair spacing', 3, 20, 1]]],
+    ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['passGap', 'Stair spacing', 3, 20, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
   const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
@@ -1625,6 +1631,9 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     document.querySelectorAll('#techs button').forEach((b) => b.classList.toggle('on', st.mode === 'single' && b.dataset.id === st.tech));
     $('#mode').textContent = st.mode === 'compare' ? 'Compare: on' : 'Compare: off';
     $('#mode').classList.toggle('on', st.mode === 'compare');
+    const eff = E.subHeight(P), note = $('#subHnote');
+    note.hidden = eff >= P.subH - 1e-9;
+    note.textContent = `Sub-terrace height limited to ${eff.toFixed(3)} (set ${P.subH}) so the gap to the next terrace stays above the climb limit.`;
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';

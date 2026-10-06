@@ -13,7 +13,7 @@
     return RAMP[RAMP.length - 1][1];
   }
   function levelColor(fine, P) {
-    const K = P.micro, ter = Math.floor(fine / K), mi = fine % K;
+    const K = P.subs, ter = Math.floor(fine / K), mi = fine % K;
     const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
     const lift = 1 + (mi - (K - 1) / 2) * 0.05;
     return c.map((v) => v * lift);
@@ -224,7 +224,7 @@
           const nx = x + dx, ny = y + dy;
           const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : E.hOf(S.fine[ny * W + nx], P);
           if (hn >= hh - 1e-6) continue;
-          const terrace = hh - hn > P.microH * 1.5;
+          const terrace = hh - hn > E.subHeight(P) * 1.5;
           const A = cam.p(x + ax, y + ay, hh), B = cam.p(x + bx, y + by, hh);
           ctx.strokeStyle = terrace ? OUT : 'rgba(24,20,34,0.45)'; ctx.lineWidth = terrace ? 1.6 : 0.7;
           ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
@@ -257,7 +257,7 @@
       const loops = loopsOf(S, L, P);
       if (!loops.length) continue;
       const ht = E.hOf(L, P), hb = L === 0 ? cam.base : E.hOf(L - 1, P);
-      const terraceLevel = L === 0 || L % P.micro === 0;
+      const terraceLevel = L === 0 || L % P.subs === 0;
       const c = levelColor(L, P), cv = veilMix(c), segs = [];
       for (const loop of loops) {
         const n = loop.length; st.verts += n;

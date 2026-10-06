@@ -6,7 +6,7 @@ software rasteriser (no GPU), on the state of the repo at PR #1. Treat timings a
 ## 1. Timing (ms)
 
 Test data: 4-octave value noise (`fbm`, detail at tile scale), square maps, default `P`
-(5 terraces x 3 micro steps, 15 levels), canvas 1200x800, all display toggles at their defaults,
+(5 terraces x 3 sub-terraces, 15 levels; they were called micro steps then), canvas 1200x800, all display toggles at their defaults,
 resolution limit of 96 lifted for the test. The `noisePack` stand-in (9 cells) gives similar numbers
 (256: A 210-260, B cold 1640-1920).
 
