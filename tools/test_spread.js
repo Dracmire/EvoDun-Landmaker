@@ -5,7 +5,7 @@ for (const f of ['fields', 'shape', 'tech']) vm.runInThisContext(fs.readFileSync
 const E = window.EVO;
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { cond ? pass++ : (fail++, console.log('FAIL', name, extra === undefined ? '' : extra)); };
-const BASE = { terraces: 12, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 3 };
+const BASE = { terraces: 12, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3 };
 const mk = (W, H, f, range) => {
   const el = new Float32Array(W * H); let mn = Infinity, mx = -Infinity;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const v = el[y * W + x] = f(x, y); mn = Math.min(mn, v); mx = Math.max(mx, v); }
@@ -50,14 +50,14 @@ for (const [subs, climb] of [[1, 1], [3, 2], [6, 2], [6, 5]]) {
   const P = Object.assign({}, BASE, { spread: 1.5, subs, climb }), S = E.shape(relief, P), s = E.subHeight(P);
   const gaps = []; for (let t = 0; t + 1 < 12; t++) { const lastSub = E.terBase(t, P, S.center) + (subs - 1) * s; gaps.push(E.terBase(t + 1, P, S.center) - lastSub); }
   ok(`subs ${subs} climb ${climb}: the gap from the last sub-terrace to the next terrace stays above climb*subH in every jump`, gaps.every((g) => g > climb * s - EPS), gaps.map((g) => g.toFixed(2)).join());
-  ok(`subs ${subs} climb ${climb}: ramps placed, slope <= max, length >= min`, S.stairs.length > 0 && S.stairs.every((r) => r.ramp && Math.abs(r.ramp.h1 - r.ramp.h0) / r.ramp.len <= P.rampSlope + 1e-6 && r.ramp.len >= 2), JSON.stringify(S.stairInfo));
+  ok(`subs ${subs} climb ${climb}: ramps placed, all 2 tiles deep whatever the jump`, S.stairs.length > 0 && S.stairs.every((r) => r.ramp && r.ramp.len === 2), JSON.stringify(S.stairInfo));
   ok(`subs ${subs} climb ${climb}: regions connect through ramps`, S.stairs.every((r) => r.bottom.every((b, c) => S.region[b] === S.region[r.top[c]])));
 }
 {
   const P = Object.assign({}, BASE, { spread: 1.5 }), S = E.shape(relief, P), maxLen = Math.max(...S.stairs.map((r) => r.ramp.len));
-  ok('with spread 1.5 and slope 0.4 the longest ramp fits in 8 tiles (7 needed for the largest jump 2.5)', maxLen <= 8, maxLen);
+  ok('with spread 1.5 the ramps are still 2 tiles deep (steeper), never the 7 of the slope-limited ramps', maxLen === 2, maxLen);
   const P3 = Object.assign({}, BASE, { spread: 3 }), S3 = E.shape(relief, P3);
-  ok('spread 3 (jump 7): ramps up to 18+ tiles are still found (the limit is computed)', S3.stairs.some((r) => r.ramp.len > 8) && S3.stairInfo.placed > 0, JSON.stringify(S3.stairInfo));
+  ok('spread 3 (jump 7): ramps are placed and still 2 tiles deep', S3.stairs.length > 0 && S3.stairs.every((r) => r.ramp.len === 2) && Math.max(...S3.stairs.map((r) => Math.abs(r.ramp.h1 - r.ramp.h0))) > 5, JSON.stringify(S3.stairInfo));
   const Ps = Object.assign({}, BASE, { spread: 1.5, stairStyle: 0 }), Ss = E.shape(relief, Ps);
   ok('steps style with uneven jumps: stairs placed, bridge levels, strictly increasing levels', Ss.stairs.length > 0 && Ss.levelH.every((h, L) => L === 0 || h > Ss.levelH[L - 1]) && Ss.levelMeta.some((m) => m.bridge));
 }

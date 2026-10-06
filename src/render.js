@@ -255,7 +255,7 @@
     ctx.fillStyle = rampFill(ctx, cam, R); ctx.fill(); if (!DBG && !PICK) { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.8; ctx.stroke(); }
     if (DBG || PICK) return;
     if (o.rampLines) { // thin lines across the slope, evenly spaced along the whole ramp (cut where they cross this tile)
-      const nL = R.len <= 2 ? 2 : 3;
+      const nL = Math.max(2, Math.min(10, Math.round(Math.abs(R.h1 - R.h0) / 0.3))); // more lines the higher the jump: a steep ramp reads as a flight of steps
       for (let q = 1; q <= nL; q++) {
         const s0 = R.len * q / (nL + 1);
         // the line s = s0 is perpendicular to the path direction: a vertical or horizontal segment through this tile

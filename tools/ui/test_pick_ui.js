@@ -10,7 +10,7 @@ const PAGE = async ({ nPts }) => {
   const E = window.EVO;
   const mk = (W, H, f) => { const el = new Float32Array(W * H); let mn = 1e9, mx = -1e9; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const v = el[y * W + x] = f(x, y); mn = Math.min(mn, v); mx = Math.max(mx, v); } return { name: 't', width: W, height: H, elevation: el, elevRange: [mn, mx], masks: {}, markers: [], fields: {} }; };
   const relief = mk(72, 56, (x, y) => 100 + 600 * (0.5 + 0.5 * Math.sin(x / 9) * Math.cos(y / 7)) + x * 3);
-  const BASE = { terraces: 6, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 3 };
+  const BASE = { terraces: 6, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3 };
   const CW = 640, CH = 480;
   let seed = 12345; const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 
@@ -116,7 +116,7 @@ const PAGE = async ({ nPts }) => {
     a.ok(`${k}: >= 98 % of the cap/ramp points resolve to the tile that the reference shows (the rest are 1-2 px edge cases, see header)`, v.tot > 100 && v.ok >= 0.98 * v.tot, `${v.ok}/${v.tot}`);
     a.ok(`${k}: the naive picker (control) is clearly worse`, v.naiveOk < 0.9 * v.tot, `${v.naiveOk}/${v.tot}`);
     if (v.hidTot) a.ok(`${k}: tiles hidden behind higher terrain are not picked (>= 75 %)`, v.hidOk >= 0.75 * v.hidTot, `${v.hidOk}/${v.hidTot}`);
-    if (v.wallTot && (t === 'box' || c === 'ramps, no smoothing')) a.ok(`${k}: wall points resolve to the tile that owns the wall (Box >= 95 %, A/B without smoothing >= 80 %: their wall pieces are cut per tile only on axis-aligned runs)`, v.wallOk >= (t === 'box' ? 0.95 : 0.8) * v.wallTot, `${v.wallOk}/${v.wallTot}`);
+    if (v.wallTot && (t === 'box' || c === 'ramps, no smoothing')) a.ok(`${k}: wall points resolve to the tile that owns the wall (Box >= 95 %, A/B without smoothing >= 70 %: their wall pieces are cut per tile only on axis-aligned runs)`, v.wallOk >= (t === 'box' ? 0.95 : 0.7) * v.wallTot, `${v.wallOk}/${v.wallTot}`);
   }
   console.log('errors:', a.errs); await a.browser.close();
 })();

@@ -120,6 +120,13 @@
   /* Rigid stair footprint: a unit edge of the level mask that touches a carved tile (on either side) is pinned. The
      vertices where a pinned run starts or ends, and the corners inside it, stay fixed through the smoothing, so the
      footprint keeps its exact tile shape and the terrain around it is still smoothed. */
+  const BAND = 2; // tiles around a carved tile where the contours are not smoothed (the chamfers of long edges would cover the footprint)
+  function nearCarved(S) {
+    if (S._nearCarved) return S._nearCarved;
+    const { W, H } = S, out = new Uint8Array(S.n);
+    for (let i = 0; i < S.n; i++) if (S.carved[i]) { const x = i % W, y = (i / W) | 0; for (let dy = -BAND; dy <= BAND; dy++) for (let dx = -BAND; dx <= BAND; dx++) { const a = x + dx, b = y + dy; if (a >= 0 && b >= 0 && a < W && b < H) out[b * W + a] = 1; } }
+    return (S._nearCarved = out);
+  }
   function anchored(loop, carved, W, H) {
     const n = loop.length, pinned = new Uint8Array(n);
     const has = (x, y) => x >= 0 && y >= 0 && x < W && y < H && carved[y * W + x] === 1;
@@ -143,7 +150,7 @@
     if (S.cache[key]) return S.cache[key];
     const { W, H, fine } = S, carved = S.stairs && S.stairs.length && P.anchor !== false ? S.carved : null; // P.anchor === false: diagnostic, no rigid footprint
     const loops = traceMask(W, H, (x, y) => fine[y * W + x] >= L).map((l) => {
-      const an = carved && anchored(l, carved, W, H);
+      const an = carved && anchored(l, nearCarved(S), W, H);
       return an ? chaikin(an.pts, W, H, P.smooth, an.fix) : chaikin(dropCollinear(l), W, H, P.smooth);
     });
     return (S.cache[key] = loops);

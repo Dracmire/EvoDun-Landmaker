@@ -56,13 +56,15 @@ old pipeline (Unity, C#) are reference only.
   its own colour and outline, the same in all three techniques and visible from all four sides. Survival
   is measured as the percentage of each tile area that is well covered by the drawn contours.
 - RAMP instead of treads (user's decision): terraces are general, so the transition is not quantized. Each gate is a
-  smooth ramp inside its rigid footprint, linear from the height of the lower terrace to the upper one. Default style
-  `ramp`; `steps` (treads with bridge levels) stays as an option. Ramp length = max(min length, ceil(gap / max slope)),
-  default max slope 0.4 height per tile (~22 deg) and minimum 2 tiles (sliders). With ramps there are no bridge levels and
-  no `tread` parameter (they only exist in `steps`). Movement does not change. Look: stone colour with a gradient along
-  the slope (lighter at the high end), dark outline, own side walls; same in Box, A and B. Cue 2 (approved): 2-3 thin transverse lines across the
-  slope, Display switch "Ramp cross lines" (on). `stairW = 0` (slider minimum) switches stairs off, which
-  also lets the pixel regression compare against older checkouts.
+  smooth ramp, SHORT AND WIDE, linear from the height of the lower terrace to the upper one. Default style `ramp`; `steps`
+  (treads with bridge levels) stays as an option. The depth into the terrace is FIXED (slider "Ramp depth", 1-4, default 2) and does
+  not depend on the jump, so the slope is jump / depth and can be steep (height is almost decorative); there is no maximum slope.
+  Width = "Stair / ramp width" slider (0-5, default 3; steps use up to 3), widened from the centre outwards; every column must lie
+  on the SAME border between the two terraces (fixed end on the lower one, path on the upper one); a column that does not fit stops
+  its side, so the ramp narrows. A ramp can span more wall than its gate. With ramps there are no bridge levels and no `tread`.
+  Movement does not change. Look: stone colour with a gradient along the slope (lighter at the high end), dark outline, own side
+  walls, transverse lines whose number grows with the jump (round(jump / 0.3), 2-10; Display switch "Ramp cross lines", on): a steep
+  ramp reads as a flight of steps. Same in Box, A and B. `stairW = 0` switches stairs off (also for the pixel regression).
 - Terrain edges are NOT touched (user's decision): A keeps its stepped border (more legible) and B the smooth one (more
   natural). Both techniques are kept to compare them.
 - The world continues past the incursion border as scenery under a veil; only movement is restricted.
@@ -131,13 +133,12 @@ incursion border; stake and way-back path visible.
 
 ## Known limitations
 1. Overlays (snake, cave, water) are drawn as square tiles and look blocky over the smoothed A/B shapes.
-2. Carved stairs and ramps: each is cut into the upper terrace (or built up on the lower one) as 1-3 columns
+2. Carved stairs and ramps: each is cut into the upper terrace (or built up on the lower one) as 1-3 columns (ramps 1-5)
    (width default 2; in `steps` style the tread rise defaults to the climb limit, 1 is also available).
    RAMP PAINTER ORDER: Box orders ramps by tile depth and matches a per-pixel z-buffer reference exactly (0 % in 8 view
    directions). A and B order by level, so a ramp that spans several levels can lose slivers: a cut ramp is drawn right
    after the slab of its low end, a built-up one right before the slab of its high end, and slab walls beside a ramp
-   are clipped to its surface. Measured over all 73 ramps of the relief test map (`tools/ui/test_ramp_ui.js`): mean
-   0.1-1.2 % of the ramp's pixels, worst 7.8 % (two ramps that touch). Thresholds in the test: mean <= 2 %, worst <= 8 % (accepted by the user as a LIMITATION OF THE LEVEL-ORDERED PAINTER; the full solution is per-pixel depth, left for WebGL in round 2). The footprint is rigid: in A the vertices
+   are clipped to its surface. Measured with `tools/ui/test_ramp_ui.js` (`--terraces N --spread S`, mean / worst % of the ramp's pixels that differ from the z-buffer, default smoothing; 5 terraces, spread 1 is the reference): 5 terraces, spread 1: Box 0 / 0, A 0.1-0.7 / <= 3.6, B 0.2-0.8 / <= 4.1. 12 terraces, spread 1: Box 0 / <= 0.04, A 0.4-3.0 / <= 30, B 0.5-3.6 / <= 32. 12 terraces, spread 1.5: Box 0.0-0.04 / <= 3.2, A 1.8-4.0 / <= 42, B 2.8-6.3 / <= 41. The test ENFORCES only the reference (Box exact; A and B mean <= 2 %, worst <= 8 %); with more levels the level-ordered painter loses more, a limit measured here, not hidden (accepted by the user as a LIMITATION OF THE LEVEL-ORDERED PAINTER; the full solution is per-pixel depth, left for WebGL in round 2). The footprint is rigid: in A the vertices
    of every contour edge that touches a carved tile are pinned through the Chaikin passes; in B the unblurred distance
    field replaces the blurred one within 0.5 tile of a carved tile (fading out by 1.5 tiles). Terrain away from the
    stairs is smoothed as before. Look (`render.js`): own cream colour with a tint per tread, light line on the top edge

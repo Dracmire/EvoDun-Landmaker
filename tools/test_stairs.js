@@ -154,13 +154,16 @@ ok('every tile has a valid level and byLevel agrees', S.fine.every((L) => L >= 0
     ok('survival: B without footprint loses stairs, with it none', E.stairSurvival(Sn, Pn, 'B').lost > 0 && E.stairSurvival(S, BASE, 'B').lost === 0); }
   ok('survival: well-formed result', (() => { const a = E.stairSurvival(S, BASE, 'A'); return a.n === S.stairs.length && a.tiles > 0 && a.worst >= 0 && a.worst <= 1; })());
   ok('survival: no stairs -> nothing lost, coverage 1', (() => { const r = E.stairSurvival(E.shape(mk(30, 20, () => 500, [0, 1000]), BASE), BASE, 'A'); return r.lost === 0 && r.coverage === 1; })());
-  // the terrain far from the stairs is still smoothed: the footprint pins only what touches carved tiles
-  const Pn = Object.assign({}, BASE, { anchor: false }), Sn = E.shape(relief, Pn);
-  const near = (S2) => { const m = new Uint8Array(S2.n); for (let i = 0; i < S2.n; i++) if (S2.carved[i]) for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) { const x = i % S2.W + dx, y = ((i / S2.W) | 0) + dy; if (x >= 0 && y >= 0 && x < S2.W && y < S2.H) m[y * S2.W + x] = 1; } return m; };
-  const nr = near(S);
-  let farSame = 0, farTot = 0;
-  for (let L = 1; L <= S.maxFine; L++) { const a = E.loopsA(S, L, BASE), b = E.loopsA(Sn, L, Pn); for (const lp of a) for (const p of lp) { if (nr[Math.min(S.n - 1, Math.floor(p[1]) * S.W + Math.floor(p[0]))]) continue; farTot++; if (b.some((q) => q.some((r) => Math.abs(r[0] - p[0]) < 1e-9 && Math.abs(r[1] - p[1]) < 1e-9))) farSame++; } }
-  ok('anchoring leaves the smoothing of the terrain far from the stairs unchanged (A)', farTot > 0 && farSame / farTot > 0.95, `${farSame}/${farTot}`);
+  // the terrain far from the stairs is still smoothed: a ramp on the left half of a map, flat plateaus (no gates) on the right
+  {
+    const half = mk(110, 40, (x, y) => (x < 30 ? 120 + x * 11 : 520 + 180 * (Math.sin(x / 6) * Math.cos(y / 5) > 0 ? 1 : 0)), [0, 1000]);
+    const Pa = Object.assign({}, BASE, { stairW: 2 }), Pn = Object.assign({}, Pa, { anchor: false }), Sa = E.shape(half, Pa), Sn = E.shape(half, Pn);
+    const far = (p) => p[0] > 60; let tot = 0, same = 0, nearTot = 0, nearSame = 0;
+    for (let L = 1; L <= Sa.maxFine; L++) { const a = E.loopsA(Sa, L, Pa), b = E.loopsA(Sn, L, Pn), key = (q) => q[0].toFixed(6) + ',' + q[1].toFixed(6), set = new Set(); for (const lp of b) for (const q of lp) set.add(key(q)); for (const lp of a) for (const q of lp) { if (far(q)) { tot++; if (set.has(key(q))) same++; } else if (q[0] < 36) { nearTot++; if (set.has(key(q))) nearSame++; } } }
+    ok('the map has stairs on the left and smooth plateaus on the right', Sa.stairs.length > 0 && Sa.stairs.every((st) => st.top[0] % Sa.W < 40) && tot > 40, `${Sa.stairs.length} ${tot}`);
+    ok('anchoring leaves the smoothing of the terrain far from the stairs identical (A)', same === tot, `${same}/${tot}`);
+    ok('(control) near the stairs the contours do change', nearTot > 0 && nearSame < nearTot, `${nearSame}/${nearTot}`);
+  }
   ok('survival is cached by the loops', E.stairSurvival(S, BASE, 'B').lost === 0);
 }
 

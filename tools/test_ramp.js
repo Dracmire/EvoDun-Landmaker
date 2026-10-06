@@ -5,7 +5,7 @@ for (const f of ['fields', 'shape', 'tech']) vm.runInThisContext(fs.readFileSync
 const E = window.EVO;
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { cond ? pass++ : (fail++, console.log('FAIL', name, extra === undefined ? '' : extra)); };
-const BASE = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 3 };
+const BASE = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3 };
 const mk = (W, H, f) => {
   const el = new Float32Array(W * H); let mn = Infinity, mx = -Infinity;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const v = el[y * W + x] = f(x, y); mn = Math.min(mn, v); mx = Math.max(mx, v); }
@@ -18,8 +18,8 @@ const EPS = 1e-6;
   const S = E.shape(relief, BASE), ramps = S.stairs.filter((r) => r.ramp);
   ok('ramps placed, style reported', ramps.length > 0 && ramps.length === S.stairs.length && S.stairInfo.style === 'ramp' && S.stairInfo.placed === ramps.length, JSON.stringify(S.stairInfo));
   ok('no bridge levels and base heights untouched in ramp mode', S.levelMeta.every((m) => !m.bridge) && S.levelH.every((h, L) => h === E.hOf(L, BASE)));
-  ok('length >= minimum, slope <= maximum', ramps.every((r) => r.ramp.len >= BASE.rampMin && Math.abs(r.ramp.h1 - r.ramp.h0) / r.ramp.len <= BASE.rampSlope + EPS), ramps.map((r) => Math.abs(r.ramp.h1 - r.ramp.h0) / r.ramp.len).filter((s) => s > BASE.rampSlope).join());
-  ok('length is the shortest that respects the slope (or the minimum)', ramps.every((r) => r.ramp.len === BASE.rampMin || Math.abs(r.ramp.h1 - r.ramp.h0) / (r.ramp.len - 1) > BASE.rampSlope - EPS));
+  ok('depth is FIXED (2 by default) whatever the jump; slope = jump / depth', ramps.every((r) => r.ramp.len === 2 && Math.abs(Math.abs(r.ramp.h1 - r.ramp.h0) / r.ramp.len - Math.abs(r.ramp.h1 - r.ramp.h0) / 2) < EPS), ramps.map((r) => r.ramp.len).join());
+  { const Sp = E.shape(relief, Object.assign({}, BASE, { spread: 1.5, terraces: 12 })); ok('with spread 1.5 some ramps are steeper than the old 0.4 maximum (the slope is no longer limited)', Sp.stairs.some((r) => Math.abs(r.ramp.h1 - r.ramp.h0) / r.ramp.len > 0.4 + EPS) && Sp.stairs.every((r) => r.ramp.len === 2)); }
   ok('one step entry per tile of length, same tiles in every column', ramps.every((r) => r.steps.length === r.ramp.len && r.steps.every((s) => s.tiles.length === r.cols.length)));
   // surface: h0 at the gate edge, h1 at the far end, linear in between, constant across the width
   let surfBad = 0;
@@ -49,17 +49,31 @@ const EPS = 1e-6;
   ok('footprint coverage is 100 % in A and B', A.coverage === 1 && B.coverage === 1 && A.lost === 0 && B.lost === 0, `${A.coverage} ${B.coverage}`);
 }
 
-// slope and minimum length parameters
+// depth and width parameters
 {
   const lens = (P) => E.shape(relief, P).stairs.map((r) => r.ramp.len);
-  const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
-  const gentle = Object.assign({}, BASE, { rampSlope: 0.2 }), steep = Object.assign({}, BASE, { rampSlope: 0.8 });
-  const Sg = E.shape(relief, gentle);
-  ok('a gentler maximum slope gives longer ramps and respects it', Sg.stairs.length > 0 && mean(lens(gentle)) > mean(lens(BASE)) && Sg.stairs.every((r) => Math.abs(r.ramp.h1 - r.ramp.h0) / r.ramp.len <= 0.2 + EPS));
-  ok('a steeper one gives shorter ramps', mean(lens(steep)) < mean(lens(BASE)));
-  const Pm = Object.assign({}, BASE, { rampMin: 4 });
-  ok('minimum length is respected', E.shape(relief, Pm).stairs.every((r) => r.ramp.len >= 4));
-  ok('width 1 gives single-column ramps, width 3 up to three', E.shape(relief, Object.assign({}, BASE, { stairW: 1 })).stairs.every((r) => r.cols.length === 1) && E.shape(relief, Object.assign({}, BASE, { stairW: 3 })).stairs.every((r) => r.cols.length <= 3));
+  for (const d of [1, 2, 3, 4]) ok(`depth ${d}: every ramp is ${d} tiles deep`, lens(Object.assign({}, BASE, { rampDepth: d })).length > 0 && lens(Object.assign({}, BASE, { rampDepth: d })).every((l) => l === d));
+  const SD = E.shape(relief, Object.assign({}, BASE, { rampDepth: 4 })), S1 = E.shape(relief, Object.assign({}, BASE, { rampDepth: 1 }));
+  const slope = (r) => Math.abs(r.ramp.h1 - r.ramp.h0) / r.ramp.len;
+  ok('a shallower ramp is steeper', S1.stairs.length > 0 && S1.stairs.reduce((a, r) => a + slope(r), 0) / S1.stairs.length > SD.stairs.reduce((a, r) => a + slope(r), 0) / SD.stairs.length);
+  for (const w of [1, 2, 3, 4, 5]) {
+    const S = E.shape(relief, Object.assign({}, BASE, { stairW: w })), cols = S.stairs.map((r) => r.cols.length);
+    ok(`width ${w}: at most ${w} contiguous columns, requested ${w}`, S.stairs.length > 0 && S.stairs.every((r) => r.cols.length >= 1 && r.cols.length <= w && r.requested === w && r.cols.every((c, i) => i === 0 || c === r.cols[i - 1] + 1) && r.cols.includes(0)), cols.join(''));
+  }
+  const W5 = E.shape(relief, Object.assign({}, BASE, { stairW: 5 })), W3 = E.shape(relief, BASE);
+  ok('width 5 gives wider ramps than width 3 on average', W5.stairs.reduce((a, r) => a + r.cols.length, 0) / W5.stairs.length > W3.stairs.reduce((a, r) => a + r.cols.length, 0) / W3.stairs.length);
+  ok('a ramp can be wider than the gate tiles it sits on (it spans more wall than the gate)', W5.stairs.some((r) => { const g = new Set(); for (const gt of W5.gates) for (const t of gt.tiles) { g.add(t.a); g.add(t.b); } return r.cols.some((c, ci) => { const t = r.mode === 'cut' ? r.bottom[ci] : r.top[ci]; return !g.has(t); }); }));
+  ok('width 5 uses offsets -2..2 (both sides reach two columns somewhere)', W5.stairs.some((r) => r.cols.includes(-2)) && W5.stairs.some((r) => r.cols.includes(2)) && W5.stairs.every((r) => r.cols.every((c) => c >= -2 && c <= 2)));
+  { let badCol = 0; const hOf = (S, t) => S.levelH[S.fine[t]];
+    for (const r of W5.stairs) r.cols.forEach((c, ci) => {
+      const tilesCol = r.steps.map((st) => st.tiles[ci]);
+      const pathTer = r.mode === 'cut' ? W5.ter[r.top[ci]] : W5.ter[r.bottom[ci]], fixTer = r.mode === 'cut' ? W5.ter[r.bottom[ci]] : W5.ter[r.top[ci]];
+      if (pathTer !== fixTer + 1 && !(r.mode === 'fill' && W5.ter[r.top[ci]] === W5.ter[r.bottom[ci]] + 1)) badCol++;
+    }); ok('every column of every ramp joins terrace t (low end) and t + 1 (top)', badCol === 0, badCol); }
+  // all columns of a ramp lie on the SAME border: low end on the lower terrace, path on the upper terrace
+  let off = 0; for (const r of W5.stairs) for (let ci = 0; ci < r.cols.length; ci++) { const lowT = r.mode === 'cut' ? r.bottom[ci] : r.steps[0].tiles[ci], upT = r.mode === 'cut' ? r.top[ci] : r.top[ci]; if (W5.ter[r.mode === 'cut' ? r.bottom[ci] : r.bottom[ci]] + 1 !== W5.ter[r.top[ci]] && W5.ter[r.bottom[ci]] !== W5.ter[r.top[ci]] - 1) off++; }
+  ok('every column joins the same two terraces (low end terrace t, top terrace t + 1)', off === 0, off);
+  ok('width 3 and 5 keep the regions of the previous widths (every ramp connects its ends)', W5.stairs.every((r) => r.bottom.every((b, c) => W5.region[b] === W5.region[r.top[c]])));
 }
 
 // stairW = 0: nothing is carved, the map keeps its levels; style 0 still gives treads with bridge levels
@@ -72,7 +86,7 @@ const EPS = 1e-6;
 
 // a hand-built cut and a hand-built built-up case with known heights
 {
-  const P = { terraces: 2, subs: 1, terH: 1, subH: 0.22, minPlateau: 1, minSub: 1, pre: 0, smooth: 0, radius: 0, passGap: 8, climb: 1, stairW: 1, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 1 };
+  const P = { terraces: 2, subs: 1, terH: 1, subH: 0.22, minPlateau: 1, minSub: 1, pre: 0, smooth: 0, radius: 0, passGap: 8, climb: 1, stairW: 1, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 1 };
   const W = 20, H = 9, n = W * H, ter = new Int16Array(n), sub = new Int16Array(n), block = new Uint8Array(n), fine = new Int16Array(n);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { ter[y * W + x] = x >= 9 ? 1 : 0; fine[y * W + x] = ter[y * W + x]; }
   const levelH = [E.hOf(0, P), E.hOf(1, P)], levelMeta = [{ ter: 0, sub: 0, bridge: false }, { ter: 1, sub: 0, bridge: false }];
@@ -81,17 +95,20 @@ const EPS = 1e-6;
   const Sc = mkS(a, b); E._carve(Sc, P); const rc = Sc.stairs[0];
   ok('hand-built: one ramp, gap known', !!rc && gap > 0, gap);
   if (rc) {
-    ok('hand-built: length = ceil(gap / slope)', rc.ramp.len === Math.max(2, Math.ceil(gap / 0.4 - 1e-9)), `${rc.ramp.len} for gap ${gap}`);
+    ok('hand-built: length = depth (2) whatever the gap', rc.ramp.len === 2, `${rc.ramp.len} for gap ${gap}`);
     ok('hand-built: heights go from the lower to the upper terrace', Math.abs(rc.ramp.h0 - levelH[0]) < EPS && Math.abs(rc.ramp.h1 - levelH[1]) < EPS);
     ok('hand-built: footprint tiles are in the upper terrace and take the lower level', rc.steps.every((s) => s.tiles.every((t) => Sc.ter[t] === 1 && Sc.fine[t] === 0)));
   }
-  const Sh = mkS(a, b); E._carve(Sh, Object.assign({}, P, { rampSlope: 1.0, rampMin: 1 }));
-  ok('hand-built: with slope 1.0 and minimum 1 the ramp is 1 tile long', Sh.stairs.length === 1 && Sh.stairs[0].ramp.len === Math.ceil(gap / 1.0 - 1e-9));
+  { const Sw = mkS(a, b); Sw.block = Sw.block.slice(); Sw.block[5 * W + 9] = 1; // column +1 is blocked: columns +2 must not be used across the gap
+    E._carve(Sw, Object.assign({}, P, { stairW: 5 }));
+    ok('hand-built: a blocked column stops its side (no column +1 or +2), the other side widens', Sw.stairs.length === 1 && Sw.stairs[0].cols.join() === '-2,-1,0' && Sw.stairInfo.narrowed === 1, JSON.stringify(Sw.stairs.map((r) => r.cols))); }
+  const Sh = mkS(a, b); E._carve(Sh, Object.assign({}, P, { rampDepth: 4 }));
+  ok('hand-built: depth 4 gives a 4 tile ramp with slope gap / 4', Sh.stairs.length === 1 && Sh.stairs[0].ramp.len === 4 && Math.abs((Sh.stairs[0].ramp.h1 - Sh.stairs[0].ramp.h0) / 4 - gap / 4) < EPS);
 }
 
 // a tile of the footprint that is lower than the surface cannot be cut (it would have to be raised)
 {
-  const P = { terraces: 2, subs: 3, terH: 1, subH: 0.22, minPlateau: 1, minSub: 1, pre: 0, smooth: 0, radius: 0, passGap: 8, climb: 2, stairW: 1, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 1 };
+  const P = { terraces: 2, subs: 3, terH: 1, subH: 0.22, minPlateau: 1, minSub: 1, pre: 0, smooth: 0, radius: 0, passGap: 8, climb: 2, stairW: 1, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 1 };
   const W = 20, H = 9, n = W * H;
   const mkS = (dipSub) => {
     const ter = new Int16Array(n), sub = new Int16Array(n), fine = new Int16Array(n), block = new Uint8Array(n);

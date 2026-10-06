@@ -10,11 +10,11 @@
 const fs = require('fs'), path = require('path');
 const { open } = require('./common');
 
-const PAGE = async ({ nPer, px, only, techs }) => {
+const PAGE = async ({ nPer, px, only, techs, spread, terraces, width }) => {
   const E = window.EVO;
   const mk = (W, H, f) => { const el = new Float32Array(W * H); let mn = 1e9, mx = -1e9; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const v = el[y * W + x] = f(x, y); mn = Math.min(mn, v); mx = Math.max(mx, v); } return { name: 't', width: W, height: H, elevation: el, elevRange: [mn, mx], masks: {}, markers: [], fields: {} }; };
   const relief = mk(72, 56, (x, y) => 100 + 600 * (0.5 + 0.5 * Math.sin(x / 9) * Math.cos(y / 7)) + x * 3);
-  const BASE = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2, stairStyle: 1, gateThr: 0.05, gateMin: 3 };
+  const BASE = { spread, terraces, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: width, stairStyle: 1, gateThr: 0.05, gateMin: 3 };
   const CW = 520, CH = 420, PX = px;
   const cv = document.createElement('canvas'); cv.style.cssText = `position:fixed;left:0;top:0;width:${CW}px;height:${CH}px;z-index:-1`; document.body.appendChild(cv);
   const views = [['oblique', 0, 50], ['oblique', 90, 50], ['oblique', 180, 50], ['oblique', 270, 50], ['iso', 45, 35], ['iso', 135, 35], ['iso', 225, 35], ['iso', 315, 35]];
@@ -53,7 +53,7 @@ const PAGE = async ({ nPer, px, only, techs }) => {
     const quad = (a, b, c, d, o) => { tri(a, b, c, o); tri(a, c, d, o); };
     const hOf = (j) => S.levelH[S.fine[j]];
     const corner = (j, x, y) => (ST.has(j) ? E.rampHeight(ST.get(j), x, y) : hOf(j));
-    const r = 12, cx = rec.top[0] % W, cyy = (rec.top[0] / W) | 0;
+    const r = 1e9, cx = rec.top[0] % W, cyy = (rec.top[0] / W) | 0;
     for (let y = Math.max(0, cyy - r); y <= Math.min(H - 1, cyy + r); y++) for (let x = Math.max(0, cx - r); x <= Math.min(W - 1, cx + r); x++) {
       const i = y * W + x, ramp = ST.has(i) ? 1 : 2;
       quad(V(x, y, corner(i, x, y)), V(x + 1, y, corner(i, x + 1, y)), V(x + 1, y + 1, corner(i, x + 1, y + 1)), V(x, y + 1, corner(i, x, y + 1)), ramp);
@@ -63,6 +63,14 @@ const PAGE = async ({ nPer, px, only, techs }) => {
         if (Math.abs(a0 - b0) < 1e-6 && Math.abs(a1 - b1) < 1e-6) continue;
         const o = ST.has(i) || ST.has(j) ? 3 : 4;
         quad(V(x + ax, y + ay, Math.min(a0, b0)), V(x + bx, y + by, Math.min(a1, b1)), V(x + bx, y + by, Math.max(a1, b1)), V(x + ax, y + ay, Math.max(a0, b0)), o);
+      }
+    }
+    // skirts: the viewer draws a wall from every edge tile of the window down to the base of the world
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      for (const [on, ax, ay, bx, by] of [[y === 0, 0, 0, 1, 0], [x === W - 1, 1, 0, 1, 1], [y === H - 1, 1, 1, 0, 1], [x === 0, 0, 1, 0, 0]]) {
+        if (!on) continue;
+        quad(V(x + ax, y + ay, cam.base), V(x + bx, y + by, cam.base), V(x + bx, y + by, corner(i, x + bx, y + by)), V(x + ax, y + ay, corner(i, x + ax, y + ay)), 2000000 + i, 4);
       }
     }
     return { own, kind };
@@ -106,6 +114,9 @@ const PAGE = async ({ nPer, px, only, techs }) => {
           if (a || b) total++;
           if (a !== b && !edge) { diff++; mism[k] = a ? 1 : 2; const hk = (a ? 'ref-only kind ' : 'viewer-only, ref kind ') + refR.kind[k]; hist[hk] = (hist[hk] || 0) + 1; }
         }
+        let probe = null;
+        if (diff > 50 && tech === 'box') { let sx = 0, sy2 = 0, c = 0; for (let k = 0; k < CW * CH; k++) if (mism[k] === 1) { sx += k % CW; sy2 += (k / CW) | 0; c++; } if (c) { const px0 = sx / c, py0 = sy2 / c, q0 = (py0 | 0) * CW + (px0 | 0), pt = E.pickTile(S, P, tech, view, CW, CH, px0, py0); probe = { at: [px0 | 0, py0 | 0], refOwner: ref[q0], refKind: refR.kind[q0], pick: pt, refTile: ref[q0] >= 0 ? [ref[q0] % S.W, (ref[q0] / S.W) | 0, S.levelH[S.fine[ref[q0]]]] : null, pickTile: pt.tile >= 0 ? [pt.tile % S.W, (pt.tile / S.W) | 0, S.levelH[S.fine[pt.tile]]] : null, rampTop: rec.top[0] % S.W + ',' + ((rec.top[0] / S.W) | 0), key: [cam.ry(ref[q0] % S.W + 0.5, ((ref[q0] / S.W) | 0) + 0.5), pt.tile >= 0 ? cam.ry(pt.tile % S.W + 0.5, ((pt.tile / S.W) | 0) + 0.5) : null] }; } }
+        if (probe && !window.__probe) window.__probe = probe;
         const pct = total ? 100 * diff / total : 0;
         const key = `${smooth ? 'default smoothing' : 'no smoothing'}|${tech}|${pk.mode}|${pk.cat}|${vname} ${yaw}`;
         (rows[key] || (rows[key] = { n: 0, sum: 0, max: 0 })); rows[key].n++; rows[key].sum += pct; rows[key].max = Math.max(rows[key].max, pct);
@@ -121,15 +132,16 @@ const PAGE = async ({ nPer, px, only, techs }) => {
       }
     }
   }
-  return { top: results.slice().sort((p, q) => q.pct - p.pct).slice(0, 8).map((r) => `${r.pct.toFixed(2)}% ${r.smooth ? 'smooth' : 'exact'} ${r.tech} ${r.mode} ${r.cat} yaw ${r.yaw} ramp #${r.ramp}`), rows, worstBy, counts, picks: picks.length, total: results.length };
+  return { probe: window.__probe, top: results.slice().sort((p, q) => q.pct - p.pct).slice(0, 8).map((r) => `${r.pct.toFixed(2)}% ${r.smooth ? 'smooth' : 'exact'} ${r.tech} ${r.mode} ${r.cat} yaw ${r.yaw} ramp #${r.ramp}`), rows, worstBy, counts, picks: picks.length, total: results.length };
 };
 
+const argNum = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? +process.argv[i + 1] : d; };
 (async () => {
   const outDir = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
   const ni = process.argv.indexOf('--n'), nPer = ni > 0 ? +process.argv[ni + 1] : 4;
   const a = await open({ w: 900, h: 700 });
     const pi = process.argv.indexOf('--px'), oi = process.argv.indexOf('--only');
-  const r = await a.page.evaluate(PAGE, { nPer, px: pi > 0 ? +process.argv[pi + 1] : 28, only: oi > 0 ? +process.argv[oi + 1] : -1, techs: process.argv.indexOf('--tech') > 0 ? [process.argv[process.argv.indexOf('--tech') + 1]] : ['box', 'A', 'B'] });
+  const r = await a.page.evaluate(PAGE, { nPer, px: pi > 0 ? +process.argv[pi + 1] : 28, only: oi > 0 ? +process.argv[oi + 1] : -1, spread: argNum('--spread', 1), terraces: argNum('--terraces', 5), width: argNum('--width', 3), techs: process.argv.indexOf('--tech') > 0 ? [process.argv[process.argv.indexOf('--tech') + 1]] : ['box', 'A', 'B'] });
   console.log(`ramps available: cut clean ${r.counts.cut.clean}, cut mixed ${r.counts.cut.mixed}, fill clean ${r.counts.fill.clean}, fill mixed ${r.counts.fill.mixed}; ${r.picks} tested x ${r.total / r.picks} renders`);
   // table: per smoothing, tech, mode/category: mean and max % of differing ramp pixels over the 8 directions
   const groups = {};
@@ -141,18 +153,20 @@ const PAGE = async ({ nPer, px, only, techs }) => {
     console.log(`| ${g.split(' | ')[0]} | ${g.split(' | ')[1]} | ${g.split(' | ')[2]} | ${mean.toFixed(2)} | ${mx.toFixed(2)} | ${wv} |`);
     if (mx > 0) anyNonZero++;
   }
+  if (r.probe) console.log('probe:', JSON.stringify(r.probe));
   console.log('\ntop cases:\n' + r.top.join('\n'));
   for (const sm of ['true', 'false']) {
     const w = r.worstBy[sm]; console.log('  ref kinds at mismatches (1 ramp top, 2 other top, 3 wall touching a ramp, 4 other wall):', JSON.stringify(r.worstBy[sm].hist));
     console.log(`\nworst case, ${sm === 'true' ? 'default smoothing' : 'no smoothing'}:`, w.desc, w.pct.toFixed(2) + '%', w.diff + ' px');
     if (outDir) { fs.mkdirSync(outDir, { recursive: true }); for (const [k, f] of [['mask', 'mask'], ['dbg', 'debug'], ['shot', 'shot']]) fs.writeFileSync(path.join(outDir, `ramp_worst_${sm === 'true' ? 'smooth' : 'exact'}_${f}.png`), Buffer.from(w[k].split(',')[1], 'base64')); }
   }
-  // thresholds: Box must be exact (its painter order is by tile depth, the same as the reference). A and B order by LEVEL, so a ramp
-  // that spans several levels can lose slivers where two ramps touch or a neighbour has an intermediate level: allow a mean of
-  // 2 % and a worst case of 8 % of the ramp's pixels (measured on all 73 ramps of the relief map: mean <= 1.2 %, worst 7.8 %).
+  // Thresholds are ENFORCED only for the reference configuration the user accepted (5 terraces, spread 1): Box exact, A and B mean <= 2 %,
+  // worst <= 8 %. Other configurations (12 terraces, spread 1.5...) are measurements: with more levels the level-ordered painter loses
+  // more (a ramp spans several levels, and the wall of a farther, higher slab is painted over it), see CLAUDE.md.
+  const enforce = argNum('--terraces', 5) === 5 && argNum('--spread', 1) === 1;
   for (const [g, vs] of Object.entries(groups)) {
     const all = Object.values(vs), mean = all.reduce((q, v) => q + v.sum / v.n, 0) / all.length, mx = Math.max(...all.map((v) => v.max)), box = g.includes('| box |');
-    a.ok(`ramp order ${g}: ${box ? 'exact' : 'mean <= 2 %, worst <= 8 %'}`, box ? mx === 0 : mean <= 2 && mx <= 8, `mean ${mean.toFixed(2)} worst ${mx.toFixed(2)}`);
+    if (enforce) a.ok(`ramp order ${g}: ${box ? 'exact' : 'mean <= 2 %, worst <= 8 %'}`, box ? mx === 0 : mean <= 2 && mx <= 8, `mean ${mean.toFixed(2)} worst ${mx.toFixed(2)}`);
   }
   console.log('errors:', a.errs); await a.browser.close();
 })();

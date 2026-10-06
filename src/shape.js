@@ -379,7 +379,7 @@
     if (P.stairW === 0) { // diagnostic: no carving at all (stair sites stay unconnected)
       S.carved = new Uint8Array(n); S.stairs = []; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: 0, dropped: 0, narrowed: 0, fills: 0, width: 0 }; return;
     }
-    const width = Math.max(1, Math.min(3, Math.round(P.stairW === undefined ? 2 : P.stairW)));
+    const wReq = Math.round(P.stairW === undefined ? 2 : P.stairW), width = Math.max(1, Math.min(3, wReq)), rwidth = Math.max(1, Math.min(5, wReq)); // steps: 1-3 columns, ramp: 1-5
     const cands = [];
     for (let L = 0; L <= S.maxFine; L++) cands.push({ h: S.levelH[L], base: L });
     for (let t = 0; t + 1 < N; t++) {
@@ -395,10 +395,11 @@
     const idx = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x);
     const okTile = (i, terr) => i >= 0 && !S.block[i] && !used[i] && S.ter[i] === terr;
 
-    const maxGap = P.terH * (1 + 3 * Math.max(0, (P.spread === undefined ? 1 : P.spread) - 1)); // the largest terrace jump (the spread caps at distance 3)
-    const ramp = P.stairStyle === 0 ? false : true, slope = Math.max(0.05, P.rampSlope === undefined ? 0.4 : P.rampSlope), minLen = Math.max(1, Math.round(P.rampMin === undefined ? 2 : P.rampMin)), maxRamp = Math.max(8, Math.ceil(maxGap / slope) + 1); // 8 is enough for spread <= 1.5 at the default slope
-    /* ramp style: the same footprint as the stair (cut into the upper terrace or built on the lower one), but one smooth
-       surface from the low height to the high one; its length comes from the maximum slope. Levels are not touched. */
+    /* ramp style (user's decision): short and wide. The depth into the terrace is FIXED (P.rampDepth, default 2) and does not
+       depend on the jump, so the slope is jump / depth and can be steep; the width is P.stairW (up to 5). The footprint is the same
+       as the stair's (cut into the upper terrace or built on the lower one), over one smooth surface. Levels are not touched. */
+    const ramp = P.stairStyle !== 0, depth = Math.max(1, Math.min(4, Math.round(P.rampDepth === undefined ? 2 : P.rampDepth)));
+    const ORDER = [0, 1, -1, 2, -2];
     const planRamp = (pass, mode) => {
       const ax = pass.a % W, ay = (pass.a / W) | 0, bx = pass.b % W, by = (pass.b / W) | 0;
       const dx = bx - ax, dy = by - ay, ex = -dy, ey = dx, cut = mode === 'cut';
@@ -406,29 +407,24 @@
       const terPath = cut ? S.ter[pass.b] : S.ter[pass.a], terFix = cut ? S.ter[pass.a] : S.ter[pass.b];
       const col = (c, k) => idx(sx + sd * dx * k + c * ex, sy + sd * dy * k + c * ey), fixed = (c) => idx(fx + c * ex, fy + c * ey);
       if (!okTile(fixed(0), terFix)) return null;
-      const hFix = hT[fixed(0)];
-      let len = 0, h0 = 0, h1 = 0;
-      for (let L = 1; L <= maxRamp; L++) {
-        if (!okTile(col(0, L - 1), terPath)) return null;
-        if (L < minLen) continue;
-        const e = col(0, L); if (!okTile(e, terPath)) return null;
-        const hEnd = hT[e], hi = cut ? hEnd : hFix, lo = cut ? hFix : hEnd;
-        if (hi - lo <= EPS) return null;
-        if (L >= Math.ceil((hi - lo) / slope - 1e-9)) { len = L; h0 = cut ? lo : hi; h1 = cut ? hi : lo; break; }
-      }
-      if (!len) return null;
-      const hAt = (t) => h0 + (h1 - h0) * t / len;
+      const len = depth, e = col(0, len);
+      for (let k = 0; k < len; k++) if (!okTile(col(0, k), terPath)) return null;
+      if (!okTile(e, terPath)) return null;
+      const hFix = hT[fixed(0)], hEnd = hT[e], hi = cut ? hEnd : hFix, lo = cut ? hFix : hEnd;
+      if (hi - lo <= EPS) return null;
+      const h0 = cut ? lo : hi, h1 = cut ? hi : lo, hAt = (t) => h0 + (h1 - h0) * t / len;
+      // a column is valid when it lies on the SAME border between the two terraces: fixed end on the lower terrace, path on the
+      // upper one, and (cut: not lower than the surface / built up: not higher)
       const valid = (c) => {
-        const f = fixed(c);
-        if (c === 0 ? !okTile(f, terFix) : (f < 0 || S.block[f] || used[f])) return false; // lateral ends may sit on any terrace (diagonal cliffs)
+        if (!okTile(fixed(c), terFix)) return false;
         for (let k = 0; k < len; k++) { const t = col(c, k); if (!okTile(t, terPath) || (cut ? hT[t] < hAt(k + 1) - EPS : hT[t] > hAt(k + 1) + EPS)) return false; }
         return okTile(col(c, len), terPath);
       };
-      const want = STAIR_COLS[width], ok = new Set(want.filter(valid));
-      if (!ok.has(0)) return null;
-      let cols = [0];
-      if (width === 3 && ok.has(-1) && ok.has(1)) cols = [-1, 0, 1]; else if (width === 2 && ok.has(1)) cols = [0, 1];
-      const rec = { mode, dir: [dx, dy], cols, requested: width, narrowed: cols.length < width, site: pass, bottom: [], top: [], steps: [],
+      if (!valid(0)) return null;
+      let lo2 = 0, hi2 = 0; const want = ORDER.slice(0, rwidth);   // widen from the centre outwards; a column that does not fit stops its side
+      for (const c of want) { if (c === 0) continue; if (c > 0 ? c === hi2 + 1 : c === lo2 - 1) { if (valid(c)) { if (c > 0) hi2 = c; else lo2 = c; } } }
+      const cols = []; for (let c = lo2; c <= hi2; c++) cols.push(c);
+      const rec = { mode, dir: [dx, dy], cols, requested: rwidth, narrowed: cols.length < rwidth, site: pass, bottom: [], top: [], steps: [],
         ramp: { mx: (ax + bx) / 2 + 0.5, my: (ay + by) / 2 + 0.5, pdx: sd * dx, pdy: sd * dy, len, h0, h1 }, level: S.fine[pass.a] };
       for (let k = 0; k < len; k++) rec.steps.push({ cand: null, tiles: [] });
       for (const c of cols) {
@@ -495,7 +491,7 @@
       S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
       for (let i = 0; i < n; i++) S.byLevel[S.fine[i]].push(i);
     }
-    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, width, style: ramp ? 'ramp' : 'steps' };
+    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, width: P.stairStyle !== 0 ? rwidth : width, style: ramp ? 'ramp' : 'steps' };
     if (!carve.size) return;
     // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height
     const bridges = [...new Set([...carve.values()].filter((c) => c.base < 0))].sort((p, q) => p.h - q.h);
