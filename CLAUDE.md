@@ -22,6 +22,11 @@ old pipeline (Unity, C#) are reference only.
   inside their terrace.
 - Slice: one zone by default, chosen by id; several zones are optional. The rest of the map is scenery under
   the veil (starts as a single band; add a gradient only if it reads badly). Movement is restricted to the slice.
+- Height spread (user's decision): the jump between terraces can grow away from the CENTRAL terrace (the one with most
+  tiles on the whole map, never the slice): jump j -> j+1 = terH*(1+(spread-1)*T(min(d-1,2))), d = distance of the jump from
+  the centre, T = 0,1,3. spread 1 (default) = uniform and changes no pixel; 1.5 gives 1, 1.5, 2.5, 2.5, ... Sub-terrace height
+  keeps using terH (the smallest jump), so the climb condition holds in every jump. Ramp length limit is computed
+  (>= 8 tiles; 8 is enough for spread <= 1.5 at slope 0.4). `node tools/test_spread.js`.
 - Terrace height is global. Height is almost decorative: levels disconnect, stairs connect.
 - Sub-terraces: small, quantized height differences inside a terrace (1 to 6 per terrace in the viewer). Climb
   limit: up to 2 sub-terraces of difference without a stair. This is PROVISIONAL, an assumption of the user and not
@@ -96,7 +101,7 @@ incursion border; stake and way-back path visible.
 - `src/shape.js`: slice (zones and/or crop, window = bbox + scenery margin), terrace quantization with the global
   elevation range + sub-terraces, minimal-plateau cleanup, stair sites, carved stairs (levels are a ranking by
   height with bridge levels), walkable regions (only inside the slice, connected only by stairs).
-  `node tools/test_slice.js`, `node tools/test_stairs.js`, `node tools/test_gates.js`, `node tools/test_ramp.js`.
+  `node tools/test_slice.js`, `node tools/test_stairs.js`, `node tools/test_gates.js`, `node tools/test_ramp.js`, `node tools/test_spread.js`.
 - `src/tech.js`: technique A (per-level tile outline -> simplify -> Chaikin) and B (signed distance field ->
   blur -> marching squares).
 - `src/render.js`: camera, extruded walls, caps, overlays, markers. Stairs (steps) are terrain; ramps have their own surface renderer. Includes Box technique (one

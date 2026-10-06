@@ -73,9 +73,24 @@
      rise: subH_eff = min(subH, terH / (subs + climb - 0.5)). */
   E.subHeight = function (P) { return Math.min(P.subH, P.terH / (P.subs + P.climb - 0.5)); };
 
-  E.hOf = function (fine, P) {
+  /* Height of the bottom of terrace t. P.spread (Height spread, 1 = uniform) widens the jump between neighbouring terraces
+     the farther it is from the central terrace c (the one with most tiles on the whole map): the jump j -> j+1 is
+     terH * (1 + (spread - 1) * T(min(d - 1, 2))) with d = distance of that jump from c (1 = next to it) and T = 0, 1, 3, so with
+     spread 1.5 the jumps are 1, 1.5, 2.5, 2.5, ... times terH. Without c, or with spread 1, terraces are t * terH. */
+  E.terGap = function (j, P, c) {
+    const sp = P.spread === undefined ? 1 : P.spread;
+    if (!(sp > 1) || c === undefined) return P.terH;
+    const d = j >= c ? j - c + 1 : c - j, k = Math.min(d - 1, 2);
+    return P.terH * (1 + (sp - 1) * [0, 1, 3][k]);
+  };
+  E.terBase = function (t, P, c) {
+    if (!(P.spread > 1) || c === undefined) return t * P.terH;
+    let h = 0; for (let j = 0; j < t; j++) h += E.terGap(j, P, c);
+    return h;
+  };
+  E.hOf = function (fine, P, c) {
     const K = P.subs;
-    return Math.floor(fine / K) * P.terH + (fine % K) * E.subHeight(P);
+    return E.terBase(Math.floor(fine / K), P, c) + (fine % K) * E.subHeight(P);
   };
 
   /* ---- slice: the tiles of the incursion, and the window that gets built (slice + scenery margin) ---- */
@@ -175,7 +190,9 @@
       else sub[i] = ter[i] > t0 ? 0 : K - 1;
     }
     cleanup(W, H, sub, ter, P.minSub);
-    return (full._q = { key, U, ter, sub, trans: {}, range: [mn, mx] });
+    const cnt = new Int32Array(N); for (let i = 0; i < n; i++) cnt[ter[i]]++;
+    let center = 0; for (let t = 1; t < N; t++) if (cnt[t] > cnt[center]) center = t; // the terrace with most tiles on the whole map (ties: the lower)
+    return (full._q = { key, U, ter, sub, trans: {}, range: [mn, mx], center });
   }
   E.quantize = quantize;
 
@@ -196,10 +213,10 @@
     // `fine` is a level index: levels are ranked by height. levelH[L] is the height of level L and levelMeta[L]
     // says where it comes from (terrace, sub-terrace; bridge levels are added by the stair carving).
     const levelH = new Array(maxFine + 1), levelMeta = new Array(maxFine + 1);
-    for (let L = 0; L <= maxFine; L++) { levelH[L] = E.hOf(L, P); levelMeta[L] = { ter: Math.floor(L / K), sub: L % K, bridge: false }; }
+    for (let L = 0; L <= maxFine; L++) { levelH[L] = E.hOf(L, P, q.center); levelMeta[L] = { ter: Math.floor(L / K), sub: L % K, bridge: false }; }
     const masks = pack.masks || {};
     const S = {
-      W, H, n, U, ter, sub, fine, maxFine, byLevel, levelH, levelMeta, subs: K, N,
+      W, H, n, U, ter, sub, fine, maxFine, byLevel, levelH, levelMeta, subs: K, N, center: q.center,
       water: masks.water || new Array(n).fill(0),
       snake: masks.snake || null, cave: masks.cave || null, waterfall: masks.waterfall || null,
       markers: pack.markers || [], name: pack.name, fields: pack.fields || {}, cache: {},
@@ -341,7 +358,7 @@
     const R = r.ramp, t = Math.max(0, Math.min(R.len, (x - R.mx) * R.pdx + (y - R.my) * R.pdy));
     return R.h0 + (R.h1 - R.h0) * t / R.len;
   };
-  const MAX_TREADS = 6, MAX_RAMP = 8, STAIR_COLS = { 1: [0], 2: [0, 1], 3: [-1, 0, 1] };
+  const MAX_TREADS = 6, STAIR_COLS = { 1: [0], 2: [0, 1], 3: [-1, 0, 1] };
   function carveStairs(S, P) {
     const { W, H, n } = S, K = S.subs, N = S.N, s = E.subHeight(P), EPS = 1e-9;
     const tread = Math.max(1, Math.min(P.climb, Math.round(P.tread === undefined ? P.climb : P.tread))), reachPlain = tread * s, reach = reachPlain + EPS; // each tread rises at most `tread` sub-terraces
@@ -352,7 +369,7 @@
     const cands = [];
     for (let L = 0; L <= S.maxFine; L++) cands.push({ h: S.levelH[L], base: L });
     for (let t = 0; t + 1 < N; t++) {
-      const top = t * P.terH + (K - 1) * s, g = (t + 1) * P.terH - top, nb = Math.ceil(g / reachPlain - EPS) - 1;
+      const top = E.terBase(t, P, S.center) + (K - 1) * s, g = E.terBase(t + 1, P, S.center) - top, nb = Math.ceil(g / reachPlain - EPS) - 1;
       for (let j = 1; j <= nb; j++) cands.push({ h: top + j * g / (nb + 1), base: -1, ter: t, frac: j / (nb + 1) });
     }
     cands.sort((p, q) => p.h - q.h);
@@ -364,7 +381,8 @@
     const idx = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x);
     const okTile = (i, terr) => i >= 0 && !S.block[i] && !used[i] && S.ter[i] === terr;
 
-    const ramp = P.stairStyle === 0 ? false : true, slope = Math.max(0.05, P.rampSlope === undefined ? 0.4 : P.rampSlope), minLen = Math.max(1, Math.round(P.rampMin === undefined ? 2 : P.rampMin));
+    const maxGap = P.terH * (1 + 3 * Math.max(0, (P.spread === undefined ? 1 : P.spread) - 1)); // the largest terrace jump (the spread caps at distance 3)
+    const ramp = P.stairStyle === 0 ? false : true, slope = Math.max(0.05, P.rampSlope === undefined ? 0.4 : P.rampSlope), minLen = Math.max(1, Math.round(P.rampMin === undefined ? 2 : P.rampMin)), maxRamp = Math.max(8, Math.ceil(maxGap / slope) + 1); // 8 is enough for spread <= 1.5 at the default slope
     /* ramp style: the same footprint as the stair (cut into the upper terrace or built on the lower one), but one smooth
        surface from the low height to the high one; its length comes from the maximum slope. Levels are not touched. */
     const planRamp = (pass, mode) => {
@@ -376,7 +394,7 @@
       if (!okTile(fixed(0), terFix)) return null;
       const hFix = hT[fixed(0)];
       let len = 0, h0 = 0, h1 = 0;
-      for (let L = 1; L <= MAX_RAMP; L++) {
+      for (let L = 1; L <= maxRamp; L++) {
         if (!okTile(col(0, L - 1), terPath)) return null;
         if (L < minLen) continue;
         const e = col(0, L); if (!okTile(e, terPath)) return null;

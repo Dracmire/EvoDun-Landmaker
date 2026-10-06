@@ -1,7 +1,7 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 2, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 3, margin: 24 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 2, stairStyle: 1, rampSlope: 0.4, rampMin: 2, gateThr: 0.05, gateMin: 3, margin: 24 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
@@ -11,7 +11,7 @@
     { id: 'top', label: 'Top 80°', yaw: 0, pitch: 80 }
   ];
   const SLIDERS = [
-    ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
+    ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
     ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['stairStyle', 'Style: 0 steps · 1 ramp', 0, 1, 1], ['rampSlope', 'Ramp max slope (height per tile)', 0.15, 1, 0.05], ['rampMin', 'Ramp min length, tiles', 1, 6, 1], ['tread', 'Tread rise, sub-terraces (steps only)', 1, 5, 1], ['stairW', 'Stair width, tiles (0 = none)', 0, 3, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
