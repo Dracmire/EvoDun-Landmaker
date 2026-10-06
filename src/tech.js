@@ -49,6 +49,9 @@
     return pts;
   }
 
+  /* closed tile-exact loops of a mask, collinear points dropped (used for the slice border) */
+  E.maskLoops = function (W, H, inside) { return traceMask(W, H, inside).map(dropCollinear); };
+
   function chaikin(loop, W, H, it) {
     let pts = loop;
     const onB = (a, b) => (a[0] === 0 && b[0] === 0) || (a[0] === W && b[0] === W) || (a[1] === 0 && b[1] === 0) || (a[1] === H && b[1] === H);
