@@ -111,5 +111,31 @@ const filled = E.fillUnassigned(ids, W, H);
   ok('zones without a zone field', /no zone field/.test(msg(() => E.shape(bare, P, { zones: [1] }))));
   ok('spec with only a margin = whole map', E.shape(mkPack(), P, { margin: 5 }).slice === null);
 }
+// 9. contiguity warning (4-neighbour), level counts inside the slice
+{
+  const W2 = 20, H2 = 10, ids2 = new Int32Array(W2 * H2);
+  for (let y = 0; y < H2; y++) for (let x = 0; x < W2; x++) ids2[y * W2 + x] = x < 6 ? 1 : 2;
+  for (let y = 0; y < H2; y++) for (let x = 14; x < 20; x++) ids2[y * W2 + x] = 3;                // zone 3 on the right
+  for (const [x, y] of [[17, 2], [18, 2], [17, 3], [18, 3]]) ids2[y * W2 + x] = 2;                // 4-tile island of zone 2 inside zone 3
+  ids2[9 * W2 + 19] = 4; ids2[8 * W2 + 18] = 4;                                                    // zone 4: two tiles touching only by a corner
+  const el2 = new Float32Array(W2 * H2).map((_, i) => i % W2);
+  const p2 = { name: 'c', width: W2, height: H2, elevation: el2, masks: {}, markers: [], fields: { zone: { ids: ids2, amb: new Uint8Array(W2 * H2), info: { classes: [], outside: 0, ambiguous: {} } } } };
+  const pc = E.zonePieces(p2);
+  const count = (id) => ids2.reduce((a, v) => a + (v === id ? 1 : 0), 0);
+  ok('zone 1 is one piece', pc.get(1).pieces === 1 && pc.get(1).total === 6 * H2);
+  ok('zone 2: main body + 4-tile island = 2 pieces, largest = total - 4', pc.get(2).pieces === 2 && pc.get(2).largest === count(2) - 4 && pc.get(2).total === count(2), JSON.stringify(pc.get(2)));
+  ok('zone 4: corner contact is not contiguous (2 pieces of 1)', pc.get(4).pieces === 2 && pc.get(4).largest === 1);
+  const w = (z) => E.shape(p2, P, { zones: z, margin: 2 }).sliceInfo.warnings;
+  ok('contiguous zone: no warning', w([1]).length === 0);
+  ok('split zone: warning with pieces and the largest piece', w([2]).length === 1 && /Zone 2 is not contiguous/.test(w([2])[0]) && /2 pieces/.test(w([2])[0]) && new RegExp(`largest has ${count(2) - 4} of ${count(2)} tiles`).test(w([2])[0]), w([2])[0]);
+  ok('only selected zones are checked', w([1, 4]).length === 1 && /Zone 4/.test(w([1, 4])[0]));
+  ok('the slice is not corrected (the island tiles are in the slice)', E.shape(p2, P, { zones: [2], margin: 0 }).sliceInfo.tiles === count(2));
+  const Sg = E.shape(mkPack(), P, { zones: [2], margin: 8 });
+  let t = new Set(), f = new Set(); for (let i = 0; i < Sg.n; i++) if (Sg.slice[i]) { t.add(Sg.ter[i]); f.add(Sg.fine[i]); }
+  ok('levelCount counts only tiles inside the slice', Sg.levelCount.terraces === t.size && Sg.levelCount.levels === f.size && Sg.levelCount.levels <= new Set(Sg.fine).size, JSON.stringify(Sg.levelCount));
+  const P24 = Object.assign({}, P, { terraces: 24 }), S24 = E.shape(mkPack(), P24, { zones: [2], margin: 8 });
+  ok('24 terraces: shaping works, levels grow', S24.levelCount.terraces > Sg.levelCount.terraces && S24.levelCount.terraces <= 24 && S24.levelCount.levels <= 72, JSON.stringify(S24.levelCount));
+  ok('whole map level count', E.shape(mkPack(), P).levelCount.terraces <= 5);
+}
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

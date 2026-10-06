@@ -63,6 +63,8 @@ incursion border; stake and way-back path visible.
 1. Overlays (snake, cave, water) are drawn as square tiles and look blocky over the smoothed A/B shapes.
 2. Ramps are a one-tile plane leaning on the wall; they don't cut geometry and only draw if facing the
    camera. Passes are chosen by lowest slope and spacing, not from pipeline data (flow, A*, terrace edges).
+3. A selected zone that is not 4-contiguous only produces a warning (pieces, largest piece); it is not corrected.
+   B costs about 3 s cold at 24 terraces (36 levels) on a 256x256 map; sliders recompute on release.
 3. Slice border: tile-exact for all techniques (not smoothed like A/B shapes); the veil is a single band and the border
    line is one colour (colouring it by the edge map is optional and not done). In Box, the line and veil are drawn per
    tile and look rougher than in A/B. Stairs outside the slice are not generated (scenery has no ramps).

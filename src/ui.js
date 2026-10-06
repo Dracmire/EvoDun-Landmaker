@@ -11,7 +11,7 @@
     { id: 'top', label: 'Top 80°', yaw: 0, pitch: 80 }
   ];
   const SLIDERS = [
-    ['Shaping', [['terraces', 'Terraces', 2, 9, 1], ['micro', 'Micro steps / terrace', 1, 3, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['microH', 'Micro step height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minMicro', 'Min micro patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
+    ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['micro', 'Micro steps / terrace', 1, 3, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['microH', 'Micro step height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minMicro', 'Min micro patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
     ['Passes', [['passGap', 'Stair spacing', 3, 20, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
@@ -272,8 +272,10 @@
     raf = 0;
     if (!S) {
       const pack = packs[st.pack].pack;
-      try { S = E.shape(pack, P, sliceSpec()); }
-      catch (e) { message(e.message); S = E.shape(pack, P, null); }
+      try {
+        S = E.shape(pack, P, sliceSpec());
+        if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
+      } catch (e) { message(e.message); S = E.shape(pack, P, null); }
     }
     const techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
@@ -295,7 +297,7 @@
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
     $('#busy').hidden = true;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.maxFine + 1} levels · ${S.passes.length} stair passes · ${rs.length} walkable regions in the ${si ? 'slice' : 'map'}, largest ${(big / tot * 100).toFixed(0)}%`;
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${S.passes.length} stair passes · ${rs.length} walkable regions in the ${si ? 'slice' : 'map'}, largest ${(big / tot * 100).toFixed(0)}%`;
   }
 
   function init() {

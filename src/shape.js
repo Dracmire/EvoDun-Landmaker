@@ -104,6 +104,27 @@
     return { mask, tiles, bbox: { x0: bx0, y0: by0, x1: bx1, y1: by1 }, x0: Math.max(0, bx0 - m), y0: Math.max(0, by0 - m), x1: Math.min(W, bx1 + m), y1: Math.min(H, by1 + m) };
   };
 
+  /* Pieces of each zone (4-neighbour contiguity, on the ids used for slicing). Cached on the pack.
+     Returns Map id -> { pieces, largest, total }. */
+  E.zonePieces = function (pack) {
+    const z = pack.fields && pack.fields.zone; if (!z) return new Map();
+    if (z.pieces) return z.pieces;
+    const ids = zoneIdsForSlice(pack), W = pack.width, H = pack.height, seen = new Uint8Array(ids.length), out = new Map(), stack = [];
+    for (let s0 = 0; s0 < ids.length; s0++) {
+      const id = ids[s0]; if (id <= 0 || seen[s0]) continue;
+      let size = 0; seen[s0] = 1; stack.push(s0);
+      while (stack.length) {
+        const i = stack.pop(), x = i % W, y = (i / W) | 0; size++;
+        for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) {
+          if (j >= 0 && !seen[j] && ids[j] === id) { seen[j] = 1; stack.push(j); }
+        }
+      }
+      const r = out.get(id) || { pieces: 0, largest: 0, total: 0 };
+      r.pieces++; r.total += size; if (size > r.largest) r.largest = size; out.set(id, r);
+    }
+    return (z.pieces = out);
+  };
+
   function cropArr(a, W, x0, y0, w, h) {
     const o = Array.isArray(a) ? new Array(w * h) : new a.constructor(w * h);
     for (let y = 0; y < h; y++) {
@@ -177,8 +198,19 @@
         if (x === 0 || !mask[i - 1]) S.border[i] |= 8;
       }
       S.sliceLoops = E.maskLoops(W, H, (x, y) => mask[y * W + x] === 1);
-      S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rect: spec.rect || null };
+      const warnings = [];
+      if (spec.zones && spec.zones.length) {
+        const pieces = E.zonePieces(full);
+        for (const id of spec.zones) {
+          const p = pieces.get(id);
+          if (p && p.pieces > 1) warnings.push(`Zone ${id} is not contiguous (4-neighbour): ${p.pieces} pieces, the largest has ${p.largest} of ${p.total} tiles. Left as is.`);
+        }
+      }
+      S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rect: spec.rect || null, warnings };
     }
+    const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
+    for (let i = 0; i < n; i++) if (!S.slice || S.slice[i]) { terSeen.add(ter[i]); fineSeen.add(fine[i]); }
+    S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
     computePasses(S, P);
     computeRegions(S, P);
     return S;
