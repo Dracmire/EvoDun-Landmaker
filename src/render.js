@@ -236,6 +236,19 @@
     ctx.beginPath(); q.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath();
     ctx.fillStyle = rampFill(ctx, cam, R); ctx.fill(); if (!DBG) { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.8; ctx.stroke(); }
     if (DBG) return;
+    if (o.rampLines) { // thin lines across the slope, evenly spaced along the whole ramp (cut where they cross this tile)
+      const nL = R.len <= 2 ? 2 : 3;
+      for (let q = 1; q <= nL; q++) {
+        const s0 = R.len * q / (nL + 1);
+        // the line s = s0 is perpendicular to the path direction: a vertical or horizontal segment through this tile
+        const horiz = R.pdx === 0, a0 = horiz ? y : x, a1 = a0 + 1;
+        const cA = horiz ? R.my + R.pdy * s0 : R.mx + R.pdx * s0;
+        if (cA < a0 - 1e-9 || cA > a1 + 1e-9) continue;
+        const pts = horiz ? [[x, cA], [x + 1, cA]] : [[cA, y], [cA, y + 1]];
+        const A = cam.p(pts[0][0], pts[0][1], hc(pts[0][0], pts[0][1])), B = cam.p(pts[1][0], pts[1][1], hc(pts[1][0], pts[1][1]));
+        ctx.strokeStyle = 'rgba(255,250,230,0.55)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
+      }
+    }
     for (const [dx, dy, ax, ay, bx, by] of DIRS) { // outline along the footprint boundary, at the height of the surface
       const nj = ST.get((y + dy) * S.W + x + dx);
       if ((nj && nj.rec === rec) || x + dx < 0 || y + dy < 0 || x + dx >= S.W || y + dy >= S.H) continue;

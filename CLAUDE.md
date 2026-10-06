@@ -50,8 +50,8 @@ old pipeline (Unity, C#) are reference only.
   `ramp`; `steps` (treads with bridge levels) stays as an option. Ramp length = max(min length, ceil(gap / max slope)),
   default max slope 0.4 height per tile (~22 deg) and minimum 2 tiles (sliders). With ramps there are no bridge levels and
   no `tread` parameter (they only exist in `steps`). Movement does not change. Look: stone colour with a gradient along
-  the slope (lighter at the high end), dark outline, own side walls; same in Box, A and B. A second cue (2-3 thin
-  transverse lines) is NOT added until the user approves it. `stairW = 0` (slider minimum) switches stairs off, which
+  the slope (lighter at the high end), dark outline, own side walls; same in Box, A and B. Cue 2 (approved): 2-3 thin transverse lines across the
+  slope, Display switch "Ramp cross lines" (on). `stairW = 0` (slider minimum) switches stairs off, which
   also lets the pixel regression compare against older checkouts.
 - Terrain edges are NOT touched (user's decision): A keeps its stepped border (more legible) and B the smooth one (more
   natural). Both techniques are kept to compare them.
@@ -120,7 +120,7 @@ incursion border; stake and way-back path visible.
    directions). A and B order by level, so a ramp that spans several levels can lose slivers: a cut ramp is drawn right
    after the slab of its low end, a built-up one right before the slab of its high end, and slab walls beside a ramp
    are clipped to its surface. Measured over all 73 ramps of the relief test map (`tools/ui/test_ramp_ui.js`): mean
-   0.1-1.2 % of the ramp's pixels, worst 7.8 % (two ramps that touch). Thresholds in the test: mean <= 2 %, worst <= 8 %. The footprint is rigid: in A the vertices
+   0.1-1.2 % of the ramp's pixels, worst 7.8 % (two ramps that touch). Thresholds in the test: mean <= 2 %, worst <= 8 % (accepted by the user as a LIMITATION OF THE LEVEL-ORDERED PAINTER; the full solution is per-pixel depth, left for WebGL in round 2). The footprint is rigid: in A the vertices
    of every contour edge that touches a carved tile are pinned through the Chaikin passes; in B the unblurred distance
    field replaces the blurred one within 0.5 tile of a carved tile (fading out by 1.5 tiles). Terrain away from the
    stairs is smoothed as before. Look (`render.js`): own cream colour with a tint per tread, light line on the top edge
@@ -144,6 +144,7 @@ incursion border; stake and way-back path visible.
 9. Box technique: light vertical stripes along the front edge of the slice (seen on the noise pack).
    Cause not investigated.
 10. The climb limit (2 sub-terraces) is a provisional assumption, not the micro-step rule.
+11. Partial connection: with the user's gate criterion many regions stay unconnected (e.g. 14 regions, the largest 55 % of the slice in one test). KNOWN LIMITATION, on purpose: the global connection will come from the rooms and the numeric world; a connection step here would be filler code. No connection step is added.
 
 ## Pending, in this order
 1. (Done, PR #1) Verify the first limitations.
