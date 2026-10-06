@@ -29,8 +29,22 @@ old pipeline (Unity, C#) are reference only.
   as well as between terraces. The effective sub-terrace height is limited so that the gap from the last
   sub-terrace to the next terrace stays above climb*subH by half a sub-step (`E.subHeight`).
 - Stairs are carved into the terrain (levels are a ranking by height, so every technique gets the same geometry);
-  stair width is a parameter (1-3 tiles, default 2). Site selection is the existing heuristic (lowest slope,
-  spacing); the edge map plays no part in it.
+  stair width is a parameter (1-3 tiles, default 2); the edge map plays no part in placing them.
+- Where stairs go: GATES, a transcription of the user's EDunProcGen.cs (NormalizeHeightsPerTerrace,
+  ComputeTerraceSlopeMap, FindRankedTerraceTransitions, FilterConnectedTerraceTransitions), on the WHOLE map and the
+  RAW elevation, then clipped to the slice. Per terrace t: min/max of the raw elevation over its tiles,
+  norm_t = (h-min)/(max-min) on t and 0 elsewhere (range <= 0.0001 -> 1); slope = sqrt(dx^2+dy^2) with central
+  differences *0.5 on the whole norm_t (neighbours of other terraces count 0; the 1-tile map frame is skipped).
+  For each 4-neighbour pair exactly one terrace apart, pos = the LOW tile; transition if slope_tLow[pos] -
+  slope_tHigh[pos] > threshold (0.05, no absolute value); each pos once. Transitions are grouped by 4-connectivity
+  (all together, not per terrace pair) and groups smaller than the minimum (3, the user's choice) are dropped.
+  Each remaining group is a gate; every terrace edge outside a gate is blocked. The user's "same room" condition is
+  omitted (no rooms). One stair per gate at the centroid, several in long gates (stair spacing), retry on the
+  next tile if the carve fails. EXTENSION OF OURS (not in the user's code): steps inside a terrace steeper than the
+  climb limit use the same rule with the sub-terrace as the unit, in groups of their own.
+- Stair footprint: terrain stays smooth, but the footprint of a stair is rigid (exact per tile) in Box, A and B, with
+  its own colour, tread lines and outline, the same in all three techniques and visible from front and back. Survival
+  is measured as the percentage of each tile area that is well covered by the drawn contours.
 - The world continues past the incursion border as scenery under a veil; only movement is restricted.
 - Numeric fields usually come as images: a 256 image is a 256x256 matrix, 1 pixel = 1 tile, and each channel
   is a field. Images encode HSV: hue is an id codec, Value carries height; so R, G, B, A, H, S, V can each be
@@ -98,7 +112,8 @@ incursion border; stake and way-back path visible.
    B costs about 3 s cold at 24 terraces (36 levels) on a 256x256 map; sliders recompute on release.
 4. Slice border: tile-exact for all techniques (not smoothed like A/B shapes); the veil is a single band and the border
    line is one colour (to be coloured by the edge map, visual only). In Box, the line and veil are drawn per
-   tile and look rougher than in A/B. Stairs outside the slice are not generated (scenery has no stairs).
+   tile and look rougher than in A/B. **The border line comes out broken (dashed) in B**: to fix in the visual-border
+   step. Stairs outside the slice are not generated (scenery has no stairs).
 5. Technique B rounds the outer corners of the slice.
 6. In compare mode the three panels are narrow in isometric views.
 7. Only two built-in sources: Snake Mountain and filler noise. Missing: Shrine-Pier pack and real 256x256 maps. Roles
