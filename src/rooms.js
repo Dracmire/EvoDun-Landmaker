@@ -1,0 +1,310 @@
+/* EvoDun crystal viewer - rooms: the minimal chain of the user's EDunProcGen.SequenceA with the connection PATCHED.
+   Port of (reference/EDunProcGen.cs): ComputeSlopeMap + ApplyPowTransform + NormalizeSlopeMap + ClassifySlopeMap,
+   TrueWatershed.WatershedFromHeightMinima, ClassifyRoomEdges, ExpandAndFilterTransitions, FindRoomCores, ScanCoreConnectivity,
+   A* between cores + BuildSpanningTree. Terrace gates already exist in the viewer (shape.js) and are reused.
+   No rendering, no UI: pure functions on flat arrays (index = y * W + x, y grows like the image rows).
+   Value 0 of the height map is VOID (outside the terrain, never low terrain): no room, edge, core or path touches it.
+
+   THE PATCH (user's design, see CLAUDE.md "Pending 4"):
+   - a transition is an undirected PAIR of 4-neighbouring tiles (room edges and terrace gates alike), not a tile;
+   - two tiles pass if (same room or the pair is a room transition) and (same terrace or the pair is a gate): ONE function
+     (`makePass`) for the reachability scan, the shortest paths and the fills, symmetric by construction;
+   - the two tiles of a valid pair are never forbidden; a pair with a Steep tile is not valid and is dropped (Steep stays closed);
+   - tiles left without room by the watershed are given to the nearest room before edges are searched (`assign`);
+   - the centre of a core is its free tile nearest to the centroid (the original rounded centroid can fall outside the core).
+   The original rules, transcribed as is, live in tools/rooms_original.js (comparison only, never loaded by the viewer).
+   Heights are floats in 0..1 (grey / 255); void is h <= 0. To be ported to Unity (C#) with the user's code once checked. */
+(function (E) {
+  const R = E.rooms = {};
+  const SL = R.SL = { Flat: 0, Gentle: 1, Steep: 2, Void: 3 };
+  const ET = R.ET = { None: 0, Transition: 1, SolidSoft: 2, SolidHard: 3 };
+  const N4 = [[0, 1], [0, -1], [-1, 0], [1, 0]]; // Unity's up, down, left, right (y up in the array, same order as the user's code)
+
+  R.defaults = { gentle: 0.2, steep: 0.33, exponent: 0.5, hTol: 0.07, minRadius: 9, minRoom: 8, hardEdge: 0.5, minSizeEdge: 12, minCore: 5 };
+
+  const key = (a, b, n) => a < b ? a * n + b : b * n + a;
+  R.key = key;
+  const roundEven = (v) => { const f = Math.floor(v), d = v - f; return d < 0.5 ? f : d > 0.5 ? f + 1 : (f % 2 === 0 ? f : f + 1); };
+
+  /* ---- slope classes (ComputeSlopeMap -> pow -> normalize -> ClassifySlopeMap) ---- */
+  R.slope = function (h, W, H, exponent) {
+    const s = new Float32Array(W * H);
+    for (let x = 1; x < W - 1; x++) for (let y = 1; y < H - 1; y++) {
+      const dx = (h[y * W + x + 1] - h[y * W + x - 1]) * 0.5, dy = (h[(y + 1) * W + x] - h[(y - 1) * W + x]) * 0.5;
+      s[y * W + x] = Math.sqrt(dx * dx + dy * dy);
+    }
+    for (let x = 0; x < W; x++) { s[x] = s[W + x]; s[(H - 1) * W + x] = s[(H - 2) * W + x]; } // the user's "edge padding"
+    for (let y = 0; y < H; y++) { s[y * W] = s[y * W + 1]; s[y * W + W - 1] = s[y * W + W - 2]; }
+    let mn = Infinity, mx = -Infinity;
+    for (let i = 0; i < s.length; i++) { s[i] = Math.pow(s[i], exponent); if (s[i] < mn) mn = s[i]; if (s[i] > mx) mx = s[i]; }
+    const range = mx - mn;
+    for (let i = 0; i < s.length; i++) s[i] = range > 0 ? (s[i] - mn) / range : 0;
+    return s;
+  };
+  R.classify = function (slope, h, gentle, steep) {
+    const c = new Uint8Array(slope.length);
+    for (let i = 0; i < c.length; i++) {
+      const v = slope[i];
+      c[i] = h[i] <= 0 || v <= 0 ? SL.Void : v < gentle ? SL.Flat : v < steep ? SL.Gentle : SL.Steep; // h <= 0: void, always
+    }
+    return c;
+  };
+
+  /* ---- rooms: watershed from height minima (WatershedFromHeightMinima). Ties of the priority queue: insertion order
+     (C#'s PriorityQueue does not promise one). ---- */
+  function Heap() { this.k = []; this.s = []; this.v = []; this.n = 0; }
+  Heap.prototype.push = function (key0, v) {
+    let i = this.k.length; this.k.push(key0); this.s.push(this.n++); this.v.push(v);
+    while (i > 0) { const p = (i - 1) >> 1; if (this.lt(i, p)) { this.swap(i, p); i = p; } else break; }
+  };
+  Heap.prototype.lt = function (i, j) { return this.k[i] < this.k[j] || (this.k[i] === this.k[j] && this.s[i] < this.s[j]); };
+  Heap.prototype.swap = function (i, j) { let t = this.k[i]; this.k[i] = this.k[j]; this.k[j] = t; t = this.s[i]; this.s[i] = this.s[j]; this.s[j] = t; t = this.v[i]; this.v[i] = this.v[j]; this.v[j] = t; };
+  Heap.prototype.pop = function () {
+    const top = this.v[0], last = this.k.length - 1;
+    if (last > 0) { this.k[0] = this.k[last]; this.s[0] = this.s[last]; this.v[0] = this.v[last]; }
+    this.k.pop(); this.s.pop(); this.v.pop();
+    let i = 0; const m = this.k.length;
+    for (;;) { let b = i; const a = 2 * i + 1, c = a + 1; if (a < m && this.lt(a, b)) b = a; if (c < m && this.lt(c, b)) b = c; if (b === i) break; this.swap(i, b); i = b; }
+    return top;
+  };
+  Object.defineProperty(Heap.prototype, 'size', { get() { return this.k.length; } });
+
+  R.watershed = function (h, cls, W, H, prm) {
+    const r = prm.minRadius, n = W * H, room = new Int32Array(n), seeds = [];
+    for (let x = r; x < W - r; x++) for (let y = r; y < H - r; y++) {
+      const c = h[y * W + x]; if (c <= 0) continue;
+      let isMin = true;
+      for (let dx = -r; dx <= r && isMin; dx++) for (let dy = -r; dy <= r; dy++) { if (!dx && !dy) continue; if (h[(y + dy) * W + x + dx] < c) { isMin = false; break; } }
+      if (isMin) seeds.push(y * W + x);
+    }
+    const q = new Heap(), count = new Int32Array(seeds.length + 1);
+    seeds.forEach((s, k) => { room[s] = k + 1; count[k + 1] = 1; q.push(h[s], s); });
+    while (q.size) {
+      const p = q.pop(), x = p % W, y = (p / W) | 0, id = room[p];
+      for (const [dx, dy] of N4) {
+        const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+        const j = ny * W + nx;
+        if (room[j] || h[j] <= 0 || cls[j] === SL.Steep || Math.abs(h[j] - h[p]) > prm.hTol) continue;
+        room[j] = id; count[id]++; q.push(h[j], j);
+      }
+    }
+    // rooms below the minimum size leave the LIST but keep their id in the map (as in the user's code)
+    const rooms = [];
+    for (let id = 1; id <= seeds.length; id++) if (count[id] >= prm.minRoom) rooms.push({ id, size: count[id] });
+    return { room, rooms, seeds: seeds.length, count };
+  };
+
+  /* PATCH: unassigned non-void tiles go to the nearest room (4-neighbour distance, level by level; a tie goes to the lowest id). */
+  R.assign = function (room, h, W, H) {
+    const out = Int32Array.from(room), n = W * H;
+    let cand = [];
+    const touch = (i, list) => { const x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (out[j] === 0 && h[j] > 0) list.push(j); } };
+    for (let i = 0; i < n; i++) if (out[i] > 0) touch(i, cand);
+    let assigned = 0;
+    while (cand.length) {
+      const seen = new Set(cand), upd = [];
+      for (const i of seen) {
+        const x = i % W, y = (i / W) | 0; let best = 0;
+        for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const v = out[ny * W + nx]; if (v > 0 && (best === 0 || v < best)) best = v; }
+        if (best) upd.push(i, best);
+      }
+      cand = [];
+      for (let k = 0; k < upd.length; k += 2) { out[upd[k]] = upd[k + 1]; assigned++; }
+      for (let k = 0; k < upd.length; k += 2) touch(upd[k], cand);
+    }
+    let left = 0; for (let i = 0; i < n; i++) if (out[i] === 0 && h[i] > 0) left++;
+    return { room: out, assigned, left };
+  };
+
+  /* ---- room edges: PAIRS of neighbouring tiles of different rooms (ClassifyRoomEdges), then Expand and Filter (pair-wise) ---- */
+  R.roomPairs = function (room, h, cls, ter, W, H, prm) {
+    const pairs = [], inner = (i) => { const x = i % W, y = (i / W) | 0; return x >= 1 && y >= 1 && x <= W - 2 && y <= H - 2; };
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const a = y * W + x;
+      for (const b of [x + 1 < W ? a + 1 : -1, y + 1 < H ? a + W : -1]) {
+        if (b < 0 || (!inner(a) && !inner(b))) continue; // the user's scan only starts from tiles off the 1-tile frame
+        const ra = room[a], rb = room[b];
+        if (ra <= 0 || rb <= 0 || ra === rb || h[a] <= 0 || h[b] <= 0) continue;
+        const hd = Math.abs(h[a] - h[b]), s1 = cls[a], s2 = cls[b];
+        let type;
+        if (ter[a] !== ter[b]) type = ET.SolidHard;
+        else if (s1 === SL.Steep || s2 === SL.Steep || hd > prm.hardEdge) type = ET.SolidHard;
+        else if (s1 === SL.Gentle && s2 === SL.Gentle && hd <= prm.hTol) type = ET.Transition;
+        else type = ET.SolidSoft;
+        pairs.push({ a, b, type });
+      }
+    }
+    return pairs;
+  };
+
+  /* A soft pair is promoted when it runs PARALLEL to a transition pair (both its tiles are 4-neighbours of the two tiles of that pair,
+     in the same rooms and terraces, none Steep); then groups of transition tiles smaller than minGroup go back to soft (the user's
+     minSizeEdge counts tiles, both sides together). The original promoted single tiles without looking at their partner. */
+  R.expandFilter = function (pairs, room, ter, cls, W, H, minGroup) {
+    const n = W * H, byKey = new Map();
+    pairs.forEach((p, i) => byKey.set(key(p.a, p.b, n), i));
+    const fr = []; pairs.forEach((p, i) => { if (p.type === ET.Transition) fr.push(i); });
+    let promoted = 0;
+    for (let f = 0; f < fr.length; f++) {
+      const p = pairs[fr[f]], ax = p.a % W, ay = (p.a / W) | 0, bx = p.b % W, by = (p.b / W) | 0;
+      for (const [dx, dy] of N4) {
+        const x1 = ax + dx, y1 = ay + dy, x2 = bx + dx, y2 = by + dy;
+        if (x1 < 0 || y1 < 0 || x1 >= W || y1 >= H || x2 < 0 || y2 < 0 || x2 >= W || y2 >= H) continue;
+        const na = y1 * W + x1, nb = y2 * W + x2; if (na === p.b || nb === p.a) continue;
+        const j = byKey.get(key(na, nb, n)); if (j === undefined || pairs[j].type !== ET.SolidSoft) continue;
+        if (room[na] !== room[p.a] || room[nb] !== room[p.b] || ter[na] !== ter[p.a] || ter[nb] !== ter[p.b]) continue;
+        if (cls[na] === SL.Steep || cls[nb] === SL.Steep) continue;
+        pairs[j].type = ET.Transition; fr.push(j); promoted++;
+      }
+    }
+    // groups of transition TILES (4-connected, both sides of the border together)
+    const par = new Map(), find = (v) => { let r = v; while (par.get(r) !== r) r = par.get(r); while (par.get(v) !== r) { const t = par.get(v); par.set(v, r); v = t; } return r; };
+    for (const p of pairs) if (p.type === ET.Transition) { if (!par.has(p.a)) par.set(p.a, p.a); if (!par.has(p.b)) par.set(p.b, p.b); }
+    for (const t of par.keys()) { const x = t % W, y = (t / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (par.has(j)) { const a = find(t), b = find(j); if (a !== b) par.set(a, b); } } }
+    const size = new Map(); for (const t of par.keys()) { const r = find(t); size.set(r, (size.get(r) || 0) + 1); }
+    let removedGroups = 0; const dead = new Set(); for (const [r, s] of size) if (s < minGroup) { dead.add(r); removedGroups++; }
+    for (const p of pairs) if (p.type === ET.Transition && dead.has(find(p.a))) p.type = ET.SolidSoft;
+    const trans = pairs.filter((p) => p.type === ET.Transition), tiles = new Set(); for (const p of trans) { tiles.add(p.a); tiles.add(p.b); }
+    return { promoted, removedGroups, transitionPairs: trans.length, transitionTiles: tiles.size };
+  };
+
+  /* ---- terrace gates as PAIRS, from the viewer's gates (E.gateTransitions: low tile + groups). Per low tile, every 4-neighbour one
+     terrace up is a pair (the gate criterion depends only on the low tile). The user's "same room" condition, omitted so far in
+     the viewer, is applied here; so are void and (PATCH) Steep. The group minimum is applied again afterwards (same result as
+     filtering by room before grouping: groups only shrink). ---- */
+  R.gatePairs = function (gateTiles, room, ter, cls, h, W, H, minGroup, dropSteep) {
+    const st = { viewerTiles: gateTiles.length, candidatePairs: 0, lostRoomOrVoid: 0, lostSteep: 0, lostGroup: 0 };
+    const cand = [];
+    for (const i of gateTiles) {
+      const x = i % W, y = (i / W) | 0;
+      for (const [dx, dy] of N4) {
+        const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+        const j = ny * W + nx; if (ter[j] !== ter[i] + 1) continue;
+        st.candidatePairs++;
+        if (h[i] <= 0 || h[j] <= 0 || room[i] <= 0 || room[i] !== room[j]) { st.lostRoomOrVoid++; continue; }
+        if (dropSteep && (cls[i] === SL.Steep || cls[j] === SL.Steep)) { st.lostSteep++; continue; }
+        cand.push([i, j]);
+      }
+    }
+    const lows = new Set(cand.map((p) => p[0])), seen = new Set(), keep = new Set();
+    for (const s0 of lows) {
+      if (seen.has(s0)) continue;
+      const grp = [s0], stack = [s0]; seen.add(s0);
+      while (stack.length) { const i = stack.pop(), x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (lows.has(j) && !seen.has(j)) { seen.add(j); grp.push(j); stack.push(j); } } }
+      if (grp.length >= minGroup) for (const t of grp) keep.add(t);
+    }
+    const pairs = cand.filter((p) => keep.has(p[0]));
+    st.lostGroup = cand.length - pairs.length; st.pairs = pairs.length; st.lowTiles = keep.size; st.groups = 0;
+    // number of groups kept
+    const seen2 = new Set(); for (const s0 of keep) { if (seen2.has(s0)) continue; st.groups++; const stack = [s0]; seen2.add(s0); while (stack.length) { const i = stack.pop(), x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (keep.has(j) && !seen2.has(j)) { seen2.add(j); stack.push(j); } } } }
+    return { pairs, stats: st };
+  };
+
+  /* ---- cores (FindRoomCores): connected tiles of one room, one terrace, not Steep. Only rooms in the list have cores. ---- */
+  R.cores = function (room, ter, cls, rooms, W, H, minCore) {
+    const n = W * H, listed = new Set(rooms.map((r) => r.id)), byRoom = new Map(), visited = new Uint8Array(n), cores = [];
+    for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) { const i = y * W + x, r = room[i]; if (r > 0 && listed.has(r)) { if (!byRoom.has(r)) byRoom.set(r, []); byRoom.get(r).push(i); } }
+    for (const { id } of rooms) {
+      for (const s of byRoom.get(id) || []) {
+        if (visited[s] || cls[s] === SL.Steep) continue;
+        const t = ter[s], tiles = [], q = [s];
+        for (let k = 0; k < q.length; k++) {
+          const p = q[k]; if (visited[p] || room[p] !== id || ter[p] !== t || cls[p] === SL.Steep) continue;
+          visited[p] = 1; tiles.push(p); const px = p % W, py = (p / W) | 0;
+          for (const [dx, dy] of N4) { const nx = px + dx, ny = py + dy; if (nx >= 0 && nx < W && ny >= 0 && ny < H && !visited[ny * W + nx]) q.push(ny * W + nx); }
+        }
+        let sx = 0, sy = 0; for (const p of tiles) { sx += p % W; sy += (p / W) | 0; }
+        const cx = sx / tiles.length, cy = sy / tiles.length;
+        cores.push({ room: id, terrace: t, tiles, size: tiles.length, cx, cy, center: roundEven(cy) * W + roundEven(cx), dead: tiles.length < minCore });
+      }
+    }
+    return cores;
+  };
+  /* PATCH: the centre is the free (not forbidden) tile of the core nearest to the centroid; -1 if the whole core is forbidden. */
+  R.fixCentres = function (cores, forb, W) {
+    let moved = 0, none = 0;
+    for (const c of cores) {
+      c.center0 = c.center; let best = -1, bd = Infinity;
+      for (const t of c.tiles) { if (forb[t]) continue; const d = (t % W - c.cx) ** 2 + (((t / W) | 0) - c.cy) ** 2; if (d < bd) { bd = d; best = t; } }
+      if (best < 0) { c.center = -1; none++; } else { if (best !== c.center0) moved++; c.center = best; }
+    }
+    return { moved, none };
+  };
+
+  /* ---- THE passability function (patched). forbidden = void, unassigned, Steep, tiles of every non-transition room pair, tiles on a
+     terrace border that are not a gate; minus the tiles of every valid pair. Symmetric by construction. ---- */
+  R.makePass = function (inp) {
+    const { W, H, h, room, ter, cls, pairs, gate } = inp, n = W * H, forb = new Uint8Array(n), rp = new Set(), gp = new Set(), free = new Uint8Array(n);
+    for (let i = 0; i < n; i++) if (h[i] <= 0 || room[i] <= 0 || cls[i] === SL.Steep) forb[i] = 1;
+    for (const p of pairs) { if (p.type === ET.Transition) { rp.add(key(p.a, p.b, n)); free[p.a] = free[p.b] = 1; } else { forb[p.a] = 1; forb[p.b] = 1; } }
+    for (const [a, b] of gate) { gp.add(key(a, b, n)); free[a] = free[b] = 1; }
+    for (let x = 1; x < W - 1; x++) for (let y = 1; y < H - 1; y++) { // ExtractNonTransitionTerraceBorders (void neighbours are not a border)
+      const i = y * W + x; if (cls[i] === SL.Steep || h[i] <= 0 || free[i]) continue;
+      for (const [dx, dy] of N4) { const j = (y + dy) * W + x + dx; if (h[j] > 0 && ter[j] !== ter[i] && cls[j] !== SL.Steep) { forb[i] = 1; break; } }
+    }
+    for (let i = 0; i < n; i++) if (free[i] && h[i] > 0 && room[i] > 0 && cls[i] !== SL.Steep) forb[i] = 0; // the tiles of a valid pair are never forbidden
+    const pass = (a, b) => !forb[a] && !forb[b] && (room[a] === room[b] || rp.has(key(a, b, n))) && (ter[a] === ter[b] || gp.has(key(a, b, n)));
+    return { pass, forb, roomPairs: rp, gatePairs: gp };
+  };
+
+  /* ---- reachability and shortest paths over a step function step(from, to) -> bool (4-neighbours) ---- */
+  R.bfs = function (W, H, start, step, wantParent) {
+    const n = W * H, dist = new Int32Array(n).fill(-1), par = wantParent ? new Int32Array(n).fill(-1) : null, q = new Int32Array(n);
+    let qh = 0, qt = 0; dist[start] = 0; q[qt++] = start;
+    while (qh < qt) {
+      const p = q[qh++], x = p % W, y = (p / W) | 0;
+      for (const [dx, dy] of N4) {
+        const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+        const j = ny * W + nx; if (dist[j] >= 0 || !step(p, j)) continue;
+        dist[j] = dist[p] + 1; if (par) par[j] = p; q[qt++] = j;
+      }
+    }
+    return { dist, par };
+  };
+  R.pathTo = (b, goal) => { const p = []; for (let t = goal; t >= 0; t = b.par[t]) { p.push(t); if (b.par[t] < 0) break; } return p.reverse(); };
+
+  /* Kruskal over the shortest paths between the centres (BuildCoreToCoreGraphWeighted + BuildSpanningTree). The A* of the original,
+     with unit costs, finds a shortest path: the BFS gives the same lengths (the path itself can differ in ties). Edges i<j are
+     tried in that direction, as in the original (it matters with its directed rule). centres: tile index or -1. */
+  R.spanning = function (W, H, centres, step) {
+    const m = centres.length, edges = [];
+    for (let i = 0; i < m; i++) {
+      if (centres[i] < 0) continue;
+      const { dist } = R.bfs(W, H, centres[i], step, false);
+      for (let j = i + 1; j < m; j++) if (centres[j] >= 0 && dist[centres[j]] >= 0) edges.push({ i, j, cost: dist[centres[j]] + 1 });
+    }
+    edges.sort((a, b) => a.cost - b.cost); // stable: ties keep the (i, j) order
+    const uf = Array.from({ length: m }, (_, i) => i), find = (v) => { while (uf[v] !== v) { uf[v] = uf[uf[v]]; v = uf[v]; } return v; };
+    const tree = []; for (const e of edges) { const a = find(e.i), b = find(e.j); if (a !== b) { uf[a] = b; tree.push(e); } }
+    const comp = new Map(); for (let i = 0; i < m; i++) if (centres[i] >= 0) { const r = find(i); comp.set(r, (comp.get(r) || 0) + 1); }
+    const sizes = [...comp.values()].sort((a, b) => b - a);
+    return { tree, trees: sizes.length, largest: sizes[0] || 0, sizes, root: find };
+  };
+
+  /* ---- the whole patched chain. inp: { W, H, h (0..1), ter (terrace map), gateTiles (low tiles of the viewer's gates) }.
+     prm: R.defaults + { gateMin } ---- */
+  R.build = function (inp, prm) {
+    const { W, H, h, ter } = inp, n = W * H, out = { prm, ter };
+    out.slope = R.slope(h, W, H, prm.exponent);
+    out.cls = R.classify(out.slope, h, prm.gentle, prm.steep);
+    const ws = R.watershed(h, out.cls, W, H, prm); out.room0 = ws.room; out.rooms = ws.rooms; out.seeds = ws.seeds;
+    let land = 0, un0 = 0; for (let i = 0; i < n; i++) if (h[i] > 0) { land++; if (!ws.room[i]) un0++; }
+    const as = R.assign(ws.room, h, W, H); out.room = as.room;
+    out.stats = { seeds: ws.seeds, rooms: ws.rooms.length, land, unassignedBefore: un0, unassignedAfter: as.left };
+    out.pairs = R.roomPairs(out.room, h, out.cls, ter, W, H, prm);
+    out.stats.roomPairs = out.pairs.length;
+    out.expand = R.expandFilter(out.pairs, out.room, ter, out.cls, W, H, prm.minSizeEdge);
+    const gp = R.gatePairs(inp.gateTiles, out.room, ter, out.cls, h, W, H, prm.gateMin, true); out.gate = gp.pairs; out.gateStats = gp.stats;
+    const mp = R.makePass({ W, H, h, room: out.room, ter, cls: out.cls, pairs: out.pairs, gate: out.gate }); out.pass = mp.pass; out.forb = mp.forb;
+    out.cores = R.cores(out.room, ter, out.cls, out.rooms, W, H, prm.minCore);
+    out.centres = R.fixCentres(out.cores, out.forb, W);
+    const alive = out.cores.filter((c) => !c.dead); out.alive = alive;
+    // the pipeline as written: scan from the first living core, cores touched by the scan are Reachable, spanning tree among them
+    const root = alive.find((c) => c.center >= 0);
+    out.scan = root ? R.bfs(W, H, root.center, out.pass, false).dist : new Int32Array(n).fill(-1);
+    out.reach = alive.filter((c) => c.tiles.some((t) => out.scan[t] >= 0));
+    out.treeReach = R.spanning(W, H, out.reach.map((c) => c.center), out.pass);
+    out.treeAll = R.spanning(W, H, alive.map((c) => c.center), out.pass);
+    return out;
+  };
+})(window.EVO = window.EVO || {});

@@ -122,6 +122,7 @@ incursion border; stake and way-back path visible.
 - `src/png.js`: own PNG decoder (`E.decodePng`, raw samples per channel, 8/16 bit). `node tools/test_png.js`.
 - `src/fields.js`: channels R,G,B,A,H,S,V, roles (elevation / zone / edge / path / vegetation / POI), categorical
   hue ids, manifest. `node tools/test_fields.js`. Format in `docs/pack-format.md`.
+- `src/rooms.js`: minimal rooms chain with the patched connection (no UI, no render; `node tools/test_rooms.js`, `node tools/rooms_check.js`); `tools/rooms_original.js` = the user's rules as written, comparison only.
 - `src/ui.js`, `src/app.html`: controls, angle presets, compare mode, multi-image loading with a role selector per
   channel, flip Y, maxnode, save pack.json, slice controls (zone chips, crop, scenery margin). Sliders recompute on
   release. Overlays: zones, edge map, graded masks (blocky tiles, see item 1).
@@ -207,9 +208,11 @@ incursion border; stake and way-back path visible.
    the two tiles of a transition pair are never forbidden; unassigned tiles go to the nearest room before edges are searched), and CHECK it on
    the real map `data/samples/skeleton_heightmap_256.png` BEFORE building anything on top: cores joined in one tree with the original rule
    (transcribed as is) vs the patched rule, plus an overlay (rooms, transitions, cores, tree). Value 0 is VOID (outside the terrain), never low
-   terrain. NOT in this stage: room types, platforms, render changes. Status: design proposed, waiting for the user's approval; no code yet.
-   Diagnosis of why corridors do not connect: `reference/README.md` (read from the code, not run; the viewer-side verification goes in
-   `docs/rooms.md` once the port exists).
+   terrain. NOT in this stage: room types, platforms, render changes. Status: DESIGN APPROVED; chain + patch + check implemented (`src/rooms.js`,
+   `tools/rooms_original.js`, `tools/rooms_check.js`, `tools/test_rooms.js`, results in `docs/rooms.md`); waiting for the user's review of the figures and the PNG
+   overlays before anything is built on top. The patch adds, by the user's decision: a pair (transition or gate) with a Steep tile is dropped; the core centre is
+   its free tile nearest the centroid. Parameters come from the user's scenes mapGen_forge (base) and ConicalTown (second check), all script arguments.
+   Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
 5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),
    RuleTile skin and modular kits, room types, platforms.
 
