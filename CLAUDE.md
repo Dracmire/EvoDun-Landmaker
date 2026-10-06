@@ -136,7 +136,7 @@ incursion border; stake and way-back path visible.
   `src/` or `data/`.
 
 ## Known limitations
-1. Overlays (snake, cave, water) are drawn as square tiles and look blocky over the smoothed A/B shapes.
+1. PARKED. Overlays (snake, cave, water) are drawn as square tiles and look blocky over the smoothed A/B shapes.
 2. Carved stairs and ramps: each is cut into the upper terrace (or built up on the lower one) as 1-3 columns (ramps 1-5)
    (width default 2; in `steps` style the tread rise defaults to the climb limit, 1 is also available).
    RAMP PAINTER ORDER: Box orders ramps by tile depth and matches a per-pixel z-buffer reference (<= 0.04 % mean, <= 3.2 % worst).
@@ -171,7 +171,7 @@ incursion border; stake and way-back path visible.
    of the faces that Box shows (hidden ones are covered by higher terrain), measured in `tools/ui/test_border_ui.js`; the
    same measurement on the previous code gave 93-97 % for A and B, so the cause was never isolated. Stairs outside the slice
    are not generated (scenery has no stairs).
-5. Technique B rounds the outer corners of the slice.
+5. PARKED. Technique B rounds the outer corners of the slice.
 6. Compare mode (Box | A | B, on by default): ONE camera for all panels (same px per tile, fitted to the first panel, same point of the map; wheel zoom,
    pan and presets move all of them), two layouts, Columns and Rows, chosen automatically (Rows in isometric presets) with a manual selector;
    Box and A are painted as soon as they are ready and B afterwards, with "computing…" in its panel (`tools/ui/test_compare_ui.js`). At zoom 1 Rows is
@@ -183,7 +183,7 @@ incursion border; stake and way-back path visible.
    were tested with synthetic images; no real Unity `EncodeToPNG` file yet (to be added under `data/samples/`).
 8. Verified in headless Chromium only: image loading, mouse drag/zoom/pan, roles, slice. Not
    verified: touch input, non-Chromium browsers, GPU timings. Measurements are in `docs/measurements.md`.
-9. Box technique: light vertical stripes along the front edge of the slice (seen on the noise pack).
+9. PARKED. Box technique: light vertical stripes along the front edge of the slice (seen on the noise pack).
    Cause not investigated.
 10. The climb limit (2 sub-terraces) is a provisional assumption, not the micro-step rule.
 11. Partial connection: with the user's gate criterion many regions stay unconnected (e.g. 14 regions, the largest 55 % of the slice in one test). KNOWN LIMITATION, on purpose: the global connection will come from the rooms and the numeric world; a connection step here would be filler code. No connection step is added.
@@ -195,9 +195,12 @@ incursion border; stake and way-back path visible.
    `EncodeToPNG` sample in `data/samples/`.
 3. Base solid before anything new. In this order: (1) carved stairs on a level ranking by height, sub-terraces
    renamed and up to 6, stair width, survival check in A and B (done); gate placement, rigid stair footprint and ramp (done, to be reviewed); (2) visual slice border from the edge map (done);
-   (3) stake, objectives and shortest route (click, manifest) (done, to be reviewed); (4) compare mode; (5) overlays that follow the
-   smoothed A/B shapes; (6) outer corners of B; (7) Box line and stripes. Test scripts live in `tools/ui/`.
-4. Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.
+   (3) stake, objectives and shortest route (click, manifest) (done, to be reviewed); (4) compare mode (done, PR #4; pixel regression against the
+   commit before it, stairW=0, 25 images, 0 differ). BASE CLOSED here. PARKED, not implemented, by the user's decision (their maps carry no
+   masks and these are finishes that do not change the comparison): (5) overlays that follow the smoothed A/B shapes (known limitation 1);
+   (6) outer corners of B (limitation 5); (7) Box line and stripes (limitation 9). Test scripts live in `tools/ui/`.
+4. NEXT: evaluate the techniques with the user's real maps and decide round 2 (wait for the user).
+   Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.
    Parked: RuleTile skin and modular kits, room types.
 
 ## How to work with the user
