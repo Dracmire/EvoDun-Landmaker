@@ -106,14 +106,14 @@ ok('every tile has a valid level and byLevel agrees', S.fine.every((L) => L >= 0
   ok('deterministic', JSON.stringify(again.fine) === JSON.stringify(S.fine) && JSON.stringify(again.stairs) === JSON.stringify(S.stairs));
 }
 // 3. a steep step inside one terrace (6 sub-terraces, climb 2) also gets a stair, found by the same gate rule with the
-//    sub-terrace as the unit: a ramp inside each sub-terrace plus a jump of 3-4 sub-terraces between the halves
+//    sub-terrace as the unit: a ramp that climbs a whole sub-terrace band on each half plus a jump of 3 sub-terraces between the halves (the gate rule normalizes with the nominal band)
 {
   const P = Object.assign({}, BASE, { terraces: 1, subs: 6, pre: 0, minPlateau: 1, minSub: 1, passGap: 8 });
-  const pk = mk(40, 20, (x) => (x < 20 ? 20 + 0.4 * x : 78 + 0.4 * (x - 20)), [0, 100]);
+  const pk = mk(40, 20, (x) => (x < 20 ? 34 + 0.8 * x : 83.5 + 0.8 * (x - 20)), [0, 100]);
   const withS = E.shape(pk, P), without = E.shape(pk, Object.assign({}, P, { stairW: 0 }));
   ok('intra-terrace: a step of 3+ sub-terraces needs a stair (a gate is found)', withS.stairInfo.gates >= 1 && withS.stairs.length >= 1 && withS.gates.every((g) => g.kind === 'sub'), JSON.stringify(withS.stairInfo));
   ok('intra-terrace: one region with the stairs, two without', withS.regionSizes.length === 1 && without.regionSizes.length === 2, `${withS.regionSizes.length} / ${without.regionSizes.length}`);
-  const small = E.shape(mk(40, 20, (x) => (x < 20 ? 20 + 0.4 * x : 36 + 0.4 * (x - 20)), [0, 100]), P);
+  const small = E.shape(mk(40, 20, (x) => (x < 20 ? 34 + 0.8 * x : 66.8 + 0.8 * (x - 20)), [0, 100]), P);
   ok('intra-terrace: a step within the climb limit needs none', small.stairInfo.gates === 0 && small.stairs.length === 0);
   const flat = E.shape(mk(40, 20, (x) => (x < 20 ? 20 : 78), [0, 100]), P);
   ok('intra-terrace: flat plateaus have zero slope, so no gate (the rule needs slope)', flat.stairInfo.gates === 0);
