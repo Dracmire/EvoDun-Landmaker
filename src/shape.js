@@ -177,17 +177,20 @@
   E.noisePack = function (W, H, seed) {
     let s = seed >>> 0;
     const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
-    const G = 9, grid = Array.from({ length: G + 1 }, () => Array.from({ length: G + 1 }, rnd));
     const sm = (t) => t * t * (3 - 2 * t);
-    const val = (x, y) => {
-      const gx = x * G / W, gy = y * G / H, x0 = Math.floor(gx), y0 = Math.floor(gy);
-      const tx = sm(gx - x0), ty = sm(gy - y0);
-      const a = grid[y0][x0], b = grid[y0][x0 + 1], c = grid[y0 + 1][x0], d = grid[y0 + 1][x0 + 1];
-      return (a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty;
+    const octave = (G) => { // own lattice per octave, so no octave ever wraps or jumps
+      const grid = Array.from({ length: G + 1 }, () => Array.from({ length: G + 1 }, rnd));
+      return (x, y) => {
+        const gx = x * G / W, gy = y * G / H, x0 = Math.min(G - 1, Math.floor(gx)), y0 = Math.min(G - 1, Math.floor(gy));
+        const tx = sm(gx - x0), ty = sm(gy - y0);
+        const a = grid[y0][x0], b = grid[y0][x0 + 1], c = grid[y0 + 1][x0], d = grid[y0 + 1][x0 + 1];
+        return (a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty;
+      };
     };
+    const o1 = octave(9), o2 = octave(18);
     const el = [];
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      el.push(+(val(x, y) * 0.65 + val(x * 2 % (W - 1), y * 2 % (H - 1)) * 0.35).toFixed(3) * 9 + 1);
+      el.push(+(o1(x, y) * 0.65 + o2(x, y) * 0.35).toFixed(3) * 9 + 1);
     }
     return { format: 'evodun-pack/0.1', name: 'Value noise (base pipeline stand-in)', width: W, height: H, elevation: el, masks: {}, markers: [] };
   };
@@ -200,11 +203,14 @@
     cx.imageSmoothingEnabled = false;
     cx.drawImage(img, 0, 0, W, H);
     const d = cx.getImageData(0, 0, W, H).data, el = [];
+    let semi = 0;
+    for (let i = 0; i < W * H; i++) if (d[i * 4 + 3] !== 255) semi++;
+    const warnings = semi ? [`${semi} pixels have alpha < 255: canvas premultiplies alpha, so their RGB values are not read exactly.`] : [];
     for (let i = 0; i < W * H; i++) {
       const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2];
       const v = channel === 'r' ? r : channel === 'g' ? g : channel === 'b' ? b : 0.299 * r + 0.587 * g + 0.114 * b;
       el.push(v / 255 * 9 + 1);
     }
-    return { format: 'evodun-pack/0.1', name: name || 'Image', width: W, height: H, elevation: el, masks: {}, markers: [] };
+    return { format: 'evodun-pack/0.1', name: name || 'Image', width: W, height: H, elevation: el, masks: {}, markers: [], warnings };
   };
 })(window.EVO = window.EVO || {});

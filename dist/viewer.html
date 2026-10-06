@@ -43,7 +43,8 @@ figcaption span{color:var(--mut);font-size:11px}
   <div><h3>Source</h3>
    <div class="row"><select id="src"></select></div>
    <div class="row" style="margin-top:6px"><input type="file" id="file" accept="image/*" style="max-width:150px"><select id="chan"><option value="l">luma</option><option value="r">R</option><option value="g">G</option><option value="b">B</option></select></div>
-   <div class="hint">Image = height field, 1 pixel = 1 tile (resampled to ≤96).</div></div>
+   <div class="hint">Image = height field, 1 pixel = 1 tile (resampled to ≤96).</div>
+   <div class="hint" id="msg" role="status" hidden style="color:var(--acc)"></div></div>
   <div id="sliders"></div>
   <div><h3>Display</h3><div id="toggles"></div></div>
   <div class="hint">Drag: small angle variation · Shift/right-drag: pan · wheel: zoom · double-click: reset</div>
@@ -236,17 +237,20 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   E.noisePack = function (W, H, seed) {
     let s = seed >>> 0;
     const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
-    const G = 9, grid = Array.from({ length: G + 1 }, () => Array.from({ length: G + 1 }, rnd));
     const sm = (t) => t * t * (3 - 2 * t);
-    const val = (x, y) => {
-      const gx = x * G / W, gy = y * G / H, x0 = Math.floor(gx), y0 = Math.floor(gy);
-      const tx = sm(gx - x0), ty = sm(gy - y0);
-      const a = grid[y0][x0], b = grid[y0][x0 + 1], c = grid[y0 + 1][x0], d = grid[y0 + 1][x0 + 1];
-      return (a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty;
+    const octave = (G) => { // own lattice per octave, so no octave ever wraps or jumps
+      const grid = Array.from({ length: G + 1 }, () => Array.from({ length: G + 1 }, rnd));
+      return (x, y) => {
+        const gx = x * G / W, gy = y * G / H, x0 = Math.min(G - 1, Math.floor(gx)), y0 = Math.min(G - 1, Math.floor(gy));
+        const tx = sm(gx - x0), ty = sm(gy - y0);
+        const a = grid[y0][x0], b = grid[y0][x0 + 1], c = grid[y0 + 1][x0], d = grid[y0 + 1][x0 + 1];
+        return (a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty;
+      };
     };
+    const o1 = octave(9), o2 = octave(18);
     const el = [];
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      el.push(+(val(x, y) * 0.65 + val(x * 2 % (W - 1), y * 2 % (H - 1)) * 0.35).toFixed(3) * 9 + 1);
+      el.push(+(o1(x, y) * 0.65 + o2(x, y) * 0.35).toFixed(3) * 9 + 1);
     }
     return { format: 'evodun-pack/0.1', name: 'Value noise (base pipeline stand-in)', width: W, height: H, elevation: el, masks: {}, markers: [] };
   };
@@ -259,12 +263,15 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     cx.imageSmoothingEnabled = false;
     cx.drawImage(img, 0, 0, W, H);
     const d = cx.getImageData(0, 0, W, H).data, el = [];
+    let semi = 0;
+    for (let i = 0; i < W * H; i++) if (d[i * 4 + 3] !== 255) semi++;
+    const warnings = semi ? [`${semi} pixels have alpha < 255: canvas premultiplies alpha, so their RGB values are not read exactly.`] : [];
     for (let i = 0; i < W * H; i++) {
       const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2];
       const v = channel === 'r' ? r : channel === 'g' ? g : channel === 'b' ? b : 0.299 * r + 0.587 * g + 0.114 * b;
       el.push(v / 255 * 9 + 1);
     }
-    return { format: 'evodun-pack/0.1', name: name || 'Image', width: W, height: H, elevation: el, masks: {}, markers: [] };
+    return { format: 'evodun-pack/0.1', name: name || 'Image', width: W, height: H, elevation: el, masks: {}, markers: [], warnings };
   };
 })(window.EVO = window.EVO || {});
 
@@ -758,7 +765,13 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   const st = { pack: 'snake', mode: 'compare', tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0;
 
-  function addPack(id, label, pack) { packs[id] = { label, pack }; const o = document.createElement('option'); o.value = id; o.textContent = label; $('#src').appendChild(o); }
+  function setPack(id, label, pack) {
+    packs[id] = { label, pack };
+    let o = [...$('#src').options].find((x) => x.value === id);
+    if (!o) { o = document.createElement('option'); o.value = id; $('#src').appendChild(o); }
+    o.textContent = label;
+  }
+  function message(text) { const m = $('#msg'); m.textContent = text || ''; m.hidden = !text; }
 
   function build() {
     const sl = $('#sliders');
@@ -794,7 +807,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       tb.appendChild(b);
     }
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
-    $('#src').addEventListener('change', (e) => { st.pack = e.target.value; invalidate(true); });
+    $('#src').addEventListener('change', (e) => { st.pack = e.target.value; message((packs[st.pack].pack.warnings || []).join(' ')); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadImage(e.target.files[0]));
     $('#chan').addEventListener('change', () => { if (lastImg) useImage(); });
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
@@ -817,15 +830,15 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   let lastImg = null;
   function loadImage(f) {
     if (!f) return;
-    const img = new Image();
-    img.onload = () => { lastImg = { img, name: f.name }; useImage(); };
-    img.src = URL.createObjectURL(f);
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); lastImg = { img, name: f.name }; useImage(); };
+    img.onerror = () => { URL.revokeObjectURL(url); message(`Could not read "${f.name}" as an image.`); };
+    img.src = url;
   }
   function useImage() {
     const pack = E.imagePack(lastImg.img, $('#chan').value, 96, lastImg.name);
-    packs.image = { label: 'Image: ' + lastImg.name, pack };
-    if (![...$('#src').options].some((o) => o.value === 'image')) { const o = document.createElement('option'); o.value = 'image'; $('#src').appendChild(o); }
-    [...$('#src').options].find((o) => o.value === 'image').textContent = packs.image.label;
+    setPack('image', 'Image: ' + lastImg.name, pack);
+    message(pack.warnings.join(' '));
     $('#src').value = 'image'; st.pack = 'image'; invalidate(true);
   }
 
@@ -859,8 +872,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   }
 
   function init() {
-    addPack('snake', 'Snake Mountain (macroform)', window.EVO_PACKS.snake_mountain);
-    addPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
+    setPack('snake', 'Snake Mountain (macroform)', window.EVO_PACKS.snake_mountain);
+    setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
     window.__evo = { P, O, st, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
