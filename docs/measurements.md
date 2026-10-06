@@ -62,3 +62,25 @@ Notes:
   (0 mismatched pixels), but does not avoid alpha premultiplication.
 - The ICC profiles were hand-built for the test, not exported from an image editor.
 - `imagePack` also resamples to <= 96 px by nearest neighbour, so larger images lose data regardless.
+
+## 3. Own PNG decoder (`src/png.js`) exactness
+
+`E.decodePng(arrayBuffer)` returns raw per-channel samples (no canvas, no colour management, no premultiplied
+alpha). Interlaced files are rejected with a message. Checked in Node 22 and Chromium 141.
+
+- `node tools/test_png.js`: 1498 checks, 0 failures. Every colour type x allowed bit depth (1-16) x filter
+  (each of the 5 alone and mixed per row) x odd sizes; edge values (0, 1, max-1, max); alpha 0/1/half/254/255
+  with arbitrary RGB underneath; split IDAT; ancillary chunks (`gAMA` 1.0, `sRGB`, `iCCP`, `tEXt`, `tRNS`);
+  a 256x256 RGBA image (~16-20 ms); explicit errors (interlaced, bad signature, CRC, truncated, missing IEND,
+  invalid colour type/depth, size mismatch). The test encoder is ours, so it was also checked by mutation:
+  8 deliberate decoder bugs (Paeth tie-break, average filter, 16-bit high byte, sub-byte bit order, tRNS,
+  left neighbour, only-first-IDAT, dropped LSB) each make it fail.
+- Independent encoders (ground truth = the arrays that were encoded), 36 files, 0 mismatching samples, decoded
+  also inside Chromium: Pillow 12 (L, 16-bit gray, LA, RGB, RGBA incl. `optimize` and `compress_level` 0/9,
+  palette 1/2/4/8 bit, 1-bit; 37x23 and 256x256) and fast-png 8.0 (16-bit gray/GA/RGB/RGBA, 8-bit RGB/RGBA).
+  The one-off scripts for this are not in the repo (they need Pillow and npm packages).
+- The PNGs that canvas altered in section 2 (alpha 0, 128, ramp; `gAMA` 1.0; ICC P3 gamma 1.0 and 2.2) decode
+  with 0 mismatches. A PNG written by Chromium's own encoder (RGBA 8-bit, alpha 255) decodes exactly.
+- Not covered: files exported by Unity `EncodeToPNG` (none available yet), Adam7 interlacing (rejected by
+  design), `tRNS` colour keys for gray/RGB images (ignored), 16-bit palette (does not exist in PNG).
+- pngjs 7's 16-bit encoder produced unusable output in my usage, so pngjs was not used as ground truth.

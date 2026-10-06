@@ -73,15 +73,92 @@
     return Math.floor(fine / K) * P.terH + (fine % K) * P.microH;
   };
 
-  E.shape = function (pack, P) {
+  /* ---- slice: the tiles of the incursion, and the window that gets built (slice + scenery margin) ---- */
+  function zoneIdsForSlice(pack) {
+    const z = pack.fields && pack.fields.zone; if (!z) return null;
+    if (!z.sliceIds) z.sliceIds = E.fillUnassigned(z.ids, pack.width, pack.height); // -1 never opens holes
+    return z.sliceIds;
+  }
+
+  /* spec: { zones: [ids], rect: [x0, y0, x1, y1] (x1, y1 exclusive), margin }. null = the whole map is the slice.
+     Returns { mask (map-sized), x0, y0, x1, y1 (window, x1/y1 exclusive), bbox, tiles }. */
+  E.sliceOf = function (pack, spec) {
+    if (!spec || (!(spec.zones && spec.zones.length) && !spec.rect)) return null;
+    const W = pack.width, H = pack.height, mask = new Uint8Array(W * H);
+    if (spec.zones && spec.zones.length) {
+      const ids = zoneIdsForSlice(pack), set = new Set(spec.zones);
+      if (!ids) throw new Error('This pack has no zone field: assign the zone role first.');
+      for (let i = 0; i < mask.length; i++) mask[i] = set.has(ids[i]) ? 1 : 0;
+    } else mask.fill(1);
+    if (spec.rect) {
+      const [rx0, ry0, rx1, ry1] = spec.rect;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (x < rx0 || x >= rx1 || y < ry0 || y >= ry1) mask[y * W + x] = 0;
+    }
+    let tiles = 0, bx0 = W, by0 = H, bx1 = 0, by1 = 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      if (!mask[y * W + x]) continue;
+      tiles++; if (x < bx0) bx0 = x; if (x + 1 > bx1) bx1 = x + 1; if (y < by0) by0 = y; if (y + 1 > by1) by1 = y + 1;
+    }
+    if (!tiles) throw new Error('The slice is empty: no tile matches the selected zones and crop.');
+    const m = spec.margin === undefined || spec.margin === null ? 24 : Math.max(0, spec.margin | 0);
+    return { mask, tiles, bbox: { x0: bx0, y0: by0, x1: bx1, y1: by1 }, x0: Math.max(0, bx0 - m), y0: Math.max(0, by0 - m), x1: Math.min(W, bx1 + m), y1: Math.min(H, by1 + m) };
+  };
+
+  /* Pieces of each zone (4-neighbour contiguity, on the ids used for slicing). Cached on the pack.
+     Returns Map id -> { pieces, largest, total }. */
+  E.zonePieces = function (pack) {
+    const z = pack.fields && pack.fields.zone; if (!z) return new Map();
+    if (z.pieces) return z.pieces;
+    const ids = zoneIdsForSlice(pack), W = pack.width, H = pack.height, seen = new Uint8Array(ids.length), out = new Map(), stack = [];
+    for (let s0 = 0; s0 < ids.length; s0++) {
+      const id = ids[s0]; if (id <= 0 || seen[s0]) continue;
+      let size = 0; seen[s0] = 1; stack.push(s0);
+      while (stack.length) {
+        const i = stack.pop(), x = i % W, y = (i / W) | 0; size++;
+        for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) {
+          if (j >= 0 && !seen[j] && ids[j] === id) { seen[j] = 1; stack.push(j); }
+        }
+      }
+      const r = out.get(id) || { pieces: 0, largest: 0, total: 0 };
+      r.pieces++; r.total += size; if (size > r.largest) r.largest = size; out.set(id, r);
+    }
+    return (z.pieces = out);
+  };
+
+  function cropArr(a, W, x0, y0, w, h) {
+    const o = Array.isArray(a) ? new Array(w * h) : new a.constructor(w * h);
+    for (let y = 0; y < h; y++) {
+      const src = (y + y0) * W + x0;
+      if (a.subarray) o.set(a.subarray(src, src + w), y * w); else for (let x = 0; x < w; x++) o[y * w + x] = a[src + x];
+    }
+    return o;
+  }
+
+  function cropPack(pack, sl) {
+    const W = pack.width, x0 = sl.x0, y0 = sl.y0, w = sl.x1 - x0, h = sl.y1 - y0, c = (a) => cropArr(a, W, x0, y0, w, h);
+    const masks = {}; for (const [k, v] of Object.entries(pack.masks || {})) masks[k] = c(v);
+    const fields = {};
+    for (const [k, f] of Object.entries(pack.fields || {})) {
+      if (f.ids) { fields[k] = { ids: c(f.ids), amb: c(f.amb), info: f.info }; if (f.sliceIds) fields[k].sliceIds = c(f.sliceIds); }
+      else fields[k] = { values: c(f.values) };
+    }
+    const markers = (pack.markers || []).filter((m) => m.x >= x0 && m.x < sl.x1 && m.y >= y0 && m.y < sl.y1).map((m) => Object.assign({}, m, { x: m.x - x0, y: m.y - y0 }));
+    return { name: pack.name, width: w, height: h, elevation: c(pack.elevation), elevRange: pack.elevRange, masks, markers, fields };
+  }
+
+  /* pack: the whole map; spec: see E.sliceOf (omit for the whole map as one slice). Terraces use the global
+     elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
+  E.shape = function (full, P, spec) {
+    const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
     const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.micro;
     let el = Float32Array.from(pack.elevation);
     for (let p = 0; p < P.pre; p++) el = blur3(el, W, H);
     let mn = Infinity, mx = -Infinity;
-    for (const v of el) { if (v < mn) mn = v; if (v > mx) mx = v; }
+    if (pack.elevRange) { mn = pack.elevRange[0]; mx = pack.elevRange[1]; }
+    else for (const v of el) { if (v < mn) mn = v; if (v > mx) mx = v; }
     const U = new Float32Array(n), ter = new Int16Array(n), mic = new Int16Array(n), g0 = new Int16Array(n);
     for (let i = 0; i < n; i++) {
-      U[i] = (el[i] - mn) / (mx - mn || 1) * N;
+      U[i] = Math.max(0, (el[i] - mn) / (mx - mn || 1) * N);
       ter[i] = Math.min(N - 1, Math.floor(U[i]));
     }
     cleanup(W, H, ter, g0, P.minPlateau);
@@ -102,15 +179,45 @@
       W, H, n, U, ter, mic, fine, maxFine, byLevel, K, N,
       water: masks.water || new Array(n).fill(0),
       snake: masks.snake || null, cave: masks.cave || null, waterfall: masks.waterfall || null,
-      markers: pack.markers || [], name: pack.name, cache: {}
+      markers: pack.markers || [], name: pack.name, fields: pack.fields || {}, cache: {},
+      mapW: full.width, mapH: full.height, ox: sl ? sl.x0 : 0, oy: sl ? sl.y0 : 0,
+      slice: null, sliceBox: null, border: null, sliceLoops: null, sliceInfo: null
     };
+    S.block = new Uint8Array(n); // not walkable: water, or outside the slice
+    for (let i = 0; i < n; i++) S.block[i] = S.water[i] ? 1 : 0;
+    if (sl) {
+      const mask = cropArr(sl.mask, full.width, sl.x0, sl.y0, W, H), b = sl.bbox;
+      S.slice = mask;
+      S.sliceBox = { x0: b.x0 - sl.x0, y0: b.y0 - sl.y0, x1: b.x1 - sl.x0, y1: b.y1 - sl.y0 };
+      S.border = new Uint8Array(n); // per tile bits N=1 E=2 S=4 W=8: that side faces outside the slice (or the window)
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = y * W + x; if (!mask[i]) { S.block[i] = 1; continue; }
+        if (y === 0 || !mask[i - W]) S.border[i] |= 1;
+        if (x === W - 1 || !mask[i + 1]) S.border[i] |= 2;
+        if (y === H - 1 || !mask[i + W]) S.border[i] |= 4;
+        if (x === 0 || !mask[i - 1]) S.border[i] |= 8;
+      }
+      S.sliceLoops = E.maskLoops(W, H, (x, y) => mask[y * W + x] === 1);
+      const warnings = [];
+      if (spec.zones && spec.zones.length) {
+        const pieces = E.zonePieces(full);
+        for (const id of spec.zones) {
+          const p = pieces.get(id);
+          if (p && p.pieces > 1) warnings.push(`Zone ${id} is not contiguous (4-neighbour): ${p.pieces} pieces, the largest has ${p.largest} of ${p.total} tiles. Left as is.`);
+        }
+      }
+      S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rect: spec.rect || null, warnings };
+    }
+    const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
+    for (let i = 0; i < n; i++) if (!S.slice || S.slice[i]) { terSeen.add(ter[i]); fineSeen.add(fine[i]); }
+    S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
     computePasses(S, P);
     computeRegions(S, P);
     return S;
   };
 
   function computePasses(S, P) {
-    const { W, H, ter, U, water } = S;
+    const { W, H, ter, U } = S, water = S.block;
     const g0 = new Int16Array(S.n);
     const reg = comps(W, H, ter, g0).id; // same-terrace regions
     const cand = [];
@@ -147,7 +254,7 @@
   }
 
   function computeRegions(S, P) {
-    const { W, H, ter, mic, water } = S, n = S.n;
+    const { W, H, ter, mic } = S, water = S.block, n = S.n;
     const par = new Int32Array(n).map((_, i) => i);
     const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
     const uni = (a, b) => { a = find(a); b = find(b); if (a !== b) par[a] = b; };
@@ -193,24 +300,5 @@
       el.push(+(o1(x, y) * 0.65 + o2(x, y) * 0.35).toFixed(3) * 9 + 1);
     }
     return { format: 'evodun-pack/0.1', name: 'Value noise (base pipeline stand-in)', width: W, height: H, elevation: el, masks: {}, markers: [] };
-  };
-
-  E.imagePack = function (img, channel, maxSide, name) {
-    const sc = Math.min(1, maxSide / Math.max(img.width, img.height));
-    const W = Math.max(2, Math.round(img.width * sc)), H = Math.max(2, Math.round(img.height * sc));
-    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-    const cx = cv.getContext('2d', { willReadFrequently: true });
-    cx.imageSmoothingEnabled = false;
-    cx.drawImage(img, 0, 0, W, H);
-    const d = cx.getImageData(0, 0, W, H).data, el = [];
-    let semi = 0;
-    for (let i = 0; i < W * H; i++) if (d[i * 4 + 3] !== 255) semi++;
-    const warnings = semi ? [`${semi} pixels have alpha < 255: canvas premultiplies alpha, so their RGB values are not read exactly.`] : [];
-    for (let i = 0; i < W * H; i++) {
-      const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2];
-      const v = channel === 'r' ? r : channel === 'g' ? g : channel === 'b' ? b : 0.299 * r + 0.587 * g + 0.114 * b;
-      el.push(v / 255 * 9 + 1);
-    }
-    return { format: 'evodun-pack/0.1', name: name || 'Image', width: W, height: H, elevation: el, masks: {}, markers: [], warnings };
   };
 })(window.EVO = window.EVO || {});
