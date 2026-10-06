@@ -43,8 +43,18 @@ old pipeline (Unity, C#) are reference only.
   next tile if the carve fails. EXTENSION OF OURS (not in the user's code): steps inside a terrace steeper than the
   climb limit use the same rule with the sub-terrace as the unit, in groups of their own.
 - Stair footprint: terrain stays smooth, but the footprint of a stair is rigid (exact per tile) in Box, A and B, with
-  its own colour, tread lines and outline, the same in all three techniques and visible from front and back. Survival
+  its own colour and outline, the same in all three techniques and visible from all four sides. Survival
   is measured as the percentage of each tile area that is well covered by the drawn contours.
+- RAMP instead of treads (user's decision): terraces are general, so the transition is not quantized. Each gate is a
+  smooth ramp inside its rigid footprint, linear from the height of the lower terrace to the upper one. Default style
+  `ramp`; `steps` (treads with bridge levels) stays as an option. Ramp length = max(min length, ceil(gap / max slope)),
+  default max slope 0.4 height per tile (~22 deg) and minimum 2 tiles (sliders). With ramps there are no bridge levels and
+  no `tread` parameter (they only exist in `steps`). Movement does not change. Look: stone colour with a gradient along
+  the slope (lighter at the high end), dark outline, own side walls; same in Box, A and B. A second cue (2-3 thin
+  transverse lines) is NOT added until the user approves it. `stairW = 0` (slider minimum) switches stairs off, which
+  also lets the pixel regression compare against older checkouts.
+- Terrain edges are NOT touched (user's decision): A keeps its stepped border (more legible) and B the smooth one (more
+  natural). Both techniques are kept to compare them.
 - The world continues past the incursion border as scenery under a veil; only movement is restricted.
 - Numeric fields usually come as images: a 256 image is a 256x256 matrix, 1 pixel = 1 tile, and each channel
   is a field. Images encode HSV: hue is an id codec, Value carries height; so R, G, B, A, H, S, V can each be
@@ -81,10 +91,10 @@ incursion border; stake and way-back path visible.
 - `src/shape.js`: slice (zones and/or crop, window = bbox + scenery margin), terrace quantization with the global
   elevation range + sub-terraces, minimal-plateau cleanup, stair sites, carved stairs (levels are a ranking by
   height with bridge levels), walkable regions (only inside the slice, connected only by stairs).
-  `node tools/test_slice.js`, `node tools/test_stairs.js`.
+  `node tools/test_slice.js`, `node tools/test_stairs.js`, `node tools/test_gates.js`, `node tools/test_ramp.js`.
 - `src/tech.js`: technique A (per-level tile outline -> simplify -> Chaikin) and B (signed distance field ->
   blur -> marching squares).
-- `src/render.js`: camera, extruded walls, caps, overlays, markers. Stairs have no special renderer: they are terrain. Includes Box technique (one
+- `src/render.js`: camera, extruded walls, caps, overlays, markers. Stairs (steps) are terrain; ramps have their own surface renderer. Includes Box technique (one
   column per tile) as reference.
 - `src/png.js`: own PNG decoder (`E.decodePng`, raw samples per channel, 8/16 bit). `node tools/test_png.js`.
 - `src/fields.js`: channels R,G,B,A,H,S,V, roles (elevation / zone / edge / path / vegetation / POI), categorical
@@ -95,7 +105,8 @@ incursion border; stake and way-back path visible.
 - `data/snake_mountain.json`: sample pack, format `evodun-pack/0.1` (width, height, row-major elevation,
   masks, markers).
 - `tools/ui/`: headless UI tests (`test_roles.js`, `test_slice_ui.js`, `test_stairs_ui.js`), pixel regression
-  (`regress.js` + `compare.js`, `EVO_ROOT` tests an older checkout), screenshots (`stairs_shots.js`), cold-cost
+  (`regress.js` + `compare.js`, `EVO_ROOT` tests an older checkout), ramp painter order against a z-buffer
+  (`test_ramp_ui.js`), screenshots (`stairs_shots.js`, `gates_shots.js`, `ramp_shots.js` four directions), cold-cost
   measurement (`measure.js`). Need Playwright and Pillow, see `tools/ui/common.js`; maps from `gen_maps.py`;
   `node tools/test_heights.js` checks the effective sub-terrace height.
 - `tools/build.py` regenerates `data/packs.js`, `index.html`, `dist/viewer.html`. Run it after touching
@@ -103,8 +114,13 @@ incursion border; stake and way-back path visible.
 
 ## Known limitations
 1. Overlays (snake, cave, water) are drawn as square tiles and look blocky over the smoothed A/B shapes.
-2. Carved stairs: each stair is cut into the upper terrace (or built up on the lower one) as 1-3 columns of treads
-   (width default 2, tread rise default = climb limit, 1 is also available). The footprint is rigid: in A the vertices
+2. Carved stairs and ramps: each is cut into the upper terrace (or built up on the lower one) as 1-3 columns
+   (width default 2; in `steps` style the tread rise defaults to the climb limit, 1 is also available).
+   RAMP PAINTER ORDER: Box orders ramps by tile depth and matches a per-pixel z-buffer reference exactly (0 % in 8 view
+   directions). A and B order by level, so a ramp that spans several levels can lose slivers: a cut ramp is drawn right
+   after the slab of its low end, a built-up one right before the slab of its high end, and slab walls beside a ramp
+   are clipped to its surface. Measured over all 73 ramps of the relief test map (`tools/ui/test_ramp_ui.js`): mean
+   0.1-1.2 % of the ramp's pixels, worst 7.8 % (two ramps that touch). Thresholds in the test: mean <= 2 %, worst <= 8 %. The footprint is rigid: in A the vertices
    of every contour edge that touches a carved tile are pinned through the Chaikin passes; in B the unblurred distance
    field replaces the blurred one within 0.5 tile of a carved tile (fading out by 1.5 tiles). Terrain away from the
    stairs is smoothed as before. Look (`render.js`): own cream colour with a tint per tread, light line on the top edge
@@ -135,7 +151,7 @@ incursion border; stake and way-back path visible.
    slice by zone id and/or crop with a veil, sliders recalculating on release. Missing: a real Unity
    `EncodeToPNG` sample in `data/samples/`.
 3. Base solid before anything new. In this order: (1) carved stairs on a level ranking by height, sub-terraces
-   renamed and up to 6, stair width, survival check in A and B (done); gate placement and rigid readable stair footprint (done, to be reviewed); (2) visual slice border from the edge map;
+   renamed and up to 6, stair width, survival check in A and B (done); gate placement, rigid stair footprint and ramp (done, to be reviewed); (2) visual slice border from the edge map;
    (3) stake, objectives and shortest route (click, manifest); (4) compare mode; (5) overlays that follow the
    smoothed A/B shapes; (6) outer corners of B; (7) Box line and stripes. Test scripts live in `tools/ui/`.
 4. Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.

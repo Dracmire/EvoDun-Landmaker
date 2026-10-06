@@ -6,7 +6,7 @@ for (const f of ['fields', 'shape', 'tech', 'render']) vm.runInThisContext(fs.re
 const E = window.EVO;
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { cond ? pass++ : (fail++, console.log('FAIL', name, extra === undefined ? '' : extra)); };
-const BASE = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: 2 };
+const BASE = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairStyle: 0, stairW: 2 };
 const mk = (W, H, f, range) => {
   const el = new Float32Array(W * H); let mn = Infinity, mx = -Infinity;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const v = el[y * W + x] = f(x, y); mn = Math.min(mn, v); mx = Math.max(mx, v); }
@@ -165,7 +165,7 @@ ok('every tile has a valid level and byLevel agrees', S.fine.every((L) => L >= 0
 }
 
 // 6. hand-built cases for guards that real maps rarely exercise
-const HP = { terraces: 2, subs: 3, terH: 1, subH: 0.22, climb: 2, stairW: 2, tread: 2 };
+const HP = { terraces: 2, subs: 3, terH: 1, subH: 0.22, climb: 2, stairStyle: 0, stairW: 2, tread: 2 };
 {
   // (a) region leak: a tile beside a carved stair tile must not join it sideways. Row 0: terrace 0 x<4, terrace 1 x>=4;
   // tiles (2,0),(3,0) are the stair; (2,1) is a pocket whose other neighbours are blocked.

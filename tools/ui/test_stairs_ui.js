@@ -12,7 +12,7 @@ const { open } = require('./common');
   await a.page.click('#mode'); await a.tech('A');
   ok('single technique: the other one shows a dash', /coverage A [\d.]+% · B –/.test(await infoText()), await infoText());
   await a.tech('B'); ok('single technique B', /coverage A – · B [\d.]+%/.test(await infoText()), await infoText());
-  ok('stair sliders exist (width 1..3, tread 1..5)', (await page.$eval('#s-stairW', (e) => e.min + '..' + e.max)) === '1..3' && (await page.$eval('#s-tread', (e) => e.min + '..' + e.max)) === '1..5');
+  ok('stair sliders exist (width 0..3, tread 1..5, style 0..1, ramp slope, ramp min length)', (await page.$eval('#s-stairW', (e) => e.min + '..' + e.max)) === '0..3' && (await page.$eval('#s-stairStyle', (e) => e.min + '..' + e.max)) === '0..1' && !!(await page.$('#s-rampSlope')) && !!(await page.$('#s-rampMin')) && (await page.$eval('#s-tread', (e) => e.min + '..' + e.max)) === '1..5');
   await a.slider('stairW', 1); await a.idle(); s = await st();
   ok('width 1: single columns, nothing narrowed', s.cols.every((c) => c === 1) && s.info.narrowed === 0 && !/narrowed/.test(await infoText()));
   await a.slider('stairW', 3); await a.idle(); s = await st(); ok('width 3: up to three columns', Math.max(...s.cols) === 3 && Math.max(...s.cols) <= 3);

@@ -7,7 +7,7 @@ for (const f of ['fields', 'shape', 'tech']) vm.runInThisContext(fs.readFileSync
 const E = window.EVO;
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { cond ? pass++ : (fail++, console.log('FAIL', name, extra === undefined ? '' : extra)); };
-const BASE = { terraces: 4, subs: 3, terH: 1, subH: 0.22, minPlateau: 1, minSub: 1, pre: 0, smooth: 0, radius: 0.9, passGap: 8, climb: 2, stairW: 2, gateThr: 0.05, gateMin: 3 };
+const BASE = { terraces: 4, subs: 3, terH: 1, subH: 0.22, minPlateau: 1, minSub: 1, pre: 0, smooth: 0, radius: 0.9, passGap: 8, climb: 2, stairStyle: 0, stairW: 2, gateThr: 0.05, gateMin: 3 };
 const mk = (W, H, f) => {
   const el = new Float32Array(W * H);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) el[y * W + x] = f(x, y);

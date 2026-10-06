@@ -332,7 +332,13 @@
      terrace (or, if that does not fit, built on the lower one) as `stairW` columns of treads; the treads take
      heights from the existing levels plus "bridge" levels in the gap between terraces (only the ones that end up
      used become levels), so every technique gets the same geometry from its normal level pipeline. */
-  const MAX_TREADS = 6, STAIR_COLS = { 1: [0], 2: [0, 1], 3: [-1, 0, 1] };
+  /* Ramp surface height at ground point (x, y) (tile units): linear along the path from the gate edge (s = 0) to the far end
+     (s = len); constant across the width. r = a stair record with `ramp`. */
+  E.rampHeight = (r, x, y) => {
+    const R = r.ramp, t = Math.max(0, Math.min(R.len, (x - R.mx) * R.pdx + (y - R.my) * R.pdy));
+    return R.h0 + (R.h1 - R.h0) * t / R.len;
+  };
+  const MAX_TREADS = 6, MAX_RAMP = 8, STAIR_COLS = { 1: [0], 2: [0, 1], 3: [-1, 0, 1] };
   function carveStairs(S, P) {
     const { W, H, n } = S, K = S.subs, N = S.N, s = E.subHeight(P), EPS = 1e-9;
     const tread = Math.max(1, Math.min(P.climb, Math.round(P.tread === undefined ? P.climb : P.tread))), reachPlain = tread * s, reach = reachPlain + EPS; // each tread rises at most `tread` sub-terraces
@@ -355,6 +361,47 @@
     const idx = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x);
     const okTile = (i, terr) => i >= 0 && !S.block[i] && !used[i] && S.ter[i] === terr;
 
+    const ramp = P.stairStyle === 0 ? false : true, slope = Math.max(0.05, P.rampSlope === undefined ? 0.4 : P.rampSlope), minLen = Math.max(1, Math.round(P.rampMin === undefined ? 2 : P.rampMin));
+    /* ramp style: the same footprint as the stair (cut into the upper terrace or built on the lower one), but one smooth
+       surface from the low height to the high one; its length comes from the maximum slope. Levels are not touched. */
+    const planRamp = (pass, mode) => {
+      const ax = pass.a % W, ay = (pass.a / W) | 0, bx = pass.b % W, by = (pass.b / W) | 0;
+      const dx = bx - ax, dy = by - ay, ex = -dy, ey = dx, cut = mode === 'cut';
+      const sx = cut ? bx : ax, sy = cut ? by : ay, sd = cut ? 1 : -1, fx = cut ? ax : bx, fy = cut ? ay : by;
+      const terPath = cut ? S.ter[pass.b] : S.ter[pass.a], terFix = cut ? S.ter[pass.a] : S.ter[pass.b];
+      const col = (c, k) => idx(sx + sd * dx * k + c * ex, sy + sd * dy * k + c * ey), fixed = (c) => idx(fx + c * ex, fy + c * ey);
+      if (!okTile(fixed(0), terFix)) return null;
+      const hFix = hT[fixed(0)];
+      let len = 0, h0 = 0, h1 = 0;
+      for (let L = 1; L <= MAX_RAMP; L++) {
+        if (!okTile(col(0, L - 1), terPath)) return null;
+        if (L < minLen) continue;
+        const e = col(0, L); if (!okTile(e, terPath)) return null;
+        const hEnd = hT[e], hi = cut ? hEnd : hFix, lo = cut ? hFix : hEnd;
+        if (hi - lo <= EPS) return null;
+        if (L >= Math.ceil((hi - lo) / slope - 1e-9)) { len = L; h0 = cut ? lo : hi; h1 = cut ? hi : lo; break; }
+      }
+      if (!len) return null;
+      const hAt = (t) => h0 + (h1 - h0) * t / len;
+      const valid = (c) => {
+        const f = fixed(c);
+        if (c === 0 ? !okTile(f, terFix) : (f < 0 || S.block[f] || used[f])) return false; // lateral ends may sit on any terrace (diagonal cliffs)
+        for (let k = 0; k < len; k++) { const t = col(c, k); if (!okTile(t, terPath) || (cut ? hT[t] < hAt(k + 1) - EPS : hT[t] > hAt(k + 1) + EPS)) return false; }
+        return okTile(col(c, len), terPath);
+      };
+      const want = STAIR_COLS[width], ok = new Set(want.filter(valid));
+      if (!ok.has(0)) return null;
+      let cols = [0];
+      if (width === 3 && ok.has(-1) && ok.has(1)) cols = [-1, 0, 1]; else if (width === 2 && ok.has(1)) cols = [0, 1];
+      const rec = { mode, dir: [dx, dy], cols, requested: width, narrowed: cols.length < width, site: pass, bottom: [], top: [], steps: [],
+        ramp: { mx: (ax + bx) / 2 + 0.5, my: (ay + by) / 2 + 0.5, pdx: sd * dx, pdy: sd * dy, len, h0, h1 }, level: S.fine[pass.a] };
+      for (let k = 0; k < len; k++) rec.steps.push({ cand: null, tiles: [] });
+      for (const c of cols) {
+        rec.bottom.push(cut ? fixed(c) : col(c, len)); rec.top.push(cut ? col(c, len) : fixed(c));
+        for (let k = 0; k < len; k++) rec.steps[cut ? k : len - 1 - k].tiles.push(col(c, k));
+      }
+      return rec;
+    };
     const plan = (pass, mode) => {
       const ax = pass.a % W, ay = (pass.a / W) | 0, bx = pass.b % W, by = (pass.b / W) | 0;
       const dx = bx - ax, dy = by - ay, ex = -dy, ey = dx, cut = mode === 'cut';
@@ -398,17 +445,22 @@
     for (const pass of S.passes) {
       let rec = null;   // cut into the upper terrace, or build up the lower one: the wider result wins (ties: cut)
       for (const site of [pass, ...pass.alts]) {   // the centred tile first, then the rest of the gate, nearest first
-        for (const mode of ['cut', 'fill']) { const r = plan(site, mode); if (r && (!rec || r.cols.length > rec.cols.length)) rec = r; }
+        for (const mode of ['cut', 'fill']) { const r = ramp ? planRamp(site, mode) : plan(site, mode); if (r && (!rec || r.cols.length > rec.cols.length)) rec = r; }
         if (rec) break;
       }
       if (!rec) { dropped++; continue; }
       if (rec.mode === 'fill') fills++;
       if (rec.narrowed) narrowed++;
       for (let ci = 0; ci < rec.cols.length; ci++) { used[rec.bottom[ci]] = 1; used[rec.top[ci]] = 1; }
-      for (const st of rec.steps) for (const t of st.tiles) { used[t] = 1; carved[t] = 1; carve.set(t, st.cand); }
+      for (const st of rec.steps) for (const t of st.tiles) { used[t] = 1; carved[t] = 1; if (st.cand) carve.set(t, st.cand); }
       stairs.push(rec);
     }
-    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, width };
+    if (ramp) { // a cut ramp lowers its footprint to the level of the low end (a hole in every slab above); a built-up one keeps its tiles
+      for (const rec of stairs) if (rec.mode === 'cut') for (const st of rec.steps) for (const t of st.tiles) S.fine[t] = rec.level;
+      S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
+      for (let i = 0; i < n; i++) S.byLevel[S.fine[i]].push(i);
+    }
+    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, width, style: ramp ? 'ramp' : 'steps' };
     if (!carve.size) return;
     // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height
     const bridges = [...new Set([...carve.values()].filter((c) => c.base < 0))].sort((p, q) => p.h - q.h);
