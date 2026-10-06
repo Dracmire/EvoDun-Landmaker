@@ -654,7 +654,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       else sub[i] = ter[i] > t0 ? 0 : K - 1;
     }
     cleanup(W, H, sub, ter, P.minSub);
-    return (full._q = { key, U, ter, sub, trans: {} });
+    return (full._q = { key, U, ter, sub, trans: {}, range: [mn, mx] });
   }
   E.quantize = quantize;
 
@@ -734,15 +734,18 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
      Returns { partner: Int32Array (upper tile of each transition pos, -1 if none), groups: [{ tiles, size }] }. */
   function transitions(full, q, P, kind) {
     const thr = P.gateThr === undefined ? 0.05 : P.gateThr, minSize = P.gateMin === undefined ? 3 : P.gateMin, K = P.subs;
-    const key = `${kind}|${thr}|${minSize}|${P.climb}`;
+    const key = `${kind}|${thr}|${minSize}|${P.climb}|band`;
     if (q.trans[key]) return q.trans[key];
     const W = full.width, H = full.height, n = W * H, raw = full.elevation;
     const unit = new Int32Array(n), nU = P.terraces * (kind === 'sub' ? K : 1);
     for (let i = 0; i < n; i++) unit[i] = kind === 'sub' ? q.ter[i] * K + q.sub[i] : q.ter[i];
-    const mn = new Float64Array(nU).fill(Infinity), mx = new Float64Array(nU).fill(-Infinity);
-    for (let i = 0; i < n; i++) { const u = unit[i]; if (raw[i] < mn[u]) mn[u] = raw[i]; if (raw[i] > mx[u]) mx[u] = raw[i]; }
-    const rg = Float64Array.from(mx, (v, u) => (v - mn[u] <= 0.0001 ? 1 : v - mn[u]));
-    const norm = (u, x, y) => { const i = y * W + x; return unit[i] === u ? (raw[i] - mn[u]) / rg[u] : 0; };
+    /* DEVIATION from the user's code: each unit is normalized with its NOMINAL band of the global elevation range
+       (clamped to 0..1), not with the min/max of its tiles. Here the plateau cleanup and the pre-smoothing move a few tiles
+       into a terrace whose raw height is far outside its band; those outliers stretch min/max (3-4x on a real map) and
+       flatten the slopes, which left whole terrace borders without gates. */
+    const [g0, g1] = q.range, bandW = (g1 - g0 || 1) / nU;
+    const lo = Float64Array.from({ length: nU }, (_, u) => g0 + u * bandW);
+    const norm = (u, x, y) => { const i = y * W + x; return unit[i] === u ? Math.max(0, Math.min(1, (raw[i] - lo[u]) / bandW)) : 0; };
     const slope = (u, x, y) => {
       if (x < 1 || y < 1 || x > W - 2 || y > H - 2) return 0;
       const dx = (norm(u, x + 1, y) - norm(u, x - 1, y)) * 0.5, dy = (norm(u, x, y + 1) - norm(u, x, y - 1)) * 0.5;

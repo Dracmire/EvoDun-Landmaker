@@ -16,15 +16,14 @@ const mk = (W, H, f) => {
 
 /* Literal transcription, written without looking at the implementation: 2D arrays of normalized heights, one per
    unit; adj(a, b) says that b is the upper partner of the low tile a. */
-function literal(full, unitOf, nUnits, adj, thr, minSize) {
+function literal(full, unitOf, nUnits, adj, thr, minSize, range) {
   const W = full.width, H = full.height, h = full.elevation;
   const norm = [], slope = [];
   for (let u = 0; u < nUnits; u++) {
-    let mn = Infinity, mx = -Infinity;
-    for (let i = 0; i < W * H; i++) if (unitOf(i) === u) { mn = Math.min(mn, h[i]); mx = Math.max(mx, h[i]); }
-    let range = mx - mn; if (!(range > 0.0001)) range = 1;
+    // NOMINAL band of the unit in the global elevation range, clamped to 0..1 (deviation from the user's code, see CLAUDE.md)
+    const bandW = (range[1] - range[0] || 1) / nUnits, lo = range[0] + u * bandW;
     const n = new Float64Array(W * H);
-    for (let i = 0; i < W * H; i++) n[i] = unitOf(i) === u ? (h[i] - mn) / range : 0;
+    for (let i = 0; i < W * H; i++) n[i] = unitOf(i) === u ? Math.max(0, Math.min(1, (h[i] - lo) / bandW)) : 0;
     norm.push(n);
     const s = new Float64Array(W * H);
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
@@ -62,7 +61,7 @@ function compare(label, full, P) {
   for (const kind of ['terrace', 'sub']) {
     const unitOf = kind === 'sub' ? (i) => q.ter[i] * K + q.sub[i] : (i) => q.ter[i];
     const adj = kind === 'sub' ? (a, b) => q.ter[a] === q.ter[b] && q.sub[b] - q.sub[a] > P.climb : (a, b) => q.ter[b] === q.ter[a] + 1;
-    const lit = literal(full, unitOf, P.terraces * (kind === 'sub' ? K : 1), adj, P.gateThr, P.gateMin);
+    const lit = literal(full, unitOf, P.terraces * (kind === 'sub' ? K : 1), adj, P.gateThr, P.gateMin, q.range);
     const impl = E.gateTransitions(full, P, kind);
     const litAll = new Set(); for (const g of lit.groups) for (const t of g) litAll.add(t);
     const implAll = new Set(); for (const g of impl.groups) for (const t of g.tiles) implAll.add(t);
@@ -90,12 +89,24 @@ ok('relief has gates', E.gateTransitions(relief, BASE, 'terrace').groups.length 
 // 2. range <= 0.0001 on a unit: treated as 1, same as the literal version, no crash
 compare('flat units', mk(24, 18, (x) => (x < 12 ? 100 : 700)), { ...BASE, subs: 1, climb: 0 });
 
-// 2b. a unit whose range is tiny but not zero (0.00005 <= 0.0001): must be treated as range 1
+// 2b. outliers: a few tiles whose raw height is far outside the band of the terrace they were assigned to (plateau cleanup,
+// pre-smoothing) must not stretch the normalization and wipe out the gates around them (the user's map lost a whole border)
 {
-  const m = mk(30, 20, (x, y) => (x < 15 ? 100 + (x % 2) * 0.00005 : 260 + (x - 15) * 12));
-  compare('tiny range unit', m, { ...BASE, subs: 1, climb: 0 });
-  const q = E.quantize(m, { ...BASE, subs: 1, climb: 0 });
-  ok('tiny range: neighbouring terraces', q.ter[14] === 0 && q.ter[15] === 1 && E.gateTransitions(m, { ...BASE, subs: 1, climb: 0 }, 'terrace').groups.length === 0);
+  const big = mk(96, 80, (x, y) => 20 + (x * 9 + 20 * Math.sin(y / 5)) % 960 * 0 + x * 10 + 15 * Math.sin(y / 4));
+  const P = { ...BASE, terraces: 12, subs: 1, climb: 0, minPlateau: 5, pre: 0 };
+  const perBorder = (m) => { const g = E.gateTransitions(m, P, 'terrace'), q = E.quantize(m, P), per = new Array(12).fill(0); for (const gr of g.groups) for (const t of gr.tiles) per[q.ter[t]]++; return per; };
+  const clean = perBorder(big);
+  const dirty = mk(96, 80, (x, y) => big.elevation[y * 96 + x]);
+  let placed = 0;
+  for (let y = 10; y < 70 && placed < 30; y += 3) for (let x = 6; x < 90 && placed < 30; x += 5) { const i = y * 96 + x; dirty.elevation[i] = placed % 2 ? 0 : 1000; placed++; }
+  dirty.elevRange = [0, 1000];
+  const q2 = E.quantize(dirty, P);
+  const dp = perBorder(dirty);
+  const lit = (() => { const unitOf = (i) => q2.ter[i], adj = (a, b) => q2.ter[b] === q2.ter[a] + 1; return literal(dirty, unitOf, 12, adj, P.gateThr, P.gateMin, q2.range); })();
+  const per = new Array(12).fill(0); for (const g of lit.groups) for (const t of g) per[q2.ter[t]]++;
+  ok('outliers: gate tiles per border equal the literal (band) transcription', per.every((v, i) => v === dp[i]), `${per} vs ${dp}`);
+  const lost = clean.reduce((sum, v, i) => sum + Math.max(0, v - dp[i]), 0), total = clean.reduce((a2, v) => a2 + v, 0);
+  ok('outliers: at most 15 % of the gate tiles are lost', total > 0 && lost / total < 0.15, `${lost}/${total}`);
 }
 
 // 3. min size and threshold are monotonic

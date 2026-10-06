@@ -38,6 +38,11 @@ old pipeline (Unity, C#) are reference only.
   For each 4-neighbour pair exactly one terrace apart, pos = the LOW tile; transition if slope_tLow[pos] -
   slope_tHigh[pos] > threshold (0.05, no absolute value); each pos once. Transitions are grouped by 4-connectivity
   (all together, not per terrace pair) and groups smaller than the minimum (3, the user's choice) are dropped.
+  DEVIATION FROM THE USER'S CODE: each terrace is normalized with its NOMINAL band of the global elevation range, clamped
+  to 0..1, not with the min/max of its tiles. In the viewer the pre-smoothing and the plateau cleanup move a few tiles
+  into a terrace whose raw height is far outside its band; on the user's 12-terrace map 124 of 6469 and 50 of 2574 such
+  tiles stretched terraces 6 and 7 by 3.7x and 3.2x and left the 6-7 border without gates. With the band, gates per
+  border come back (`tools/test_gates.js`, `tools/diag_gates.js`).
   Each remaining group is a gate; every terrace edge outside a gate is blocked. The user's "same room" condition is
   omitted (no rooms). One stair per gate at the centroid, several in long gates (stair spacing), retry on the
   next tile if the carve fails. EXTENSION OF OURS (not in the user's code): steps inside a terrace steeper than the
