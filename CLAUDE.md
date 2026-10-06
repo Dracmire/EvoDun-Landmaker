@@ -104,9 +104,14 @@ incursion border; stake and way-back path visible.
 ## Known limitations
 1. Overlays (snake, cave, water) are drawn as square tiles and look blocky over the smoothed A/B shapes.
 2. Carved stairs: each stair is cut into the upper terrace (or built up on the lower one) as 1-3 columns of treads
-   (width default 2, tread rise default = climb limit, 1 is also available). A/B smoothing can close a narrow slot:
-   the info line shows how many stairs are lost in A and in B (tread = a level whose tiles are not inside its
-   contour and outside the next one). The smoothing is deliberately NOT changed to hide this. Lateral columns may
+   (width default 2, tread rise default = climb limit, 1 is also available). The footprint is rigid: in A the vertices
+   of every contour edge that touches a carved tile are pinned through the Chaikin passes; in B the unblurred distance
+   field replaces the blurred one within 0.5 tile of a carved tile (fading out by 1.5 tiles). Terrain away from the
+   stairs is smoothed as before. Look (`render.js`): own cream colour with a tint per tread, light line on the top edge
+   of each riser, dark outline on the flanks, risers and flanks tinted, identical in Box, A and B. The info line gives
+   the stair coverage per technique (share of each tread tile's area inside contour(L) and outside contour(L+1), 4x4
+   samples; stair lost if the mean of a tread is below 0.5, degraded if a tile is below 0.9): 100 % with the footprint,
+   and `P.anchor = false` (diagnostic) switches it off to show what the smoothing does without it. Lateral columns may
    start on any terrace (diagonal cliffs); a stair that fits neither as cut nor as build-up is dropped and counted.
 3. A selected zone that is not 4-contiguous only produces a warning (pieces, largest piece); it is not corrected.
    B costs about 3 s cold at 24 terraces (36 levels) on a 256x256 map; sliders recompute on release.
@@ -130,7 +135,7 @@ incursion border; stake and way-back path visible.
    slice by zone id and/or crop with a veil, sliders recalculating on release. Missing: a real Unity
    `EncodeToPNG` sample in `data/samples/`.
 3. Base solid before anything new. In this order: (1) carved stairs on a level ranking by height, sub-terraces
-   renamed and up to 6, stair width, survival check in A and B (done, to be reviewed); (2) visual slice border from the edge map;
+   renamed and up to 6, stair width, survival check in A and B (done); gate placement and rigid readable stair footprint (done, to be reviewed); (2) visual slice border from the edge map;
    (3) stake, objectives and shortest route (click, manifest); (4) compare mode; (5) overlays that follow the
    smoothed A/B shapes; (6) outer corners of B; (7) Box line and stripes. Test scripts live in `tools/ui/`.
 4. Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.

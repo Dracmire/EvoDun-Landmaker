@@ -126,33 +126,44 @@ ok('every tile has a valid level and byLevel agrees', S.fine.every((L) => L >= 0
   let out = 0; for (const st of Sl.stairs) for (const list of [st.bottom, st.top, ...st.steps.map((x) => x.tiles)]) for (const t of list) if (!Sl.slice[t] || Sl.block[t]) out++;
   ok('slice: no stair tile outside the slice or on blocked tiles', Sl.stairs.length > 0 && out === 0, out);
 }
-// 5. survival in A and B
+// 5. survival in A and B: coverage of each tread tile (share of its area inside contour(L) and outside contour(L+1))
 {
-  /* independent re-implementation: even-odd ray cast to the left, tiles judged one by one */
+  /* independent re-implementation: even-odd ray cast, 4x4 samples per tile, no box rejection */
   const inside = (loops, x, y) => { let c = 0; for (const lp of loops) for (let i = 0; i < lp.length; i++) { const a = lp[i], b = lp[(i + 1) % lp.length]; if ((a[1] <= y) !== (b[1] <= y)) { const xi = a[0] + (y - a[1]) / (b[1] - a[1]) * (b[0] - a[0]); if (xi < x) c++; } } return c % 2 === 1; };
   const indep = (S2, P2, tech) => {
-    const lo = tech === 'A' ? E.loopsA : E.loopsB; let lost = 0, degraded = 0;
+    const lo = tech === 'A' ? E.loopsA : E.loopsB; let lost = 0, degraded = 0, sum = 0, cnt = 0;
     for (const st of S2.stairs) { let closed = false, bad = 0;
-      for (const step of st.steps) { let ok1 = 0; for (const t of step.tiles) { const L = S2.fine[t], x = t % S2.W + 0.5, y = Math.floor(t / S2.W) + 0.5; const next = L + 1 <= S2.maxFine ? lo(S2, L + 1, P2) : []; if (inside(lo(S2, L, P2), x, y) && !inside(next, x, y)) ok1++; else bad++; } if (!ok1) closed = true; }
+      for (const step of st.steps) { let m = 0;
+        for (const t of step.tiles) { const L = S2.fine[t], X = t % S2.W, Y = Math.floor(t / S2.W), next = L + 1 <= S2.maxFine ? lo(S2, L + 1, P2) : [], cur = lo(S2, L, P2); let g = 0;
+          for (let j = 0; j < 4; j++) for (let k = 0; k < 4; k++) { const x = X + (k + 0.5) / 4 + 1e-4, y = Y + (j + 0.5) / 4 + 1.3e-4; if (inside(cur, x, y) && !inside(next, x, y)) g++; }
+          m += g / 16; sum += g / 16; cnt++; if (g / 16 < 0.9) bad++; }
+        if (m / step.tiles.length < 0.5) closed = true; }
       if (closed) lost++; else if (bad) degraded++; }
-    return { lost, degraded };
+    return { lost, degraded, coverage: cnt ? sum / cnt : 1 };
   };
   const cfgs = [['defaults', BASE], ['width 1', Object.assign({}, BASE, { stairW: 1 })], ['strong smoothing', Object.assign({}, BASE, { stairW: 1, tread: 1, smooth: 4, radius: 2.5 })], ['width 3, tread 1', Object.assign({}, BASE, { stairW: 3, tread: 1 })]];
   for (const [name, Pc] of cfgs) for (const t of ['A', 'B']) {
     const S2 = E.shape(relief, Pc), a1 = E.stairSurvival(S2, Pc, t), b1 = indep(S2, Pc, t);
-    ok(`survival ${name} / ${t}: same lost and degraded as an independent check`, a1.lost === b1.lost && a1.degraded === b1.degraded, `${a1.lost}/${a1.degraded} vs ${b1.lost}/${b1.degraded}`);
+    ok(`survival ${name} / ${t}: same lost, degraded and coverage as an independent check`, a1.lost === b1.lost && a1.degraded === b1.degraded && Math.abs(a1.coverage - b1.coverage) < 1e-9, `${a1.lost}/${a1.degraded}/${a1.coverage} vs ${b1.lost}/${b1.degraded}/${b1.coverage}`);
+    ok(`survival ${name} / ${t}: with the rigid footprint every stair is fully covered`, a1.n > 0 && a1.lost === 0 && a1.degraded === 0 && a1.coverage === 1 && a1.tilesFailed === 0, JSON.stringify(Object.assign({}, a1, { lostIdx: 0 })));
+    const Pn = Object.assign({}, Pc, { anchor: false }), Sn = E.shape(relief, Pn), n1 = E.stairSurvival(Sn, Pn, t), n2 = indep(Sn, Pn, t);
+    ok(`survival ${name} / ${t}: the check agrees with the independent one without the footprint`, n1.lost === n2.lost && n1.degraded === n2.degraded && Math.abs(n1.coverage - n2.coverage) < 1e-9);
+    ok(`survival ${name} / ${t}: without the rigid footprint the check fails (it detects the problem)`, n1.coverage < 0.97 && n1.degraded + n1.lost > 0, n1.coverage);
   }
-  const sv = (S2, P2, t) => E.stairSurvival(S2, P2, t);
-  const a = sv(S, BASE, 'A'), b = sv(S, BASE, 'B');
-  ok('survival: well-formed result', a.n === S.stairs.length && b.n === S.stairs.length && a.lost + a.degraded <= a.n && b.lost + b.degraded <= b.n && a.tilesFailed <= a.tiles && a.tiles === b.tiles);
-  ok('survival: no stairs -> nothing lost', sv(E.shape(mk(30, 20, () => 500, [0, 1000]), BASE), BASE, 'A').lost === 0);
-  const P1 = Object.assign({}, BASE, { stairW: 1 }), S1 = E.shape(relief, P1), b1 = sv(S1, P1, 'B');
-  ok('survival: with width 1 and the default smoothing B closes some slots (detector works)', b1.lost > 0 && b1.lostIdx.length === b1.lost, b1.lost + '/' + b1.n);
-  ok('survival: width 2 loses fewer than width 1 in B', b.lost < b1.lost, `${b.lost} vs ${b1.lost}`);
-  const Pr = Object.assign({}, BASE, { stairW: 1, tread: 1, smooth: 4, radius: 2.5 }), Sr = E.shape(relief, Pr);
-  ok('survival: stronger smoothing loses more', sv(Sr, Pr, 'B').lost >= b1.lost);
-  ok('survival is cached by the loops', sv(S, BASE, 'B').lost === b.lost);
+  { const Pn = Object.assign({}, BASE, { anchor: false }), Sn = E.shape(relief, Pn);
+    ok('survival: B without footprint loses stairs, with it none', E.stairSurvival(Sn, Pn, 'B').lost > 0 && E.stairSurvival(S, BASE, 'B').lost === 0); }
+  ok('survival: well-formed result', (() => { const a = E.stairSurvival(S, BASE, 'A'); return a.n === S.stairs.length && a.tiles > 0 && a.worst >= 0 && a.worst <= 1; })());
+  ok('survival: no stairs -> nothing lost, coverage 1', (() => { const r = E.stairSurvival(E.shape(mk(30, 20, () => 500, [0, 1000]), BASE), BASE, 'A'); return r.lost === 0 && r.coverage === 1; })());
+  // the terrain far from the stairs is still smoothed: the footprint pins only what touches carved tiles
+  const Pn = Object.assign({}, BASE, { anchor: false }), Sn = E.shape(relief, Pn);
+  const near = (S2) => { const m = new Uint8Array(S2.n); for (let i = 0; i < S2.n; i++) if (S2.carved[i]) for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) { const x = i % S2.W + dx, y = ((i / S2.W) | 0) + dy; if (x >= 0 && y >= 0 && x < S2.W && y < S2.H) m[y * S2.W + x] = 1; } return m; };
+  const nr = near(S);
+  let farSame = 0, farTot = 0;
+  for (let L = 1; L <= S.maxFine; L++) { const a = E.loopsA(S, L, BASE), b = E.loopsA(Sn, L, Pn); for (const lp of a) for (const p of lp) { if (nr[Math.min(S.n - 1, Math.floor(p[1]) * S.W + Math.floor(p[0]))]) continue; farTot++; if (b.some((q) => q.some((r) => Math.abs(r[0] - p[0]) < 1e-9 && Math.abs(r[1] - p[1]) < 1e-9))) farSame++; } }
+  ok('anchoring leaves the smoothing of the terrain far from the stairs unchanged (A)', farTot > 0 && farSame / farTot > 0.95, `${farSame}/${farTot}`);
+  ok('survival is cached by the loops', E.stairSurvival(S, BASE, 'B').lost === 0);
 }
+
 // 6. hand-built cases for guards that real maps rarely exercise
 const HP = { terraces: 2, subs: 3, terH: 1, subH: 0.22, climb: 2, stairW: 2, tread: 2 };
 {

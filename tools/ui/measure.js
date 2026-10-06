@@ -21,12 +21,12 @@ const { open } = require('./common');
       }
       const sa = E.stairSurvival(S, P, 'A'), sb = E.stairSurvival(S, P, 'B');
       out.push({ terraces, subs, slice, levels: S.levelH.length, bridges: S.levelMeta.filter((m) => m.bridge).length, stairs: S.stairs.length, sites: S.stairInfo.sites,
-        shape: med(shapeMs), box: med(cold.box), A: med(cold.A), B: med(cold.B), lostA: `${sa.lost}/${sa.n}`, lostB: `${sb.lost}/${sb.n}` });
+        shape: med(shapeMs), box: med(cold.box), A: med(cold.A), B: med(cold.B), lostA: `${(sa.coverage * 100).toFixed(1)}% (${sa.lost} lost)`, lostB: `${(sb.coverage * 100).toFixed(1)}% (${sb.lost} lost)` });
     }
     return out;
   }, { reps });
   const f = (v) => (typeof v === 'number' ? (v >= 100 ? v.toFixed(0) : v.toFixed(1)) : v);
-  console.log('| terraces | sub-terraces | slice | levels (bridges) | stairs / sites | shape | Box cold | A cold | B cold | lost A | lost B |\n|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|');
+  console.log('| terraces | sub-terraces | slice | levels (bridges) | stairs / sites | shape | Box cold | A cold | B cold | coverage A | coverage B |\n|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|');
   for (const r of rows) console.log(`| ${r.terraces} | ${r.subs} | ${r.slice} | ${r.levels} (${r.bridges}) | ${r.stairs} / ${r.sites} | ${f(r.shape)} | ${f(r.box)} | ${f(r.A)} | ${f(r.B)} | ${r.lostA} | ${r.lostB} |`);
   console.log('errors:', a.errs); await a.browser.close();
 })();

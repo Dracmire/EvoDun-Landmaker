@@ -14,9 +14,13 @@ const { open } = require('./common');
   /* stairs of the current slice with the facing of their wall for the current view: rny > 0 faces the camera */
   const stairs = () => a.page.evaluate(() => {
     const ev = window.__evo, S = ev.S(), cv = document.querySelector('#stage canvas'), cam = window.EVO.makeCam(S, ev.P, ev.view(), cv.clientWidth, cv.clientHeight);
-    return S.stairs.map((st, i) => { const t = st.top[0], n = cam.nrm(-st.dir[0], -st.dir[1]); return { i, cols: st.cols.length, mode: st.mode, rny: n[1], x: (t % S.W) + 0.5, y: ((t / S.W) | 0) + 0.5, h: S.levelH[S.fine[t]] }; });
+    return S.stairs.map((st, i) => { const t = st.top[0], n = cam.nrm(-st.dir[0], -st.dir[1]); return { i, cols: st.cols.length, treads: st.steps.length, mode: st.mode, rny: n[1], x: (t % S.W) + 0.5, y: ((t / S.W) | 0) + 0.5, h: S.levelH[S.fine[t]] }; });
   });
-  const pick = (list, front) => list.filter((s) => (front ? s.rny > 0.5 : s.rny < -0.5)).sort((p, q) => q.cols - p.cols || (p.mode === 'cut' ? -1 : 1) - (q.mode === 'cut' ? -1 : 1) || p.i - q.i)[0];
+  /* zoom that gives `px` screen pixels per tile along a tile edge at the current preset */
+  const zoomFor = (px) => a.page.evaluate((px) => { const ev = window.__evo, cv = document.querySelector('#stage canvas'), v = ev.view(); v.zoom = 1; v.panX = 0; v.panY = 0; return px / window.EVO.makeCam(ev.S(), ev.P, v, cv.clientWidth, cv.clientHeight).sc; }, px);
+  const pxTile = () => a.page.evaluate(() => { const ev = window.__evo, cv = document.querySelector('#stage canvas'), c = window.EVO.makeCam(ev.S(), ev.P, ev.view(), cv.clientWidth, cv.clientHeight); return Math.round(c.sc * 10) / 10; });
+  const PX = 28;
+  const pick = (list, front) => list.filter((s) => (front ? s.rny > 0.5 : s.rny < -0.5)).sort((p, q) => q.treads - p.treads || q.cols - p.cols || (p.mode === 'cut' ? -1 : 1) - (q.mode === 'cut' ? -1 : 1) || p.i - q.i)[0];
   for (const kv of setArg.split(',').filter(Boolean)) { const [k, v] = kv.split('='); await a.slider(k, +v); await a.idle(); }
   await a.load('maps'); await a.zone(6);
   console.log('zone 6:', await info());
@@ -25,7 +29,7 @@ const { open } = require('./common');
     const list = await stairs();
     for (const [facing, front] of [['front', true], ['back', false]]) {
       const s = pick(list, front); if (!s) { console.log('no stair', facing, pname); continue; }
-      await a.focus(s.x, s.y, s.h, 10); console.log(`${facing} ${pname}: stair #${s.i} (${s.mode}, ${s.cols} columns)`);
+      await a.focus(s.x, s.y, s.h, await zoomFor(PX)); console.log(`${facing} ${pname}: stair #${s.i} (${s.mode}, ${s.cols} columns, ${s.treads} treads), ${await pxTile()} px per tile`);
       await shot(`stair_${facing}_${pname}`);
     }
   }
@@ -37,7 +41,7 @@ const { open } = require('./common');
   console.log('lost in A:', lost.A, ' lost in B:', lost.B);
   if (lost.B.length) {
     const s = lost.info[lost.B[0]];
-    for (const [pid, pname] of [['oblique', 'oblique'], ['isoE', 'iso']]) { await a.preset(pid); await a.focus(s.x, s.y, s.h, 10); await shot(`lost_in_B_${pname}`); }
+    for (const [pid, pname] of [['oblique', 'oblique'], ['isoE', 'iso']]) { await a.preset(pid); await a.focus(s.x, s.y, s.h, await zoomFor(PX)); await shot(`lost_in_B_${pname}`); }
   }
   console.log('errors:', a.errs); await a.browser.close();
   process.exit(a.errs.length ? 1 : 0);

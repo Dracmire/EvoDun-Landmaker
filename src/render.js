@@ -168,6 +168,41 @@
     }
   }
 
+  /* ---- Stair look (same in Box, A and B): the footprint is rigid, so it gets its own colour, a tint per tread,
+     light lines on the top edge of each riser and a dark outline along its flanks. ---- */
+  const STAIR_RGB = [226, 212, 178];
+  function stairTiles(S) { // tile -> { dir, k (tread index, 0 = lowest), m }
+    if (S._stairTile) return S._stairTile;
+    const map = new Map();
+    for (const st of S.stairs) st.steps.forEach((step, k) => { for (const t of step.tiles) map.set(t, { dir: st.dir, k, m: st.steps.length }); });
+    S._stairNear = new Uint8Array(S.n); // carved tiles and their 4-neighbours: the only tiles with stair edges
+    for (const t of map.keys()) { const x = t % S.W, y = (t / S.W) | 0; S._stairNear[t] = 1; if (x > 0) S._stairNear[t - 1] = 1; if (x < S.W - 1) S._stairNear[t + 1] = 1; if (y > 0) S._stairNear[t - S.W] = 1; if (y < S.H - 1) S._stairNear[t + S.W] = 1; }
+    return (S._stairTile = map);
+  }
+  const stairColor = (info) => STAIR_RGB.map((v) => v * (0.78 + 0.3 * (info.m > 1 ? info.k / (info.m - 1) : 0.5)));
+  const STAIR_LINE = 'rgba(255,248,226,0.95)', STAIR_EDGE = 'rgba(24,20,34,0.9)';
+  /* edge of tile t towards neighbour n (t higher than n) that belongs to a stair: returns 'riser', 'flank' or null */
+  function stairEdge(S, t, n) {
+    const T = stairTiles(S), a = T.get(t), b = T.get(n);
+    if (!a && !b) return null;
+    const dx = Math.abs((n % S.W) - (t % S.W)), info = a || b, par = info.dir[0] !== 0 ? dx === 1 : dx === 0;
+    if (par) return 'riser';
+    return a && b ? null : 'flank';
+  }
+  function drawStairEdges(ctx, cam, S, i, hh) { // edges of tile i that face a lower neighbour, at the height of its cap
+    if (!S._stairNear[i]) return;
+    const x = i % S.W, y = (i / S.W) | 0;
+    for (const [dx, dy, ax, ay, bx, by] of [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]]) {
+      const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= S.W || ny >= S.H) continue;
+      const j = ny * S.W + nx; if (S.levelH[S.fine[j]] >= hh - 1e-6) continue;
+      const kind = stairEdge(S, i, j); if (!kind) continue;
+      const A = cam.p(x + ax, y + ay, hh), B = cam.p(x + bx, y + by, hh);
+      ctx.strokeStyle = kind === 'riser' ? STAIR_LINE : STAIR_EDGE; ctx.lineWidth = kind === 'riser' ? 1.5 : 1.8;
+      ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
+    }
+  }
+  function hasStairs(S) { return S.stairs && S.stairs.length > 0; }
+
   /* ---- Box reference: one column per tile ---- */
   function renderBox(ctx, cam, S, P, o, st) {
     const { W, H } = S, order = [];
@@ -176,9 +211,10 @@
     order.sort((a, b) => key(a) - key(b) || S.fine[a] - S.fine[b]);
     const dirs = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
     const rank = new Int32Array(S.n); order.forEach((t, r) => { rank[t] = r; });
+    const ST = hasStairs(S) ? stairTiles(S) : null;
     const face = (i2, b) => { const bp = new Path2D(); borderFaces(bp, cam, i2 % W, (i2 / W) | 0, 1 << b, S.levelH[S.fine[i2]]); strokeBorder(ctx, bp); };
     for (const i of order) {
-      const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = S.levelH[f], c = levelColor(S, f, P);
+      const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = S.levelH[f], si = ST && ST.get(i), c = si ? stairColor(si) : levelColor(S, f, P);
       const veiled = !!(o.veil && S.slice && !S.slice[i]), cc = veiled ? veilMix(c) : c;
       for (const [dx, dy, ax, ay, bx, by] of dirs) {
         const nx = x + dx, ny = y + dy;
@@ -186,12 +222,14 @@
         if (hn >= hh - 1e-6) continue;
         const [rnx, rny] = cam.nrm(dx, dy);
         if (rny <= 0.001) continue;
-        wallQuad(ctx, cam, x + ax, y + ay, x + bx, y + by, hn, hh, cc, rnx, o, st);
+        const sj = ST && (si || ST.get(ny * W + nx)); // a wall that belongs to a stair (riser or flank) takes its colour
+        wallQuad(ctx, cam, x + ax, y + ay, x + bx, y + by, hn, hh, sj && nx >= 0 && ny >= 0 && nx < W && ny < H ? stairColor(sj) : cc, rnx, o, st);
       }
       tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = rgb(cc); ctx.fill(); ctx.strokeStyle = rgb(cc); ctx.lineWidth = 0.8; ctx.stroke();
       const ov = tileOverlay(S, P, o, i);
       for (const col of ov) { tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = col; ctx.fill(); }
       if (veiled && ov.length) { tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = VEIL; ctx.fill(); }
+      if (ST) drawStairEdges(ctx, cam, S, i, hh);
       if (o.outlines) { // rim only where a lower neighbour exists
         for (const [dx, dy, ax, ay, bx, by] of dirs) {
           const nx = x + dx, ny = y + dy;
@@ -222,6 +260,7 @@
 
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
   function renderLevels(ctx, cam, S, P, o, st, loopsOf) {
+    const ST = hasStairs(S) ? stairTiles(S) : null;
     for (let L = 0; L <= S.maxFine; L++) {
       const loops = loopsOf(S, L, P);
       if (!loops.length) continue;
@@ -237,11 +276,16 @@
           if (rny <= 0.001) continue;
           const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
           // the wall belongs to the tile just inside the region (against the outward normal)
-          segs.push({ a, b, rnx, d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)) });
+          const seg = { a, b, rnx, d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)), stair: null };
+          if (ST && (Math.abs(dx) < 0.02 || Math.abs(dy) < 0.02)) { // axis-aligned wall touching a carved tile: part of the rigid footprint
+            const tile = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? ST.get(iy * S.W + ix) : undefined; };
+            seg.stair = tile(mx - 0.2 * dy / len, my + 0.2 * dx / len) || tile(mx + 0.2 * dy / len, my - 0.2 * dx / len) || null;
+          }
+          segs.push(seg);
         }
       }
       segs.sort((p, q) => p.d - q.d);
-      for (const s of segs) wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], hb, ht, s.veiled ? cv : c, s.rnx, o, st);
+      for (const s of segs) wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], hb, ht, s.stair ? stairColor(s.stair) : s.veiled ? cv : c, s.rnx, o, st);
       const path = new Path2D();
       for (const loop of loops) {
         loop.forEach((p, k) => { const q = cam.p(p[0], p[1], ht); k ? path.lineTo(q[0], q[1]) : path.moveTo(q[0], q[1]); });
@@ -250,6 +294,10 @@
       st.polys += loops.length;
       ctx.fillStyle = rgb(c); ctx.fill(path, 'evenodd');
       ctx.save(); ctx.clip(path, 'evenodd');
+      if (ST) for (const i of S.byLevel[L]) {
+        const si = ST.get(i); if (!si) continue;
+        tileQuad(ctx, cam, i % S.W, (i / S.W) | 0, ht); ctx.fillStyle = rgb(stairColor(si)); ctx.fill();
+      }
       for (const i of S.byLevel[L]) {
         const ov = tileOverlay(S, P, o, i);
         if (!ov.length) continue;
@@ -262,6 +310,7 @@
         ctx.strokeStyle = terraceLevel ? OUT : 'rgba(24,20,34,0.42)'; ctx.lineWidth = terraceLevel ? 1.7 : 0.7; ctx.lineJoin = 'round';
         ctx.stroke(path);
       }
+      if (ST) for (const i of S.byLevel[L]) drawStairEdges(ctx, cam, S, i, ht);
       if (o.border && S.border) {
         const bp = new Path2D(); let any = false;
         for (const i of S.byLevel[L]) if (S.border[i]) { borderFaces(bp, cam, i % S.W, (i / S.W) | 0, S.border[i], ht); any = true; }

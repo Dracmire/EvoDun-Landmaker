@@ -85,32 +85,33 @@ alpha). Interlaced files are rejected with a message. Checked in Node 22 and Chr
   design), `tRNS` colour keys for gray/RGB images (ignored), 16-bit palette (does not exist in PNG).
 - pngjs 7's 16-bit encoder produced unusable output in my usage, so pngjs was not used as ground truth.
 
-## 4. Cold cost with carved stairs (bridge levels)
+## 4. Cold cost with carved stairs (bridge levels) and rigid footprint
 
 `node tools/ui/measure.js 3`: median of 3 runs, Chromium 141 headless (software rasteriser, ±30 %), canvas
 1200x800, Oblique 50 degrees, synthetic 256x256 map (12 zones), default parameters except terraces and
-sub-terraces. "Cold" is the first render with an empty contour cache. Times in ms. "lost A / lost B" are the stairs
-whose slot is closed by the A / B contours (`E.stairSurvival`); stairs / sites is how many sites could be carved.
+sub-terraces. "Cold" is the first render with an empty contour cache. Times in ms. Stairs are placed at gates (the
+user's criterion, default threshold 0.05 and minimum size 3), with the rigid footprint on. "coverage" is
+`E.stairSurvival`: share of each tread tile's area drawn as its own step by the A / B contours.
 
-| terraces | sub-terraces | slice | levels (bridges) | stairs / sites | shape | Box cold | A cold | B cold | lost A | lost B |
+| terraces | sub-terraces | slice | levels (bridges) | stairs / sites | shape | Box cold | A cold | B cold | coverage A | coverage B |
 |---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 5 | 3 | whole map | 19 (4) | 297 / 297 | 90.4 | 341 | 162 | 1835 | 1/297 | 21/297 |
-| 5 | 3 | zone 6 | 14 (2) | 24 / 24 | 28.9 | 139 | 20.1 | 395 | 0/24 | 0/24 |
-| 5 | 6 | whole map | 34 (4) | 297 / 297 | 114 | 410 | 252 | 3369 | 1/297 | 23/297 |
-| 5 | 6 | zone 6 | 26 (2) | 24 / 24 | 13.2 | 106 | 83.6 | 754 | 0/24 | 0/24 |
-| 24 | 3 | whole map | 95 (23) | 652 / 656 | 199 | 458 | 746 | 9155 | 1/652 | 132/652 |
-| 24 | 3 | zone 6 | 70 (12) | 63 / 63 | 24.8 | 246 | 195 | 1912 | 0/63 | 12/63 |
-| 24 | 6 | whole map | 167 (23) | 830 / 916 | 303 | 481 | 1367 | 16145 | 5/830 | 253/830 |
-| 24 | 6 | zone 6 | 127 (12) | 79 / 87 | 33.8 | 163 | 356 | 3563 | 1/79 | 28/79 |
+| 5 | 3 | whole map | 19 (4) | 376 / 376 | 42.5 | 425 | 232 | 2353 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 5 | 3 | zone 6 | 14 (2) | 29 / 29 | 11.7 | 157 | 21.3 | 558 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 5 | 6 | whole map | 34 (4) | 376 / 376 | 27.1 | 436 | 289 | 3989 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 5 | 6 | zone 6 | 26 (2) | 29 / 29 | 8.1 | 135 | 78.4 | 937 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 24 | 3 | whole map | 95 (23) | 1553 / 1599 | 47.3 | 627 | 883 | 11451 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 24 | 3 | zone 6 | 70 (12) | 166 / 167 | 12.9 | 167 | 203 | 2772 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 24 | 6 | whole map | 167 (23) | 1341 / 1602 | 41.5 | 677 | 1482 | 20274 | 100.0% (0 lost) | 100.0% (0 lost) |
+| 24 | 6 | zone 6 | 127 (12) | 126 / 167 | 19.5 | 233 | 393 | 4593 | 100.0% (0 lost) | 100.0% (0 lost) |
 
 Reading it:
 - B is the expensive one: its cost grows with the number of levels (one signed distance field per level) and with
-  the area. With the defaults (5 terraces x 3 sub-terraces) one zone costs ~0.4 s cold; the whole 256x256 map
-  ~1.8 s. At 24 terraces x 6 sub-terraces it is 3.6 s for one zone and 16 s for the whole map (167 levels).
-- Bridge levels are few (2 for one zone at 5 terraces, up to 23 for the whole map at 24 terraces) and are not what
-  makes B slow: levels per terrace are.
-- A and Box stay below 0.5 s except A on the whole map at 24 x 6 (1.4 s).
-- At the defaults, one zone: 0 stairs lost in A and in B. On the whole map B loses 21 of 297 (7 %), and with 24
-  terraces 20-30 % of the stairs: narrow slots do not survive the distance-field blur at that density. The
-  smoothing was deliberately not changed.
-- Shape time (the carving included) is below 0.35 s everywhere.
+  the area. With the defaults (5 terraces x 3 sub-terraces) one zone costs ~0.6 s cold; the whole 256x256 map
+  ~2.4 s. At 24 terraces x 6 sub-terraces it is 4.6 s for one zone and 20 s for the whole map (167 levels).
+- The rigid footprint costs B extra: one more field (shared by all levels) and a blend per level, plus more
+  contour vertices around the stairs. Before it, the same scenario (older stair placement, 297 stairs) took 1.8 s
+  for the whole map at the defaults and 16 s at 24 x 6.
+- Gates give more stairs than the old heuristic (376 vs 297 on the whole map at the defaults).
+- With the footprint every stair is 100 % covered in A and B in every row (0 lost). Without it
+  (`P.anchor = false`) B loses stairs and A degrades them: see `tools/test_stairs.js`.
+- Shape time (gates and carving included) is below 0.05 s everywhere here (the whole-map quantization is cached).
