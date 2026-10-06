@@ -27,6 +27,16 @@ exports.open = async (opts = {}) => {
     tech: async (t) => { await page.click(`#techs button[data-id=${t}]`); await api.idle(); },
     preset: async (p) => { await page.click(`#presets button[data-id=${p}]`); await api.idle(); },
     slider: (id, v) => page.evaluate(({ id, v }) => { const el = document.querySelector('#s-' + id); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, { id, v }),
+    /* centre the camera on tile (x, y) of the window at height h with the given zoom (uses E.makeCam) */
+    focus: async (x, y, h, zoom) => {
+      await page.evaluate(({ x, y, h, zoom }) => {
+        const ev = window.__evo, cv = document.querySelector('#stage canvas'), w = cv.clientWidth, hh = cv.clientHeight;
+        const v = ev.view(); v.zoom = zoom; v.panX = 0; v.panY = 0;
+        const p = window.EVO.makeCam(ev.S(), ev.P, v, w, hh).p(x, y, h);
+        ev.st.zoom = zoom; ev.st.panX = w / 2 - p[0]; ev.st.panY = hh / 2 - p[1]; ev.draw();
+      }, { x, y, h, zoom });
+      await api.idle();
+    },
     canvas: async () => Buffer.from((await page.evaluate(() => document.querySelector('#stage canvas').toDataURL('image/png'))).split(',')[1], 'base64'),
     ok: (name, cond, extra) => { console.log((cond ? 'PASS ' : 'FAIL ') + name + (extra !== undefined ? '  ' + extra : '')); if (!cond) process.exitCode = 1; }
   };

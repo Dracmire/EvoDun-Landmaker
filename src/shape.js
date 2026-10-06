@@ -217,18 +217,33 @@
       }
       S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rect: spec.rect || null, warnings };
     }
-    const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
-    for (let i = 0; i < n; i++) if (!S.slice || S.slice[i]) { terSeen.add(ter[i]); fineSeen.add(fine[i]); }
-    S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
     computePasses(S, P);
+    carveStairs(S, P);
+    const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
+    for (let i = 0; i < n; i++) if (!S.slice || S.slice[i]) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
+    S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
     computeRegions(S, P);
     return S;
   };
 
+  /* Stair sites. Same heuristic as before (lowest slope, one per pair of regions, then spacing). A site is a pair
+     of 4-neighbour tiles (a lower, b upper) that cannot be walked: one terrace apart, or in the same terrace with
+     more than `climb` sub-terraces of difference (the climb limit is provisional). */
   function computePasses(S, P) {
-    const { W, H, ter, U } = S, water = S.block;
+    const { W, H, ter, sub, U } = S, water = S.block;
     const g0 = new Int16Array(S.n);
     const reg = comps(W, H, ter, g0).id; // same-terrace regions
+    let wreg = null;                      // same-terrace regions split by the climb limit (only if it can matter)
+    if (P.climb < S.subs - 1) {
+      const par = new Int32Array(S.n).map((_, i) => i);
+      const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) for (const [dx, dy] of [[1, 0], [0, 1]]) {
+        const nx = x + dx, ny = y + dy; if (nx >= W || ny >= H) continue;
+        const i = y * W + x, j = ny * W + nx;
+        if (ter[i] === ter[j] && Math.abs(sub[i] - sub[j]) <= P.climb) { const ra = find(i), rb = find(j); if (ra !== rb) par[ra] = rb; }
+      }
+      wreg = new Int32Array(S.n).map((_, i) => find(i));
+    }
     const cand = [];
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x;
@@ -236,10 +251,15 @@
         const nx = x + dx, ny = y + dy;
         if (nx >= W || ny >= H) continue;
         const j = ny * W + nx;
-        if (Math.abs(ter[i] - ter[j]) !== 1) continue;
         if (water[i] || water[j]) continue;
-        const a = ter[i] < ter[j] ? i : j, b = a === i ? j : i;
-        cand.push({ a, b, g: Math.abs(U[i] - U[j]) });
+        const dt = Math.abs(ter[i] - ter[j]);
+        if (dt === 1) {
+          const a = ter[i] < ter[j] ? i : j, b = a === i ? j : i;
+          cand.push({ a, b, g: Math.abs(U[i] - U[j]), key: reg[a] + ':' + reg[b] });
+        } else if (dt === 0 && wreg && Math.abs(sub[i] - sub[j]) > P.climb) {
+          const a = sub[i] < sub[j] ? i : j, b = a === i ? j : i;
+          cand.push({ a, b, g: Math.abs(U[i] - U[j]), key: 'w' + wreg[a] + ':' + wreg[b] });
+        }
       }
     }
     cand.sort((p, q) => p.g - q.g);
@@ -247,9 +267,8 @@
     const bx = (c) => c.b % W, by = (c) => (c.b / W) | 0;
     const take = (c) => { chosen.push(c); usedA.add(c.a); usedB.add(c.b); };
     for (const c of cand) { // best pass per region pair keeps regions connectable
-      const key = reg[c.a] + ':' + reg[c.b];
-      if (pair.has(key) || usedA.has(c.a) || usedB.has(c.b)) continue;
-      pair.add(key); take(c);
+      if (pair.has(c.key) || usedA.has(c.a) || usedB.has(c.b)) continue;
+      pair.add(c.key); take(c);
     }
     for (const c of cand) {
       if (usedA.has(c.a) || usedB.has(c.b)) continue;
@@ -262,8 +281,104 @@
     S.passes = chosen;
   }
 
+  /* Stairs are carved into the terrain. Each tread rises at most `tread` sub-terraces (default: the climb limit; never more). A stair is cut into the upper
+     terrace (or, if that does not fit, built on the lower one) as `stairW` columns of treads; the treads take
+     heights from the existing levels plus "bridge" levels in the gap between terraces (only the ones that end up
+     used become levels), so every technique gets the same geometry from its normal level pipeline. */
+  const MAX_TREADS = 6, STAIR_COLS = { 1: [0], 2: [0, 1], 3: [-1, 0, 1] };
+  function carveStairs(S, P) {
+    const { W, H, n } = S, K = S.subs, N = S.N, s = E.subHeight(P), EPS = 1e-9;
+    const tread = Math.max(1, Math.min(P.climb, Math.round(P.tread === undefined ? P.climb : P.tread))), reachPlain = tread * s, reach = reachPlain + EPS; // each tread rises at most `tread` sub-terraces
+    if (P.stairW === 0) { // diagnostic: no carving at all (stair sites stay unconnected)
+      S.carved = new Uint8Array(n); S.stairs = []; S.stairInfo = { sites: S.passes.length, placed: 0, dropped: 0, narrowed: 0, fills: 0, width: 0 }; return;
+    }
+    const width = Math.max(1, Math.min(3, Math.round(P.stairW === undefined ? 2 : P.stairW)));
+    const cands = [];
+    for (let L = 0; L <= S.maxFine; L++) cands.push({ h: S.levelH[L], base: L });
+    for (let t = 0; t + 1 < N; t++) {
+      const top = t * P.terH + (K - 1) * s, g = (t + 1) * P.terH - top, nb = Math.ceil(g / reachPlain - EPS) - 1;
+      for (let j = 1; j <= nb; j++) cands.push({ h: top + j * g / (nb + 1), base: -1, ter: t, frac: j / (nb + 1) });
+    }
+    cands.sort((p, q) => p.h - q.h);
+    const pickUp = (h) => { for (let k = cands.length - 1; k >= 0; k--) if (cands[k].h <= h + reach) return cands[k].h > h + EPS ? cands[k] : null; return null; };
+    const pickDown = (h) => { for (let k = 0; k < cands.length; k++) if (cands[k].h >= h - reach) return cands[k].h < h - EPS ? cands[k] : null; return null; };
+    const hT = new Float64Array(n); for (let i = 0; i < n; i++) hT[i] = S.levelH[S.fine[i]];
+    const used = new Uint8Array(n), carved = new Uint8Array(n), carve = new Map(), stairs = [];
+    let dropped = 0, narrowed = 0, fills = 0;
+    const idx = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x);
+    const okTile = (i, terr) => i >= 0 && !S.block[i] && !used[i] && S.ter[i] === terr;
+
+    const plan = (pass, mode) => {
+      const ax = pass.a % W, ay = (pass.a / W) | 0, bx = pass.b % W, by = (pass.b / W) | 0;
+      const dx = bx - ax, dy = by - ay, ex = -dy, ey = dx, cut = mode === 'cut';
+      const sx = cut ? bx : ax, sy = cut ? by : ay, sd = cut ? 1 : -1;        // path: b, b+d, ...  (cut)  or  a, a-d, ...  (fill)
+      const fx = cut ? ax : bx, fy = cut ? ay : by;                           // fixed end: the lower tile (cut) or the upper tile (fill)
+      const terPath = cut ? S.ter[pass.b] : S.ter[pass.a], terFix = cut ? S.ter[pass.a] : S.ter[pass.b];
+      const col = (c, k) => idx(sx + sd * dx * k + c * ex, sy + sd * dy * k + c * ey), fixed = (c) => idx(fx + c * ex, fy + c * ey);
+      // heights of the treads, from the central column
+      const steps = []; let cur = hT[fixed(0)], end = -1;
+      if (!okTile(fixed(0), terFix)) return null;
+      for (let k = 0; k <= MAX_TREADS; k++) {
+        const t = col(0, k); if (!okTile(t, terPath)) return null;
+        const o = hT[t];
+        if (cut ? o - cur <= reach : cur - o <= reach) { if (cut ? o < cur - EPS : o > cur + EPS) return null; end = k; break; }
+        const c = cut ? pickUp(cur) : pickDown(cur);
+        if (!c || (cut ? c.h >= o - EPS : c.h <= o + EPS)) return null;
+        steps.push(c); cur = c.h;
+      }
+      if (end < 1) return null;
+      const m = steps.length, first = steps[0].h, last = steps[m - 1].h;
+      const valid = (c) => {
+        const f = fixed(c);
+        if (c === 0 ? !okTile(f, terFix) : (f < 0 || S.block[f] || used[f])) return false; // lateral ends may sit on any terrace (diagonal cliffs)
+        if (c === 0 && (cut ? first - hT[f] > reach : hT[f] - first > reach)) return false;
+        for (let k = 0; k < m; k++) { const t = col(c, k); if (!okTile(t, terPath) || (cut ? hT[t] <= steps[k].h + EPS : hT[t] >= steps[k].h - EPS)) return false; }
+        const e = col(c, m); if (!okTile(e, terPath)) return false;
+        return cut ? hT[e] >= last - EPS && hT[e] - last <= reach : hT[e] <= last + EPS && last - hT[e] <= reach;
+      };
+      const want = STAIR_COLS[width], ok = new Set(want.filter(valid));
+      if (!ok.has(0)) return null;
+      let cols = [0];
+      if (width === 3 && ok.has(-1) && ok.has(1)) cols = [-1, 0, 1]; else if (width === 2 && ok.has(1)) cols = [0, 1];
+      const asc = cut ? steps : steps.slice().reverse();
+      const rec = { mode, dir: [dx, dy], cols, requested: width, narrowed: cols.length < width, site: pass, bottom: [], top: [], steps: asc.map((c) => ({ cand: c, tiles: [] })) };
+      for (const c of cols) {
+        rec.bottom.push(cut ? fixed(c) : col(c, m)); rec.top.push(cut ? col(c, m) : fixed(c));
+        for (let k = 0; k < m; k++) rec.steps[cut ? k : m - 1 - k].tiles.push(col(c, k));
+      }
+      return rec;
+    };
+    for (const pass of S.passes) {
+      let rec = null;   // cut into the upper terrace, or build up the lower one: the wider result wins (ties: cut)
+      for (const mode of ['cut', 'fill']) { const r = plan(pass, mode); if (r && (!rec || r.cols.length > rec.cols.length)) rec = r; }
+      if (!rec) { dropped++; continue; }
+      if (rec.mode === 'fill') fills++;
+      if (rec.narrowed) narrowed++;
+      for (let ci = 0; ci < rec.cols.length; ci++) { used[rec.bottom[ci]] = 1; used[rec.top[ci]] = 1; }
+      for (const st of rec.steps) for (const t of st.tiles) { used[t] = 1; carved[t] = 1; carve.set(t, st.cand); }
+      stairs.push(rec);
+    }
+    S.carved = carved; S.stairs = stairs; S.stairInfo = { sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, width };
+    if (!carve.size) return;
+    // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height
+    const bridges = [...new Set([...carve.values()].filter((c) => c.base < 0))].sort((p, q) => p.h - q.h);
+    const newH = [], newMeta = [], baseIdx = new Array(S.maxFine + 1), bridgeIdx = new Map();
+    let bi = 0;
+    for (let L = 0; L <= S.maxFine; L++) {
+      while (bi < bridges.length && bridges[bi].h < S.levelH[L] - EPS) {
+        bridgeIdx.set(bridges[bi], newH.length); newH.push(bridges[bi].h);
+        newMeta.push({ ter: bridges[bi].ter, sub: K - 1, bridge: true, frac: bridges[bi].frac }); bi++;
+      }
+      baseIdx[L] = newH.length; newH.push(S.levelH[L]); newMeta.push(S.levelMeta[L]);
+    }
+    for (let i = 0; i < n; i++) { const c = carve.get(i); S.fine[i] = c ? (c.base >= 0 ? baseIdx[c.base] : bridgeIdx.get(c)) : baseIdx[S.fine[i]]; }
+    S.levelH = newH; S.levelMeta = newMeta; S.maxFine = newH.length - 1;
+    S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
+    for (let i = 0; i < n; i++) S.byLevel[S.fine[i]].push(i);
+  }
+
   function computeRegions(S, P) {
-    const { W, H, ter, sub } = S, water = S.block, n = S.n;
+    const { W, H, ter, sub } = S, water = S.block, n = S.n, carved = S.carved;
     const par = new Int32Array(n).map((_, i) => i);
     const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
     const uni = (a, b) => { a = find(a); b = find(b); if (a !== b) par[a] = b; };
@@ -274,11 +389,16 @@
         const nx = x + dx, ny = y + dy;
         if (nx >= W || ny >= H) continue;
         const j = ny * W + nx;
-        if (water[j]) continue;
+        if (water[j] || carved[i] || carved[j]) continue;   // carved tiles only connect along their stair
         if (ter[i] === ter[j] && Math.abs(sub[i] - sub[j]) <= P.climb) uni(i, j);
       }
     }
-    for (const p of S.passes) uni(p.a, p.b);
+    for (const st of S.stairs) for (let ci = 0; ci < st.cols.length; ci++) {
+      let prev = st.bottom[ci];
+      for (const step of st.steps) { uni(prev, step.tiles[ci]); prev = step.tiles[ci]; }
+      uni(prev, st.top[ci]);
+      if (ci > 0) for (const step of st.steps) uni(step.tiles[ci - 1], step.tiles[ci]);
+    }
     const idOf = new Map(), region = new Int32Array(n).fill(-1), sizes = [];
     for (let i = 0; i < n; i++) {
       if (water[i]) continue;

@@ -49,6 +49,37 @@
     return pts;
   }
 
+  const inLoops = (loops, x, y) => { // even-odd point in polygon
+    let c = false;
+    for (const lp of loops) for (let i = 0, j = lp.length - 1; i < lp.length; j = i++) {
+      const p = lp[i], q = lp[j];
+      if ((p[1] > y) !== (q[1] > y) && x < (q[0] - p[0]) * (y - p[1]) / (q[1] - p[1]) + p[0]) c = !c;
+    }
+    return c;
+  };
+
+  /* Does each carved stair survive the drawn contours of technique A or B? A tile of a tread (level L) survives if
+     its centre is inside the contour of level L and outside the contour of level L+1, which is what makes it a step
+     of its own. A tread is closed when none of its tiles survive; a stair is lost when any of its treads is closed
+     and degraded when only some tiles fail. */
+  E.stairSurvival = function (S, P, tech) {
+    const loopsOf = tech === 'A' ? E.loopsA : E.loopsB, get = (L) => (L > S.maxFine ? [] : loopsOf(S, L, P));
+    let lost = 0, degraded = 0, failed = 0, tiles = 0; const lostIdx = [];
+    S.stairs.forEach((st, si) => {
+      let closed = false, bad = 0;
+      for (const step of st.steps) {
+        let ok = 0;
+        for (const t of step.tiles) {
+          const L = S.fine[t], x = t % S.W + 0.5, y = ((t / S.W) | 0) + 0.5; tiles++;
+          if (inLoops(get(L), x, y) && !inLoops(get(L + 1), x, y)) ok++; else { bad++; failed++; }
+        }
+        if (!ok) closed = true;
+      }
+      if (closed) { lost++; lostIdx.push(si); } else if (bad) degraded++;
+    });
+    return { n: S.stairs.length, lost, degraded, tilesFailed: failed, tiles, lostIdx };
+  };
+
   /* closed tile-exact loops of a mask, collinear points dropped (used for the slice border) */
   E.maskLoops = function (W, H, inside) { return traceMask(W, H, inside).map(dropCollinear); };
 

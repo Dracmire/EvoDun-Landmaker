@@ -696,18 +696,33 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       }
       S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rect: spec.rect || null, warnings };
     }
-    const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
-    for (let i = 0; i < n; i++) if (!S.slice || S.slice[i]) { terSeen.add(ter[i]); fineSeen.add(fine[i]); }
-    S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
     computePasses(S, P);
+    carveStairs(S, P);
+    const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
+    for (let i = 0; i < n; i++) if (!S.slice || S.slice[i]) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
+    S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
     computeRegions(S, P);
     return S;
   };
 
+  /* Stair sites. Same heuristic as before (lowest slope, one per pair of regions, then spacing). A site is a pair
+     of 4-neighbour tiles (a lower, b upper) that cannot be walked: one terrace apart, or in the same terrace with
+     more than `climb` sub-terraces of difference (the climb limit is provisional). */
   function computePasses(S, P) {
-    const { W, H, ter, U } = S, water = S.block;
+    const { W, H, ter, sub, U } = S, water = S.block;
     const g0 = new Int16Array(S.n);
     const reg = comps(W, H, ter, g0).id; // same-terrace regions
+    let wreg = null;                      // same-terrace regions split by the climb limit (only if it can matter)
+    if (P.climb < S.subs - 1) {
+      const par = new Int32Array(S.n).map((_, i) => i);
+      const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) for (const [dx, dy] of [[1, 0], [0, 1]]) {
+        const nx = x + dx, ny = y + dy; if (nx >= W || ny >= H) continue;
+        const i = y * W + x, j = ny * W + nx;
+        if (ter[i] === ter[j] && Math.abs(sub[i] - sub[j]) <= P.climb) { const ra = find(i), rb = find(j); if (ra !== rb) par[ra] = rb; }
+      }
+      wreg = new Int32Array(S.n).map((_, i) => find(i));
+    }
     const cand = [];
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x;
@@ -715,10 +730,15 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         const nx = x + dx, ny = y + dy;
         if (nx >= W || ny >= H) continue;
         const j = ny * W + nx;
-        if (Math.abs(ter[i] - ter[j]) !== 1) continue;
         if (water[i] || water[j]) continue;
-        const a = ter[i] < ter[j] ? i : j, b = a === i ? j : i;
-        cand.push({ a, b, g: Math.abs(U[i] - U[j]) });
+        const dt = Math.abs(ter[i] - ter[j]);
+        if (dt === 1) {
+          const a = ter[i] < ter[j] ? i : j, b = a === i ? j : i;
+          cand.push({ a, b, g: Math.abs(U[i] - U[j]), key: reg[a] + ':' + reg[b] });
+        } else if (dt === 0 && wreg && Math.abs(sub[i] - sub[j]) > P.climb) {
+          const a = sub[i] < sub[j] ? i : j, b = a === i ? j : i;
+          cand.push({ a, b, g: Math.abs(U[i] - U[j]), key: 'w' + wreg[a] + ':' + wreg[b] });
+        }
       }
     }
     cand.sort((p, q) => p.g - q.g);
@@ -726,9 +746,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const bx = (c) => c.b % W, by = (c) => (c.b / W) | 0;
     const take = (c) => { chosen.push(c); usedA.add(c.a); usedB.add(c.b); };
     for (const c of cand) { // best pass per region pair keeps regions connectable
-      const key = reg[c.a] + ':' + reg[c.b];
-      if (pair.has(key) || usedA.has(c.a) || usedB.has(c.b)) continue;
-      pair.add(key); take(c);
+      if (pair.has(c.key) || usedA.has(c.a) || usedB.has(c.b)) continue;
+      pair.add(c.key); take(c);
     }
     for (const c of cand) {
       if (usedA.has(c.a) || usedB.has(c.b)) continue;
@@ -741,8 +760,104 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     S.passes = chosen;
   }
 
+  /* Stairs are carved into the terrain. Each tread rises at most `tread` sub-terraces (default: the climb limit; never more). A stair is cut into the upper
+     terrace (or, if that does not fit, built on the lower one) as `stairW` columns of treads; the treads take
+     heights from the existing levels plus "bridge" levels in the gap between terraces (only the ones that end up
+     used become levels), so every technique gets the same geometry from its normal level pipeline. */
+  const MAX_TREADS = 6, STAIR_COLS = { 1: [0], 2: [0, 1], 3: [-1, 0, 1] };
+  function carveStairs(S, P) {
+    const { W, H, n } = S, K = S.subs, N = S.N, s = E.subHeight(P), EPS = 1e-9;
+    const tread = Math.max(1, Math.min(P.climb, Math.round(P.tread === undefined ? P.climb : P.tread))), reachPlain = tread * s, reach = reachPlain + EPS; // each tread rises at most `tread` sub-terraces
+    if (P.stairW === 0) { // diagnostic: no carving at all (stair sites stay unconnected)
+      S.carved = new Uint8Array(n); S.stairs = []; S.stairInfo = { sites: S.passes.length, placed: 0, dropped: 0, narrowed: 0, fills: 0, width: 0 }; return;
+    }
+    const width = Math.max(1, Math.min(3, Math.round(P.stairW === undefined ? 2 : P.stairW)));
+    const cands = [];
+    for (let L = 0; L <= S.maxFine; L++) cands.push({ h: S.levelH[L], base: L });
+    for (let t = 0; t + 1 < N; t++) {
+      const top = t * P.terH + (K - 1) * s, g = (t + 1) * P.terH - top, nb = Math.ceil(g / reachPlain - EPS) - 1;
+      for (let j = 1; j <= nb; j++) cands.push({ h: top + j * g / (nb + 1), base: -1, ter: t, frac: j / (nb + 1) });
+    }
+    cands.sort((p, q) => p.h - q.h);
+    const pickUp = (h) => { for (let k = cands.length - 1; k >= 0; k--) if (cands[k].h <= h + reach) return cands[k].h > h + EPS ? cands[k] : null; return null; };
+    const pickDown = (h) => { for (let k = 0; k < cands.length; k++) if (cands[k].h >= h - reach) return cands[k].h < h - EPS ? cands[k] : null; return null; };
+    const hT = new Float64Array(n); for (let i = 0; i < n; i++) hT[i] = S.levelH[S.fine[i]];
+    const used = new Uint8Array(n), carved = new Uint8Array(n), carve = new Map(), stairs = [];
+    let dropped = 0, narrowed = 0, fills = 0;
+    const idx = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x);
+    const okTile = (i, terr) => i >= 0 && !S.block[i] && !used[i] && S.ter[i] === terr;
+
+    const plan = (pass, mode) => {
+      const ax = pass.a % W, ay = (pass.a / W) | 0, bx = pass.b % W, by = (pass.b / W) | 0;
+      const dx = bx - ax, dy = by - ay, ex = -dy, ey = dx, cut = mode === 'cut';
+      const sx = cut ? bx : ax, sy = cut ? by : ay, sd = cut ? 1 : -1;        // path: b, b+d, ...  (cut)  or  a, a-d, ...  (fill)
+      const fx = cut ? ax : bx, fy = cut ? ay : by;                           // fixed end: the lower tile (cut) or the upper tile (fill)
+      const terPath = cut ? S.ter[pass.b] : S.ter[pass.a], terFix = cut ? S.ter[pass.a] : S.ter[pass.b];
+      const col = (c, k) => idx(sx + sd * dx * k + c * ex, sy + sd * dy * k + c * ey), fixed = (c) => idx(fx + c * ex, fy + c * ey);
+      // heights of the treads, from the central column
+      const steps = []; let cur = hT[fixed(0)], end = -1;
+      if (!okTile(fixed(0), terFix)) return null;
+      for (let k = 0; k <= MAX_TREADS; k++) {
+        const t = col(0, k); if (!okTile(t, terPath)) return null;
+        const o = hT[t];
+        if (cut ? o - cur <= reach : cur - o <= reach) { if (cut ? o < cur - EPS : o > cur + EPS) return null; end = k; break; }
+        const c = cut ? pickUp(cur) : pickDown(cur);
+        if (!c || (cut ? c.h >= o - EPS : c.h <= o + EPS)) return null;
+        steps.push(c); cur = c.h;
+      }
+      if (end < 1) return null;
+      const m = steps.length, first = steps[0].h, last = steps[m - 1].h;
+      const valid = (c) => {
+        const f = fixed(c);
+        if (c === 0 ? !okTile(f, terFix) : (f < 0 || S.block[f] || used[f])) return false; // lateral ends may sit on any terrace (diagonal cliffs)
+        if (c === 0 && (cut ? first - hT[f] > reach : hT[f] - first > reach)) return false;
+        for (let k = 0; k < m; k++) { const t = col(c, k); if (!okTile(t, terPath) || (cut ? hT[t] <= steps[k].h + EPS : hT[t] >= steps[k].h - EPS)) return false; }
+        const e = col(c, m); if (!okTile(e, terPath)) return false;
+        return cut ? hT[e] >= last - EPS && hT[e] - last <= reach : hT[e] <= last + EPS && last - hT[e] <= reach;
+      };
+      const want = STAIR_COLS[width], ok = new Set(want.filter(valid));
+      if (!ok.has(0)) return null;
+      let cols = [0];
+      if (width === 3 && ok.has(-1) && ok.has(1)) cols = [-1, 0, 1]; else if (width === 2 && ok.has(1)) cols = [0, 1];
+      const asc = cut ? steps : steps.slice().reverse();
+      const rec = { mode, dir: [dx, dy], cols, requested: width, narrowed: cols.length < width, site: pass, bottom: [], top: [], steps: asc.map((c) => ({ cand: c, tiles: [] })) };
+      for (const c of cols) {
+        rec.bottom.push(cut ? fixed(c) : col(c, m)); rec.top.push(cut ? col(c, m) : fixed(c));
+        for (let k = 0; k < m; k++) rec.steps[cut ? k : m - 1 - k].tiles.push(col(c, k));
+      }
+      return rec;
+    };
+    for (const pass of S.passes) {
+      let rec = null;   // cut into the upper terrace, or build up the lower one: the wider result wins (ties: cut)
+      for (const mode of ['cut', 'fill']) { const r = plan(pass, mode); if (r && (!rec || r.cols.length > rec.cols.length)) rec = r; }
+      if (!rec) { dropped++; continue; }
+      if (rec.mode === 'fill') fills++;
+      if (rec.narrowed) narrowed++;
+      for (let ci = 0; ci < rec.cols.length; ci++) { used[rec.bottom[ci]] = 1; used[rec.top[ci]] = 1; }
+      for (const st of rec.steps) for (const t of st.tiles) { used[t] = 1; carved[t] = 1; carve.set(t, st.cand); }
+      stairs.push(rec);
+    }
+    S.carved = carved; S.stairs = stairs; S.stairInfo = { sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, width };
+    if (!carve.size) return;
+    // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height
+    const bridges = [...new Set([...carve.values()].filter((c) => c.base < 0))].sort((p, q) => p.h - q.h);
+    const newH = [], newMeta = [], baseIdx = new Array(S.maxFine + 1), bridgeIdx = new Map();
+    let bi = 0;
+    for (let L = 0; L <= S.maxFine; L++) {
+      while (bi < bridges.length && bridges[bi].h < S.levelH[L] - EPS) {
+        bridgeIdx.set(bridges[bi], newH.length); newH.push(bridges[bi].h);
+        newMeta.push({ ter: bridges[bi].ter, sub: K - 1, bridge: true, frac: bridges[bi].frac }); bi++;
+      }
+      baseIdx[L] = newH.length; newH.push(S.levelH[L]); newMeta.push(S.levelMeta[L]);
+    }
+    for (let i = 0; i < n; i++) { const c = carve.get(i); S.fine[i] = c ? (c.base >= 0 ? baseIdx[c.base] : bridgeIdx.get(c)) : baseIdx[S.fine[i]]; }
+    S.levelH = newH; S.levelMeta = newMeta; S.maxFine = newH.length - 1;
+    S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
+    for (let i = 0; i < n; i++) S.byLevel[S.fine[i]].push(i);
+  }
+
   function computeRegions(S, P) {
-    const { W, H, ter, sub } = S, water = S.block, n = S.n;
+    const { W, H, ter, sub } = S, water = S.block, n = S.n, carved = S.carved;
     const par = new Int32Array(n).map((_, i) => i);
     const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
     const uni = (a, b) => { a = find(a); b = find(b); if (a !== b) par[a] = b; };
@@ -753,11 +868,16 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         const nx = x + dx, ny = y + dy;
         if (nx >= W || ny >= H) continue;
         const j = ny * W + nx;
-        if (water[j]) continue;
+        if (water[j] || carved[i] || carved[j]) continue;   // carved tiles only connect along their stair
         if (ter[i] === ter[j] && Math.abs(sub[i] - sub[j]) <= P.climb) uni(i, j);
       }
     }
-    for (const p of S.passes) uni(p.a, p.b);
+    for (const st of S.stairs) for (let ci = 0; ci < st.cols.length; ci++) {
+      let prev = st.bottom[ci];
+      for (const step of st.steps) { uni(prev, step.tiles[ci]); prev = step.tiles[ci]; }
+      uni(prev, st.top[ci]);
+      if (ci > 0) for (const step of st.steps) uni(step.tiles[ci - 1], step.tiles[ci]);
+    }
     const idOf = new Map(), region = new Int32Array(n).fill(-1), sizes = [];
     for (let i = 0; i < n; i++) {
       if (water[i]) continue;
@@ -841,6 +961,37 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     }
     return pts;
   }
+
+  const inLoops = (loops, x, y) => { // even-odd point in polygon
+    let c = false;
+    for (const lp of loops) for (let i = 0, j = lp.length - 1; i < lp.length; j = i++) {
+      const p = lp[i], q = lp[j];
+      if ((p[1] > y) !== (q[1] > y) && x < (q[0] - p[0]) * (y - p[1]) / (q[1] - p[1]) + p[0]) c = !c;
+    }
+    return c;
+  };
+
+  /* Does each carved stair survive the drawn contours of technique A or B? A tile of a tread (level L) survives if
+     its centre is inside the contour of level L and outside the contour of level L+1, which is what makes it a step
+     of its own. A tread is closed when none of its tiles survive; a stair is lost when any of its treads is closed
+     and degraded when only some tiles fail. */
+  E.stairSurvival = function (S, P, tech) {
+    const loopsOf = tech === 'A' ? E.loopsA : E.loopsB, get = (L) => (L > S.maxFine ? [] : loopsOf(S, L, P));
+    let lost = 0, degraded = 0, failed = 0, tiles = 0; const lostIdx = [];
+    S.stairs.forEach((st, si) => {
+      let closed = false, bad = 0;
+      for (const step of st.steps) {
+        let ok = 0;
+        for (const t of step.tiles) {
+          const L = S.fine[t], x = t % S.W + 0.5, y = ((t / S.W) | 0) + 0.5; tiles++;
+          if (inLoops(get(L), x, y) && !inLoops(get(L + 1), x, y)) ok++; else { bad++; failed++; }
+        }
+        if (!ok) closed = true;
+      }
+      if (closed) { lost++; lostIdx.push(si); } else if (bad) degraded++;
+    });
+    return { n: S.stairs.length, lost, degraded, tilesFailed: failed, tiles, lostIdx };
+  };
 
   /* closed tile-exact loops of a mask, collinear points dropped (used for the slice border) */
   E.maskLoops = function (W, H, inside) { return traceMask(W, H, inside).map(dropCollinear); };
@@ -1033,10 +1184,14 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return RAMP[RAMP.length - 1][1];
   }
   function levelColor(S, L, P) {
-    const K = P.subs, m = S.levelMeta[L], ter = m.ter, mi = m.sub;
-    const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
-    const lift = 1 + (mi - (K - 1) / 2) * 0.05;
-    return c.map((v) => v * lift);
+    const K = P.subs, m = S.levelMeta[L];
+    const at = (ter, mi) => { // colour of terrace `ter`, sub-terrace `mi`
+      const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
+      const lift = 1 + (mi - (K - 1) / 2) * 0.05;
+      return c.map((v) => v * lift);
+    };
+    if (m.bridge) { const lo = at(m.ter, K - 1), hi = at(m.ter + 1, 0); return lo.map((v, k) => v + (hi[k] - v) * m.frac); } // between two terraces
+    return at(m.ter, m.sub);
   }
   const OUT = 'rgba(24,20,34,0.92)';
 
@@ -1159,40 +1314,10 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath();
   }
 
-  function drawRamp(ctx, cam, S, P, pass, o) {
-    const { W } = S, a = pass.a, b = pass.b;
-    const xa = a % W, ya = (a / W) | 0, xb = b % W, yb = (b / W) | 0, dx = xa - xb, dy = ya - yb;
-    const [rnx, rny] = cam.nrm(dx, dy);
-    if (rny < -0.3) return false;
-    const hb = S.levelH[S.fine[b]], ha = S.levelH[S.fine[a]];
-    let e1, e2, f1, f2;
-    if (dx === 1) { e1 = [xb + 1, yb]; e2 = [xb + 1, yb + 1]; f1 = [xb + 2, yb]; f2 = [xb + 2, yb + 1]; }
-    else if (dx === -1) { e1 = [xb, yb]; e2 = [xb, yb + 1]; f1 = [xb - 1, yb]; f2 = [xb - 1, yb + 1]; }
-    else if (dy === 1) { e1 = [xb, yb + 1]; e2 = [xb + 1, yb + 1]; f1 = [xb, yb + 2]; f2 = [xb + 1, yb + 2]; }
-    else { e1 = [xb, yb]; e2 = [xb + 1, yb]; f1 = [xb, yb - 1]; f2 = [xb + 1, yb - 1]; }
-    const q = [cam.p(e1[0], e1[1], hb), cam.p(e2[0], e2[1], hb), cam.p(f2[0], f2[1], ha), cam.p(f1[0], f1[1], ha)];
-    const c = levelColor(S, S.fine[b], P);
-    ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(q[k][0], q[k][1]); ctx.closePath();
-    ctx.fillStyle = rgb(c, 1.18); ctx.fill();
-    const n = clamp(Math.round((hb - ha) / 0.28), 2, 6);
-    ctx.strokeStyle = rgb(c, 0.55, 0.85); ctx.lineWidth = 1;
-    for (let k = 1; k < n; k++) {
-      const t = k / n, hh = hb + (ha - hb) * t;
-      const A = cam.p(e1[0] + (f1[0] - e1[0]) * t, e1[1] + (f1[1] - e1[1]) * t, hh);
-      const B = cam.p(e2[0] + (f2[0] - e2[0]) * t, e2[1] + (f2[1] - e2[1]) * t, hh);
-      ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
-    }
-    if (o.outlines) {
-      ctx.strokeStyle = OUT; ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); ctx.lineTo(q[3][0], q[3][1]); ctx.lineTo(q[2][0], q[2][1]); ctx.lineTo(q[1][0], q[1][1]); ctx.stroke();
-    }
-    return true;
-  }
-
   function drawPassMarks(ctx, cam, S, P) {
     ctx.fillStyle = 'rgba(255,214,64,0.95)'; ctx.strokeStyle = 'rgba(24,20,34,0.9)'; ctx.lineWidth = 1;
-    for (const p of S.passes) {
-      const x = p.b % S.W + 0.5, y = ((p.b / S.W) | 0) + 0.5, hh = S.levelH[S.fine[p.b]];
+    for (const st of S.stairs) {
+      const t = st.top[0], x = t % S.W + 0.5, y = ((t / S.W) | 0) + 0.5, hh = S.levelH[S.fine[t]]; // top of the stair
       const c = cam.p(x, y, hh), r = Math.max(3, cam.sc * 0.18);
       ctx.beginPath(); ctx.moveTo(c[0], c[1] - r * 1.2); ctx.lineTo(c[0] + r, c[1] + r * 0.8); ctx.lineTo(c[0] - r, c[1] + r * 0.8); ctx.closePath(); ctx.fill(); ctx.stroke();
     }
@@ -1220,7 +1345,6 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     for (let i = 0; i < S.n; i++) order.push(i);
     const key = (i) => cam.ry(i % W + 0.5, ((i / W) | 0) + 0.5);
     order.sort((a, b) => key(a) - key(b) || S.fine[a] - S.fine[b]);
-    const passA = new Map(S.passes.map((p) => [p.a, p]));
     const dirs = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
     const rank = new Int32Array(S.n); order.forEach((t, r) => { rank[t] = r; });
     const face = (i2, b) => { const bp = new Path2D(); borderFaces(bp, cam, i2 % W, (i2 / W) | 0, 1 << b, S.levelH[S.fine[i2]]); strokeBorder(ctx, bp); };
@@ -1264,20 +1388,16 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         }
       }
       st.polys++;
-      const p = passA.get(i);
-      if (p && drawRamp(ctx, cam, S, P, p, o)) st.ramps++;
     }
   }
 
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
   function renderLevels(ctx, cam, S, P, o, st, loopsOf) {
-    const byB = new Map();
-    for (const p of S.passes) { const f = S.fine[p.b]; if (!byB.has(f)) byB.set(f, []); byB.get(f).push(p); }
     for (let L = 0; L <= S.maxFine; L++) {
       const loops = loopsOf(S, L, P);
       if (!loops.length) continue;
       const ht = S.levelH[L], hb = L === 0 ? cam.base : S.levelH[L - 1];
-      const terraceLevel = L === 0 || L % P.subs === 0;
+      const terraceLevel = L === 0 || (!S.levelMeta[L].bridge && S.levelMeta[L].sub === 0);
       const c = levelColor(S, L, P), cv = veilMix(c), segs = [];
       for (const loop of loops) {
         const n = loop.length; st.verts += n;
@@ -1318,7 +1438,6 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         for (const i of S.byLevel[L]) if (S.border[i]) { borderFaces(bp, cam, i % S.W, (i / S.W) | 0, S.border[i], ht); any = true; }
         if (any) strokeBorder(ctx, bp);
       }
-      for (const p of byB.get(L) || []) if (drawRamp(ctx, cam, S, P, p, o)) st.ramps++;
     }
   }
 
@@ -1331,7 +1450,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424');
     ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, ramps: 0 };
+    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0 };
     const cam = makeCam(S, P, view, w, h);
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
@@ -1346,7 +1465,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, margin: 24 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 2, margin: 24 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, passes: false, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
@@ -1358,7 +1477,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   const SLIDERS = [
     ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
-    ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['passGap', 'Stair spacing', 3, 20, 1]]],
+    ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['passGap', 'Stair spacing', 3, 20, 1], ['tread', 'Tread rise, sub-terraces', 1, 5, 1], ['stairW', 'Stair width (tiles)', 1, 3, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
   const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
@@ -1631,7 +1750,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     techs.forEach((t, i) => {
       const f = stage.children[i], cv = f.querySelector('canvas');
       const r = E.render(cv, S, P, t, view(), O);
-      f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ramps} ramps · ${r.ms.toFixed(0)} ms</span>`;
+      f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ms.toFixed(0)} ms</span>`;
     });
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
     document.querySelectorAll('#techs button').forEach((b) => b.classList.toggle('on', st.mode === 'single' && b.dataset.id === st.tech));
@@ -1640,12 +1759,15 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const eff = E.subHeight(P), note = $('#subHnote');
     note.hidden = eff >= P.subH - 1e-9;
     note.textContent = `Sub-terrace height limited to ${eff.toFixed(3)} (set ${P.subH}) so the gap to the next terrace stays above the climb limit.`;
+    const surv = {}; for (const t of techs) if (t !== 'box') surv[t] = E.stairSurvival(S, P, t);
+    const sv = (t) => (surv[t] ? `${surv[t].lost}/${surv[t].n}` + (surv[t].degraded ? ` (+${surv[t].degraded} degraded)` : '') : '–');
+    const sinf = S.stairInfo, stairText = `${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · lost A ${sv('A')} · B ${sv('B')}`;
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
     $('#busy').hidden = true;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${S.passes.length} stair passes · ${rs.length} walkable regions in the ${si ? 'slice' : 'map'}, largest ${(big / tot * 100).toFixed(0)}%`;
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText} · ${rs.length} walkable regions in the ${si ? 'slice' : 'map'}, largest ${(big / tot * 100).toFixed(0)}%`;
   }
 
   function init() {
@@ -1653,7 +1775,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { P, O, st, packs, sliceSel, S: () => S, sliceSpec, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

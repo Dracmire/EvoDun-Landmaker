@@ -13,10 +13,14 @@
     return RAMP[RAMP.length - 1][1];
   }
   function levelColor(S, L, P) {
-    const K = P.subs, m = S.levelMeta[L], ter = m.ter, mi = m.sub;
-    const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
-    const lift = 1 + (mi - (K - 1) / 2) * 0.05;
-    return c.map((v) => v * lift);
+    const K = P.subs, m = S.levelMeta[L];
+    const at = (ter, mi) => { // colour of terrace `ter`, sub-terrace `mi`
+      const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
+      const lift = 1 + (mi - (K - 1) / 2) * 0.05;
+      return c.map((v) => v * lift);
+    };
+    if (m.bridge) { const lo = at(m.ter, K - 1), hi = at(m.ter + 1, 0); return lo.map((v, k) => v + (hi[k] - v) * m.frac); } // between two terraces
+    return at(m.ter, m.sub);
   }
   const OUT = 'rgba(24,20,34,0.92)';
 
@@ -139,40 +143,10 @@
     ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath();
   }
 
-  function drawRamp(ctx, cam, S, P, pass, o) {
-    const { W } = S, a = pass.a, b = pass.b;
-    const xa = a % W, ya = (a / W) | 0, xb = b % W, yb = (b / W) | 0, dx = xa - xb, dy = ya - yb;
-    const [rnx, rny] = cam.nrm(dx, dy);
-    if (rny < -0.3) return false;
-    const hb = S.levelH[S.fine[b]], ha = S.levelH[S.fine[a]];
-    let e1, e2, f1, f2;
-    if (dx === 1) { e1 = [xb + 1, yb]; e2 = [xb + 1, yb + 1]; f1 = [xb + 2, yb]; f2 = [xb + 2, yb + 1]; }
-    else if (dx === -1) { e1 = [xb, yb]; e2 = [xb, yb + 1]; f1 = [xb - 1, yb]; f2 = [xb - 1, yb + 1]; }
-    else if (dy === 1) { e1 = [xb, yb + 1]; e2 = [xb + 1, yb + 1]; f1 = [xb, yb + 2]; f2 = [xb + 1, yb + 2]; }
-    else { e1 = [xb, yb]; e2 = [xb + 1, yb]; f1 = [xb, yb - 1]; f2 = [xb + 1, yb - 1]; }
-    const q = [cam.p(e1[0], e1[1], hb), cam.p(e2[0], e2[1], hb), cam.p(f2[0], f2[1], ha), cam.p(f1[0], f1[1], ha)];
-    const c = levelColor(S, S.fine[b], P);
-    ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(q[k][0], q[k][1]); ctx.closePath();
-    ctx.fillStyle = rgb(c, 1.18); ctx.fill();
-    const n = clamp(Math.round((hb - ha) / 0.28), 2, 6);
-    ctx.strokeStyle = rgb(c, 0.55, 0.85); ctx.lineWidth = 1;
-    for (let k = 1; k < n; k++) {
-      const t = k / n, hh = hb + (ha - hb) * t;
-      const A = cam.p(e1[0] + (f1[0] - e1[0]) * t, e1[1] + (f1[1] - e1[1]) * t, hh);
-      const B = cam.p(e2[0] + (f2[0] - e2[0]) * t, e2[1] + (f2[1] - e2[1]) * t, hh);
-      ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
-    }
-    if (o.outlines) {
-      ctx.strokeStyle = OUT; ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); ctx.lineTo(q[3][0], q[3][1]); ctx.lineTo(q[2][0], q[2][1]); ctx.lineTo(q[1][0], q[1][1]); ctx.stroke();
-    }
-    return true;
-  }
-
   function drawPassMarks(ctx, cam, S, P) {
     ctx.fillStyle = 'rgba(255,214,64,0.95)'; ctx.strokeStyle = 'rgba(24,20,34,0.9)'; ctx.lineWidth = 1;
-    for (const p of S.passes) {
-      const x = p.b % S.W + 0.5, y = ((p.b / S.W) | 0) + 0.5, hh = S.levelH[S.fine[p.b]];
+    for (const st of S.stairs) {
+      const t = st.top[0], x = t % S.W + 0.5, y = ((t / S.W) | 0) + 0.5, hh = S.levelH[S.fine[t]]; // top of the stair
       const c = cam.p(x, y, hh), r = Math.max(3, cam.sc * 0.18);
       ctx.beginPath(); ctx.moveTo(c[0], c[1] - r * 1.2); ctx.lineTo(c[0] + r, c[1] + r * 0.8); ctx.lineTo(c[0] - r, c[1] + r * 0.8); ctx.closePath(); ctx.fill(); ctx.stroke();
     }
@@ -200,7 +174,6 @@
     for (let i = 0; i < S.n; i++) order.push(i);
     const key = (i) => cam.ry(i % W + 0.5, ((i / W) | 0) + 0.5);
     order.sort((a, b) => key(a) - key(b) || S.fine[a] - S.fine[b]);
-    const passA = new Map(S.passes.map((p) => [p.a, p]));
     const dirs = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
     const rank = new Int32Array(S.n); order.forEach((t, r) => { rank[t] = r; });
     const face = (i2, b) => { const bp = new Path2D(); borderFaces(bp, cam, i2 % W, (i2 / W) | 0, 1 << b, S.levelH[S.fine[i2]]); strokeBorder(ctx, bp); };
@@ -244,20 +217,16 @@
         }
       }
       st.polys++;
-      const p = passA.get(i);
-      if (p && drawRamp(ctx, cam, S, P, p, o)) st.ramps++;
     }
   }
 
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
   function renderLevels(ctx, cam, S, P, o, st, loopsOf) {
-    const byB = new Map();
-    for (const p of S.passes) { const f = S.fine[p.b]; if (!byB.has(f)) byB.set(f, []); byB.get(f).push(p); }
     for (let L = 0; L <= S.maxFine; L++) {
       const loops = loopsOf(S, L, P);
       if (!loops.length) continue;
       const ht = S.levelH[L], hb = L === 0 ? cam.base : S.levelH[L - 1];
-      const terraceLevel = L === 0 || L % P.subs === 0;
+      const terraceLevel = L === 0 || (!S.levelMeta[L].bridge && S.levelMeta[L].sub === 0);
       const c = levelColor(S, L, P), cv = veilMix(c), segs = [];
       for (const loop of loops) {
         const n = loop.length; st.verts += n;
@@ -298,7 +267,6 @@
         for (const i of S.byLevel[L]) if (S.border[i]) { borderFaces(bp, cam, i % S.W, (i / S.W) | 0, S.border[i], ht); any = true; }
         if (any) strokeBorder(ctx, bp);
       }
-      for (const p of byB.get(L) || []) if (drawRamp(ctx, cam, S, P, p, o)) st.ramps++;
     }
   }
 
@@ -311,7 +279,7 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424');
     ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, ramps: 0 };
+    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0 };
     const cam = makeCam(S, P, view, w, h);
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
