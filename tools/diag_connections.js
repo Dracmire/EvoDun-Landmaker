@@ -6,8 +6,7 @@ global.window = global;
 for (const f of ['png', 'fields', 'shape', 'tech', 'rooms']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
 const E = window.EVO, arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 (async () => {
-  const img = await E.decodePng(fs.readFileSync(path.join(__dirname, '../data/samples/skeleton_heightmap_256.png'))), W = img.width, H = img.height;
-  const mk = () => ({ name: 'skeleton', width: W, height: H, elevation: Float32Array.from(img.channels[0], (v) => v / img.max * 1000), masks: {}, markers: [], fields: {} });
+  const { W, H, mk } = await require('./real_pack.js').load(E);
   const P = { terraces: +arg('--terraces', 5), subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, climb: 2, gateThr: 0.05, gateMin: 3, passGap: 8, stairW: 3, stairStyle: 1, rampDepth: +arg('--depth', 2), spread: 1, smooth: 2, radius: 0.9, tread: 2, roomsMinCore: +arg('--minCore', 20), roomsCross: +arg('--cost', 10), rooms: true };
   const rooms = arg('--rooms', ''), spec = rooms ? { rooms: rooms.split(',').map(Number), margin: 6 } : null;
   const limit = +arg('--limit', 100), run = (keep) => E.shape(mk(), { ...P, rampKeep: keep, roomsIsoLimit: limit }, spec);

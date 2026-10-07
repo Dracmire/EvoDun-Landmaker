@@ -249,6 +249,10 @@ incursion border; stake and way-back path visible.
    the group of cores with the MOST cores under the same passability (tie: more tiles); other groups are not connected and stay unreachable (`R.startGroups`; `P.rScanFirst` = old
    rule, diagnostic only). `tools/rooms_check.js` numbers shift slightly with it. (3) Ramp depth ladder: depth, depth-1, ... 1 at full width, then the same with the lateral columns out.
    (4) The edge-problem outline is ELECTRIC BLUE dashed (white was confused with the white slice border at the map edge); in a slice the cause "no path inside the slice (what it would join lies outside it)".
+   TESTS USE THE VIEWER'S PACK: every rooms test and tool builds the real map with `tools/real_pack.js` (`E.imageChannels` + `E.packFromRoles`, channel V), never `v / max * 1000` by hand
+   (land range 66.66666412 vs 66.66667175 moves the terraces); `tools/ui/test_viewer_node_ui.js` compares viewer and Node (5 and 6 terraces). Figures of the viewer, terraces 3-8 (paths without route / total; main / walkable):
+   3: 3/129, 31542/35196; 4: 1/142, 31188/34096; 5: 1/175, 32921/33129; 6: 8/211, 26294/31784 (problems 3700, 552, 498, 205, 179...); 7: 9/221, 18429/30692; 8: 20/267, 11646/28365. Full table in `docs/rooms.md`.
+   The warning marks (roomKind 3) are cleared at the start of `classifyWalk` (it runs in every pass of the recovery loop).
    Diagnostic flags `rampKeep`, `noUnmerge`, `rScanFirst` are not in the UI or the manifest (like `P.anchor`). `node tools/diag_connections.js --table` prints terraces 3-8 before / after.
    KNOWN LIMIT (documented, not fixed): with 10 and 12 terraces the rooms passability fragments by itself (66 and 138 groups, forbidden margins 34-40 % of the land): the rooms method
    is meant for 2-5 terraces. ClassifySlopeMap (limitation 12) goes in a SEPARATE PR after this one; approved first option: empty neighbour = the tile's own height, Void by height <= 0,

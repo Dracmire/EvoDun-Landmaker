@@ -95,3 +95,18 @@ Tests: `tools/test_gates_rooms.js`, `test_slice_rooms.js`, `test_room_faces.js`,
 - Merge by passGap only when the connection still has a route; otherwise the pair gets its own ramp (variants: depth D..1 at full width, then without lateral columns); all paths are checked again after each carve.
 - Only "gate pair whose ramp did not fit" may remain as a connection without route. `node tools/diag_connections.js --table`, `tools/test_conns_rooms.js` (terraces 3-8, depth 1-4).
 - Known limit: 10 and 12 terraces fragment the passability (66 and 138 groups, forbidden margins 34-40 % of the land). The method is used with 2-5 terraces.
+
+### Terraces 3-8 on the real map (numbers of the VIEWER, `node tools/diag_connections.js --table`)
+All rooms tests and tools build the pack like the viewer (`tools/real_pack.js`: `E.imageChannels` + `E.packFromRoles`, channel V; the land range is 66.66666412, a hand-made `v / max * 1000` gives 66.66667175 and moves the terraces).
+`tools/ui/test_viewer_node_ui.js` compares the viewer with Node (5 and 6 terraces). Paths without route / total; main / walkable tiles; edge problems.
+
+| Terraces | before (no retry, old start core) | after |
+|---|---|---|
+| 3 | 3/129; 31552 / 35207; 2 problems | 3/129 (all "did not fit"); 31542 / 35196; 2 |
+| 4 | 2/142; 29021 / 34098; 4 | 1/142; 31188 / 34096; 3 |
+| 5 | 1/175; 32925 / 33133; 1 | 1/175; 32921 / 33129; 1 |
+| 6 | 10/211; 13720 / 31814; 9 (12605, 3701, ...) | 8/211; 26294 / 31784; 8 (3700, 552, 498, 205, 179, ...) |
+| 7 | 10/221; 18426 / 30678; 17 | 9/221; 18429 / 30692; 17 |
+| 8 | 0/2 (tree of 2 connections); 686 / 22488; 97 | 20/267; 11646 / 28365; 23 |
+
+Warning-outline faces (kind 3) are cleared at the start of every `classifyWalk` (it runs in each pass of the recovery loop); 6 terraces: 5722 faces, each touching a problem region (before: 16836, 11112 of them stale).

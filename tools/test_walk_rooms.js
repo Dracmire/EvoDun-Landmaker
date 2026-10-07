@@ -8,8 +8,7 @@ for (const f of ['png', 'fields', 'shape', 'tech', 'rooms']) vm.runInThisContext
 const E = window.EVO; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log('FAIL', name, extra === undefined ? '' : extra); } };
 (async () => {
-  const img = await E.decodePng(fs.readFileSync(path.join(__dirname, '../data/samples/skeleton_heightmap_256.png'))), W = img.width, H = img.height;
-  const mk = () => ({ name: 'skeleton', width: W, height: H, elevation: Float32Array.from(img.channels[0], (v) => v / img.max * 1000), masks: {}, markers: [], fields: {} });
+  const { W, H, mk } = await require('./real_pack.js').load(E);
   const P = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, climb: 2, gateThr: 0.05, gateMin: 3, passGap: 8, stairW: 3, stairStyle: 1, rampDepth: 2, spread: 1, smooth: 2, radius: 0.9, tread: 2, roomsMinCore: 20, roomsCross: 10, rooms: true };
   const stats = {};
   for (const limit of [20, 100, 300, 1000]) {
@@ -47,6 +46,15 @@ const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log
   for (const T of [3, 4, 5, 6, 7, 8]) {
     const S = E.shape(mk(), { ...P, terraces: T }, null), w = S.walkInfo, rs = S.regionSizes;
     ok(`${T} terraces: main is the largest region, the rest are problems of ${w.limit} tiles or more`, rs[S.mainRegion] === Math.max(...rs) && w.problems.length === rs.length - 1 && w.problems.every((q) => q.size >= w.limit), [rs.length, w.problems.length]);
+    { // every warning face (kind 3) touches a walkable region that is not the main one (the marks of an earlier pass of the recovery loop must be gone)
+      let faces = 0, stale = 0; const OFF = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+      for (let i = 0; i < S.n; i++) for (let b = 0; b < 4; b++) if (S.roomKind[i * 4 + b] === 3) {
+        faces++; const x = i % S.W, y = (i / S.W) | 0, nx = x + OFF[b][0], ny = y + OFF[b][1], j = nx < 0 || ny < 0 || nx >= S.W || ny >= S.H ? -1 : ny * S.W + nx;
+        const prob = (t) => t >= 0 && S.region[t] >= 0 && S.region[t] !== S.mainRegion; if (!prob(i) && !prob(j)) stale++;
+        if (!(S.roomBits[i] & (1 << b))) stale++;
+      }
+      ok(`${T} terraces: every warning face touches a problem region (${faces} faces)`, stale === 0 && (w.problems.length === 0) === (faces === 0), [stale, faces, w.problems.length]);
+    }
     ok(`${T} terraces: every problem has a named cause`, w.problems.every((q) => typeof q.cause === 'string' && q.cause.length > 0 && !/^unknown$/i.test(q.cause)), JSON.stringify(w.problems.slice(0, 2).map((q) => q.cause)));
   }
   { const S = E.shape(mk(), { ...P, terraces: 6 }, { rooms: [8], margin: 6 }); ok('a slice: no problem is named "unknown"', S.walkInfo.problems.every((q) => q.cause && !/unknown/i.test(q.cause)), JSON.stringify(S.walkInfo.problems.map((q) => q.cause))); }

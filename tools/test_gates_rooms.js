@@ -7,8 +7,7 @@ for (const f of ['png', 'fields', 'shape', 'tech', 'rooms']) vm.runInThisContext
 const E = window.EVO; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log('FAIL', name, extra === undefined ? '' : extra); } };
 (async () => {
-  const img = await E.decodePng(fs.readFileSync(path.join(__dirname, '../data/samples/skeleton_heightmap_256.png'))), W = img.width, H = img.height, n = W * H;
-  const mk = () => ({ name: 'skeleton', width: W, height: H, elevation: Float32Array.from(img.channels[0], (v) => v / img.max * 1000), masks: {}, markers: [], fields: {} });
+  const { W, H, mk } = await require('./real_pack.js').load(E); const n = W * H;
   const base = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, climb: 2, gateThr: 0.05, gateMin: 3, passGap: 8, stairW: 3, stairStyle: 1, rampDepth: 2, spread: 1, smooth: 2, radius: 0.9, tread: 2, roomsMinCore: 20, roomsCross: 10 };
   const full = mk(), P = { ...base, rooms: true }, S = E.shape(full, P, null), RL = S.rooms, U = RL.usage;
   ok('the layer exists and the tree uses far fewer gates than there are candidates', RL && U.usedGateGroups > 50 && U.usedGateGroups < RL.gateStats.groups / 2, [U.usedGateGroups, RL.gateStats.groups]);

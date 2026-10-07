@@ -733,6 +733,7 @@
       return 'a steep slope or the margin of a wall';
     };
     const warnK = S.roomKind, warnB = S.roomBits;
+    for (let k = 0; k < warnK.length; k++) if (warnK[k] === 3) { warnK[k] = 0; warnB[k >> 2] &= ~(1 << (k & 3)); } // classifyWalk runs in every build() of the recovery loop: drop the marks of the previous pass first
     for (let i = 0; i < n; i++) {
       const r = S.region[i]; if (r < 0 || r === S.mainRegion) continue; const o = stat.get(r), x = i % W, y = (i / W) | 0;
       for (let b = 0; b < 4; b++) {

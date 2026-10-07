@@ -42,8 +42,7 @@ const writePng = (file, w, h, rgb) => {
 };
 
 (async () => {
-  const img = await E.decodePng(fs.readFileSync(mapFile)), W = img.width, H = img.height, n = W * H;
-  const h = new Float32Array(n); for (let i = 0; i < n; i++) h[i] = img.channels[0][i] / img.max;
+  const rp = await require('./real_pack.js').load(E, { file: mapFile }), W = rp.W, H = rp.H, n = W * H, h = Float32Array.from(rp.mk().elevation, (v) => v / E.ELEVATION_SCALE); // same pack as the viewer (single image, channel V)
   let land = 0, voidN = 0; for (let i = 0; i < n; i++) h[i] > 0 ? land++ : voidN++;
   console.log(`${path.basename(mapFile)}: ${W}x${H}, void ${(voidN / n * 100).toFixed(1)} %, preset ${preset}`);
   console.log('parameters:', JSON.stringify({ ...A, minCore, pre, minPlateau, subs }));

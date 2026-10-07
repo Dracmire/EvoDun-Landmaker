@@ -7,8 +7,7 @@ for (const f of ['png', 'fields', 'shape', 'tech', 'rooms']) vm.runInThisContext
 const E = window.EVO; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log('FAIL', name, extra === undefined ? '' : extra); } };
 (async () => {
-  const img = await E.decodePng(fs.readFileSync(path.join(__dirname, '../data/samples/skeleton_heightmap_256.png'))), W = img.width, H = img.height;
-  const mk = () => ({ name: 'skeleton', width: W, height: H, elevation: Float32Array.from(img.channels[0], (v) => v / img.max * 1000), masks: {}, markers: [], fields: {} });
+  const { W, H, mk } = await require('./real_pack.js').load(E);
   const P = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, climb: 2, gateThr: 0.05, gateMin: 3, passGap: 8, stairW: 3, stairStyle: 1, rampDepth: 2, spread: 1, smooth: 2, radius: 0.9, tread: 2, roomsMinCore: 20, roomsCross: 10, rooms: true };
   const base = E.shape(mk(), P, null), RL = base.rooms;
   const withPatch = (() => { const ids = RL.rooms.map((r) => r.id).slice(0, 14); for (const a of ids) for (const b of ids) if (a < b) { const m = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) m[i] = RL.room[i] === a || RL.room[i] === b ? 1 : 0; const su = E.rooms.sliceUse(RL, W, H, m); if (su.patch > 0 && su.kept > 0) return [a, b]; } return null; })();
