@@ -290,7 +290,7 @@
       S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rooms: spec.rooms ? spec.rooms.slice() : [], rect: spec.rect || null, warnings };
     }
     S.rooms = RL; S.subFree = !!RL;
-    if (RL) computeGatesRooms(S, P, full, RL, sl); else computeGates(S, P, full, q);
+    if (RL) { computeGatesRooms(S, P, full, RL, sl); computeRoomFaces(S, full, RL); } else computeGates(S, P, full, q);
     carveStairs(S, P);
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
@@ -422,7 +422,27 @@
       alts.sort((p, q) => p.d - q.d || p.a - q.a);
       sites.push({ a: c.site.a, b: c.site.b, gate: gi, kind: 'terrace', patch: c.pairs.every((u) => u.patch), alts: alts.map((o) => ({ a: o.a, b: o.b })) });
     }
-    S.gates = gates; S.passes = sites; S.roomGates = { candidates: RL.usage.gateGroups, usedGroups: new Set(clusters.map((c) => c.gid)).size, sites: sites.length, merged: used.length - clusters.length, patchSites: sites.filter((x) => x.patch).length, slice: SU ? { nodes: SU.nodes, kept: SU.kept, patch: SU.patch, componentsBefore: SU.componentsBefore, componentsAfter: SU.componentsAfter } : null };
+    S.sliceUse = SU; S.gates = gates; S.passes = sites; S.roomGates = { candidates: RL.usage.gateGroups, usedGroups: new Set(clusters.map((c) => c.gid)).size, sites: sites.length, merged: used.length - clusters.length, patchSites: sites.filter((x) => x.patch).length, slice: SU ? { nodes: SU.nodes, kept: SU.kept, patch: SU.patch, componentsBefore: SU.componentsBefore, componentsAfter: SU.componentsAfter } : null };
+  }
+
+  /* Room borders, per tile face (the window's tiles; S.roomKind[i * 4 + b], b = N E S W like S.border): 1 = a border between two rooms that BLOCKS (a pair that is
+     not a valid transition), 2 = a valid transition that the tree of this slice crosses (highlighted), 0 = no border or an open transition nobody uses
+     (a gap). S.roomMap = the room id of every window tile (0 = void / none). S.roomBorderInfo counts faces once each. */
+  function computeRoomFaces(S, full, RL) {
+    const W = S.W, H = S.H, fw = full.width, fh = full.height, n = fw * fh, kind = new Uint8Array(S.n * 4), bits = new Uint8Array(S.n), map = new Int32Array(S.n);
+    const usedRoom = S.sliceUse ? S.sliceUse.room : RL.usage.usedRoom, OFF = [[0, -1], [1, 0], [0, 1], [-1, 0]], info = { closed: 0, open: 0, used: 0 };
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x, mx = x + S.ox, my = y + S.oy, m = my * fw + mx, r = RL.room[m]; map[i] = r;
+      if (r <= 0) continue;
+      for (let b = 0; b < 4; b++) {
+        const nx = mx + OFF[b][0], ny = my + OFF[b][1]; if (nx < 0 || ny < 0 || nx >= fw || ny >= fh || nx - S.ox < 0 || ny - S.oy < 0 || nx - S.ox >= W || ny - S.oy >= H) continue;
+        const m2 = ny * fw + nx, r2 = RL.room[m2]; if (r2 <= 0 || r2 === r) continue;
+        const kk = E.rooms.key(m, m2, n), open = RL.rp.has(kk), used = open && usedRoom.has(kk);
+        kind[i * 4 + b] = used ? 2 : open ? 0 : 1; if (kind[i * 4 + b]) bits[i] |= 1 << b;
+        if (m < m2) { if (used) info.used++; else if (open) info.open++; else info.closed++; }
+      }
+    }
+    S.roomKind = kind; S.roomBits = bits; S.roomMap = map; S.roomBorderInfo = info;
   }
 
   /* Stairs are carved into the terrain. Each tread rises at most `tread` sub-terraces (default: the climb limit; never more). A stair is cut into the upper

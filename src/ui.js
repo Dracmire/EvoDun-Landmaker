@@ -2,7 +2,7 @@
 (function (E) {
   const $ = (s) => document.querySelector(s);
   const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, roomsMinCore: 20, roomsCross: 10 };
-  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, zones: false, edges: false, masks: false };
+  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, roomTint: false, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
     { id: 'low', label: 'Low 28°', yaw: 0, pitch: 28 },
@@ -17,7 +17,7 @@
     ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 80, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
-  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
+  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['roomTint', 'Room tint (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
   const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field']];
 
   const packs = {};
@@ -421,8 +421,9 @@
   }
   function roomsText() {
     const r = S.rooms; if (!r) return '';
+    const rb = S.roomBorderInfo, rbt = rb ? ` · room borders: ${rb.closed} blocking faces (orange) · ${rb.open} open transitions (gap) · ${rb.used} on a tree path (green)` : '';
     const u = r.usage, tr = r.treeReach, ms = st.rooms ? st.rooms.total.toFixed(0) : '?';
-    return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree${roomsSliceText()} · ${ms} ms${st.cold ? ' (cold)' : ''}`;
+    return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree${roomsSliceText()}${rbt} · ${ms} ms${st.cold ? ' (cold)' : ''}`;
   }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
