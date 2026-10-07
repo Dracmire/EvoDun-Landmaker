@@ -218,7 +218,9 @@ incursion border; stake and way-back path visible.
    its free tile nearest the centroid. Parameters come from the user's scenes mapGen_forge (base) and ConicalTown (second check), all script arguments.
    User's decision after the first check: lax gates (transStrict 0.05, min 3) are only CANDIDATES; a gate or room transition is USED only when a path of the
    spanning tree crosses it, the rest is discarded. Terraces are quantized over the LAND only (void takes the nearest land value, range = lowest..highest land) in
-   the check script, not yet in the viewer. Measured in `tools/rooms_check.js` (`--coreSweep`, `--crossCosts`); the minimum core size is still to be decided.
+   the check script, not yet in the viewer. Measured in `tools/rooms_check.js` (`--coreSweep`, `--crossCosts`); DECIDED: minimum core size 20, gate crossing cost 10 (both to become viewer sliders: core 5-80, cost 0-40; transStrict 0.05 and gate minimum 3 by default when rooms are on).
+   Integration into the viewer: design proposed, waiting for approval (rooms switch, used gates only, exact crossing pair, void, slice by rooms, room borders, route by the tree).
+   POSSIBLE IMPROVEMENT (not done, user's call): add some loops to the spanning tree so there is not a single route between two points.
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
 5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),
    RuleTile skin and modular kits, room types, platforms.
