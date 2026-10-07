@@ -148,7 +148,7 @@
   E.loopsA = function (S, L, P) {
     const key = 'A' + L + ':' + P.smooth + (P.anchor === false ? 'n' : '');
     if (S.cache[key]) return S.cache[key];
-    const { W, H, fine } = S, carved = S.stairs && S.stairs.length && P.anchor !== false ? S.carved : null; // P.anchor === false: diagnostic, no rigid footprint
+    const { W, H } = S, fine = S.fineMask || S.fine, carved = S.stairs && S.stairs.length && P.anchor !== false ? S.carved : null; // P.anchor === false: diagnostic, no rigid footprint
     const loops = traceMask(W, H, (x, y) => fine[y * W + x] >= L).map((l) => {
       const an = carved && anchored(l, nearCarved(S), W, H);
       return an ? chaikin(an.pts, W, H, P.smooth, an.fix) : chaikin(dropCollinear(l), W, H, P.smooth);
@@ -276,7 +276,7 @@
   E.loopsB = function (S, L, P) {
     const key = 'B' + L + ':' + P.radius + (P.anchor === false ? 'n' : '');
     if (S.cache[key]) return S.cache[key];
-    const { W, H, fine } = S, s = 4, r = Math.round(P.radius * s), pad = r * 3 + 3;
+    const { W, H } = S, fine = S.fineMask || S.fine, s = 4, r = Math.round(P.radius * s), pad = r * 3 + 3;
     const w = W * s + pad * 2, h = H * s + pad * 2;
     const inside = new Uint8Array(w * h);
     for (let y = 0; y < H * s; y++) for (let x = 0; x < W * s; x++) {

@@ -1,8 +1,8 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24 };
-  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, zones: false, edges: false, masks: false };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100 };
+  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, roomTint: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
     { id: 'low', label: 'Low 28°', yaw: 0, pitch: 28 },
@@ -14,9 +14,10 @@
     ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 20, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
     ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['stairStyle', 'Style: 0 steps · 1 ramp', 0, 1, 1], ['rampDepth', 'Ramp depth, tiles (fixed)', 1, 4, 1], ['tread', 'Tread rise, sub-terraces (steps only)', 1, 5, 1], ['stairW', 'Stair / ramp width, tiles (0 = none; steps use up to 3)', 0, 5, 1]]],
+    ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 80, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
-  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
+  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
   const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field']];
 
   const packs = {};
@@ -36,6 +37,10 @@
     const sl = $('#sliders');
     for (const [title, list] of SLIDERS) {
       const h = document.createElement('h3'); h.textContent = title; sl.appendChild(h);
+      if (title === 'Rooms') { // the switch: off, the viewer is the one without rooms (gates by terrace)
+        const l = document.createElement('label'); l.className = 'tg'; l.innerHTML = '<input type="checkbox" id="t-rooms"><span>Rooms (watershed rooms, cores, tree)</span>';
+        const i = l.querySelector('input'); i.checked = P.rooms; i.addEventListener('change', () => { P.rooms = i.checked; refreshMessage(); invalidate(true); }); sl.appendChild(l);
+      }
       for (const [k, label, mn, mx, step] of list) {
         const row = document.createElement('label'); row.className = 'sl';
         row.innerHTML = `<span>${label}</span><output id="o-${k}"></output><input type="range" id="s-${k}" min="${mn}" max="${mx}" step="${step}">`;
@@ -70,6 +75,7 @@
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
     $('#src').addEventListener('change', (e) => { st.pack = e.target.value; for (const id of cropIds) $('#' + id).value = ''; onPackChanged(); refreshMessage(); invalidate(true); }); // a crop belongs to one map
     buildRoles();
+    $('#wholeRooms').addEventListener('click', () => { sliceSel.rooms.clear(); sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); syncRoomChips(); refreshMessage(); invalidate(true); });
     $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
     for (const id of cropIds) $('#' + id).addEventListener('change', () => { refreshMessage(); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadFiles(e.target.files));
@@ -142,24 +148,27 @@
       if (inc.stake && near(inc.stake)) inc.stake = null; else { const k = inc.objectives.findIndex(near); if (k >= 0) inc.objectives.splice(k, 1); else return note('No mark there.'); }
     } else {
       if (S.slice && !S.slice[tile]) return note(`(${x}, ${y}) is outside the slice: movement is limited to the slice.`);
-      if (S.block[tile]) return note(`(${x}, ${y}) is not walkable (water).`);
+      if (S.block[tile]) return note(`(${x}, ${y}) is not walkable (water or void).`);
+      if (S.isolated && S.isolated[tile]) return note(`(${x}, ${y}) is isolated terrain (a walkable region under ${S.walkInfo.limit} tiles): decorative, no stake or objective there.`);
+      if (!E.tileWalkable(S, tile)) return note(`(${x}, ${y}) is in the margin of a wall, a cliff or a steep slope: not walkable with rooms on. Pick a tile a little further in.`);
       if (inc.mode === 'stake') inc.stake = { x, y }; else inc.objectives.push({ x, y });
     }
     invalidate(false);
   }
 
   /* ---- slice ---- */
-  const sliceSel = { zones: new Set(), whole: false };
+  const sliceSel = { zones: new Set(), whole: false, rooms: new Set() };
   const cropIds = ['cx0', 'cy0', 'cx1', 'cy1'];
   function sliceSpec() {
     const pack = packs[st.pack].pack, spec = { margin: P.margin };
-    if (pack.fields && pack.fields.zone && sliceSel.zones.size && !sliceSel.whole) spec.zones = [...sliceSel.zones].sort((a, b) => a - b);
+    if (P.rooms && sliceSel.rooms.size) spec.rooms = [...sliceSel.rooms].sort((a, b) => a - b); // rooms choose the slice when they are on and one is picked
+    else if (pack.fields && pack.fields.zone && sliceSel.zones.size && !sliceSel.whole) spec.zones = [...sliceSel.zones].sort((a, b) => a - b);
     const v = cropIds.map((id) => $('#' + id).value.trim());
     if (v.some((x) => x !== '')) {
       const d = [0, 0, pack.width, pack.height];
       spec.rect = v.map((x, k) => (x === '' ? d[k] : Math.max(0, Math.round(+x) || 0)));
     }
-    return spec.zones || spec.rect ? spec : null;
+    return spec.zones || spec.rooms || spec.rect ? spec : null;
   }
   const hueOf = (c) => (c.hue !== undefined ? c.hue * 360 : (c.id * 137.5) % 360);
   function buildChips(pack) {
@@ -180,6 +189,29 @@
       box.appendChild(b);
     }
     syncChips();
+  }
+  function buildRoomChips() {
+    const box = $('#roomChips'), on = !!(S && S.rooms);
+    $('#roomHint').hidden = $('#roomBtns').hidden = !on;
+    if (!on) { box.innerHTML = ''; st.roomChipsKey = null; return; }
+    if (st.roomChipsKey === S.rooms.room) { syncRoomChips(); return; }
+    st.roomChipsKey = S.rooms.room; box.innerHTML = '';
+    const ids = new Set(S.rooms.rooms.map((r) => r.id)); for (const id of [...sliceSel.rooms]) if (!ids.has(id)) sliceSel.rooms.delete(id);
+    for (const r of S.rooms.rooms) {
+      const b = document.createElement('button'); b.className = 'chip'; b.dataset.id = r.id;
+      b.innerHTML = `<i style="background:hsl(${E.rooms.hue(r.id).toFixed(0)},55%,50%)"></i>${r.id} <small>${S.rooms.roomSizes[r.id]}</small>`;
+      b.addEventListener('click', (e) => {
+        sliceSel.whole = false;
+        if (e.ctrlKey || e.shiftKey || e.metaKey) { sliceSel.rooms.has(r.id) ? sliceSel.rooms.delete(r.id) : sliceSel.rooms.add(r.id); } else { sliceSel.rooms.clear(); sliceSel.rooms.add(r.id); }
+        syncRoomChips(); refreshMessage(); invalidate(true);
+      });
+      box.appendChild(b);
+    }
+    syncRoomChips();
+  }
+  function syncRoomChips() {
+    document.querySelectorAll('#roomChips .chip').forEach((b) => b.classList.toggle('on', sliceSel.rooms.has(+b.dataset.id)));
+    $('#wholeRooms').classList.toggle('on', !sliceSel.rooms.size);
   }
   function syncChips() {
     document.querySelectorAll('#zoneChips .chip').forEach((b) => b.classList.toggle('on', !sliceSel.whole && sliceSel.zones.has(+b.dataset.id)));
@@ -341,6 +373,8 @@
         S = E.shape(pack, P, sliceSpec());
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
+      buildRoomChips();
+      st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
     }
     const incursion = computeIncursion(); O.incursion = incursion;
     $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');
@@ -382,6 +416,32 @@
     };
     if (needB) { info(surv, techs); requestAnimationFrame(() => setTimeout(finish, 0)); } else finish();
   }
+  function roomsSliceText() {
+    const g = S.roomGates; if (!g) return '';
+    const sl = g.slice, ramps = `${g.sites} ramps` + (g.patchSites ? ` (${g.patchSites} patch, blue)` : '');
+    return sl ? ` · slice connections: ${sl.kept} from the global tree + ${sl.patch} patch (components ${sl.componentsBefore} -> ${sl.componentsAfter} among ${sl.nodes} cores) · ${ramps}` : ` · ${ramps}`;
+  }
+  function walkText() {
+    const w = S.walkInfo; if (!w) return '';
+    const land = S.landTiles, pr = w.problems;
+    let t = `<br><b>Walkable</b> ${w.walkable} tiles (${(w.walkable / land * 100).toFixed(0)}% of the ${S.slice ? 'slice' : 'land'}) · isolated: ${w.isolatedRegions} region${w.isolatedRegions === 1 ? '' : 's'}, ${w.isolatedTiles} tiles (under ${w.limit}, decorative) · edge problems: ${pr.length} region${pr.length === 1 ? '' : 's'}${pr.length ? ' (' + pr.map((p) => p.size).join(', ') + ')' : ''}`;
+    if (S.isoRampsDropped) t += ` · ${S.isoRampsDropped} ramps not built (they would end in isolated terrain)`;
+    for (const p of pr.slice(0, 5)) t += `<br>&nbsp;&nbsp;edge problem: ${p.size} tiles around (${p.at}), x ${p.box[0]}..${p.box[2]}, y ${p.box[1]}..${p.box[3]}, separated by ${p.causes.slice(0, 3).map(([c, k]) => `${c} (${k})`).join(', ') || p.cause}`;
+    return t;
+  }
+  function connText() {
+    const c = S.connInfo; if (!c) return '';
+    let t = ` · tree connections walkable: ${c.ok + c.recomputed} of ${c.total}` + (c.recomputed ? ` (${c.recomputed} recomputed over the carved graph, same crossing cost)` : '') + (c.unresolved ? `, <b>${c.unresolved} NOT walkable</b>` : '');
+    if (c.unresolved) t += ': ' + c.list.slice(0, 4).map((x) => `(${x.from}) -> (${x.to}) stops at (${x.at[0]}) -> (${x.at[1]}): ${x.reason}`).join('; ');
+    const v = S.stairInfo.variants; if (v && v.length > 1) t += ` · ramp variants: ${v.map((k, i) => (i ? S.stairInfo.variantLabels[i] : 'as planned') + ' ' + k).join(', ')}` + (S.unmerged ? ` · ${S.unmerged} pairs not merged (own ramp)` : '');
+    return t;
+  }
+  function roomsText() {
+    const r = S.rooms; if (!r) return '';
+    const rb = S.roomBorderInfo, rbt = rb ? ` · room borders: ${rb.closed} blocking faces (orange) · ${rb.open} open transitions (gap) · ${rb.used} on a tree path (green)` : '';
+    const u = r.usage, tr = r.treeReach, ms = st.rooms ? st.rooms.total.toFixed(0) : '?';
+    return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree (graph) · largest walkable region ${(Math.max(...S.regionSizes, 0) / S.landTiles * 100).toFixed(0)}% of the ${S.slice ? 'slice' : 'land'}${roomsSliceText()}${connText()}${rbt} · ${ms} ms${st.cold ? ' (cold)' : ''}` + walkText();
+  }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
     document.querySelectorAll('#techs button').forEach((b) => b.classList.toggle('on', st.mode === 'single' && b.dataset.id === st.tech));
@@ -397,7 +457,7 @@
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%`;
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText();
   }
 
   function init() {
@@ -405,7 +465,7 @@
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { timing: () => st.timing, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

@@ -185,8 +185,9 @@
     };
     const W = first.width, H = first.height, scale = o.elevationScale || E.ELEVATION_SCALE;
     const src = field(roles.elevation), elevation = new Float32Array(W * H);
-    let emin = Infinity, emax = -Infinity;
-    for (let i = 0; i < elevation.length; i++) { elevation[i] = src[i] * scale; const v = elevation[i]; if (v < emin) emin = v; if (v > emax) emax = v; } // stored (float32) values
+    let emin = Infinity, emax = -Infinity, lmin = Infinity, lmax = -Infinity, voidN = 0;
+    for (let i = 0; i < elevation.length; i++) { elevation[i] = src[i] * scale; const v = elevation[i]; if (v < emin) emin = v; if (v > emax) emax = v; if (v > 0) { if (v < lmin) lmin = v; if (v > lmax) lmax = v; } else voidN++; } // stored (float32) values
+    if (voidN && voidN < elevation.length) { emin = lmin; emax = lmax; } // height 0 is VOID (not terrain): the range is the land's
     const fields = {}, warnings = [];
     for (const role of ['zone', 'edge']) {
       const r = roles[role]; if (!r) continue;
@@ -196,7 +197,7 @@
       const w = ambiguityWarning(role, fields[role].info); if (w) warnings.push(w);
     }
     for (const role of ['path', 'vegetation', 'poi']) if (roles[role]) fields[role] = { values: field(roles[role]) };
-    return { format: 'evodun-pack/0.2', name: o.name || 'Images', width: W, height: H, elevation, elevRange: [emin, emax], masks: {}, markers: o.markers || [], fields, warnings };
+    return { format: 'evodun-pack/0.2', name: o.name || 'Images', width: W, height: H, elevation, elevRange: [emin, emax], voidTiles: voidN < elevation.length ? voidN : 0, masks: {}, markers: o.markers || [], fields, warnings };
   };
 
   /* Zone ids for slicing: every id -1 pixel takes the majority id among its 8 neighbours (neighbours that are

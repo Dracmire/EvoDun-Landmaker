@@ -60,6 +60,9 @@ non-interlaced only. 1 pixel = 1 tile, native resolution (no resampling). All im
   plus `margin` tiles of scenery is built. Pixels with id -1 take the majority id of their 8 neighbours for this
   purpose (they never open holes) but stay marked in the zones overlay. Outside the slice: drawn under a one-band veil,
   no stairs, not walkable. A yellow line follows the slice border at the height of each cap (also on the map edge).
+- VOID: an elevation of 0 (or less) is NOT terrain (the black of a height image): it is not drawn, not walkable, belongs to no level, and the
+  terraces are quantized over the LAND only (`elevRange` = lowest..highest land tile; void tiles take the nearest land value for the smoothing and
+  the slopes). A baked 8-bit height that rounds to 0 would be read as void: keep real terrain >= 1 (the lowest in the user's skeleton map is 17).
 - Terraces are quantized with the raw global elevation range of the whole map (`elevRange`), so they do not change
   with the slice or the window, and they ignore zones completely (a zone border is not a terrace edge).
 - `maxnode` and `elevation` scale are optional; images alone (no manifest) work through the role selectors.

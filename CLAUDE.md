@@ -27,6 +27,9 @@ old pipeline (Unity, C#) are reference only.
   the centre, T = 0,1,3. spread 1 (default) = uniform and changes no pixel; 1.5 gives 1, 1.5, 2.5, 2.5, ... Sub-terrace height
   keeps using terH (the smallest jump), so the climb condition holds in every jump. Ramp length limit is computed
   (>= 8 tiles; 8 is enough for spread <= 1.5 at slope 0.4). `node tools/test_spread.js`.
+- VOID (user's decision): elevation <= 0 is not terrain. Not drawn (Box, A and B: `S.void`, `S.fineMask`), not walkable, in no level; terraces are quantized over the
+  land only (`E.landFill`: void takes the nearest land value, range = lowest..highest land). Always on, whatever the rooms switch. `tools/test_void.js`, `tools/ui/test_void_ui.js`.
+  The synthetic test maps never use 0 (gen_maps.py clips grey to >= 1).
 - Terrace height is global. Height is almost decorative: levels disconnect, stairs connect.
 - Sub-terraces: small, quantized height differences inside a terrace (1 to 6 per terrace in the viewer). Climb
   limit: up to 2 sub-terraces of difference without a stair. This is PROVISIONAL, an assumption of the user and not
@@ -122,9 +125,12 @@ incursion border; stake and way-back path visible.
 - `src/png.js`: own PNG decoder (`E.decodePng`, raw samples per channel, 8/16 bit). `node tools/test_png.js`.
 - `src/fields.js`: channels R,G,B,A,H,S,V, roles (elevation / zone / edge / path / vegetation / POI), categorical
   hue ids, manifest. `node tools/test_fields.js`. Format in `docs/pack-format.md`.
+- `src/rooms.js` (rooms ON = `P.rooms`, off by default; `E.rooms.layer(pack, P)` caches the whole-map chain in stages; `E.shape` then takes the gates from the tree: `computeGatesRooms`, `tools/test_gates_rooms.js`, `tools/ui/test_rooms_ui.js`, cold cost `tools/ui/measure_rooms.js`): minimal rooms chain with the patched connection (no UI, no render; `node tools/test_rooms.js`, `node tools/rooms_check.js`); `tools/rooms_original.js` = the user's rules as written, comparison only.
 - `src/ui.js`, `src/app.html`: controls, angle presets, compare mode, multi-image loading with a role selector per
   channel, flip Y, maxnode, save pack.json, slice controls (zone chips, crop, scenery margin). Sliders recompute on
   release. Overlays: zones, edge map, graded masks (blocky tiles, see item 1).
+- `reference/`: the user's C# generator `EDunProcGen.cs` (READ-ONLY, not built, not run, not edited) and `README.md` with the function index.
+- `data/samples/skeleton_heightmap_256.png`: the user's REAL height map (8-bit RGBA, grey, 32 % pure black = void; lowest terrain value 17).
 - `data/snake_mountain.json`: sample pack, format `evodun-pack/0.1` (width, height, row-major elevation,
   masks, markers).
 - `tools/ui/`: headless UI tests (`test_roles.js`, `test_slice_ui.js`, `test_stairs_ui.js`), pixel regression
@@ -187,6 +193,10 @@ incursion border; stake and way-back path visible.
    Cause not investigated.
 10. The climb limit (2 sub-terraces) is a provisional assumption, not the micro-step rule.
 11. Partial connection: with the user's gate criterion many regions stay unconnected (e.g. 14 regions, the largest 55 % of the slice in one test). KNOWN LIMITATION, on purpose: the global connection will come from the rooms and the numeric world; a connection step here would be filler code. No connection step is added.
+12. PENDING, NOT FIXED (found while porting the user's rooms chain): `ClassifySlopeMap` calls Void any tile with slope <= 0 WITHOUT a height test, and the
+    slope normalization (min/max, after the power) includes the coast. On a map with a black void the steepest values are on the coast (exponent 1, real map:
+    1099 of the 1100 tiles with normalized slope >= 0.6 touch the void), so thresholds inland depend on the coast. `src/rooms.js` forces h <= 0 to Void and keeps the
+    user's normalization; a decision (exclude the coast from the range?) is still to be taken with the user.
 
 ## Pending, in this order
 1. (Done, PR #1) Verify the first limitations.
@@ -199,9 +209,58 @@ incursion border; stake and way-back path visible.
    commit before it, stairW=0, 25 images, 0 differ). BASE CLOSED here. PARKED, not implemented, by the user's decision (their maps carry no
    masks and these are finishes that do not change the comparison): (5) overlays that follow the smoothed A/B shapes (known limitation 1);
    (6) outer corners of B (limitation 5); (7) Box line and stripes (limitation 9). Test scripts live in `tools/ui/`.
-4. NEXT: evaluate the techniques with the user's real maps and decide round 2 (wait for the user).
-   Round 2 of techniques: HD-2D layered terraces, and SDF exterior mesh for Snake Mountain only.
-   Parked: RuleTile skin and modular kits, room types.
+4. NEXT STAGE: ROOMS (user's decision). Port to the viewer the minimal chain of the user's `reference/EDunProcGen.cs` (`SequenceA`: slope
+   classes, rooms by watershed, room edges, cores, A* between cores with a spanning tree; terrace gates already exist and are reused)
+   with the connection PATCHED (a transition is an undirected PAIR of neighbouring tiles; one passability function for scan, A* and fills;
+   the two tiles of a transition pair are never forbidden; unassigned tiles go to the nearest room before edges are searched), and CHECK it on
+   the real map `data/samples/skeleton_heightmap_256.png` BEFORE building anything on top: cores joined in one tree with the original rule
+   (transcribed as is) vs the patched rule, plus an overlay (rooms, transitions, cores, tree). Value 0 is VOID (outside the terrain), never low
+   terrain. NOT in this stage: room types, platforms, render changes. Status: DESIGN APPROVED; chain + patch + check implemented (`src/rooms.js`,
+   `tools/rooms_original.js`, `tools/rooms_check.js`, `tools/test_rooms.js`, results in `docs/rooms.md`); waiting for the user's review of the figures and the PNG
+   overlays before anything is built on top. The patch adds, by the user's decision: a pair (transition or gate) with a Steep tile is dropped; the core centre is
+   its free tile nearest the centroid. Parameters come from the user's scenes mapGen_forge (base) and ConicalTown (second check), all script arguments.
+   User's decision after the first check: lax gates (transStrict 0.05, min 3) are only CANDIDATES; a gate or room transition is USED only when a path of the
+   spanning tree crosses it, the rest is discarded. Terraces are quantized over the LAND only (void takes the nearest land value, range = lowest..highest land) in
+   the check script, not yet in the viewer. Measured in `tools/rooms_check.js` (`--coreSweep`, `--crossCosts`); DECIDED: minimum core size 20, gate crossing cost 10 (both to become viewer sliders: core 5-80, cost 0-40; transStrict 0.05 and gate minimum 3 by default when rooms are on).
+   Integration into the viewer: design proposed, waiting for approval (rooms switch, used gates only, exact crossing pair, void, slice by rooms, room borders, route by the tree).
+   DECIDED for the integration (user): sub-terraces are only visual with rooms on; the tree is GLOBAL (computed once on the whole map, cached) and a slice keeps the
+   connections whose paths stay inside it plus the minimum extra ones to join what the cut separated (Kruskal from those components; "patch" ramps exist only while
+   that slice is chosen and get another tone); room transitions are OPEN (all valid ones, used or not) and only borders that are not a transition block; unused
+   terrace gates are closed (cliff). Six commits: (1) void + land quantization [done], (2) rooms layer + switch + sliders [done], (3) used gates -> ramps at the exact pair, sub-terraces visual [done, PR], (4) slice by rooms + patch connections [done],
+   (5) room borders + overlay [done], (6) route by the tree [done] (PR); all in the viewer, off by default, see `docs/rooms.md` "In the viewer".
+   CONNECTIONS MUST STAY WALKABLE (user's decision, fix of PR #6): every tree connection (global and slice patch) must be walkable end to end in the FINAL walking graph (E.route).
+   Mechanism (`carveStairs` + `checkConnections`, `S.conns`, `S.connInfo`): the tiles of the tree paths are reserved; a ramp may occupy one only if the path walks it along the
+   ramp (links: bottom -> treads -> top of a column, or between adjacent columns); variants in order: cut into the upper terrace, built on the lower, depth 1 of each, lateral
+   columns out (narrower). If none fits, the connection is recomputed over the carved graph with the same crossing cost; what is still not walkable is NOT forced: it is counted and
+   named in the info. The tree itself, the candidate gates and the look of the ramps are untouched. `P.rampKeep = false` is the old behaviour (diagnostic). Not a full-connectivity rule.
+   `tools/test_conns_rooms.js`, `tools/diag_connections.js`.
+   ISOLATED TERRAIN (user's rule, rooms on, measured on the WALKABLE regions of the final graph, `classifyWalk` in `shape.js`): MAIN = the largest region (of the slice, if there is one);
+   ISOLATED = any other region with fewer tiles than the slider "Isolated limit" (20-1000, default 100): decorative, NOT walkable, not counted as a region, takes no ramp (a ramp that
+   would end entirely in isolated terrain is not built) and no stake or objective (refused with the reason); it is drawn as normal terrain with the "not walkable" tone, the same as the
+   forbidden margins of the layer (walls, cliffs, Steep), identical in Box, A and B, Display switch. EDGE PROBLEM = any other region with the limit or more tiles: NOT hidden and NOT
+   connected; it stays walkable, gets a magenta warning outline (Display switch) and the info names it (size, place, what separates it: ramp, terrace gate without ramp, room border
+   without transition...). Info: "Walkable N tiles (X % of the land) - isolated: K regions, M tiles - edge problems: J regions (sizes)". `tools/test_walk_rooms.js`.
+   LAST FIX COMMIT OF PR #6 (changing Terraces 3-8 / ramp depth, user's decisions):
+   (1) MERGE BY passGap is conditional: a pair merged into a ramp at another pair (or whose own ramp was carved at an alternative pair of its gate) is only kept
+   so if the connection that crosses it has a route after the recompute; otherwise that pair gets its OWN ramp (`S.makeSite`, or `site.exact` = no alternative pairs) and the
+   whole slice is carved again (at most 6 times, from the tree paths, not from an earlier recompute; all connections are checked again after each carve; `S.unmerged`,
+   `S.exactRetry`, `S.retryBroke` = neighbour paths broken by a retry, 0 in every measured case). The only reason a connection can stay without route is "gate pair whose ramp did not fit"
+   (tried at its own pair, with all variants, and failed), named in the info. (2) START CORE (DEVIATION from the user's `ChooseStartingCore`, user's decision): the scan starts from
+   the group of cores with the MOST cores under the same passability (tie: more tiles); other groups are not connected and stay unreachable (`R.startGroups`; `P.rScanFirst` = old
+   rule, diagnostic only). `tools/rooms_check.js` numbers shift slightly with it. (3) Ramp depth ladder: depth, depth-1, ... 1 at full width, then the same with the lateral columns out.
+   (4) The edge-problem outline is ELECTRIC BLUE dashed (white was confused with the white slice border at the map edge); in a slice the cause "no path inside the slice (what it would join lies outside it)".
+   TESTS USE THE VIEWER'S PACK: every rooms test and tool builds the real map with `tools/real_pack.js` (`E.imageChannels` + `E.packFromRoles`, channel V), never `v / max * 1000` by hand
+   (land range 66.66666412 vs 66.66667175 moves the terraces); `tools/ui/test_viewer_node_ui.js` compares viewer and Node (5 and 6 terraces). Figures of the viewer, terraces 3-8 (paths without route / total; main / walkable):
+   3: 3/129, 31542/35196; 4: 1/142, 31188/34096; 5: 1/175, 32921/33129; 6: 8/211, 26294/31784 (problems 3700, 552, 498, 205, 179...); 7: 9/221, 18429/30692; 8: 20/267, 11646/28365. Full table in `docs/rooms.md`.
+   The warning marks (roomKind 3) are cleared at the start of `classifyWalk` (it runs in every pass of the recovery loop).
+   Diagnostic flags `rampKeep`, `noUnmerge`, `rScanFirst` are not in the UI or the manifest (like `P.anchor`). `node tools/diag_connections.js --table` prints terraces 3-8 before / after.
+   KNOWN LIMIT (documented, not fixed): with 10 and 12 terraces the rooms passability fragments by itself (66 and 138 groups, forbidden margins 34-40 % of the land): the rooms method
+   is meant for 2-5 terraces. ClassifySlopeMap (limitation 12) goes in a SEPARATE PR after this one; approved first option: empty neighbour = the tile's own height, Void by height <= 0,
+   min/max range over land without void in its 3x3 (shore stays walkable up to the edge).
+   POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
+   Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
+5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),
+   RuleTile skin and modular kits, room types, platforms.
 
 ## How to work with the user
 - Do not write code until the design is agreed. For each point: read the relevant code, propose the

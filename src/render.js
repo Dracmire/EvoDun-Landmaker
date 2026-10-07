@@ -104,6 +104,20 @@
     }
     ctx.restore();
   }
+  /* Room borders: a line on every face between two rooms that blocks (orange); an open transition is a gap; the ones the tree uses are green. */
+  const ROOM_COLORS = { 1: 'rgba(255,150,40,0.98)', 2: 'rgba(70,232,130,0.98)', 3: 'rgba(40,110,255,0.98)' }; // 3 = the warning outline of an edge-problem region (electric blue, dashed: white is the slice border at the map edge, cyan the passes, pink the route)
+  function roomFaces(list, S, cam, i, b, hh, o) { const k = S.roomKind[i * 4 + b]; if (k === 3 ? !o.edgeWarn : !o.roomBorders) return; const x = i % S.W, y = (i / S.W) | 0, f = FACE[b]; list.push([cam.p(x + f[0], y + f[1], hh), cam.p(x + f[2], y + f[3], hh), k]); }
+  function strokeRoomFaces(ctx, list) {
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const path = new Path2D(); for (const [p, q] of list) { path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]); }
+    ctx.strokeStyle = BORDER_CASE; ctx.lineWidth = 3.4; ctx.stroke(path);
+    for (const kind of [1, 2, 3]) {
+      const pp = new Path2D(); let any = false;
+      for (const [p, q, k] of list) if (k === kind) { pp.moveTo(p[0], p[1]); pp.lineTo(q[0], q[1]); any = true; }
+      if (any) { ctx.strokeStyle = ROOM_COLORS[kind]; ctx.lineWidth = 1.8; if (kind === 3) { ctx.lineCap = 'butt'; ctx.setLineDash([3, 2.5]); } ctx.stroke(pp); ctx.setLineDash([]); ctx.lineCap = 'round'; }
+    }
+    ctx.restore();
+  }
   function veilPath(cam, S, ht) { // the whole plane minus the slice, at cap height ht (even-odd)
     const vp = new Path2D(); vp.rect(-5e4, -5e4, 1e5, 1e5);
     for (const loop of S.sliceLoops) {
@@ -145,6 +159,8 @@
       const z = F.zone.ids[i];
       if (F.zone.amb[i]) out.push(AMBIGUOUS); else if (z > 0) out.push(zoneTint(S, z));
     }
+    if (o.nowalk && S.nowalk && S.nowalk[i]) out.push('rgba(48,40,84,0.36)'); // not walkable (rooms on): isolated terrain and the margins of walls, cliffs and steep slopes
+    if (o.roomTint && S.roomMap && S.roomMap[i] > 0) out.push(`hsla(${E.rooms.hue(S.roomMap[i]).toFixed(0)},55%,50%,0.45)`);
     if (o.edges && F.edge) {
       const e = F.edge.ids[i];
       if (F.edge.amb[i]) out.push(AMBIGUOUS); else if (e > 0) out.push(edgeTint(S, e));
@@ -190,7 +206,8 @@
 
   /* ---- Stair look (same in Box, A and B): the footprint is rigid, so it gets its own colour, a tint per tread,
      light lines on the top edge of each riser and a dark outline along its flanks. ---- */
-  const STAIR_RGB = [226, 212, 178];
+  const STAIR_RGB = [226, 212, 178], PATCH_RGB = [176, 200, 232]; // PATCH: a ramp that joins what the slice cut apart (only while that slice is chosen)
+  const toneOf = (R) => (R && R.patch ? PATCH_RGB : STAIR_RGB);
   function stairTiles(S) { // tile -> { dir, k (tread index, 0 = lowest), m }
     if (S._stairTile) return S._stairTile;
     const map = new Map();
@@ -199,7 +216,7 @@
     for (const t of map.keys()) { const x = t % S.W, y = (t / S.W) | 0; S._stairNear[t] = 1; if (x > 0) S._stairNear[t - 1] = 1; if (x < S.W - 1) S._stairNear[t + 1] = 1; if (y > 0) S._stairNear[t - S.W] = 1; if (y < S.H - 1) S._stairNear[t + S.W] = 1; }
     return (S._stairTile = map);
   }
-  const stairColor = (info) => DBG ? [255, 0, 0] : info.rec ? STAIR_RGB : STAIR_RGB.map((v) => v * (0.78 + 0.3 * (info.m > 1 ? info.k / (info.m - 1) : 0.5)));
+  const stairColor = (info) => DBG ? [255, 0, 0] : info.rec ? toneOf(info.rec.ramp) : STAIR_RGB.map((v) => v * (0.78 + 0.3 * (info.m > 1 ? info.k / (info.m - 1) : 0.5)));
   const STAIR_LINE = 'rgba(255,248,226,0.95)', STAIR_EDGE = 'rgba(24,20,34,0.9)';
   /* edge of tile t towards neighbour n (t higher than n) that belongs to a stair: returns 'riser', 'flank' or null */
   function stairEdge(S, t, n) {
@@ -231,9 +248,10 @@
     if (DBG) return 'rgb(255,0,0)';
     const along = R.pdx !== 0, a0 = pos(0), a1 = pos(R.len), q0 = along ? R.my : R.mx; // the gradient of this tile's column (its own cliff)
     const p0 = along ? cam.p(a0, q0, R.h0) : cam.p(q0, a0, R.h0), p1 = along ? cam.p(a1, q0, R.h1) : cam.p(q0, a1, R.h1);
-    if (Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) < 2) return rgb(STAIR_RGB);
+    const T = toneOf(R);
+    if (Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) < 2) return rgb(T);
     const g = ctx.createLinearGradient(p0[0], p0[1], p1[0], p1[1]), up = R.h1 > R.h0;
-    g.addColorStop(0, rgb(STAIR_RGB, up ? 0.7 : 1.12)); g.addColorStop(1, rgb(STAIR_RGB, up ? 1.12 : 0.7));
+    g.addColorStop(0, rgb(T, up ? 0.7 : 1.12)); g.addColorStop(1, rgb(T, up ? 1.12 : 0.7));
     return g;
   }
   /* One piece of a ramp tile: the part of tile i whose path coordinate s (0 at the gate edge, len at the far end) lies in [sa, sb]
@@ -249,14 +267,14 @@
     const EDGES = [[0, -1, X0, Y0, X1, Y0, Math.abs(Y0 - y) < e], [1, 0, X1, Y0, X1, Y1, Math.abs(X1 - (x + 1)) < e], [0, 1, X1, Y1, X0, Y1, Math.abs(Y1 - (y + 1)) < e], [-1, 0, X0, Y1, X0, Y0, Math.abs(X0 - x) < e]];
     for (const [dx, dy, ax, ay, bx, by, onB] of EDGES) { // side walls where the surface is above the neighbour
       if (!onB) continue;
-      const nx = x + dx, ny = y + dy, out = nx < 0 || ny < 0 || nx >= S.W || ny >= S.H, j = out ? -1 : ny * S.W + nx, nj = j >= 0 ? ST.get(j) : null;
+      const nx = x + dx, ny = y + dy, out = nx < 0 || ny < 0 || nx >= S.W || ny >= S.H || (S.void && S.void[ny * S.W + nx]), j = out ? -1 : ny * S.W + nx, nj = j >= 0 ? ST.get(j) : null;
       const [rnx, rny] = cam.nrm(dx, dy);   // (a neighbour of the same ramp gets a wall only where its column is shifted and the surfaces differ)
       if (rny <= 0.001) continue;
       const e0 = hc(ax, ay), e1 = hc(bx, by);
       const hn0 = out ? cam.base : nj ? E.rampHeight(nj.rec, ax, ay, j) : S.levelH[S.fine[j]], hn1 = out ? cam.base : nj ? E.rampHeight(nj.rec, bx, by, j) : hn0; // beside another ramp: its surface
       const b0 = Math.min(hn0, e0), b1 = Math.min(hn1, e1);
       if (e0 - b0 < 1e-6 && e1 - b1 < 1e-6) continue;
-      wallQuad(ctx, cam, ax, ay, bx, by, [b0, b1], [e0, e1], DBG ? [255, 0, 0] : STAIR_RGB, rnx, o, st);
+      wallQuad(ctx, cam, ax, ay, bx, by, [b0, b1], [e0, e1], DBG ? [255, 0, 0] : toneOf(R), rnx, o, st);
     }
     const q = [[X0, Y0], [X1, Y0], [X1, Y1], [X0, Y1]].map(([px, py]) => cam.p(px, py, hc(px, py)));
     ctx.beginPath(); q.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath();
@@ -337,7 +355,7 @@
   /* ---- Box reference: one column per tile ---- */
   function renderBox(ctx, cam, S, P, o, st) {
     const { W, H } = S, order = [];
-    for (let i = 0; i < S.n; i++) order.push(i);
+    for (let i = 0; i < S.n; i++) if (!S.void || !S.void[i]) order.push(i); // void is not terrain
     const key = (i) => cam.ry(i % W + 0.5, ((i / W) | 0) + 0.5);
     order.sort((a, b) => key(a) - key(b) || S.fine[a] - S.fine[b]);
     const dirs = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
@@ -352,7 +370,7 @@
       if (isRamp) rampTile(ctx, cam, S, o, i, si.rec, ST, st);
       else for (const [dx, dy, ax, ay, bx, by] of dirs) {
         const nx = x + dx, ny = y + dy;
-        const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : S.levelH[S.fine[ny * W + nx]];
+        const hn = nx < 0 || ny < 0 || nx >= W || ny >= H || (S.void && S.void[ny * W + nx]) ? cam.base : S.levelH[S.fine[ny * W + nx]];
         if (hn >= hh - 1e-6) continue;
         const [rnx, rny] = cam.nrm(dx, dy);
         if (rny <= 0.001) continue;
@@ -372,7 +390,7 @@
       if (o.outlines && !isRamp) { // rim only where a lower neighbour exists
         for (const [dx, dy, ax, ay, bx, by] of dirs) {
           const nx = x + dx, ny = y + dy;
-          const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : S.levelH[S.fine[ny * W + nx]];
+          const hn = nx < 0 || ny < 0 || nx >= W || ny >= H || (S.void && S.void[ny * W + nx]) ? cam.base : S.levelH[S.fine[ny * W + nx]];
           if (hn >= hh - 1e-6) continue;
           const terrace = hh - hn > E.subHeight(P) * 1.5;
           const A = cam.p(x + ax, y + ay, hh), B = cam.p(x + bx, y + by, hh);
@@ -392,6 +410,15 @@
           const i2 = py * W + px;
           if ((S.border[i2] >> b & 1) && rank[i2] < rank[i]) face(i2, b);
         }
+      }
+      if ((o.roomBorders || o.edgeWarn) && S.roomBits && !PICK && S.roomBits[i]) { // each face is drawn once, after the later (painter order) of its two tiles
+        const bp = [];
+        for (let b = 0; b < 4; b++) {
+          if (!(S.roomBits[i] >> b & 1)) continue;
+          const j = (y + dirs[b][1]) * W + x + dirs[b][0]; if (rank[j] > rank[i]) continue;
+          roomFaces(bp, S, cam, i, b, Math.max(hh, S.levelH[S.fine[j]]), o);
+        }
+        if (bp.length) strokeRoomFaces(ctx, bp);
       }
       st.polys++;
     }
@@ -481,6 +508,14 @@
         const bp = [];
         for (const i of S.byLevel[L]) if (S.border[i]) borderFaces(bp, S, cam, i, S.border[i], ht);
         if (bp.length) strokeBorder(ctx, bp);
+      }
+      if ((o.roomBorders || o.edgeWarn) && S.roomBits && !PICK) { // a face belongs to the higher of its two tiles (the lower index when they are level)
+        const bp = [], dd = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+        for (const i of S.byLevel[L]) {
+          if (!S.roomBits[i]) continue; const x = i % S.W, y = (i / S.W) | 0;
+          for (let b = 0; b < 4; b++) { if (!(S.roomBits[i] >> b & 1)) continue; const j = (y + dd[b][1]) * S.W + x + dd[b][0]; if (S.fine[j] > L || (S.fine[j] === L && j < i)) continue; roomFaces(bp, S, cam, i, b, ht, o); }
+        }
+        if (bp.length) strokeRoomFaces(ctx, bp);
       }
     }
   }

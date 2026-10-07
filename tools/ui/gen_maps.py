@@ -20,7 +20,7 @@ def fbm():
     return (h - h.min()) / (h.max() - h.min())
 
 height = np.clip(np.round(1 + fbm() * 999), 1, 1000)             # baked: 1..1000
-gray = np.round(height / 1000 * 255).astype(np.uint8)            # grey = height / 1000
+gray = np.clip(np.round(height / 1000 * 255), 1, 255).astype(np.uint8)  # grey = height / 1000; never 0 (0 is VOID, not terrain)
 seeds = np.array([((i + 0.5 + rng.uniform(-.25, .25)) * N / 4, (j + 0.5 + rng.uniform(-.25, .25)) * N / 3) for j in range(3) for i in range(4)])
 yy, xx = np.mgrid[0:N, 0:N]
 zid = (((xx[..., None] - seeds[:, 0]) ** 2 + (yy[..., None] - seeds[:, 1]) ** 2)).argmin(2) + 1
