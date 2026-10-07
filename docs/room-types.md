@@ -1,0 +1,35 @@
+# Room types (Cake / Diorama / Ascension) — phase 1
+
+Technique: the user's crystallizer (`reference/SingleRoomMeshGeneratorV16.4.cs`, index in `reference/README.md`). Code: `src/roomtypes.js`. Needs the Rooms switch.
+Viewer controls: Rooms group -> "Cake rings" switch and sliders (Cake · rings 1-6 = 3, ring step 0.1-0.6 of the terrace height = 0.3, tiles per ring 1-3 = 1, seam window 2-12 = 5); Display -> "Room type tint" (Cake orange, Diorama green, Ascension blue).
+The info shows "Room types" when the Cake switch or the tint is on.
+
+## What follows the ACTIVE code
+`GenerateRoom` ends with `BuildCakesForCurrentRoom(platformHeights); return;` (lines 648-649). PASS 1/2, `DetectCakeDirection` and `DetectCakeViaTerraceEdges` are dead code and are not used.
+`BuildCakesForCurrentRoom` (1719), `BuildCakeDownRingsSimple` (1670), `BuildCakeUpRings` (1602) and the type rule (473-560) are.
+
+## Rules (and how they are adapted to the viewer: no platforms, terraces touch)
+- Input: rooms, terrace per tile, used terrace gates (the tree's), room transitions; all of the WHOLE map (classification does not depend on the slice).
+- Type: CAKE = >= 2 terraces in the room, cakeLayers > 0 and a terrace edge (the LOW tile of a used gate pair whose two tiles are in the room); DIORAMA = not cake and >= 3 neighbouring rooms by transitions (the lobby-platform count is lost);
+  ASCENSION = the rest.
+- One cake per terrace link (low, high). Direction: one link -> the terrace with more room PIECES (4-connected) wins: more on the high = Down, more on the low = Up, tie = Down; several links -> Down only if low is the room's minimum terrace.
+- Core = all the room's tiles of the core terrace (low if Down, high if Up). Rings = Dilate8 shells outside the core (d tiles each); Down is clipped to the seam window; Up goes around the whole core (no "high side" filter: the rings already sit on low tiles).
+  Down: CUT into tiles of the high terrace; Up: BUILT on tiles of the low terrace; same room only, no void; ramp footprints reserved; empty rings dropped and renumbered; diagonal gaps stitched only with free candidates.
+- Heights: Down core top + (k+1) step, Up core top - (k+1) step, step = min(0.3 terH, (gap - 0.05 terH) / n) with gap = lowest high tile - core top (Down) or core top - highest low tile (Up). The rings replace the sub-terraces on their tiles.
+- Conflicts: a tile in rings of two links keeps the smaller ring index (tie: the lower link).
+- Walking, regions, stake and route do not change (rooms walking ignores levels).
+
+## Measured (real map, rooms on, defaults)
+| Terraces | Cake / Diorama / Ascension | links (bowl + pyramid) | ring tiles | levels |
+|---|---|---|---|---|
+| 5 | 31 / 0 / 1 (the user's figures) | 30 + 40 | 15205 of 44582 land | 15 -> 41 |
+| 3 | 27 / 5 / 0 (the user expected 30 / 2 / 0) | 26 + 14 | 7012 | 8 -> 23 |
+| 2 | 26 / 4 / 2 (the user expected 28 / 2 / 2) | 19 + 7 | 4337 | 5 -> 14 |
+Variants of "terrace edge" tried at 3 / 2 terraces (none gives the expected figures): used pairs 27/5/0 and 26/4/2 (= ramps, = used gate groups), candidate gates 31/1/0 and 30/0/2, any terrace adjacency inside the room 31/1/0 and 32/0/0.
+Cold (headless Chromium, compare mode, whole map): rooms on 2.7 s to the first panels, 5.2 s to all three; with Cake rings 3.7 s and 10.0 s (B grows with the number of levels: 41 instead of 15).
+
+## Phase 2 (not done)
+Wall offsets (cake -5, diorama -20, ascension +0.5 in world units, tileSize 10): in the user's code they are the wall that encloses the room; the viewer has no room walls. Needs its own design.
+
+## For Unity later
+`classify` and the ring construction port as they are (sets of tiles, BFS); the level assignment replaces the heights given to `BuildPlatformMesh`. The viewer's figures are acceptance numbers for the port.

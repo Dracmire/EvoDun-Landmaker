@@ -104,6 +104,14 @@ old pipeline (Unity, C#) are reference only.
   per-pixel z-buffer: 99.2-100 % of cap/ramp points, naive picker 4-25 %). Route = BFS over the same edges as the regions
   (`E.route`, `tools/test_route.js`); with no route the info names both regions (R1 = id 0...), their tile counts, the
   closest approach between them (`E.regionGap`) and how many gates touch both without a ramp.
+- ROOM TYPES / CAKE (user's decisions; the code that counts is the ACTIVE one of `reference/SingleRoomMeshGeneratorV16.4.cs`: GenerateRoom calls `BuildCakesForCurrentRoom` and returns, lines 648-649; pass 1/2, `DetectCakeDirection`
+  and `DetectCakeViaTerraceEdges` are dead code): Cake is a GEOMETRY stage common to Box, A and B (a switch; off = identical pixels). ONE cake per terrace link (low, high) of the room; a link = a terrace edge = the gate tiles of each used ramp with both
+  ends in the room. Direction: one link -> more pieces of the room on the high terrace = Down (bowl), more on the low = Up (pyramid), tie = Down; several links -> Down only if low is the minimum terrace of the room, else Up (pieces = 4-connected pieces
+  of the room per terrace, there are no platforms). Core = ALL the room's tiles of the core terrace (low if Down, high if Up). Rings OUTSIDE the core: ring k = Dilate8(core, (k+1)d) minus Dilate8(core, k d), cakeLayers 3, dilationPerLayer 1 (sliders).
+  Down: clipped to the seam window (Dilate8 of the link's gate tiles, radius 5). Up: around the whole high core. Heights: uniform step cakeStepHeight = 0.3 terH; Down rises from the core top (+0.3, +0.6, +0.9), Up descends. ADAPTATION TO THE VIEWER:
+  in Unity the rings fill the gap between the platforms of two terraces, here terraces touch: Down rings are CUT into tiles of the high terrace of the same room, Up rings are BUILT on tiles of the low terrace of the same room; never outside the room, never on void.
+  The footprint of a ramp is reserved (no margin, so the stand reaches the flank of the ramp); empty rings are dropped and the rest renumbered; step = min(step, (gap - margin) / n); rings replace the sub-terraces on the tiles they take; walking,
+  stake and route are unchanged (rooms walking does not depend on levels). A tile claimed by two links keeps the smaller ring index (tie: lower link). Wall offsets of Diorama / Ascension (their wall encloses the room; the viewer has no room walls) are PHASE 2 with a design of their own.
 - Visual target: Sea of Stars / 2D-HD readability, Unexplored 2 style stage modelling. Flat colour per
   level, gradient on cliffs, outlines. Orthographic camera with predefined angles and zoom, no free rotation.
 - Same style pass for every technique so the comparison is fair.
@@ -126,6 +134,8 @@ incursion border; stake and way-back path visible.
 - `src/fields.js`: channels R,G,B,A,H,S,V, roles (elevation / zone / edge / path / vegetation / POI), categorical
   hue ids, manifest. `node tools/test_fields.js`. Format in `docs/pack-format.md`.
 - `src/rooms.js` (rooms ON = `P.rooms`, off by default; `E.rooms.layer(pack, P)` caches the whole-map chain in stages; `E.shape` then takes the gates from the tree: `computeGatesRooms`, `tools/test_gates_rooms.js`, `tools/ui/test_rooms_ui.js`, cold cost `tools/ui/measure_rooms.js`): minimal rooms chain with the patched connection (no UI, no render; `node tools/test_rooms.js`, `node tools/rooms_check.js`); `tools/rooms_original.js` = the user's rules as written, comparison only.
+- `src/roomtypes.js` (room types; needs rooms on): `E.roomTypes.classify` (Cake / Diorama / Ascension of every room of the WHOLE map, V16.4 rule with neighbours instead of lobby platforms) and the Cake geometry (`P.cake`, off by default;
+  `buildRings`, `cake`: rings as new levels, shared by Box, A and B). Tint per type = Display toggle `typeTint`. `node tools/test_roomtypes.js`, `tools/ui/test_cake_ui.js`, `tools/ui/regress_rooms.js` (pixel regression with rooms on), `docs/room-types.md`.
 - `src/ui.js`, `src/app.html`: controls, angle presets, compare mode, multi-image loading with a role selector per
   channel, flip Y, maxnode, save pack.json, slice controls (zone chips, crop, scenery margin). Sliders recompute on
   release. Overlays: zones, edge map, graded masks (blocky tiles, see item 1).
@@ -264,7 +274,9 @@ incursion border; stake and way-back path visible.
    min/max range over land without void in its 3x3 (shore stays walkable up to the edge).
    POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
-5. NEXT: technique ROOM TYPES (Cake / Diorama / Ascension, the user's crystallizer; his materializers are in `reference/`, index in `reference/README.md` "Room materializer"; room type rule of
+5. IN PROGRESS (phase 1 implemented, waiting for the user's review): technique ROOM TYPES, phase 1 = classification + tint + Cake geometry (`docs/room-types.md`). Fixed test set: real map, 5 terraces, rooms on. Measured: 31 Cake, 0 Diorama, 1 Ascension
+   (30 bowls + 40 pyramids, 15205 ring tiles of 44582 land tiles, 26 levels added) = the user's figures; with 3 and 2 terraces the viewer gives 27/5/0 and 26/4/2, NOT the 30/2/0 and 28/2/2 the user expected (open point: how the terrace edge was counted there).
+   Phase 2: wall offsets. History of the point: NEXT: technique ROOM TYPES (Cake / Diorama / Ascension, the user's crystallizer; his materializers are in `reference/`, index in `reference/README.md` "Room materializer"; room type rule of
    `SingleRoomMeshGeneratorV16.4.cs`). Proposal first, no code until approved. Known and ACCEPTED imbalance with the V16.4 rule: 31 Cake, 0 Diorama, 1 Ascension of 32 rooms (3 terraces 30/2/0;
    2 terraces 28/2/2); not fixed now. A LATER step, user's decision: fewer ramps or ramps only in X rooms to even the types out (in `skeletonMeshmakerGenV4`, Step5 line 316, a multi-terrace room
    WITHOUT a terrace transition is Diorama; the original main type was Diorama). AFTER it: HD-2D layered terraces, SDF exterior mesh for Snake Mountain, RuleTile skin / modular kits.
