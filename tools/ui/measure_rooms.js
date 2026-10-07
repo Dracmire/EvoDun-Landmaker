@@ -7,13 +7,13 @@ const { open } = require('./common');
 const FILE = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png');
 const round = (o) => JSON.stringify(Object.fromEntries(Object.entries(o).map(([k, v]) => [k, Math.round(v)])));
 (async () => {
-  for (const on of [false, true]) {
+  for (const on of [false, true, 'cake']) {
     const a = await open({ w: 1500, h: 900 }), page = a.page;
-    if (on) await page.evaluate(() => { window.__evo.P.rooms = true; });
+    if (on) await page.evaluate((c) => { window.__evo.P.rooms = true; if (c) window.__evo.P.cake = true; }, on === 'cake');
     await page.setInputFiles('#file', [FILE]); await page.waitForTimeout(800); await a.idle();
     const t = await page.evaluate(() => window.__evo.timing()), r = await page.evaluate(() => window.__evo.roomsTiming());
-    console.log(`cold, rooms ${on ? 'ON ' : 'off'}: first panels (shape + Box + A) ${t.first.toFixed(0)} ms, all three ${t.all.toFixed(0)} ms` + (r ? `; rooms chain ${r.total.toFixed(0)} ms ${round(r.ms)}` : ''));
-    if (on) {
+    console.log(`cold, rooms ${on === 'cake' ? 'ON + Cake rings' : on ? 'ON ' : 'off'}: first panels (shape + Box + A) ${t.first.toFixed(0)} ms, all three ${t.all.toFixed(0)} ms` + (r ? `; rooms chain ${r.total.toFixed(0)} ms ${round(r.ms)}` : ''));
+    if (on === true) {
       await page.click('#roomChips .chip[data-id="8"]'); await a.idle();
       const t3 = await page.evaluate(() => window.__evo.timing()), sl = await page.evaluate(() => { const S = window.__evo.S(); return S.roomGates.slice; });
       console.log(`  slice = room 8, defaults (tree cut + patch: ${sl.kept} kept + ${sl.patch} patch): first panels ${t3.first.toFixed(0)} ms, all three ${t3.all.toFixed(0)} ms`);

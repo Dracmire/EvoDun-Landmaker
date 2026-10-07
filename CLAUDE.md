@@ -104,6 +104,16 @@ old pipeline (Unity, C#) are reference only.
   per-pixel z-buffer: 99.2-100 % of cap/ramp points, naive picker 4-25 %). Route = BFS over the same edges as the regions
   (`E.route`, `tools/test_route.js`); with no route the info names both regions (R1 = id 0...), their tile counts, the
   closest approach between them (`E.regionGap`) and how many gates touch both without a ramp.
+- ROOM TYPES / CAKE (user's decisions; the code that counts is the ACTIVE one of `reference/SingleRoomMeshGeneratorV16.4.cs`: GenerateRoom calls `BuildCakesForCurrentRoom` and returns, lines 648-649; pass 1/2, `DetectCakeDirection`
+  and `DetectCakeViaTerraceEdges` are dead code): Cake is a GEOMETRY stage common to Box, A and B (a switch; off = identical pixels). ONE cake per terrace link (low, high) of the room; a link = a terrace edge = the gate tiles of each used ramp with both
+  ends in the room. Direction: one link -> more pieces of the room on the high terrace = Down (bowl), more on the low = Up (pyramid), tie = Down; several links -> Down only if low is the minimum terrace of the room, else Up (pieces = 4-connected pieces
+  of the room per terrace, there are no platforms). Core = ALL the room's tiles of the core terrace (low if Down, high if Up). Rings OUTSIDE the core: ring k = Dilate8(core, (k+1)d) minus Dilate8(core, k d), cakeLayers 3, dilationPerLayer 1 (sliders).
+  Down: clipped to the seam window (Dilate8 of the link's gate tiles, radius 5). Up: around the whole high core. Heights: uniform step cakeStepHeight = 0.3 terH; Down rises from the core top (+0.3, +0.6, +0.9), Up descends. ADAPTATION TO THE VIEWER:
+  in Unity the rings fill the gap between the platforms of two terraces, here terraces touch: Down rings are CUT into tiles of the high terrace of the same room, Up rings are BUILT on tiles of the low terrace of the same room; never outside the room, never on void.
+  The footprint of a ramp is reserved (no margin, so the stand reaches the flank of the ramp), AND a CORRIDOR is opened (user's decision, measured on the real map: 78 of 140 ramps had the foot totally enclosed by ring tiles above it, 40 had lower ring tiles beside the head): Up (pyramid): the low-terrace tiles straight in front of the foot of every
+  column of the ramp are reserved, as far as the band of rings (layers x tiles per ring); Down (bowl): the same behind the head, on the high terrace; width = the ramp's; it keeps the height of its terrace and stops at the room's limit, void, another terrace or another ramp (it never touches the core); if the straight way is closed at once, the free neighbours of the end tiles
+  are reserved instead. Result: feet enclosed 78 -> 0, heads enclosed 2 -> 0, 796 of 15205 ring tiles lost (1007 corridor tiles). `P.cakeCorridor === false` = diagnostic, no corridor (`tools/diag_cake_ramps.js`); empty rings are dropped and the rest renumbered; step = min(step, (gap - margin) / n); rings replace the sub-terraces on the tiles they take; walking,
+  stake and route are unchanged (rooms walking does not depend on levels). A tile claimed by two links keeps the smaller ring index (tie: lower link). Wall offsets of Diorama / Ascension (their wall encloses the room; the viewer has no room walls) are PHASE 2 with a design of their own.
 - Visual target: Sea of Stars / 2D-HD readability, Unexplored 2 style stage modelling. Flat colour per
   level, gradient on cliffs, outlines. Orthographic camera with predefined angles and zoom, no free rotation.
 - Same style pass for every technique so the comparison is fair.
@@ -126,6 +136,8 @@ incursion border; stake and way-back path visible.
 - `src/fields.js`: channels R,G,B,A,H,S,V, roles (elevation / zone / edge / path / vegetation / POI), categorical
   hue ids, manifest. `node tools/test_fields.js`. Format in `docs/pack-format.md`.
 - `src/rooms.js` (rooms ON = `P.rooms`, off by default; `E.rooms.layer(pack, P)` caches the whole-map chain in stages; `E.shape` then takes the gates from the tree: `computeGatesRooms`, `tools/test_gates_rooms.js`, `tools/ui/test_rooms_ui.js`, cold cost `tools/ui/measure_rooms.js`): minimal rooms chain with the patched connection (no UI, no render; `node tools/test_rooms.js`, `node tools/rooms_check.js`); `tools/rooms_original.js` = the user's rules as written, comparison only.
+- `src/roomtypes.js` (room types; needs rooms on): `E.roomTypes.classify` (Cake / Diorama / Ascension of every room of the WHOLE map, V16.4 rule with neighbours instead of lobby platforms) and the Cake geometry (`P.cake`, off by default;
+  `buildRings`, `cake`: rings as new levels, shared by Box, A and B). Tint per type = Display toggle `typeTint`. `node tools/test_roomtypes.js`, `tools/ui/test_cake_ui.js`, `tools/ui/regress_rooms.js` (pixel regression with rooms on), `docs/room-types.md`.
 - `src/ui.js`, `src/app.html`: controls, angle presets, compare mode, multi-image loading with a role selector per
   channel, flip Y, maxnode, save pack.json, slice controls (zone chips, crop, scenery margin). Sliders recompute on
   release. Overlays: zones, edge map, graded masks (blocky tiles, see item 1).
@@ -197,6 +209,8 @@ incursion border; stake and way-back path visible.
     slope normalization (min/max, after the power) includes the coast. On a map with a black void the steepest values are on the coast (exponent 1, real map:
     1099 of the 1100 tiles with normalized slope >= 0.6 touch the void), so thresholds inland depend on the coast. `src/rooms.js` forces h <= 0 to Void and keeps the
     user's normalization; a decision (exclude the coast from the range?) is still to be taken with the user.
+13. The "not walkable" tone (rooms on) looks jagged over the Cake rings: it is drawn per tile like every overlay (same cause as limitation 1, PARKED).
+14. Cold cost with Cake rings on (real map, whole map, compare mode): 3.7 s to the first panels and 10.0 s to the three (rooms on without Cake: 2.7 s and 5.2 s); B grows with the number of levels (15 -> 41).
 
 ## Pending, in this order
 1. (Done, PR #1) Verify the first limitations.
@@ -209,7 +223,12 @@ incursion border; stake and way-back path visible.
    commit before it, stairW=0, 25 images, 0 differ). BASE CLOSED here. PARKED, not implemented, by the user's decision (their maps carry no
    masks and these are finishes that do not change the comparison): (5) overlays that follow the smoothed A/B shapes (known limitation 1);
    (6) outer corners of B (limitation 5); (7) Box line and stripes (limitation 9). Test scripts live in `tools/ui/`.
-4. NEXT STAGE: ROOMS (user's decision). Port to the viewer the minimal chain of the user's `reference/EDunProcGen.cs` (`SequenceA`: slope
+4. ROOMS: CLOSED AND FROZEN as it stood in PR #6 (user's decision; merged). In the viewer the rooms layer is a TEST DATA SOURCE for the crystallizations, not a generator, and it is not developed
+   any more. NOT DONE, noted for the GENERATOR (another project): recompute through another candidate gate, `ClassifySlopeMap` (limitation 12 stays a known one), size classes Micro/Small,
+   Hub/Corridor/Leaf, central circuit by flow, platforms. Reason (user): no crystallization needs them in a significant way. FINDINGS (real map, 5 terraces): 132 of the 175 tree connections are
+   ramps and 119 of them join two levels of the SAME room; with minimum core 50 there would be 111 ramps and 73 % of the land connected, with 200 there would be 51 and 62 % (today 142 and 74 %);
+   a difference of 1e-5 in the heights moved 6 terraces from 83 % to 94 %. FIXED TEST SET for every crystallization: the real map, 5 terraces, rooms on, everything else by default; and Snake Mountain.
+   History of the stage (kept for reference): ROOMS (user's decision). Port to the viewer the minimal chain of the user's `reference/EDunProcGen.cs` (`SequenceA`: slope
    classes, rooms by watershed, room edges, cores, A* between cores with a spanning tree; terrace gates already exist and are reused)
    with the connection PATCHED (a transition is an undirected PAIR of neighbouring tiles; one passability function for scan, A* and fills;
    the two tiles of a transition pair are never forbidden; unassigned tiles go to the nearest room before edges are searched), and CHECK it on
@@ -255,12 +274,19 @@ incursion border; stake and way-back path visible.
    The warning marks (roomKind 3) are cleared at the start of `classifyWalk` (it runs in every pass of the recovery loop).
    Diagnostic flags `rampKeep`, `noUnmerge`, `rScanFirst` are not in the UI or the manifest (like `P.anchor`). `node tools/diag_connections.js --table` prints terraces 3-8 before / after.
    KNOWN LIMIT (documented, not fixed): with 10 and 12 terraces the rooms passability fragments by itself (66 and 138 groups, forbidden margins 34-40 % of the land): the rooms method
-   is meant for 2-5 terraces. ClassifySlopeMap (limitation 12) goes in a SEPARATE PR after this one; approved first option: empty neighbour = the tile's own height, Void by height <= 0,
+   is meant for 2-5 terraces. ClassifySlopeMap (limitation 12): NOT done (generator project); the first option that had been approved, for the record: empty neighbour = the tile's own height, Void by height <= 0,
    min/max range over land without void in its 3x3 (shore stays walkable up to the edge).
    POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
-5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),
-   RuleTile skin and modular kits, room types, platforms.
+5. DONE phase 1 (approved by the user; PR of phase 1 open): technique ROOM TYPES, phase 1 = classification + tint + Cake geometry (`docs/room-types.md`). Fixed test set: real map, 5 terraces, rooms on. Measured: 31 Cake, 0 Diorama, 1 Ascension
+   (30 bowls + 40 pyramids, 14409 ring tiles of 44582 land tiles after the corridor (15205 before), 26 levels added) = the user's figures; with 3 and 2 terraces the viewer gives 27/5/0 and 26/4/2, the user's earlier 30/2/0 and 28/2/2 came from counting every candidate gate and only pieces >= 20 tiles; the viewer's values are the correct ones (user's decision) and the test keeps them as expected.
+   Phase 2: wall offsets. History of the point: NEXT: technique ROOM TYPES (Cake / Diorama / Ascension, the user's crystallizer; his materializers are in `reference/`, index in `reference/README.md` "Room materializer"; room type rule of
+   `SingleRoomMeshGeneratorV16.4.cs`). Proposal first, no code until approved. Known and ACCEPTED imbalance with the V16.4 rule: 31 Cake, 0 Diorama, 1 Ascension of 32 rooms (3 terraces 27/5/0;
+   2 terraces 26/4/2); not fixed now. A LATER step, user's decision: fewer ramps or ramps only in X rooms to even the types out (in `skeletonMeshmakerGenV4`, Step5 line 316, a multi-terrace room
+   WITHOUT a terrace transition is Diorama; the original main type was Diorama). AFTER it: HD-2D layered terraces, SDF exterior mesh for Snake Mountain, RuleTile skin / modular kits.
+   LATER PHASE (user's decision, no date): "tiles to curves" in the style of Unexplored 2: one Voronoi seed per tile, displaced by rules at the corners (by type and by height), at most 40 % of the tile; borders dressed with pieces. It uses per-tile data only, it does NOT need rooms.
+   Reference: the "Tiles to Curves" devlog by Ludomotion. Candidate libraries, LICENCE TO BE CONFIRMED before adding anything: Delaunator (JS) for the viewer; delaunator-sharp (MIT) and Clipper2 (BSL-1.0) for Unity.
+   PARKED (user's decision): per-pixel depth/WebGL, platforms, size classes.
 
 ## How to work with the user
 - Do not write code until the design is agreed. For each point: read the relevant code, propose the

@@ -315,6 +315,11 @@
       S.fine.set(snap.fine); S.levelH = snap.levelH.slice(); S.levelMeta = snap.levelMeta.slice(); S.maxFine = snap.maxFine; S.byLevel = snap.byLevel.map((a) => a.slice()); refreshMask(S);
       build(); S.retryBroke += S.conns.reduce((a, c, i) => a + (okBefore[i] && c.status !== 'ok' ? 1 : 0), 0); S.unmerged += add.filter(Boolean).length; S.isoRampsDropped += useless.length;
     }
+    if (RL && E.roomTypes) { // room types (classification always, tint and info) and the Cake geometry (P.cake): after the stairs, before the levels are counted
+      const ty = E.roomTypes.classify(RL, P); S.types = ty; S.roomType = new Uint8Array(n);
+      for (let i = 0; i < n; i++) if (!(vd && vd[i])) S.roomType[i] = ty.type[(((i / W) | 0) + S.oy) * S.mapW + (i % W) + S.ox] || 0;
+      if (P.cake) E.roomTypes.cake(S, P, RL, q, ty);
+    }
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
     S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
