@@ -209,7 +209,12 @@ incursion border; stake and way-back path visible.
    commit before it, stairW=0, 25 images, 0 differ). BASE CLOSED here. PARKED, not implemented, by the user's decision (their maps carry no
    masks and these are finishes that do not change the comparison): (5) overlays that follow the smoothed A/B shapes (known limitation 1);
    (6) outer corners of B (limitation 5); (7) Box line and stripes (limitation 9). Test scripts live in `tools/ui/`.
-4. NEXT STAGE: ROOMS (user's decision). Port to the viewer the minimal chain of the user's `reference/EDunProcGen.cs` (`SequenceA`: slope
+4. ROOMS: CLOSED AND FROZEN as it stood in PR #6 (user's decision; merged). In the viewer the rooms layer is a TEST DATA SOURCE for the crystallizations, not a generator, and it is not developed
+   any more. NOT DONE, noted for the GENERATOR (another project): recompute through another candidate gate, `ClassifySlopeMap` (limitation 12 stays a known one), size classes Micro/Small,
+   Hub/Corridor/Leaf, central circuit by flow, platforms. Reason (user): no crystallization needs them in a significant way. FINDINGS (real map, 5 terraces): 132 of the 175 tree connections are
+   ramps and 119 of them join two levels of the SAME room; with minimum core 50 there would be 111 ramps and 73 % of the land connected, with 200 there would be 51 and 62 % (today 142 and 74 %);
+   a difference of 1e-5 in the heights moved 6 terraces from 83 % to 94 %. FIXED TEST SET for every crystallization: the real map, 5 terraces, rooms on, everything else by default; and Snake Mountain.
+   History of the stage (kept for reference): ROOMS (user's decision). Port to the viewer the minimal chain of the user's `reference/EDunProcGen.cs` (`SequenceA`: slope
    classes, rooms by watershed, room edges, cores, A* between cores with a spanning tree; terrace gates already exist and are reused)
    with the connection PATCHED (a transition is an undirected PAIR of neighbouring tiles; one passability function for scan, A* and fills;
    the two tiles of a transition pair are never forbidden; unassigned tiles go to the nearest room before edges are searched), and CHECK it on
@@ -255,12 +260,15 @@ incursion border; stake and way-back path visible.
    The warning marks (roomKind 3) are cleared at the start of `classifyWalk` (it runs in every pass of the recovery loop).
    Diagnostic flags `rampKeep`, `noUnmerge`, `rScanFirst` are not in the UI or the manifest (like `P.anchor`). `node tools/diag_connections.js --table` prints terraces 3-8 before / after.
    KNOWN LIMIT (documented, not fixed): with 10 and 12 terraces the rooms passability fragments by itself (66 and 138 groups, forbidden margins 34-40 % of the land): the rooms method
-   is meant for 2-5 terraces. ClassifySlopeMap (limitation 12) goes in a SEPARATE PR after this one; approved first option: empty neighbour = the tile's own height, Void by height <= 0,
+   is meant for 2-5 terraces. ClassifySlopeMap (limitation 12): NOT done (generator project); the first option that had been approved, for the record: empty neighbour = the tile's own height, Void by height <= 0,
    min/max range over land without void in its 3x3 (shore stays walkable up to the edge).
    POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
-5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),
-   RuleTile skin and modular kits, room types, platforms.
+5. NEXT: technique ROOM TYPES (Cake / Diorama / Ascension, the user's crystallizer; his materializers are in `reference/`, index in `reference/README.md` "Room materializer"; room type rule of
+   `SingleRoomMeshGeneratorV16.4.cs`). Proposal first, no code until approved. Known and ACCEPTED imbalance with the V16.4 rule: 31 Cake, 0 Diorama, 1 Ascension of 32 rooms (3 terraces 30/2/0;
+   2 terraces 28/2/2); not fixed now. A LATER step, user's decision: fewer ramps or ramps only in X rooms to even the types out (in `skeletonMeshmakerGenV4`, Step5 line 316, a multi-terrace room
+   WITHOUT a terrace transition is Diorama; the original main type was Diorama). AFTER it: HD-2D layered terraces, SDF exterior mesh for Snake Mountain, RuleTile skin / modular kits.
+   PARKED (user's decision): per-pixel depth/WebGL, platforms, size classes.
 
 ## How to work with the user
 - Do not write code until the design is agreed. For each point: read the relevant code, propose the

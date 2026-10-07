@@ -110,3 +110,11 @@ All rooms tests and tools build the pack like the viewer (`tools/real_pack.js`: 
 | 8 | 0/2 (tree of 2 connections); 686 / 22488; 97 | 20/267; 11646 / 28365; 23 |
 
 Warning-outline faces (kind 3) are cleared at the start of every `classifyWalk` (it runs in each pass of the recovery loop); 6 terraces: 5722 faces, each touching a problem region (before: 16836, 11112 of them stale).
+
+## Status: CLOSED (frozen as in PR #6)
+In the viewer the rooms layer is a test data source for the crystallizations, not a generator; it is not developed any more.
+- NOT done, noted for the generator (another project): recompute through an alternative candidate gate, `ClassifySlopeMap` (CLAUDE.md limitation 12 stays a known limitation), size classes Micro/Small, Hub/Corridor/Leaf, central circuit by flow, platforms. Reason (user): no crystallization needs them in a significant way.
+- Findings (real map, 5 terraces): 132 of the 175 tree connections are ramps and 119 of them join two levels of the same room; with minimum core 50 there would be 111 ramps and 73 % of the land connected, with 200 there would be 51 and 62 % (today 142 and 74 %); a difference of 1e-5 in the heights moved 6 terraces from 83 % to 94 %.
+- Fixed test set for every crystallization: the real map `data/samples/skeleton_heightmap_256.png`, 5 terraces, rooms on, the rest by default; and Snake Mountain.
+- Next: technique "room types" (Cake / Diorama / Ascension), see CLAUDE.md "Pending" 5 and `reference/README.md` "Room materializer".
+
