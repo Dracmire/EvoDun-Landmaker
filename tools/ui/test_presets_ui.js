@@ -13,14 +13,15 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
   const st = () => page.evaluate(() => { const e = window.__evo, S = e.S(), P = e.P, c = S.types.counts; return { P: [P.terraces, P.roomsMinCore, P.rRadius, P.minPlateau, P.rooms, P.cake], types: `${c.cake}/${c.diorama}/${c.ascension}`, rooms: S.types.rooms.size, ramps: S.stairs.length, levels: S.maxFine + 1, sliders: ['terraces', 'roomsMinCore', 'rRadius', 'minPlateau'].map((k) => +document.querySelector('#s-' + k).value) }; });
   const d = await st(); ok('default: 31/0/1 of 32 rooms, 140 ramps (the old behaviour)', d.types === '31/0/1' && d.rooms === 32 && d.ramps === 140, JSON.stringify(d));
   const t0 = Date.now(); await page.selectOption('#roomsPreset', 'balanced'); await a.idle(); const cold = Date.now() - t0, b = await st(), tm = await page.evaluate(() => window.__evo.timing());
-  ok('Balanced types: terraces 3, core 100, radius 5 (sliders follow), 32/29/27 of 88 rooms, 54 ramps', JSON.stringify(b.P.slice(0, 3)) === '[3,100,5]' && JSON.stringify(b.sliders.slice(0, 3)) === '[3,100,5]' && b.types === '32/29/27' && b.rooms === 88 && b.ramps === 54, JSON.stringify(b));
+  ok('Balanced types: terraces 3, core 100, radius 5, min plateau 120 (sliders follow), 29/30/29 of 88 rooms, 48 ramps', JSON.stringify([b.P[0], b.P[1], b.P[2], b.P[3]]) === '[3,100,5,120]' && JSON.stringify(b.sliders) === '[3,100,5,120]' && b.types === '29/30/29' && b.rooms === 88 && b.ramps === 48, JSON.stringify(b));
   console.log(`  info: Balanced types + Cake: ${b.levels} levels (without Cake: see test_roomtypes), recompute ${cold} ms; compare mode cold: first panels ${tm.first.toFixed(0)} ms, all three ${tm.all.toFixed(0)} ms`);
   await a.slider('rRadius', 6); await a.idle(); ok('moving a slider off the preset shows Custom', (await sel()) === 'custom');
+  await a.slider('minPlateau', 121); await a.idle(); ok('min plateau is part of the preset: 121 shows Custom too', (await sel()) === 'custom'); await a.slider('minPlateau', 120); await a.idle(); await a.slider('rRadius', 5); await a.idle();
   await a.slider('rRadius', 5); await a.idle(); ok('putting it back shows Balanced types again', (await sel()) === 'balanced');
   await page.selectOption('#roomsPreset', 'default'); await a.idle(); const d2 = await st();
-  ok('Default restores terraces 5, core 20, radius 9 and the old picture data (31/0/1, 140 ramps, same levels)', JSON.stringify(d2.P.slice(0, 3)) === '[5,20,9]' && d2.types === d.types && d2.ramps === d.ramps && d2.levels === d.levels, JSON.stringify(d2));
+  ok('Default restores terraces 5, core 20, radius 9, min plateau 5 and the old picture data (31/0/1, 140 ramps, same levels)', JSON.stringify([d2.P[0], d2.P[1], d2.P[2], d2.P[3]]) === '[5,20,9,5]' && d2.types === d.types && d2.ramps === d.ramps && d2.levels === d.levels, JSON.stringify(d2));
   // manifest round trip: seven fields
-  await page.selectOption('#roomsPreset', 'balanced'); await a.idle(); await a.slider('minPlateau', 120); await a.idle(); const before = await st();
+  await page.selectOption('#roomsPreset', 'balanced'); await a.idle(); const before = await st();
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('#saveManifest')]); const file = path.join(os.tmpdir(), 'evo_viewer_block.json'); fs.copyFileSync(await dl.path(), file);
   const json = JSON.parse(fs.readFileSync(file, 'utf8'));
   ok('pack.json carries the viewer block with the seven fields', json.format === 'evodun-pack/0.3' && JSON.stringify(json.viewer) === JSON.stringify({ preset: 'balanced', rooms: true, cake: true, terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 }), JSON.stringify(json.viewer));

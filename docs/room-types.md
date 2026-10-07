@@ -46,12 +46,12 @@ User's decision: no Cake cap and no change in the classification; the types are 
 | minPlateau 250 | 32 | 28 / 3 / 1 | 82 | 78.6 % | 78.6 % | 0 |
 | 3 terraces + core 100 | 32 | 20 / 7 / 5 | 44 | 74.8 % | 76.5 % | 4 |
 | rRadius 5 | 88 | 62 / 7 / 19 | 156 | 61.1 % | 69.4 % | 8 |
-| **Balanced types** (3 terraces + core 100 + rRadius 5) | 88 | 32 / 29 / 27 | 54 | 70.3 % | 72.0 % | 4 |
-| Balanced types + minPlateau 120 | 88 | 29 / 30 / 29 | 48 | 73.0 % | 74.7 % | 4 |
-| Balanced types + minPlateau 250 | 88 | 25 / 33 / 30 | 43 | 73.5 % | 75.2 % | 4 |
+| 3 terraces + core 100 + rRadius 5 | 88 | 32 / 29 / 27 | 54 | 70.3 % | 72.0 % | 4 |
+| **Balanced types** (preset: + minPlateau 120) | 88 | 29 / 30 / 29 | 48 | 73.0 % | 74.7 % | 4 |
+| + minPlateau 250 | 88 | 25 / 33 / 30 | 43 | 73.5 % | 75.2 % | 4 |
 
-Reading: minPlateau 120 improves BOTH things on top of Balanced types: the types are evener (29 / 30 / 29, spread 1 against 5) and the main region grows 70.3 -> 73.0 % (walkable 72.0 -> 74.7 %), with 6 fewer ramps. minPlateau 250 connects a bit more (73.5 %) but unbalances the types again (25 / 33 / 30). rRadius 14-30 gives only Cake; gateThr 0.45 / gateMin 8 leaves 5 % connected (user's measurements).
-Balanced types + Cake: 31 bowls + 8 pyramids, 3850 ring tiles, 21 levels (9 without Cake).
+Reading (user's decision: the preset "Balanced types" includes minPlateau 120): minPlateau 120 improves BOTH things on top of 3 terraces + core 100 + radius 5: the types are evener (29 / 30 / 29, spread 1 against 5) and the main region grows 70.3 -> 73.0 % (walkable 72.0 -> 74.7 %), with 6 fewer ramps. minPlateau 250 connects a bit more (73.5 %) but unbalances the types again (25 / 33 / 30). rRadius 14-30 gives only Cake; gateThr 0.45 / gateMin 8 leaves 5 % connected (user's measurements).
+Balanced types (with minPlateau 120) + Cake: see `node tools/test_roomtypes.js` (info line). Before minPlateau 120 it was 31 bowls + 8 pyramids, 3850 ring tiles, 21 levels (9 without Cake).
 
-Viewer: Rooms group -> "Rooms preset" (Default / Balanced types / Custom; it only sets terraces, Min core size and Room radius), sliders Min core size 5-250 (default 20), Room radius 3-30 (default 9, `P.rRadius`, already a generator parameter) and Min plateau 1-300 (default 5; it was 1-20). The preset and the switches are saved in the optional `viewer` block of the manifest (`docs/pack-format.md`).
+Viewer: Rooms group -> "Rooms preset" (Default / Balanced types / Custom; it only sets terraces, Min core size, Room radius and Min plateau), sliders Min core size 5-250 (default 20), Room radius 3-30 (default 9, `P.rRadius`, already a generator parameter) and Min plateau 1-300 (default 5; it was 1-20). The preset and the switches are saved in the optional `viewer` block of the manifest (`docs/pack-format.md`).
 

@@ -20,7 +20,7 @@ So that a saved pack reproduces the same picture when it is loaded again. Writte
 ```json
 "viewer": { "preset": "balanced", "rooms": true, "cake": true, "terraces": 3, "roomsMinCore": 100, "rRadius": 5, "minPlateau": 120 }
 ```
-`preset` is "default", "balanced" (Balanced types: terraces 3, min core 100, room radius 5) or "custom"; `rooms` / `cake` are the switches (Cake needs rooms); `terraces` 2-24 (default 5), `roomsMinCore` 5-250 (20), `rRadius` 3-30 (9), `minPlateau` 1-300 (5), integers. Any field may be missing (= its default).
+`preset` is "default", "balanced" (Balanced types: terraces 3, min core 100, room radius 5, min plateau 120) or "custom"; `rooms` / `cake` are the switches (Cake needs rooms); `terraces` 2-24 (default 5), `roomsMinCore` 5-250 (20), `rRadius` 3-30 (9), `minPlateau` 1-300 (5), integers. Any field may be missing (= its default).
 
 ## 0.2 (channels as fields)
 A pack is a small JSON manifest plus PNG images that are selected together in the viewer. Images are decoded

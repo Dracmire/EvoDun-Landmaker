@@ -147,8 +147,9 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
   { // the user's table, measured in the viewer (types, ramps, rooms, main % of the land), reproduced by tools/room_types_table.js
     const T2 = require('./room_types_table.js'), want = [['31/0/1', 140, 32, 74], ['24/3/5', 83, 32, 69], ['28/3/1', 82, 32, 79], ['20/7/5', 44, 32, 75], ['62/7/19', 156, 88, 61], ['32/29/27', 54, 88, 70]];
     want.forEach((w, k) => { const r = T2.run(mk, T2.ROWS[k][1]); ok(`table row ${k + 1} "${T2.ROWS[k][0]}": types ${w[0]}, ${w[1]} ramps, ${w[2]} rooms, main ${w[3]} % of the land`, `${r.c.cake}/${r.c.diorama}/${r.c.ascension}` === w[0] && r.ramps === w[1] && r.rooms === w[2] && Math.round(r.main / r.land * 100) === w[3], `${r.c.cake}/${r.c.diorama}/${r.c.ascension} ${r.ramps} ${r.rooms} ${(r.main / r.land * 100).toFixed(1)}`); });
-    const b0 = run({ ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5 }), b1 = run({ ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5, cake: true });
-    check('Balanced types preset (3 terraces, core 100, radius 5)', b0, b1);
+    const PB = { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 }, b0 = run(PB), b1 = run({ ...PB, cake: true }), cb = b0.types.counts;
+    ok('Balanced types preset (3 terraces, core 100, radius 5, minPlateau 120): 88 rooms, 29 Cake / 30 Diorama / 29 Ascension, 48 ramps', b0.types.rooms.size === 88 && cb.cake === 29 && cb.diorama === 30 && cb.ascension === 29 && b0.stairs.length === 48, JSON.stringify([cb, b0.stairs.length]));
+    check('Balanced types preset (3 terraces, core 100, radius 5, minPlateau 120)', b0, b1);
     console.log(`  info: Balanced types + Cake: ${b1.cake.down} bowls + ${b1.cake.up} pyramids, ${b1.cake.flat} flat links, ${b1.cake.tiles} ring tiles, ${b1.cake.levelsAdded} levels added (${b0.maxFine + 1} -> ${b1.maxFine + 1})`);
     const d9 = run({ ...P0, rRadius: 9 }); ok('rRadius 9 is the default: the same levels and tiles as without the parameter', d9.fine.every((v, i) => v === base.fine[i]) && JSON.stringify(d9.levelH) === JSON.stringify(base.levelH));
   }

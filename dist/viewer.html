@@ -2980,8 +2980,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   }
   function message(text) { const m = $('#msg'); m.textContent = text || ''; m.hidden = !text; }
 
-  /* rooms presets (user's decision): they only SET existing parameters, no logic. Balanced types = the generator's parameters that even out Cake / Diorama / Ascension (real map: 32 / 29 / 27 of 88 rooms) */
-  const ROOMS_PRESETS = { default: { terraces: 5, roomsMinCore: 20, rRadius: 9 }, balanced: { terraces: 3, roomsMinCore: 100, rRadius: 5 } };
+  /* rooms presets (user's decision): they only SET existing parameters, no logic. Balanced types = the generator's parameters that even out Cake / Diorama / Ascension (real map: 29 / 30 / 29 of 88 rooms, 48 ramps) */
+  const ROOMS_PRESETS = { default: { terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, balanced: { terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 } };
   function setParam(k, v) { P[k] = v; const i = $('#s-' + k), o = $('#o-' + k); if (i) i.value = v; if (o) o.textContent = v; }
   function syncRoomsPreset() {
     const sel = $('#roomsPreset'); if (!sel) return;
