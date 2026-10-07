@@ -50,3 +50,44 @@ terrace or the pair is a transition (room edge) / a gate (terrace); the two tile
 tile is not valid; one passability function serves the scan, A* and the floods; unassigned tiles are given to the nearest room before edges
 are searched; the centre of a core is its free tile nearest to the centroid. Implemented in `src/rooms.js`; the original rules are transcribed
 in `tools/rooms_original.js` for comparison.
+
+## Room materializer (crystallization by room type) — added for the "room types" technique
+Also read-only, not built, not run, not edited. These are the user's Unity materializers that turn discovered rooms into meshes
+(Cake / Diorama / Ascension). `MeshBuilder.cs` of the older WFC system is NOT here: it does not take part in this.
+
+| File | What it is |
+|---|---|
+| `SingleRoomMeshGeneratorV16.4.cs` | The latest single-room materializer: room type, cake rings, walls, terrain stairs, transitions |
+| `SingleRoomMeshFromGenDataV3.cs` | Dispatcher: reads `GenStructuralData`, groups `PlatformSeed` by room, calls `GenerateRoom()` |
+| `SOgendata.cs` | `GenStructuralData`: what the materializer receives (height map, slope classes, rooms, edges, terrace edges, room segments, A* connections, platforms, forbidden, cores) |
+| `skeletonMeshmakerGenV4.cs` | Earlier whole-dungeon version: critical path, Voronoi pockets, packing, classification, meshes |
+| `SkeletonMeshmakerSDF.cs` | Earlier SDF / bowl version of the same |
+
+### `SingleRoomMeshGeneratorV16.4.cs` (line numbers of this copy)
+| What | Where | Line |
+|---|---|---|
+| Wall offsets per room type (cake -5, diorama -20, ascension +0.5), `isCakeDown`, `corePad` | fields | 69-79 |
+| One room, end to end | `GenerateRoom` | 301 |
+| ROOM TYPE RULE | inside `GenerateRoom` | 473-560 |
+| All rooms from platform seeds | `BuildFromSeeds`, `PrepareRoomInputs` | 1367, 1412 |
+| Stairs on terrace edges | `GenerateTerrainStairs` | 1437 |
+| Cake rings | `BuildCakeDownRingsBiased`, `BuildCakeDownRingsSimple`, `GenerateCakeDownLayersV2` | 1509, 1670, 3247 |
+| Cake passes | `BuildCakesForCurrentRoom`, `BuildPendingCakes` | 1719, 1910 |
+| Cake from terrace edges, bowl or pyramid | `DetectCakeViaTerraceEdges`, `DetectCakeDirection`, `FindCenterPlatform` | 2087, 2606, 2573 |
+| Outline, smoothing, extrusion | `ExtractBorderEdges`, `ChaikinSmooth`, `ExtrudeBorder`, `TessellateWithCollider2D` | 2699, 2777, 3018, 2797 |
+
+Room type rule of V16.4 (as written):
+- CAKE: the room's platforms lie on more than one terrace, `cakeLayers > 0`, and the room has a terrace edge between two different terraces
+  (and more than one height type). Bowl (`CakeDown`) when the core terrace is LOWER than the dominant one, pyramid (`CakeUp`) when higher.
+- DIORAMA: not cake, and 3 or more lobby platforms (platforms that hold a room-transition tile) OR 3 or more distinct neighbouring rooms.
+- ASCENSION: the rest.
+
+Room type rule of the earlier `skeletonMeshmakerGenV4.cs` (`Step5_ClassifyRoomsAndTransitions`, line 316), along the critical path:
+one terrace -> Ascension; several terraces with a terrace edge going up -> CakeUp, going down -> CakeDown; several terraces WITHOUT a terrace
+edge -> Diorama; two Dioramas in a row on the critical path -> the second becomes Ascension.
+In both rules a room is a Cake only if it has a terrace transition inside it, so the number of ramps decides how many rooms are Cakes.
+
+Measured with the viewer's rooms on `data/samples/skeleton_heightmap_256.png` and the V16.4 rule (platform footprints replaced by the room's
+pieces per terrace, neighbours instead of lobby platforms): 5 terraces -> 31 Cake, 0 Diorama, 1 Ascension of 32 rooms; 3 terraces -> 30 / 2 / 0;
+2 terraces -> 28 / 2 / 2. The user knows this imbalance and accepts it to start (their original main type was Diorama); balancing it later
+(fewer ramps, or ramps only in some rooms) is a separate, later step.
