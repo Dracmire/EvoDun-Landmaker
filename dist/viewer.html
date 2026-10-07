@@ -1976,9 +1976,35 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const fw = S.mapW, n = S.n, K = S.subs, W = S.W, H = S.H;
     const reserved = new Uint8Array(RL.W * RL.H), mapOf = (i) => ((((i / W) | 0) + S.oy) * fw + (i % W) + S.ox);
     for (const rec of S.stairs || []) { for (const t of rec.bottom) reserved[mapOf(t)] = 1; for (const t of rec.top) reserved[mapOf(t)] = 1; for (const st of rec.steps) for (const t of st.tiles) reserved[mapOf(t)] = 1; }
+    /* CORRIDOR (user's decision): the rings must not bury a ramp. Up (pyramid, rings on the low terrace): the low-terrace tiles straight in front of the foot of every column of the ramp are reserved, as far as the band of rings
+       (layers x tiles per ring); Down (bowl, rings cut into the high terrace): the same behind the head, on the high terrace. Width = the ramp's columns. It stops at the room's limit, void, another terrace and the footprint of another ramp
+       (so it never touches the core, which is on the other terrace, or another ramp). The corridor keeps the height of its terrace. P.cakeCorridor === false: diagnostic, no corridor. */
+    const foot = reserved.slice(), prm = T.paramsOf(P); let corridor = 0;
+    if (P.cakeCorridor !== false) for (const rec of S.stairs || []) {
+      if (!rec.cols || !rec.cols.length || !rec.steps.length) continue;
+      const b0 = rec.bottom[0], o = types.rooms.get(RL.room[mapOf(b0)]); if (!o || o.type !== T.CAKE) continue;
+      const tl = S.ter[b0], th = S.ter[rec.top[0]], l = o.linkList.find((k) => k.low === tl && k.high === th); if (!l) continue;
+      const atFoot = !l.down, first = rec.steps[0], last = rec.steps[rec.steps.length - 1], want = atFoot ? tl : th;
+      let mine = 0;
+      for (let ci = 0; ci < rec.cols.length; ci++) {
+        const a = atFoot ? rec.bottom[ci] : rec.top[ci], from = atFoot ? first.tiles[ci] : last.tiles[ci], dx = (a % W) - (from % W), dy = ((a / W) | 0) - ((from / W) | 0);
+        if (Math.abs(dx) + Math.abs(dy) !== 1) continue;
+        let x = a % W, y = (a / W) | 0;
+        for (let j = 1; j <= prm.layers * prm.per; j++) {
+          x += dx; y += dy; if (x < 0 || y < 0 || x >= W || y >= H) break; const t = y * W + x, m = mapOf(t);
+          if ((S.void && S.void[t]) || RL.room[m] !== o.id || S.ter[t] !== want || foot[m]) break;
+          mine++; if (!reserved[m]) { reserved[m] = 1; corridor++; }
+        }
+      }
+      if (!mine) { // the straight way is closed at once (a cliff or the room's limit right in front): keep at least the free neighbours of the end tiles open
+        for (let ci = 0; ci < rec.cols.length; ci++) { const a = atFoot ? rec.bottom[ci] : rec.top[ci], x = a % W, y = (a / W) | 0;
+          for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const t = ny * W + nx, m = mapOf(t);
+            if (!(S.void && S.void[t]) && RL.room[m] === o.id && S.ter[t] === want && !foot[m] && !reserved[m]) { reserved[m] = 1; corridor++; } } }
+      }
+    }
     const R = buildRings(RL, types, P, q, reserved), eps = 1e-6, claimed = [];
     for (let i = 0; i < n; i++) { if (S.void && S.void[i]) continue; const c = R.claim.get(mapOf(i)); if (c) claimed.push([i, c]); }
-    const info = { links: R.links.length, down: 0, up: 0, flat: R.flat, conflicts: R.conflicts, tiles: claimed.length, levelsAdded: 0, rings: [0, 0, 0, 0, 0, 0, 0], list: R.links, claim: R.claim };
+    const info = { corridor, links: R.links.length, down: 0, up: 0, flat: R.flat, conflicts: R.conflicts, tiles: claimed.length, levelsAdded: 0, rings: [0, 0, 0, 0, 0, 0, 0], list: R.links, claim: R.claim };
     for (const l of R.links) { if (l.flat) continue; l.down ? info.down++ : info.up++; info.rings[Math.min(6, l.rings)]++; }
     S.cake = info; if (!claimed.length) return;
     // insert the new heights in the ranking of levels (an existing level is reused when the height matches)

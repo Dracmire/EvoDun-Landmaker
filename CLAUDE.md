@@ -110,7 +110,9 @@ old pipeline (Unity, C#) are reference only.
   of the room per terrace, there are no platforms). Core = ALL the room's tiles of the core terrace (low if Down, high if Up). Rings OUTSIDE the core: ring k = Dilate8(core, (k+1)d) minus Dilate8(core, k d), cakeLayers 3, dilationPerLayer 1 (sliders).
   Down: clipped to the seam window (Dilate8 of the link's gate tiles, radius 5). Up: around the whole high core. Heights: uniform step cakeStepHeight = 0.3 terH; Down rises from the core top (+0.3, +0.6, +0.9), Up descends. ADAPTATION TO THE VIEWER:
   in Unity the rings fill the gap between the platforms of two terraces, here terraces touch: Down rings are CUT into tiles of the high terrace of the same room, Up rings are BUILT on tiles of the low terrace of the same room; never outside the room, never on void.
-  The footprint of a ramp is reserved (no margin, so the stand reaches the flank of the ramp); empty rings are dropped and the rest renumbered; step = min(step, (gap - margin) / n); rings replace the sub-terraces on the tiles they take; walking,
+  The footprint of a ramp is reserved (no margin, so the stand reaches the flank of the ramp), AND a CORRIDOR is opened (user's decision, measured on the real map: 78 of 140 ramps had the foot totally enclosed by ring tiles above it, 40 had lower ring tiles beside the head): Up (pyramid): the low-terrace tiles straight in front of the foot of every
+  column of the ramp are reserved, as far as the band of rings (layers x tiles per ring); Down (bowl): the same behind the head, on the high terrace; width = the ramp's; it keeps the height of its terrace and stops at the room's limit, void, another terrace or another ramp (it never touches the core); if the straight way is closed at once, the free neighbours of the end tiles
+  are reserved instead. Result: feet enclosed 78 -> 0, heads enclosed 2 -> 0, 796 of 15205 ring tiles lost (1007 corridor tiles). `P.cakeCorridor === false` = diagnostic, no corridor (`tools/diag_cake_ramps.js`); empty rings are dropped and the rest renumbered; step = min(step, (gap - margin) / n); rings replace the sub-terraces on the tiles they take; walking,
   stake and route are unchanged (rooms walking does not depend on levels). A tile claimed by two links keeps the smaller ring index (tie: lower link). Wall offsets of Diorama / Ascension (their wall encloses the room; the viewer has no room walls) are PHASE 2 with a design of their own.
 - Visual target: Sea of Stars / 2D-HD readability, Unexplored 2 style stage modelling. Flat colour per
   level, gradient on cliffs, outlines. Orthographic camera with predefined angles and zoom, no free rotation.
@@ -207,6 +209,8 @@ incursion border; stake and way-back path visible.
     slope normalization (min/max, after the power) includes the coast. On a map with a black void the steepest values are on the coast (exponent 1, real map:
     1099 of the 1100 tiles with normalized slope >= 0.6 touch the void), so thresholds inland depend on the coast. `src/rooms.js` forces h <= 0 to Void and keeps the
     user's normalization; a decision (exclude the coast from the range?) is still to be taken with the user.
+13. The "not walkable" tone (rooms on) looks jagged over the Cake rings: it is drawn per tile like every overlay (same cause as limitation 1, PARKED).
+14. Cold cost with Cake rings on (real map, whole map, compare mode): 3.7 s to the first panels and 10.0 s to the three (rooms on without Cake: 2.7 s and 5.2 s); B grows with the number of levels (15 -> 41).
 
 ## Pending, in this order
 1. (Done, PR #1) Verify the first limitations.
@@ -274,12 +278,14 @@ incursion border; stake and way-back path visible.
    min/max range over land without void in its 3x3 (shore stays walkable up to the edge).
    POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
-5. IN PROGRESS (phase 1 implemented, waiting for the user's review): technique ROOM TYPES, phase 1 = classification + tint + Cake geometry (`docs/room-types.md`). Fixed test set: real map, 5 terraces, rooms on. Measured: 31 Cake, 0 Diorama, 1 Ascension
-   (30 bowls + 40 pyramids, 15205 ring tiles of 44582 land tiles, 26 levels added) = the user's figures; with 3 and 2 terraces the viewer gives 27/5/0 and 26/4/2, NOT the 30/2/0 and 28/2/2 the user expected (open point: how the terrace edge was counted there).
+5. DONE phase 1 (approved by the user; PR of phase 1 open): technique ROOM TYPES, phase 1 = classification + tint + Cake geometry (`docs/room-types.md`). Fixed test set: real map, 5 terraces, rooms on. Measured: 31 Cake, 0 Diorama, 1 Ascension
+   (30 bowls + 40 pyramids, 14409 ring tiles of 44582 land tiles after the corridor (15205 before), 26 levels added) = the user's figures; with 3 and 2 terraces the viewer gives 27/5/0 and 26/4/2, the user's earlier 30/2/0 and 28/2/2 came from counting every candidate gate and only pieces >= 20 tiles; the viewer's values are the correct ones (user's decision) and the test keeps them as expected.
    Phase 2: wall offsets. History of the point: NEXT: technique ROOM TYPES (Cake / Diorama / Ascension, the user's crystallizer; his materializers are in `reference/`, index in `reference/README.md` "Room materializer"; room type rule of
-   `SingleRoomMeshGeneratorV16.4.cs`). Proposal first, no code until approved. Known and ACCEPTED imbalance with the V16.4 rule: 31 Cake, 0 Diorama, 1 Ascension of 32 rooms (3 terraces 30/2/0;
-   2 terraces 28/2/2); not fixed now. A LATER step, user's decision: fewer ramps or ramps only in X rooms to even the types out (in `skeletonMeshmakerGenV4`, Step5 line 316, a multi-terrace room
+   `SingleRoomMeshGeneratorV16.4.cs`). Proposal first, no code until approved. Known and ACCEPTED imbalance with the V16.4 rule: 31 Cake, 0 Diorama, 1 Ascension of 32 rooms (3 terraces 27/5/0;
+   2 terraces 26/4/2); not fixed now. A LATER step, user's decision: fewer ramps or ramps only in X rooms to even the types out (in `skeletonMeshmakerGenV4`, Step5 line 316, a multi-terrace room
    WITHOUT a terrace transition is Diorama; the original main type was Diorama). AFTER it: HD-2D layered terraces, SDF exterior mesh for Snake Mountain, RuleTile skin / modular kits.
+   LATER PHASE (user's decision, no date): "tiles to curves" in the style of Unexplored 2: one Voronoi seed per tile, displaced by rules at the corners (by type and by height), at most 40 % of the tile; borders dressed with pieces. It uses per-tile data only, it does NOT need rooms.
+   Reference: the "Tiles to Curves" devlog by Ludomotion. Candidate libraries, LICENCE TO BE CONFIRMED before adding anything: Delaunator (JS) for the viewer; delaunator-sharp (MIT) and Clipper2 (BSL-1.0) for Unity.
    PARKED (user's decision): per-pixel depth/WebGL, platforms, size classes.
 
 ## How to work with the user

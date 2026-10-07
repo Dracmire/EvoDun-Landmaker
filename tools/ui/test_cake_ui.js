@@ -25,12 +25,12 @@ const { open } = require('./common');
   await page.check('#t-cake'); await a.idle();
   for (const tech of ['box', 'A', 'B']) {
     const r = await page.evaluate(({ tech }) => {
-      const E = window.EVO, e = window.__evo, S = e.S(), P = e.P, CW = 1200, CH = 800, view = { yaw: 0, pitch: 80, zoom: 1, panX: 0, panY: 0 }, cam = E.makeCam(S, P, view, CW, CH);
-      const rt = []; for (let i = 0; i < S.n; i++) if (S.ringTile[i]) rt.push(i); let got = 0, tot = 0;
+      const E = window.EVO, e = window.__evo, S = e.S(), P = e.P, CW = 1200, CH = 800, view = { yaw: 0, pitch: 80, zoom: 3, panX: 0, panY: 0 }, cam = E.makeCam(S, P, view, CW, CH);
+      const rt = [], hh = (i) => S.levelH[S.fine[i]]; for (let i = 0; i < S.n; i++) if (S.ringTile[i]) { const x = i % S.W, y = (i / S.W) | 0; let free = true; for (let dy = -1; dy <= 1 && free; dy++) for (let dx = -1; dx <= 1; dx++) { const nx = x + dx, ny = y + dy; if ((dx || dy) && nx >= 0 && ny >= 0 && nx < S.W && ny < S.H && hh(ny * S.W + nx) > hh(i) + 1e-9) { free = false; break; } } if (free) { const p = cam.p(x + 0.5, y + 0.5, hh(i)); if (p[0] > 20 && p[0] < CW - 20 && p[1] > 20 && p[1] < CH - 20) rt.push(i); } } /* ring tiles no taller neighbour can hide, inside the view (3 x zoom: outlines would cover the centre of a 3 px tile) */ let got = 0, tot = 0;
       for (let k = 0; k < rt.length && tot < 120; k += Math.max(1, Math.floor(rt.length / 120))) { const i = rt[k], x = i % S.W, y = (i / S.W) | 0, p = cam.p(x + 0.5, y + 0.5, S.levelH[S.fine[i]]), t = E.pickTile(S, P, tech, view, CW, CH, p[0], p[1]); tot++; if (t.tile === i) got++; }
       return { got, tot, rings: rt.length };
     }, { tech });
-    ok(`${tech}: a click on the centre of a ring tile resolves to that tile (top view)`, r.tot > 100 && r.got / r.tot >= 0.85, JSON.stringify(r));
+    ok(`${tech}: a click on the centre of a ring tile that no taller neighbour hides resolves to that tile (top view)`, r.tot > 100 && r.got / r.tot >= 0.95, JSON.stringify(r));
   }
   // rooms off: the switch does nothing
   await page.uncheck('#t-rooms'); await a.idle(); await a.tech('A'); await a.preset('oblique'); const ro = hash(await a.canvas()); await page.uncheck('#t-cake'); await a.idle();

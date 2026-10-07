@@ -15,6 +15,8 @@ The info shows "Room types" when the Cake switch or the tint is on.
 - One cake per terrace link (low, high). Direction: one link -> the terrace with more room PIECES (4-connected) wins: more on the high = Down, more on the low = Up, tie = Down; several links -> Down only if low is the room's minimum terrace.
 - Core = all the room's tiles of the core terrace (low if Down, high if Up). Rings = Dilate8 shells outside the core (d tiles each); Down is clipped to the seam window; Up goes around the whole core (no "high side" filter: the rings already sit on low tiles).
   Down: CUT into tiles of the high terrace; Up: BUILT on tiles of the low terrace; same room only, no void; ramp footprints reserved; empty rings dropped and renumbered; diagonal gaps stitched only with free candidates.
+- Corridor (user's decision): the rings must not bury a ramp. Pyramid: the low-terrace tiles straight in front of the foot of each column of the ramp are reserved (layers x tiles per ring long); bowl: the same behind the head, on the high terrace. Same width as the ramp, same height as its terrace, it stops at the room's limit, void, another terrace or another ramp.
+  If the straight way is closed at once, the free neighbours of the end tiles are reserved. Measured (5 terraces, `node tools/diag_cake_ramps.js`): ramps with the foot enclosed by ring tiles > 0.25 above: 78 -> 0; heads enclosed by lower ring tiles: 2 -> 0; ring tiles 15205 -> 14409 (796 lost; 1007 corridor tiles reserved).
 - Heights: Down core top + (k+1) step, Up core top - (k+1) step, step = min(0.3 terH, (gap - 0.05 terH) / n) with gap = lowest high tile - core top (Down) or core top - highest low tile (Up). The rings replace the sub-terraces on their tiles.
 - Conflicts: a tile in rings of two links keeps the smaller ring index (tie: the lower link).
 - Walking, regions, stake and route do not change (rooms walking ignores levels).
@@ -22,10 +24,10 @@ The info shows "Room types" when the Cake switch or the tint is on.
 ## Measured (real map, rooms on, defaults)
 | Terraces | Cake / Diorama / Ascension | links (bowl + pyramid) | ring tiles | levels |
 |---|---|---|---|---|
-| 5 | 31 / 0 / 1 (the user's figures) | 30 + 40 | 15205 of 44582 land | 15 -> 41 |
-| 3 | 27 / 5 / 0 (the user expected 30 / 2 / 0) | 26 + 14 | 7012 | 8 -> 23 |
-| 2 | 26 / 4 / 2 (the user expected 28 / 2 / 2) | 19 + 7 | 4337 | 5 -> 14 |
-Variants of "terrace edge" tried at 3 / 2 terraces (none gives the expected figures): used pairs 27/5/0 and 26/4/2 (= ramps, = used gate groups), candidate gates 31/1/0 and 30/0/2, any terrace adjacency inside the room 31/1/0 and 32/0/0.
+| 5 | 31 / 0 / 1 (the user's figures) | 30 + 40 | 14409 of 44582 land (15205 before the corridor) | 15 -> 41 |
+| 3 | 27 / 5 / 0 (expected values) | 26 + 14 | 6573 | 8 -> 23 |
+| 2 | 26 / 4 / 2 (expected values) | 19 + 7 | 4057 | 5 -> 14 |
+The earlier 30/2/0 and 28/2/2 (user) came from counting every candidate gate and only pieces >= 20 tiles; the figures above are the correct ones (user's decision). Variants of "terrace edge" tried at 3 / 2 terraces (none gives the expected figures): used pairs 27/5/0 and 26/4/2 (= ramps, = used gate groups), candidate gates 31/1/0 and 30/0/2, any terrace adjacency inside the room 31/1/0 and 32/0/0.
 Cold (headless Chromium, compare mode, whole map): rooms on 2.7 s to the first panels, 5.2 s to all three; with Cake rings 3.7 s and 10.0 s (B grows with the number of levels: 41 instead of 15).
 
 ## Phase 2 (not done)

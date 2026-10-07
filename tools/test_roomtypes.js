@@ -5,6 +5,7 @@ const fs = require('fs'), path = require('path'), vm = require('vm');
 global.window = global;
 for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
 const E = window.EVO, T = E.roomTypes; let pass = 0, fail = 0;
+const measureRamps = require('./diag_cake_ramps.js').measure; // the same measurement as the diagnostic (buried / enclosed feet and heads)
 const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log('FAIL', name, extra === undefined ? '' : extra); } };
 const P0 = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, climb: 2, gateThr: 0.05, gateMin: 3, passGap: 8, stairW: 3, stairStyle: 1, rampDepth: 2, spread: 1, smooth: 2, radius: 0.9, tread: 2, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rooms: true, margin: 24 };
 
@@ -86,8 +87,8 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
   const c = base.types.counts;
   ok('5 terraces: 31 Cake, 0 Diorama, 1 Ascension of 32 rooms (the user\'s figures)', c.cake === 31 && c.diorama === 0 && c.ascension === 1 && base.types.rooms.size === 32, JSON.stringify(c));
   { const c3 = run({ ...P0, terraces: 3 }).types.counts, c2 = run({ ...P0, terraces: 2 }).types.counts;
-    console.log(`  info: 3 terraces ${c3.cake}/${c3.diorama}/${c3.ascension} (the user expects 30/2/0), 2 terraces ${c2.cake}/${c2.diorama}/${c2.ascension} (expects 28/2/2): PENDING, not reproduced with used gates as terrace edges`);
-    ok('3 and 2 terraces: measured values stay as recorded (27/5/0 and 26/4/2)', c3.cake === 27 && c3.diorama === 5 && c2.cake === 26 && c2.diorama === 4 && c2.ascension === 2, JSON.stringify([c3, c2])); }
+    console.log(`  info: 3 terraces ${c3.cake}/${c3.diorama}/${c3.ascension} (expected 27/5/0), 2 terraces ${c2.cake}/${c2.diorama}/${c2.ascension} (expected 26/4/2)`);
+    ok('3 and 2 terraces: 27/5/0 and 26/4/2 (the expected values: used gates as terrace edges)', c3.cake === 27 && c3.diorama === 5 && c2.cake === 26 && c2.diorama === 4 && c2.ascension === 2, JSON.stringify([c3, c2])); }
   ok('Cake off: no cake info, no ring tiles, classification still there', base.cake === undefined && base.ringTile === undefined && !!base.types && !!base.roomType);
   ok('Cake on builds links in both directions', cake.cake.down > 10 && cake.cake.up > 10 && cake.cake.links === cake.cake.down + cake.cake.up + cake.cake.flat, JSON.stringify({ d: cake.cake.down, u: cake.cake.up, f: cake.cake.flat }));
   const check = (label, S0, S1) => {
@@ -120,11 +121,29 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
     ok(`${label}: ramps keep their level (rec.level) and their end heights`, S1.stairs.length === S0.stairs.length && S1.stairs.every((r, k) => Math.abs(S1.levelH[r.level] - S0.levelH[S0.stairs[k].level]) < 1e-9 && r.top.every((t, j) => Math.abs(S1.levelH[S1.fine[t]] - S0.levelH[S0.fine[S0.stairs[k].top[j]]]) < 1e-9)));
     const a = S0.connInfo, b = S1.connInfo, wa = S0.walkInfo, wb = S1.walkInfo;
     ok(`${label}: walking, connections, regions, stake / route data unchanged`, JSON.stringify([a.ok, a.recomputed, a.unresolved, a.noRoute]) === JSON.stringify([b.ok, b.recomputed, b.unresolved, b.noRoute]) && wa.walkable === wb.walkable && wa.main === wb.main && JSON.stringify(S0.regionSizes) === JSON.stringify(S1.regionSizes) && S0.region.every((v, i) => v === S1.region[i]) && S0.nowalk.every((v, i) => v === S1.nowalk[i]));
+    { // CORRIDOR: the straight way in front of the foot (pyramid) / behind the head (bowl) of every ramp is not a ring tile; no foot or head is enclosed
+      const m = measureRamps(S1), RL = S1.rooms; let closed = 0, ringOnWay = 0, checked = 0;
+      for (const rec of S1.stairs) {
+        const b0 = rec.bottom[0], o = S1.types.rooms.get(RL.room[mapOf(b0)]); if (!o || o.type !== 1) continue;
+        const l = o.linkList.find((k) => k.low === S1.ter[b0] && k.high === S1.ter[rec.top[0]]); if (!l) continue;
+        const atFoot = !l.down, want = atFoot ? S1.ter[b0] : S1.ter[rec.top[0]];
+        for (let ci = 0; ci < rec.cols.length; ci++) {
+          const a = atFoot ? rec.bottom[ci] : rec.top[ci], from = atFoot ? rec.steps[0].tiles[ci] : rec.steps[rec.steps.length - 1].tiles[ci], dx = (a % S1.W) - (from % S1.W), dy = ((a / S1.W) | 0) - ((from / S1.W) | 0);
+          let x = a % S1.W, y = (a / S1.W) | 0;
+          for (let j = 1; j <= 3; j++) { x += dx; y += dy; if (x < 0 || y < 0 || x >= S1.W || y >= S1.H) break; const t = y * S1.W + x; if ((S1.void && S1.void[t]) || RL.room[mapOf(t)] !== o.id || S1.ter[t] !== want || used.has(t)) break; checked++; if (S1.ringTile[t]) ringOnWay++; if (Math.abs(S1.levelH[S1.fine[t]] - S0.levelH[S0.fine[t]]) > 1e-9) closed++; }
+        }
+      }
+      ok(`${label}: the way in front of every foot (pyramid) / behind every head (bowl) is free of rings and keeps its height (${checked} tiles)`, ringOnWay === 0 && closed === 0 && checked > 0, [ringOnWay, closed, checked]);
+      ok(`${label}: no ramp foot is enclosed by ring tiles above it, no head by ring tiles below it (${m.ramps} ramps)`, m.footEnclosed === 0 && m.headEnclosed === 0, JSON.stringify(m));
+    }
     const steps = S1.cake.list.filter((l) => !l.flat); ok(`${label}: step <= 0.3 and n * step <= gap - margin on every link`, steps.every((l) => l.step <= 0.3 + 1e-9 && l.rings * l.step <= l.gap - 0.05 + 1e-9), JSON.stringify(steps.find((l) => l.rings * l.step > l.gap - 0.05 + 1e-9)));
   };
   check('5 terraces', base, cake);
   console.log(`  info: 5 terraces: ${cake.cake.down} bowls + ${cake.cake.up} pyramids, ${cake.cake.flat} flat links, ${cake.cake.tiles} ring tiles of ${cake.landTiles} land tiles, ${cake.cake.levelsAdded} levels added (${base.maxFine + 1} -> ${cake.maxFine + 1}), ${cake.cake.conflicts} tiles claimed twice`);
   for (const t of [3, 4, 6]) { const a = run({ ...P0, terraces: t }), b = run({ ...P0, terraces: t, cake: true }); check(`${t} terraces`, a, b); }
+  { const nb = run({ ...P0, cake: true, cakeCorridor: false }), m0 = measureRamps(nb), m1 = measureRamps(cake);
+    ok('mutation: without the corridor many feet are enclosed (the test can fail)', m0.footEnclosed > 20, JSON.stringify(m0));
+    console.log(`  info: 5 terraces, ramps buried by the rings: feet enclosed ${m0.footEnclosed} -> ${m1.footEnclosed}, heads enclosed ${m0.headEnclosed} -> ${m1.headEnclosed}; ring tiles ${nb.cake.tiles} -> ${cake.cake.tiles} (${nb.cake.tiles - cake.cake.tiles} lost, ${cake.cake.corridor} corridor tiles reserved)`); }
   { const sp = { rooms: [8], margin: 6 }, a = run(P0, sp), b = run({ ...P0, cake: true }, sp); check('slice = room 8', a, b);
     const whole = base.roomType, mi = (i) => (((i / b.W) | 0) + b.oy) * b.mapW + (i % b.W) + b.ox; let diff = 0; for (let i = 0; i < b.n; i++) if (b.roomType[i] !== (b.void && b.void[i] ? 0 : whole[mi(i)])) diff++;
     ok('slice: the room type of every tile equals the whole-map type (classification does not depend on the slice)', diff === 0, diff); }

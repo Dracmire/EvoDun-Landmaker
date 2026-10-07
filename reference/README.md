@@ -88,6 +88,6 @@ edge -> Diorama; two Dioramas in a row on the critical path -> the second become
 In both rules a room is a Cake only if it has a terrace transition inside it, so the number of ramps decides how many rooms are Cakes.
 
 Measured with the viewer's rooms on `data/samples/skeleton_heightmap_256.png` and the V16.4 rule (platform footprints replaced by the room's
-pieces per terrace, neighbours instead of lobby platforms): 5 terraces -> 31 Cake, 0 Diorama, 1 Ascension of 32 rooms; 3 terraces -> 30 / 2 / 0;
-2 terraces -> 28 / 2 / 2. The user knows this imbalance and accepts it to start (their original main type was Diorama); balancing it later
+pieces per terrace, neighbours instead of lobby platforms): 5 terraces -> 31 Cake, 0 Diorama, 1 Ascension of 32 rooms; 3 terraces -> 27 / 5 / 0;
+2 terraces -> 26 / 4 / 2 (terrace edge = the gate tiles of the USED ramps; counting every candidate gate and only pieces of 20 tiles or more gave 30 / 2 / 0 and 28 / 2 / 2, the figures of an earlier measurement). The user knows this imbalance and accepts it to start (their original main type was Diorama); balancing it later
 (fewer ramps, or ramps only in some rooms) is a separate, later step.
