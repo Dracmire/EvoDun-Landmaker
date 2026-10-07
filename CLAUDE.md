@@ -240,6 +240,19 @@ incursion border; stake and way-back path visible.
    forbidden margins of the layer (walls, cliffs, Steep), identical in Box, A and B, Display switch. EDGE PROBLEM = any other region with the limit or more tiles: NOT hidden and NOT
    connected; it stays walkable, gets a magenta warning outline (Display switch) and the info names it (size, place, what separates it: ramp, terrace gate without ramp, room border
    without transition...). Info: "Walkable N tiles (X % of the land) - isolated: K regions, M tiles - edge problems: J regions (sizes)". `tools/test_walk_rooms.js`.
+   LAST FIX COMMIT OF PR #6 (changing Terraces 3-8 / ramp depth, user's decisions):
+   (1) MERGE BY passGap is conditional: a pair merged into a ramp at another pair (or whose own ramp was carved at an alternative pair of its gate) is only kept
+   so if the connection that crosses it has a route after the recompute; otherwise that pair gets its OWN ramp (`S.makeSite`, or `site.exact` = no alternative pairs) and the
+   whole slice is carved again (at most 6 times, from the tree paths, not from an earlier recompute; all connections are checked again after each carve; `S.unmerged`,
+   `S.exactRetry`, `S.retryBroke` = neighbour paths broken by a retry, 0 in every measured case). The only reason a connection can stay without route is "gate pair whose ramp did not fit"
+   (tried at its own pair, with all variants, and failed), named in the info. (2) START CORE (DEVIATION from the user's `ChooseStartingCore`, user's decision): the scan starts from
+   the group of cores with the MOST cores under the same passability (tie: more tiles); other groups are not connected and stay unreachable (`R.startGroups`; `P.rScanFirst` = old
+   rule, diagnostic only). `tools/rooms_check.js` numbers shift slightly with it. (3) Ramp depth ladder: depth, depth-1, ... 1 at full width, then the same with the lateral columns out.
+   (4) The edge-problem outline is ELECTRIC BLUE dashed (white was confused with the white slice border at the map edge); in a slice the cause "no path inside the slice (what it would join lies outside it)".
+   Diagnostic flags `rampKeep`, `noUnmerge`, `rScanFirst` are not in the UI or the manifest (like `P.anchor`). `node tools/diag_connections.js --table` prints terraces 3-8 before / after.
+   KNOWN LIMIT (documented, not fixed): with 10 and 12 terraces the rooms passability fragments by itself (66 and 138 groups, forbidden margins 34-40 % of the land): the rooms method
+   is meant for 2-5 terraces. ClassifySlopeMap (limitation 12) goes in a SEPARATE PR after this one; approved first option: empty neighbour = the tile's own height, Void by height <= 0,
+   min/max range over land without void in its 3x3 (shore stays walkable up to the edge).
    POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
 5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),

@@ -426,14 +426,14 @@
     const land = S.landTiles, pr = w.problems;
     let t = `<br><b>Walkable</b> ${w.walkable} tiles (${(w.walkable / land * 100).toFixed(0)}% of the ${S.slice ? 'slice' : 'land'}) · isolated: ${w.isolatedRegions} region${w.isolatedRegions === 1 ? '' : 's'}, ${w.isolatedTiles} tiles (under ${w.limit}, decorative) · edge problems: ${pr.length} region${pr.length === 1 ? '' : 's'}${pr.length ? ' (' + pr.map((p) => p.size).join(', ') + ')' : ''}`;
     if (S.isoRampsDropped) t += ` · ${S.isoRampsDropped} ramps not built (they would end in isolated terrain)`;
-    for (const p of pr.slice(0, 5)) t += `<br>&nbsp;&nbsp;edge problem: ${p.size} tiles around (${p.at}), x ${p.box[0]}..${p.box[2]}, y ${p.box[1]}..${p.box[3]}, separated by ${p.causes.slice(0, 3).map(([c, k]) => `${c} (${k})`).join(', ') || 'unknown'}`;
+    for (const p of pr.slice(0, 5)) t += `<br>&nbsp;&nbsp;edge problem: ${p.size} tiles around (${p.at}), x ${p.box[0]}..${p.box[2]}, y ${p.box[1]}..${p.box[3]}, separated by ${p.causes.slice(0, 3).map(([c, k]) => `${c} (${k})`).join(', ') || p.cause}`;
     return t;
   }
   function connText() {
     const c = S.connInfo; if (!c) return '';
     let t = ` · tree connections walkable: ${c.ok + c.recomputed} of ${c.total}` + (c.recomputed ? ` (${c.recomputed} recomputed over the carved graph, same crossing cost)` : '') + (c.unresolved ? `, <b>${c.unresolved} NOT walkable</b>` : '');
     if (c.unresolved) t += ': ' + c.list.slice(0, 4).map((x) => `(${x.from}) -> (${x.to}) stops at (${x.at[0]}) -> (${x.at[1]}): ${x.reason}`).join('; ');
-    const v = S.stairInfo.variants; if (v && v.length > 1) t += ` · ramp variants: ${v.map((k, i) => ['as planned', 'depth 1', 'narrow', 'depth 1 + narrow'][i] + ' ' + k).join(', ')}`;
+    const v = S.stairInfo.variants; if (v && v.length > 1) t += ` · ramp variants: ${v.map((k, i) => (i ? S.stairInfo.variantLabels[i] : 'as planned') + ' ' + k).join(', ')}` + (S.unmerged ? ` · ${S.unmerged} pairs not merged (own ramp)` : '');
     return t;
   }
   function roomsText() {

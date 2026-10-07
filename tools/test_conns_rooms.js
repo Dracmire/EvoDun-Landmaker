@@ -42,5 +42,27 @@ const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log
   ok('without the fix (rampKeep false) the bug is there: paths cut sideways and connections without any route', old.connInfo.noRoute >= 5 && old.connInfo.reasons['path crosses a ramp sideways'] >= 5, JSON.stringify(old.connInfo));
   ok('with the fix some ramps use a variant (shallower or narrower) and most keep the original shape', base.stairInfo.variantsChanged > 5 && base.stairInfo.variants[0] > base.stairInfo.variantsChanged, JSON.stringify(base.stairInfo.variants));
   const off = E.shape(mk(), { ...P, rooms: false }, null); ok('rooms off: no connections, no variants', off.conns === undefined && off.connInfo === undefined && off.stairInfo.variants.length === 1);
+  // terraces 3-8 on the real map and ramp depth 1-4 (5 terraces): the only connection without route that may stay is a gate pair whose ramp did not fit
+  const DID = 'gate pair whose ramp did not fit', reasonsOf = (S) => Object.keys(S.connInfo.unresolvedReasons);
+  const checkTer = (label, Pv) => {
+    const S = E.shape(mk(), Pv, null), info = S.connInfo, RLv = S.rooms, n = S.n, key = (a, b) => (a < b ? a * n + b : b * n + a);
+    ok(`${label}: no unresolved connection except 'ramp did not fit'`, reasonsOf(S).every((r) => r === DID), JSON.stringify(info.unresolvedReasons));
+    const unres = S.conns.filter((c) => c.status === 'unresolved');
+    ok(`${label}: each of them names a pair whose ramp WAS tried and failed (site dropped, no ramp placed)`, unres.every((c) => { const site = S.passes.find((x) => key(x.a, x.b) === key(c.fail[0], c.fail[1])); return site && site.dropped === true && !S.stairs.some((r) => r.site === site); }), unres.length);
+    ok(`${label}: no unresolved connection has a route in the final graph`, unres.every((c) => !E.route(S, Pv, c.path[0], c.path[c.path.length - 1])));
+    ok(`${label}: retries broke no other path`, S.retryBroke === 0, S.retryBroke);
+    // scan start: the group with the MOST cores under the rooms passability (independent computation)
+    const alive = RLv.alive.filter((c) => c.center >= 0), seen = new Set(), sizes = [];
+    for (const c of alive) { if (seen.has(c)) continue; const d = E.rooms.bfs(S.mapW, S.mapH, c.center, RLv.pass, false).dist, m = alive.filter((o) => o === c || o.tiles.some((t) => d[t] >= 0)); m.forEach((o) => seen.add(o)); sizes.push(m.length); }
+    const reach = alive.filter((c) => c.tiles.some((t) => RLv.scan[t] >= 0)).length;
+    ok(`${label}: the scan starts from the group with the most cores (${Math.max(...sizes)} of ${alive.length}, ${sizes.length} groups)`, reach === Math.max(...sizes) && RLv.startGroups[0] === Math.max(...sizes), [reach, sizes.join(',')]);
+    return S;
+  };
+  for (const T of [3, 4, 5, 6, 7, 8]) checkTer(`${T} terraces`, { ...P, terraces: T });
+  for (const D of [1, 2, 3, 4]) checkTer(`5 terraces, ramp depth ${D}`, { ...P, rampDepth: D });
+  // power: without the retry (P.noUnmerge) other reasons remain at 6 terraces; the old start core (first living core) reaches fewer cores at 8
+  ok('mutation: without the retry (noUnmerge) some connection stays unresolved for another reason', reasonsOf(E.shape(mk(), { ...P, terraces: 6, noUnmerge: true }, null)).some((r) => r !== DID));
+  { const a = E.shape(mk(), { ...P, terraces: 8 }, null).rooms, b = E.shape(mk(), { ...P, terraces: 8, rScanFirst: true }, null).rooms, cnt = (R) => R.alive.filter((c) => c.tiles.some((t) => R.scan[t] >= 0)).length;
+    ok('mutation: with 8 terraces the old start (first living core) reaches fewer cores than the largest group', cnt(b) < cnt(a), [cnt(a), cnt(b)]); }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();

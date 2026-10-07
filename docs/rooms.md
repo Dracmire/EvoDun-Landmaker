@@ -89,3 +89,9 @@ Tests: `tools/test_gates_rooms.js`, `test_slice_rooms.js`, `test_room_faces.js`,
   walkable is recomputed over the carved graph with the same crossing cost; if there is none it is not forced and the info names it (`S.connInfo`). `P.rampKeep = false` = before the fix.
   `node tools/diag_connections.js` prints before / after; `tools/test_conns_rooms.js`.
 - Isolated terrain / edge problems: see CLAUDE.md "ISOLATED TERRAIN". `tools/test_walk_rooms.js`.
+
+## Robustness when changing Terraces / ramp depth (last fix commit of PR #6)
+- Start core: the scan starts from the group of cores with the MOST cores under the same passability (deviation from `ChooseStartingCore`, user's decision); other groups stay unreachable.
+- Merge by passGap only when the connection still has a route; otherwise the pair gets its own ramp (variants: depth D..1 at full width, then without lateral columns); all paths are checked again after each carve.
+- Only "gate pair whose ramp did not fit" may remain as a connection without route. `node tools/diag_connections.js --table`, `tools/test_conns_rooms.js` (terraces 3-8, depth 1-4).
+- Known limit: 10 and 12 terraces fragment the passability (66 and 138 groups, forbidden margins 34-40 % of the land). The method is used with 2-5 terraces.

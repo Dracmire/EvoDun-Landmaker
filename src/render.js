@@ -105,7 +105,7 @@
     ctx.restore();
   }
   /* Room borders: a line on every face between two rooms that blocks (orange); an open transition is a gap; the ones the tree uses are green. */
-  const ROOM_COLORS = { 1: 'rgba(255,150,40,0.98)', 2: 'rgba(70,232,130,0.98)', 3: 'rgba(255,70,200,0.98)' }; // 3 = the warning outline of an edge-problem region
+  const ROOM_COLORS = { 1: 'rgba(255,150,40,0.98)', 2: 'rgba(70,232,130,0.98)', 3: 'rgba(40,110,255,0.98)' }; // 3 = the warning outline of an edge-problem region (electric blue, dashed: white is the slice border at the map edge, cyan the passes, pink the route)
   function roomFaces(list, S, cam, i, b, hh, o) { const k = S.roomKind[i * 4 + b]; if (k === 3 ? !o.edgeWarn : !o.roomBorders) return; const x = i % S.W, y = (i / S.W) | 0, f = FACE[b]; list.push([cam.p(x + f[0], y + f[1], hh), cam.p(x + f[2], y + f[3], hh), k]); }
   function strokeRoomFaces(ctx, list) {
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
@@ -114,7 +114,7 @@
     for (const kind of [1, 2, 3]) {
       const pp = new Path2D(); let any = false;
       for (const [p, q, k] of list) if (k === kind) { pp.moveTo(p[0], p[1]); pp.lineTo(q[0], q[1]); any = true; }
-      if (any) { ctx.strokeStyle = ROOM_COLORS[kind]; ctx.lineWidth = 1.8; ctx.stroke(pp); }
+      if (any) { ctx.strokeStyle = ROOM_COLORS[kind]; ctx.lineWidth = 1.8; if (kind === 3) { ctx.lineCap = 'butt'; ctx.setLineDash([3, 2.5]); } ctx.stroke(pp); ctx.setLineDash([]); ctx.lineCap = 'round'; }
     }
     ctx.restore();
   }

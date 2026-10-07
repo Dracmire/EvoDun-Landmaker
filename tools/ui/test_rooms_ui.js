@@ -87,9 +87,9 @@ const { open } = require('./common');
     ok(`${tech} ${preset}: the not-walkable tone changes the terrain it covers and leaves the ramps alone`, toneN > 20 && tone / toneN > 0.45 && rampN > 10 && rampChanged / rampN < 0.1, JSON.stringify({ tone, toneN, rampChanged, rampN }));
   }
   await a.tech('A'); await a.preset('oblique');
-  const magenta = () => page.evaluate(() => { const cv = document.querySelector('#stage canvas'), d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > 235 && d[i + 1] > 50 && d[i + 1] < 95 && d[i + 2] > 170 && d[i + 2] < 225) n++; return n; });
-  const mOn = await magenta(); await page.uncheck('#t-edgeWarn'); await a.idle(); const mOff = await magenta(); await page.check('#t-edgeWarn'); await a.idle();
-  ok('the edge-problem outline is drawn (magenta) and the toggle removes it', mOn > 30 && mOff < 5, [mOn, mOff]);
+  const warnPx = () => page.evaluate(() => { const cv = document.querySelector('#stage canvas'), d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] < 80 && d[i + 1] > 90 && d[i + 1] < 140 && d[i + 2] > 235) n++; return n; });
+  const mOn = await warnPx(); await page.uncheck('#t-edgeWarn'); await a.idle(); const mOff = await warnPx(); await page.check('#t-edgeWarn'); await a.idle();
+  ok('the edge-problem outline is drawn (electric blue) and the toggle removes it', mOn > 30 && mOff < 5, [mOn, mOff]);
   const isoTile = await page.evaluate(() => { const S = window.__evo.S(); for (let i = 0; i < S.n; i++) if (S.isolated[i]) return i; return -1; });
   await page.evaluate((t) => { const ev = window.__evo; ev.setIncMode('stake'); ev.placeMark(t); }, isoTile);
   ok('a stake on isolated terrain is refused with the reason', /isolated terrain \(a walkable region under 100 tiles\)/.test(await page.$eval('#incInfo', (e) => e.innerText)) && (await page.evaluate(() => window.__evo.inc.stake)) === null);

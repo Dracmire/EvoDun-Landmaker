@@ -292,15 +292,28 @@
     S.rooms = RL; S.subFree = !!RL;
     if (RL) { computeGatesRooms(S, P, full, RL, sl); computeRoomFaces(S, full, RL); } else computeGates(S, P, full, q);
     const snap = RL ? { fine: S.fine.slice(), levelH: S.levelH.slice(), levelMeta: S.levelMeta.slice(), maxFine: S.maxFine, byLevel: S.byLevel.map((a) => a.slice()) } : null;
-    const build = () => { carveStairs(S, P); if (RL) checkConnections(S, P); computeRegions(S, P); if (RL) classifyWalk(S, P, RL); };
+    const build = () => { for (const c of S.conns || []) if (c.old) { c.path = c.old; c.old = null; } /* a re-carve starts again from the tree paths, not from an earlier recompute */ carveStairs(S, P); if (RL) checkConnections(S, P); computeRegions(S, P); if (RL) classifyWalk(S, P, RL); };
     build();
-    // rooms on: a ramp that ends up entirely inside ISOLATED terrain (decorative, not walkable) is not built: its site is dropped and the carving redone
-    for (let tries = 0; RL && tries < 2; tries++) {
+    /* rooms on, repeated until nothing changes (at most 6 times):
+       - MERGE BY passGap: a connection that crosses a pair merged into a ramp at another pair and has no route even after the recompute: that pair is NOT merged,
+         it gets its own ramp (with the usual variants). The merge stays when the recompute finds a route.
+       - a ramp that ends up entirely inside ISOLATED terrain is not built (its site is dropped). */
+    S.unmerged = 0; S.exactRetry = 0; S.isoRampsDropped = 0; S.retryBroke = 0;
+    for (let tries = 0; RL && tries < 6; tries++) {
+      const have = new Set(S.passes.map((x) => x.a * S.n + x.b)), add = [];
+      if (P.noUnmerge !== true && P.rampKeep !== false) for (const c of S.conns) if (c.status === 'unresolved' && c.reason === 'gate pair merged into a ramp at another pair') {
+        const [u, v] = c.fail, lo = S.ter[u] < S.ter[v] ? u : v, hi = lo === u ? v : u; if (have.has(lo * S.n + hi)) continue; const site = S.makeSite(lo, hi); if (site) { have.add(lo * S.n + hi); add.push(site); }
+      }
+      if (P.noUnmerge !== true && P.rampKeep !== false) for (const c of S.conns) if (c.status === 'unresolved' && c.reason === 'gate pair carved at another pair of its gate') {
+        const site = S.passes.find((x) => !x.exact && ((x.a === c.fail[0] && x.b === c.fail[1]) || (x.a === c.fail[1] && x.b === c.fail[0]))); if (site) { site.exact = true; S.exactRetry = (S.exactRetry || 0) + 1; add.push(null); } // its ramp went to another pair: try only its own pair
+      }
       const useless = S.stairs.filter((rec) => rec.steps.every((st) => st.tiles.every((t) => S.isolated[t])) && rec.bottom.every((t) => S.isolated[t]) && rec.top.every((t) => S.isolated[t]));
-      if (!useless.length) break;
+      if (!add.length && !useless.length) break;
+      const okBefore = S.conns.map((c) => c.status === 'ok');
       for (const rec of useless) rec.site.noRamp = true;
+      for (const site of add) if (site) S.passes.push(site);
       S.fine.set(snap.fine); S.levelH = snap.levelH.slice(); S.levelMeta = snap.levelMeta.slice(); S.maxFine = snap.maxFine; S.byLevel = snap.byLevel.map((a) => a.slice()); refreshMask(S);
-      build(); S.isoRampsDropped = (S.isoRampsDropped || 0) + useless.length;
+      build(); S.retryBroke += S.conns.reduce((a, c, i) => a + (okBefore[i] && c.status !== 'ok' ? 1 : 0), 0); S.unmerged += add.filter(Boolean).length; S.isoRampsDropped += useless.length;
     }
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
@@ -408,6 +421,7 @@
     const W = S.W, H = S.H, fw = full.width, n = fw * full.height, gates = [], sites = [], U = RL.usage, gap = P.passGap;
     if (!RL.gateByKey) { RL.gateByKey = new Map(); for (const p of RL.gate) RL.gateByKey.set(E.rooms.key(p[0], p[1], n), p); RL.gateByGroup = new Map(); for (const p of RL.gate) { const g = U.gateGroupOf.get(p[0]); if (!RL.gateByGroup.has(g)) RL.gateByGroup.set(g, []); RL.gateByGroup.get(g).push(p); } }
     const win = (t) => { const x = t % fw - S.ox, y = ((t / fw) | 0) - S.oy; return x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x; };
+    const mapOfWin = (i) => (((i / W) | 0) + S.oy) * fw + (i % W) + S.ox;
     const xy = (i) => [i % W, (i / W) | 0];
     const used = [], SU = sl ? E.rooms.sliceUse(RL, fw, full.height, sl.mask) : null; // a slice: the global tree cut + the patch connections
     const entries = SU ? [...SU.gate].map(([k, o]) => [k, o.count, o.patch]) : [...U.usedGate].map(([k, c]) => [k, c, false]);
@@ -434,6 +448,14 @@
     }
     // the tree connections that stay inside the window (window tile indices): they must remain walkable after the ramps are carved
     S.conns = (SU ? SU.edges : U.edges.map((e) => ({ kind: 'global', path: e.path }))).map((e) => ({ kind: e.kind, path: e.path.map(win) })).filter((c) => c.path.every((t) => t >= 0));
+    /* a pair of a gate that was merged into a ramp at another pair gets its OWN site (used when the connection that crosses it has no route otherwise) */
+    S.makeSite = (a, b) => {
+      const gi = gates.findIndex((g) => g.tiles.some((t) => (t.a === a && t.b === b) || (t.a === b && t.b === a))); if (gi < 0) return null;
+      const host = sites.find((x) => x.gate === gi), [sx, sy] = xy(a), gid = U.gateGroupOf.get(mapOfWin(a)), alts = [];
+      for (const p of RL.gateByGroup.get(gid) || []) { const a2 = win(p[0]), b2 = win(p[1]); if (a2 < 0 || b2 < 0 || a2 === a || S.block[a2] || S.block[b2]) continue; const [x, y] = xy(a2); if (Math.max(Math.abs(x - sx), Math.abs(y - sy)) <= 3) alts.push({ a: a2, b: b2, d: Math.hypot(x - sx, y - sy) }); }
+      alts.sort((p, q) => p.d - q.d || p.a - q.a);
+      return { a, b, gate: gi, kind: 'terrace', patch: host ? host.patch : false, unmerged: true, alts: alts.map((o) => ({ a: o.a, b: o.b })) };
+    };
     S.sliceUse = SU; S.gates = gates; S.passes = sites; S.roomGates = { candidates: RL.usage.gateGroups, usedGroups: new Set(clusters.map((c) => c.gid)).size, sites: sites.length, merged: used.length - clusters.length, patchSites: sites.filter((x) => x.patch).length, slice: SU ? { nodes: SU.nodes, kept: SU.kept, patch: SU.patch, componentsBefore: SU.componentsBefore, componentsAfter: SU.componentsAfter } : null };
   }
 
@@ -593,12 +615,14 @@
       }
       return true;
     };
-    const ladder = ramp && keep ? [[depthDefault, rwidthDefault], [1, rwidthDefault], [depthDefault, 1], [1, 1]].filter((v, k, a) => a.findIndex((w) => w[0] === v[0] && w[1] === v[1]) === k) : ramp ? [[depthDefault, rwidthDefault]] : [[0, 0]];
+    // depth D, D-1, ... 1 at full width, then the same depths with the lateral columns out (width 1); a ramp that is not the first of the ladder is a variant
+    const ladder = [];
+    if (ramp && keep) { for (let d = depthDefault; d >= 1; d--) ladder.push([d, rwidthDefault]); if (rwidthDefault > 1) for (let d = depthDefault; d >= 1; d--) ladder.push([d, 1]); } else ladder.push(ramp ? [depthDefault, rwidthDefault] : [0, 0]);
     const variantHist = new Array(ladder.length).fill(0); let variantsChanged = 0;
     for (const pass of S.passes) {
       if (pass.noRamp) continue; // its ramp would end up in isolated terrain (rooms on)
       let rec = null, variant = 0;   // cut into the upper terrace, or build up the lower one: the wider result wins (ties: cut)
-      for (const site of [pass, ...pass.alts]) {   // the centred tile first, then the rest of the gate, nearest first
+      for (const site of pass.exact ? [pass] : [pass, ...pass.alts]) {   // the centred tile first, then the rest of the gate, nearest first
         for (let vi = 0; vi < ladder.length && !rec; vi++) {
           const cand = [];
           for (const mode of ['cut', 'fill']) { const r = ramp ? planRamp(site, mode, ladder[vi][0], ladder[vi][1]) : plan(site, mode); if (r) cand.push(r); }
@@ -625,7 +649,7 @@
       refreshMask(S);
     }
     for (const rec of stairs) if (rec.ramp && rec.site && rec.site.patch) rec.ramp.patch = true; // a patch ramp (it exists only for this slice) has its own tone
-    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, shiftedCols, width: P.stairStyle !== 0 ? rwidth : width, style: ramp ? 'ramp' : 'steps', variants: variantHist, variantsChanged };
+    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, shiftedCols, width: P.stairStyle !== 0 ? rwidth : width, style: ramp ? 'ramp' : 'steps', variants: variantHist, variantLabels: ladder.map(([d, w]) => `depth ${d}${w === 1 && rwidthDefault > 1 ? ' narrow' : ''}`), variantsChanged };
     if (!carve.size) return;
     // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height
     const bridges = [...new Set([...carve.values()].filter((c) => c.base < 0))].sort((p, q) => p.h - q.h);
@@ -657,25 +681,26 @@
     }
     const step = (u, v) => { if (S.block[u] || S.block[v]) return false; if (S.carved[u] || S.carved[v]) return links.has(lk(u, v)); return !roomBlocked(S, u) && !roomBlocked(S, v) && roomStep(S, u, v); };
     const cc = RL.prm.crossCost || 0, extra = cc > 0 ? (u, v) => (links.has(lk(u, v)) && S.ter[u] !== S.ter[v] ? cc : 0) : null;
-    const siteOf = new Map(); // gate pair (window tiles) -> the site of its gate
-    S.passes.forEach((site) => { for (const t of S.gates[site.gate].tiles) siteOf.set(lk(t.a, t.b), site); });
+    const exactOf = new Map(); // gate pair (window tiles) -> the site that is exactly that pair
+    S.passes.forEach((site) => { exactOf.set(lk(site.a, site.b), site); });
+    const inGate = new Set(); S.gates.forEach((g) => { for (const t of g.tiles) inGate.add(lk(t.a, t.b)); });
     const why = (u, v) => {
       if (S.block[u] || S.block[v] || roomBlocked(S, u) || roomBlocked(S, v)) return 'blocked tile';
       if (S.carved[u] || S.carved[v]) return 'path crosses a ramp sideways';
-      if (S.ter[u] !== S.ter[v]) { const site = siteOf.get(lk(u, v)); return !site ? 'gate pair without ramp' : site.dropped ? 'gate pair whose ramp did not fit' : 'gate pair merged into a ramp at another pair'; }
+      if (S.ter[u] !== S.ter[v]) { const site = exactOf.get(lk(u, v)); if (site) return site.dropped ? 'gate pair whose ramp did not fit' : 'gate pair carved at another pair of its gate'; return inGate.has(lk(u, v)) ? 'gate pair merged into a ramp at another pair' : 'gate pair without ramp'; }
       return 'other';
     };
-    const info = { total: conns.length, ok: 0, recomputed: 0, unresolved: 0, noRoute: 0, reasons: {}, list: [], global: 0, patch: 0, keep: P.rampKeep !== false }; // noRoute: no route at all between its ends in the final graph
+    const info = { total: conns.length, ok: 0, recomputed: 0, unresolved: 0, noRoute: 0, reasons: {}, unresolvedReasons: {}, list: [], global: 0, patch: 0, keep: P.rampKeep !== false }; // noRoute: no route at all between its ends in the final graph
     for (const c of conns) {
       c.kind === 'patch' ? info.patch++ : info.global++;
       let bad = -1; for (let k = 1; k < c.path.length; k++) if (!step(c.path[k - 1], c.path[k])) { bad = k; break; }
       if (bad < 0) { c.status = 'ok'; info.ok++; continue; }
-      const reason = why(c.path[bad - 1], c.path[bad]); c.reason = reason; info.reasons[reason] = (info.reasons[reason] || 0) + 1;
+      const reason = why(c.path[bad - 1], c.path[bad]); c.reason = reason; c.fail = [c.path[bad - 1], c.path[bad]]; info.reasons[reason] = (info.reasons[reason] || 0) + 1;
       const a = c.path[0], b = c.path[c.path.length - 1];
       const r = E.rooms.dijkstra(W, H, a, step, true, extra, b);
       if (info.keep && r.dist[b] >= 0) { c.old = c.path; c.path = E.rooms.pathTo(r, b); c.status = 'recomputed'; info.recomputed++; continue; }
       if (r.dist[b] < 0) info.noRoute++;
-      c.status = 'unresolved'; info.unresolved++;
+      c.status = 'unresolved'; info.unresolved++; info.unresolvedReasons[reason] = (info.unresolvedReasons[reason] || 0) + 1;
       const mxy = (t) => [S.ox + (t % W), S.oy + ((t / W) | 0)];
       if (info.list.length < 8) info.list.push({ from: mxy(a), to: mxy(b), at: [mxy(c.path[bad - 1]), mxy(c.path[bad])], reason, kind: c.kind });
     }
@@ -719,7 +744,8 @@
         if (c >= 0) { const w = cause(i, c); o.causes[w] = (o.causes[w] || 0) + 1; }
       }
     }
-    const problems = [...stat.values()].map((o) => { const top = Object.entries(o.causes).sort((p, q) => q[1] - p[1]); return { id: o.id, size: o.size, at: [Math.round(S.ox + o.sx / o.size), Math.round(S.oy + o.sy / o.size)], box: [S.ox + o.x0, S.oy + o.y0, S.ox + o.x1, S.oy + o.y1], causes: top, cause: top.length ? top[0][0] : 'unknown' }; }).sort((p, q) => q.size - p.size);
+    const none = S.slice ? 'no path inside the slice (what it would join lies outside it)' : 'only non-walkable margins around it (no neighbouring walkable region)';
+    const problems = [...stat.values()].map((o) => { const top = Object.entries(o.causes).sort((p, q) => q[1] - p[1]); return { id: o.id, size: o.size, at: [Math.round(S.ox + o.sx / o.size), Math.round(S.oy + o.sy / o.size)], box: [S.ox + o.x0, S.oy + o.y0, S.ox + o.x1, S.oy + o.y1], causes: top, cause: top.length ? top[0][0] : none }; }).sort((p, q) => q.size - p.size);
     let wt = 0; for (const v of sizes) wt += v;
     S.walkInfo = { limit, main: main >= 0 ? rs[main] : 0, walkable: wt, isolatedRegions: isoRegions, isolatedTiles: isoTiles, problems };
   }

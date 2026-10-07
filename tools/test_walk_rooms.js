@@ -43,5 +43,12 @@ const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log
   const S = E.shape(mk(), P, null); let iso = -1; for (let i = 0; i < S.n; i++) if (S.isolated[i]) { iso = i; break; }
   ok('an isolated tile is refused for a mark', iso >= 0 && !E.tileWalkable(S, iso));
   const off = E.shape(mk(), { ...P, rooms: false }, null); ok('rooms off: no isolated terrain, no tone, no warning', off.isolated === undefined && off.nowalk === undefined && off.walkInfo === undefined);
+  // terraces 3-8: the same rule holds, every problem is named (no empty cause, none "unknown" in a slice), main is the largest region
+  for (const T of [3, 4, 5, 6, 7, 8]) {
+    const S = E.shape(mk(), { ...P, terraces: T }, null), w = S.walkInfo, rs = S.regionSizes;
+    ok(`${T} terraces: main is the largest region, the rest are problems of ${w.limit} tiles or more`, rs[S.mainRegion] === Math.max(...rs) && w.problems.length === rs.length - 1 && w.problems.every((q) => q.size >= w.limit), [rs.length, w.problems.length]);
+    ok(`${T} terraces: every problem has a named cause`, w.problems.every((q) => typeof q.cause === 'string' && q.cause.length > 0 && !/^unknown$/i.test(q.cause)), JSON.stringify(w.problems.slice(0, 2).map((q) => q.cause)));
+  }
+  { const S = E.shape(mk(), { ...P, terraces: 6 }, { rooms: [8], margin: 6 }); ok('a slice: no problem is named "unknown"', S.walkInfo.problems.every((q) => q.cause && !/unknown/i.test(q.cause)), JSON.stringify(S.walkInfo.problems.map((q) => q.cause))); }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();

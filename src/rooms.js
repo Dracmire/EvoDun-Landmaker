@@ -413,16 +413,27 @@
       const gp = R.gatePairs(inp.gateTiles, s1.room, ter, s1.cls, h, W, H, prm.gateMin, true), mp = R.makePass({ W, H, h, room: s1.room, ter, cls: s1.cls, pairs: s2.pairs, gate: gp.pairs });
       return { gate: gp.pairs, gateStats: gp.stats, pass: mp.pass, forb: mp.forb, rp: mp.roomPairs, gp: mp.gatePairs };
     });
-    const k4 = k3 + '#' + prm.minCore;
+    const k4 = k3 + '#' + prm.minCore + (prm.scanFirst ? 'f' : '');
     const s4 = R.stage(C, 'cores', k4, () => {
       const cores = R.cores(s1.room, ter, s1.cls, s1.rooms, W, H, prm.minCore), centres = R.fixCentres(cores, s3.forb, W), alive = cores.filter((c) => !c.dead);
-      // the pipeline as written: scan from the first living core, cores touched by the scan are Reachable
-      const root = alive.find((c) => c.center >= 0), scan = root ? R.bfs(W, H, root.center, s3.pass, false).dist : new Int32Array(n).fill(-1);
-      return { cores, centres, alive, scan, reach: alive.filter((c) => c.tiles.some((t) => scan[t] >= 0)) };
+      /* START CORE (the user's decision, a DEVIATION from his ChooseStartingCore = the first living core): the scan starts from the GROUP of cores with the most
+         cores under the same passability (a tie: the most tiles), so a small pocket that happens to come first does not discard the rest of the map. The other
+         groups are not connected: they stay unreachable. prm.scanFirst = true restores the first living core (diagnostic). */
+      const cand = alive.filter((c) => c.center >= 0); let root = cand[0], groups = [];
+      if (cand.length && !prm.scanFirst) {
+        const seen = new Set();
+        for (const c of cand) {
+          if (seen.has(c)) continue; const d = R.bfs(W, H, c.center, s3.pass, false).dist, members = cand.filter((o) => o === c || o.tiles.some((t) => d[t] >= 0));
+          for (const o of members) seen.add(o); groups.push({ root: c, cores: members.length, tiles: members.reduce((a, o) => a + o.size, 0) });
+        }
+        groups.sort((p, q) => q.cores - p.cores || q.tiles - p.tiles); root = groups[0].root;
+      }
+      const scan = root ? R.bfs(W, H, root.center, s3.pass, false).dist : new Int32Array(n).fill(-1);
+      return { cores, centres, alive, scan, reach: alive.filter((c) => c.tiles.some((t) => scan[t] >= 0)), startGroups: groups.map((g) => g.cores) };
     });
     const k5 = k4 + '#' + (prm.crossCost || 0) + (prm.treeAll ? 'a' : '');
     const out = { prm, ter, W, H, h, room: s1.room, room0: s1.room0, rooms: s1.rooms, roomSizes: s1.sizes, seeds: s1.seeds, cls: s1.cls, slope: s1.slope, stats: s1.stats, pairs: s2.pairs, expand: s2.expand,
-      gate: s3.gate, gateStats: s3.gateStats, pass: s3.pass, forb: s3.forb, rp: s3.rp, gp: s3.gp, cores: s4.cores, centres: s4.centres, alive: s4.alive, scan: s4.scan, reach: s4.reach };
+      gate: s3.gate, gateStats: s3.gateStats, pass: s3.pass, forb: s3.forb, rp: s3.rp, gp: s3.gp, cores: s4.cores, centres: s4.centres, alive: s4.alive, scan: s4.scan, reach: s4.reach, startGroups: s4.startGroups };
     const cc = prm.crossCost || 0; out.extra = cc > 0 ? (a, b) => ter[a] !== ter[b] && s3.gp.has(key(a, b, n)) ? cc : 0 : null; // crossing a terrace gate costs cc tiles more
     const s5 = R.stage(C, 'tree', k5, () => {
       const treeReach = R.spanning(W, H, s4.reach.map((c) => c.center), s3.pass, out.extra);
@@ -438,7 +449,7 @@
      E.gateTransitions), heights are the elevation over the highest land tile (0..1, void = 0), the rest are P's rooms parameters. */
   R.paramsOf = (P) => ({ gentle: P.rGentle === undefined ? 0.2 : P.rGentle, steep: P.rSteep === undefined ? 0.33 : P.rSteep, exponent: P.rExp === undefined ? 0.5 : P.rExp, hTol: P.rHTol === undefined ? 0.07 : P.rHTol,
     minRadius: P.rRadius === undefined ? 9 : P.rRadius, minRoom: P.rMinRoom === undefined ? 8 : P.rMinRoom, hardEdge: P.rHardEdge === undefined ? 0.5 : P.rHardEdge, minSizeEdge: P.rMinSizeEdge === undefined ? 12 : P.rMinSizeEdge,
-    minCore: P.roomsMinCore === undefined ? 20 : P.roomsMinCore, crossCost: P.roomsCross === undefined ? 10 : P.roomsCross, gateMin: P.gateMin === undefined ? 3 : P.gateMin });
+    minCore: P.roomsMinCore === undefined ? 20 : P.roomsMinCore, crossCost: P.roomsCross === undefined ? 10 : P.roomsCross, scanFirst: !!P.rScanFirst, gateMin: P.gateMin === undefined ? 3 : P.gateMin });
   R.layer = function (full, P) {
     const W = full.width, H = full.height, n = W * H, q = E.quantize(full, P), tr = E.gateTransitions(full, P, 'terrace');
     if (!full._rc) full._rc = {};
