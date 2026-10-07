@@ -24,6 +24,7 @@
 
   const key = (a, b, n) => a < b ? a * n + b : b * n + a;
   R.key = key;
+  R.hue = (id) => (id * 137.508) % 360; // colour of a room: chips and overlay
   const roundEven = (v) => { const f = Math.floor(v), d = v - f; return d < 0.5 ? f : d > 0.5 ? f + 1 : (f % 2 === 0 ? f : f + 1); };
 
   /* ---- slope classes (ComputeSlopeMap -> pow -> normalize -> ClassifySlopeMap) ---- */
@@ -312,12 +313,15 @@
      (and those plus the path tiles). res: R.build output. */
   R.usage = function (res, W, H) {
     const n = W * H, tr = res.treeReach, cs = res.reach, usedGate = new Map(), usedRoom = new Map(), pathTiles = new Set(); let steps = 0; // used pairs -> how many tree paths cross them
+    const edges = [];
     for (const e of tr.tree) {
       const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra, cs[e.j].center), pth = R.pathTo(b, cs[e.j].center); steps += pth.length - 1;
+      const g = [], r = [];
       for (let k = 0; k < pth.length; k++) {
         pathTiles.add(pth[k]); if (k === 0) continue;
-        const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) usedGate.set(kk, (usedGate.get(kk) || 0) + 1); else if (res.rp.has(kk)) usedRoom.set(kk, (usedRoom.get(kk) || 0) + 1);
+        const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) { usedGate.set(kk, (usedGate.get(kk) || 0) + 1); g.push(kk); } else if (res.rp.has(kk)) { usedRoom.set(kk, (usedRoom.get(kk) || 0) + 1); r.push(kk); }
       }
+      edges.push({ i: e.i, j: e.j, path: pth, g, r });
     }
     const comps = (tiles) => { // 4-connected components of a tile set -> Map tile -> id
       const id = new Map(); let c = 0;
@@ -336,7 +340,35 @@
     const bigPath = new Set(); for (const e of tr.tree) if (inBig.has(e.i)) { const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra, cs[e.j].center); for (const t of R.pathTo(b, cs[e.j].center)) bigPath.add(t); }
     const withPaths = new Set([...coreTiles, ...bigPath]);
     return { usedGatePairs: usedGate.size, usedRoomPairs: usedRoom.size, gateGroups: gg.count, usedGateGroups: usedGG.size, roomGroups: rg.count, usedRoomGroups: usedRG.size,
-      steps, pathTiles: pathTiles.size, bigCores: big.length, bigCoreTiles: coreTiles.size, bigWithPaths: withPaths.size, usedGate, usedRoom, gateGroupOf: gg.id };
+      steps, pathTiles: pathTiles.size, bigCores: big.length, bigCoreTiles: coreTiles.size, bigWithPaths: withPaths.size, usedGate, usedRoom, gateGroupOf: gg.id, edges };
+  };
+
+  /* A slice cuts the global tree (user's rule). Nodes = living cores whose centre is inside the slice (mask, map-sized). The global tree edges whose whole
+     path stays inside are KEPT; the components the cut left apart are joined with the minimum extra connections (Kruskal starting from those components,
+     shortest paths that stay inside the slice, same crossing cost): the PATCH connections. Returns what the slice uses: gate and room-transition pairs
+     with how many connections cross them and whether any is global (patch = false) or all are patch. res: R.build output. */
+  R.sliceUse = function (res, W, H, mask) {
+    const n = W * H, U = res.usage, cs = res.reach, nodes = res.alive.filter((c) => c.center >= 0 && mask[c.center]), idx = new Map(nodes.map((c, k) => [c, k]));
+    const uf = Array.from({ length: nodes.length }, (_, k) => k), find = (v) => { while (uf[v] !== v) { uf[v] = uf[uf[v]]; v = uf[v]; } return v; };
+    const gate = new Map(), room = new Map(), add = (map, kk, patch) => { const o = map.get(kk) || { count: 0, patch: true }; o.count++; if (!patch) o.patch = false; map.set(kk, o); };
+    let kept = 0; const comps0 = () => { const s = new Set(); for (let k = 0; k < nodes.length; k++) s.add(find(k)); return s.size; };
+    for (const e of U.edges) {
+      const a = idx.get(cs[e.i]), b = idx.get(cs[e.j]); if (a === undefined || b === undefined || !e.path.every((t) => mask[t])) continue;
+      uf[find(a)] = find(b); kept++; for (const kk of e.g) add(gate, kk, false); for (const kk of e.r) add(room, kk, false);
+    }
+    const before = comps0(), step = (a, b) => mask[a] && mask[b] && res.pass(a, b), cand = [];
+    for (let i = 0; i < nodes.length; i++) {
+      if (!nodes.some((_, j) => j > i && find(j) !== find(i))) continue; // nothing left to join from here
+      const { dist } = R.dijkstra(W, H, nodes[i].center, step, false, res.extra);
+      for (let j = i + 1; j < nodes.length; j++) if (find(i) !== find(j) && dist[nodes[j].center] >= 0) cand.push({ i, j, cost: dist[nodes[j].center] + 1 });
+    }
+    cand.sort((p, q) => p.cost - q.cost); let patch = 0, steps = 0;
+    for (const c of cand) {
+      if (find(c.i) === find(c.j)) continue; uf[find(c.i)] = find(c.j); patch++;
+      const b = R.dijkstra(W, H, nodes[c.i].center, step, true, res.extra, nodes[c.j].center), pth = R.pathTo(b, nodes[c.j].center); steps += pth.length - 1;
+      for (let k = 1; k < pth.length; k++) { const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) add(gate, kk, true); else if (res.rp.has(kk)) add(room, kk, true); }
+    }
+    return { nodes: nodes.length, kept, patch, componentsBefore: before, componentsAfter: comps0(), patchSteps: steps, gate, room };
   };
 
   /* Elevation for quantizing over the LAND only: void tiles (h <= 0) take the value of the nearest land tile (so the pre-smoothing does not drag the
@@ -368,7 +400,8 @@
     const s1 = R.stage(C, 'rooms', k1, () => {
       const slope = R.slope(h, W, H, prm.exponent), cls = R.classify(slope, h, prm.gentle, prm.steep), ws = R.watershed(h, cls, W, H, prm), as = R.assign(ws.room, h, W, H);
       let land = 0, un0 = 0; for (let i = 0; i < n; i++) if (h[i] > 0) { land++; if (!ws.room[i]) un0++; }
-      return { slope, cls, room0: ws.room, rooms: ws.rooms, seeds: ws.seeds, room: as.room, stats: { seeds: ws.seeds, rooms: ws.rooms.length, land, unassignedBefore: un0, unassignedAfter: as.left } };
+      const sizes = new Int32Array(ws.seeds + 1); for (let i = 0; i < n; i++) if (as.room[i] > 0) sizes[as.room[i]]++; // tiles per room id after the assignment
+      return { slope, cls, room0: ws.room, rooms: ws.rooms, seeds: ws.seeds, room: as.room, sizes, stats: { seeds: ws.seeds, rooms: ws.rooms.length, land, unassignedBefore: un0, unassignedAfter: as.left } };
     });
     const k2 = k1 + '#' + (inp.tkey || '') + '|' + prm.hardEdge + '|' + prm.minSizeEdge;
     const s2 = R.stage(C, 'edges', k2, () => {
@@ -388,7 +421,7 @@
       return { cores, centres, alive, scan, reach: alive.filter((c) => c.tiles.some((t) => scan[t] >= 0)) };
     });
     const k5 = k4 + '#' + (prm.crossCost || 0) + (prm.treeAll ? 'a' : '');
-    const out = { prm, ter, W, H, h, room: s1.room, room0: s1.room0, rooms: s1.rooms, seeds: s1.seeds, cls: s1.cls, slope: s1.slope, stats: s1.stats, pairs: s2.pairs, expand: s2.expand,
+    const out = { prm, ter, W, H, h, room: s1.room, room0: s1.room0, rooms: s1.rooms, roomSizes: s1.sizes, seeds: s1.seeds, cls: s1.cls, slope: s1.slope, stats: s1.stats, pairs: s2.pairs, expand: s2.expand,
       gate: s3.gate, gateStats: s3.gateStats, pass: s3.pass, forb: s3.forb, rp: s3.rp, gp: s3.gp, cores: s4.cores, centres: s4.centres, alive: s4.alive, scan: s4.scan, reach: s4.reach };
     const cc = prm.crossCost || 0; out.extra = cc > 0 ? (a, b) => ter[a] !== ter[b] && s3.gp.has(key(a, b, n)) ? cc : 0 : null; // crossing a terrace gate costs cc tiles more
     const s5 = R.stage(C, 'tree', k5, () => {

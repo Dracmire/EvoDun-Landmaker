@@ -71,6 +71,9 @@ figcaption span{color:var(--mut);font-size:11px}
    <div class="hint" id="zoneHint" hidden>Zones: click = only this zone · Ctrl/Shift-click = add or remove</div>
    <div id="zoneChips" class="chips"></div>
    <div class="row" id="zoneBtns" hidden style="margin-top:4px"><button id="wholeMap">Whole map</button></div>
+   <div class="hint" id="roomHint" hidden>Rooms (rooms on): click = only this room · Ctrl/Shift-click = add or remove</div>
+   <div id="roomChips" class="chips"></div>
+   <div class="row" id="roomBtns" hidden style="margin-top:4px"><button id="wholeRooms">Whole map</button></div>
    <div class="hint" style="margin-top:6px">Crop in tiles (x1, y1 exclusive; blank = no limit)</div>
    <div class="crop"><input type="number" id="cx0" min="0" placeholder="x0"><input type="number" id="cy0" min="0" placeholder="y0"><input type="number" id="cx1" min="0" placeholder="x1"><input type="number" id="cy1" min="0" placeholder="y1"></div>
    <div class="hint" id="sliceInfo"></div>
@@ -598,9 +601,11 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   /* spec: { zones: [ids], rect: [x0, y0, x1, y1] (x1, y1 exclusive), margin }. null = the whole map is the slice.
      Returns { mask (map-sized), x0, y0, x1, y1 (window, x1/y1 exclusive), bbox, tiles }. */
   E.sliceOf = function (pack, spec) {
-    if (!spec || (!(spec.zones && spec.zones.length) && !spec.rect)) return null;
+    if (!spec || (!(spec.zones && spec.zones.length) && !(spec.rooms && spec.rooms.length) && !spec.rect)) return null;
     const W = pack.width, H = pack.height, mask = new Uint8Array(W * H);
-    if (spec.zones && spec.zones.length) {
+    if (spec.rooms && spec.rooms.length && spec.roomMap) { // rooms (rooms switch on) choose the slice, like zones
+      const set = new Set(spec.rooms); for (let i = 0; i < mask.length; i++) mask[i] = set.has(spec.roomMap[i]) ? 1 : 0;
+    } else if (spec.zones && spec.zones.length) {
       const ids = zoneIdsForSlice(pack), set = new Set(spec.zones);
       if (!ids) throw new Error('This pack has no zone field: assign the zone role first.');
       for (let i = 0; i < mask.length; i++) mask[i] = set.has(ids[i]) ? 1 : 0;
@@ -714,6 +719,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   /* pack: the whole map; spec: see E.sliceOf (omit for the whole map as one slice). Terraces use the global
      elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
   E.shape = function (full, P, spec) {
+    const RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: the global tree gives the gates, sub-terraces are only visual
+    if (RL && spec && spec.rooms && spec.rooms.length) spec = Object.assign({}, spec, { roomMap: RL.room });
     const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
     const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.subs;
     const q = quantize(full, P);
@@ -778,11 +785,10 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
           if (p && p.pieces > 1) warnings.push(`Zone ${id} is not contiguous (4-neighbour): ${p.pieces} pieces, the largest has ${p.largest} of ${p.total} tiles. Left as is.`);
         }
       }
-      S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rect: spec.rect || null, warnings };
+      S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rooms: spec.rooms ? spec.rooms.slice() : [], rect: spec.rect || null, warnings };
     }
-    const RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: gates come from the tree, sub-terraces are only visual
     S.rooms = RL; S.subFree = !!RL;
-    if (RL) computeGatesRooms(S, P, full, RL); else computeGates(S, P, full, q);
+    if (RL) computeGatesRooms(S, P, full, RL, sl); else computeGates(S, P, full, q);
     carveStairs(S, P);
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
@@ -886,16 +892,17 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
      A site is that exact pair (a = low tile, b = high tile). Crossings of the same gate group closer than passGap to a chosen site are merged into it
      (sites are taken by number of crossing paths, then position); the candidate pairs of the group within 3 tiles are the fallbacks when the carve does
      not fit. Everything is clipped to the window (both tiles unblocked). */
-  function computeGatesRooms(S, P, full, RL) {
+  function computeGatesRooms(S, P, full, RL, sl) {
     const W = S.W, H = S.H, fw = full.width, n = fw * full.height, gates = [], sites = [], U = RL.usage, gap = P.passGap;
     if (!RL.gateByKey) { RL.gateByKey = new Map(); for (const p of RL.gate) RL.gateByKey.set(E.rooms.key(p[0], p[1], n), p); RL.gateByGroup = new Map(); for (const p of RL.gate) { const g = U.gateGroupOf.get(p[0]); if (!RL.gateByGroup.has(g)) RL.gateByGroup.set(g, []); RL.gateByGroup.get(g).push(p); } }
     const win = (t) => { const x = t % fw - S.ox, y = ((t / fw) | 0) - S.oy; return x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x; };
     const xy = (i) => [i % W, (i / W) | 0];
-    const used = [];
-    for (const [k, count] of U.usedGate) {
+    const used = [], SU = sl ? E.rooms.sliceUse(RL, fw, full.height, sl.mask) : null; // a slice: the global tree cut + the patch connections
+    const entries = SU ? [...SU.gate].map(([k, o]) => [k, o.count, o.patch]) : [...U.usedGate].map(([k, c]) => [k, c, false]);
+    for (const [k, count, patch] of entries) {
       const p = RL.gateByKey.get(k); if (!p) continue;
       const a = win(p[0]), b = win(p[1]); if (a < 0 || b < 0 || S.block[a] || S.block[b]) continue;
-      used.push({ a, b, count, gid: U.gateGroupOf.get(p[0]) });
+      used.push({ a, b, count, patch, gid: U.gateGroupOf.get(p[0]) });
     }
     used.sort((p, q) => q.count - p.count || p.a - q.a);
     const clusters = [];
@@ -911,9 +918,9 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const alts = [];
       for (const p of RL.gateByGroup.get(c.gid)) { const a = win(p[0]), b = win(p[1]); if (a < 0 || b < 0 || a === c.site.a || S.block[a] || S.block[b]) continue; const [x, y] = xy(a); if (Math.max(Math.abs(x - sx), Math.abs(y - sy)) <= 3) alts.push({ a, b, d: Math.hypot(x - sx, y - sy) }); }
       alts.sort((p, q) => p.d - q.d || p.a - q.a);
-      sites.push({ a: c.site.a, b: c.site.b, gate: gi, kind: 'terrace', alts: alts.map((o) => ({ a: o.a, b: o.b })) });
+      sites.push({ a: c.site.a, b: c.site.b, gate: gi, kind: 'terrace', patch: c.pairs.every((u) => u.patch), alts: alts.map((o) => ({ a: o.a, b: o.b })) });
     }
-    S.gates = gates; S.passes = sites; S.roomGates = { candidates: RL.usage.gateGroups, usedGroups: new Set(clusters.map((c) => c.gid)).size, sites: sites.length, merged: used.length - clusters.length };
+    S.gates = gates; S.passes = sites; S.roomGates = { candidates: RL.usage.gateGroups, usedGroups: new Set(clusters.map((c) => c.gid)).size, sites: sites.length, merged: used.length - clusters.length, patchSites: sites.filter((x) => x.patch).length, slice: SU ? { nodes: SU.nodes, kept: SU.kept, patch: SU.patch, componentsBefore: SU.componentsBefore, componentsAfter: SU.componentsAfter } : null };
   }
 
   /* Stairs are carved into the terrain. Each tread rises at most `tread` sub-terraces (default: the climb limit; never more). A stair is cut into the upper
@@ -1054,6 +1061,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       for (let i = 0; i < n; i++) if (!S.void || !S.void[i]) S.byLevel[S.fine[i]].push(i);
       refreshMask(S);
     }
+    for (const rec of stairs) if (rec.ramp && rec.site && rec.site.patch) rec.ramp.patch = true; // a patch ramp (it exists only for this slice) has its own tone
     S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, shiftedCols, width: P.stairStyle !== 0 ? rwidth : width, style: ramp ? 'ramp' : 'steps' };
     if (!carve.size) return;
     // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height
@@ -1217,6 +1225,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   const key = (a, b, n) => a < b ? a * n + b : b * n + a;
   R.key = key;
+  R.hue = (id) => (id * 137.508) % 360; // colour of a room: chips and overlay
   const roundEven = (v) => { const f = Math.floor(v), d = v - f; return d < 0.5 ? f : d > 0.5 ? f + 1 : (f % 2 === 0 ? f : f + 1); };
 
   /* ---- slope classes (ComputeSlopeMap -> pow -> normalize -> ClassifySlopeMap) ---- */
@@ -1505,12 +1514,15 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
      (and those plus the path tiles). res: R.build output. */
   R.usage = function (res, W, H) {
     const n = W * H, tr = res.treeReach, cs = res.reach, usedGate = new Map(), usedRoom = new Map(), pathTiles = new Set(); let steps = 0; // used pairs -> how many tree paths cross them
+    const edges = [];
     for (const e of tr.tree) {
       const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra, cs[e.j].center), pth = R.pathTo(b, cs[e.j].center); steps += pth.length - 1;
+      const g = [], r = [];
       for (let k = 0; k < pth.length; k++) {
         pathTiles.add(pth[k]); if (k === 0) continue;
-        const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) usedGate.set(kk, (usedGate.get(kk) || 0) + 1); else if (res.rp.has(kk)) usedRoom.set(kk, (usedRoom.get(kk) || 0) + 1);
+        const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) { usedGate.set(kk, (usedGate.get(kk) || 0) + 1); g.push(kk); } else if (res.rp.has(kk)) { usedRoom.set(kk, (usedRoom.get(kk) || 0) + 1); r.push(kk); }
       }
+      edges.push({ i: e.i, j: e.j, path: pth, g, r });
     }
     const comps = (tiles) => { // 4-connected components of a tile set -> Map tile -> id
       const id = new Map(); let c = 0;
@@ -1529,7 +1541,35 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const bigPath = new Set(); for (const e of tr.tree) if (inBig.has(e.i)) { const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra, cs[e.j].center); for (const t of R.pathTo(b, cs[e.j].center)) bigPath.add(t); }
     const withPaths = new Set([...coreTiles, ...bigPath]);
     return { usedGatePairs: usedGate.size, usedRoomPairs: usedRoom.size, gateGroups: gg.count, usedGateGroups: usedGG.size, roomGroups: rg.count, usedRoomGroups: usedRG.size,
-      steps, pathTiles: pathTiles.size, bigCores: big.length, bigCoreTiles: coreTiles.size, bigWithPaths: withPaths.size, usedGate, usedRoom, gateGroupOf: gg.id };
+      steps, pathTiles: pathTiles.size, bigCores: big.length, bigCoreTiles: coreTiles.size, bigWithPaths: withPaths.size, usedGate, usedRoom, gateGroupOf: gg.id, edges };
+  };
+
+  /* A slice cuts the global tree (user's rule). Nodes = living cores whose centre is inside the slice (mask, map-sized). The global tree edges whose whole
+     path stays inside are KEPT; the components the cut left apart are joined with the minimum extra connections (Kruskal starting from those components,
+     shortest paths that stay inside the slice, same crossing cost): the PATCH connections. Returns what the slice uses: gate and room-transition pairs
+     with how many connections cross them and whether any is global (patch = false) or all are patch. res: R.build output. */
+  R.sliceUse = function (res, W, H, mask) {
+    const n = W * H, U = res.usage, cs = res.reach, nodes = res.alive.filter((c) => c.center >= 0 && mask[c.center]), idx = new Map(nodes.map((c, k) => [c, k]));
+    const uf = Array.from({ length: nodes.length }, (_, k) => k), find = (v) => { while (uf[v] !== v) { uf[v] = uf[uf[v]]; v = uf[v]; } return v; };
+    const gate = new Map(), room = new Map(), add = (map, kk, patch) => { const o = map.get(kk) || { count: 0, patch: true }; o.count++; if (!patch) o.patch = false; map.set(kk, o); };
+    let kept = 0; const comps0 = () => { const s = new Set(); for (let k = 0; k < nodes.length; k++) s.add(find(k)); return s.size; };
+    for (const e of U.edges) {
+      const a = idx.get(cs[e.i]), b = idx.get(cs[e.j]); if (a === undefined || b === undefined || !e.path.every((t) => mask[t])) continue;
+      uf[find(a)] = find(b); kept++; for (const kk of e.g) add(gate, kk, false); for (const kk of e.r) add(room, kk, false);
+    }
+    const before = comps0(), step = (a, b) => mask[a] && mask[b] && res.pass(a, b), cand = [];
+    for (let i = 0; i < nodes.length; i++) {
+      if (!nodes.some((_, j) => j > i && find(j) !== find(i))) continue; // nothing left to join from here
+      const { dist } = R.dijkstra(W, H, nodes[i].center, step, false, res.extra);
+      for (let j = i + 1; j < nodes.length; j++) if (find(i) !== find(j) && dist[nodes[j].center] >= 0) cand.push({ i, j, cost: dist[nodes[j].center] + 1 });
+    }
+    cand.sort((p, q) => p.cost - q.cost); let patch = 0, steps = 0;
+    for (const c of cand) {
+      if (find(c.i) === find(c.j)) continue; uf[find(c.i)] = find(c.j); patch++;
+      const b = R.dijkstra(W, H, nodes[c.i].center, step, true, res.extra, nodes[c.j].center), pth = R.pathTo(b, nodes[c.j].center); steps += pth.length - 1;
+      for (let k = 1; k < pth.length; k++) { const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) add(gate, kk, true); else if (res.rp.has(kk)) add(room, kk, true); }
+    }
+    return { nodes: nodes.length, kept, patch, componentsBefore: before, componentsAfter: comps0(), patchSteps: steps, gate, room };
   };
 
   /* Elevation for quantizing over the LAND only: void tiles (h <= 0) take the value of the nearest land tile (so the pre-smoothing does not drag the
@@ -1561,7 +1601,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const s1 = R.stage(C, 'rooms', k1, () => {
       const slope = R.slope(h, W, H, prm.exponent), cls = R.classify(slope, h, prm.gentle, prm.steep), ws = R.watershed(h, cls, W, H, prm), as = R.assign(ws.room, h, W, H);
       let land = 0, un0 = 0; for (let i = 0; i < n; i++) if (h[i] > 0) { land++; if (!ws.room[i]) un0++; }
-      return { slope, cls, room0: ws.room, rooms: ws.rooms, seeds: ws.seeds, room: as.room, stats: { seeds: ws.seeds, rooms: ws.rooms.length, land, unassignedBefore: un0, unassignedAfter: as.left } };
+      const sizes = new Int32Array(ws.seeds + 1); for (let i = 0; i < n; i++) if (as.room[i] > 0) sizes[as.room[i]]++; // tiles per room id after the assignment
+      return { slope, cls, room0: ws.room, rooms: ws.rooms, seeds: ws.seeds, room: as.room, sizes, stats: { seeds: ws.seeds, rooms: ws.rooms.length, land, unassignedBefore: un0, unassignedAfter: as.left } };
     });
     const k2 = k1 + '#' + (inp.tkey || '') + '|' + prm.hardEdge + '|' + prm.minSizeEdge;
     const s2 = R.stage(C, 'edges', k2, () => {
@@ -1581,7 +1622,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       return { cores, centres, alive, scan, reach: alive.filter((c) => c.tiles.some((t) => scan[t] >= 0)) };
     });
     const k5 = k4 + '#' + (prm.crossCost || 0) + (prm.treeAll ? 'a' : '');
-    const out = { prm, ter, W, H, h, room: s1.room, room0: s1.room0, rooms: s1.rooms, seeds: s1.seeds, cls: s1.cls, slope: s1.slope, stats: s1.stats, pairs: s2.pairs, expand: s2.expand,
+    const out = { prm, ter, W, H, h, room: s1.room, room0: s1.room0, rooms: s1.rooms, roomSizes: s1.sizes, seeds: s1.seeds, cls: s1.cls, slope: s1.slope, stats: s1.stats, pairs: s2.pairs, expand: s2.expand,
       gate: s3.gate, gateStats: s3.gateStats, pass: s3.pass, forb: s3.forb, rp: s3.rp, gp: s3.gp, cores: s4.cores, centres: s4.centres, alive: s4.alive, scan: s4.scan, reach: s4.reach };
     const cc = prm.crossCost || 0; out.extra = cc > 0 ? (a, b) => ter[a] !== ter[b] && s3.gp.has(key(a, b, n)) ? cc : 0 : null; // crossing a terrace gate costs cc tiles more
     const s5 = R.stage(C, 'tree', k5, () => {
@@ -2122,7 +2163,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   /* ---- Stair look (same in Box, A and B): the footprint is rigid, so it gets its own colour, a tint per tread,
      light lines on the top edge of each riser and a dark outline along its flanks. ---- */
-  const STAIR_RGB = [226, 212, 178];
+  const STAIR_RGB = [226, 212, 178], PATCH_RGB = [176, 200, 232]; // PATCH: a ramp that joins what the slice cut apart (only while that slice is chosen)
+  const toneOf = (R) => (R && R.patch ? PATCH_RGB : STAIR_RGB);
   function stairTiles(S) { // tile -> { dir, k (tread index, 0 = lowest), m }
     if (S._stairTile) return S._stairTile;
     const map = new Map();
@@ -2131,7 +2173,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     for (const t of map.keys()) { const x = t % S.W, y = (t / S.W) | 0; S._stairNear[t] = 1; if (x > 0) S._stairNear[t - 1] = 1; if (x < S.W - 1) S._stairNear[t + 1] = 1; if (y > 0) S._stairNear[t - S.W] = 1; if (y < S.H - 1) S._stairNear[t + S.W] = 1; }
     return (S._stairTile = map);
   }
-  const stairColor = (info) => DBG ? [255, 0, 0] : info.rec ? STAIR_RGB : STAIR_RGB.map((v) => v * (0.78 + 0.3 * (info.m > 1 ? info.k / (info.m - 1) : 0.5)));
+  const stairColor = (info) => DBG ? [255, 0, 0] : info.rec ? toneOf(info.rec.ramp) : STAIR_RGB.map((v) => v * (0.78 + 0.3 * (info.m > 1 ? info.k / (info.m - 1) : 0.5)));
   const STAIR_LINE = 'rgba(255,248,226,0.95)', STAIR_EDGE = 'rgba(24,20,34,0.9)';
   /* edge of tile t towards neighbour n (t higher than n) that belongs to a stair: returns 'riser', 'flank' or null */
   function stairEdge(S, t, n) {
@@ -2163,9 +2205,10 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     if (DBG) return 'rgb(255,0,0)';
     const along = R.pdx !== 0, a0 = pos(0), a1 = pos(R.len), q0 = along ? R.my : R.mx; // the gradient of this tile's column (its own cliff)
     const p0 = along ? cam.p(a0, q0, R.h0) : cam.p(q0, a0, R.h0), p1 = along ? cam.p(a1, q0, R.h1) : cam.p(q0, a1, R.h1);
-    if (Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) < 2) return rgb(STAIR_RGB);
+    const T = toneOf(R);
+    if (Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) < 2) return rgb(T);
     const g = ctx.createLinearGradient(p0[0], p0[1], p1[0], p1[1]), up = R.h1 > R.h0;
-    g.addColorStop(0, rgb(STAIR_RGB, up ? 0.7 : 1.12)); g.addColorStop(1, rgb(STAIR_RGB, up ? 1.12 : 0.7));
+    g.addColorStop(0, rgb(T, up ? 0.7 : 1.12)); g.addColorStop(1, rgb(T, up ? 1.12 : 0.7));
     return g;
   }
   /* One piece of a ramp tile: the part of tile i whose path coordinate s (0 at the gate edge, len at the far end) lies in [sa, sb]
@@ -2188,7 +2231,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const hn0 = out ? cam.base : nj ? E.rampHeight(nj.rec, ax, ay, j) : S.levelH[S.fine[j]], hn1 = out ? cam.base : nj ? E.rampHeight(nj.rec, bx, by, j) : hn0; // beside another ramp: its surface
       const b0 = Math.min(hn0, e0), b1 = Math.min(hn1, e1);
       if (e0 - b0 < 1e-6 && e1 - b1 < 1e-6) continue;
-      wallQuad(ctx, cam, ax, ay, bx, by, [b0, b1], [e0, e1], DBG ? [255, 0, 0] : STAIR_RGB, rnx, o, st);
+      wallQuad(ctx, cam, ax, ay, bx, by, [b0, b1], [e0, e1], DBG ? [255, 0, 0] : toneOf(R), rnx, o, st);
     }
     const q = [[X0, Y0], [X1, Y0], [X1, Y1], [X0, Y1]].map(([px, py]) => cam.p(px, py, hc(px, py)));
     ctx.beginPath(); q.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath();
@@ -2557,6 +2600,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
     $('#src').addEventListener('change', (e) => { st.pack = e.target.value; for (const id of cropIds) $('#' + id).value = ''; onPackChanged(); refreshMessage(); invalidate(true); }); // a crop belongs to one map
     buildRoles();
+    $('#wholeRooms').addEventListener('click', () => { sliceSel.rooms.clear(); sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); syncRoomChips(); refreshMessage(); invalidate(true); });
     $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
     for (const id of cropIds) $('#' + id).addEventListener('change', () => { refreshMessage(); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadFiles(e.target.files));
@@ -2636,17 +2680,18 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   }
 
   /* ---- slice ---- */
-  const sliceSel = { zones: new Set(), whole: false };
+  const sliceSel = { zones: new Set(), whole: false, rooms: new Set() };
   const cropIds = ['cx0', 'cy0', 'cx1', 'cy1'];
   function sliceSpec() {
     const pack = packs[st.pack].pack, spec = { margin: P.margin };
-    if (pack.fields && pack.fields.zone && sliceSel.zones.size && !sliceSel.whole) spec.zones = [...sliceSel.zones].sort((a, b) => a - b);
+    if (P.rooms && sliceSel.rooms.size) spec.rooms = [...sliceSel.rooms].sort((a, b) => a - b); // rooms choose the slice when they are on and one is picked
+    else if (pack.fields && pack.fields.zone && sliceSel.zones.size && !sliceSel.whole) spec.zones = [...sliceSel.zones].sort((a, b) => a - b);
     const v = cropIds.map((id) => $('#' + id).value.trim());
     if (v.some((x) => x !== '')) {
       const d = [0, 0, pack.width, pack.height];
       spec.rect = v.map((x, k) => (x === '' ? d[k] : Math.max(0, Math.round(+x) || 0)));
     }
-    return spec.zones || spec.rect ? spec : null;
+    return spec.zones || spec.rooms || spec.rect ? spec : null;
   }
   const hueOf = (c) => (c.hue !== undefined ? c.hue * 360 : (c.id * 137.5) % 360);
   function buildChips(pack) {
@@ -2667,6 +2712,29 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       box.appendChild(b);
     }
     syncChips();
+  }
+  function buildRoomChips() {
+    const box = $('#roomChips'), on = !!(S && S.rooms);
+    $('#roomHint').hidden = $('#roomBtns').hidden = !on;
+    if (!on) { box.innerHTML = ''; st.roomChipsKey = null; return; }
+    if (st.roomChipsKey === S.rooms.room) { syncRoomChips(); return; }
+    st.roomChipsKey = S.rooms.room; box.innerHTML = '';
+    const ids = new Set(S.rooms.rooms.map((r) => r.id)); for (const id of [...sliceSel.rooms]) if (!ids.has(id)) sliceSel.rooms.delete(id);
+    for (const r of S.rooms.rooms) {
+      const b = document.createElement('button'); b.className = 'chip'; b.dataset.id = r.id;
+      b.innerHTML = `<i style="background:hsl(${E.rooms.hue(r.id).toFixed(0)},55%,50%)"></i>${r.id} <small>${S.rooms.roomSizes[r.id]}</small>`;
+      b.addEventListener('click', (e) => {
+        sliceSel.whole = false;
+        if (e.ctrlKey || e.shiftKey || e.metaKey) { sliceSel.rooms.has(r.id) ? sliceSel.rooms.delete(r.id) : sliceSel.rooms.add(r.id); } else { sliceSel.rooms.clear(); sliceSel.rooms.add(r.id); }
+        syncRoomChips(); refreshMessage(); invalidate(true);
+      });
+      box.appendChild(b);
+    }
+    syncRoomChips();
+  }
+  function syncRoomChips() {
+    document.querySelectorAll('#roomChips .chip').forEach((b) => b.classList.toggle('on', sliceSel.rooms.has(+b.dataset.id)));
+    $('#wholeRooms').classList.toggle('on', !sliceSel.rooms.size);
   }
   function syncChips() {
     document.querySelectorAll('#zoneChips .chip').forEach((b) => b.classList.toggle('on', !sliceSel.whole && sliceSel.zones.has(+b.dataset.id)));
@@ -2828,6 +2896,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         S = E.shape(pack, P, sliceSpec());
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
+      buildRoomChips();
       st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
     }
     const incursion = computeIncursion(); O.incursion = incursion;
@@ -2870,10 +2939,15 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     };
     if (needB) { info(surv, techs); requestAnimationFrame(() => setTimeout(finish, 0)); } else finish();
   }
+  function roomsSliceText() {
+    const g = S.roomGates; if (!g) return '';
+    const sl = g.slice, ramps = `${g.sites} ramps` + (g.patchSites ? ` (${g.patchSites} patch, blue)` : '');
+    return sl ? ` · slice connections: ${sl.kept} from the global tree + ${sl.patch} patch (components ${sl.componentsBefore} -> ${sl.componentsAfter} among ${sl.nodes} cores) · ${ramps}` : ` · ${ramps}`;
+  }
   function roomsText() {
     const r = S.rooms; if (!r) return '';
     const u = r.usage, tr = r.treeReach, ms = st.rooms ? st.rooms.total.toFixed(0) : '?';
-    return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree · ${ms} ms${st.cold ? ' (cold)' : ''}`;
+    return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree${roomsSliceText()} · ${ms} ms${st.cold ? ' (cold)' : ''}`;
   }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));

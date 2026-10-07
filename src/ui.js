@@ -75,6 +75,7 @@
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
     $('#src').addEventListener('change', (e) => { st.pack = e.target.value; for (const id of cropIds) $('#' + id).value = ''; onPackChanged(); refreshMessage(); invalidate(true); }); // a crop belongs to one map
     buildRoles();
+    $('#wholeRooms').addEventListener('click', () => { sliceSel.rooms.clear(); sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); syncRoomChips(); refreshMessage(); invalidate(true); });
     $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
     for (const id of cropIds) $('#' + id).addEventListener('change', () => { refreshMessage(); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadFiles(e.target.files));
@@ -154,17 +155,18 @@
   }
 
   /* ---- slice ---- */
-  const sliceSel = { zones: new Set(), whole: false };
+  const sliceSel = { zones: new Set(), whole: false, rooms: new Set() };
   const cropIds = ['cx0', 'cy0', 'cx1', 'cy1'];
   function sliceSpec() {
     const pack = packs[st.pack].pack, spec = { margin: P.margin };
-    if (pack.fields && pack.fields.zone && sliceSel.zones.size && !sliceSel.whole) spec.zones = [...sliceSel.zones].sort((a, b) => a - b);
+    if (P.rooms && sliceSel.rooms.size) spec.rooms = [...sliceSel.rooms].sort((a, b) => a - b); // rooms choose the slice when they are on and one is picked
+    else if (pack.fields && pack.fields.zone && sliceSel.zones.size && !sliceSel.whole) spec.zones = [...sliceSel.zones].sort((a, b) => a - b);
     const v = cropIds.map((id) => $('#' + id).value.trim());
     if (v.some((x) => x !== '')) {
       const d = [0, 0, pack.width, pack.height];
       spec.rect = v.map((x, k) => (x === '' ? d[k] : Math.max(0, Math.round(+x) || 0)));
     }
-    return spec.zones || spec.rect ? spec : null;
+    return spec.zones || spec.rooms || spec.rect ? spec : null;
   }
   const hueOf = (c) => (c.hue !== undefined ? c.hue * 360 : (c.id * 137.5) % 360);
   function buildChips(pack) {
@@ -185,6 +187,29 @@
       box.appendChild(b);
     }
     syncChips();
+  }
+  function buildRoomChips() {
+    const box = $('#roomChips'), on = !!(S && S.rooms);
+    $('#roomHint').hidden = $('#roomBtns').hidden = !on;
+    if (!on) { box.innerHTML = ''; st.roomChipsKey = null; return; }
+    if (st.roomChipsKey === S.rooms.room) { syncRoomChips(); return; }
+    st.roomChipsKey = S.rooms.room; box.innerHTML = '';
+    const ids = new Set(S.rooms.rooms.map((r) => r.id)); for (const id of [...sliceSel.rooms]) if (!ids.has(id)) sliceSel.rooms.delete(id);
+    for (const r of S.rooms.rooms) {
+      const b = document.createElement('button'); b.className = 'chip'; b.dataset.id = r.id;
+      b.innerHTML = `<i style="background:hsl(${E.rooms.hue(r.id).toFixed(0)},55%,50%)"></i>${r.id} <small>${S.rooms.roomSizes[r.id]}</small>`;
+      b.addEventListener('click', (e) => {
+        sliceSel.whole = false;
+        if (e.ctrlKey || e.shiftKey || e.metaKey) { sliceSel.rooms.has(r.id) ? sliceSel.rooms.delete(r.id) : sliceSel.rooms.add(r.id); } else { sliceSel.rooms.clear(); sliceSel.rooms.add(r.id); }
+        syncRoomChips(); refreshMessage(); invalidate(true);
+      });
+      box.appendChild(b);
+    }
+    syncRoomChips();
+  }
+  function syncRoomChips() {
+    document.querySelectorAll('#roomChips .chip').forEach((b) => b.classList.toggle('on', sliceSel.rooms.has(+b.dataset.id)));
+    $('#wholeRooms').classList.toggle('on', !sliceSel.rooms.size);
   }
   function syncChips() {
     document.querySelectorAll('#zoneChips .chip').forEach((b) => b.classList.toggle('on', !sliceSel.whole && sliceSel.zones.has(+b.dataset.id)));
@@ -346,6 +371,7 @@
         S = E.shape(pack, P, sliceSpec());
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
+      buildRoomChips();
       st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
     }
     const incursion = computeIncursion(); O.incursion = incursion;
@@ -388,10 +414,15 @@
     };
     if (needB) { info(surv, techs); requestAnimationFrame(() => setTimeout(finish, 0)); } else finish();
   }
+  function roomsSliceText() {
+    const g = S.roomGates; if (!g) return '';
+    const sl = g.slice, ramps = `${g.sites} ramps` + (g.patchSites ? ` (${g.patchSites} patch, blue)` : '');
+    return sl ? ` · slice connections: ${sl.kept} from the global tree + ${sl.patch} patch (components ${sl.componentsBefore} -> ${sl.componentsAfter} among ${sl.nodes} cores) · ${ramps}` : ` · ${ramps}`;
+  }
   function roomsText() {
     const r = S.rooms; if (!r) return '';
     const u = r.usage, tr = r.treeReach, ms = st.rooms ? st.rooms.total.toFixed(0) : '?';
-    return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree · ${ms} ms${st.cold ? ' (cold)' : ''}`;
+    return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree${roomsSliceText()} · ${ms} ms${st.cold ? ' (cold)' : ''}`;
   }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));

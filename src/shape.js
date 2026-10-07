@@ -103,9 +103,11 @@
   /* spec: { zones: [ids], rect: [x0, y0, x1, y1] (x1, y1 exclusive), margin }. null = the whole map is the slice.
      Returns { mask (map-sized), x0, y0, x1, y1 (window, x1/y1 exclusive), bbox, tiles }. */
   E.sliceOf = function (pack, spec) {
-    if (!spec || (!(spec.zones && spec.zones.length) && !spec.rect)) return null;
+    if (!spec || (!(spec.zones && spec.zones.length) && !(spec.rooms && spec.rooms.length) && !spec.rect)) return null;
     const W = pack.width, H = pack.height, mask = new Uint8Array(W * H);
-    if (spec.zones && spec.zones.length) {
+    if (spec.rooms && spec.rooms.length && spec.roomMap) { // rooms (rooms switch on) choose the slice, like zones
+      const set = new Set(spec.rooms); for (let i = 0; i < mask.length; i++) mask[i] = set.has(spec.roomMap[i]) ? 1 : 0;
+    } else if (spec.zones && spec.zones.length) {
       const ids = zoneIdsForSlice(pack), set = new Set(spec.zones);
       if (!ids) throw new Error('This pack has no zone field: assign the zone role first.');
       for (let i = 0; i < mask.length; i++) mask[i] = set.has(ids[i]) ? 1 : 0;
@@ -219,6 +221,8 @@
   /* pack: the whole map; spec: see E.sliceOf (omit for the whole map as one slice). Terraces use the global
      elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
   E.shape = function (full, P, spec) {
+    const RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: the global tree gives the gates, sub-terraces are only visual
+    if (RL && spec && spec.rooms && spec.rooms.length) spec = Object.assign({}, spec, { roomMap: RL.room });
     const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
     const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.subs;
     const q = quantize(full, P);
@@ -283,11 +287,10 @@
           if (p && p.pieces > 1) warnings.push(`Zone ${id} is not contiguous (4-neighbour): ${p.pieces} pieces, the largest has ${p.largest} of ${p.total} tiles. Left as is.`);
         }
       }
-      S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rect: spec.rect || null, warnings };
+      S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rooms: spec.rooms ? spec.rooms.slice() : [], rect: spec.rect || null, warnings };
     }
-    const RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: gates come from the tree, sub-terraces are only visual
     S.rooms = RL; S.subFree = !!RL;
-    if (RL) computeGatesRooms(S, P, full, RL); else computeGates(S, P, full, q);
+    if (RL) computeGatesRooms(S, P, full, RL, sl); else computeGates(S, P, full, q);
     carveStairs(S, P);
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
@@ -391,16 +394,17 @@
      A site is that exact pair (a = low tile, b = high tile). Crossings of the same gate group closer than passGap to a chosen site are merged into it
      (sites are taken by number of crossing paths, then position); the candidate pairs of the group within 3 tiles are the fallbacks when the carve does
      not fit. Everything is clipped to the window (both tiles unblocked). */
-  function computeGatesRooms(S, P, full, RL) {
+  function computeGatesRooms(S, P, full, RL, sl) {
     const W = S.W, H = S.H, fw = full.width, n = fw * full.height, gates = [], sites = [], U = RL.usage, gap = P.passGap;
     if (!RL.gateByKey) { RL.gateByKey = new Map(); for (const p of RL.gate) RL.gateByKey.set(E.rooms.key(p[0], p[1], n), p); RL.gateByGroup = new Map(); for (const p of RL.gate) { const g = U.gateGroupOf.get(p[0]); if (!RL.gateByGroup.has(g)) RL.gateByGroup.set(g, []); RL.gateByGroup.get(g).push(p); } }
     const win = (t) => { const x = t % fw - S.ox, y = ((t / fw) | 0) - S.oy; return x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x; };
     const xy = (i) => [i % W, (i / W) | 0];
-    const used = [];
-    for (const [k, count] of U.usedGate) {
+    const used = [], SU = sl ? E.rooms.sliceUse(RL, fw, full.height, sl.mask) : null; // a slice: the global tree cut + the patch connections
+    const entries = SU ? [...SU.gate].map(([k, o]) => [k, o.count, o.patch]) : [...U.usedGate].map(([k, c]) => [k, c, false]);
+    for (const [k, count, patch] of entries) {
       const p = RL.gateByKey.get(k); if (!p) continue;
       const a = win(p[0]), b = win(p[1]); if (a < 0 || b < 0 || S.block[a] || S.block[b]) continue;
-      used.push({ a, b, count, gid: U.gateGroupOf.get(p[0]) });
+      used.push({ a, b, count, patch, gid: U.gateGroupOf.get(p[0]) });
     }
     used.sort((p, q) => q.count - p.count || p.a - q.a);
     const clusters = [];
@@ -416,9 +420,9 @@
       const alts = [];
       for (const p of RL.gateByGroup.get(c.gid)) { const a = win(p[0]), b = win(p[1]); if (a < 0 || b < 0 || a === c.site.a || S.block[a] || S.block[b]) continue; const [x, y] = xy(a); if (Math.max(Math.abs(x - sx), Math.abs(y - sy)) <= 3) alts.push({ a, b, d: Math.hypot(x - sx, y - sy) }); }
       alts.sort((p, q) => p.d - q.d || p.a - q.a);
-      sites.push({ a: c.site.a, b: c.site.b, gate: gi, kind: 'terrace', alts: alts.map((o) => ({ a: o.a, b: o.b })) });
+      sites.push({ a: c.site.a, b: c.site.b, gate: gi, kind: 'terrace', patch: c.pairs.every((u) => u.patch), alts: alts.map((o) => ({ a: o.a, b: o.b })) });
     }
-    S.gates = gates; S.passes = sites; S.roomGates = { candidates: RL.usage.gateGroups, usedGroups: new Set(clusters.map((c) => c.gid)).size, sites: sites.length, merged: used.length - clusters.length };
+    S.gates = gates; S.passes = sites; S.roomGates = { candidates: RL.usage.gateGroups, usedGroups: new Set(clusters.map((c) => c.gid)).size, sites: sites.length, merged: used.length - clusters.length, patchSites: sites.filter((x) => x.patch).length, slice: SU ? { nodes: SU.nodes, kept: SU.kept, patch: SU.patch, componentsBefore: SU.componentsBefore, componentsAfter: SU.componentsAfter } : null };
   }
 
   /* Stairs are carved into the terrain. Each tread rises at most `tread` sub-terraces (default: the climb limit; never more). A stair is cut into the upper
@@ -559,6 +563,7 @@
       for (let i = 0; i < n; i++) if (!S.void || !S.void[i]) S.byLevel[S.fine[i]].push(i);
       refreshMask(S);
     }
+    for (const rec of stairs) if (rec.ramp && rec.site && rec.site.patch) rec.ramp.patch = true; // a patch ramp (it exists only for this slice) has its own tone
     S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, shiftedCols, width: P.stairStyle !== 0 ? rwidth : width, style: ramp ? 'ramp' : 'steps' };
     if (!carve.size) return;
     // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height

@@ -226,7 +226,7 @@ incursion border; stake and way-back path visible.
    DECIDED for the integration (user): sub-terraces are only visual with rooms on; the tree is GLOBAL (computed once on the whole map, cached) and a slice keeps the
    connections whose paths stay inside it plus the minimum extra ones to join what the cut separated (Kruskal from those components; "patch" ramps exist only while
    that slice is chosen and get another tone); room transitions are OPEN (all valid ones, used or not) and only borders that are not a transition block; unused
-   terrace gates are closed (cliff). Six commits: (1) void + land quantization [done], (2) rooms layer + switch + sliders [done], (3) used gates -> ramps at the exact pair, sub-terraces visual [done, PR], (4) slice by rooms,
+   terrace gates are closed (cliff). Six commits: (1) void + land quantization [done], (2) rooms layer + switch + sliders [done], (3) used gates -> ramps at the exact pair, sub-terraces visual [done, PR], (4) slice by rooms + patch connections [done],
    (5) room borders + overlay, (6) route by the tree (PR).
    POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
