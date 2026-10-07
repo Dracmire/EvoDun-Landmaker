@@ -234,6 +234,12 @@ incursion border; stake and way-back path visible.
    columns out (narrower). If none fits, the connection is recomputed over the carved graph with the same crossing cost; what is still not walkable is NOT forced: it is counted and
    named in the info. The tree itself, the candidate gates and the look of the ramps are untouched. `P.rampKeep = false` is the old behaviour (diagnostic). Not a full-connectivity rule.
    `tools/test_conns_rooms.js`, `tools/diag_connections.js`.
+   ISOLATED TERRAIN (user's rule, rooms on, measured on the WALKABLE regions of the final graph, `classifyWalk` in `shape.js`): MAIN = the largest region (of the slice, if there is one);
+   ISOLATED = any other region with fewer tiles than the slider "Isolated limit" (20-1000, default 100): decorative, NOT walkable, not counted as a region, takes no ramp (a ramp that
+   would end entirely in isolated terrain is not built) and no stake or objective (refused with the reason); it is drawn as normal terrain with the "not walkable" tone, the same as the
+   forbidden margins of the layer (walls, cliffs, Steep), identical in Box, A and B, Display switch. EDGE PROBLEM = any other region with the limit or more tiles: NOT hidden and NOT
+   connected; it stays walkable, gets a magenta warning outline (Display switch) and the info names it (size, place, what separates it: ramp, terrace gate without ramp, room border
+   without transition...). Info: "Walkable N tiles (X % of the land) - isolated: K regions, M tiles - edge problems: J regions (sizes)". `tools/test_walk_rooms.js`.
    POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
 5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),

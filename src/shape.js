@@ -291,13 +291,21 @@
     }
     S.rooms = RL; S.subFree = !!RL;
     if (RL) { computeGatesRooms(S, P, full, RL, sl); computeRoomFaces(S, full, RL); } else computeGates(S, P, full, q);
-    carveStairs(S, P);
-    if (RL) checkConnections(S, P);
+    const snap = RL ? { fine: S.fine.slice(), levelH: S.levelH.slice(), levelMeta: S.levelMeta.slice(), maxFine: S.maxFine, byLevel: S.byLevel.map((a) => a.slice()) } : null;
+    const build = () => { carveStairs(S, P); if (RL) checkConnections(S, P); computeRegions(S, P); if (RL) classifyWalk(S, P, RL); };
+    build();
+    // rooms on: a ramp that ends up entirely inside ISOLATED terrain (decorative, not walkable) is not built: its site is dropped and the carving redone
+    for (let tries = 0; RL && tries < 2; tries++) {
+      const useless = S.stairs.filter((rec) => rec.steps.every((st) => st.tiles.every((t) => S.isolated[t])) && rec.bottom.every((t) => S.isolated[t]) && rec.top.every((t) => S.isolated[t]));
+      if (!useless.length) break;
+      for (const rec of useless) rec.site.noRamp = true;
+      S.fine.set(snap.fine); S.levelH = snap.levelH.slice(); S.levelMeta = snap.levelMeta.slice(); S.maxFine = snap.maxFine; S.byLevel = snap.byLevel.map((a) => a.slice()); refreshMask(S);
+      build(); S.isoRampsDropped = (S.isoRampsDropped || 0) + useless.length;
+    }
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
     S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
     { let lt = 0; for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) lt++; S.landTiles = lt; } // land tiles of the slice (or the map)
-    computeRegions(S, P);
     return S;
   };
 
@@ -588,6 +596,7 @@
     const ladder = ramp && keep ? [[depthDefault, rwidthDefault], [1, rwidthDefault], [depthDefault, 1], [1, 1]].filter((v, k, a) => a.findIndex((w) => w[0] === v[0] && w[1] === v[1]) === k) : ramp ? [[depthDefault, rwidthDefault]] : [[0, 0]];
     const variantHist = new Array(ladder.length).fill(0); let variantsChanged = 0;
     for (const pass of S.passes) {
+      if (pass.noRamp) continue; // its ramp would end up in isolated terrain (rooms on)
       let rec = null, variant = 0;   // cut into the upper terrace, or build up the lower one: the wider result wins (ties: cut)
       for (const site of [pass, ...pass.alts]) {   // the centred tile first, then the rest of the gate, nearest first
         for (let vi = 0; vi < ladder.length && !rec; vi++) {
@@ -672,6 +681,48 @@
     }
     S.connInfo = info;
   }
+  /* Rooms on, after the regions of the final walking graph (user's rule). MAIN = the largest region (of the slice, if there is one). ISOLATED terrain = any other
+     region with fewer tiles than P.roomsIsoLimit (default 100): decorative, NOT walkable, not a region, takes no ramp (and no mark). EDGE PROBLEM = any other region with
+     that many tiles or more: it stays walkable, gets a warning outline (faces, kind 3 of S.roomKind) and the info names it (size, place, what separates it).
+     S.nowalk = the tiles drawn with the "not walkable" tone: isolated terrain and the forbidden margins (walls, cliffs, Steep) of the layer. */
+  function classifyWalk(S, P, RL) {
+    const n = S.n, W = S.W, H = S.H, limit = P.roomsIsoLimit === undefined ? 100 : P.roomsIsoLimit, rs = S.regionSizes, nr = rs.length;
+    let main = -1; for (let r = 0; r < nr; r++) if (main < 0 || rs[r] > rs[main]) main = r;
+    const isoR = new Uint8Array(nr); for (let r = 0; r < nr; r++) if (r !== main && rs[r] < limit) isoR[r] = 1;
+    const isolated = new Uint8Array(n), newId = new Int32Array(nr).fill(-1), sizes = []; let k = 0, isoRegions = 0, isoTiles = 0;
+    for (let r = 0; r < nr; r++) { if (isoR[r]) { isoRegions++; isoTiles += rs[r]; } else { newId[r] = k++; sizes.push(rs[r]); } }
+    const old = Int32Array.from(S.region);
+    for (let i = 0; i < n; i++) if (old[i] >= 0) { if (isoR[old[i]]) { isolated[i] = 1; S.region[i] = -1; } else S.region[i] = newId[old[i]]; }
+    S.regionSizes = sizes; S.isolated = isolated; S.mainRegion = main >= 0 ? newId[main] : -1;
+    const nowalk = new Uint8Array(n);
+    for (let i = 0; i < n; i++) if (!S.block[i] && !(S.void && S.void[i]) && (isolated[i] || (!S.carved[i] && RL.forb[mapIdxOf(S, i)] === 1))) nowalk[i] = 1;
+    S.nowalk = nowalk;
+    // edge problems: the regions that are neither main nor isolated
+    const stat = new Map(), OFF = [[0, -1], [1, 0], [0, 1], [-1, 0]], N = S.mapW * S.mapH;
+    for (let i = 0; i < n; i++) { const r = S.region[i]; if (r < 0 || r === S.mainRegion) continue; let o = stat.get(r); if (!o) stat.set(r, o = { id: r, size: 0, sx: 0, sy: 0, x0: 1e9, y0: 1e9, x1: -1, y1: -1, causes: {} }); const x = i % W, y = (i / W) | 0; o.size++; o.sx += x; o.sy += y; o.x0 = Math.min(o.x0, x); o.y0 = Math.min(o.y0, y); o.x1 = Math.max(o.x1, x); o.y1 = Math.max(o.y1, y); }
+    const walkable = (j) => S.region[j] >= 0;
+    const cause = (a, c) => {
+      if (S.carved[a] || S.carved[c]) return 'a ramp';
+      if (S.ter[a] !== S.ter[c]) return Math.abs(a - c) === 1 || Math.abs(a - c) === W ? (RL.gp.has(E.rooms.key(mapIdxOf(S, a), mapIdxOf(S, c), N)) ? 'a terrace gate without a ramp' : 'a terrace cliff') : 'a terrace cliff';
+      if (RL.room[mapIdxOf(S, a)] !== RL.room[mapIdxOf(S, c)]) return 'a room border without a transition';
+      return 'a steep slope or the margin of a wall';
+    };
+    const warnK = S.roomKind, warnB = S.roomBits;
+    for (let i = 0; i < n; i++) {
+      const r = S.region[i]; if (r < 0 || r === S.mainRegion) continue; const o = stat.get(r), x = i % W, y = (i / W) | 0;
+      for (let b = 0; b < 4; b++) {
+        const nx = x + OFF[b][0], ny = y + OFF[b][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx;
+        if (S.region[j] === r || (S.void && S.void[j]) || S.block[j]) continue;
+        // a face of the warning outline (both tiles flagged so the painter draws it once, like the room borders)
+        { if (!warnK[i * 4 + b]) { warnK[i * 4 + b] = 3; warnB[i] |= 1 << b; } if (!warnK[j * 4 + (b + 2) % 4]) { warnK[j * 4 + (b + 2) % 4] = 3; warnB[j] |= 1 << ((b + 2) % 4); } }
+        let c = -1; if (walkable(j)) c = j; else { const mx2 = nx + OFF[b][0], my2 = ny + OFF[b][1]; if (mx2 >= 0 && my2 >= 0 && mx2 < W && my2 < H && walkable(my2 * W + mx2) && S.region[my2 * W + mx2] !== r) c = my2 * W + mx2; }
+        if (c >= 0) { const w = cause(i, c); o.causes[w] = (o.causes[w] || 0) + 1; }
+      }
+    }
+    const problems = [...stat.values()].map((o) => { const top = Object.entries(o.causes).sort((p, q) => q[1] - p[1]); return { id: o.id, size: o.size, at: [Math.round(S.ox + o.sx / o.size), Math.round(S.oy + o.sy / o.size)], box: [S.ox + o.x0, S.oy + o.y0, S.ox + o.x1, S.oy + o.y1], causes: top, cause: top.length ? top[0][0] : 'unknown' }; }).sort((p, q) => q.size - p.size);
+    let wt = 0; for (const v of sizes) wt += v;
+    S.walkInfo = { limit, main: main >= 0 ? rs[main] : 0, walkable: wt, isolatedRegions: isoRegions, isolatedTiles: isoTiles, problems };
+  }
   function refreshMask(S) { if (S.void) { S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < S.n; i++) if (S.void[i]) S.fineMask[i] = -1; } } // level membership: void belongs to no level
 
   /* Rooms on: walking is the patched passability of the rooms chain (E.rooms.makePass): same terrace and room, or a valid room transition (all of them open);
@@ -679,7 +730,7 @@
   const mapIdxOf = (S, i) => (((i / S.W) | 0) + S.oy) * S.mapW + (i % S.W) + S.ox;
   const roomStep = (S, i, j) => S.ter[i] === S.ter[j] && S.rooms.pass(mapIdxOf(S, i), mapIdxOf(S, j));
   const roomBlocked = (S, i) => S.block[i] || (!S.carved[i] && S.rooms.forb[mapIdxOf(S, i)] === 1);
-  E.tileWalkable = (S, i) => !(S.rooms ? roomBlocked(S, i) : S.block[i]); // can a mark stand on tile i (window index)?
+  E.tileWalkable = (S, i) => !(S.rooms ? roomBlocked(S, i) || (S.isolated && S.isolated[i] === 1) : S.block[i]); // can a mark stand on tile i (window index)?
   const adj4For = (W) => (a, b) => (Math.abs(a - b) === W || (Math.abs(a - b) === 1 && ((a / W) | 0) === ((b / W) | 0)));
   function computeRegions(S, P) {
     const adj4 = adj4For(S.W);

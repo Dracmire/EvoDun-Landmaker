@@ -22,10 +22,13 @@ const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log
     const comp = new Int32Array(n).fill(-1); let nc = 0;
     for (let s0 = 0; s0 < n; s0++) { if (comp[s0] >= 0 || blocked(s0)) continue; comp[s0] = nc; const q = [s0]; for (let h = 0; h < q.length; h++) for (const j of adj[q[h]]) if (comp[j] < 0 && !blocked(j)) { comp[j] = nc; q.push(j); } nc++; }
     // S.region partitions the walkable tiles exactly like the independent components
-    const map = new Map(); let mism = 0, same = 0; for (let i = 0; i < n; i++) { if (blocked(i)) { if (S.region[i] >= 0) mism++; continue; } if (S.region[i] < 0) { mism++; continue; } if (!map.has(S.region[i])) map.set(S.region[i], comp[i]); else if (map.get(S.region[i]) !== comp[i]) mism++; else same++; }
-    ok(`${label}: regions are the components of the independent graph (${nc})`, mism === 0 && map.size === nc, [mism, map.size, nc]);
+    const csize = new Map(); for (let i = 0; i < n; i++) if (comp[i] >= 0) csize.set(comp[i], (csize.get(comp[i]) || 0) + 1);
+    let bigC = -1; for (const [c, z] of csize) if (bigC < 0 || z > csize.get(bigC)) bigC = c;
+    const isoC = new Set([...csize].filter(([c, z]) => c !== bigC && z < 100).map(([c]) => c)); // isolated terrain: not a region (limit 100)
+    const map = new Map(); let mism = 0, same = 0; for (let i = 0; i < n; i++) { if (blocked(i)) { if (S.region[i] >= 0) mism++; continue; } if (isoC.has(comp[i])) { if (S.region[i] >= 0 || !S.isolated[i]) mism++; continue; } if (S.region[i] < 0) { mism++; continue; } if (!map.has(S.region[i])) map.set(S.region[i], comp[i]); else if (map.get(S.region[i]) !== comp[i]) mism++; else same++; }
+    ok(`${label}: regions are the components of the independent graph (${nc}, minus the isolated ones under 100 tiles)`, mism === 0 && map.size === nc - isoC.size, [mism, map.size, nc, isoC.size]);
     // routes: random pairs
-    let rnd = 5; const r = () => (rnd = (rnd * 1664525 + 1013904223) >>> 0) / 4294967296; const walk = []; for (let i = 0; i < n; i++) if (!blocked(i)) walk.push(i);
+    let rnd = 5; const r = () => (rnd = (rnd * 1664525 + 1013904223) >>> 0) / 4294967296; const walk = []; for (let i = 0; i < n; i++) if (!blocked(i) && !S.isolated[i]) walk.push(i);
     let bad = 0, checked = 0, nul = 0, forbiddenStep = 0, cliffStep = 0, lenBad = 0;
     for (let k = 0; k < 120; k++) {
       const a = walk[Math.floor(r() * walk.length)], b = walk[Math.floor(r() * walk.length)], route = E.route(S, P, a, b);

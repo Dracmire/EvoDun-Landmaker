@@ -66,6 +66,37 @@ const { open } = require('./common');
     const f = (a2) => (a2[1] ? a2[0] / a2[1] : 0);
     ok(`${tech}: blocking faces show the orange line, open (unused) transitions do not, used ones are green`, r.closed[1] > 40 && f(r.closed) > 0.6 && r.open[1] > 10 && f(r.open) < 0.25 && r.used[1] > 5 && f(r.used) > 0.5, JSON.stringify(r));
   }
+  // walkable / isolated / edge problems: info, the tone (not over ramps), the warning outline
+  const info2 = await page.$eval('#info', (e) => e.innerText);
+  ok('the info separates walkable, isolated terrain and edge problems', /Walkable \d+ tiles \(\d+% of the land\) · isolated: \d+ regions?, \d+ tiles \(under 100, decorative\) · edge problems: \d+ regions?/.test(info2), info2.split('\n').filter((l) => /Walkable/.test(l)).join(' | '));
+  ok('the Isolated limit slider is 20-1000, default 100, and the two toggles exist', await page.evaluate(() => { const x = document.querySelector('#s-roomsIsoLimit'); return x && +x.min === 20 && +x.max === 1000 && +x.value === 100 && document.querySelector('#t-nowalk').checked && document.querySelector('#t-edgeWarn').checked; }));
+  for (const tech of ['box', 'A', 'B']) for (const preset of ['oblique', 'isoE']) {
+    await a.tech(tech); await a.preset(preset);
+    const sample = () => page.evaluate(() => {
+      const ev = window.__evo, S = ev.S(), E = window.EVO, cv = document.querySelector('#stage canvas'), w = cv.clientWidth, h = cv.clientHeight, ctx = cv.getContext('2d'), dpr = cv.width / cv.clientWidth, cam = E.makeCam(S, ev.P, ev.view(), w, h);
+      const px = (i, hh) => { const p = cam.p(i % S.W + 0.5, ((i / S.W) | 0) + 0.5, hh); if (p[0] < 4 || p[1] < 4 || p[0] > w - 4 || p[1] > h - 4) return null; return Array.from(ctx.getImageData(Math.round(p[0] * dpr), Math.round(p[1] * dpr), 1, 1).data).slice(0, 3); };
+      const nw = [], rp = [], seen = { n: 0, r: 0 };
+      for (let i = 0; i < S.n; i++) { if (S.nowalk[i] && !S.carved[i] && (++seen.n % 53 === 0)) nw.push([i, S.levelH[S.fine[i]]]); if (S.carved[i] && (++seen.r % 5 === 0)) rp.push([i, S.levelH[S.fine[i]]]); }
+      return { nw: nw.map(([i, hh]) => px(i, hh)), rp: rp.map(([i, hh]) => px(i, hh)) };
+    });
+    const on = await sample(); await page.uncheck('#t-nowalk'); await a.idle(); const off = await sample(); await page.check('#t-nowalk'); await a.idle();
+    const diff = (x, y) => Math.abs(x[0] - y[0]) + Math.abs(x[1] - y[1]) + Math.abs(x[2] - y[2]);
+    let tone = 0, toneN = 0, rampChanged = 0, rampN = 0;
+    on.nw.forEach((c, k) => { if (c && off.nw[k]) { toneN++; if (diff(c, off.nw[k]) > 10) tone++; } });
+    on.rp.forEach((c, k) => { if (c && off.rp[k]) { rampN++; if (diff(c, off.rp[k]) > 6) rampChanged++; } });
+    ok(`${tech} ${preset}: the not-walkable tone changes the terrain it covers and leaves the ramps alone`, toneN > 20 && tone / toneN > 0.45 && rampN > 10 && rampChanged / rampN < 0.1, JSON.stringify({ tone, toneN, rampChanged, rampN }));
+  }
+  await a.tech('A'); await a.preset('oblique');
+  const magenta = () => page.evaluate(() => { const cv = document.querySelector('#stage canvas'), d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > 235 && d[i + 1] > 50 && d[i + 1] < 95 && d[i + 2] > 170 && d[i + 2] < 225) n++; return n; });
+  const mOn = await magenta(); await page.uncheck('#t-edgeWarn'); await a.idle(); const mOff = await magenta(); await page.check('#t-edgeWarn'); await a.idle();
+  ok('the edge-problem outline is drawn (magenta) and the toggle removes it', mOn > 30 && mOff < 5, [mOn, mOff]);
+  const isoTile = await page.evaluate(() => { const S = window.__evo.S(); for (let i = 0; i < S.n; i++) if (S.isolated[i]) return i; return -1; });
+  await page.evaluate((t) => { const ev = window.__evo; ev.setIncMode('stake'); ev.placeMark(t); }, isoTile);
+  ok('a stake on isolated terrain is refused with the reason', /isolated terrain \(a walkable region under 100 tiles\)/.test(await page.$eval('#incInfo', (e) => e.innerText)) && (await page.evaluate(() => window.__evo.inc.stake)) === null);
+  await page.evaluate(() => window.__evo.setIncMode(null));
+  await a.slider('roomsIsoLimit', 1000); await a.idle();
+  ok('raising the limit to 1000 turns more terrain into isolated', await page.evaluate(() => window.__evo.S().walkInfo.limit === 1000));
+  await a.slider('roomsIsoLimit', 100); await a.idle();
   await page.uncheck('#t-roomBorders'); await a.idle();
   ok('with the toggle off no orange line is drawn', await page.evaluate(() => { const cv = document.querySelector('#stage canvas'), d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > 245 && d[i + 1] > 140 && d[i + 1] < 160 && d[i + 2] > 30 && d[i + 2] < 50) n++; return n < 20; }));
   await page.check('#t-roomBorders'); await a.idle();

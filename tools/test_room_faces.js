@@ -14,8 +14,8 @@ const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log
   let pairs = 0, sym = 0, bad = 0;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) for (let b = 0; b < 4; b++) {
     const nx = x + OFF[b][0], ny = y + OFF[b][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-    const i = y * W + x, j = ny * W + nx, r = RL.room[i], r2 = RL.room[j]; if (r <= 0 || r2 <= 0 || r === r2) { if (S.roomKind[i * 4 + b]) bad++; continue; }
-    const k = S.roomKind[i * 4 + b], k2 = S.roomKind[j * 4 + (b + 2) % 4], open = RL.rp.has(E.rooms.key(i, j, n));
+    const i = y * W + x, j = ny * W + nx, r = RL.room[i], r2 = RL.room[j]; if (r <= 0 || r2 <= 0 || r === r2) { if (S.roomKind[i * 4 + b] === 1 || S.roomKind[i * 4 + b] === 2) bad++; continue; }
+    const k = S.roomKind[i * 4 + b] === 3 ? 0 : S.roomKind[i * 4 + b], k2 = S.roomKind[j * 4 + (b + 2) % 4] === 3 ? 0 : S.roomKind[j * 4 + (b + 2) % 4], open = RL.rp.has(E.rooms.key(i, j, n)); // kind 3 = the warning outline of an edge-problem region, not a room border
     if (i < j) pairs++; if (k !== k2) sym++;
     if (open && k === 1) bad++; if (!open && k !== 1) bad++;
   }

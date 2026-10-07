@@ -82,3 +82,10 @@ crossing cost 0-40 (default 10); gate threshold 0.05 and gate minimum 3 are the 
   A mark on a margin tile is refused with the reason.
 - **Void** is always on, rooms or not (see `docs/pack-format.md`).
 Tests: `tools/test_gates_rooms.js`, `test_slice_rooms.js`, `test_room_faces.js`, `test_route_rooms.js`, `tools/ui/test_rooms_ui.js`; cold cost: `tools/ui/measure_rooms.js`.
+
+### Connections stay walkable, isolated terrain (follow-up in PR #6)
+- The tiles of the tree paths are reserved while ramps are carved (`carveStairs`): a ramp may occupy one only if the path walks it along the ramp (bottom -> treads -> top of a
+  column, or between adjacent columns). Variants in order: cut into the upper terrace, built on the lower one, depth 1 of each, lateral columns out. A connection that still is not
+  walkable is recomputed over the carved graph with the same crossing cost; if there is none it is not forced and the info names it (`S.connInfo`). `P.rampKeep = false` = before the fix.
+  `node tools/diag_connections.js` prints before / after; `tools/test_conns_rooms.js`.
+- Isolated terrain / edge problems: see CLAUDE.md "ISOLATED TERRAIN". `tools/test_walk_rooms.js`.
