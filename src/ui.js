@@ -346,8 +346,7 @@
         S = E.shape(pack, P, sliceSpec());
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
-      S.rooms = null;
-      if (P.rooms) { const tr0 = performance.now(); S.rooms = E.rooms.layer(pack, P); st.rooms = { ms: S.rooms.ms, total: performance.now() - tr0 }; } else st.rooms = null;
+      st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
     }
     const incursion = computeIncursion(); O.incursion = incursion;
     $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');

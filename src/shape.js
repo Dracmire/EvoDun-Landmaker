@@ -285,7 +285,9 @@
       }
       S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rect: spec.rect || null, warnings };
     }
-    computeGates(S, P, full, q);
+    const RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: gates come from the tree, sub-terraces are only visual
+    S.rooms = RL; S.subFree = !!RL;
+    if (RL) computeGatesRooms(S, P, full, RL); else computeGates(S, P, full, q);
     carveStairs(S, P);
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
@@ -383,6 +385,40 @@
       }
     }
     S.gates = gates; S.passes = sites;
+  }
+
+  /* Rooms on: gates are the PAIRS where a path of the spanning tree crosses a terrace gate (RL.usage); every other candidate gate stays a cliff.
+     A site is that exact pair (a = low tile, b = high tile). Crossings of the same gate group closer than passGap to a chosen site are merged into it
+     (sites are taken by number of crossing paths, then position); the candidate pairs of the group within 3 tiles are the fallbacks when the carve does
+     not fit. Everything is clipped to the window (both tiles unblocked). */
+  function computeGatesRooms(S, P, full, RL) {
+    const W = S.W, H = S.H, fw = full.width, n = fw * full.height, gates = [], sites = [], U = RL.usage, gap = P.passGap;
+    if (!RL.gateByKey) { RL.gateByKey = new Map(); for (const p of RL.gate) RL.gateByKey.set(E.rooms.key(p[0], p[1], n), p); RL.gateByGroup = new Map(); for (const p of RL.gate) { const g = U.gateGroupOf.get(p[0]); if (!RL.gateByGroup.has(g)) RL.gateByGroup.set(g, []); RL.gateByGroup.get(g).push(p); } }
+    const win = (t) => { const x = t % fw - S.ox, y = ((t / fw) | 0) - S.oy; return x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x; };
+    const xy = (i) => [i % W, (i / W) | 0];
+    const used = [];
+    for (const [k, count] of U.usedGate) {
+      const p = RL.gateByKey.get(k); if (!p) continue;
+      const a = win(p[0]), b = win(p[1]); if (a < 0 || b < 0 || S.block[a] || S.block[b]) continue;
+      used.push({ a, b, count, gid: U.gateGroupOf.get(p[0]) });
+    }
+    used.sort((p, q) => q.count - p.count || p.a - q.a);
+    const clusters = [];
+    for (const u of used) {
+      const [x, y] = xy(u.a); let into = null;
+      for (const c of clusters) { if (c.gid !== u.gid) continue; const [cx, cy] = xy(c.site.a); if (Math.max(Math.abs(cx - x), Math.abs(cy - y)) < gap) { into = c; break; } }
+      if (into) { into.pairs.push(u); into.count += u.count; } else clusters.push({ gid: u.gid, site: u, pairs: [u], count: u.count });
+    }
+    clusters.sort((p, q) => p.gid - q.gid || p.site.a - q.site.a);
+    for (const c of clusters) {
+      const gi = gates.length, [sx, sy] = xy(c.site.a);
+      gates.push({ kind: 'terrace', size: c.count, tiles: c.pairs.map((u) => ({ a: u.a, b: u.b })) });
+      const alts = [];
+      for (const p of RL.gateByGroup.get(c.gid)) { const a = win(p[0]), b = win(p[1]); if (a < 0 || b < 0 || a === c.site.a || S.block[a] || S.block[b]) continue; const [x, y] = xy(a); if (Math.max(Math.abs(x - sx), Math.abs(y - sy)) <= 3) alts.push({ a, b, d: Math.hypot(x - sx, y - sy) }); }
+      alts.sort((p, q) => p.d - q.d || p.a - q.a);
+      sites.push({ a: c.site.a, b: c.site.b, gate: gi, kind: 'terrace', alts: alts.map((o) => ({ a: o.a, b: o.b })) });
+    }
+    S.gates = gates; S.passes = sites; S.roomGates = { candidates: RL.usage.gateGroups, usedGroups: new Set(clusters.map((c) => c.gid)).size, sites: sites.length, merged: used.length - clusters.length };
   }
 
   /* Stairs are carved into the terrain. Each tread rises at most `tread` sub-terraces (default: the climb limit; never more). A stair is cut into the upper
@@ -559,7 +595,7 @@
         if (nx >= W || ny >= H) continue;
         const j = ny * W + nx;
         if (water[j] || carved[i] || carved[j]) continue;   // carved tiles only connect along their stair
-        if (ter[i] === ter[j] && Math.abs(sub[i] - sub[j]) <= P.climb) uni(i, j);
+        if (ter[i] === ter[j] && (S.subFree || Math.abs(sub[i] - sub[j]) <= P.climb)) uni(i, j);
       }
     }
     for (const st of S.stairs) for (let ci = 0; ci < st.cols.length; ci++) {
@@ -596,7 +632,7 @@
       const x = i % W, y = (i / W) | 0;
       if (!S.carved[i]) for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) {
         if (j < 0 || S.block[j] || S.carved[j]) continue;   // carved tiles only connect along their stair
-        if (S.ter[i] === S.ter[j] && Math.abs(S.sub[i] - S.sub[j]) <= P.climb) out.push(j);
+        if (S.ter[i] === S.ter[j] && (S.subFree || Math.abs(S.sub[i] - S.sub[j]) <= P.climb)) out.push(j);
       }
       const e = extra.get(i); if (e) for (const j of e) if (!S.block[j]) out.push(j);
       return out;

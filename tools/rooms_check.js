@@ -148,8 +148,8 @@ const writePng = (file, w, h, rgb) => {
         if (y + 1 < H && h[i + W] > 0 && res.ter[i + W] !== res.ter[i]) for (let d = 0; d < scale; d++) set(x * scale + d, (y + 1) * scale - 1, [0, 0, 0]); }
       const cs = res.reach, tr = res.treeReach;
       for (const e of tr.tree) { const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra); for (const t of R.pathTo(b, cs[e.j].center)) { const x0 = (t % W) * scale + (scale >> 1) - 1, y0 = ((t / W) | 0) * scale + (scale >> 1) - 1; for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) set(x0 + dx, y0 + dy, [255, 40, 255]); } }
-      for (const k of u.usedRoom) { const a = Math.floor(k / n), b = k % n; tile(a, [255, 232, 0]); tile(b, [255, 232, 0]); }
-      for (const k of u.usedGate) { const a = Math.floor(k / n), b = k % n; tile(a, [0, 225, 255]); tile(b, [0, 225, 255]); }
+      for (const k of u.usedRoom.keys()) { const a = Math.floor(k / n), b = k % n; tile(a, [255, 232, 0]); tile(b, [255, 232, 0]); }
+      for (const k of u.usedGate.keys()) { const a = Math.floor(k / n), b = k % n; tile(a, [0, 225, 255]); tile(b, [0, 225, 255]); }
       for (const c of cs) { if (c.center < 0) continue; const x0 = (c.center % W) * scale - 1, y0 = ((c.center / W) | 0) * scale - 1; for (let dy = 0; dy < scale + 2; dy++) for (let dx = 0; dx < scale + 2; dx++) set(x0 + dx, y0 + dy, [255, 30, 30]); }
       return { w, h: hh, rgb };
     };

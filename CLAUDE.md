@@ -125,7 +125,7 @@ incursion border; stake and way-back path visible.
 - `src/png.js`: own PNG decoder (`E.decodePng`, raw samples per channel, 8/16 bit). `node tools/test_png.js`.
 - `src/fields.js`: channels R,G,B,A,H,S,V, roles (elevation / zone / edge / path / vegetation / POI), categorical
   hue ids, manifest. `node tools/test_fields.js`. Format in `docs/pack-format.md`.
-- `src/rooms.js`: minimal rooms chain with the patched connection (no UI, no render; `node tools/test_rooms.js`, `node tools/rooms_check.js`); `tools/rooms_original.js` = the user's rules as written, comparison only.
+- `src/rooms.js` (rooms ON = `P.rooms`, off by default; `E.rooms.layer(pack, P)` caches the whole-map chain in stages; `E.shape` then takes the gates from the tree: `computeGatesRooms`, `tools/test_gates_rooms.js`, `tools/ui/test_rooms_ui.js`, cold cost `tools/ui/measure_rooms.js`): minimal rooms chain with the patched connection (no UI, no render; `node tools/test_rooms.js`, `node tools/rooms_check.js`); `tools/rooms_original.js` = the user's rules as written, comparison only.
 - `src/ui.js`, `src/app.html`: controls, angle presets, compare mode, multi-image loading with a role selector per
   channel, flip Y, maxnode, save pack.json, slice controls (zone chips, crop, scenery margin). Sliders recompute on
   release. Overlays: zones, edge map, graded masks (blocky tiles, see item 1).
@@ -226,7 +226,7 @@ incursion border; stake and way-back path visible.
    DECIDED for the integration (user): sub-terraces are only visual with rooms on; the tree is GLOBAL (computed once on the whole map, cached) and a slice keeps the
    connections whose paths stay inside it plus the minimum extra ones to join what the cut separated (Kruskal from those components; "patch" ramps exist only while
    that slice is chosen and get another tone); room transitions are OPEN (all valid ones, used or not) and only borders that are not a transition block; unused
-   terrace gates are closed (cliff). Six commits: (1) void + land quantization [done], (2) rooms layer + switch + sliders, (3) used gates -> ramps (PR), (4) slice by rooms,
+   terrace gates are closed (cliff). Six commits: (1) void + land quantization [done], (2) rooms layer + switch + sliders [done], (3) used gates -> ramps at the exact pair, sub-terraces visual [done, PR], (4) slice by rooms,
    (5) room borders + overlay, (6) route by the tree (PR).
    POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).

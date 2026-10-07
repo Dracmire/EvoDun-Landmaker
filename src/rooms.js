@@ -311,12 +311,12 @@
      both sides (like the user's minSizeEdge groups); a group is used if one of its pairs is. Coverage = land tiles of the cores of the largest tree
      (and those plus the path tiles). res: R.build output. */
   R.usage = function (res, W, H) {
-    const n = W * H, tr = res.treeReach, cs = res.reach, usedGate = new Set(), usedRoom = new Set(), pathTiles = new Set(); let steps = 0;
+    const n = W * H, tr = res.treeReach, cs = res.reach, usedGate = new Map(), usedRoom = new Map(), pathTiles = new Set(); let steps = 0; // used pairs -> how many tree paths cross them
     for (const e of tr.tree) {
       const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra, cs[e.j].center), pth = R.pathTo(b, cs[e.j].center); steps += pth.length - 1;
       for (let k = 0; k < pth.length; k++) {
         pathTiles.add(pth[k]); if (k === 0) continue;
-        const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) usedGate.add(kk); else if (res.rp.has(kk)) usedRoom.add(kk);
+        const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) usedGate.set(kk, (usedGate.get(kk) || 0) + 1); else if (res.rp.has(kk)) usedRoom.set(kk, (usedRoom.get(kk) || 0) + 1);
       }
     }
     const comps = (tiles) => { // 4-connected components of a tile set -> Map tile -> id
@@ -336,7 +336,7 @@
     const bigPath = new Set(); for (const e of tr.tree) if (inBig.has(e.i)) { const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra, cs[e.j].center); for (const t of R.pathTo(b, cs[e.j].center)) bigPath.add(t); }
     const withPaths = new Set([...coreTiles, ...bigPath]);
     return { usedGatePairs: usedGate.size, usedRoomPairs: usedRoom.size, gateGroups: gg.count, usedGateGroups: usedGG.size, roomGroups: rg.count, usedRoomGroups: usedRG.size,
-      steps, pathTiles: pathTiles.size, bigCores: big.length, bigCoreTiles: coreTiles.size, bigWithPaths: withPaths.size, usedGate, usedRoom };
+      steps, pathTiles: pathTiles.size, bigCores: big.length, bigCoreTiles: coreTiles.size, bigWithPaths: withPaths.size, usedGate, usedRoom, gateGroupOf: gg.id };
   };
 
   /* Elevation for quantizing over the LAND only: void tiles (h <= 0) take the value of the nearest land tile (so the pre-smoothing does not drag the
