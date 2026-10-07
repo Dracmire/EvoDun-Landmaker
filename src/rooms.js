@@ -248,7 +248,7 @@
   };
 
   /* ---- reachability and shortest paths over a step function step(from, to) -> bool (4-neighbours) ---- */
-  R.bfs = function (W, H, start, step, wantParent) {
+  R.bfs = function (W, H, start, step, wantParent, goal) { // goal (optional): stop as soon as it is reached
     const n = W * H, dist = new Int32Array(n).fill(-1), par = wantParent ? new Int32Array(n).fill(-1) : null, q = new Int32Array(n);
     let qh = 0, qt = 0; dist[start] = 0; q[qt++] = start;
     while (qh < qt) {
@@ -257,6 +257,7 @@
         const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
         const j = ny * W + nx; if (dist[j] >= 0 || !step(p, j)) continue;
         dist[j] = dist[p] + 1; if (par) par[j] = p; q[qt++] = j;
+        if (j === goal) return { dist, par };
       }
     }
     return { dist, par };
@@ -265,17 +266,23 @@
 
   /* Shortest paths with an extra cost per step: extra(a, b) >= 0 is added to the unit cost (Dijkstra; without extra it is the BFS above).
      Used to make the paths prefer going round to crossing a terrace gate (the user's variant: a crossing costs `crossCost` tiles more). */
-  R.dijkstra = function (W, H, start, step, wantParent, extra) {
-    if (!extra) return R.bfs(W, H, start, step, wantParent);
-    const n = W * H, dist = new Int32Array(n).fill(-1), best = new Float64Array(n).fill(Infinity), par = wantParent ? new Int32Array(n).fill(-1) : null, q = new Heap();
-    best[start] = 0; q.push(0, start);
-    while (q.size) {
-      const p = q.pop(); if (dist[p] >= 0) continue; dist[p] = best[p];
+  R.maxExtra = 64; // largest extra cost per step the bucket queue supports (the viewer's slider stops at 40)
+  R.dijkstra = function (W, H, start, step, wantParent, extra, goal) {
+    if (!extra) return R.bfs(W, H, start, step, wantParent, goal);
+    // integer costs (1 + extra, extra <= a few tens): Dial's buckets, circular, much faster than a heap on this grid
+    const n = W * H, dist = new Int32Array(n).fill(-1), best = new Int32Array(n).fill(0x3fffffff), par = wantParent ? new Int32Array(n).fill(-1) : null;
+    const NB = (R.maxExtra || 64) + 2, buckets = Array.from({ length: NB }, () => []); let pending = 1, cur = 0;
+    best[start] = 0; buckets[0].push(start);
+    while (pending > 0) {
+      const bk = buckets[cur % NB];
+      if (!bk.length) { cur++; continue; }
+      const p = bk.pop(); pending--; if (dist[p] >= 0 || best[p] !== cur) continue; dist[p] = cur;
+      if (p === goal) break;
       const x = p % W, y = (p / W) | 0;
       for (const [dx, dy] of N4) {
         const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
         const j = ny * W + nx; if (dist[j] >= 0 || !step(p, j)) continue;
-        const c = best[p] + 1 + extra(p, j); if (c < best[j]) { best[j] = c; if (par) par[j] = p; q.push(c, j); }
+        const c = cur + 1 + extra(p, j); if (c < best[j]) { best[j] = c; if (par) par[j] = p; buckets[c % NB].push(j); pending++; }
       }
     }
     return { dist, par };
@@ -306,7 +313,7 @@
   R.usage = function (res, W, H) {
     const n = W * H, tr = res.treeReach, cs = res.reach, usedGate = new Set(), usedRoom = new Set(), pathTiles = new Set(); let steps = 0;
     for (const e of tr.tree) {
-      const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra), pth = R.pathTo(b, cs[e.j].center); steps += pth.length - 1;
+      const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra, cs[e.j].center), pth = R.pathTo(b, cs[e.j].center); steps += pth.length - 1;
       for (let k = 0; k < pth.length; k++) {
         pathTiles.add(pth[k]); if (k === 0) continue;
         const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) usedGate.add(kk); else if (res.rp.has(kk)) usedRoom.add(kk);
@@ -326,7 +333,7 @@
     const bySize = new Map(); cs.forEach((c, i) => { const r = tr.root(i); if (!bySize.has(r)) bySize.set(r, []); bySize.get(r).push(i); });
     let big = []; for (const l of bySize.values()) if (l.length > big.length) big = l;
     const inBig = new Set(big), coreTiles = new Set(); for (const i of big) for (const t of cs[i].tiles) coreTiles.add(t);
-    const bigPath = new Set(); for (const e of tr.tree) if (inBig.has(e.i)) { const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra); for (const t of R.pathTo(b, cs[e.j].center)) bigPath.add(t); }
+    const bigPath = new Set(); for (const e of tr.tree) if (inBig.has(e.i)) { const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra, cs[e.j].center); for (const t of R.pathTo(b, cs[e.j].center)) bigPath.add(t); }
     const withPaths = new Set([...coreTiles, ...bigPath]);
     return { usedGatePairs: usedGate.size, usedRoomPairs: usedRoom.size, gateGroups: gg.count, usedGateGroups: usedGG.size, roomGroups: rg.count, usedRoomGroups: usedRG.size,
       steps, pathTiles: pathTiles.size, bigCores: big.length, bigCoreTiles: coreTiles.size, bigWithPaths: withPaths.size, usedGate, usedRoom };
@@ -345,31 +352,66 @@
     return { el, range: [mn * scale, mx * scale] };
   };
 
-  /* ---- the whole patched chain. inp: { W, H, h (0..1), ter (terrace map), gateTiles (low tiles of the viewer's gates) }.
-     prm: R.defaults + { gateMin, crossCost (extra cost of crossing a terrace gate, default 0) } ---- */
-  R.build = function (inp, prm) {
-    const { W, H, h, ter } = inp, n = W * H, out = { prm, ter };
-    out.slope = R.slope(h, W, H, prm.exponent);
-    out.cls = R.classify(out.slope, h, prm.gentle, prm.steep);
-    const ws = R.watershed(h, out.cls, W, H, prm); out.room0 = ws.room; out.rooms = ws.rooms; out.seeds = ws.seeds;
-    let land = 0, un0 = 0; for (let i = 0; i < n; i++) if (h[i] > 0) { land++; if (!ws.room[i]) un0++; }
-    const as = R.assign(ws.room, h, W, H); out.room = as.room;
-    out.stats = { seeds: ws.seeds, rooms: ws.rooms.length, land, unassignedBefore: un0, unassignedAfter: as.left };
-    out.pairs = R.roomPairs(out.room, h, out.cls, ter, W, H, prm);
-    out.stats.roomPairs = out.pairs.length;
-    out.expand = R.expandFilter(out.pairs, out.room, ter, out.cls, W, H, prm.minSizeEdge);
-    const gp = R.gatePairs(inp.gateTiles, out.room, ter, out.cls, h, W, H, prm.gateMin, true); out.gate = gp.pairs; out.gateStats = gp.stats;
-    const mp = R.makePass({ W, H, h, room: out.room, ter, cls: out.cls, pairs: out.pairs, gate: out.gate }); out.pass = mp.pass; out.forb = mp.forb; out.rp = mp.roomPairs; out.gp = mp.gatePairs;
-    const cc = prm.crossCost || 0; out.extra = cc > 0 ? (a, b) => out.gp.has(key(a, b, n)) ? cc : 0 : null; // crossing a terrace gate costs cc tiles more
-    out.cores = R.cores(out.room, ter, out.cls, out.rooms, W, H, prm.minCore);
-    out.centres = R.fixCentres(out.cores, out.forb, W);
-    const alive = out.cores.filter((c) => !c.dead); out.alive = alive;
-    // the pipeline as written: scan from the first living core, cores touched by the scan are Reachable, spanning tree among them
-    const root = alive.find((c) => c.center >= 0);
-    out.scan = root ? R.bfs(W, H, root.center, out.pass, false).dist : new Int32Array(n).fill(-1);
-    out.reach = alive.filter((c) => c.tiles.some((t) => out.scan[t] >= 0));
-    out.treeReach = R.spanning(W, H, out.reach.map((c) => c.center), out.pass, out.extra);
-    out.treeAll = R.spanning(W, H, alive.map((c) => c.center), out.pass, out.extra);
+  /* ---- the whole patched chain, in cached stages (a cache object keeps what an unchanged key already computed).
+     inp: { W, H, h (0..1), ter (terrace map), gateTiles (low tiles of the viewer's gates), hkey / tkey / gkey (strings that change when h, ter or
+     the gate tiles change; needed only when a cache is passed) }.
+     prm: R.defaults + { gateMin, crossCost (extra cost of crossing a terrace gate, default 0), treeAll (also a tree over ALL living cores, diagnostic) }.
+     Stages and what invalidates them: rooms (h and the slope / watershed parameters), edges (+ terraces, hardEdge, minSizeEdge), pass (+ gate tiles,
+     gateMin), cores (+ minCore: centres, scan), tree (+ crossCost: spanning forest and what it uses). res.ms = ms of the stages that ran. ---- */
+  R.stage = function (cache, name, key, fn) {
+    const c = cache[name]; if (c && c.key === key) return c.v;
+    const t = performance.now(), v = fn(); cache[name] = { key, v }; (cache.ms || (cache.ms = {}))[name] = performance.now() - t; return v;
+  };
+  R.build = function (inp, prm, cache) {
+    const { W, H, h, ter } = inp, n = W * H, C = cache || {}; C.ms = {};
+    const k1 = [W, H, prm.gentle, prm.steep, prm.exponent, prm.hTol, prm.minRadius, prm.minRoom, inp.hkey || ''].join('|');
+    const s1 = R.stage(C, 'rooms', k1, () => {
+      const slope = R.slope(h, W, H, prm.exponent), cls = R.classify(slope, h, prm.gentle, prm.steep), ws = R.watershed(h, cls, W, H, prm), as = R.assign(ws.room, h, W, H);
+      let land = 0, un0 = 0; for (let i = 0; i < n; i++) if (h[i] > 0) { land++; if (!ws.room[i]) un0++; }
+      return { slope, cls, room0: ws.room, rooms: ws.rooms, seeds: ws.seeds, room: as.room, stats: { seeds: ws.seeds, rooms: ws.rooms.length, land, unassignedBefore: un0, unassignedAfter: as.left } };
+    });
+    const k2 = k1 + '#' + (inp.tkey || '') + '|' + prm.hardEdge + '|' + prm.minSizeEdge;
+    const s2 = R.stage(C, 'edges', k2, () => {
+      const pairs = R.roomPairs(s1.room, h, s1.cls, ter, W, H, prm), expand = R.expandFilter(pairs, s1.room, ter, s1.cls, W, H, prm.minSizeEdge);
+      return { pairs, expand };
+    });
+    const k3 = k2 + '#' + (inp.gkey || '') + '|' + prm.gateMin;
+    const s3 = R.stage(C, 'pass', k3, () => {
+      const gp = R.gatePairs(inp.gateTiles, s1.room, ter, s1.cls, h, W, H, prm.gateMin, true), mp = R.makePass({ W, H, h, room: s1.room, ter, cls: s1.cls, pairs: s2.pairs, gate: gp.pairs });
+      return { gate: gp.pairs, gateStats: gp.stats, pass: mp.pass, forb: mp.forb, rp: mp.roomPairs, gp: mp.gatePairs };
+    });
+    const k4 = k3 + '#' + prm.minCore;
+    const s4 = R.stage(C, 'cores', k4, () => {
+      const cores = R.cores(s1.room, ter, s1.cls, s1.rooms, W, H, prm.minCore), centres = R.fixCentres(cores, s3.forb, W), alive = cores.filter((c) => !c.dead);
+      // the pipeline as written: scan from the first living core, cores touched by the scan are Reachable
+      const root = alive.find((c) => c.center >= 0), scan = root ? R.bfs(W, H, root.center, s3.pass, false).dist : new Int32Array(n).fill(-1);
+      return { cores, centres, alive, scan, reach: alive.filter((c) => c.tiles.some((t) => scan[t] >= 0)) };
+    });
+    const k5 = k4 + '#' + (prm.crossCost || 0) + (prm.treeAll ? 'a' : '');
+    const out = { prm, ter, W, H, h, room: s1.room, room0: s1.room0, rooms: s1.rooms, seeds: s1.seeds, cls: s1.cls, slope: s1.slope, stats: s1.stats, pairs: s2.pairs, expand: s2.expand,
+      gate: s3.gate, gateStats: s3.gateStats, pass: s3.pass, forb: s3.forb, rp: s3.rp, gp: s3.gp, cores: s4.cores, centres: s4.centres, alive: s4.alive, scan: s4.scan, reach: s4.reach };
+    const cc = prm.crossCost || 0; out.extra = cc > 0 ? (a, b) => ter[a] !== ter[b] && s3.gp.has(key(a, b, n)) ? cc : 0 : null; // crossing a terrace gate costs cc tiles more
+    const s5 = R.stage(C, 'tree', k5, () => {
+      const treeReach = R.spanning(W, H, s4.reach.map((c) => c.center), s3.pass, out.extra);
+      const treeAll = prm.treeAll ? R.spanning(W, H, s4.alive.map((c) => c.center), s3.pass, out.extra) : null;
+      const part = Object.assign({}, out, { treeReach });
+      return { treeReach, treeAll, usage: R.usage(part, W, H) };
+    });
+    out.treeReach = s5.treeReach; out.treeAll = s5.treeAll; out.usage = s5.usage; out.ms = Object.assign({}, C.ms);
     return out;
+  };
+
+  /* The layer of the viewer for a pack: the whole map, cached on the pack (`full._rc`). Terraces and gate tiles are the viewer's own (E.quantize,
+     E.gateTransitions), heights are the elevation over the highest land tile (0..1, void = 0), the rest are P's rooms parameters. */
+  R.paramsOf = (P) => ({ gentle: P.rGentle === undefined ? 0.2 : P.rGentle, steep: P.rSteep === undefined ? 0.33 : P.rSteep, exponent: P.rExp === undefined ? 0.5 : P.rExp, hTol: P.rHTol === undefined ? 0.07 : P.rHTol,
+    minRadius: P.rRadius === undefined ? 9 : P.rRadius, minRoom: P.rMinRoom === undefined ? 8 : P.rMinRoom, hardEdge: P.rHardEdge === undefined ? 0.5 : P.rHardEdge, minSizeEdge: P.rMinSizeEdge === undefined ? 12 : P.rMinSizeEdge,
+    minCore: P.roomsMinCore === undefined ? 20 : P.roomsMinCore, crossCost: P.roomsCross === undefined ? 10 : P.roomsCross, gateMin: P.gateMin === undefined ? 3 : P.gateMin });
+  R.layer = function (full, P) {
+    const W = full.width, H = full.height, n = W * H, q = E.quantize(full, P), tr = E.gateTransitions(full, P, 'terrace');
+    if (!full._rc) full._rc = {};
+    if (!full._rcH) { let mx = 0; for (let i = 0; i < n; i++) if (full.elevation[i] > mx) mx = full.elevation[i]; full._rcH = Float32Array.from(full.elevation, (v) => (v > 0 && mx > 0 ? v / mx : 0)); }
+    const tiles = []; for (const g of tr.groups) for (const i of g.tiles) tiles.push(i);
+    const prm = R.paramsOf(P), res = R.build({ W, H, h: full._rcH, ter: q.ter, gateTiles: tiles, hkey: 'h', tkey: q.key, gkey: `${P.gateThr}|${P.gateMin}` }, prm, full._rc);
+    res.gateGroups = tr.groups.length; res.mapW = W; res.mapH = H; return res;
   };
 })(window.EVO = window.EVO || {});

@@ -29,7 +29,7 @@ const sweep = arg('--sweep', '0.05,0.1,0.2,0.3,0.45').split(',').filter(Boolean)
 const pre = +arg('--pre', 1), minPlateau = +arg('--minPlateau', 5), subs = +arg('--subs', 3), minCore = +arg('--minCore', 5);
 
 const coreSweep = arg('--coreSweep', '5,20,50').split(',').filter(Boolean).map(Number), crossCosts = arg('--crossCosts', '0,10,30').split(',').filter(Boolean).map(Number);
-const prmOf = (transStrict, o = {}) => ({ gentle: A.gentle, steep: A.steep, exponent: A.exp, hTol: A.hTol, minRadius: A.minRadius, minRoom: A.minRoom, hardEdge: A.hardEdge, minSizeEdge: A.minSizeEdge, minCore: o.minCore === undefined ? minCore : o.minCore, crossCost: o.crossCost || 0, transStrict, gateMin: A.minTerraceTrans });
+const prmOf = (transStrict, o = {}) => ({ treeAll: o.treeAll !== false, gentle: A.gentle, steep: A.steep, exponent: A.exp, hTol: A.hTol, minRadius: A.minRadius, minRoom: A.minRoom, hardEdge: A.hardEdge, minSizeEdge: A.minSizeEdge, minCore: o.minCore === undefined ? minCore : o.minCore, crossCost: o.crossCost || 0, transStrict, gateMin: A.minTerraceTrans });
 
 // ---- PNG writer (tool side only) ----
 const crcT = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
@@ -98,7 +98,7 @@ const writePng = (file, w, h, rgb) => {
     console.log(`\nUSED by the spanning tree (transStrict ${A.transStrict}, min gate group ${A.minTerraceTrans}); candidates: gate groups / transition groups; tree = forest over the scan-reachable cores`);
     console.log('minCore cost | living scan trees largest | gate groups used/cand (pairs) | transition groups used/cand | tree path steps (unique tiles) | land in largest tree: cores, cores+paths');
     for (const mc of coreSweep) for (const cc of crossCosts) {
-      const res = R.build({ W, H, h, ter: v.ter, gateTiles: v.tiles }, prmOf(A.transStrict, { minCore: mc, crossCost: cc })), u = R.usage(res, W, H), t = res.treeReach;
+      const res = R.build({ W, H, h, ter: v.ter, gateTiles: v.tiles }, prmOf(A.transStrict, { minCore: mc, crossCost: cc, treeAll: false })), u = res.usage, t = res.treeReach;
       usedRuns.push({ mc, cc, res, u });
       console.log(`${String(mc).padStart(7)} ${String(cc).padStart(4)} | ${String(res.alive.length).padStart(4)} ${String(res.reach.length).padStart(4)} ${String(t.trees).padStart(3)} ${String(t.largest).padStart(4)} | ${String(u.usedGateGroups).padStart(3)}/${u.gateGroups} (${u.usedGatePairs}) | ${String(u.usedRoomGroups).padStart(3)}/${u.roomGroups} | ${String(u.steps).padStart(5)} (${u.pathTiles}) | ${(u.bigCoreTiles / land * 100).toFixed(1)} %, ${(u.bigWithPaths / land * 100).toFixed(1)} %`);
     }
