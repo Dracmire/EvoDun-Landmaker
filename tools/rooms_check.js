@@ -6,9 +6,10 @@
      node tools/rooms_check.js [--map data/samples/skeleton_heightmap_256.png] [--preset forge|conical] [--out DIR]
         [--gentle 0.2] [--steep 0.33] [--exp 0.5] [--hTol 0.07] [--terraces 5] [--minRadius 9] [--minRoom 8] [--hardEdge 0.5]
         [--minSizeEdge 12] [--transStrict 0.45] [--minTerraceTrans 8] [--minCore 5] [--sweep 0.05,0.1,0.2,0.3,0.45] [--scale 4]
-        [--pre 1] [--minPlateau 5] [--subs 3] [--noPng]
+        [--pre 1] [--minPlateau 5] [--subs 3] [--noPng] [--voidInRange]
+        [--coreSweep 5,20,50] [--crossCosts 0,10,30]   (what the spanning tree USES: gates and transitions crossed by its paths)
    Presets are the values the user read from his scenes: forge = mapGen_forge, conical = ConicalTown. Any flag overrides the preset.
-   Void = height 0. Colours of the PNG are printed at the end. */
+   Void = height 0; terraces are quantized over the LAND only (void takes the nearest land value, range = lowest..highest land) unless --voidInRange. Colours of the PNG are printed at the end. */
 const fs = require('fs'), path = require('path'), vm = require('vm'), zlib = require('zlib');
 global.window = global;
 for (const f of ['png', 'fields', 'shape', 'tech', 'rooms']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
@@ -27,7 +28,8 @@ const mapFile = arg('--map', path.join(__dirname, '../data/samples/skeleton_heig
 const sweep = arg('--sweep', '0.05,0.1,0.2,0.3,0.45').split(',').filter(Boolean).map(Number);
 const pre = +arg('--pre', 1), minPlateau = +arg('--minPlateau', 5), subs = +arg('--subs', 3), minCore = +arg('--minCore', 5);
 
-const prmOf = (transStrict) => ({ gentle: A.gentle, steep: A.steep, exponent: A.exp, hTol: A.hTol, minRadius: A.minRadius, minRoom: A.minRoom, hardEdge: A.hardEdge, minSizeEdge: A.minSizeEdge, minCore, transStrict, gateMin: A.minTerraceTrans });
+const coreSweep = arg('--coreSweep', '5,20,50').split(',').filter(Boolean).map(Number), crossCosts = arg('--crossCosts', '0,10,30').split(',').filter(Boolean).map(Number);
+const prmOf = (transStrict, o = {}) => ({ gentle: A.gentle, steep: A.steep, exponent: A.exp, hTol: A.hTol, minRadius: A.minRadius, minRoom: A.minRoom, hardEdge: A.hardEdge, minSizeEdge: A.minSizeEdge, minCore: o.minCore === undefined ? minCore : o.minCore, crossCost: o.crossCost || 0, transStrict, gateMin: A.minTerraceTrans });
 
 // ---- PNG writer (tool side only) ----
 const crcT = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
@@ -47,8 +49,10 @@ const writePng = (file, w, h, rgb) => {
   console.log('parameters:', JSON.stringify({ ...A, minCore, pre, minPlateau, subs }));
 
   // the viewer's terraces and gates (global range of the whole map, void included as the lowest value: see docs/rooms.md)
-  const el = Float32Array.from(h, (v) => v * 1000);
-  const full = { name: 'm', width: W, height: H, elevation: el, elevRange: [0, 1000], masks: {}, markers: [], fields: {} };
+  const le = R.landElevation(h, W, H, 1000), voidInRange = has('--voidInRange');
+  const el = voidInRange ? Float32Array.from(h, (v) => v * 1000) : le.el;
+  const full = { name: 'm', width: W, height: H, elevation: el, elevRange: voidInRange ? [0, 1000] : le.range, masks: {}, markers: [], fields: {} };
+  console.log(`terraces over ${voidInRange ? 'the whole map, void included (old behaviour)' : 'the land only'}: elevation range ${full.elevRange.map((v) => v.toFixed(0)).join('..')}`);
   const Pv = (thr) => ({ terraces: A.terraces, subs, terH: 1, subH: 0.22, minPlateau, minSub: 3, pre, climb: 2, gateThr: thr, gateMin: A.minTerraceTrans });
   const viewer = (thr) => { const P = Pv(thr), q = E.quantize(full, P), t = E.gateTransitions(full, P, 'terrace'); const tiles = []; for (const g of t.groups) for (const i of g.tiles) tiles.push(i); return { ter: Int32Array.from(q.ter), tiles, groups: t.groups.length }; };
 
@@ -87,6 +91,19 @@ const writePng = (file, w, h, rgb) => {
     }
   }
 
+  // ---- what the spanning tree USES: gates and room transitions crossed by its paths, per minimum core size and per extra cost of crossing a gate ----
+  const usedRuns = [];
+  if (coreSweep.length) {
+    const v = viewer(A.transStrict);
+    console.log(`\nUSED by the spanning tree (transStrict ${A.transStrict}, min gate group ${A.minTerraceTrans}); candidates: gate groups / transition groups; tree = forest over the scan-reachable cores`);
+    console.log('minCore cost | living scan trees largest | gate groups used/cand (pairs) | transition groups used/cand | tree path steps (unique tiles) | land in largest tree: cores, cores+paths');
+    for (const mc of coreSweep) for (const cc of crossCosts) {
+      const res = R.build({ W, H, h, ter: v.ter, gateTiles: v.tiles }, prmOf(A.transStrict, { minCore: mc, crossCost: cc })), u = R.usage(res, W, H), t = res.treeReach;
+      usedRuns.push({ mc, cc, res, u });
+      console.log(`${String(mc).padStart(7)} ${String(cc).padStart(4)} | ${String(res.alive.length).padStart(4)} ${String(res.reach.length).padStart(4)} ${String(t.trees).padStart(3)} ${String(t.largest).padStart(4)} | ${String(u.usedGateGroups).padStart(3)}/${u.gateGroups} (${u.usedGatePairs}) | ${String(u.usedRoomGroups).padStart(3)}/${u.roomGroups} | ${String(u.steps).padStart(5)} (${u.pathTiles}) | ${(u.bigCoreTiles / land * 100).toFixed(1)} %, ${(u.bigWithPaths / land * 100).toFixed(1)} %`);
+    }
+  }
+
   // ---- overlays ----
   if (!has('--noPng')) {
     fs.mkdirSync(outDir, { recursive: true });
@@ -122,6 +139,21 @@ const writePng = (file, w, h, rgb) => {
     const pa = paint(resA, 'A', trA, resA.gateSet, false), pb = paint(resB, 'B', trB, resB.gateSet, false), pc = paint(resC, 'C', trC, gC, true);
     const tag = `${preset}_t${A.transStrict}_m${A.minTerraceTrans}`;
     writePng(path.join(outDir, `${tag}_A.png`), pa.w, pa.h, pa.rgb); writePng(path.join(outDir, `${tag}_B.png`), pb.w, pb.h, pb.rgb); writePng(path.join(outDir, `${tag}_C.png`), pc.w, pc.h, pc.rgb);
+    const paintUsed = (r) => { // only what the tree uses: gates (cyan), transitions (yellow), paths (magenta), centres (red); rooms faint, cliffs thin
+      const res = r.res, u = r.u, w = W * scale, hh = H * scale, rgb = new Uint8Array(w * hh * 3), set = (x, y, c) => { if (x < 0 || y < 0 || x >= w || y >= hh) return; const o = (y * w + x) * 3; rgb[o] = c[0]; rgb[o + 1] = c[1]; rgb[o + 2] = c[2]; };
+      const tile = (i, c) => { const x0 = (i % W) * scale, y0 = ((i / W) | 0) * scale; for (let dy = 0; dy < scale; dy++) for (let dx = 0; dx < scale; dx++) set(x0 + dx, y0 + dy, c); };
+      for (let i = 0; i < n; i++) { if (h[i] <= 0) { tile(i, [8, 8, 12]); continue; } const c = res.room[i] > 0 ? hue(res.room[i]) : [90, 90, 90]; tile(i, c.map((v) => v * 0.45 + 20)); }
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x; if (h[i] <= 0) continue;
+        if (x + 1 < W && h[i + 1] > 0 && res.ter[i + 1] !== res.ter[i]) for (let d = 0; d < scale; d++) set((x + 1) * scale - 1, y * scale + d, [0, 0, 0]);
+        if (y + 1 < H && h[i + W] > 0 && res.ter[i + W] !== res.ter[i]) for (let d = 0; d < scale; d++) set(x * scale + d, (y + 1) * scale - 1, [0, 0, 0]); }
+      const cs = res.reach, tr = res.treeReach;
+      for (const e of tr.tree) { const b = R.dijkstra(W, H, cs[e.i].center, res.pass, true, res.extra); for (const t of R.pathTo(b, cs[e.j].center)) { const x0 = (t % W) * scale + (scale >> 1) - 1, y0 = ((t / W) | 0) * scale + (scale >> 1) - 1; for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) set(x0 + dx, y0 + dy, [255, 40, 255]); } }
+      for (const k of u.usedRoom) { const a = Math.floor(k / n), b = k % n; tile(a, [255, 232, 0]); tile(b, [255, 232, 0]); }
+      for (const k of u.usedGate) { const a = Math.floor(k / n), b = k % n; tile(a, [0, 225, 255]); tile(b, [0, 225, 255]); }
+      for (const c of cs) { if (c.center < 0) continue; const x0 = (c.center % W) * scale - 1, y0 = ((c.center / W) | 0) * scale - 1; for (let dy = 0; dy < scale + 2; dy++) for (let dx = 0; dx < scale + 2; dx++) set(x0 + dx, y0 + dy, [255, 30, 30]); }
+      return { w, h: hh, rgb };
+    };
+    for (const r of usedRuns) { const pu = paintUsed(r); writePng(path.join(outDir, `${tag}_used_core${r.mc}_cost${r.cc}.png`), pu.w, pu.h, pu.rgb); }
     const gap = 8, w2 = pa.w * 2 + gap, both = new Uint8Array(w2 * pa.h * 3).fill(30);
     for (let y = 0; y < pa.h; y++) { Buffer.from(pa.rgb.buffer, y * pa.w * 3, pa.w * 3).copy(Buffer.from(both.buffer), y * w2 * 3); Buffer.from(pc.rgb.buffer, y * pc.w * 3, pc.w * 3).copy(Buffer.from(both.buffer), (y * w2 + pa.w + gap) * 3); }
     writePng(path.join(outDir, `${tag}_A_vs_C.png`), w2, pa.h, both);

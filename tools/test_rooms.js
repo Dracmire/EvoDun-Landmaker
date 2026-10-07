@@ -118,4 +118,30 @@ const reach = (m, a, b, step) => R.bfs(m.W, m.H, a, step, false).dist[b] >= 0;
   const sp = R.spanning(12, 12, [start, goal, idx(m, 1, 10)], step); ok('8 spanning tree joins 3 centres with 2 edges', sp.tree.length === 2 && sp.trees === 1 && sp.largest === 3);
 }
 
+// ---- 9. what the tree USES: two candidate gates, the path crosses one; and the extra cost of crossing makes paths go round ----
+{ const W = 12, H = 8, m = blank(W, H); m.room.fill(1); for (let y = 0; y < H; y++) for (let x = 6; x < W; x++) m.ter[y * W + x] = 1;
+  const gate = [[idx(m, 5, 1), idx(m, 6, 1)], [idx(m, 5, 6), idx(m, 6, 6)]], mp = R.makePass({ W, H, h: m.h, room: m.room, ter: m.ter, cls: m.cls, pairs: [], gate });
+  const centres = [idx(m, 2, 4), idx(m, 9, 4)], sp = R.spanning(W, H, centres, mp.pass, null);
+  const res = { pass: mp.pass, gp: mp.gatePairs, rp: mp.roomPairs, pairs: [], gate, treeReach: sp, reach: centres.map((c) => ({ center: c, tiles: [c] })), extra: null };
+  const u = R.usage(res, W, H);
+  ok('9 the tree crosses ONE of the two candidate gates', u.gateGroups === 2 && u.usedGateGroups === 1 && u.usedGatePairs === 1 && u.usedRoomPairs === 0, JSON.stringify([u.gateGroups, u.usedGateGroups, u.usedGatePairs]));
+  ok('9 it is the nearer one (y = 6) and the path has 7 + 2 + 2 steps', u.usedGate.has(R.key(idx(m, 5, 6), idx(m, 6, 6), W * H)) && u.steps === 11, [u.steps]);
+  // extra cost: a wall at x = 4 with a direct opening at y = 2 (a "gate" step) and a detour opening at y = 0
+  const g = blank(9, 5); const open = (a, b) => !(a % 9 === 4 || b % 9 === 4) || (a / 9 | 0) === 2 && (b / 9 | 0) === 2 || (a / 9 | 0) === 0 && (b / 9 | 0) === 0 || (a % 9 !== 4 && b % 9 !== 4);
+  const step = (a, b) => { const ax = a % 9, bx = b % 9, ay = (a / 9) | 0, by = (b / 9) | 0; if (ax === 4 || bx === 4) return ay === by && (ay === 2 || ay === 0); return true; };
+  const gk = new Set([R.key(2 * 9 + 3, 2 * 9 + 4, 45)]), cost10 = (a, b) => gk.has(R.key(a, b, 45)) ? 10 : 0;
+  const s0 = 2 * 9, goal = 2 * 9 + 8;
+  const p0 = R.pathTo(R.dijkstra(9, 5, s0, step, true, null), goal), p1 = R.pathTo(R.dijkstra(9, 5, s0, step, true, cost10), goal);
+  ok('9 without extra cost the path takes the direct opening (8 steps)', p0.length === 9 && p0.includes(2 * 9 + 4), p0.length);
+  ok('9 with extra cost 10 on that crossing the path goes round through y = 0', p1.includes(0 * 9 + 4) && !p1.includes(2 * 9 + 4), p1.length);
+}
+
+// ---- 10. terraces over the land only: void takes the nearest land value, the range excludes it ----
+{ const W = 7, H = 3, h = new Float32Array(W * H); for (let y = 0; y < H; y++) for (let x = 2; x <= 4; x++) h[y * W + x] = 0.2 + 0.1 * (x - 2);
+  const le = R.landElevation(h, W, H, 1000);
+  ok('10 range is lowest..highest land, not 0..max', Math.abs(le.range[0] - 200) < 1e-3 && Math.abs(le.range[1] - 400) < 1e-3, le.range);
+  ok('10 void tiles take the nearest land value', Math.abs(le.el[0] - 200) < 1e-3 && Math.abs(le.el[1] - 200) < 1e-3 && Math.abs(le.el[6] - 400) < 1e-3 && Math.abs(le.el[W + 3] - 300) < 1e-3, [le.el[0], le.el[1], le.el[6]]);
+  ok('10 land tiles are unchanged', Math.abs(le.el[2] - 200) < 1e-3 && Math.abs(le.el[3] - 300) < 1e-3);
+}
+
 console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);

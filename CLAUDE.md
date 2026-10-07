@@ -190,6 +190,10 @@ incursion border; stake and way-back path visible.
    Cause not investigated.
 10. The climb limit (2 sub-terraces) is a provisional assumption, not the micro-step rule.
 11. Partial connection: with the user's gate criterion many regions stay unconnected (e.g. 14 regions, the largest 55 % of the slice in one test). KNOWN LIMITATION, on purpose: the global connection will come from the rooms and the numeric world; a connection step here would be filler code. No connection step is added.
+12. PENDING, NOT FIXED (found while porting the user's rooms chain): `ClassifySlopeMap` calls Void any tile with slope <= 0 WITHOUT a height test, and the
+    slope normalization (min/max, after the power) includes the coast. On a map with a black void the steepest values are on the coast (exponent 1, real map:
+    1099 of the 1100 tiles with normalized slope >= 0.6 touch the void), so thresholds inland depend on the coast. `src/rooms.js` forces h <= 0 to Void and keeps the
+    user's normalization; a decision (exclude the coast from the range?) is still to be taken with the user.
 
 ## Pending, in this order
 1. (Done, PR #1) Verify the first limitations.
@@ -212,6 +216,9 @@ incursion border; stake and way-back path visible.
    `tools/rooms_original.js`, `tools/rooms_check.js`, `tools/test_rooms.js`, results in `docs/rooms.md`); waiting for the user's review of the figures and the PNG
    overlays before anything is built on top. The patch adds, by the user's decision: a pair (transition or gate) with a Steep tile is dropped; the core centre is
    its free tile nearest the centroid. Parameters come from the user's scenes mapGen_forge (base) and ConicalTown (second check), all script arguments.
+   User's decision after the first check: lax gates (transStrict 0.05, min 3) are only CANDIDATES; a gate or room transition is USED only when a path of the
+   spanning tree crosses it, the rest is discarded. Terraces are quantized over the LAND only (void takes the nearest land value, range = lowest..highest land) in
+   the check script, not yet in the viewer. Measured in `tools/rooms_check.js` (`--coreSweep`, `--crossCosts`); the minimum core size is still to be decided.
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
 5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),
    RuleTile skin and modular kits, room types, platforms.
