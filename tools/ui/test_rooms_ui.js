@@ -9,7 +9,7 @@ const { open } = require('./common');
   await page.waitForTimeout(1500); await a.idle();
   const stages = () => page.evaluate(() => { const t = window.__evo.roomsTiming(); return t ? Object.keys(t.ms).sort().join(',') : null; });
   ok('rooms are off by default and nothing is computed', !(await page.$eval('#t-rooms', (e) => e.checked)) && (await stages()) === null && !/Rooms/.test(await page.$eval('#info', (e) => e.innerText)));
-  ok('the two sliders exist with the agreed ranges and defaults (core 5-80 = 20, cost 0-40 = 10)', await page.evaluate(() => { const c = document.querySelector('#s-roomsMinCore'), x = document.querySelector('#s-roomsCross'); return c && x && +c.min === 5 && +c.max === 80 && +c.value === 20 && +x.min === 0 && +x.max === 40 && +x.value === 10; }));
+  ok('the two sliders exist with the agreed ranges and defaults (core 5-250 = 20, cost 0-40 = 10)', await page.evaluate(() => { const c = document.querySelector('#s-roomsMinCore'), x = document.querySelector('#s-roomsCross'); return c && x && +c.min === 5 && +c.max === 250 && +c.value === 20 && +x.min === 0 && +x.max === 40 && +x.value === 10; }));
   const cold = Date.now(); await page.check('#t-rooms'); await a.idle();
   const txt = await page.$eval('#info', (e) => e.innerText), t1 = await page.evaluate(() => window.__evo.roomsTiming());
   console.log('cold rooms chain (whole map, core 20, cost 10):', t1.total.toFixed(0), 'ms', JSON.stringify(Object.fromEntries(Object.entries(t1.ms).map(([k, v]) => [k, Math.round(v)]))));

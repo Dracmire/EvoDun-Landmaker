@@ -190,6 +190,15 @@ const zoneImg = (extra) => rgba(W, H, (x, y) => {
   ok('no stake / objectives: not written', (() => { const o = E.buildManifest({ name: 'n', roles: {} }); return !('stake' in o) && !('objectives' in o); })());
   let thrown = 0; for (const bad of [{ stake: { x: 1.5, y: 2 } }, { stake: { x: -1, y: 2 } }, { stake: 'a' }, { objectives: [{ x: 1 }] }, { objectives: {} }]) { try { E.parseManifest(Object.assign({ format: 'evodun-pack/0.3', roles: {} }, bad)); } catch (e) { thrown++; } }
   ok('manifest: bad stake / objectives are rejected', thrown === 5, thrown);
+  { // the optional `viewer` block: seven fields, round trip, absent = null, bad values rejected
+    const V = { preset: 'balanced', rooms: true, cake: true, terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 };
+    const rt2 = E.parseManifest(JSON.parse(JSON.stringify(E.buildManifest({ name: 'v', roles: {}, viewer: V }))));
+    ok('manifest viewer block: the seven fields survive a round trip', JSON.stringify(rt2.viewer) === JSON.stringify(V), JSON.stringify(rt2.viewer));
+    ok('manifest viewer block: absent -> null (defaults) and not written', E.parseManifest({ format: 'evodun-pack/0.3', roles: {} }).viewer === null && !('viewer' in E.buildManifest({ name: 'n', roles: {} })));
+    ok('manifest viewer block: a partial block keeps only its fields', JSON.stringify(E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { terraces: 3 } }).viewer) === JSON.stringify({ terraces: 3 }));
+    let bad = 0; for (const v of [{ terraces: 1 }, { terraces: 25 }, { roomsMinCore: 4 }, { roomsMinCore: 251 }, { rRadius: 2 }, { rRadius: 31 }, { minPlateau: 0 }, { minPlateau: 301 }, { terraces: 3.5 }, { rooms: 'yes' }, { cake: 1 }, { preset: 'other' }]) { try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: v }); } catch (e) { bad++; } }
+    ok('manifest viewer block: out-of-range or wrong-type values are rejected', bad === 12, bad);
+  }
 }
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

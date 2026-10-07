@@ -144,6 +144,14 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
   { const nb = run({ ...P0, cake: true, cakeCorridor: false }), m0 = measureRamps(nb), m1 = measureRamps(cake);
     ok('mutation: without the corridor many feet are enclosed (the test can fail)', m0.footEnclosed > 20, JSON.stringify(m0));
     console.log(`  info: 5 terraces, ramps buried by the rings: feet enclosed ${m0.footEnclosed} -> ${m1.footEnclosed}, heads enclosed ${m0.headEnclosed} -> ${m1.headEnclosed}; ring tiles ${nb.cake.tiles} -> ${cake.cake.tiles} (${nb.cake.tiles - cake.cake.tiles} lost, ${cake.cake.corridor} corridor tiles reserved)`); }
+  { // the user's table, measured in the viewer (types, ramps, rooms, main % of the land), reproduced by tools/room_types_table.js
+    const T2 = require('./room_types_table.js'), want = [['31/0/1', 140, 32, 74], ['24/3/5', 83, 32, 69], ['28/3/1', 82, 32, 79], ['20/7/5', 44, 32, 75], ['62/7/19', 156, 88, 61], ['32/29/27', 54, 88, 70]];
+    want.forEach((w, k) => { const r = T2.run(mk, T2.ROWS[k][1]); ok(`table row ${k + 1} "${T2.ROWS[k][0]}": types ${w[0]}, ${w[1]} ramps, ${w[2]} rooms, main ${w[3]} % of the land`, `${r.c.cake}/${r.c.diorama}/${r.c.ascension}` === w[0] && r.ramps === w[1] && r.rooms === w[2] && Math.round(r.main / r.land * 100) === w[3], `${r.c.cake}/${r.c.diorama}/${r.c.ascension} ${r.ramps} ${r.rooms} ${(r.main / r.land * 100).toFixed(1)}`); });
+    const b0 = run({ ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5 }), b1 = run({ ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5, cake: true });
+    check('Balanced types preset (3 terraces, core 100, radius 5)', b0, b1);
+    console.log(`  info: Balanced types + Cake: ${b1.cake.down} bowls + ${b1.cake.up} pyramids, ${b1.cake.flat} flat links, ${b1.cake.tiles} ring tiles, ${b1.cake.levelsAdded} levels added (${b0.maxFine + 1} -> ${b1.maxFine + 1})`);
+    const d9 = run({ ...P0, rRadius: 9 }); ok('rRadius 9 is the default: the same levels and tiles as without the parameter', d9.fine.every((v, i) => v === base.fine[i]) && JSON.stringify(d9.levelH) === JSON.stringify(base.levelH));
+  }
   { const sp = { rooms: [8], margin: 6 }, a = run(P0, sp), b = run({ ...P0, cake: true }, sp); check('slice = room 8', a, b);
     const whole = base.roomType, mi = (i) => (((i / b.W) | 0) + b.oy) * b.mapW + (i % b.W) + b.ox; let diff = 0; for (let i = 0; i < b.n; i++) if (b.roomType[i] !== (b.void && b.void[i] ? 0 : whole[mi(i)])) diff++;
     ok('slice: the room type of every tile equals the whole-map type (classification does not depend on the slice)', diff === 0, diff); }

@@ -231,6 +231,7 @@
   };
 
   /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
+  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau']; // the optional `viewer` block of the manifest
   E.parseManifest = function (json) {
     if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
     const known = new Set([...E.ROLES.map((r) => r[0]), ...E.RESERVED_ROLES]), roles = {}, notes = [];
@@ -248,11 +249,20 @@
       if (m !== undefined && !(Number.isInteger(m) && m >= 0)) throw new Error('Manifest: slice.margin must be a non-negative integer.');
       slice = { zones: z || [], rect: r || null, margin: m };
     }
+    let viewer = null; // optional block: the viewer's parameters, so that a saved pack reproduces the same picture (absent = defaults)
+    if (json.viewer !== undefined && json.viewer !== null) {
+      const v = json.viewer, num = (k, lo, hi) => { if (v[k] !== undefined && !(Number.isInteger(v[k]) && v[k] >= lo && v[k] <= hi)) throw new Error(`Manifest: viewer.${k} must be an integer from ${lo} to ${hi}.`); };
+      if (typeof v !== 'object') throw new Error('Manifest: viewer must be an object.');
+      if (v.preset !== undefined && !['default', 'balanced', 'custom'].includes(v.preset)) throw new Error('Manifest: viewer.preset must be "default", "balanced" or "custom".');
+      for (const k of ['rooms', 'cake']) if (v[k] !== undefined && typeof v[k] !== 'boolean') throw new Error(`Manifest: viewer.${k} must be true or false.`);
+      num('terraces', 2, 24); num('roomsMinCore', 5, 250); num('rRadius', 3, 30); num('minPlateau', 1, 300);
+      viewer = {}; for (const k of E.VIEWER_KEYS) if (v[k] !== undefined) viewer[k] = v[k];
+    }
     const pt = (v, what) => { if (!v || !Number.isInteger(v.x) || !Number.isInteger(v.y) || v.x < 0 || v.y < 0) throw new Error(`Manifest: ${what} needs integer { x, y } (tile of the whole map).`); return { x: v.x, y: v.y }; };
     const stake = json.stake === undefined || json.stake === null ? null : pt(json.stake, 'stake');
     if (json.objectives !== undefined && !Array.isArray(json.objectives)) throw new Error('Manifest: objectives must be a list of { x, y }.');
     const objectives = (json.objectives || []).map((o, k) => Object.assign(pt(o, `objective ${k + 1}`), typeof o.label === 'string' ? { label: o.label } : {}));
-    return { name: json.name || '', stake, objectives, flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, slice, markers: json.markers || [], notes };
+    return { name: json.name || '', stake, objectives, flipY: !!json.flipY, maxnode: json.maxnode > 0 ? json.maxnode : 0, roles, slice, viewer, markers: json.markers || [], notes };
   };
   E.buildManifest = function (m) {
     const roles = {};
@@ -267,6 +277,7 @@
       if (m.slice.margin !== undefined && m.slice.margin !== null) sl.margin = m.slice.margin;
       if (Object.keys(sl).length) out.slice = sl;
     }
+    if (m.viewer) { const vb = {}; for (const k of E.VIEWER_KEYS) if (m.viewer[k] !== undefined) vb[k] = m.viewer[k]; if (Object.keys(vb).length) out.viewer = vb; }
     if (m.markers && m.markers.length) out.markers = m.markers;
     if (m.stake) out.stake = { x: m.stake.x, y: m.stake.y };
     if (m.objectives && m.objectives.length) out.objectives = m.objectives.map((o) => Object.assign({ x: o.x, y: o.y }, o.label ? { label: o.label } : {}));
