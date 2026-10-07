@@ -249,7 +249,7 @@
     const EDGES = [[0, -1, X0, Y0, X1, Y0, Math.abs(Y0 - y) < e], [1, 0, X1, Y0, X1, Y1, Math.abs(X1 - (x + 1)) < e], [0, 1, X1, Y1, X0, Y1, Math.abs(Y1 - (y + 1)) < e], [-1, 0, X0, Y1, X0, Y0, Math.abs(X0 - x) < e]];
     for (const [dx, dy, ax, ay, bx, by, onB] of EDGES) { // side walls where the surface is above the neighbour
       if (!onB) continue;
-      const nx = x + dx, ny = y + dy, out = nx < 0 || ny < 0 || nx >= S.W || ny >= S.H, j = out ? -1 : ny * S.W + nx, nj = j >= 0 ? ST.get(j) : null;
+      const nx = x + dx, ny = y + dy, out = nx < 0 || ny < 0 || nx >= S.W || ny >= S.H || (S.void && S.void[ny * S.W + nx]), j = out ? -1 : ny * S.W + nx, nj = j >= 0 ? ST.get(j) : null;
       const [rnx, rny] = cam.nrm(dx, dy);   // (a neighbour of the same ramp gets a wall only where its column is shifted and the surfaces differ)
       if (rny <= 0.001) continue;
       const e0 = hc(ax, ay), e1 = hc(bx, by);
@@ -337,7 +337,7 @@
   /* ---- Box reference: one column per tile ---- */
   function renderBox(ctx, cam, S, P, o, st) {
     const { W, H } = S, order = [];
-    for (let i = 0; i < S.n; i++) order.push(i);
+    for (let i = 0; i < S.n; i++) if (!S.void || !S.void[i]) order.push(i); // void is not terrain
     const key = (i) => cam.ry(i % W + 0.5, ((i / W) | 0) + 0.5);
     order.sort((a, b) => key(a) - key(b) || S.fine[a] - S.fine[b]);
     const dirs = [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]];
@@ -352,7 +352,7 @@
       if (isRamp) rampTile(ctx, cam, S, o, i, si.rec, ST, st);
       else for (const [dx, dy, ax, ay, bx, by] of dirs) {
         const nx = x + dx, ny = y + dy;
-        const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : S.levelH[S.fine[ny * W + nx]];
+        const hn = nx < 0 || ny < 0 || nx >= W || ny >= H || (S.void && S.void[ny * W + nx]) ? cam.base : S.levelH[S.fine[ny * W + nx]];
         if (hn >= hh - 1e-6) continue;
         const [rnx, rny] = cam.nrm(dx, dy);
         if (rny <= 0.001) continue;
@@ -372,7 +372,7 @@
       if (o.outlines && !isRamp) { // rim only where a lower neighbour exists
         for (const [dx, dy, ax, ay, bx, by] of dirs) {
           const nx = x + dx, ny = y + dy;
-          const hn = nx < 0 || ny < 0 || nx >= W || ny >= H ? cam.base : S.levelH[S.fine[ny * W + nx]];
+          const hn = nx < 0 || ny < 0 || nx >= W || ny >= H || (S.void && S.void[ny * W + nx]) ? cam.base : S.levelH[S.fine[ny * W + nx]];
           if (hn >= hh - 1e-6) continue;
           const terrace = hh - hn > E.subHeight(P) * 1.5;
           const A = cam.p(x + ax, y + ay, hh), B = cam.p(x + bx, y + by, hh);

@@ -166,18 +166,38 @@
     return { name: pack.name, width: w, height: h, elevation: c(pack.elevation), elevRange: pack.elevRange, masks, markers, fields };
   }
 
+  /* Void: elevation <= 0 is NOT terrain (a black pixel of the height image), never a low terrace. landFill returns the elevation with every
+     void tile replaced by the value of the nearest land tile (4-neighbour distance, so smoothing and slopes do not see a cliff at the coast),
+     the void mask and the range [lowest land, highest land]. Without void tiles (or without land) `void` is null and `el` is the input itself. */
+  E.landFill = function (elev, W, H) {
+    const n = W * H; let land = 0, mn = Infinity, mx = -Infinity;
+    for (let i = 0; i < n; i++) { const v = elev[i]; if (v > 0) { land++; if (v < mn) mn = v; if (v > mx) mx = v; } }
+    if (land === 0 || land === n) return { el: elev, void: null, range: land ? [mn, mx] : null };
+    const el = Float32Array.from(elev), vd = new Uint8Array(n), done = new Uint8Array(n); let q = [];
+    for (let i = 0; i < n; i++) if (elev[i] > 0) { done[i] = 1; q.push(i); } else vd[i] = 1;
+    while (q.length) {
+      const next = [];
+      for (const i of q) { const x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (!done[j]) { done[j] = 1; el[j] = el[i]; next.push(j); } } }
+      q = next;
+    }
+    return { el, void: vd, range: [mn, mx] };
+  };
+
   /* Terraces and sub-terraces of the WHOLE map (U = raw-range position after pre-smoothing), cached on the pack by the
      shaping parameters and then cropped to the window, so a slice never changes them. */
   function quantize(full, P) {
     const key = [P.terraces, P.subs, P.minPlateau, P.minSub, P.pre].join('|');
     if (full._q && full._q.key === key) return full._q;
     const W = full.width, H = full.height, n = W * H, N = P.terraces, K = P.subs;
-    let el = Float32Array.from(full.elevation);
+    const lf = E.landFill(full.elevation, W, H), vd = lf.void;
+    let el = Float32Array.from(lf.el);
     for (let p = 0; p < P.pre; p++) el = blur3(el, W, H);
     let mn = Infinity, mx = -Infinity;
-    if (full.elevRange) { mn = full.elevRange[0]; mx = full.elevRange[1]; }
+    if (vd) { mn = lf.range[0]; mx = lf.range[1]; } // terraces over the land only
+    else if (full.elevRange) { mn = full.elevRange[0]; mx = full.elevRange[1]; }
     else for (const v of el) { if (v < mn) mn = v; if (v > mx) mx = v; }
     const U = new Float32Array(n), ter = new Int16Array(n), sub = new Int16Array(n), g0 = new Int16Array(n);
+    if (vd) for (let i = 0; i < n; i++) if (vd[i]) g0[i] = 1; // void never votes in, nor merges into, a land plateau
     for (let i = 0; i < n; i++) {
       U[i] = Math.max(0, (el[i] - mn) / (mx - mn || 1) * N);
       ter[i] = Math.min(N - 1, Math.floor(U[i]));
@@ -189,10 +209,10 @@
       else if (ter[i] === t0) sub[i] = Math.min(K - 1, Math.floor((U[i] - t0) * K));
       else sub[i] = ter[i] > t0 ? 0 : K - 1;
     }
-    cleanup(W, H, sub, ter, P.minSub);
-    const cnt = new Int32Array(N); for (let i = 0; i < n; i++) cnt[ter[i]]++;
-    let center = 0; for (let t = 1; t < N; t++) if (cnt[t] > cnt[center]) center = t; // the terrace with most tiles on the whole map (ties: the lower)
-    return (full._q = { key, U, ter, sub, trans: {}, range: [mn, mx], center });
+    if (vd) { const g1 = new Int16Array(n); for (let i = 0; i < n; i++) g1[i] = ter[i] + (vd[i] ? 1000 : 0); cleanup(W, H, sub, g1, P.minSub); } else cleanup(W, H, sub, ter, P.minSub);
+    const cnt = new Int32Array(N); for (let i = 0; i < n; i++) if (!vd || !vd[i]) cnt[ter[i]]++;
+    let center = 0; for (let t = 1; t < N; t++) if (cnt[t] > cnt[center]) center = t; // the terrace with most land tiles on the whole map (ties: the lower)
+    return (full._q = { key, U, ter, sub, trans: {}, range: [mn, mx], center, void: vd, raw: lf.el });
   }
   E.quantize = quantize;
 
@@ -205,26 +225,29 @@
     const U = sl ? cropArr(q.U, full.width, sl.x0, sl.y0, W, H) : q.U;
     const ter = sl ? cropArr(q.ter, full.width, sl.x0, sl.y0, W, H) : q.ter;
     const sub = sl ? cropArr(q.sub, full.width, sl.x0, sl.y0, W, H) : q.sub;
+    const vd = q.void ? (sl ? cropArr(q.void, full.width, sl.x0, sl.y0, W, H) : q.void) : null; // void: not terrain, not drawn, not walkable
     const fine = new Int16Array(n);
     let maxFine = 0;
-    for (let i = 0; i < n; i++) { fine[i] = ter[i] * K + sub[i]; if (fine[i] > maxFine) maxFine = fine[i]; }
+    for (let i = 0; i < n; i++) { fine[i] = ter[i] * K + sub[i]; if ((!vd || !vd[i]) && fine[i] > maxFine) maxFine = fine[i]; }
+    for (let i = 0; i < n; i++) if (fine[i] > maxFine) fine[i] = maxFine; // void tiles only need a valid index
     const byLevel = Array.from({ length: maxFine + 1 }, () => []);
-    for (let i = 0; i < n; i++) byLevel[fine[i]].push(i);
+    for (let i = 0; i < n; i++) if (!vd || !vd[i]) byLevel[fine[i]].push(i);
     // `fine` is a level index: levels are ranked by height. levelH[L] is the height of level L and levelMeta[L]
     // says where it comes from (terrace, sub-terrace; bridge levels are added by the stair carving).
     const levelH = new Array(maxFine + 1), levelMeta = new Array(maxFine + 1);
     for (let L = 0; L <= maxFine; L++) { levelH[L] = E.hOf(L, P, q.center); levelMeta[L] = { ter: Math.floor(L / K), sub: L % K, bridge: false }; }
     const masks = pack.masks || {};
     const S = {
-      W, H, n, U, ter, sub, fine, maxFine, byLevel, levelH, levelMeta, subs: K, N, center: q.center,
+      W, H, n, U, ter, sub, fine, maxFine, byLevel, levelH, levelMeta, subs: K, N, center: q.center, void: vd,
       water: masks.water || new Array(n).fill(0),
       snake: masks.snake || null, cave: masks.cave || null, waterfall: masks.waterfall || null,
       markers: pack.markers || [], name: pack.name, fields: pack.fields || {}, cache: {},
       mapW: full.width, mapH: full.height, ox: sl ? sl.x0 : 0, oy: sl ? sl.y0 : 0,
       slice: null, sliceBox: null, border: null, sliceLoops: null, sliceInfo: null
     };
+    if (vd) { S.fineMask = Int16Array.from(fine); for (let i = 0; i < n; i++) if (vd[i]) S.fineMask[i] = -1; } // level membership: void belongs to no level
     S.block = new Uint8Array(n); // not walkable: water, or outside the slice
-    for (let i = 0; i < n; i++) S.block[i] = S.water[i] ? 1 : 0;
+    for (let i = 0; i < n; i++) S.block[i] = S.water[i] || (vd && vd[i]) ? 1 : 0;
     if (sl) {
       const mask = cropArr(sl.mask, full.width, sl.x0, sl.y0, W, H), b = sl.bbox;
       S.slice = mask;
@@ -265,7 +288,7 @@
     computeGates(S, P, full, q);
     carveStairs(S, P);
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
-    for (let i = 0; i < n; i++) if (!S.slice || S.slice[i]) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
+    for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
     S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
     computeRegions(S, P);
     return S;
@@ -288,7 +311,7 @@
     const thr = P.gateThr === undefined ? 0.05 : P.gateThr, minSize = P.gateMin === undefined ? 3 : P.gateMin, K = P.subs;
     const key = `${kind}|${thr}|${minSize}|${P.climb}|band`;
     if (q.trans[key]) return q.trans[key];
-    const W = full.width, H = full.height, n = W * H, raw = full.elevation;
+    const W = full.width, H = full.height, n = W * H, raw = q.raw || full.elevation; // void filled with the nearest land value
     const unit = new Int32Array(n), nU = P.terraces * (kind === 'sub' ? K : 1);
     for (let i = 0; i < n; i++) unit[i] = kind === 'sub' ? q.ter[i] * K + q.sub[i] : q.ter[i];
     /* DEVIATION from the user's code: each unit is normalized with its NOMINAL band of the global elevation range
@@ -497,7 +520,8 @@
     if (ramp) { // a cut ramp lowers its footprint to the level of the low end (a hole in every slab above); a built-up one keeps its tiles
       for (const rec of stairs) if (rec.mode === 'cut') for (const st of rec.steps) for (const t of st.tiles) S.fine[t] = rec.level;
       S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
-      for (let i = 0; i < n; i++) S.byLevel[S.fine[i]].push(i);
+      for (let i = 0; i < n; i++) if (!S.void || !S.void[i]) S.byLevel[S.fine[i]].push(i);
+      refreshMask(S);
     }
     S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, shiftedCols, width: P.stairStyle !== 0 ? rwidth : width, style: ramp ? 'ramp' : 'steps' };
     if (!carve.size) return;
@@ -515,8 +539,10 @@
     for (let i = 0; i < n; i++) { const c = carve.get(i); S.fine[i] = c ? (c.base >= 0 ? baseIdx[c.base] : bridgeIdx.get(c)) : baseIdx[S.fine[i]]; }
     S.levelH = newH; S.levelMeta = newMeta; S.maxFine = newH.length - 1;
     S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
-    for (let i = 0; i < n; i++) S.byLevel[S.fine[i]].push(i);
+    for (let i = 0; i < n; i++) if (!S.void || !S.void[i]) S.byLevel[S.fine[i]].push(i);
+    refreshMask(S);
   }
+  function refreshMask(S) { if (S.void) { S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < S.n; i++) if (S.void[i]) S.fineMask[i] = -1; } } // level membership: void belongs to no level
 
   const adj4For = (W) => (a, b) => (Math.abs(a - b) === W || (Math.abs(a - b) === 1 && ((a / W) | 0) === ((b / W) | 0)));
   function computeRegions(S, P) {

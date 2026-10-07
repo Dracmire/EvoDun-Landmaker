@@ -27,6 +27,9 @@ old pipeline (Unity, C#) are reference only.
   the centre, T = 0,1,3. spread 1 (default) = uniform and changes no pixel; 1.5 gives 1, 1.5, 2.5, 2.5, ... Sub-terrace height
   keeps using terH (the smallest jump), so the climb condition holds in every jump. Ramp length limit is computed
   (>= 8 tiles; 8 is enough for spread <= 1.5 at slope 0.4). `node tools/test_spread.js`.
+- VOID (user's decision): elevation <= 0 is not terrain. Not drawn (Box, A and B: `S.void`, `S.fineMask`), not walkable, in no level; terraces are quantized over the
+  land only (`E.landFill`: void takes the nearest land value, range = lowest..highest land). Always on, whatever the rooms switch. `tools/test_void.js`, `tools/ui/test_void_ui.js`.
+  The synthetic test maps never use 0 (gen_maps.py clips grey to >= 1).
 - Terrace height is global. Height is almost decorative: levels disconnect, stairs connect.
 - Sub-terraces: small, quantized height differences inside a terrace (1 to 6 per terrace in the viewer). Climb
   limit: up to 2 sub-terraces of difference without a stair. This is PROVISIONAL, an assumption of the user and not
@@ -220,7 +223,12 @@ incursion border; stake and way-back path visible.
    spanning tree crosses it, the rest is discarded. Terraces are quantized over the LAND only (void takes the nearest land value, range = lowest..highest land) in
    the check script, not yet in the viewer. Measured in `tools/rooms_check.js` (`--coreSweep`, `--crossCosts`); DECIDED: minimum core size 20, gate crossing cost 10 (both to become viewer sliders: core 5-80, cost 0-40; transStrict 0.05 and gate minimum 3 by default when rooms are on).
    Integration into the viewer: design proposed, waiting for approval (rooms switch, used gates only, exact crossing pair, void, slice by rooms, room borders, route by the tree).
-   POSSIBLE IMPROVEMENT (not done, user's call): add some loops to the spanning tree so there is not a single route between two points.
+   DECIDED for the integration (user): sub-terraces are only visual with rooms on; the tree is GLOBAL (computed once on the whole map, cached) and a slice keeps the
+   connections whose paths stay inside it plus the minimum extra ones to join what the cut separated (Kruskal from those components; "patch" ramps exist only while
+   that slice is chosen and get another tone); room transitions are OPEN (all valid ones, used or not) and only borders that are not a transition block; unused
+   terrace gates are closed (cliff). Six commits: (1) void + land quantization [done], (2) rooms layer + switch + sliders, (3) used gates -> ramps (PR), (4) slice by rooms,
+   (5) room borders + overlay, (6) route by the tree (PR).
+   POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
 5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),
    RuleTile skin and modular kits, room types, platforms.

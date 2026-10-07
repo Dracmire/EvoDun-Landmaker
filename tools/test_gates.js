@@ -98,7 +98,7 @@ compare('flat units', mk(24, 18, (x) => (x < 12 ? 100 : 700)), { ...BASE, subs: 
   const clean = perBorder(big);
   const dirty = mk(96, 80, (x, y) => big.elevation[y * 96 + x]);
   let placed = 0;
-  for (let y = 10; y < 70 && placed < 30; y += 3) for (let x = 6; x < 90 && placed < 30; x += 5) { const i = y * 96 + x; dirty.elevation[i] = placed % 2 ? 0 : 1000; placed++; }
+  for (let y = 10; y < 70 && placed < 30; y += 3) for (let x = 6; x < 90 && placed < 30; x += 5) { const i = y * 96 + x; dirty.elevation[i] = placed % 2 ? 1 : 1000; placed++; }
   dirty.elevRange = [0, 1000];
   const q2 = E.quantize(dirty, P);
   const dp = perBorder(dirty);
