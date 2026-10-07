@@ -67,3 +67,18 @@ PNGs of only the used gates (cyan) and transitions (yellow) with the tree paths:
 Only this map (and the same map with ConicalTown's values; the scene's own height map is not in the repo). Not compared with a run of the user's
 Unity code. The tie rules of C# `PriorityQueue` (watershed) and A* (equal-length paths) are not reproduced. The spanning tree uses BFS lengths (same
 as the A* lengths with unit cost). Terrace quantization over the land only is done in the check script (`R.landElevation`), NOT in the viewer's `E.quantize` of the UI.
+
+## In the viewer (rooms on)
+`P.rooms` (off by default; with it off the viewer is the one without rooms and the pixel regression is identical). Sliders: min core size 5-80 (default 20), gate
+crossing cost 0-40 (default 10); gate threshold 0.05 and gate minimum 3 are the existing ones. The other chain parameters are fields of `P` (`rGentle`, `rSteep`,
+`rExp`, `rHTol`, `rRadius`, `rMinRoom`, `rHardEdge`, `rMinSizeEdge`) with the mapGen_forge values.
+- **Layer**: `E.rooms.layer(pack, P)`, the whole map, cached on the pack in stages (rooms, edges, pass, cores, tree); each control recomputes only what depends on it.
+- **Ramps only on used gates**: `computeGatesRooms` (`shape.js`). A site is the exact pair a tree path crosses; crossings of one gate group closer than `passGap`
+  are merged into the most crossed one; other candidate gates stay cliffs. Sub-terraces are only visual.
+- **Slice** by rooms (chips, Ctrl/Shift for several, Whole map): the tree is GLOBAL; a slice keeps the connections whose paths stay inside and adds the minimum
+  patch connections (`R.sliceUse`, Kruskal from the kept components). Patch ramps (blue) exist only while that slice is chosen.
+- **Room borders**: per tile face, a line where a border blocks (orange), a gap on every open transition, green on the ones the slice's tree crosses; "Room tint" overlay.
+- **Walking** (`E.route`, regions): the patched passability (all valid room transitions open, same terrace, margins of walls/cliffs/Steep not walkable) plus the ramps.
+  A mark on a margin tile is refused with the reason.
+- **Void** is always on, rooms or not (see `docs/pack-format.md`).
+Tests: `tools/test_gates_rooms.js`, `test_slice_rooms.js`, `test_room_faces.js`, `test_route_rooms.js`, `tools/ui/test_rooms_ui.js`; cold cost: `tools/ui/measure_rooms.js`.

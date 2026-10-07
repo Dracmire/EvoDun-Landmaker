@@ -148,7 +148,8 @@
       if (inc.stake && near(inc.stake)) inc.stake = null; else { const k = inc.objectives.findIndex(near); if (k >= 0) inc.objectives.splice(k, 1); else return note('No mark there.'); }
     } else {
       if (S.slice && !S.slice[tile]) return note(`(${x}, ${y}) is outside the slice: movement is limited to the slice.`);
-      if (S.block[tile]) return note(`(${x}, ${y}) is not walkable (water).`);
+      if (S.block[tile]) return note(`(${x}, ${y}) is not walkable (water or void).`);
+      if (!E.tileWalkable(S, tile)) return note(`(${x}, ${y}) is in the margin of a wall, a cliff or a steep slope: not walkable with rooms on. Pick a tile a little further in.`);
       if (inc.mode === 'stake') inc.stake = { x, y }; else inc.objectives.push({ x, y });
     }
     invalidate(false);

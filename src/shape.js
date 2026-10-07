@@ -605,10 +605,17 @@
   }
   function refreshMask(S) { if (S.void) { S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < S.n; i++) if (S.void[i]) S.fineMask[i] = -1; } } // level membership: void belongs to no level
 
+  /* Rooms on: walking is the patched passability of the rooms chain (E.rooms.makePass): same terrace and room, or a valid room transition (all of them open);
+     the margin of a wall, cliff or Steep tile is not walkable; terraces change only along a ramp. Window tile -> map tile for the layer's arrays. */
+  const mapIdxOf = (S, i) => (((i / S.W) | 0) + S.oy) * S.mapW + (i % S.W) + S.ox;
+  const roomStep = (S, i, j) => S.ter[i] === S.ter[j] && S.rooms.pass(mapIdxOf(S, i), mapIdxOf(S, j));
+  const roomBlocked = (S, i) => S.block[i] || (!S.carved[i] && S.rooms.forb[mapIdxOf(S, i)] === 1);
+  E.tileWalkable = (S, i) => !(S.rooms ? roomBlocked(S, i) : S.block[i]); // can a mark stand on tile i (window index)?
   const adj4For = (W) => (a, b) => (Math.abs(a - b) === W || (Math.abs(a - b) === 1 && ((a / W) | 0) === ((b / W) | 0)));
   function computeRegions(S, P) {
     const adj4 = adj4For(S.W);
-    const { W, H, ter, sub } = S, water = S.block, n = S.n, carved = S.carved;
+    const { W, H, ter, sub } = S, rooms = S.rooms, n = S.n, carved = S.carved;
+    const water = rooms ? Uint8Array.from({ length: n }, (_, i) => (roomBlocked(S, i) ? 1 : 0)) : S.block; // rooms on: the forbidden margins are not walkable either
     const par = new Int32Array(n).map((_, i) => i);
     const find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
     const uni = (a, b) => { a = find(a); b = find(b); if (a !== b) par[a] = b; };
@@ -620,7 +627,7 @@
         if (nx >= W || ny >= H) continue;
         const j = ny * W + nx;
         if (water[j] || carved[i] || carved[j]) continue;   // carved tiles only connect along their stair
-        if (ter[i] === ter[j] && (S.subFree || Math.abs(sub[i] - sub[j]) <= P.climb)) uni(i, j);
+        if (rooms ? roomStep(S, i, j) : ter[i] === ter[j] && (S.subFree || Math.abs(sub[i] - sub[j]) <= P.climb)) uni(i, j);
       }
     }
     for (const st of S.stairs) for (let ci = 0; ci < st.cols.length; ci++) {
@@ -653,11 +660,11 @@
     const W = S.W, H = S.H, out = [];
     const neighbors = (i) => {
       out.length = 0;
-      if (S.block[i]) return out;
+      if (S.block[i] || (S.rooms && roomBlocked(S, i))) return out;
       const x = i % W, y = (i / W) | 0;
       if (!S.carved[i]) for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]) {
         if (j < 0 || S.block[j] || S.carved[j]) continue;   // carved tiles only connect along their stair
-        if (S.ter[i] === S.ter[j] && (S.subFree || Math.abs(S.sub[i] - S.sub[j]) <= P.climb)) out.push(j);
+        if (S.rooms ? roomStep(S, i, j) : S.ter[i] === S.ter[j] && (S.subFree || Math.abs(S.sub[i] - S.sub[j]) <= P.climb)) out.push(j);
       }
       const e = extra.get(i); if (e) for (const j of e) if (!S.block[j]) out.push(j);
       return out;

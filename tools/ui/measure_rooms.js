@@ -14,6 +14,10 @@ const round = (o) => JSON.stringify(Object.fromEntries(Object.entries(o).map(([k
     const t = await page.evaluate(() => window.__evo.timing()), r = await page.evaluate(() => window.__evo.roomsTiming());
     console.log(`cold, rooms ${on ? 'ON ' : 'off'}: first panels (shape + Box + A) ${t.first.toFixed(0)} ms, all three ${t.all.toFixed(0)} ms` + (r ? `; rooms chain ${r.total.toFixed(0)} ms ${round(r.ms)}` : ''));
     if (on) {
+      await page.click('#roomChips .chip[data-id="8"]'); await a.idle();
+      const t3 = await page.evaluate(() => window.__evo.timing()), sl = await page.evaluate(() => { const S = window.__evo.S(); return S.roomGates.slice; });
+      console.log(`  slice = room 8, defaults (tree cut + patch: ${sl.kept} kept + ${sl.patch} patch): first panels ${t3.first.toFixed(0)} ms, all three ${t3.all.toFixed(0)} ms`);
+      await page.click('#wholeRooms'); await a.idle();
       for (const [id, v, label] of [['roomsCross', 25, 'crossing cost 10 -> 25'], ['roomsMinCore', 50, 'min core 20 -> 50'], ['gateThr', 0.1, 'gate threshold 0.05 -> 0.1'], ['terraces', 6, 'terraces 5 -> 6']]) {
         await a.slider(id, v); await a.idle();
         const t2 = await page.evaluate(() => window.__evo.timing()), r2 = await page.evaluate(() => window.__evo.roomsTiming());

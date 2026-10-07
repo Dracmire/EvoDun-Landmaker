@@ -33,6 +33,13 @@ const { open } = require('./common');
   await page.click('#wholeRooms'); await a.idle();
   ok('Whole map restores the whole map', await page.evaluate(() => window.__evo.S().sliceInfo === null));
   // room borders: orange line on blocking faces (not on open transitions), green on the used ones, in Box, A and B
+  // stake and objectives with rooms on: the route follows the patched passability (ramps for terraces); a margin tile is refused
+  const marks = await page.evaluate(() => { const S = window.__evo.S(), big = S.regionSizes.indexOf(Math.max(...S.regionSizes)), A = []; let forb = -1; for (let i = 0; i < S.n; i++) { if (S.region[i] === big) A.push(i); if (forb < 0 && !S.block[i] && !S.carved[i] && S.rooms.forb[i]) forb = i; } return { s: A[(A.length * 0.2) | 0], o: A[(A.length * 0.9) | 0], forb }; });
+  await page.evaluate((m) => { const ev = window.__evo; ev.setIncMode('stake'); ev.placeMark(m.forb); }, marks);
+  ok('a stake on a forbidden margin tile is refused with a reason', /margin of a wall, a cliff or a steep slope/.test(await page.$eval('#incInfo', (e) => e.innerText)) && (await page.evaluate(() => window.__evo.inc.stake)) === null);
+  await page.evaluate((m) => { const ev = window.__evo; ev.setIncMode('stake'); ev.placeMark(m.s); ev.setIncMode('obj'); ev.placeMark(m.o); ev.setIncMode(null); }, marks); await a.idle();
+  ok('the objective has a route to the stake over the walkable tiles', /route of \d+ tiles to the stake/.test(await page.$eval('#incInfo', (e) => e.innerText)), await page.$eval('#incInfo', (e) => e.innerText));
+  await page.click('#m-clear'); await a.idle();
   await page.click('#mode'); await a.idle();
   ok('the Room borders toggle exists, on by default', await page.$eval('#t-roomBorders', (e) => e.checked));
   for (const tech of ['box', 'A', 'B']) {
