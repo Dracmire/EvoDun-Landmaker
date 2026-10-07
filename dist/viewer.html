@@ -790,9 +790,11 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     S.rooms = RL; S.subFree = !!RL;
     if (RL) { computeGatesRooms(S, P, full, RL, sl); computeRoomFaces(S, full, RL); } else computeGates(S, P, full, q);
     carveStairs(S, P);
+    if (RL) checkConnections(S, P);
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
     S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
+    { let lt = 0; for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) lt++; S.landTiles = lt; } // land tiles of the slice (or the map)
     computeRegions(S, P);
     return S;
   };
@@ -920,6 +922,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       alts.sort((p, q) => p.d - q.d || p.a - q.a);
       sites.push({ a: c.site.a, b: c.site.b, gate: gi, kind: 'terrace', patch: c.pairs.every((u) => u.patch), alts: alts.map((o) => ({ a: o.a, b: o.b })) });
     }
+    // the tree connections that stay inside the window (window tile indices): they must remain walkable after the ramps are carved
+    S.conns = (SU ? SU.edges : U.edges.map((e) => ({ kind: 'global', path: e.path }))).map((e) => ({ kind: e.kind, path: e.path.map(win) })).filter((c) => c.path.every((t) => t >= 0));
     S.sliceUse = SU; S.gates = gates; S.passes = sites; S.roomGates = { candidates: RL.usage.gateGroups, usedGroups: new Set(clusters.map((c) => c.gid)).size, sites: sites.length, merged: used.length - clusters.length, patchSites: sites.filter((x) => x.patch).length, slice: SU ? { nodes: SU.nodes, kept: SU.kept, patch: SU.patch, componentsBefore: SU.componentsBefore, componentsAfter: SU.componentsAfter } : null };
   }
 
@@ -981,9 +985,10 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     /* ramp style (user's decision): short and wide. The depth into the terrace is FIXED (P.rampDepth, default 2) and does not
        depend on the jump, so the slope is jump / depth and can be steep; the width is P.stairW (up to 5). The footprint is the same
        as the stair's (cut into the upper terrace or built on the lower one), over one smooth surface. Levels are not touched. */
-    const ramp = P.stairStyle !== 0, depth = Math.max(1, Math.min(4, Math.round(P.rampDepth === undefined ? 2 : P.rampDepth)));
+    const ramp = P.stairStyle !== 0, depthDefault = Math.max(1, Math.min(4, Math.round(P.rampDepth === undefined ? 2 : P.rampDepth))), rwidthDefault = rwidth;
     const ORDER = [0, 1, -1, 2, -2];
-    const planRamp = (pass, mode) => {
+    const planRamp = (pass, mode, dOv, wOv) => {
+      const depth = dOv || depthDefault, rwidth = wOv || rwidthDefault; // variants of the ramp: a shallower one (depth 1) or a narrower one (width 1)
       const ax = pass.a % W, ay = (pass.a / W) | 0, bx = pass.b % W, by = (pass.b / W) | 0;
       const dx = bx - ax, dy = by - ay, ex = -dy, ey = dx, cut = mode === 'cut';
       const sx = cut ? bx : ax, sy = cut ? by : ay, sd = cut ? 1 : -1, fx = cut ? ax : bx, fy = cut ? ay : by;
@@ -1010,7 +1015,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       let lo2 = 0, hi2 = 0; const shifts = new Map([[0, 0]]), want = ORDER.slice(0, rwidth);   // widen from the centre outwards; a column that does not fit stops its side
       for (const c of want) { if (c === 0) continue; if (c > 0 ? c === hi2 + 1 : c === lo2 - 1) { const d = P.rampShift === false ? (validAt(c, 0) ? 0 : null) : shiftOf(c); if (d !== null) { shifts.set(c, d); if (c > 0) hi2 = c; else lo2 = c; } } }
       const cols = []; for (let c = lo2; c <= hi2; c++) cols.push(c);
-      const rec = { mode, dir: [dx, dy], cols, requested: rwidth, narrowed: cols.length < rwidth, site: pass, bottom: [], top: [], steps: [],
+      const rec = { mode, dir: [dx, dy], cols, requested: rwidthDefault, narrowed: cols.length < rwidthDefault, site: pass, bottom: [], top: [], steps: [],
         ramp: { mx: (ax + bx) / 2 + 0.5, my: (ay + by) / 2 + 0.5, pdx: sd * dx, pdy: sd * dy, len, h0, h1, shift: new Map() }, level: S.fine[pass.a] };
       for (let k = 0; k < len; k++) rec.steps.push({ cand: null, tiles: [] });
       for (const c of cols) {
@@ -1061,18 +1066,45 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       }
       return rec;
     };
+    /* Rooms on: the tree decided which cores are joined and along which tiles (S.conns, window indices). The tiles of those paths are RESERVED: a ramp may only
+       occupy one if the path walks it ALONG the ramp (bottom -> treads -> top of a column, or sideways between two columns of the ramp), because carved tiles
+       connect only along their stair. Variants, in order: cut into the upper terrace, built on the lower one, depth 1 of each, lateral columns out (narrower). */
+    const keep = !!S.rooms && P.rampKeep !== false, links = new Set(), lk = (a, b) => (a < b ? a * n + b : b * n + a), tileConns = new Map();
+    if (keep) S.conns.forEach((c, ci) => { for (const t of c.path) { let l = tileConns.get(t); if (!l) tileConns.set(t, l = []); if (l[l.length - 1] !== ci) l.push(ci); } });
+    const adj4 = adj4For(W);
+    const recLinks = (rec) => { const out = []; for (let ci = 0; ci < rec.cols.length; ci++) { let prev = rec.bottom[ci]; for (const st of rec.steps) { out.push([prev, st.tiles[ci]]); prev = st.tiles[ci]; } out.push([prev, rec.top[ci]]); if (ci > 0) for (const st of rec.steps) if (adj4(st.tiles[ci - 1], st.tiles[ci])) out.push([st.tiles[ci - 1], st.tiles[ci]]); } return out; };
+    const walkOK = (rec) => { // every step of a reserved path that touches the footprint is a link of this ramp (or of an earlier one)
+      if (!keep) return true;
+      const foot = new Set(); for (const st of rec.steps) for (const t of st.tiles) foot.add(t);
+      const mine = new Set(recLinks(rec).map(([a, b]) => lk(a, b))), seen = new Set();
+      for (const t of foot) for (const ci of tileConns.get(t) || []) {
+        if (seen.has(ci)) continue; seen.add(ci); const path = S.conns[ci].path;
+        for (let k = 1; k < path.length; k++) { const u = path[k - 1], v = path[k]; if ((foot.has(u) || foot.has(v)) && !mine.has(lk(u, v)) && !links.has(lk(u, v))) return false; }
+      }
+      return true;
+    };
+    const ladder = ramp && keep ? [[depthDefault, rwidthDefault], [1, rwidthDefault], [depthDefault, 1], [1, 1]].filter((v, k, a) => a.findIndex((w) => w[0] === v[0] && w[1] === v[1]) === k) : ramp ? [[depthDefault, rwidthDefault]] : [[0, 0]];
+    const variantHist = new Array(ladder.length).fill(0); let variantsChanged = 0;
     for (const pass of S.passes) {
-      let rec = null;   // cut into the upper terrace, or build up the lower one: the wider result wins (ties: cut)
+      let rec = null, variant = 0;   // cut into the upper terrace, or build up the lower one: the wider result wins (ties: cut)
       for (const site of [pass, ...pass.alts]) {   // the centred tile first, then the rest of the gate, nearest first
-        for (const mode of ['cut', 'fill']) { const r = ramp ? planRamp(site, mode) : plan(site, mode); if (r && (!rec || r.cols.length > rec.cols.length)) rec = r; }
+        for (let vi = 0; vi < ladder.length && !rec; vi++) {
+          const cand = [];
+          for (const mode of ['cut', 'fill']) { const r = ramp ? planRamp(site, mode, ladder[vi][0], ladder[vi][1]) : plan(site, mode); if (r) cand.push(r); }
+          if (vi === 0 && !cand.length) break;   // nothing fits here at all: the next site of the gate (variants are for a ramp that fits but would cut a path)
+          cand.sort((p, q) => q.cols.length - p.cols.length || (p.mode === 'cut' ? -1 : 1));
+          for (const r of cand) if (walkOK(r)) { rec = r; variant = vi; break; }
+        }
         if (rec) break;
       }
-      if (!rec) { dropped++; continue; }
+      if (!rec) { dropped++; pass.dropped = true; continue; }
+      rec.variant = variant; variantHist[variant]++; if (variant) variantsChanged++;
       if (rec.mode === 'fill') fills++;
       if (rec.narrowed) narrowed++;
       shiftedCols += rec.shifted || 0;
       for (let ci = 0; ci < rec.cols.length; ci++) { used[rec.bottom[ci]] = 1; used[rec.top[ci]] = 1; }
       for (const st of rec.steps) for (const t of st.tiles) { used[t] = 1; carved[t] = 1; if (st.cand) carve.set(t, st.cand); }
+      for (const [a, b] of recLinks(rec)) links.add(lk(a, b));
       stairs.push(rec);
     }
     if (ramp) { // a cut ramp lowers its footprint to the level of the low end (a hole in every slab above); a built-up one keeps its tiles
@@ -1082,7 +1114,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       refreshMask(S);
     }
     for (const rec of stairs) if (rec.ramp && rec.site && rec.site.patch) rec.ramp.patch = true; // a patch ramp (it exists only for this slice) has its own tone
-    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, shiftedCols, width: P.stairStyle !== 0 ? rwidth : width, style: ramp ? 'ramp' : 'steps' };
+    S.carved = carved; S.stairs = stairs; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: stairs.length, dropped, narrowed, fills, shiftedCols, width: P.stairStyle !== 0 ? rwidth : width, style: ramp ? 'ramp' : 'steps', variants: variantHist, variantsChanged };
     if (!carve.size) return;
     // rebuild the level ranking: base levels plus the bridge levels that are used, ordered by height
     const bridges = [...new Set([...carve.values()].filter((c) => c.base < 0))].sort((p, q) => p.h - q.h);
@@ -1100,6 +1132,43 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
     for (let i = 0; i < n; i++) if (!S.void || !S.void[i]) S.byLevel[S.fine[i]].push(i);
     refreshMask(S);
+  }
+  /* Rooms on: after the ramps are carved, is every connection of the tree still walkable from end to end in the FINAL walking graph (the one of E.route)?
+     A step is walkable when neither tile is carved and the patched passability allows it, or when it is a link of a ramp (carved tiles connect only along their
+     stair). A connection that is not is recomputed over the carved graph with the same crossing cost (per ramp crossed); if no such path exists it is NOT forced:
+     it is counted and named (S.connInfo). P.rampKeep === false: the old behaviour (nothing reserved, nothing recomputed) to measure what the fix changes. */
+  function checkConnections(S, P) {
+    const conns = S.conns, n = S.n, W = S.W, H = S.H, RL = S.rooms, adj4 = adj4For(W), lk = (a, b) => (a < b ? a * n + b : b * n + a);
+    const links = new Set();
+    for (const rec of S.stairs) for (let ci = 0; ci < rec.cols.length; ci++) {
+      let prev = rec.bottom[ci]; for (const st of rec.steps) { links.add(lk(prev, st.tiles[ci])); prev = st.tiles[ci]; } links.add(lk(prev, rec.top[ci]));
+      if (ci > 0) for (const st of rec.steps) if (adj4(st.tiles[ci - 1], st.tiles[ci])) links.add(lk(st.tiles[ci - 1], st.tiles[ci]));
+    }
+    const step = (u, v) => { if (S.block[u] || S.block[v]) return false; if (S.carved[u] || S.carved[v]) return links.has(lk(u, v)); return !roomBlocked(S, u) && !roomBlocked(S, v) && roomStep(S, u, v); };
+    const cc = RL.prm.crossCost || 0, extra = cc > 0 ? (u, v) => (links.has(lk(u, v)) && S.ter[u] !== S.ter[v] ? cc : 0) : null;
+    const siteOf = new Map(); // gate pair (window tiles) -> the site of its gate
+    S.passes.forEach((site) => { for (const t of S.gates[site.gate].tiles) siteOf.set(lk(t.a, t.b), site); });
+    const why = (u, v) => {
+      if (S.block[u] || S.block[v] || roomBlocked(S, u) || roomBlocked(S, v)) return 'blocked tile';
+      if (S.carved[u] || S.carved[v]) return 'path crosses a ramp sideways';
+      if (S.ter[u] !== S.ter[v]) { const site = siteOf.get(lk(u, v)); return !site ? 'gate pair without ramp' : site.dropped ? 'gate pair whose ramp did not fit' : 'gate pair merged into a ramp at another pair'; }
+      return 'other';
+    };
+    const info = { total: conns.length, ok: 0, recomputed: 0, unresolved: 0, noRoute: 0, reasons: {}, list: [], global: 0, patch: 0, keep: P.rampKeep !== false }; // noRoute: no route at all between its ends in the final graph
+    for (const c of conns) {
+      c.kind === 'patch' ? info.patch++ : info.global++;
+      let bad = -1; for (let k = 1; k < c.path.length; k++) if (!step(c.path[k - 1], c.path[k])) { bad = k; break; }
+      if (bad < 0) { c.status = 'ok'; info.ok++; continue; }
+      const reason = why(c.path[bad - 1], c.path[bad]); c.reason = reason; info.reasons[reason] = (info.reasons[reason] || 0) + 1;
+      const a = c.path[0], b = c.path[c.path.length - 1];
+      const r = E.rooms.dijkstra(W, H, a, step, true, extra, b);
+      if (info.keep && r.dist[b] >= 0) { c.old = c.path; c.path = E.rooms.pathTo(r, b); c.status = 'recomputed'; info.recomputed++; continue; }
+      if (r.dist[b] < 0) info.noRoute++;
+      c.status = 'unresolved'; info.unresolved++;
+      const mxy = (t) => [S.ox + (t % W), S.oy + ((t / W) | 0)];
+      if (info.list.length < 8) info.list.push({ from: mxy(a), to: mxy(b), at: [mxy(c.path[bad - 1]), mxy(c.path[bad])], reason, kind: c.kind });
+    }
+    S.connInfo = info;
   }
   function refreshMask(S) { if (S.void) { S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < S.n; i++) if (S.void[i]) S.fineMask[i] = -1; } } // level membership: void belongs to no level
 
@@ -1579,10 +1648,10 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const n = W * H, U = res.usage, cs = res.reach, nodes = res.alive.filter((c) => c.center >= 0 && mask[c.center]), idx = new Map(nodes.map((c, k) => [c, k]));
     const uf = Array.from({ length: nodes.length }, (_, k) => k), find = (v) => { while (uf[v] !== v) { uf[v] = uf[uf[v]]; v = uf[v]; } return v; };
     const gate = new Map(), room = new Map(), add = (map, kk, patch) => { const o = map.get(kk) || { count: 0, patch: true }; o.count++; if (!patch) o.patch = false; map.set(kk, o); };
-    let kept = 0; const comps0 = () => { const s = new Set(); for (let k = 0; k < nodes.length; k++) s.add(find(k)); return s.size; };
+    const edgeList = []; let kept = 0; const comps0 = () => { const s = new Set(); for (let k = 0; k < nodes.length; k++) s.add(find(k)); return s.size; };
     for (const e of U.edges) {
       const a = idx.get(cs[e.i]), b = idx.get(cs[e.j]); if (a === undefined || b === undefined || !e.path.every((t) => mask[t])) continue;
-      uf[find(a)] = find(b); kept++; for (const kk of e.g) add(gate, kk, false); for (const kk of e.r) add(room, kk, false);
+      uf[find(a)] = find(b); kept++; edgeList.push({ kind: 'global', path: e.path }); for (const kk of e.g) add(gate, kk, false); for (const kk of e.r) add(room, kk, false);
     }
     const before = comps0(), step = (a, b) => mask[a] && mask[b] && res.pass(a, b), cand = [];
     for (let i = 0; i < nodes.length; i++) {
@@ -1593,10 +1662,10 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     cand.sort((p, q) => p.cost - q.cost); let patch = 0, steps = 0;
     for (const c of cand) {
       if (find(c.i) === find(c.j)) continue; uf[find(c.i)] = find(c.j); patch++;
-      const b = R.dijkstra(W, H, nodes[c.i].center, step, true, res.extra, nodes[c.j].center), pth = R.pathTo(b, nodes[c.j].center); steps += pth.length - 1;
+      const b = R.dijkstra(W, H, nodes[c.i].center, step, true, res.extra, nodes[c.j].center), pth = R.pathTo(b, nodes[c.j].center); steps += pth.length - 1; edgeList.push({ kind: 'patch', path: pth });
       for (let k = 1; k < pth.length; k++) { const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) add(gate, kk, true); else if (res.rp.has(kk)) add(room, kk, true); }
     }
-    return { nodes: nodes.length, kept, patch, componentsBefore: before, componentsAfter: comps0(), patchSteps: steps, gate, room };
+    return { nodes: nodes.length, kept, patch, componentsBefore: before, componentsAfter: comps0(), patchSteps: steps, gate, room, edges: edgeList };
   };
 
   /* Elevation for quantizing over the LAND only: void tiles (h <= 0) take the value of the nearest land tile (so the pre-smoothing does not drag the
@@ -3004,11 +3073,18 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const sl = g.slice, ramps = `${g.sites} ramps` + (g.patchSites ? ` (${g.patchSites} patch, blue)` : '');
     return sl ? ` · slice connections: ${sl.kept} from the global tree + ${sl.patch} patch (components ${sl.componentsBefore} -> ${sl.componentsAfter} among ${sl.nodes} cores) · ${ramps}` : ` · ${ramps}`;
   }
+  function connText() {
+    const c = S.connInfo; if (!c) return '';
+    let t = ` · tree connections walkable: ${c.ok + c.recomputed} of ${c.total}` + (c.recomputed ? ` (${c.recomputed} recomputed over the carved graph, same crossing cost)` : '') + (c.unresolved ? `, <b>${c.unresolved} NOT walkable</b>` : '');
+    if (c.unresolved) t += ': ' + c.list.slice(0, 4).map((x) => `(${x.from}) -> (${x.to}) stops at (${x.at[0]}) -> (${x.at[1]}): ${x.reason}`).join('; ');
+    const v = S.stairInfo.variants; if (v && v.length > 1) t += ` · ramp variants: ${v.map((k, i) => ['as planned', 'depth 1', 'narrow', 'depth 1 + narrow'][i] + ' ' + k).join(', ')}`;
+    return t;
+  }
   function roomsText() {
     const r = S.rooms; if (!r) return '';
     const rb = S.roomBorderInfo, rbt = rb ? ` · room borders: ${rb.closed} blocking faces (orange) · ${rb.open} open transitions (gap) · ${rb.used} on a tree path (green)` : '';
     const u = r.usage, tr = r.treeReach, ms = st.rooms ? st.rooms.total.toFixed(0) : '?';
-    return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree${roomsSliceText()}${rbt} · ${ms} ms${st.cold ? ' (cold)' : ''}`;
+    return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree (graph) · largest walkable region ${(Math.max(...S.regionSizes, 0) / S.landTiles * 100).toFixed(0)}% of the ${S.slice ? 'slice' : 'land'}${roomsSliceText()}${connText()}${rbt} · ${ms} ms${st.cold ? ' (cold)' : ''}`;
   }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));

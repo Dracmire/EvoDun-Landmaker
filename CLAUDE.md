@@ -228,6 +228,12 @@ incursion border; stake and way-back path visible.
    that slice is chosen and get another tone); room transitions are OPEN (all valid ones, used or not) and only borders that are not a transition block; unused
    terrace gates are closed (cliff). Six commits: (1) void + land quantization [done], (2) rooms layer + switch + sliders [done], (3) used gates -> ramps at the exact pair, sub-terraces visual [done, PR], (4) slice by rooms + patch connections [done],
    (5) room borders + overlay [done], (6) route by the tree [done] (PR); all in the viewer, off by default, see `docs/rooms.md` "In the viewer".
+   CONNECTIONS MUST STAY WALKABLE (user's decision, fix of PR #6): every tree connection (global and slice patch) must be walkable end to end in the FINAL walking graph (E.route).
+   Mechanism (`carveStairs` + `checkConnections`, `S.conns`, `S.connInfo`): the tiles of the tree paths are reserved; a ramp may occupy one only if the path walks it along the
+   ramp (links: bottom -> treads -> top of a column, or between adjacent columns); variants in order: cut into the upper terrace, built on the lower, depth 1 of each, lateral
+   columns out (narrower). If none fits, the connection is recomputed over the carved graph with the same crossing cost; what is still not walkable is NOT forced: it is counted and
+   named in the info. The tree itself, the candidate gates and the look of the ramps are untouched. `P.rampKeep = false` is the old behaviour (diagnostic). Not a full-connectivity rule.
+   `tools/test_conns_rooms.js`, `tools/diag_connections.js`.
    POSSIBLE IMPROVEMENT (not done, user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
    Diagnosis of why corridors do not connect: `reference/README.md` (corrected after running a transcription; verification in `docs/rooms.md`).
 5. PARKED (user's decision): round 2 of techniques (HD-2D layered terraces, SDF exterior mesh for Snake Mountain; per-pixel depth/WebGL),

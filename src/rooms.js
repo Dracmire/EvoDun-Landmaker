@@ -351,10 +351,10 @@
     const n = W * H, U = res.usage, cs = res.reach, nodes = res.alive.filter((c) => c.center >= 0 && mask[c.center]), idx = new Map(nodes.map((c, k) => [c, k]));
     const uf = Array.from({ length: nodes.length }, (_, k) => k), find = (v) => { while (uf[v] !== v) { uf[v] = uf[uf[v]]; v = uf[v]; } return v; };
     const gate = new Map(), room = new Map(), add = (map, kk, patch) => { const o = map.get(kk) || { count: 0, patch: true }; o.count++; if (!patch) o.patch = false; map.set(kk, o); };
-    let kept = 0; const comps0 = () => { const s = new Set(); for (let k = 0; k < nodes.length; k++) s.add(find(k)); return s.size; };
+    const edgeList = []; let kept = 0; const comps0 = () => { const s = new Set(); for (let k = 0; k < nodes.length; k++) s.add(find(k)); return s.size; };
     for (const e of U.edges) {
       const a = idx.get(cs[e.i]), b = idx.get(cs[e.j]); if (a === undefined || b === undefined || !e.path.every((t) => mask[t])) continue;
-      uf[find(a)] = find(b); kept++; for (const kk of e.g) add(gate, kk, false); for (const kk of e.r) add(room, kk, false);
+      uf[find(a)] = find(b); kept++; edgeList.push({ kind: 'global', path: e.path }); for (const kk of e.g) add(gate, kk, false); for (const kk of e.r) add(room, kk, false);
     }
     const before = comps0(), step = (a, b) => mask[a] && mask[b] && res.pass(a, b), cand = [];
     for (let i = 0; i < nodes.length; i++) {
@@ -365,10 +365,10 @@
     cand.sort((p, q) => p.cost - q.cost); let patch = 0, steps = 0;
     for (const c of cand) {
       if (find(c.i) === find(c.j)) continue; uf[find(c.i)] = find(c.j); patch++;
-      const b = R.dijkstra(W, H, nodes[c.i].center, step, true, res.extra, nodes[c.j].center), pth = R.pathTo(b, nodes[c.j].center); steps += pth.length - 1;
+      const b = R.dijkstra(W, H, nodes[c.i].center, step, true, res.extra, nodes[c.j].center), pth = R.pathTo(b, nodes[c.j].center); steps += pth.length - 1; edgeList.push({ kind: 'patch', path: pth });
       for (let k = 1; k < pth.length; k++) { const kk = key(pth[k - 1], pth[k], n); if (res.gp.has(kk)) add(gate, kk, true); else if (res.rp.has(kk)) add(room, kk, true); }
     }
-    return { nodes: nodes.length, kept, patch, componentsBefore: before, componentsAfter: comps0(), patchSteps: steps, gate, room };
+    return { nodes: nodes.length, kept, patch, componentsBefore: before, componentsAfter: comps0(), patchSteps: steps, gate, room, edges: edgeList };
   };
 
   /* Elevation for quantizing over the LAND only: void tiles (h <= 0) take the value of the nearest land tile (so the pre-smoothing does not drag the
