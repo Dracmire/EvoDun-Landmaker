@@ -223,16 +223,12 @@
   E.shape = function (full, P, spec) {
     const RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: the global tree gives the gates, sub-terraces are only visual
     if (RL && spec && spec.rooms && spec.rooms.length) spec = Object.assign({}, spec, { roomMap: RL.room });
-    let pocketIds = null, seedIds = null; // POCKET (Pocket view, P.pocket): a Diorama room as the slice is drawn as its pocket; the window grows to hold the whole disc
-    if (RL && E.pocket && P.pocket && spec && spec.rooms && spec.rooms.length === 1) {
-      const pd = P._padded, o = pd ? { id: spec.rooms[0], tiles: pd.tiles, type: E.roomTypes.DIORAMA } : E.roomTypes.classify(RL, P).rooms.get(spec.rooms[0]);
+    let pocketIds = null, seedIds = null, padNeed = 0; // POCKET (Pocket view, P.pocket): a Diorama room is drawn as its pocket. The shape is the WHOLE map shape (no slice, so the gates, ramps and walkable regions are the world's, with no patch connections)
+    if (RL && E.pocket && P.pocket && spec && spec.rooms && spec.rooms.length === 1) { // and the pocket then keeps only the fragment and what surrounds it
+      const o = E.roomTypes.classify(RL, P).rooms.get(spec.rooms[0]);
       if (o && o.type === E.roomTypes.DIORAMA) {
-        pocketIds = [o.id]; seedIds = pd ? pd.seedIds : [o.id];
-        if (!pd && E.pocket.overflows(RL, o)) { // the disc leaves the map: build everything on a copy with a border of void (pseudo-space) and the same room there
-          const pad = E.pocket.margin(o.tiles), pf = E.pocket.padPack(full, pad), RL2 = E.rooms.layer(pf, P), id2 = E.pocket.matchRoom(RL, RL2, o.id, pad);
-          if (id2 > 0) { const S2 = E.shape(pf, Object.assign({}, P, { _padded: { pad, seedIds: [o.id], tiles: o.tiles } }), Object.assign({}, spec, { rooms: [id2] })); S2.pad = pad; return S2; }
-        }
-        spec = Object.assign({}, spec, { margin: Math.max(spec.margin === undefined || spec.margin === null ? 24 : spec.margin, E.pocket.margin(o.tiles)) });
+        pocketIds = [o.id]; seedIds = [o.id]; spec = null;
+        padNeed = E.pocket.padNeeded(RL, o); // the disc leaves the map: the world shape is embedded in a bigger grid of void (pseudo-space) before the pocket is made
       }
     }
     const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
@@ -338,7 +334,7 @@
         S.dioBits = db; S.roomBitsDio = bd;
       }
     }
-    if (pocketIds) E.pocket.apply(S, P, RL, pocketIds, { ids: seedIds }); // the pocket of a Diorama: the fragment stays, the surroundings change
+    if (pocketIds) { if (padNeed > 0) E.pocket.embed(S, padNeed); E.pocket.apply(S, P, RL, pocketIds, { ids: seedIds }); } // the pocket of a Diorama: the fragment stays, the surroundings change
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
     S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };

@@ -17,29 +17,31 @@
 (function (E) {
   const P_ = E.pocket = {};
   const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-  P_.defaults = { yaw: 45, factor: 3, shift: 2, seeds: 9, margin: 0.05 };
+  P_.defaults = { yaw: 45, factor: 3, shift: 1, seedArea: 80, seedMin: 30, seedMax: 48, margin: 0.05, pathWidth: 2, mergeGap: 3, rampLen: 3, pondMax: 0.5 };
   // mulberry32: a small deterministic PRNG
   const rng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
   const seedOf = (ids) => { let h = 2166136261; for (const id of ids) { h ^= id + 0x9e3779b9; h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; };
-  /* the margin (tiles) the window needs around the fragment to hold the whole disc: the centre is 2 r from the centroid, the radius 3 r */
-  P_.margin = (tiles, o) => { o = Object.assign({}, P_.defaults, o); const r = Math.sqrt(tiles / Math.PI); return Math.ceil((o.shift + o.factor) * r) + 3; };
-
-  /* PADDING (pseudo-space): the disc of a pocket may leave the map (room 64 is at the edge). The window of a shape cannot, so the whole map is copied with a border of void (elevation 0, zone 0, masks 0) and the shape and the
-     rooms layer are built on that copy. matchRoom finds the same room there (same tile set, translated by pad) so the fragment stays the world's; the seeds still use the original room id. */
-  P_.padPack = function (full, pad) {
-    const w = full.width, h = full.height, W2 = w + 2 * pad, H2 = h + 2 * pad, key = pad;
-    if (full._pad && full._pad.key === key) return full._pad.pack;
-    const cp = (a, T) => { const o = new (T || a.constructor)(W2 * H2); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) o[(y + pad) * W2 + x + pad] = a[y * w + x]; return o; };
-    const masks = {}; for (const [k, v] of Object.entries(full.masks || {})) masks[k] = Array.isArray(v) ? Array.from(cp(Float64Array.from(v), Float64Array)) : cp(v);
-    const fields = {}; for (const [k, f] of Object.entries(full.fields || {})) fields[k] = f.ids ? Object.assign({}, f, { ids: cp(f.ids), amb: cp(f.amb), sliceIds: undefined }) : { values: cp(f.values) };
-    const pack = { name: full.name, width: W2, height: H2, elevation: cp(full.elevation), elevRange: full.elevRange, masks, markers: (full.markers || []).map((m) => Object.assign({}, m, { x: m.x + pad, y: m.y + pad })), fields };
-    full._pad = { key, pack }; return pack;
+  /* PADDING (pseudo-space): the disc of a pocket may leave the map (room 64 is at the edge). The world shape is built as always (whole map, so the fragment, its ramps and its walking are exactly the world's) and then EMBEDDED in a
+     bigger grid with a border of void: every per-tile array is copied at an offset and the tile indices of the ramps are remapped. S.pad = the border; S.ox / S.oy become -pad (window tile -> map tile). */
+  P_.embed = function (S, pad) {
+    const W = S.W, H = S.H, W2 = W + 2 * pad, H2 = H + 2 * pad, n2 = W2 * H2, idx = (i) => (((i / W) | 0) + pad) * W2 + (i % W) + pad;
+    const grow = (a, fill, per) => { if (!a || a.length === undefined) return a; per = per || 1; const T = a.constructor === Array ? Array : a.constructor, o = T === Array ? new Array(n2 * per).fill(fill) : new T(n2 * per).fill(fill);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x, j = (y + pad) * W2 + x + pad; for (let k = 0; k < per; k++) o[j * per + k] = a[i * per + k]; } return o; };
+    S.U = grow(S.U, 0); S.ter = grow(S.ter, 0); S.sub = grow(S.sub, 0); S.fine = grow(S.fine, 0); S.void = grow(S.void || new Uint8Array(W * H), 1); S.fineMask = grow(S.fineMask || Int16Array.from(S.fine), -1);
+    S.water = grow(S.water, 0); S.block = grow(S.block, 1); S.roomKind = grow(S.roomKind, 0, 4); S.roomBits = grow(S.roomBits, 0); S.roomMap = grow(S.roomMap, 0); S.carved = grow(S.carved, 0);
+    S.region = grow(S.region, -1); S.isolated = grow(S.isolated, 0); S.nowalk = grow(S.nowalk, 0); S.roomType = grow(S.roomType, 0);
+    for (const k of ['snake', 'cave', 'waterfall']) if (S[k] && S[k].length === W * H) S[k] = grow(S[k], 0);
+    S.dioBits = S.roomBitsDio = S.slice = S.border = S.borderKind = S.sliceLoops = null; S.sliceUse = null; S.conns = []; S.passes = []; S.gates = []; S.makeSite = null; S._walk = null; S.cache = {};
+    for (const rec of S.stairs || []) { rec.bottom = rec.bottom.map(idx); rec.top = rec.top.map(idx); for (const st of rec.steps || []) st.tiles = st.tiles.map(idx); if (rec.ramp) { rec.ramp.mx += pad; rec.ramp.my += pad; } if (rec.site) { const m = (o) => (o ? Object.assign({}, o, { a: idx(o.a), b: idx(o.b) }) : o); rec.site = Object.assign({}, m(rec.site), { alts: (rec.site.alts || []).map(m) }); } }
+    S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []); for (let i = 0; i < n2; i++) if (!S.void[i]) S.byLevel[S.fine[i]].push(i);
+    S.W = W2; S.H = H2; S.n = n2; S.ox = -pad; S.oy = -pad; S.pad = pad; return S;
   };
-  /* does the disc of room o (RL = layer of the original map) leave the map? */
-  P_.overflows = function (RL, o, opts) {
-    const W = RL.W, H = RL.H; let sx = 0, sy = 0, c = 0; for (let i = 0; i < W * H; i++) if (RL.room[i] === o.id) { sx += (i % W) + 0.5; sy += ((i / W) | 0) + 0.5; c++; }
-    if (!c) return false; opts = Object.assign({}, P_.defaults, opts); const r = Math.sqrt(c / Math.PI), u = [Math.sin(opts.yaw * Math.PI / 180), Math.cos(opts.yaw * Math.PI / 180)], cx = sx / c + opts.shift * r * u[0], cy = sy / c + opts.shift * r * u[1], R = opts.factor * r;
-    return cx - R < 0 || cy - R < 0 || cx + R > W || cy + R > H;
+  /* the padding (tiles) the map needs so that the disc of room o (RL = layer of the original map) fits: 0 when it already fits */
+  P_.padNeeded = function (RL, o, opts) {
+    const W = RL.W, H = RL.H, fl = []; let sx = 0, sy = 0; for (let i = 0; i < W * H; i++) if (RL.room[i] === o.id) { fl.push(i); sx += (i % W) + 0.5; sy += ((i / W) | 0) + 0.5; }
+    if (!fl.length) return 0; opts = Object.assign({}, P_.defaults, opts); const c = fl.length, cx = sx / c, cy = sy / c, r = Math.sqrt(c / Math.PI), yw = opts.yaw * Math.PI / 180, dx = cx + opts.shift * r * Math.sin(yw), dy = cy + opts.shift * r * Math.cos(yw);
+    let R = opts.factor * r; for (const i of fl) R = Math.max(R, Math.hypot((i % W) + 0.5 - dx, ((i / W) | 0) + 0.5 - dy) + 0.71);
+    const over = Math.max(R - dx, R - dy, dx + R - W, dy + R - H); return over > 0 ? Math.ceil(over) + 3 : 0;
   };
   /* id of the room of RL2 (layer of the padded map) that has exactly the tiles of room id of RL translated by pad; 0 if there is none */
   P_.matchRoom = function (RL, RL2, id, pad) {
@@ -50,18 +52,23 @@
   };
 
   /* PLAN (pure): W, H window; frag Uint8Array (1 = fragment tile); heightOf(i) height of a fragment tile; exits [{ a, dx, dy }] (a = fragment tile, (dx, dy) = outward direction);
-     opts { ids, yaw, factor, shift, seeds, jump (height of one terrace) }. Returns { disc, role, height, cell, exits, info }. role: 0 none, 1 fragment, 2 decoration, 3 road, 4 pond. */
+     opts { ids, yaw, factor, shift, jump (height of one terrace), sub (height of one sub-level), ... see defaults }. Returns { disc, role, height, cell, seeds, exits, info }.
+     role: 0 none, 1 fragment, 2 decoration, 3 path (on the decoration), 4 pond. */
   P_.plan = function (W, H, frag, heightOf, exits, opts) {
-    const o = Object.assign({}, P_.defaults, opts), n = W * H, ids = o.ids || [0], jump = o.jump || 1, yaw = o.yaw * Math.PI / 180, u = [Math.sin(yaw), Math.cos(yaw)], v = [-u[1], u[0]];
+    const o = Object.assign({}, P_.defaults, opts), n = W * H, ids = o.ids || [0], jump = o.jump || 1, sub = o.sub === undefined ? 0.22 * jump : o.sub, yaw = o.yaw * Math.PI / 180, u = [Math.sin(yaw), Math.cos(yaw)], v = [-u[1], u[0]];
     const fl = []; let sx = 0, sy = 0; for (let i = 0; i < n; i++) if (frag[i]) { fl.push(i); sx += (i % W) + 0.5; sy += ((i / W) | 0) + 0.5; }
-    const cnt = fl.length, cx = sx / cnt, cy = sy / cnt, r = Math.sqrt(cnt / Math.PI), R = o.factor * r, dc = [cx + o.shift * r * u[0], cy + o.shift * r * u[1]];
+    const cnt = fl.length, cx = sx / cnt, cy = sy / cnt, r = Math.sqrt(cnt / Math.PI), dc = [cx + o.shift * r * u[0], cy + o.shift * r * u[1]];
+    const px = (i) => (i % W) + 0.5, py = (i) => ((i / W) | 0) + 0.5;
+    let R = o.factor * r, grown = false; for (const i of fl) { const d = Math.hypot(px(i) - dc[0], py(i) - dc[1]) + 0.71; if (d > R) { R = d; grown = true; } } // no fragment tile outside the disc: R grows to hold them all
+    const inDisc = (i) => Math.hypot(px(i) - dc[0], py(i) - dc[1]) <= R, sOf = (x, y) => ((x - cx) * u[0] + (y - cy) * u[1]) / r; // s: position along the camera axis in units of r (+ = toward the camera)
     const role = new Uint8Array(n), height = new Float32Array(n).fill(NaN), cell = new Int16Array(n).fill(-1), rand = rng(seedOf(ids));
-    const px = (i) => (i % W) + 0.5, py = (i) => ((i / W) | 0) + 0.5, inDisc = (i) => Math.hypot(px(i) - dc[0], py(i) - dc[1]) <= R;
     for (const i of fl) { role[i] = 1; height[i] = heightOf(i); }
+    let sF = -Infinity, sf = Infinity; for (const i of fl) { const s = sOf(px(i), py(i)); if (s > sF) sF = s; if (s < sf) sf = s; } // front and back extent of the fragment
+    const sBack = o.shift - R / r, sEdge = o.shift + R / r; // back and front edge of the disc
     // nearest fragment tile of every disc tile: a grid of the fragment tiles keeps it fast
     const nearest = new Int32Array(n).fill(-1), g = 8, gw = Math.ceil(W / g), gh = Math.ceil(H / g), grid = Array.from({ length: gw * gh }, () => []);
     for (const i of fl) grid[(((i / W) | 0) / g | 0) * gw + (((i % W) / g) | 0)].push(i);
-    const nearestFrag = (x, y) => { // ring search over the grid, then exact
+    const nearestFrag = (x, y) => {
       const gx = Math.floor(x / g), gy = Math.floor(y / g); let best = -1, bd = Infinity;
       for (let rad = 0; rad < Math.max(gw, gh); rad++) {
         for (let yy = gy - rad; yy <= gy + rad; yy++) for (let xx = gx - rad; xx <= gx + rad; xx++) { if (Math.max(Math.abs(yy - gy), Math.abs(xx - gx)) !== rad || xx < 0 || yy < 0 || xx >= gw || yy >= gh) continue; for (const f of grid[yy * gw + xx]) { const d = (px(f) - x) ** 2 + (py(f) - y) ** 2; if (d < bd) { bd = d; best = f; } } }
@@ -70,20 +77,21 @@
       return best;
     };
     const disc = []; for (let i = 0; i < n; i++) if (!frag[i] && inDisc(i)) disc.push(i);
-    // seeds: 3 behind, 4 in front, 2 at the sides (zone by s = dot(position - centroid, u) / r), weights 0.5 + noise, each random inside the disc and its zone (no fragment tile needed)
-    const zoneOf = (s) => (s < -0.2 ? 0 : s > 0.2 ? 1 : 2), want = [0, 0, 0, 1, 1, 1, 1, 2, 2].slice(0, o.seeds), seeds = [];
-    for (const z of want) {
-      let pos = null; for (let t = 0; t < 400 && !pos; t++) { const a = rand() * 2 * Math.PI, d = Math.sqrt(rand()) * R, x = dc[0] + Math.cos(a) * d, y = dc[1] + Math.sin(a) * d, s = ((x - cx) * u[0] + (y - cy) * u[1]) / r; if (zoneOf(s) === z) pos = [x, y]; }
-      if (!pos) { const s = z === 0 ? -0.5 : z === 1 ? 1.2 : 0, l = z === 2 ? (rand() < 0.5 ? -0.8 : 0.8) : 0; pos = [cx + (s * r) * u[0] + l * r * v[0], cy + (s * r) * u[1] + l * r * v[1]]; } // fallback: a fixed anchor
-      seeds.push({ x: pos[0], y: pos[1], w: 0.5 + rand(), zone: z, k: 0, id: seeds.length });
+    /* SEEDS: proportional to the area of the disc (one per o.seedArea tiles, within seedMin..seedMax), weights 0.5 + noise (like Step3_ApplyVoronoi), deterministic by room id. The first ones are forced into the back and the front
+       so the backdrop and the view always exist. The height of a cell follows the camera axis: behind the fragment it rises toward the edge in steps (+1, +2, +3 terraces: the backdrop), in front it falls in bands (0, -1, -2)
+       toward the pond, in the middle (the sides) 0; plus a jitter of -1, 0 or +1 sub-level per cell. */
+    const nSeeds = Math.max(o.seedMin, Math.min(o.seedMax, Math.round(Math.PI * R * R / o.seedArea))), seeds = [];
+    const kOf = (s) => { if (s < sf) return 1 + Math.min(2, Math.floor(3 * Math.max(0, (sf - s) / Math.max(1e-6, sf - sBack)))); if (s > sF) { const f = (s - sF) / Math.max(1e-6, sEdge - sF); return f < 1 / 3 ? 0 : f < 2 / 3 ? -1 : -2; } return 0; };
+    for (let q = 0; q < nSeeds; q++) {
+      const want = q < 3 ? 0 : q < 6 ? 1 : -1; let pos = null, s = 0;
+      for (let t = 0; t < 600 && !pos; t++) { const a = rand() * 2 * Math.PI, d = Math.sqrt(rand()) * R, x = dc[0] + Math.cos(a) * d, y = dc[1] + Math.sin(a) * d; s = sOf(x, y); if (want === 0 ? s < sf : want === 1 ? s > sF : true) pos = [x, y]; }
+      if (!pos) { s = want === 0 ? (sf + sBack) / 2 : (sF + sEdge) / 2; pos = [cx + s * r * u[0], cy + s * r * u[1]]; }
+      seeds.push({ x: pos[0], y: pos[1], w: 0.5 + rand(), s, k: kOf(s), j: Math.floor(rand() * 3) - 1, id: q });
     }
-    for (const sd of seeds) { const q = rand(); sd.k = sd.zone === 0 ? (q < 0.5 ? 1 : 2) : sd.zone === 1 ? (q < 0.5 ? -1 : -2) : (q < 0.5 ? 0 : -1); }
-    // the lowest cell of the front is the POND (lowest offset, then the nearest to the camera)
-    const front = seeds.filter((s) => s.zone === 1).sort((a, b) => a.k - b.k || ((b.x - cx) * u[0] + (b.y - cy) * u[1]) - ((a.x - cx) * u[0] + (a.y - cy) * u[1])); 
     for (const i of disc) {
-      let bd = Infinity, bs = 0; for (const s of seeds) { const d = ((px(i) - s.x) ** 2 + (py(i) - s.y) ** 2) / (s.w * s.w); if (d < bd) { bd = d; bs = s.id; } }
+      let bd = Infinity, bs = 0; for (const sd of seeds) { const d = ((px(i) - sd.x) ** 2 + (py(i) - sd.y) ** 2) / (sd.w * sd.w); if (d < bd) { bd = d; bs = sd.id; } }
       const ref = nearestFrag(px(i), py(i)); nearest[i] = ref; cell[i] = bs;
-      role[i] = 2; height[i] = height[ref] + seeds[bs].k * jump;
+      role[i] = 2; height[i] = height[ref] + seeds[bs].k * jump + seeds[bs].j * sub;
     }
     // HARD RULE: nothing hides the fragment. A ray from the tile away from the camera: the first fragment tile it meets is the edge in front of which the tile stands; the tile stays below it
     let capped = 0;
@@ -91,36 +99,51 @@
       let x = px(i), y = py(i), hit = -1; for (let s = 0; s < 4 * R && hit < 0; s++) { x -= u[0] * 0.5; y -= u[1] * 0.5; const ix = Math.floor(x), iy = Math.floor(y); if (ix < 0 || iy < 0 || ix >= W || iy >= H) break; const j = iy * W + ix; if (frag[j]) hit = j; }
       if (hit >= 0 && height[i] > height[hit] - o.margin * jump) { height[i] = height[hit] - o.margin * jump; capped++; }
     }
-    // exits: runs of faces with the same direction and consecutive tiles; a road of the run's width and the height of the fragment on each face, to the edge of the disc (it cuts the decoration)
-    const sortKey = (e) => (e.dx ? [e.dx + 5, e.a % W, (e.a / W) | 0] : [e.dy + 20, (e.a / W) | 0, e.a % W]), runs = [], sorted = exits.slice().sort((p, q) => { const a = sortKey(p), b = sortKey(q); return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]; });
-    for (const e of sorted) {
-      const last = runs[runs.length - 1], lf = last && last.faces[last.faces.length - 1], fixed = (t) => (t.dx ? t.a % W : (t.a / W) | 0), along = (t) => (t.dx ? (t.a / W) | 0 : t.a % W);
-      if (last && last.dx === e.dx && last.dy === e.dy && fixed(lf) === fixed(e) && along(e) === along(lf) + 1) last.faces.push(e); else runs.push({ dx: e.dx, dy: e.dy, faces: [e] });
+    const decoHeight = Float32Array.from(height); // the decoration before the paths
+    /* EXITS as PATHS: runs of faces with the same direction and consecutive tiles; parallel runs of the same direction less than mergeGap tiles apart become one. A path of width min(run, pathWidth) leaves from the middle face,
+       straight to the edge of the disc (bent around a notch of the fragment when needed), drawn ON the decoration (it keeps the height of the cell it crosses, it is not an embankment); the first rampLen tiles
+       are a short ramp from the height of the fragment on that face to the height of the decoration. */
+    const fixedOf = (t) => (t.dx ? t.a % W : (t.a / W) | 0), alongOf = (t) => (t.dx ? (t.a / W) | 0 : t.a % W);
+    const sortKey = (e) => [e.dx ? e.dx + 5 : e.dy + 20, fixedOf(e), alongOf(e)], sorted = exits.slice().sort((p, q) => { const a = sortKey(p), b = sortKey(q); return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]; });
+    let runs = [];
+    for (const e of sorted) { const last = runs[runs.length - 1], lf = last && last.faces[last.faces.length - 1]; if (last && last.dx === e.dx && last.dy === e.dy && fixedOf(lf) === fixedOf(e) && alongOf(e) === alongOf(lf) + 1) last.faces.push(e); else runs.push({ dx: e.dx, dy: e.dy, faces: [e] }); }
+    const nRuns0 = runs.length, par = runs.map((_, i) => i), find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+    const span = (ru) => [Math.min(...ru.faces.map(alongOf)), Math.max(...ru.faces.map(alongOf))];
+    for (let a = 0; a < runs.length; a++) for (let b = a + 1; b < runs.length; b++) {
+      if (runs[a].dx !== runs[b].dx || runs[a].dy !== runs[b].dy || Math.abs(fixedOf(runs[a].faces[0]) - fixedOf(runs[b].faces[0])) >= o.mergeGap) continue;
+      const [a0, a1] = span(runs[a]), [b0, b1] = span(runs[b]), gap = Math.max(a0, b0) - Math.min(a1, b1) - 1; if (gap < o.mergeGap) par[find(a)] = find(b);
     }
-    let reached = 0, blocked = 0, bent = 0; const road = [];
-    /* the road of one face: straight along the outward direction to the edge of the disc (or of the window); if the fragment is in the way (a notch of the border) the first of the other directions
-       (the two sides, then back) whose straight line from the first free tile is clear; null if there is none */
-    const trace = (f, dx, dy, from) => {
+    const groups = new Map(); runs.forEach((ru, i) => { const k = find(i); if (!groups.has(k)) groups.set(k, { dx: ru.dx, dy: ru.dy, faces: [] }); groups.get(k).faces.push(...ru.faces); });
+    runs = [...groups.values()].map((ru) => { ru.faces.sort((p, q) => alongOf(p) - alongOf(q) || fixedOf(p) - fixedOf(q)); return ru; });
+    let reached = 0, blocked = 0, bent = 0; const pathTiles = new Set();
+    const trace = (dx, dy, from) => { // straight from `from` (outside the fragment) to the edge of the disc; null if the fragment is in the way
       const out = []; let x = from[0], y = from[1];
       for (let m = 0; m < 4 * R + 8; m++) { if (x < 0 || y < 0 || x >= W || y >= H) return out; const j = y * W + x; if (frag[j]) return null; if (!inDisc(j)) return out; out.push(j); x += dx; y += dy; }
       return out;
     };
     for (const run of runs) {
-      run.width = run.faces.length; run.reached = true; run.bent = false; run.length = 0;
-      for (const f of run.faces) {
-        const x0 = (f.a % W) + f.dx, y0 = ((f.a / W) | 0) + f.dy, h = height[f.a];
-        let path = trace(f, f.dx, f.dy, [x0, y0]);
-        if (!path) { for (const [dx, dy] of [[f.dy, f.dx], [-f.dy, -f.dx], [-f.dx, -f.dy]]) { path = trace(f, dx, dy, [x0, y0]); if (path) { run.bent = true; break; } } }
-        if (!path) { run.reached = false; continue; }
-        for (const j of path) { role[j] = 3; height[j] = h; cell[j] = -1; road.push(j); }
-        run.length = Math.max(run.length, path.length);
+      run.width = Math.min(run.faces.length, o.pathWidth); run.reached = true; run.bent = false; run.length = 0; run.paths = [];
+      const mid = run.faces[Math.floor((run.faces.length - 1) / 2)], lat = run.dx ? [0, 1] : [1, 0]; // lateral unit vector (along the face)
+      for (let c = 0; c < run.width; c++) {
+        const f = mid, x0 = (f.a % W) + f.dx + lat[0] * c, y0 = ((f.a / W) | 0) + f.dy + lat[1] * c; if (x0 < 0 || y0 < 0 || x0 >= W || y0 >= H) continue;
+        const fa = f.a + lat[1] * c * W + lat[0] * c, h0 = fa < n && frag[fa] ? height[fa] : height[f.a];
+        let path = trace(f.dx, f.dy, [x0, y0]);
+        if (!path) { for (const [dx, dy] of [[f.dy, f.dx], [-f.dy, -f.dx], [-f.dx, -f.dy]]) { path = trace(dx, dy, [x0, y0]); if (path) { run.bent = true; break; } } }
+        if (!path) { if (c === 0) run.reached = false; continue; }
+        const m = Math.min(o.rampLen, path.length - 1), hT = path.length > m ? height[path[m]] : height[path[path.length - 1]];
+        for (let t = 0; t < path.length; t++) { const j = path[t]; if (t < m) height[j] = h0 + (hT - h0) * (t + 1) / (m + 1); role[j] = 3; cell[j] = -1; pathTiles.add(j); }
+        run.paths.push(path); run.length = Math.max(run.length, path.length);
       }
       run.reached ? reached++ : blocked++; if (run.bent) bent++;
     }
-    // the pond is the first front cell (lowest first) that still owns decoration tiles once the roads are cut (a cell may be eaten by its neighbours or crossed by a road)
-    { const owned = new Set(); for (const i of disc) if (role[i] === 2) owned.add(cell[i]); const pondSeed = front.find((x) => owned.has(x.id)); if (pondSeed) { pondSeed.pond = true; for (const i of disc) if (cell[i] === pondSeed.id && role[i] === 2) role[i] = 4; } }
-    let decoTiles = 0, pondTiles = 0, roadTiles = 0; for (let i = 0; i < n; i++) { if (role[i] === 2) decoTiles++; else if (role[i] === 4) pondTiles++; else if (role[i] === 3) roadTiles++; }
-    return { disc: { cx: dc[0], cy: dc[1], R, r, centroid: [cx, cy], u }, role, height, cell, seeds, exits: runs, info: { fragTiles: cnt, decoTiles, pondTiles, roadTiles, exitRuns: runs.length, exitFaces: exits.length, exitsReached: reached, exitsBlocked: blocked, exitsBent: bent, capped, seeds: seeds.length, pocketTiles: cnt + decoTiles + pondTiles + roadTiles } };
+    // POND: the lowest cell of the front (lowest offset, then the nearest to the camera) that still has decoration tiles; at most pondMax of the fragment's tiles, the ones nearest to its seed
+    const cand = seeds.filter((sd) => sd.k < 0).sort((a, b) => a.k - b.k || b.s - a.s); let pondCell = -1, pondTiles = 0;
+    for (const sd of cand) {
+      const ts = disc.filter((i) => cell[i] === sd.id && role[i] === 2).sort((a, b) => ((px(a) - sd.x) ** 2 + (py(a) - sd.y) ** 2) - ((px(b) - sd.x) ** 2 + (py(b) - sd.y) ** 2) || a - b);
+      if (!ts.length) continue; const take = Math.max(1, Math.min(ts.length, Math.floor(o.pondMax * cnt))); for (let t = 0; t < take; t++) role[ts[t]] = 4; pondCell = sd.id; pondTiles = take; break;
+    }
+    let decoTiles = 0, roadTiles = 0, backTiles = 0; for (let i = 0; i < n; i++) { if (role[i] === 2 || role[i] === 4) { decoTiles++; if (sOf(px(i), py(i)) < sf) backTiles++; } else if (role[i] === 3) roadTiles++; }
+    return { disc: { cx: dc[0], cy: dc[1], R, r, centroid: [cx, cy], u, grown }, role, height, decoHeight, cell, seeds, pondCell, exits: runs, info: { fragTiles: cnt, decoTiles, pondTiles, pondMax: Math.floor(o.pondMax * cnt), roadTiles, exitRuns: runs.length, exitRunsBeforeMerge: nRuns0, exitFaces: exits.length, exitsReached: reached, exitsBlocked: blocked, exitsBent: bent, capped, seeds: seeds.length, backDepth: (sf - sBack) * r, backTiles, discGrown: grown, pocketTiles: cnt + decoTiles + roadTiles } };
   };
 
   /* Floors of a fragment (user's criterion): a terrace of the room with >= 20 walkable tiles (valid walkable region: no forbidden margin, no void, no ramp footprint) is a floor; two floors joined by a ramp inside the room
@@ -138,28 +161,29 @@
   /* APPLY to a shape S whose slice is the room(s) of the pocket (rooms on, the room is a Diorama): everything outside the pocket becomes void (not drawn), the decoration gets levels of its own, the roads and the pond are marked.
      Sets S.pocket (true), S.pocketRole (Uint8 per window tile: 1 fragment, 2 decoration, 3 road, 4 pond), S.pocketInfo. The fragment is not touched (same fine levels, same walkability). */
   P_.apply = function (S, P, RL, ids, opts) {
-    const n = S.n, W = S.W, H = S.H, K = S.subs, frag = Uint8Array.from(S.slice, (v, i) => (v && !(S.void && S.void[i]) ? 1 : 0)), idsSet = new Set(ids), fw = S.mapW;
-    const mapOf = (i) => (((i / W) | 0) + S.oy) * fw + (i % W) + S.ox;
+    const n = S.n, W = S.W, H = S.H, K = S.subs, idsSet = new Set(ids), fw = S.mapW, frag = new Uint8Array(n);
+    const mapOf = (i) => { const x = (i % W) + S.ox, y = ((i / W) | 0) + S.oy; return x < 0 || y < 0 || x >= fw || y >= S.mapH ? -1 : y * fw + x; }; // -1: outside the map (the border of void of a padded pocket)
+    for (let i = 0; i < n; i++) if (idsSet.has(RL.room[mapOf(i)]) && !(S.void && S.void[i])) frag[i] = 1; // the room's tiles of the WORLD shape (whole map, no slice)
     // exits: faces of the fragment border across an open room transition
     const exits = [];
     for (let i = 0; i < n; i++) { if (!frag[i]) continue; const x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (frag[j]) continue; const rb = RL.room[mapOf(j)]; if (rb <= 0 || idsSet.has(rb)) continue; if (RL.rp.has(E.rooms.key(mapOf(i), mapOf(j), RL.W * RL.H))) exits.push({ a: i, dx, dy }); } }
-    const jump = P.terH, plan = P_.plan(W, H, frag, (i) => S.levelH[S.fine[i]], exits, Object.assign({ ids, jump }, opts));
+    const jump = P.terH, plan = P_.plan(W, H, frag, (i) => S.levelH[S.fine[i]], exits, Object.assign({ ids, jump, sub: E.subHeight(P) }, opts));
     // the window may cut the disc at the edge of the map: counted
-    const d = plan.disc, truncated = d.cx - d.R < -S.ox || d.cy - d.R < -S.oy || d.cx + d.R > fw - S.ox || d.cy + d.R > S.mapH - S.oy;
+    const d = plan.disc, truncated = d.cx - d.R < 0 || d.cy - d.R < 0 || d.cx + d.R > W || d.cy + d.R > H;
     // levels: insert the heights of the decoration, roads and pond in the ranking (an existing level is reused when the height matches)
-    const eps = 1e-6, hs = new Set(); for (let i = 0; i < n; i++) if (plan.role[i] >= 2) hs.add(Math.round(plan.height[i] / eps));
-    const list = [...hs].sort((a, b) => a - b).map((k) => k * eps), old = S.levelH, newH = [], newMeta = [], remap = new Array(old.length), hIdx = new Map(); let hi = 0;
+    // levels: the heights of the decoration and the paths are inserted in the ranking as levels of their own (never shared with the fragment: a height that equals an existing level is nudged up by 0.003), so they can have their own look
+    const eps = 1e-6, old = S.levelH, hs = new Set(); for (let i = 0; i < n; i++) if (plan.role[i] >= 2) { let h = plan.height[i]; if (old.some((x) => Math.abs(x - h) < 1e-4)) h += 0.003; plan.height[i] = h; hs.add(Math.round(plan.height[i] / eps)); }
+    const list = [...hs].sort((a, b) => a - b).map((k) => k * eps), newH = [], newMeta = [], remap = new Array(old.length), hIdx = new Map(); let hi = 0;
     for (let L = 0; L <= S.maxFine; L++) {
-      while (hi < list.length && list[hi] < old[L] - 1e-5) { hIdx.set(list[hi], newH.length); newH.push(list[hi]); newMeta.push(null); hi++; }
-      if (hi < list.length && Math.abs(list[hi] - old[L]) <= 1e-5) { hIdx.set(list[hi], newH.length); hi++; }
+      while (hi < list.length && list[hi] < old[L]) { hIdx.set(Math.round(list[hi] / eps), newH.length); newH.push(list[hi]); newMeta.push(null); hi++; }
       remap[L] = newH.length; newH.push(old[L]); newMeta.push(S.levelMeta[L]);
     }
-    while (hi < list.length) { hIdx.set(list[hi], newH.length); newH.push(list[hi]); newMeta.push(null); hi++; }
-    const N = S.N, top = E.terBase(N - 1, P, S.center) + (K - 1) * E.subHeight(P);
-    newH.forEach((h, L) => { if (newMeta[L]) return; // a level of the decoration: colour between the terraces (bridge), or the lowest / highest colour outside the range
-      if (h <= E.terBase(0, P, S.center)) { newMeta[L] = { ter: 0, sub: 0, bridge: false }; return; } if (h >= top) { newMeta[L] = { ter: N - 1, sub: K - 1, bridge: false }; return; }
+    while (hi < list.length) { hIdx.set(Math.round(list[hi] / eps), newH.length); newH.push(list[hi]); newMeta.push(null); hi++; }
+    const N = S.N, lo0 = E.terBase(0, P, S.center), top = E.terBase(N - 1, P, S.center) + (K - 1) * E.subHeight(P), jmp = P.terH;
+    newH.forEach((h, L) => { if (newMeta[L]) return; // a level of the decoration: it follows the palette; beyond the lowest / highest terrace it keeps going (darker below, lighter above, `ext` in terraces) and it is always a little desaturated (`deco`)
+      if (h <= lo0) { newMeta[L] = { ter: 0, sub: 0, bridge: false, deco: true, ext: (h - lo0) / jmp }; return; } if (h >= top) { newMeta[L] = { ter: N - 1, sub: K - 1, bridge: false, deco: true, ext: (h - top) / jmp }; return; }
       let t = 0; while (t + 1 < N && E.terBase(t + 1, P, S.center) <= h) t++; const lo = E.terBase(t, P, S.center) + (K - 1) * E.subHeight(P), hiB = E.terBase(t + 1, P, S.center);
-      newMeta[L] = h <= lo ? { ter: t, sub: K - 1, bridge: false } : { ter: t, sub: K - 1, bridge: true, frac: Math.max(0.05, Math.min(0.95, (h - lo) / (hiB - lo))) }; });
+      newMeta[L] = h <= lo ? { ter: t, sub: K - 1, bridge: false, deco: true } : { ter: t, sub: K - 1, bridge: true, frac: Math.max(0.05, Math.min(0.95, (h - lo) / (hiB - lo))), deco: true }; });
     const fine = new Int16Array(n);
     for (let i = 0; i < n; i++) fine[i] = plan.role[i] >= 2 ? hIdx.get(Math.round(plan.height[i] / eps)) : remap[S.fine[i]];
     S.fine.set(fine); for (const rec of S.stairs || []) if (rec.level !== undefined) rec.level = remap[rec.level];
@@ -170,8 +194,11 @@
     S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < n; i++) if (vd[i]) S.fineMask[i] = -1;
     for (let i = 0; i < n; i++) if (plan.role[i] >= 2) S.block[i] = 1; // not walkable
     { let x0 = W, y0 = H, x1 = 0, y1 = 0; for (let i = 0; i < n; i++) if (plan.role[i]) { const x = i % W, y = (i / W) | 0; if (x < x0) x0 = x; if (x + 1 > x1) x1 = x + 1; if (y < y0) y0 = y; if (y + 1 > y1) y1 = y + 1; } S.sliceBox = { x0, y0, x1, y1 }; } // the camera fits the whole pocket
+    { const inP = (t) => plan.role[t] > 0, tiles = (r) => r.bottom.concat(r.top, ...(r.steps || []).map((x) => x.tiles)); // the ramps of the world that are not part of the pocket are not drawn (a ramp must touch the fragment and lie wholly inside the pocket)
+      S.stairs = (S.stairs || []).filter((r) => tiles(r).every(inP) && tiles(r).some((t) => frag[t])); }
+    S.slice = frag; S.border = null; S.borderKind = null; S.borderInfo = null; // the fragment is the slice (walking, the regions and the ramps are the world's); no border line
     S.pocket = true; S.pocketRole = plan.role; S.pocketPlan = plan;
-    const fl = P_.floors(S, frag, (i) => RL.forb[mapOf(i)] !== 1 && RL.h[mapOf(i)] > 0), dbl = fl.length >= 2; let faces = null;
+    const fl = P_.floors(S, frag, (i) => RL.forb[mapOf(i)] !== 1 && RL.h[mapOf(i)] > 0 && S.region[i] >= 0), dbl = fl.length >= 2; let faces = null;
     if (dbl) { const hi2 = fl.slice().sort((a, b) => b.h - a.h), A = hi2[0], B = hi2[hi2.length - 1], u = plan.disc.u; faces = (A.cx - B.cx) * u[0] + (A.cy - B.cy) * u[1] < 0; } // the higher floor is farther from the camera: the cliff between them faces the camera
     S.pocketInfo = Object.assign({}, plan.info, { ids: ((opts && opts.ids) || ids).slice(), perTerrace: fl.perTerrace, R: d.R, r: d.r, floors: fl.map((f) => f.tiles), double: dbl, cliffFacesCamera: faces, truncated, levelsAdded: newH.length - old.length });
     return S.pocketInfo;

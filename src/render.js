@@ -23,8 +23,11 @@
       const lift = 1 + (mi - (K - 1) / 2) * 0.05;
       return c.map((v) => v * lift);
     };
-    if (m.bridge) { const lo = at(m.ter, K - 1), hi = at(m.ter + 1, 0); return lo.map((v, k) => v + (hi[k] - v) * m.frac); } // between two terraces
-    return at(m.ter, m.sub);
+    const base = m.bridge ? (() => { const lo = at(m.ter, K - 1), hi = at(m.ter + 1, 0); return lo.map((v, k) => v + (hi[k] - v) * m.frac); })() : at(m.ter, m.sub); // a bridge is between two terraces
+    if (!m.deco) return base;
+    // pocket decoration: beyond the palette it keeps going (darker below the lowest terrace, lighter above the highest), and it is a little desaturated so it does not read as walkable
+    let c = base; if (m.ext) c = m.ext < 0 ? c.map((v) => v * Math.max(0.45, 1 + 0.2 * m.ext)) : c.map((v) => v + (255 - v) * Math.min(0.35, 0.1 * m.ext));
+    const lum = 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]; return c.map((v) => (v + (lum - v) * 0.45) * 0.9);
   }
   const OUT = 'rgba(24,20,34,0.92)';
 
