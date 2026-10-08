@@ -78,35 +78,6 @@
     return { rooms, counts, type, W, H, pairCount };
   };
 
-  /* DIORAMA BUBBLE (mock-up, diagnostic flag P.dioBubble = factor, 0/undefined = off). Only for a room classified Diorama. The BACKGROUND of the scene: the tiles OUTSIDE the room up to
-     factor x the equivalent radius of the room (r = sqrt(tiles / pi), measured from the centroid of the room), growing (4-neighbours) only across CLOSED borders: never across a room transition
-     (T.rp, an open door) or a used terrace gate (a ramp), at any depth. Void is never included. Returns { mask, t, tiles, r, R, bbox, need, edge } or null. t = 0 at the equivalent radius, 1 at the
-     limit of the bubble (how far toward the silhouette a tile is). edge = how the perimeter faces of the room end: toward the bubble, open (transition / ramp), void or map edge, closed but beyond R. */
-  T.bubble = function (RL, roomId, factor, P) {
-    const W = RL.W, H = RL.H, n = W * H, room = RL.room, h = RL.h, ty = T.classify(RL, P), o = ty.rooms.get(roomId);
-    if (!o || o.type !== T.DIORAMA || !(factor > 0)) return null;
-    gateByKey(RL, n);
-    let cnt = 0, sx = 0, sy = 0, x0 = W, y0 = H, x1 = -1, y1 = -1; const src = [];
-    for (let i = 0; i < n; i++) if (room[i] === roomId) { cnt++; const x = i % W, y = (i / W) | 0; sx += x + 0.5; sy += y + 0.5; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; src.push(i); }
-    const cx = sx / cnt, cy = sy / cnt, r = Math.sqrt(cnt / Math.PI), R = factor * r, mask = new Uint8Array(n), t = new Float32Array(n);
-    const open = (a, b) => { const k = E.rooms.key(a, b, n); return RL.rp.has(k) || RL.usage.usedGate.has(k); }; // a door or a ramp: the bubble never crosses it
-    const dc = (i) => Math.hypot((i % W) + 0.5 - cx, ((i / W) | 0) + 0.5 - cy);
-    const queue = src.slice(), edge = { faces: 0, bubble: 0, open: 0, void: 0, beyond: 0 }; let tiles = 0, bx0 = x0, by0 = y0, bx1 = x1, by1 = y1;
-    for (let q = 0; q < queue.length; q++) {
-      const a = queue[q], x = a % W, y = (a / W) | 0;
-      for (const [dx, dy] of N4) {
-        const nx = x + dx, ny = y + dy, inMap = nx >= 0 && ny >= 0 && nx < W && ny < H, j = ny * W + nx, fromRoom = room[a] === roomId;
-        if (fromRoom) { edge.faces++; if (!inMap || !(h[j] > 0)) { edge.void++; continue; } if (room[j] === roomId) { edge.faces--; continue; } if (open(a, j)) { edge.open++; continue; } }
-        if (!inMap || room[j] === roomId || !(h[j] > 0) || open(a, j)) continue;
-        if (dc(j) > R) { if (fromRoom) edge.beyond++; continue; }
-        if (fromRoom) edge.bubble++; if (mask[j]) continue;
-        mask[j] = 1; tiles++; queue.push(j);
-        t[j] = Math.max(0, Math.min(1, R > r ? (dc(j) - r) / (R - r) : 1)); if (nx < bx0) bx0 = nx; if (nx > bx1) bx1 = nx; if (ny < by0) by0 = ny; if (ny > by1) by1 = ny;
-      }
-    }
-    return { mask, t, tiles, roomTiles: cnt, r, R, factor, edge, bbox: { x0: bx0, y0: by0, x1: bx1 + 1, y1: by1 + 1 }, need: Math.max(x0 - bx0, bx1 - x1, y0 - by0, by1 - y1) + 1 };
-  };
-
   /* Cake rings of the whole map, reserved = Uint8Array(map) with the footprints of the ramps (end tiles and treads). Returns the ring tiles with their link and index. */
   function buildRings(RL, types, P, q, reserved) {
     const W = types.W, H = types.H, n = W * H, room = RL.room, ter = RL.ter, prm = T.paramsOf(P), K = P.subs, s = E.subHeight(P);
