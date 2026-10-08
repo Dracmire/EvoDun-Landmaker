@@ -35,3 +35,30 @@ Wall offsets (cake -5, diorama -20, ascension +0.5 in world units, tileSize 10):
 
 ## For Unity later
 `classify` and the ring construction port as they are (sets of tiles, BFS); the level assignment replaces the heights given to `BuildPlatformMesh`. The viewer's figures are acceptance numbers for the port.
+
+## Balancing the types with the generator's existing parameters (no new logic)
+User's decision: no Cake cap and no change in the classification; the types are evened out only with parameters that already exist. `node tools/room_types_table.js` reproduces the table measured in the viewer (real map, rooms on, Cake off):
+
+| Row | Rooms | Cake / Diorama / Ascension | Ramps | Main (% of the land) | Walkable | Edge problems |
+|---|---|---|---|---|---|---|
+| default | 32 | 31 / 0 / 1 | 140 | 73.8 % | 74.3 % | 1 |
+| core 100 | 32 | 24 / 3 / 5 | 83 | 69.0 % | 69.9 % | 3 |
+| minPlateau 250 | 32 | 28 / 3 / 1 | 82 | 78.6 % | 78.6 % | 0 |
+| 3 terraces + core 100 | 32 | 20 / 7 / 5 | 44 | 74.8 % | 76.5 % | 4 |
+| rRadius 5 | 88 | 62 / 7 / 19 | 156 | 61.1 % | 69.4 % | 8 |
+| 3 terraces + core 100 + rRadius 5 | 88 | 32 / 29 / 27 | 54 | 70.3 % | 72.0 % | 4 |
+| **Balanced types** (preset: + minPlateau 120) | 88 | 29 / 30 / 29 | 48 | 73.0 % | 74.7 % | 4 |
+| + minPlateau 250 | 88 | 25 / 33 / 30 | 43 | 73.5 % | 75.2 % | 4 |
+
+Reading (user's decision: the preset "Balanced types" includes minPlateau 120): minPlateau 120 improves BOTH things on top of 3 terraces + core 100 + radius 5: the types are evener (29 / 30 / 29, spread 1 against 5) and the main region grows 70.3 -> 73.0 % (walkable 72.0 -> 74.7 %), with 6 fewer ramps. minPlateau 250 connects a bit more (73.5 %) but unbalances the types again (25 / 33 / 30). rRadius 14-30 gives only Cake; gateThr 0.45 / gateMin 8 leaves 5 % connected (user's measurements).
+Balanced types (with minPlateau 120) + Cake: see `node tools/test_roomtypes.js` (info line). Before minPlateau 120 it was 31 bowls + 8 pyramids, 3850 ring tiles, 21 levels (9 without Cake).
+
+Viewer: Rooms group -> "Rooms preset" (Default / Balanced types / Custom; it only sets terraces, Min core size, Room radius and Min plateau), sliders Min core size 5-250 (default 20), Room radius 3-30 (default 9, `P.rRadius`, already a generator parameter) and Min plateau 1-300 (default 5; it was 1-20). The preset and the switches are saved in the optional `viewer` block of the manifest (`docs/pack-format.md`).
+
+## Phase 2, part A: the Diorama BACKGROUND bubble (mock-up, diagnostic flag `P.dioBubble`)
+User's design: Diorama rooms are the scene of a HADES-style composition (silhouettes, framing, flat colour); the bubble is the BACKGROUND. Their code: `skeletonMeshmakerGenV4.cs` (`Step3_ApplyVoronoi` 235, `VoronoiPartitioner` 527): weighted Voronoi, distance^2 / weight^2, weight 3 for Diorama (3x the radius), ~9 noise seeds per room; `PackPlatformsIntoRegion` (566): platforms with a connection stay fixed, the rest moves 40 % toward the centre; in V16.4 the bubble is `BuildPocketWall` (2970: convex hull + Chaikin 3 + 2 tiles).
+Mock-up (nothing is on by default, no UI control, set `window.__evo.P.dioBubble = 3` and recompute): with a Diorama room as the slice there are THREE planes: SCENE = the room (as today); BACKGROUND = the tiles outside the room up to `factor` x the equivalent radius (sqrt(tiles / pi), measured from the centroid of the room), growing 4-neighbour only across CLOSED borders, never across a room transition or a used terrace gate (a ramp), at any depth, never onto void; VEIL = the rest (as today).
+The background keeps the real relief (levels) but is painted as a backdrop, the same in Box, A and B: 3 flat tones by height band, darkened toward the silhouette in 5 nested steps (alpha 0.28 each, thresholds 0, 0.2, 0.4, 0.6, 0.8 of the way from the equivalent radius to the limit of the bubble), no tints, no route or room marks, not walkable (blocked, in no region), no marks accepted. The window grows to hold the bubble. Code: `E.roomTypes.bubble` (`src/roomtypes.js`), `S.bg / S.bgT / S.bgBands / S.openLoops / S.bubbleInfo` (`src/shape.js`), `bgRGB`, `bgCap` (`src/render.js`), info line in `src/ui.js`. Tests: `tools/test_roomtypes.js` (hand-made map with doors, a used gate, void and the radius; real map: three planes, not walkable, same scene).
+Measured with Balanced types (30 Diorama rooms of 88; the smallest bubbles 370 tiles, the largest 8191): coastal room 38 (256 tiles, 10 faces on void): bubble 1922 tiles, perimeter 138 faces: 99 toward the bubble (72 %), 29 open (21 %), 10 void (7 %); inner room 49 (251 tiles): bubble 2005 tiles, 96 faces: 78 toward the bubble (81 %), 18 open (19 %). The open faces are where the original fragment sits against the edge of the bubble (where it connects).
+NOT reproduced (generator work): moving platforms 40 % toward the centre (`PackPlatformsIntoRegion`), the weighted Voronoi with ~9 noise seeds per room (the bubble here is a plain disc clipped by closed borders), enlarged terrain with detail, the convex hull + Chaikin envelope of `BuildPocketWall`. To port to Unity: `T.bubble` (a BFS over tile sets with the door / ramp test) to choose the background tiles; the look (tones, silhouette steps) is art, not code.
+

@@ -75,6 +75,17 @@
   const AMBIGUOUS = 'rgba(255,0,255,0.75)';
   const VEIL_RGB = [10, 8, 24], VEIL_A = 0.6;               // one band: everything outside the slice
   const VEIL = `rgba(${VEIL_RGB},${VEIL_A})`;
+  /* BACKGROUND of a Diorama scene (mock-up): few flat tones by height band (3), darkened toward the silhouette in 5 steps (a step = a nested polygon at alpha 0.28, so the result is
+     1 - 0.72^k); the same in Box (per tile colour) and in A and B (tone under the cap + the nested polygons, smooth edges, no seams). Walls take the tone of their tile. */
+  const BG_TONES = [[70, 78, 106], [88, 96, 124], [108, 116, 142]], BG_SIL = [12, 10, 28], BG_STEPS = [0, 0.2, 0.4, 0.6, 0.8], BG_STEP_A = 0.28;
+  const bgBand = (S, h) => Math.min(2, Math.floor(3 * (h - S.levelH[0]) / (S.levelH[S.maxFine] - S.levelH[0] + 1e-9)));
+  const bgStep = (t) => { let k = 0; for (let j = 0; j < BG_STEPS.length; j++) if (t >= BG_STEPS[j]) k = j; return k; };
+  function bgRGB(S, i) { const f = 1 - Math.pow(1 - BG_STEP_A, bgStep(S.bgT[i]) + 1), c = BG_TONES[bgBand(S, S.levelH[S.fine[i]])]; return c.map((v, k) => v * (1 - f) + BG_SIL[k] * f); }
+  function bgCap(ctx, cam, S, ht, L) { // inside a cap pass (already clipped to the cap): the tone of the band of this level over the bubble, then the darkening steps
+    ctx.fillStyle = rgb(BG_TONES[bgBand(S, S.levelH[L])]); ctx.fill(bgPath(cam, S.bgBands[0], ht), 'evenodd');
+    for (let k = 0; k < BG_STEPS.length; k++) { if (!S.bgBands[k].length) continue; ctx.fillStyle = `rgba(${BG_SIL},${BG_STEP_A})`; ctx.fill(bgPath(cam, S.bgBands[k], ht), 'evenodd'); }
+  }
+  function bgPath(cam, loops, ht) { const p = new Path2D(); for (const loop of loops) { loop.forEach((q, k) => { const r = cam.p(q[0], q[1], ht); k ? p.lineTo(r[0], r[1]) : p.moveTo(r[0], r[1]); }); p.closePath(); } return p; }
   const veilMix = (c) => c.map((v, k) => v * (1 - VEIL_A) + VEIL_RGB[k] * VEIL_A); // same result as painting VEIL over c, without seams
   const BORDER = 'rgba(255,226,110,0.98)', BORDER_CASE = 'rgba(24,20,34,0.95)';
   const FACE = [[0, 0, 1, 0], [1, 0, 1, 1], [1, 1, 0, 1], [0, 1, 0, 0]]; // N E S W, same bits as S.border
@@ -106,7 +117,7 @@
   }
   /* Room borders: a line on every face between two rooms that blocks (orange); an open transition is a gap; the ones the tree uses are green. */
   const ROOM_COLORS = { 1: 'rgba(255,150,40,0.98)', 2: 'rgba(70,232,130,0.98)', 3: 'rgba(40,110,255,0.98)' }; // 3 = the warning outline of an edge-problem region (electric blue, dashed: white is the slice border at the map edge, cyan the passes, pink the route)
-  function roomFaces(list, S, cam, i, b, hh, o) { const k = S.roomKind[i * 4 + b]; if (k === 3 ? !o.edgeWarn : !o.roomBorders) return; const x = i % S.W, y = (i / S.W) | 0, f = FACE[b]; list.push([cam.p(x + f[0], y + f[1], hh), cam.p(x + f[2], y + f[3], hh), k]); }
+  function roomFaces(list, S, cam, i, b, hh, o) { if (S.bg && S.bg[i]) return; const k = S.roomKind[i * 4 + b]; if (k === 3 ? !o.edgeWarn : !o.roomBorders) return; const x = i % S.W, y = (i / S.W) | 0, f = FACE[b]; list.push([cam.p(x + f[0], y + f[1], hh), cam.p(x + f[2], y + f[3], hh), k]); }
   function strokeRoomFaces(ctx, list) {
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     const path = new Path2D(); for (const [p, q] of list) { path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]); }
@@ -120,7 +131,7 @@
   }
   function veilPath(cam, S, ht) { // the whole plane minus the slice, at cap height ht (even-odd)
     const vp = new Path2D(); vp.rect(-5e4, -5e4, 1e5, 1e5);
-    for (const loop of S.sliceLoops) {
+    for (const loop of S.openLoops || S.sliceLoops) {
       loop.forEach((p, k) => { const q = cam.p(p[0], p[1], ht); k ? vp.lineTo(q[0], q[1]) : vp.moveTo(q[0], q[1]); });
       vp.closePath();
     }
@@ -144,6 +155,7 @@
 
   function tileOverlay(S, P, o, i) {
     const out = [];
+    if (S.bg && S.bg[i]) return []; // backdrop: no tints, no marks
     if (o.regions && S.region[i] >= 0) {
       const r = S.region[i], hue = (r * 137.5) % 360;
       out.push(`hsla(${hue},75%,55%,0.42)`);
@@ -367,7 +379,7 @@
       const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = S.levelH[f], si = ST && ST.get(i), c = si ? stairColor(si) : levelColor(S, f, P);
       const isRamp = !!(si && si.rec);
       if (PICK) PKC = pcode(2, i);
-      const veiled = !!(o.veil && S.slice && !S.slice[i]), cc = veiled ? veilMix(c) : c;
+      const isBg = !!(S.bg && S.bg[i]), veiled = !!(o.veil && S.slice && !S.slice[i] && !isBg), cc = isBg ? bgRGB(S, i) : veiled ? veilMix(c) : c;
       if (isRamp) rampTile(ctx, cam, S, o, i, si.rec, ST, st);
       else for (const [dx, dy, ax, ay, bx, by] of dirs) {
         const nx = x + dx, ny = y + dy;
@@ -440,7 +452,7 @@
       const mkSeg = (a, b, dx, dy, len) => {
         const rnxy = cam.nrm(dy / len, -dx / len), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
         if (rnxy[1] <= 0.001) return null;
-        const seg = { a, b, rnx: rnxy[0], d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)), stair: null, own: tileIdx(mx - 0.2 * dy / len, my + 0.2 * dx / len) };
+        const seg = { a, b, rnx: rnxy[0], d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len) && !(S.bg && S.bg[tileIdx(mx - 0.2 * dy / len, my + 0.2 * dx / len)])), bgc: S.bg && S.bg[tileIdx(mx - 0.2 * dy / len, my + 0.2 * dx / len)] ? bgRGB(S, tileIdx(mx - 0.2 * dy / len, my + 0.2 * dx / len)) : null, stair: null, own: tileIdx(mx - 0.2 * dy / len, my + 0.2 * dx / len) };
         if (ST) { // a wall touching a carved tile (also the diagonal corner cells of B): part of the rigid footprint
           const inn = tileOf(mx - 0.2 * dy / len, my + 0.2 * dx / len), outn = tileOf(mx + 0.2 * dy / len, my - 0.2 * dx / len);
           if (inn && inn.rec) return null;                  // the ramp draws its own side walls
@@ -478,7 +490,7 @@
         let hbs = hb;
         if (s.clip) { hbs = [Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.a[0], s.a[1], s.clipT))), Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.b[0], s.b[1], s.clipT)))]; if (hbs[0] >= ht - 1e-6 && hbs[1] >= ht - 1e-6) continue; }
         if (PICK) PKC = pcode(2, Math.max(0, s.own));
-        wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], hbs, ht, s.stair ? stairColor(s.stair) : s.veiled ? cv : c, s.rnx, o, st);
+        wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], hbs, ht, s.stair ? stairColor(s.stair) : s.bgc ? s.bgc : s.veiled ? cv : c, s.rnx, o, st);
       }
       const path = new Path2D();
       for (const loop of loops) {
@@ -492,6 +504,7 @@
         const si = ST.get(i); if (!si) continue;
         tileQuad(ctx, cam, i % S.W, (i / S.W) | 0, ht); ctx.fillStyle = rgb(stairColor(si)); ctx.fill();
       }
+      if (S.bgBands) bgCap(ctx, cam, S, ht, L);
       for (const i of S.byLevel[L]) {
         const ov = tileOverlay(S, P, o, i);
         if (!ov.length) continue;
