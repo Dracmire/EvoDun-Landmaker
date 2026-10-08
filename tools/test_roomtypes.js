@@ -42,6 +42,15 @@ const rect = (room, ter, x0, y0, x1, y1) => ({ room, ter, x0, y0, x1, y1 });
   const c0 = T.classify(fake(12, 8, [rect(1, 0, 0, 0, 4, 7), rect(1, 1, 5, 0, 9, 7)], [[4, 3, 5, 3]]), { ...P0, cakeLayers: 0 });
   ok('cakeLayers 0 -> no Cake', c0.rooms.get(1).type !== T.CAKE);
 }
+{ // "Diorama never touches Diorama": hand-made rooms A (100 tiles) and B (50 tiles), both with 3 neighbours by transition
+  const build = (pairsAB) => fake(15, 12, [rect(1, 0, 0, 0, 9, 9), rect(2, 0, 10, 0, 14, 9), rect(3, 0, 0, 10, 4, 11), rect(4, 0, 5, 10, 9, 11), rect(5, 0, 10, 10, 11, 11), rect(6, 0, 12, 10, 14, 11)], [],
+    [...Array.from({ length: pairsAB }, (_, k) => [9, 1 + k, 10, 1 + k]), [2, 9, 2, 10], [7, 9, 7, 10], [10, 9, 10, 10], [13, 9, 13, 10]]);
+  const c3 = T.classify(build(3), P0), c2 = T.classify(build(2), P0), cOff = T.classify(build(3), { ...P0, dioNoTouch: false });
+  ok('D-D: A (100 tiles) and B (50) are both Diorama by the V16.4 rule, joined by 3 transition pairs: the bigger stays, the smaller becomes Ascension', c3.rooms.get(1).type === T.DIORAMA && c3.rooms.get(2).type === T.ASCENSION && c3.rooms.get(2).demoted === true && c3.counts.dioDemoted === 1 && c3.counts.dioDemotedTiles === 50, JSON.stringify(c3.counts));
+  ok('D-D: joined by only 2 pairs they are not "connected by walking": both stay Diorama', c2.rooms.get(1).type === T.DIORAMA && c2.rooms.get(2).type === T.DIORAMA && c2.counts.dioDemoted === 0);
+  ok('D-D off (P.dioNoTouch false): the plain V16.4 rule, both Diorama', cOff.rooms.get(1).type === T.DIORAMA && cOff.rooms.get(2).type === T.DIORAMA);
+  ok('D-D: a Diorama that only touches a demoted one stays (greedy by size)', (() => { const RL = build(3); const cc = T.classify(RL, P0); return cc.rooms.get(1).type === T.DIORAMA; })());
+}
 /* ---- rings of a hand-made Cake ---- */
 const mkq = (RL, sub) => ({ sub: sub || new Int8Array(RL.W * RL.H), center: undefined, void: null });
 const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.buildRings(RL, ty, P, mkq(RL, sub), reserved || new Uint8Array(RL.W * RL.H)); const by = new Map(); for (const [t, c] of R.claim) { if (!by.has(c.k)) by.set(c.k, []); by.get(c.k).push(t); } return { R, by, ty }; };
@@ -104,7 +113,7 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
   const base = run(P0), cake = run({ ...P0, cake: true });
   const c = base.types.counts;
   ok('5 terraces: 31 Cake, 0 Diorama, 1 Ascension of 32 rooms (the user\'s figures)', c.cake === 31 && c.diorama === 0 && c.ascension === 1 && base.types.rooms.size === 32, JSON.stringify(c));
-  { const c3 = run({ ...P0, terraces: 3 }).types.counts, c2 = run({ ...P0, terraces: 2 }).types.counts;
+  { const c3 = run({ ...P0, terraces: 3, dioNoTouch: false }).types.counts, c2 = run({ ...P0, terraces: 2, dioNoTouch: false }).types.counts;
     console.log(`  info: 3 terraces ${c3.cake}/${c3.diorama}/${c3.ascension} (expected 27/5/0), 2 terraces ${c2.cake}/${c2.diorama}/${c2.ascension} (expected 26/4/2)`);
     ok('3 and 2 terraces: 27/5/0 and 26/4/2 (the expected values: used gates as terrace edges)', c3.cake === 27 && c3.diorama === 5 && c2.cake === 26 && c2.diorama === 4 && c2.ascension === 2, JSON.stringify([c3, c2])); }
   ok('Cake off: no cake info, no ring tiles, classification still there', base.cake === undefined && base.ringTile === undefined && !!base.types && !!base.roomType);
@@ -164,9 +173,10 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
     console.log(`  info: 5 terraces, ramps buried by the rings: feet enclosed ${m0.footEnclosed} -> ${m1.footEnclosed}, heads enclosed ${m0.headEnclosed} -> ${m1.headEnclosed}; ring tiles ${nb.cake.tiles} -> ${cake.cake.tiles} (${nb.cake.tiles - cake.cake.tiles} lost, ${cake.cake.corridor} corridor tiles reserved)`); }
   { // the user's table, measured in the viewer (types, ramps, rooms, main % of the land), reproduced by tools/room_types_table.js
     const T2 = require('./room_types_table.js'), want = [['31/0/1', 140, 32, 74], ['24/3/5', 83, 32, 69], ['28/3/1', 82, 32, 79], ['20/7/5', 44, 32, 75], ['62/7/19', 156, 88, 61], ['32/29/27', 54, 88, 70]];
-    want.forEach((w, k) => { const r = T2.run(mk, T2.ROWS[k][1]); ok(`table row ${k + 1} "${T2.ROWS[k][0]}": types ${w[0]}, ${w[1]} ramps, ${w[2]} rooms, main ${w[3]} % of the land`, `${r.c.cake}/${r.c.diorama}/${r.c.ascension}` === w[0] && r.ramps === w[1] && r.rooms === w[2] && Math.round(r.main / r.land * 100) === w[3], `${r.c.cake}/${r.c.diorama}/${r.c.ascension} ${r.ramps} ${r.rooms} ${(r.main / r.land * 100).toFixed(1)}`); });
+    want.forEach((w, k) => { const r = T2.run(mk, T2.ROWS[k][1], { dioNoTouch: false }); ok(`table row ${k + 1} "${T2.ROWS[k][0]}": types ${w[0]}, ${w[1]} ramps, ${w[2]} rooms, main ${w[3]} % of the land`, `${r.c.cake}/${r.c.diorama}/${r.c.ascension}` === w[0] && r.ramps === w[1] && r.rooms === w[2] && Math.round(r.main / r.land * 100) === w[3], `${r.c.cake}/${r.c.diorama}/${r.c.ascension} ${r.ramps} ${r.rooms} ${(r.main / r.land * 100).toFixed(1)}`); });
     const PB = { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 }, b0 = run(PB), b1 = run({ ...PB, cake: true }), cb = b0.types.counts;
-    ok('Balanced types preset (3 terraces, core 100, radius 5, minPlateau 120): 88 rooms, 29 Cake / 30 Diorama / 29 Ascension, 48 ramps', b0.types.rooms.size === 88 && cb.cake === 29 && cb.diorama === 30 && cb.ascension === 29 && b0.stairs.length === 48, JSON.stringify([cb, b0.stairs.length]));
+    ok('Balanced types preset (3 terraces, core 100, radius 5, minPlateau 120): 88 rooms, 29 Cake / 18 Diorama / 41 Ascension (rule D-D on: 12 Dioramas of 30 demoted, 2452 tiles), 48 ramps', b0.types.rooms.size === 88 && cb.cake === 29 && cb.diorama === 18 && cb.ascension === 41 && cb.dioDemoted === 12 && cb.dioDemotedTiles === 2452 && b0.stairs.length === 48, JSON.stringify([cb, b0.stairs.length]));
+    { const off = run({ ...PB, dioNoTouch: false }).types.counts; ok('rule D-D off: the plain V16.4 counts 29 / 30 / 29, nothing demoted', off.cake === 29 && off.diorama === 30 && off.ascension === 29 && off.dioDemoted === 0, JSON.stringify(off)); }
     check('Balanced types preset (3 terraces, core 100, radius 5, minPlateau 120)', b0, b1);
     console.log(`  info: Balanced types + Cake: ${b1.cake.down} bowls + ${b1.cake.up} pyramids, ${b1.cake.flat} flat links, ${b1.cake.tiles} ring tiles, ${b1.cake.levelsAdded} levels added (${b0.maxFine + 1} -> ${b1.maxFine + 1})`);
     const d9 = run({ ...P0, rRadius: 9 }); ok('rRadius 9 is the default: the same levels and tiles as without the parameter', d9.fine.every((v, i) => v === base.fine[i]) && JSON.stringify(d9.levelH) === JSON.stringify(base.levelH));

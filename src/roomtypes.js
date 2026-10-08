@@ -48,8 +48,9 @@
       const o = get(r), lk = lo + ',' + hi; let l = o.links.get(lk); if (!l) o.links.set(lk, l = { low: lo, high: hi, pos: [] });
       l.pos.push(ter[a] === lo ? a : b);
     }
-    // neighbouring rooms by room transitions (all valid ones, used or not)
-    for (const k of RL.rp) { const a = (k / n) | 0, b = k % n, ra = room[a], rb = room[b]; if (ra > 0 && rb > 0 && ra !== rb) { get(ra).neigh.add(rb); get(rb).neigh.add(ra); } }
+    // neighbouring rooms by room transitions (all valid ones, used or not); pairCount = how many transition PAIRS join two rooms (key 'low,high')
+    const pairCount = new Map();
+    for (const k of RL.rp) { const a = (k / n) | 0, b = k % n, ra = room[a], rb = room[b]; if (ra > 0 && rb > 0 && ra !== rb) { get(ra).neigh.add(rb); get(rb).neigh.add(ra); const pk = Math.min(ra, rb) + ',' + Math.max(ra, rb); pairCount.set(pk, (pairCount.get(pk) || 0) + 1); } }
     const counts = { cake: 0, diorama: 0, ascension: 0, bowl: 0, pyramid: 0, links: 0 };
     for (const o of rooms.values()) {
       const terr = [...o.terraces].sort((p, q) => p - q); o.terraceList = terr; o.minTer = terr[0];
@@ -63,10 +64,18 @@
           l.core = l.down ? l.low : l.high; counts.links++; l.down ? counts.bowl++ : counts.pyramid++;
         }
       }
-      counts[o.type === T.CAKE ? 'cake' : o.type === T.DIORAMA ? 'diorama' : 'ascension']++;
     }
+    /* RULE "Diorama never touches Diorama" (user's decision; param P.dioNoTouch, default ON; false = the plain V16.4 rule): after the V16.4 rule, if two Dioramas are connected by walking
+       (at least 3 open room-transition pairs between them), the BIGGEST stays and the others become Ascension (greedy by size, then by id: a Diorama that only touches a demoted one stays). */
+    counts.dioDemoted = 0; counts.dioDemotedTiles = 0;
+    if (P.dioNoTouch !== false) {
+      const dio = [...rooms.values()].filter((o) => o.type === T.DIORAMA).sort((p, q) => q.tiles - p.tiles || p.id - q.id), kept = new Set();
+      const minPairs = P.dioTouchMin === undefined ? 3 : P.dioTouchMin, joined = (a, b) => (pairCount.get(Math.min(a, b) + ',' + Math.max(a, b)) || 0) >= minPairs; // 'connected by walking' = at least 3 open transition pairs (the minimum size of a transition group; it reproduces the user's figures)
+      for (const o of dio) { if ([...o.neigh].some((id) => kept.has(id) && joined(o.id, id))) { o.type = T.ASCENSION; o.demoted = true; counts.dioDemoted++; counts.dioDemotedTiles += o.tiles; } else kept.add(o.id); }
+    }
+    for (const o of rooms.values()) counts[o.type === T.CAKE ? 'cake' : o.type === T.DIORAMA ? 'diorama' : 'ascension']++;
     const type = new Uint8Array(n); for (let i = 0; i < n; i++) if (room[i] > 0) type[i] = rooms.get(room[i]).type;
-    return { rooms, counts, type, W, H };
+    return { rooms, counts, type, W, H, pairCount };
   };
 
   /* DIORAMA BUBBLE (mock-up, diagnostic flag P.dioBubble = factor, 0/undefined = off). Only for a room classified Diorama. The BACKGROUND of the scene: the tiles OUTSIDE the room up to

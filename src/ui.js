@@ -471,7 +471,7 @@
   function typesText() {
     const t = S.types; if (!t || !(P.cake || O.typeTint)) return ''; // shown with the Cake switch or the type tint on (the canvas size must not change otherwise)
     const c = t.counts, k = S.cake;
-    let x = `<br><b>Room types</b> (V16.4 rule, neighbours instead of lobby platforms): ${c.cake} Cake (${c.bowl} bowls, ${c.pyramid} pyramids) · ${c.diorama} Diorama · ${c.ascension} Ascension of ${t.rooms.size} rooms`;
+    let x = `<br><b>Room types</b> (V16.4 rule, neighbours instead of lobby platforms): ${c.cake} Cake (${c.bowl} bowls, ${c.pyramid} pyramids) · ${c.diorama} Diorama · ${c.ascension} Ascension of ${t.rooms.size} rooms` + (c.dioDemoted ? ` (rule "Diorama never touches Diorama": ${c.dioDemoted} Dioramas of ${c.diorama + c.dioDemoted} became Ascension, ${c.dioDemotedTiles} tiles)` : '');
     if (P.cake && k) x += ` · Cake rings ON: ${k.down} bowl + ${k.up} pyramid links built, ${k.flat} links without rings, ${k.tiles} ring tiles, ${k.levelsAdded} levels added` + (k.conflicts ? `, ${k.conflicts} tiles claimed twice` : '');
     return x;
   }
