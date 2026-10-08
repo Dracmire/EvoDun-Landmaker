@@ -17,7 +17,7 @@
 (function (E) {
   const P_ = E.pocket = {};
   const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-  P_.defaults = { yaw: 45, factor: 3, shift: 1, seedArea: 80, seedMin: 30, seedMax: 48, margin: 0.05, pathWidth: 2, mergeGap: 3, rampLen: 3, pondMax: 0.5, arch: 'hill', ph: 2.5, sepMin: 2, sepK: 0.6, lakeOpen: 2.2, lakeDrop: 1.2, shoreUp: 0.4, rockW: 0.3 };
+  P_.defaults = { yaw: 45, factor: 3, shift: 1, seedArea: 80, seedMin: 30, seedMax: 48, margin: 0.05, pathWidth: 2, mergeGap: 3, rampLen: 3, pondMax: 0.5, arch: 'hill', ph: 2.5, sepMin: 2, sepK: 0.6, lakeOpen: 2.2, lakeDrop: 1.2, shoreUp: 0.4, rockW: 0.3, Rmin: 14 };
   // mulberry32: a small deterministic PRNG
   const rng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
   const seedOf = (ids) => { let h = 2166136261; for (const id of ids) { h ^= id + 0x9e3779b9; h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; };
@@ -25,7 +25,7 @@
   P_.windowOf = function (RL, o, opts) {
     const W = RL.W, H = RL.H, fl = []; let sx = 0, sy = 0; for (let i = 0; i < W * H; i++) if (RL.room[i] === o.id) { fl.push(i); sx += (i % W) + 0.5; sy += ((i / W) | 0) + 0.5; }
     if (!fl.length) return null; opts = Object.assign({}, P_.defaults, opts); const c = fl.length, cx = sx / c, cy = sy / c, r = Math.sqrt(c / Math.PI), yw = opts.yaw * Math.PI / 180, dx = cx + opts.shift * r * Math.sin(yw), dy = cy + opts.shift * r * Math.cos(yw);
-    let R = opts.factor * r; for (const i of fl) R = Math.max(R, Math.hypot((i % W) + 0.5 - dx, ((i / W) | 0) + 0.5 - dy) + 0.71);
+    let R = Math.max(opts.factor * r, opts.Rmin); for (const i of fl) R = Math.max(R, Math.hypot((i % W) + 0.5 - dx, ((i / W) | 0) + 0.5 - dy) + 0.71);
     return { x0: Math.floor(dx - R) - 3, y0: Math.floor(dy - R) - 3, x1: Math.ceil(dx + R) + 3, y1: Math.ceil(dy + R) + 3 };
   };
   /* REFRAME: the world shape (whole map) is copied into the window [x0, x1) x [y0, y1) (map coordinates, possibly past the map: void there): every per-tile array is copied at an offset, the ramps that do not lie wholly in the window are
@@ -64,7 +64,7 @@
     const fl = []; let sx = 0, sy = 0; for (let i = 0; i < n; i++) if (frag[i]) { fl.push(i); sx += (i % W) + 0.5; sy += ((i / W) | 0) + 0.5; }
     const cnt = fl.length, cx = sx / cnt, cy = sy / cnt, r = Math.sqrt(cnt / Math.PI), dc = [cx + o.shift * r * u[0], cy + o.shift * r * u[1]], sep = Math.max(o.sepMin, o.sepK * r);
     const px = (i) => (i % W) + 0.5, py = (i) => ((i / W) | 0) + 0.5;
-    let R = o.factor * r, grown = false; for (const i of fl) { const d = Math.hypot(px(i) - dc[0], py(i) - dc[1]) + 0.71; if (d > R) { R = d; grown = true; } } // no fragment tile outside the disc: R grows to hold them all
+    let R = Math.max(o.factor * r, o.Rmin), grown = false; for (const i of fl) { const d = Math.hypot(px(i) - dc[0], py(i) - dc[1]) + 0.71; if (d > R) { R = d; grown = true; } } // no fragment tile outside the disc: R grows to hold them all
     const inDisc = (i) => Math.hypot(px(i) - dc[0], py(i) - dc[1]) <= R, sOf = (x, y) => ((x - cx) * u[0] + (y - cy) * u[1]) / r; // s: position along the camera axis in units of r (+ = toward the camera)
     const role = new Uint8Array(n), height = new Float32Array(n).fill(NaN), cell = new Int16Array(n).fill(-1), rand = rng(seedOf(ids));
     for (const i of fl) { role[i] = 1; height[i] = heightOf(i); }
@@ -146,17 +146,21 @@
        and a short ramp of rampLen tiles; island: a bridge at the fragment's height over the void ring that ends at the rock ring; drop: a ridge (width 1) at the fragment's height all the way to the edge. */
     const fixedOf = (t) => (t.dx ? t.a % W : (t.a / W) | 0), alongOf = (t) => (t.dx ? (t.a / W) | 0 : t.a % W);
     const sortKey = (e) => [e.dx ? e.dx + 5 : e.dy + 20, fixedOf(e), alongOf(e)], sorted = exits.slice().sort((p, q) => { const a = sortKey(p), b = sortKey(q); return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]; });
-    let runs = [];
-    for (const e of sorted) { const last = runs[runs.length - 1], lf = last && last.faces[last.faces.length - 1]; if (last && last.dx === e.dx && last.dy === e.dy && fixedOf(lf) === fixedOf(e) && alongOf(e) === alongOf(lf) + 1) last.faces.push(e); else runs.push({ dx: e.dx, dy: e.dy, faces: [e] }); }
-    const nRuns0 = runs.length, par = runs.map((_, i) => i), find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+    /* ONE path per neighbouring room: the runs of faces are made (and the parallel ones less than mergeGap apart merged) for each neighbour apart, and only the LONGEST run of that neighbour gets a path */
     const span = (ru) => [Math.min(...ru.faces.map(alongOf)), Math.max(...ru.faces.map(alongOf))];
-    for (let a = 0; a < runs.length; a++) for (let b = a + 1; b < runs.length; b++) {
-      if (runs[a].dx !== runs[b].dx || runs[a].dy !== runs[b].dy || Math.abs(fixedOf(runs[a].faces[0]) - fixedOf(runs[b].faces[0])) >= o.mergeGap) continue;
-      const [a0, a1] = span(runs[a]), [b0, b1] = span(runs[b]), gap = Math.max(a0, b0) - Math.min(a1, b1) - 1; if (gap < o.mergeGap) par[find(a)] = find(b);
+    let runs = [], nRuns0 = 0; const byNb = new Map(); for (const e of sorted) { const k = e.nb === undefined ? 0 : e.nb; if (!byNb.has(k)) byNb.set(k, []); byNb.get(k).push(e); }
+    for (const k of [...byNb.keys()].sort((a, b) => a - b)) {
+      const rs = []; for (const e of byNb.get(k)) { const last = rs[rs.length - 1], lf = last && last.faces[last.faces.length - 1]; if (last && last.dx === e.dx && last.dy === e.dy && fixedOf(lf) === fixedOf(e) && alongOf(e) === alongOf(lf) + 1) last.faces.push(e); else rs.push({ dx: e.dx, dy: e.dy, faces: [e], nb: k }); }
+      nRuns0 += rs.length; const par = rs.map((_, i) => i), find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+      for (let a = 0; a < rs.length; a++) for (let b = a + 1; b < rs.length; b++) {
+        if (rs[a].dx !== rs[b].dx || rs[a].dy !== rs[b].dy || Math.abs(fixedOf(rs[a].faces[0]) - fixedOf(rs[b].faces[0])) >= o.mergeGap) continue;
+        const [a0, a1] = span(rs[a]), [b0, b1] = span(rs[b]), gap = Math.max(a0, b0) - Math.min(a1, b1) - 1; if (gap < o.mergeGap) par[find(a)] = find(b);
+      }
+      const groups = new Map(); rs.forEach((ru, i) => { const g = find(i); if (!groups.has(g)) groups.set(g, { dx: ru.dx, dy: ru.dy, faces: [], nb: k }); groups.get(g).faces.push(...ru.faces); });
+      const merged = [...groups.values()].map((ru) => { ru.faces.sort((p, q) => alongOf(p) - alongOf(q) || fixedOf(p) - fixedOf(q)); return ru; });
+      let best = merged[0]; for (const m of merged) if (m.faces.length > best.faces.length) best = m; if (best) runs.push(best);
     }
-    const groups = new Map(); runs.forEach((ru, i) => { const k = find(i); if (!groups.has(k)) groups.set(k, { dx: ru.dx, dy: ru.dy, faces: [] }); groups.get(k).faces.push(...ru.faces); });
-    runs = [...groups.values()].map((ru) => { ru.faces.sort((p, q) => alongOf(p) - alongOf(q) || fixedOf(p) - fixedOf(q)); return ru; });
-    let reached = 0, blocked = 0, bent = 0; const pathTiles = new Set(), pw = arch === 'drop' ? 1 : o.pathWidth;
+    let reached = 0, blocked = 0, bent = 0; const pathTiles = new Set(), pw = o.pathWidth, role0 = Uint8Array.from(role), height0 = Float32Array.from(height);
     const trace = (dx, dy, from) => { // straight from `from` (outside the fragment) to the edge of the disc; null if the fragment is in the way
       const out = []; let x = from[0], y = from[1];
       for (let m = 0; m < 4 * R + 8; m++) { if (x < 0 || y < 0 || x >= W || y >= H) return out; const j = y * W + x; if (frag[j]) return null; if (!inDisc(j)) return out; out.push(j); x += dx; y += dy; }
@@ -172,15 +176,23 @@
         if (!path) { for (const [dx, dy] of [[f.dy, f.dx], [-f.dy, -f.dx], [-f.dx, -f.dy]]) { path = trace(dx, dy, [x0, y0]); if (path) { run.bent = true; break; } } }
         if (!path) { if (c === 0) run.reached = false; continue; }
         let sp = 0; // tiles at the fragment's height
-        if (arch === 'drop') sp = path.length;
+        let descent = false;
+        if (arch === 'drop') { while (sp < path.length && role[path[sp]] === 0) sp++; sp = Math.min(path.length, Math.max(1, Math.min(sp + 1, Math.ceil(sep) + 1))); descent = true; }
         else if (arch === 'island') { while (sp < path.length && role[path[sp]] === 0) sp++; sp = Math.min(path.length, Math.max(1, Math.min(sp + 1, Math.ceil(sep) + 1))); path = path.slice(0, sp); }
         else if (arch === 'lake' || arch === 'falls') { while (sp < path.length && role[path[sp]] === 4) sp++; }
-        const m = Math.min(o.rampLen, path.length - sp - 1), hT = path.length > sp + m ? height[path[sp + m]] : height[path[path.length - 1]];
+        const m = descent ? Math.max(0, path.length - sp - 1) : Math.min(o.rampLen, path.length - sp - 1), hT = path.length > sp + m ? height[path[sp + m]] : height[path[path.length - 1]];
         for (let t = 0; t < path.length; t++) { const j = path[t]; if (t < sp) height[j] = h0; else if (t < sp + m) height[j] = h0 + (hT - h0) * (t - sp + 1) / (m + 1); role[j] = 3; cell[j] = -1; pathTiles.add(j); }
         run.paths.push(path); run.length = Math.max(run.length, path.length); run.span = Math.max(run.span, sp);
       }
       run.reached ? reached++ : blocked++; if (run.bent) bent++;
     }
+    // short pieces of path (< 3 tiles) between water, or after the water at the end of the path, are removed (lake, falls)
+    let stubsRemoved = 0;
+    if (arch === 'lake' || arch === 'falls') for (const run of runs) { run.tails = []; for (const p of run.paths) {
+      const w = p.map((t) => role0[t] === 4); let t = 0, tail = 0;
+      while (t < p.length) { if (w[t]) { t++; continue; } let e = t; while (e < p.length && !w[e]) e++; const waterBefore = t > 0 && w[t - 1];
+        if (waterBefore && e - t < 3) { for (let q = t; q < e; q++) { role[p[q]] = role0[p[q]]; height[p[q]] = height0[p[q]]; cell[p[q]] = cell[p[q]] < 0 ? 0 : cell[p[q]]; pathTiles.delete(p[q]); } stubsRemoved++; } else if (e === p.length) tail = e - t; t = e; }
+      run.tails.push(tail); } }
     // POND (hill): the lowest cell of the front (lowest offset, then the nearest to the camera) that still has decoration tiles; at most pondMax of the fragment's tiles, the ones nearest to its seed
     let pondCell = -1, pondTiles = 0;
     if (arch === 'hill') {
@@ -192,7 +204,7 @@
     }
     let decoTiles = 0, roadTiles = 0, backTiles = 0, waterTiles = 0, voidTiles = 0; for (let i = 0; i < n; i++) { if (role[i] === 2 || role[i] === 4) { decoTiles++; if (role[i] === 4) waterTiles++; if (sOf(px(i), py(i)) < sf) backTiles++; } else if (role[i] === 3) roadTiles++; }
     for (const i of disc) if (role[i] === 0) voidTiles++;
-    return { disc: { cx: dc[0], cy: dc[1], R, r, centroid: [cx, cy], u, grown, sep }, role, height, decoHeight, cell, seeds, pondCell, exits: runs, waterH, shoreH, info: { arch, fragTiles: cnt, decoTiles, pondTiles, pondMax: Math.floor(o.pondMax * cnt), waterTiles, voidTiles, channelTiles, roadTiles, exitRuns: runs.length, exitRunsBeforeMerge: nRuns0, exitFaces: exits.length, exitsReached: reached, exitsBlocked: blocked, exitsBent: bent, capped, seeds: seeds.length, backDepth: (sf - sBack) * r, backTiles, discGrown: grown, sep, pocketTiles: cnt + decoTiles + roadTiles } };
+    return { disc: { cx: dc[0], cy: dc[1], R, r, centroid: [cx, cy], u, grown, sep }, role, height, decoHeight, cell, seeds, pondCell, exits: runs, waterH, shoreH, info: { arch, fragTiles: cnt, decoTiles, pondTiles, pondMax: Math.floor(o.pondMax * cnt), waterTiles, voidTiles, channelTiles, stubsRemoved, roadTiles, exitRuns: runs.length, exitRunsBeforeMerge: nRuns0, exitFaces: exits.length, exitsReached: reached, exitsBlocked: blocked, exitsBent: bent, capped, seeds: seeds.length, backDepth: (sf - sBack) * r, backTiles, discGrown: grown, sep, pocketTiles: cnt + decoTiles + roadTiles } };
   };
 
   /* Floors of a fragment (user's criterion): a terrace of the room with >= 20 walkable tiles (valid walkable region: no forbidden margin, no void, no ramp footprint) is a floor; two floors joined by a ramp inside the room
