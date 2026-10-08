@@ -26,8 +26,9 @@
     const base = m.bridge ? (() => { const lo = at(m.ter, K - 1), hi = at(m.ter + 1, 0); return lo.map((v, k) => v + (hi[k] - v) * m.frac); })() : at(m.ter, m.sub); // a bridge is between two terraces
     if (!m.deco) return base;
     // pocket decoration: beyond the palette it keeps going (darker below the lowest terrace, lighter above the highest), and it is a little desaturated so it does not read as walkable
-    let c = base; if (m.ext) c = m.ext < 0 ? c.map((v) => v * Math.max(0.45, 1 + 0.2 * m.ext)) : c.map((v) => v + (255 - v) * Math.min(0.35, 0.1 * m.ext));
-    const lum = 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]; return c.map((v) => (v + (lum - v) * 0.45) * 0.9);
+    let c = base; if (m.ext && m.ext < 0) c = c.map((v) => v * Math.max(0.45, 1 + 0.2 * m.ext)); // beyond the palette it keeps going darker below the lowest terrace; above the highest it does not get lighter
+    const lum = 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]; c = c.map((v) => (v + (lum - v) * 0.6) * 0.8); // much less saturated and darker than the fragment
+    const mx = Math.max(c[0], c[1], c[2]); return mx > 150 ? c.map((v) => v * 150 / mx) : c; // the backdrop never gets close to white
   }
   const OUT = 'rgba(24,20,34,0.92)';
 

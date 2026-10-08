@@ -223,12 +223,12 @@
   E.shape = function (full, P, spec) {
     const RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: the global tree gives the gates, sub-terraces are only visual
     if (RL && spec && spec.rooms && spec.rooms.length) spec = Object.assign({}, spec, { roomMap: RL.room });
-    let pocketIds = null, seedIds = null, padNeed = 0; // POCKET (Pocket view, P.pocket): a Diorama room is drawn as its pocket. The shape is the WHOLE map shape (no slice, so the gates, ramps and walkable regions are the world's, with no patch connections)
+    let pocketIds = null, seedIds = null, pocketWin = null; // POCKET (Pocket view, P.pocket): a Diorama room is drawn as its pocket. The shape is the WHOLE map shape (no slice, so the gates, ramps and walkable regions are the world's, with no patch connections)
     if (RL && E.pocket && P.pocket && spec && spec.rooms && spec.rooms.length === 1) { // and the pocket then keeps only the fragment and what surrounds it
       const o = E.roomTypes.classify(RL, P).rooms.get(spec.rooms[0]);
       if (o && o.type === E.roomTypes.DIORAMA) {
         pocketIds = [o.id]; seedIds = [o.id]; spec = null;
-        padNeed = E.pocket.padNeeded(RL, o); // the disc leaves the map: the world shape is embedded in a bigger grid of void (pseudo-space) before the pocket is made
+        pocketWin = E.pocket.windowOf(RL, o); // the world shape is reframed to the window of the disc (it may extend past the map: void) before the pocket is made
       }
     }
     const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
@@ -334,7 +334,7 @@
         S.dioBits = db; S.roomBitsDio = bd;
       }
     }
-    if (pocketIds) { if (padNeed > 0) E.pocket.embed(S, padNeed); E.pocket.apply(S, P, RL, pocketIds, { ids: seedIds }); } // the pocket of a Diorama: the fragment stays, the surroundings change
+    if (pocketIds) { if (pocketWin) E.pocket.reframe(S, pocketWin); E.pocket.apply(S, P, RL, pocketIds, { ids: seedIds }); } // the pocket of a Diorama: the fragment stays, the surroundings change
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
     S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
