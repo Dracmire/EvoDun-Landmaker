@@ -2081,7 +2081,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 (function (E) {
   const P_ = E.pocket = {};
   const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-  P_.defaults = { yaw: 45, factor: 3, shift: 1, seedArea: 80, seedMin: 30, seedMax: 48, margin: 0.05, pathWidth: 2, mergeGap: 3, rampLen: 3, pondMax: 0.5 };
+  P_.defaults = { yaw: 45, factor: 3, shift: 1, seedArea: 80, seedMin: 30, seedMax: 48, margin: 0.05, pathWidth: 2, mergeGap: 3, rampLen: 3, pondMax: 0.5, arch: 'hill', ph: 2.5, sepMin: 2, sepK: 0.6, lakeOpen: 2.2, lakeDrop: 1.2, shoreUp: 0.4, rockW: 0.3, Rmin: 14 };
   // mulberry32: a small deterministic PRNG
   const rng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
   const seedOf = (ids) => { let h = 2166136261; for (const id of ids) { h ^= id + 0x9e3779b9; h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; };
@@ -2089,7 +2089,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   P_.windowOf = function (RL, o, opts) {
     const W = RL.W, H = RL.H, fl = []; let sx = 0, sy = 0; for (let i = 0; i < W * H; i++) if (RL.room[i] === o.id) { fl.push(i); sx += (i % W) + 0.5; sy += ((i / W) | 0) + 0.5; }
     if (!fl.length) return null; opts = Object.assign({}, P_.defaults, opts); const c = fl.length, cx = sx / c, cy = sy / c, r = Math.sqrt(c / Math.PI), yw = opts.yaw * Math.PI / 180, dx = cx + opts.shift * r * Math.sin(yw), dy = cy + opts.shift * r * Math.cos(yw);
-    let R = opts.factor * r; for (const i of fl) R = Math.max(R, Math.hypot((i % W) + 0.5 - dx, ((i / W) | 0) + 0.5 - dy) + 0.71);
+    let R = Math.max(opts.factor * r, opts.Rmin); for (const i of fl) R = Math.max(R, Math.hypot((i % W) + 0.5 - dx, ((i / W) | 0) + 0.5 - dy) + 0.71);
     return { x0: Math.floor(dx - R) - 3, y0: Math.floor(dy - R) - 3, x1: Math.ceil(dx + R) + 3, y1: Math.ceil(dy + R) + 3 };
   };
   /* REFRAME: the world shape (whole map) is copied into the window [x0, x1) x [y0, y1) (map coordinates, possibly past the map: void there): every per-tile array is copied at an offset, the ramps that do not lie wholly in the window are
@@ -2113,21 +2113,29 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     S.W = w; S.H = h; S.n = n2; S.ox = x0; S.oy = y0; return S;
   };
   /* PLAN (pure): W, H window; frag Uint8Array (1 = fragment tile); heightOf(i) height of a fragment tile; exits [{ a, dx, dy }] (a = fragment tile, (dx, dy) = outward direction);
-     opts { ids, yaw, factor, shift, jump (height of one terrace), sub (height of one sub-level), ... see defaults }. Returns { disc, role, height, cell, seeds, exits, info }.
-     role: 0 none, 1 fragment, 2 decoration, 3 path (on the decoration), 4 pond. */
+     opts { ids, yaw, factor, shift, jump (height of one terrace), sub (height of one sub-level), arch, ph (Pocket height), lowH, highH, highMask, ... see defaults }. Returns { disc, role, height, decoHeight, cell, seeds, exits, info }.
+     role: 0 none (void), 1 fragment, 2 decoration, 3 path / causeway / bridge / ridge, 4 water.
+     FRAMING ARCHETYPES (user's design; the pocket is framing, not terrain: what surrounds the fragment must separate it). Separation s = max(2, 0.6 r) tiles. Offsets of the decoration are in terraces x jump x ph (Pocket height); the fragment keeps its heights.
+       hill   (Cerro):   the fragment is the high point; front bands -1, -2, -3 by distance, sides -1, a small pond (<= 50 % of the fragment), backdrop +1..+3 behind.
+       lake   (Lago):    a water ring of width s around the fragment, open to the front (front cells up to lakeOpen x s); water at (lowest floor - 1.2 terraces x ph); shore just above it, backdrop behind. Exits: causeways at the fragment's height across the water.
+       falls  (Cascada): a lake on the side of the low floor; behind and beside the high floor the decoration keeps that floor's height (cornice) with a 2-tile water channel that runs to the edge of the cornice and falls into the lake.
+       island (Isla):    a ring s of VOID (not drawn); beyond it a rock ring (+1..+2) behind and at the sides, void in front. Exits: short bridges at the fragment's height over the void.
+       drop   (Caída):   a ring s of void; the rest of the disc far below (-3..-4 terraces x ph); exits: narrow ridges at the fragment's height to the edge. */
+  P_.ARCH = ['hill', 'lake', 'falls', 'island', 'drop'];
+  P_.ARCH_NAME = { hill: 'Cerro', lake: 'Lago', falls: 'Cascada', island: 'Isla', drop: 'Caída' };
   P_.plan = function (W, H, frag, heightOf, exits, opts) {
-    const o = Object.assign({}, P_.defaults, opts), n = W * H, ids = o.ids || [0], jump = o.jump || 1, sub = o.sub === undefined ? 0.22 * jump : o.sub, yaw = o.yaw * Math.PI / 180, u = [Math.sin(yaw), Math.cos(yaw)], v = [-u[1], u[0]];
+    const o = Object.assign({}, P_.defaults, opts), n = W * H, ids = o.ids || [0], jump = o.jump || 1, sub = o.sub === undefined ? 0.22 * jump : o.sub, PH = o.ph, arch = o.arch, yaw = o.yaw * Math.PI / 180, u = [Math.sin(yaw), Math.cos(yaw)], v = [-u[1], u[0]];
     const fl = []; let sx = 0, sy = 0; for (let i = 0; i < n; i++) if (frag[i]) { fl.push(i); sx += (i % W) + 0.5; sy += ((i / W) | 0) + 0.5; }
-    const cnt = fl.length, cx = sx / cnt, cy = sy / cnt, r = Math.sqrt(cnt / Math.PI), dc = [cx + o.shift * r * u[0], cy + o.shift * r * u[1]];
+    const cnt = fl.length, cx = sx / cnt, cy = sy / cnt, r = Math.sqrt(cnt / Math.PI), dc = [cx + o.shift * r * u[0], cy + o.shift * r * u[1]], sep = Math.max(o.sepMin, o.sepK * r);
     const px = (i) => (i % W) + 0.5, py = (i) => ((i / W) | 0) + 0.5;
-    let R = o.factor * r, grown = false; for (const i of fl) { const d = Math.hypot(px(i) - dc[0], py(i) - dc[1]) + 0.71; if (d > R) { R = d; grown = true; } } // no fragment tile outside the disc: R grows to hold them all
+    let R = Math.max(o.factor * r, o.Rmin), grown = false; for (const i of fl) { const d = Math.hypot(px(i) - dc[0], py(i) - dc[1]) + 0.71; if (d > R) { R = d; grown = true; } } // no fragment tile outside the disc: R grows to hold them all
     const inDisc = (i) => Math.hypot(px(i) - dc[0], py(i) - dc[1]) <= R, sOf = (x, y) => ((x - cx) * u[0] + (y - cy) * u[1]) / r; // s: position along the camera axis in units of r (+ = toward the camera)
     const role = new Uint8Array(n), height = new Float32Array(n).fill(NaN), cell = new Int16Array(n).fill(-1), rand = rng(seedOf(ids));
     for (const i of fl) { role[i] = 1; height[i] = heightOf(i); }
     let sF = -Infinity, sf = Infinity; for (const i of fl) { const s = sOf(px(i), py(i)); if (s > sF) sF = s; if (s < sf) sf = s; } // front and back extent of the fragment
     const sBack = o.shift - R / r, sEdge = o.shift + R / r; // back and front edge of the disc
-    // nearest fragment tile of every disc tile: a grid of the fragment tiles keeps it fast
-    const nearest = new Int32Array(n).fill(-1), g = 8, gw = Math.ceil(W / g), gh = Math.ceil(H / g), grid = Array.from({ length: gw * gh }, () => []);
+    // nearest fragment tile of every disc tile (and its distance): a grid of the fragment tiles keeps it fast
+    const nearest = new Int32Array(n).fill(-1), dn = new Float32Array(n), g = 8, gw = Math.ceil(W / g), gh = Math.ceil(H / g), grid = Array.from({ length: gw * gh }, () => []);
     for (const i of fl) grid[(((i / W) | 0) / g | 0) * gw + (((i % W) / g) | 0)].push(i);
     const nearestFrag = (x, y) => {
       const gx = Math.floor(x / g), gy = Math.floor(y / g); let best = -1, bd = Infinity;
@@ -2138,66 +2146,92 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       return best;
     };
     const disc = []; for (let i = 0; i < n; i++) if (!frag[i] && inDisc(i)) disc.push(i);
-    /* SEEDS: proportional to the area of the disc (one per o.seedArea tiles, within seedMin..seedMax), weights 0.5 + noise (like Step3_ApplyVoronoi), deterministic by room id. The first ones are forced into the back and the front
-       so the backdrop and the view always exist. The height of a cell follows the camera axis: behind the fragment it rises toward the edge in steps (+1, +2, +3 terraces: the backdrop), in front it falls in bands (0, -1, -2)
-       toward the pond, in the middle (the sides) 0; plus a jitter of -1, 0 or +1 sub-level per cell. */
+    for (const i of disc) { const f = nearestFrag(px(i), py(i)); nearest[i] = f; dn[i] = Math.hypot(px(i) - px(f), py(i) - py(f)); }
+    /* the offset of a cell comes from the DISTANCE of its seed to the fragment along the camera axis (a ray away from the camera that hits the fragment: the seed is in front of it; toward the camera: behind it; neither: the distance
+       to the extent of the fragment). BANDS by archetype: [front thirds of the distance, side, back thirds]. Chance only picks the positions of the seeds and the jitter of -1, 0, +1 sub-level. */
+    const BANDS = { hill: { F: [-1, -2, -3], S: -1, B: [1, 2, 3] }, lake: { F: [0, 0, 0], S: 0, B: [1, 2, 3] }, falls: { F: [0, 0, 0], S: 0, B: [1, 2, 3] }, island: { F: [0, 0, 0], S: 1, B: [1, 2, 2] }, drop: { F: [-3, -3, -4], S: -3, B: [-3, -4, -4] } }[arch];
     const nSeeds = Math.max(o.seedMin, Math.min(o.seedMax, Math.round(Math.PI * R * R / o.seedArea))), seeds = [];
-    /* the offset of a cell comes from the DISTANCE of its seed to the fragment along the camera axis (a ray away from the camera hits the fragment: the seed is in front of it; toward the camera: behind it; neither: the distance to the extent of the
-       fragment): in front the bands of that distance give 0, -1, -2 (the third band is where the pond goes), behind +1, +2, +3 (the backdrop). Chance only picks the position of the seeds and the jitter. */
     const rayD = (x0, y0, sg) => { let x = x0, y = y0; for (let t = 0; t < 4 * R; t++) { x += sg * u[0] * 0.5; y += sg * u[1] * 0.5; const ix = Math.floor(x), iy = Math.floor(y); if (ix < 0 || iy < 0 || ix >= W || iy >= H) return -1; if (frag[iy * W + ix]) return (t + 1) * 0.5; } return -1; };
     const frontReach = Math.max(1e-6, (sEdge - sF) * r), backReach = Math.max(1e-6, (sf - sBack) * r);
-    const kOf = (x, y, s) => {
+    const zoneOf = (x, y, s) => { // 'F' in front of the fragment, 'B' behind it, 'S' at its sides; d = distance along the camera axis
       const df = rayD(x, y, -1), db = rayD(x, y, 1); let front = df >= 0 && (db < 0 || df <= db), back = db >= 0 && !front, d = front ? df : db;
-      if (!front && !back) { if (s > sF) { front = true; d = (s - sF) * r; } else if (s < sf) { back = true; d = (sf - s) * r; } else return { k: 0, d: 0 }; }
-      if (front) { const f = d / frontReach; return { k: f < 1 / 3 ? 0 : f < 2 / 3 ? -1 : -2, d }; }
-      return { k: 1 + Math.min(2, Math.floor(3 * d / backReach)), d };
+      if (!front && !back) { if (s > sF) { front = true; d = (s - sF) * r; } else if (s < sf) { back = true; d = (sf - s) * r; } else return { z: 'S', d: 0 }; }
+      return { z: front ? 'F' : 'B', d };
     };
+    const kOf = (z, d) => (z === 'F' ? BANDS.F[Math.min(2, Math.floor(3 * d / frontReach))] : z === 'B' ? BANDS.B[Math.min(2, Math.floor(3 * d / backReach))] : BANDS.S);
     for (let q = 0; q < nSeeds; q++) {
       const want = q < 3 ? 0 : q < 6 ? 1 : -1; let pos = null, s = 0;
       for (let t = 0; t < 600 && !pos; t++) { const a = rand() * 2 * Math.PI, d = Math.sqrt(rand()) * R, x = dc[0] + Math.cos(a) * d, y = dc[1] + Math.sin(a) * d; s = sOf(x, y); if (want === 0 ? s < sf : want === 1 ? s > sF : true) pos = [x, y]; }
       if (!pos) { s = want === 0 ? (sf + sBack) / 2 : (sF + sEdge) / 2; pos = [cx + s * r * u[0], cy + s * r * u[1]]; }
-      const kd = kOf(pos[0], pos[1], s); seeds.push({ x: pos[0], y: pos[1], w: 0.5 + rand(), s, k: kd.k, d: kd.d, j: Math.floor(rand() * 3) - 1, id: q });
+      const zd = zoneOf(pos[0], pos[1], s); seeds.push({ x: pos[0], y: pos[1], w: 0.5 + rand(), s, z: zd.z, k: kOf(zd.z, zd.d), d: zd.d, j: Math.floor(rand() * 3) - 1, id: q });
     }
-    for (const i of disc) {
-      let bd = Infinity, bs = 0; for (const sd of seeds) { const d = ((px(i) - sd.x) ** 2 + (py(i) - sd.y) ** 2) / (sd.w * sd.w); if (d < bd) { bd = d; bs = sd.id; } }
-      nearest[i] = nearestFrag(px(i), py(i)); cell[i] = bs;
-    }
-    { // neighbouring cells differ by at most one band: the one farther from the fragment moves toward the other
+    for (const i of disc) { let bd = Infinity, bs = 0; for (const sd of seeds) { const d = ((px(i) - sd.x) ** 2 + (py(i) - sd.y) ** 2) / (sd.w * sd.w); if (d < bd) { bd = d; bs = sd.id; } } cell[i] = bs; }
+    { // neighbouring cells differ by at most one band (the higher one is lowered)
       const pairs = new Set(); for (const i of disc) { const x = i % W; if (x + 1 < W && cell[i + 1] >= 0 && cell[i + 1] !== cell[i] && !frag[i + 1]) pairs.add(Math.min(cell[i], cell[i + 1]) * 1000 + Math.max(cell[i], cell[i + 1])); if (i + W < n && cell[i + W] >= 0 && cell[i + W] !== cell[i] && !frag[i + W]) pairs.add(Math.min(cell[i], cell[i + W]) * 1000 + Math.max(cell[i], cell[i + W])); }
       const list = [...pairs].sort((a, b) => a - b).map((v) => [Math.floor(v / 1000), v % 1000]);
-      for (let it = 0; it < 30; it++) { let ch = false; for (const [a, b] of list) { const A = seeds[a], B = seeds[b]; if (Math.abs(A.k - B.k) > 1) { const far = A.d > B.d ? A : B, near = far === A ? B : A; far.k += near.k > far.k ? 1 : -1; ch = true; } } if (!ch) break; }
+      for (let it = 0; it < 1000; it++) { let ch = false; for (const [a, b] of list) { const A = seeds[a], B = seeds[b]; if (A.k > B.k + 1) { A.k = B.k + 1; ch = true; } else if (B.k > A.k + 1) { B.k = A.k + 1; ch = true; } } if (!ch) break; } // min-plus smoothing: terminates, and no neighbour is more than one band higher
     }
-    for (const i of disc) { const sd = seeds[cell[i]]; role[i] = 2; height[i] = height[nearest[i]] + sd.k * jump + sd.j * sub; }
+    // per-tile zone (for the ring rules): the same ray test as the seeds
+    const zoneT = new Uint8Array(n); // 0 side, 1 front, 2 back
+    for (const i of disc) { const zd = zoneOf(px(i), py(i), sOf(px(i), py(i))); zoneT[i] = zd.z === 'F' ? 1 : zd.z === 'B' ? 2 : 0; }
+    const lowH = o.lowH === undefined ? Math.min(...fl.map((i) => height[i])) : o.lowH, highH = o.highH === undefined ? lowH : o.highH, hm = o.highMask;
+    const waterH = lowH - o.lakeDrop * jump * PH, shoreH = waterH + o.shoreUp * jump;
+    const ringWater = (i) => dn[i] <= sep || (zoneT[i] === 1 && dn[i] <= o.lakeOpen * sep);
+    const rockW = Math.max(3, o.rockW * r);
+    for (const i of disc) {
+      const sd = seeds[cell[i]], dec = (ref) => ref + sd.k * jump * PH + sd.j * sub; role[i] = 2;
+      if (arch === 'hill') height[i] = dec(height[nearest[i]]);
+      else if (arch === 'lake' || arch === 'falls') {
+        if (arch === 'falls' && hm && hm[nearest[i]] && zoneT[i] !== 1) { height[i] = highH; continue; } // the cornice: flat at the height of the high floor
+        if (ringWater(i)) { role[i] = 4; height[i] = waterH; } else height[i] = dec(shoreH);
+      } else if (arch === 'island') {
+        if (dn[i] <= sep || zoneT[i] === 1 || dn[i] > sep + rockW) role[i] = 0; else height[i] = height[nearest[i]] + (dn[i] <= sep + rockW / 2 ? 1 : 2) * jump * PH + sd.j * sub;
+      } else { if (dn[i] <= sep) role[i] = 0; else height[i] = dec(height[nearest[i]]); }
+    }
+    let channelTiles = 0;
+    if (arch === 'falls' && hm) { // the channel: 2 tiles wide, at the cornice, beside the high floor on its outer side, from the back edge to where the cornice ends (the fall)
+      let lH = 0, nH = 0, lL = 0, nL = 0, lmax = -Infinity, lmin = Infinity; for (const i of fl) { const l = (px(i) - cx) * v[0] + (py(i) - cy) * v[1]; if (hm[i]) { lH += l; nH++; if (l > lmax) lmax = l; if (l < lmin) lmin = l; } else { lL += l; nL++; } }
+      const latOf = (i) => (px(i) - cx) * v[0] + (py(i) - cy) * v[1], cor = disc.filter((i) => role[i] === 2 && height[i] === Math.fround(highH) && hm[nearest[i]] && zoneT[i] !== 1);
+      if (nH && nL && cor.length) { const side = lL / nL >= lH / nH ? 1 : -1; let cmin = Infinity, cmax = -Infinity; for (const i of cor) { const l = latOf(i); if (l < cmin) cmin = l; if (l > cmax) cmax = l; }
+        // along the outer side of the high floor (away from the low floor, so it never crosses the fragment), kept inside the cornice
+        let l0 = side > 0 ? Math.max(lmin - 2, cmin + 2) : Math.min(lmax + 2, cmax - 2); if (l0 < cmin + 1 || l0 > cmax - 1) l0 = (cmin + cmax) / 2;
+        for (const i of cor) if (Math.abs(latOf(i) - l0) <= 1) { role[i] = 4; height[i] = highH - sub; channelTiles++; } }
+    }
     // HARD RULE: nothing hides the fragment. A ray from the tile away from the camera: the first fragment tile it meets is the edge in front of which the tile stands; the tile stays below it
     let capped = 0;
     for (const i of disc) {
+      if (role[i] < 2) continue;
       let x = px(i), y = py(i), hit = -1; for (let s = 0; s < 4 * R && hit < 0; s++) { x -= u[0] * 0.5; y -= u[1] * 0.5; const ix = Math.floor(x), iy = Math.floor(y); if (ix < 0 || iy < 0 || ix >= W || iy >= H) break; const j = iy * W + ix; if (frag[j]) hit = j; }
       if (hit >= 0 && height[i] > height[hit] - o.margin * jump) { height[i] = height[hit] - o.margin * jump; capped++; }
     }
     const decoHeight = Float32Array.from(height); // the decoration before the paths
-    /* EXITS as PATHS: runs of faces with the same direction and consecutive tiles; parallel runs of the same direction less than mergeGap tiles apart become one. A path of width min(run, pathWidth) leaves from the middle face,
-       straight to the edge of the disc (bent around a notch of the fragment when needed), drawn ON the decoration (it keeps the height of the cell it crosses, it is not an embankment); the first rampLen tiles
-       are a short ramp from the height of the fragment on that face to the height of the decoration. */
+    /* EXITS as PATHS: runs of faces with the same direction and consecutive tiles; parallel runs of the same direction less than mergeGap tiles apart become one. A path of width min(run, width) leaves from the middle face, straight to the
+       edge of the disc (bent around a notch of the fragment when needed). By archetype: hill / lake / falls: ON the decoration (it keeps the height of the cell it crosses), after a SPAN at the fragment's height over the water (lake, falls)
+       and a short ramp of rampLen tiles; island: a bridge at the fragment's height over the void ring that ends at the rock ring; drop: a ridge (width 1) at the fragment's height all the way to the edge. */
     const fixedOf = (t) => (t.dx ? t.a % W : (t.a / W) | 0), alongOf = (t) => (t.dx ? (t.a / W) | 0 : t.a % W);
     const sortKey = (e) => [e.dx ? e.dx + 5 : e.dy + 20, fixedOf(e), alongOf(e)], sorted = exits.slice().sort((p, q) => { const a = sortKey(p), b = sortKey(q); return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]; });
-    let runs = [];
-    for (const e of sorted) { const last = runs[runs.length - 1], lf = last && last.faces[last.faces.length - 1]; if (last && last.dx === e.dx && last.dy === e.dy && fixedOf(lf) === fixedOf(e) && alongOf(e) === alongOf(lf) + 1) last.faces.push(e); else runs.push({ dx: e.dx, dy: e.dy, faces: [e] }); }
-    const nRuns0 = runs.length, par = runs.map((_, i) => i), find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+    /* ONE path per neighbouring room: the runs of faces are made (and the parallel ones less than mergeGap apart merged) for each neighbour apart, and only the LONGEST run of that neighbour gets a path */
     const span = (ru) => [Math.min(...ru.faces.map(alongOf)), Math.max(...ru.faces.map(alongOf))];
-    for (let a = 0; a < runs.length; a++) for (let b = a + 1; b < runs.length; b++) {
-      if (runs[a].dx !== runs[b].dx || runs[a].dy !== runs[b].dy || Math.abs(fixedOf(runs[a].faces[0]) - fixedOf(runs[b].faces[0])) >= o.mergeGap) continue;
-      const [a0, a1] = span(runs[a]), [b0, b1] = span(runs[b]), gap = Math.max(a0, b0) - Math.min(a1, b1) - 1; if (gap < o.mergeGap) par[find(a)] = find(b);
+    let runs = [], nRuns0 = 0; const byNb = new Map(); for (const e of sorted) { const k = e.nb === undefined ? 0 : e.nb; if (!byNb.has(k)) byNb.set(k, []); byNb.get(k).push(e); }
+    for (const k of [...byNb.keys()].sort((a, b) => a - b)) {
+      const rs = []; for (const e of byNb.get(k)) { const last = rs[rs.length - 1], lf = last && last.faces[last.faces.length - 1]; if (last && last.dx === e.dx && last.dy === e.dy && fixedOf(lf) === fixedOf(e) && alongOf(e) === alongOf(lf) + 1) last.faces.push(e); else rs.push({ dx: e.dx, dy: e.dy, faces: [e], nb: k }); }
+      nRuns0 += rs.length; const par = rs.map((_, i) => i), find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+      for (let a = 0; a < rs.length; a++) for (let b = a + 1; b < rs.length; b++) {
+        if (rs[a].dx !== rs[b].dx || rs[a].dy !== rs[b].dy || Math.abs(fixedOf(rs[a].faces[0]) - fixedOf(rs[b].faces[0])) >= o.mergeGap) continue;
+        const [a0, a1] = span(rs[a]), [b0, b1] = span(rs[b]), gap = Math.max(a0, b0) - Math.min(a1, b1) - 1; if (gap < o.mergeGap) par[find(a)] = find(b);
+      }
+      const groups = new Map(); rs.forEach((ru, i) => { const g = find(i); if (!groups.has(g)) groups.set(g, { dx: ru.dx, dy: ru.dy, faces: [], nb: k }); groups.get(g).faces.push(...ru.faces); });
+      const merged = [...groups.values()].map((ru) => { ru.faces.sort((p, q) => alongOf(p) - alongOf(q) || fixedOf(p) - fixedOf(q)); return ru; });
+      let best = merged[0]; for (const m of merged) if (m.faces.length > best.faces.length) best = m; if (best) runs.push(best);
     }
-    const groups = new Map(); runs.forEach((ru, i) => { const k = find(i); if (!groups.has(k)) groups.set(k, { dx: ru.dx, dy: ru.dy, faces: [] }); groups.get(k).faces.push(...ru.faces); });
-    runs = [...groups.values()].map((ru) => { ru.faces.sort((p, q) => alongOf(p) - alongOf(q) || fixedOf(p) - fixedOf(q)); return ru; });
-    let reached = 0, blocked = 0, bent = 0; const pathTiles = new Set();
+    let reached = 0, blocked = 0, bent = 0; const pathTiles = new Set(), pw = o.pathWidth, role0 = Uint8Array.from(role), height0 = Float32Array.from(height);
     const trace = (dx, dy, from) => { // straight from `from` (outside the fragment) to the edge of the disc; null if the fragment is in the way
       const out = []; let x = from[0], y = from[1];
       for (let m = 0; m < 4 * R + 8; m++) { if (x < 0 || y < 0 || x >= W || y >= H) return out; const j = y * W + x; if (frag[j]) return null; if (!inDisc(j)) return out; out.push(j); x += dx; y += dy; }
       return out;
     };
     for (const run of runs) {
-      run.width = Math.min(run.faces.length, o.pathWidth); run.reached = true; run.bent = false; run.length = 0; run.paths = [];
+      run.width = Math.min(run.faces.length, pw); run.reached = true; run.bent = false; run.length = 0; run.paths = []; run.span = 0;
       const mid = run.faces[Math.floor((run.faces.length - 1) / 2)], lat = run.dx ? [0, 1] : [1, 0]; // lateral unit vector (along the face)
       for (let c = 0; c < run.width; c++) {
         const f = mid, x0 = (f.a % W) + f.dx + lat[0] * c, y0 = ((f.a / W) | 0) + f.dy + lat[1] * c; if (x0 < 0 || y0 < 0 || x0 >= W || y0 >= H) continue;
@@ -2205,20 +2239,36 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         let path = trace(f.dx, f.dy, [x0, y0]);
         if (!path) { for (const [dx, dy] of [[f.dy, f.dx], [-f.dy, -f.dx], [-f.dx, -f.dy]]) { path = trace(dx, dy, [x0, y0]); if (path) { run.bent = true; break; } } }
         if (!path) { if (c === 0) run.reached = false; continue; }
-        const m = Math.min(o.rampLen, path.length - 1), hT = path.length > m ? height[path[m]] : height[path[path.length - 1]];
-        for (let t = 0; t < path.length; t++) { const j = path[t]; if (t < m) height[j] = h0 + (hT - h0) * (t + 1) / (m + 1); role[j] = 3; cell[j] = -1; pathTiles.add(j); }
-        run.paths.push(path); run.length = Math.max(run.length, path.length);
+        let sp = 0; // tiles at the fragment's height
+        let descent = false;
+        if (arch === 'drop') { while (sp < path.length && role[path[sp]] === 0) sp++; sp = Math.min(path.length, Math.max(1, Math.min(sp + 1, Math.ceil(sep) + 1))); descent = true; }
+        else if (arch === 'island') { while (sp < path.length && role[path[sp]] === 0) sp++; sp = Math.min(path.length, Math.max(1, Math.min(sp + 1, Math.ceil(sep) + 1))); path = path.slice(0, sp); }
+        else if (arch === 'lake' || arch === 'falls') { while (sp < path.length && role[path[sp]] === 4) sp++; }
+        const m = descent ? Math.max(0, path.length - sp - 1) : Math.min(o.rampLen, path.length - sp - 1), hT = path.length > sp + m ? height[path[sp + m]] : height[path[path.length - 1]];
+        for (let t = 0; t < path.length; t++) { const j = path[t]; if (t < sp) height[j] = h0; else if (t < sp + m) height[j] = h0 + (hT - h0) * (t - sp + 1) / (m + 1); role[j] = 3; cell[j] = -1; pathTiles.add(j); }
+        run.paths.push(path); run.length = Math.max(run.length, path.length); run.span = Math.max(run.span, sp);
       }
       run.reached ? reached++ : blocked++; if (run.bent) bent++;
     }
-    // POND: the lowest cell of the front (lowest offset, then the nearest to the camera) that still has decoration tiles; at most pondMax of the fragment's tiles, the ones nearest to its seed
-    const cand = seeds.filter((sd) => sd.k < 0).sort((a, b) => a.k - b.k || b.s - a.s); let pondCell = -1, pondTiles = 0;
-    for (const sd of cand) {
-      const ts = disc.filter((i) => cell[i] === sd.id && role[i] === 2).sort((a, b) => ((px(a) - sd.x) ** 2 + (py(a) - sd.y) ** 2) - ((px(b) - sd.x) ** 2 + (py(b) - sd.y) ** 2) || a - b);
-      if (!ts.length) continue; const take = Math.max(1, Math.min(ts.length, Math.floor(o.pondMax * cnt))); for (let t = 0; t < take; t++) role[ts[t]] = 4; pondCell = sd.id; pondTiles = take; break;
+    // short pieces of path (< 3 tiles) between water, or after the water at the end of the path, are removed (lake, falls)
+    let stubsRemoved = 0;
+    if (arch === 'lake' || arch === 'falls') for (const run of runs) { run.tails = []; for (const p of run.paths) {
+      const w = p.map((t) => role0[t] === 4); let t = 0, tail = 0;
+      while (t < p.length) { if (w[t]) { t++; continue; } let e = t; while (e < p.length && !w[e]) e++; const waterBefore = t > 0 && w[t - 1];
+        if (waterBefore && e - t < 3) { for (let q = t; q < e; q++) { role[p[q]] = role0[p[q]]; height[p[q]] = height0[p[q]]; cell[p[q]] = cell[p[q]] < 0 ? 0 : cell[p[q]]; pathTiles.delete(p[q]); } stubsRemoved++; } else if (e === p.length) tail = e - t; t = e; }
+      run.tails.push(tail); } }
+    // POND (hill): the lowest cell of the front (lowest offset, then the nearest to the camera) that still has decoration tiles; at most pondMax of the fragment's tiles, the ones nearest to its seed
+    let pondCell = -1, pondTiles = 0;
+    if (arch === 'hill') {
+      const cand = seeds.filter((sd) => sd.k < 0).sort((a, b) => a.k - b.k || b.s - a.s);
+      for (const sd of cand) {
+        const ts = disc.filter((i) => cell[i] === sd.id && role[i] === 2).sort((a, b) => ((px(a) - sd.x) ** 2 + (py(a) - sd.y) ** 2) - ((px(b) - sd.x) ** 2 + (py(b) - sd.y) ** 2) || a - b);
+        if (!ts.length) continue; const take = Math.max(1, Math.min(ts.length, Math.floor(o.pondMax * cnt))); for (let t = 0; t < take; t++) role[ts[t]] = 4; pondCell = sd.id; pondTiles = take; break;
+      }
     }
-    let decoTiles = 0, roadTiles = 0, backTiles = 0; for (let i = 0; i < n; i++) { if (role[i] === 2 || role[i] === 4) { decoTiles++; if (sOf(px(i), py(i)) < sf) backTiles++; } else if (role[i] === 3) roadTiles++; }
-    return { disc: { cx: dc[0], cy: dc[1], R, r, centroid: [cx, cy], u, grown }, role, height, decoHeight, cell, seeds, pondCell, exits: runs, info: { fragTiles: cnt, decoTiles, pondTiles, pondMax: Math.floor(o.pondMax * cnt), roadTiles, exitRuns: runs.length, exitRunsBeforeMerge: nRuns0, exitFaces: exits.length, exitsReached: reached, exitsBlocked: blocked, exitsBent: bent, capped, seeds: seeds.length, backDepth: (sf - sBack) * r, backTiles, discGrown: grown, pocketTiles: cnt + decoTiles + roadTiles } };
+    let decoTiles = 0, roadTiles = 0, backTiles = 0, waterTiles = 0, voidTiles = 0; for (let i = 0; i < n; i++) { if (role[i] === 2 || role[i] === 4) { decoTiles++; if (role[i] === 4) waterTiles++; if (sOf(px(i), py(i)) < sf) backTiles++; } else if (role[i] === 3) roadTiles++; }
+    for (const i of disc) if (role[i] === 0) voidTiles++;
+    return { disc: { cx: dc[0], cy: dc[1], R, r, centroid: [cx, cy], u, grown, sep }, role, height, decoHeight, cell, seeds, pondCell, exits: runs, waterH, shoreH, info: { arch, fragTiles: cnt, decoTiles, pondTiles, pondMax: Math.floor(o.pondMax * cnt), waterTiles, voidTiles, channelTiles, stubsRemoved, roadTiles, exitRuns: runs.length, exitRunsBeforeMerge: nRuns0, exitFaces: exits.length, exitsReached: reached, exitsBlocked: blocked, exitsBent: bent, capped, seeds: seeds.length, backDepth: (sf - sBack) * r, backTiles, discGrown: grown, sep, pocketTiles: cnt + decoTiles + roadTiles } };
   };
 
   /* Floors of a fragment (user's criterion): a terrace of the room with >= 20 walkable tiles (valid walkable region: no forbidden margin, no void, no ramp footprint) is a floor; two floors joined by a ramp inside the room
@@ -2233,28 +2283,63 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     out.perTerrace = [...per.values()].map((o) => ({ ter: o.ter, tiles: o.tiles })).sort((a, b) => a.ter - b.ter); return out;
   };
 
-  /* APPLY to a shape S whose slice is the room(s) of the pocket (rooms on, the room is a Diorama): everything outside the pocket becomes void (not drawn), the decoration gets levels of its own, the roads and the pond are marked.
-     Sets S.pocket (true), S.pocketRole (Uint8 per window tile: 1 fragment, 2 decoration, 3 road, 4 pond), S.pocketInfo. The fragment is not touched (same fine levels, same walkability). */
+  /* AUTO framing (user's rules). double -> falls; else pos = dominant terrace / (N - 1), rel = the room's mean terrace - the mean of its neighbours' mean terraces, coast = perimeter faces toward void / perimeter faces.
+     Low (pos <= 1/3, rel <= -0.3 or coast >= 0.25) -> lake; high (pos >= 2/3 or rel >= +0.3) -> drop; middle: hill if at least half of the neighbours are Cake rooms that are lower (mean < room mean - 0.3) or the largest arc
+     without exits (angles of the groups of exit faces per neighbour, seen from the centroid) is >= 180 deg; else island. Returns { arch, reason, stats }. */
+  P_.chooseArchetype = function (RL, types, id, P, dbl, exits) {
+    const W = RL.W, H = RL.H, N = P.terraces, o = types.rooms.get(id), cnt = new Array(N).fill(0), sum = new Map(), num = new Map();
+    let perim = 0, coast = 0, sx = 0, sy = 0, n = 0;
+    for (let i = 0; i < W * H; i++) { const r = RL.room[i]; if (r <= 0) continue; sum.set(r, (sum.get(r) || 0) + RL.ter[i]); num.set(r, (num.get(r) || 0) + 1);
+      if (r !== id) continue; cnt[RL.ter[i]]++; n++; sx += (i % W) + 0.5; sy += ((i / W) | 0) + 0.5; const x = i % W, y = (i / W) | 0;
+      for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) { perim++; coast++; continue; } const j = ny * W + nx; if (RL.room[j] === id) continue; perim++; if (RL.h[j] <= 0) coast++; } }
+    const mean = (r) => sum.get(r) / num.get(r), me = mean(id), nbs = [...o.neigh], rel = nbs.length ? me - nbs.reduce((a, r) => a + mean(r), 0) / nbs.length : 0;
+    const dom = cnt.indexOf(Math.max(...cnt)), pos = N > 1 ? dom / (N - 1) : 0.5, costa = perim ? coast / perim : 0, stats = { dom, pos, rel, costa, mean: me };
+    if (dbl) return { arch: 'falls', reason: 'double: two floors without a ramp between them', stats };
+    if (pos <= 1 / 3) return { arch: 'lake', reason: `low: dominant terrace ${dom} of ${N - 1} (pos ${pos.toFixed(2)} <= 1/3)`, stats };
+    if (rel <= -0.3) return { arch: 'lake', reason: `low: ${rel.toFixed(2)} terraces below its neighbours (<= -0.3)`, stats };
+    if (costa >= 0.25) return { arch: 'lake', reason: `low: coast ${(costa * 100).toFixed(0)} % of the perimeter (>= 25 %)`, stats };
+    if (pos >= 2 / 3) return { arch: 'drop', reason: `high: dominant terrace ${dom} of ${N - 1} (pos ${pos.toFixed(2)} >= 2/3)`, stats };
+    if (rel >= 0.3) return { arch: 'drop', reason: `high: ${rel.toFixed(2)} terraces above its neighbours (>= +0.3)`, stats };
+    const cakeLow = nbs.filter((r) => types.rooms.get(r).type === E.roomTypes.CAKE && mean(r) < me - 0.3).length; stats.cakeLow = cakeLow; stats.neigh = nbs.length;
+    if (nbs.length && cakeLow * 2 >= nbs.length) return { arch: 'hill', reason: `middle: ${cakeLow} of ${nbs.length} neighbours are lower Cake rooms`, stats };
+    const cx = sx / n, cy = sy / n, by = new Map(); // exit groups per neighbour: mean direction seen from the centroid
+    for (const e of exits) { const a = Math.atan2(e.y - cy, e.x - cx); let q = by.get(e.nb); if (!q) by.set(e.nb, q = [0, 0]); q[0] += Math.cos(a); q[1] += Math.sin(a); }
+    const ang = [...by.values()].map((q) => Math.atan2(q[1], q[0])).sort((a, b) => a - b); let arc = 360;
+    if (ang.length) { arc = 0; for (let i = 0; i < ang.length; i++) { const nx = i + 1 < ang.length ? ang[i + 1] : ang[0] + 2 * Math.PI; arc = Math.max(arc, (nx - ang[i]) * 180 / Math.PI); } }
+    stats.arc = arc;
+    if (arc >= 180) return { arch: 'hill', reason: `middle: the largest arc without exits is ${arc.toFixed(0)} deg (>= 180)`, stats };
+    return { arch: 'island', reason: `middle: exits all around (largest arc without exits ${arc.toFixed(0)} deg < 180)`, stats };
+  };
+
+  /* APPLY to a shape S (the WORLD shape, reframed to the window of the pocket) of a Diorama: everything outside the pocket becomes void (not drawn), the decoration gets levels of its own, the water gets levels of its own (own colour),
+     the paths are marked. Sets S.pocket (true), S.pocketRole (Uint8 per window tile: 1 fragment, 2 decoration, 3 path, 4 water), S.pocketInfo. The fragment is not touched (same fine levels, same walkability).
+     P.pocketFraming ('auto' or an archetype), P.pocketHeight (multiplies the decoration offsets). S.sliceBox / S.fitH frame the fragment and ~2 r around it; island and drop set S.baseH (the walls over the void go down to it). */
   P_.apply = function (S, P, RL, ids, opts) {
     const n = S.n, W = S.W, H = S.H, K = S.subs, idsSet = new Set(ids), fw = S.mapW, frag = new Uint8Array(n);
     const mapOf = (i) => { const x = (i % W) + S.ox, y = ((i / W) | 0) + S.oy; return x < 0 || y < 0 || x >= fw || y >= S.mapH ? -1 : y * fw + x; }; // -1: outside the map (the border of void of a padded pocket)
     for (let i = 0; i < n; i++) if (idsSet.has(RL.room[mapOf(i)]) && !(S.void && S.void[i])) frag[i] = 1; // the room's tiles of the WORLD shape (whole map, no slice)
-    // exits: faces of the fragment border across an open room transition
+    // exits: faces of the fragment border across an open room transition (nb = the neighbouring room, x / y = the face in window tiles)
     const exits = [];
-    for (let i = 0; i < n; i++) { if (!frag[i]) continue; const x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (frag[j]) continue; const rb = RL.room[mapOf(j)]; if (rb <= 0 || idsSet.has(rb)) continue; if (RL.rp.has(E.rooms.key(mapOf(i), mapOf(j), RL.W * RL.H))) exits.push({ a: i, dx, dy }); } }
-    const jump = P.terH, plan = P_.plan(W, H, frag, (i) => S.levelH[S.fine[i]], exits, Object.assign({ ids, jump, sub: E.subHeight(P) }, opts));
-    // the window may cut the disc at the edge of the map: counted
+    for (let i = 0; i < n; i++) { if (!frag[i]) continue; const x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (frag[j]) continue; const rb = RL.room[mapOf(j)]; if (rb <= 0 || idsSet.has(rb)) continue; if (RL.rp.has(E.rooms.key(mapOf(i), mapOf(j), RL.W * RL.H))) exits.push({ a: i, dx, dy, nb: rb, x: x + S.ox + 0.5 + dx * 0.5, y: y + S.oy + 0.5 + dy * 0.5 }); } }
+    // floors first (they need the shape as the world made it): the double / archetype and the heights the framing refers to
+    const fl = P_.floors(S, frag, (i) => RL.forb[mapOf(i)] !== 1 && RL.h[mapOf(i)] > 0 && S.region[i] >= 0), dbl = fl.length >= 2;
+    const fragH = []; for (let i = 0; i < n; i++) if (frag[i]) fragH.push(S.levelH[S.fine[i]]);
+    const fSorted = fl.slice().sort((a, b) => a.h - b.h), lowFloor = fSorted[0], highFloor = fSorted[fSorted.length - 1], lowH = lowFloor ? lowFloor.h : Math.min(...fragH);
+    let highMask = null, highH = lowH; if (dbl) { highMask = new Uint8Array(n); const hs = new Set(highFloor.ters); for (let i = 0; i < n; i++) if (frag[i] && hs.has(S.ter[i])) highMask[i] = 1; const hv = []; for (let i = 0; i < n; i++) if (highMask[i]) hv.push(S.levelH[S.fine[i]]); hv.sort((a, b) => a - b); highH = hv[hv.length >> 1]; }
+    const want = P.pocketFraming || 'auto', pick = want !== 'auto' && P_.ARCH.includes(want) ? { arch: want, reason: 'chosen manually' } : P_.chooseArchetype(RL, S.types, [...idsSet][0], P, dbl, exits);
+    const PH = P.pocketHeight === undefined ? P_.defaults.ph : P.pocketHeight, jump = P.terH, plan = P_.plan(W, H, frag, (i) => S.levelH[S.fine[i]], exits, Object.assign({ ids, jump, sub: E.subHeight(P), arch: pick.arch, ph: PH, lowH, highH, highMask }, opts));
     const d = plan.disc, truncated = d.cx - d.R < 0 || d.cy - d.R < 0 || d.cx + d.R > W || d.cy + d.R > H;
-    // levels: insert the heights of the decoration, roads and pond in the ranking (an existing level is reused when the height matches)
-    // levels: the heights of the decoration and the paths are inserted in the ranking as levels of their own (never shared with the fragment: a height that equals an existing level is nudged up by 0.003), so they can have their own look
     /* QUANTIZE to the existing grid of heights (user's decision, B costs per level): the decoration and the paths snap DOWN (never higher: the hard rule holds) to the levels of the world (terraces x sub-terraces, the cake rings if on)
        extended beyond the lowest and highest terrace with the same spacing; the jitter then moves a cell between existing sub-levels and creates no new level. */
     { const Kk = S.subs, Nn = S.N, sh = E.subHeight(P), jm = P.terH, bT = (t) => (t < 0 ? E.terBase(0, P, S.center) + t * jm : t >= Nn ? E.terBase(Nn - 1, P, S.center) + (t - Nn + 1) * jm : E.terBase(t, P, S.center)), gs = S.levelH.slice();
-      for (let t = -8; t < Nn + 10; t++) for (let q = 0; q < Kk; q++) gs.push(bT(t) + q * sh);
+      for (let t = -16; t < Nn + 12; t++) for (let q = 0; q < Kk; q++) gs.push(bT(t) + q * sh);
       gs.sort((a, b) => a - b); const G = gs.filter((v, i) => i === 0 || v - gs[i - 1] > 1e-5);
       const snap = (h) => { let lo = 0, hi = G.length - 1; if (h <= G[0]) return G[0]; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (G[m] <= h + 1e-5) lo = m; else hi = m - 1; } return G[lo]; };
       for (let i = 0; i < n; i++) if (plan.role[i] >= 2) { plan.height[i] = snap(plan.height[i]); plan.decoHeight[i] = snap(plan.decoHeight[i]); } }
-    const eps = 1e-6, old = S.levelH, hs = new Set(); for (let i = 0; i < n; i++) if (plan.role[i] >= 2) { let h = plan.height[i]; if (old.some((x) => Math.abs(x - h) < 1e-4)) h += 0.003; plan.height[i] = h; hs.add(Math.round(plan.height[i] / eps)); }
+    /* levels: the heights of the decoration and the paths are inserted in the ranking as levels of their own (never shared with the fragment: a height that equals an existing level is nudged up by 0.003); the water gets levels of its
+       own too (+0.006), with their own colour (meta.water), so it is flat and smooth in A and B and the wall under a water tile that falls to another level is water-coloured (the waterfall) */
+    const eps = 1e-6, old = S.levelH, hs = new Set(), wk = new Set();
+    for (let i = 0; i < n; i++) if (plan.role[i] >= 2) { let h = plan.height[i]; if (plan.role[i] === 4) h += 0.006; else if (old.some((x) => Math.abs(x - h) < 1e-4)) h += 0.003; plan.height[i] = h; const k = Math.round(plan.height[i] / eps); hs.add(k); if (plan.role[i] === 4) wk.add(k); }
     const list = [...hs].sort((a, b) => a - b).map((k) => k * eps), newH = [], newMeta = [], remap = new Array(old.length), hIdx = new Map(); let hi = 0;
     for (let L = 0; L <= S.maxFine; L++) {
       while (hi < list.length && list[hi] < old[L]) { hIdx.set(Math.round(list[hi] / eps), newH.length); newH.push(list[hi]); newMeta.push(null); hi++; }
@@ -2262,7 +2347,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     }
     while (hi < list.length) { hIdx.set(Math.round(list[hi] / eps), newH.length); newH.push(list[hi]); newMeta.push(null); hi++; }
     const N = S.N, lo0 = E.terBase(0, P, S.center), top = E.terBase(N - 1, P, S.center) + (K - 1) * E.subHeight(P), jmp = P.terH;
-    newH.forEach((h, L) => { if (newMeta[L]) return; // a level of the decoration: it follows the palette; beyond the lowest / highest terrace it keeps going (darker below, lighter above, `ext` in terraces) and it is always a little desaturated (`deco`)
+    newH.forEach((h, L) => { if (newMeta[L]) return; // a level of the decoration: it follows the palette; beyond the lowest / highest terrace it keeps going (darker below, `ext` in terraces) and it is always desaturated (`deco`); water: own colour
+      if (wk.has(Math.round(h / eps))) { newMeta[L] = { ter: 0, sub: 0, bridge: false, water: true }; return; }
       if (h <= lo0) { newMeta[L] = { ter: 0, sub: 0, bridge: false, deco: true, ext: (h - lo0) / jmp }; return; } if (h >= top) { newMeta[L] = { ter: N - 1, sub: K - 1, bridge: false, deco: true, ext: (h - top) / jmp }; return; }
       let t = 0; while (t + 1 < N && E.terBase(t + 1, P, S.center) <= h) t++; const lo = E.terBase(t, P, S.center) + (K - 1) * E.subHeight(P), hiB = E.terBase(t + 1, P, S.center);
       newMeta[L] = h <= lo ? { ter: t, sub: K - 1, bridge: false, deco: true } : { ter: t, sub: K - 1, bridge: true, frac: Math.max(0.05, Math.min(0.95, (h - lo) / (hiB - lo))), deco: true }; });
@@ -2270,19 +2356,22 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     for (let i = 0; i < n; i++) fine[i] = plan.role[i] >= 2 ? hIdx.get(Math.round(plan.height[i] / eps)) : remap[S.fine[i]];
     S.fine.set(fine); for (const rec of S.stairs || []) if (rec.level !== undefined) rec.level = remap[rec.level];
     S.levelH = newH; S.levelMeta = newMeta; S.maxFine = newH.length - 1;
-    // void: everything outside the pocket (fragment + decoration + roads + pond) is not drawn; the world void inside the disc is decoration now
+    // void: everything outside the pocket (fragment + decoration + water + paths) is not drawn; the ring of void of island and drop is not drawn either
     const vd = new Uint8Array(n); for (let i = 0; i < n; i++) vd[i] = plan.role[i] === 0 ? 1 : 0; S.void = vd;
     S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []); for (let i = 0; i < n; i++) if (!vd[i]) S.byLevel[S.fine[i]].push(i);
     S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < n; i++) if (vd[i]) S.fineMask[i] = -1;
     for (let i = 0; i < n; i++) if (plan.role[i] >= 2) S.block[i] = 1; // not walkable
-    { let x0 = W, y0 = H, x1 = 0, y1 = 0; for (let i = 0; i < n; i++) if (plan.role[i]) { const x = i % W, y = (i / W) | 0; if (x < x0) x0 = x; if (x + 1 > x1) x1 = x + 1; if (y < y0) y0 = y; if (y + 1 > y1) y1 = y + 1; } S.sliceBox = { x0, y0, x1, y1 }; } // the camera fits the whole pocket
+    // framing of the camera: the fragment and ~2 r around it (the rest of the disc spills out of the frame); the vertical fit uses the fragment's heights only; over the void the walls go down to a deep base of the pocket's own
+    { const m = Math.ceil(2 * d.r); let x0 = W, y0 = H, x1 = 0, y1 = 0, hmin = Infinity, hmax = -Infinity; for (let i = 0; i < n; i++) if (frag[i]) { const x = i % W, y = (i / W) | 0; if (x < x0) x0 = x; if (x + 1 > x1) x1 = x + 1; if (y < y0) y0 = y; if (y + 1 > y1) y1 = y + 1; const h = S.levelH[S.fine[i]]; if (h < hmin) hmin = h; if (h > hmax) hmax = h; }
+      S.sliceBox = { x0: Math.max(0, x0 - m), y0: Math.max(0, y0 - m), x1: Math.min(W, x1 + m), y1: Math.min(H, y1 + m) }; S.fitH = [hmin - 1, hmax + 1.5];
+      if (pick.arch === 'island' || pick.arch === 'drop') { let lo = Infinity; for (let i = 0; i < n; i++) if (plan.role[i] > 0 && S.levelH[S.fine[i]] < lo) lo = S.levelH[S.fine[i]]; S.baseH = lo - 3 * jump * PH; } else S.baseH = undefined; }
     { const inP = (t) => plan.role[t] > 0, tiles = (r) => r.bottom.concat(r.top, ...(r.steps || []).map((x) => x.tiles)); // the ramps of the world that are not part of the pocket are not drawn (a ramp must touch the fragment and lie wholly inside the pocket)
       S.stairs = (S.stairs || []).filter((r) => tiles(r).every(inP) && tiles(r).some((t) => frag[t])); }
     S.slice = frag; S.border = null; S.borderKind = null; S.borderInfo = null; // the fragment is the slice (walking, the regions and the ramps are the world's); no border line
     S.pocket = true; S.pocketRole = plan.role; S.pocketPlan = plan;
-    const fl = P_.floors(S, frag, (i) => RL.forb[mapOf(i)] !== 1 && RL.h[mapOf(i)] > 0 && S.region[i] >= 0), dbl = fl.length >= 2; let faces = null;
+    let faces = null;
     if (dbl) { const hi2 = fl.slice().sort((a, b) => b.h - a.h), A = hi2[0], B = hi2[hi2.length - 1], u = plan.disc.u; faces = (A.cx - B.cx) * u[0] + (A.cy - B.cy) * u[1] < 0; } // the higher floor is farther from the camera: the cliff between them faces the camera
-    S.pocketInfo = Object.assign({}, plan.info, { ids: ((opts && opts.ids) || ids).slice(), perTerrace: fl.perTerrace, R: d.R, r: d.r, floors: fl.map((f) => f.tiles), double: dbl, cliffFacesCamera: faces, truncated, levelsAdded: newH.length - old.length });
+    S.pocketInfo = Object.assign({}, plan.info, { ids: ((opts && opts.ids) || ids).slice(), archetype: pick.arch, archetypeName: P_.ARCH_NAME[pick.arch], reason: pick.reason, auto: want === 'auto', stats: pick.stats || null, ph: PH, perTerrace: fl.perTerrace, R: d.R, r: d.r, floors: fl.map((f) => f.tiles), double: dbl, cliffFacesCamera: faces, truncated, levelsAdded: newH.length - old.length, baseH: S.baseH });
     return S.pocketInfo;
   };
 })(window.EVO = window.EVO || {});
@@ -2628,6 +2717,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   function levelColor(S, L, P) {
     if (DBG) return [128, 128, 128];
     const K = P.subs, m = S.levelMeta[L];
+    if (m.water) return [52, 142, 222]; // pocket water: a level of its own with its own colour
     const at = (ter, mi) => { // colour of terrace `ter`, sub-terrace `mi`
       const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
       const lift = 1 + (mi - (K - 1) / 2) * 0.05;
@@ -2645,14 +2735,14 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   function makeCam(S, P, view, w, h) {
     const yaw = view.yaw * Math.PI / 180, pit = view.pitch * Math.PI / 180;
     const cy = Math.cos(yaw), sy = Math.sin(yaw), sp = Math.sin(pit), cp = Math.cos(pit);
-    const base = S.levelH[0] - P.terH, top = S.levelH[S.maxFine];
+    const base = S.baseH !== undefined ? S.baseH : S.levelH[0] - P.terH, top = S.levelH[S.maxFine]; // S.baseH: a pocket over the void has a deep base of its own
     const raw = (x, y, hh) => {
       const X = x - S.W / 2, Y = y - S.H / 2;
       return [cy * X - sy * Y, (sy * X + cy * Y) * sp - hh * cp];
     };
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     const fb = S.sliceBox ? [S.sliceBox.x0 - 2, S.sliceBox.y0 - 2, S.sliceBox.x1 + 2, S.sliceBox.y1 + 2] : [0, 0, S.W, S.H]; // fit the slice, scenery spills past
-    for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of [base, top + 1.5]) {
+    for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of S.fitH || [base, top + 1.5]) { // S.fitH: a pocket frames the fragment's heights only
       const [a, b] = raw(x, y, hh); x0 = Math.min(x0, a); x1 = Math.max(x1, a); y0 = Math.min(y0, b); y1 = Math.max(y1, b);
     }
     const fit = Math.min((w - 20) / (x1 - x0), (h - 20) / (y1 - y0)), sc = (view.fitSc || fit) * view.zoom; // view.fitSc: the scale of the first panel, shared by all panels
@@ -2759,7 +2849,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   function tileOverlay(S, P, o, i) {
     const out = [];
-    if (S.pocket && !S.slice[i]) { const r = S.pocketRole[i]; return r === 4 ? ['rgba(52,142,222,0.95)'] : r === 3 ? [ROAD] : []; } // pocket: the decoration takes no tints and no marks; the pond is water, the exits are marked roads
+    if (S.pocket && !S.slice[i]) { const r = S.pocketRole[i]; return r === 3 ? [ROAD] : []; } // pocket: the decoration takes no tints and no marks; the pond is water, the exits are marked roads
     if (o.regions && S.region[i] >= 0) {
       const r = S.region[i], hue = (r * 137.5) % 360;
       out.push(`hsla(${hue},75%,55%,0.42)`);
@@ -3205,7 +3295,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, pocket: false, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
@@ -3218,7 +3308,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 300, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
     ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['stairStyle', 'Style: 0 steps · 1 ramp', 0, 1, 1], ['rampDepth', 'Ramp depth, tiles (fixed)', 1, 4, 1], ['tread', 'Tread rise, sub-terraces (steps only)', 1, 5, 1], ['stairW', 'Stair / ramp width, tiles (0 = none; steps use up to 3)', 0, 5, 1]]],
-    ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 6, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1]]],
+    ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 6, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1], ['pocketHeight', 'Pocket height (decoration relief x)', 1, 4, 0.1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
   const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
@@ -3264,6 +3354,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         const ic = lc.querySelector('input'); ic.checked = P.cake; ic.addEventListener('change', () => { P.cake = ic.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lc);
         const lk = document.createElement('label'); lk.className = 'tg'; lk.innerHTML = '<input type="checkbox" id="t-pocket"><span>Pocket view (a chosen Diorama room is drawn as its pocket; needs Rooms)</span>';
         const ik = lk.querySelector('input'); ik.checked = !!P.pocket; ik.addEventListener('change', () => { P.pocket = ik.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lk);
+        const lf = document.createElement('label'); lf.className = 'sl'; lf.innerHTML = '<span>Pocket framing</span><select id="pocketFraming"><option value="auto">Auto</option><option value="hill">Cerro</option><option value="lake">Lago</option><option value="falls">Cascada</option><option value="island">Isla</option><option value="drop">Caída</option></select>';
+        lf.querySelector('select').value = P.pocketFraming; lf.querySelector('select').addEventListener('change', (e) => { P.pocketFraming = e.target.value; refreshMessage(); invalidate(true); }); sl.appendChild(lf);
         const lp = document.createElement('label'); lp.className = 'sl'; lp.innerHTML = '<span>Rooms preset</span><select id="roomsPreset"><option value="default">Default</option><option value="balanced">Balanced types</option><option value="custom">Custom</option></select>';
         lp.querySelector('select').addEventListener('change', (e) => { if (e.target.value === 'custom') return; applyRoomsPreset(e.target.value); invalidate(true); }); sl.appendChild(lp);
       }
@@ -3679,7 +3771,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   }
   function pocketText() {
     const pi = S.pocketInfo; if (!pi) return P.pocket && sliceSel.rooms.size === 1 && S.types ? ` · Pocket view: room ${[...sliceSel.rooms][0]} is not a Diorama (normal slice)` : '';
-    return ` · <b>POCKET</b> of Diorama room ${pi.ids.join('+')}: fragment ${pi.fragTiles} tiles, pocket ${pi.pocketTiles} tiles (disc radius ${pi.R.toFixed(1)}${S.ox < 0 || S.oy < 0 || S.ox + S.W > S.mapW || S.oy + S.H > S.mapH ? ', window extends past the map edge (void)' : ''}), ${pi.exitRuns} exit${pi.exitRuns === 1 ? '' : 's'} (${pi.exitFaces} faces, ${pi.exitsReached} reached${pi.exitsBent ? `, ${pi.exitsBent} bent` : ''}), pond ${pi.pondTiles} tiles (limit ${pi.pondMax}), backdrop band ${pi.backDepth.toFixed(1)} tiles deep / ${pi.backTiles} tiles, ${pi.seeds} seeds, floors ${pi.floors.length ? pi.floors.join(' + ') : 'none'} (${pi.double ? `double${pi.cliffFacesCamera ? ', cliff facing the camera' : ''}` : 'single'})`;
+    return ` · <b>POCKET</b> of Diorama room ${pi.ids.join('+')}: fragment ${pi.fragTiles} tiles, pocket ${pi.pocketTiles} tiles (disc radius ${pi.R.toFixed(1)}${S.ox < 0 || S.oy < 0 || S.ox + S.W > S.mapW || S.oy + S.H > S.mapH ? ', window extends past the map edge (void)' : ''}), ${pi.exitRuns} exit${pi.exitRuns === 1 ? '' : 's'} (${pi.exitFaces} faces, ${pi.exitsReached} reached${pi.exitsBent ? `, ${pi.exitsBent} bent` : ''}), framing <b>${pi.archetypeName}</b> (${pi.auto ? 'auto: ' : ''}${pi.reason}), Pocket height ${pi.ph}, water ${pi.waterTiles} tiles${pi.archetype === 'hill' ? ` (pond limit ${pi.pondMax})` : ''}${pi.voidTiles ? `, void ${pi.voidTiles} tiles` : ''}${pi.channelTiles ? `, channel ${pi.channelTiles} tiles` : ''}, backdrop band ${pi.backDepth.toFixed(1)} tiles deep / ${pi.backTiles} tiles, ${pi.seeds} seeds, floors ${pi.floors.length ? pi.floors.join(' + ') : 'none'} (${pi.double ? `double${pi.cliffFacesCamera ? ', cliff facing the camera' : ''}` : 'single'})`;
   }
   function roomsText() {
     const r = S.rooms; if (!r) return '';
