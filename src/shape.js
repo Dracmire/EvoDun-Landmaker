@@ -327,6 +327,7 @@
       const ty = E.roomTypes.classify(RL, P); S.types = ty; S.roomType = new Uint8Array(n);
       for (let i = 0; i < n; i++) if (!(vd && vd[i])) S.roomType[i] = ty.type[(((i / W) | 0) + S.oy) * S.mapW + (i % W) + S.ox] || 0;
       if (P.cake) E.roomTypes.cake(S, P, RL, q, ty);
+      if (P.ascWalls && S.roomMap && S.roomKind && !pocketIds) S.ascWalls = E.roomTypes.ascWalls(S, P, RL, ty);
       if (S.roomMap && !pocketIds) { // footprint outline of every Diorama (Display toggle): the faces toward a tile of another room or toward void; roomBitsDio = the border bits plus these
         const db = new Uint8Array(n), bd = Uint8Array.from(S.roomBits), OFF2 = [[0, -1], [1, 0], [0, 1], [-1, 0]];
         for (let i = 0; i < n; i++) { const r = S.roomMap[i]; if (r <= 0 || (vd && vd[i])) continue; const o = ty.rooms.get(r); if (!o || o.type !== E.roomTypes.DIORAMA) continue; const x = i % W, y = (i / W) | 0;
