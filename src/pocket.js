@@ -169,6 +169,7 @@
     S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []); for (let i = 0; i < n; i++) if (!vd[i]) S.byLevel[S.fine[i]].push(i);
     S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < n; i++) if (vd[i]) S.fineMask[i] = -1;
     for (let i = 0; i < n; i++) if (plan.role[i] >= 2) S.block[i] = 1; // not walkable
+    { let x0 = W, y0 = H, x1 = 0, y1 = 0; for (let i = 0; i < n; i++) if (plan.role[i]) { const x = i % W, y = (i / W) | 0; if (x < x0) x0 = x; if (x + 1 > x1) x1 = x + 1; if (y < y0) y0 = y; if (y + 1 > y1) y1 = y + 1; } S.sliceBox = { x0, y0, x1, y1 }; } // the camera fits the whole pocket
     S.pocket = true; S.pocketRole = plan.role; S.pocketPlan = plan;
     const fl = P_.floors(S, frag, (i) => RL.forb[mapOf(i)] !== 1 && RL.h[mapOf(i)] > 0), dbl = fl.length >= 2; let faces = null;
     if (dbl) { const hi2 = fl.slice().sort((a, b) => b.h - a.h), A = hi2[0], B = hi2[hi2.length - 1], u = plan.disc.u; faces = (A.cx - B.cx) * u[0] + (A.cy - B.cy) * u[1] < 0; } // the higher floor is farther from the camera: the cliff between them faces the camera

@@ -106,16 +106,16 @@
     ctx.restore();
   }
   /* Room borders: a line on every face between two rooms that blocks (orange); an open transition is a gap; the ones the tree uses are green. */
-  const ROOM_COLORS = { 1: 'rgba(255,150,40,0.98)', 2: 'rgba(70,232,130,0.98)', 3: 'rgba(40,110,255,0.98)' }; // 3 = the warning outline of an edge-problem region (electric blue, dashed: white is the slice border at the map edge, cyan the passes, pink the route)
-  function roomFaces(list, S, cam, i, b, hh, o) { if (S.pocket && !S.slice[i]) return; const k = S.roomKind[i * 4 + b]; if (k === 3 ? !o.edgeWarn : !o.roomBorders) return; const x = i % S.W, y = (i / S.W) | 0, f = FACE[b]; list.push([cam.p(x + f[0], y + f[1], hh), cam.p(x + f[2], y + f[3], hh), k]); }
+  const ROOM_COLORS = { 4: 'rgba(255,226,40,0.99)', 1: 'rgba(255,150,40,0.98)', 2: 'rgba(70,232,130,0.98)', 3: 'rgba(40,110,255,0.98)' }; // 3 = the warning outline of an edge-problem region (electric blue, dashed: white is the slice border at the map edge, cyan the passes, pink the route)
+  function roomFaces(list, S, cam, i, b, hh, o) { if (S.pocket && !S.slice[i]) return; let k = S.roomKind[i * 4 + b]; if (o.dioOutline && S.dioBits && (S.dioBits[i] >> b & 1)) k = 4; else if (!k || (k === 3 ? !o.edgeWarn : !o.roomBorders)) return; const x = i % S.W, y = (i / S.W) | 0, f = FACE[b]; list.push([cam.p(x + f[0], y + f[1], hh), cam.p(x + f[2], y + f[3], hh), k]); }
   function strokeRoomFaces(ctx, list) {
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     const path = new Path2D(); for (const [p, q] of list) { path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]); }
     ctx.strokeStyle = BORDER_CASE; ctx.lineWidth = 3.4; ctx.stroke(path);
-    for (const kind of [1, 2, 3]) {
+    for (const kind of [1, 2, 3, 4]) {
       const pp = new Path2D(); let any = false;
       for (const [p, q, k] of list) if (k === kind) { pp.moveTo(p[0], p[1]); pp.lineTo(q[0], q[1]); any = true; }
-      if (any) { ctx.strokeStyle = ROOM_COLORS[kind]; ctx.lineWidth = 1.8; if (kind === 3) { ctx.lineCap = 'butt'; ctx.setLineDash([3, 2.5]); } ctx.stroke(pp); ctx.setLineDash([]); ctx.lineCap = 'round'; }
+      if (any) { ctx.strokeStyle = ROOM_COLORS[kind]; ctx.lineWidth = kind === 4 ? 2.6 : 1.8; if (kind === 3) { ctx.lineCap = 'butt'; ctx.setLineDash([3, 2.5]); } ctx.stroke(pp); ctx.setLineDash([]); ctx.lineCap = 'round'; }
     }
     ctx.restore();
   }
@@ -414,10 +414,11 @@
           if ((S.border[i2] >> b & 1) && rank[i2] < rank[i]) face(i2, b);
         }
       }
-      if ((o.roomBorders || o.edgeWarn) && S.roomBits && !PICK && S.roomBits[i]) { // each face is drawn once, after the later (painter order) of its two tiles
+      const RB = o.dioOutline && S.roomBitsDio ? S.roomBitsDio : S.roomBits;
+      if ((o.roomBorders || o.edgeWarn || o.dioOutline) && RB && !PICK && RB[i]) { // each face is drawn once, after the later (painter order) of its two tiles
         const bp = [];
         for (let b = 0; b < 4; b++) {
-          if (!(S.roomBits[i] >> b & 1)) continue;
+          if (!(RB[i] >> b & 1)) continue;
           const j = (y + dirs[b][1]) * W + x + dirs[b][0]; if (rank[j] > rank[i]) continue;
           roomFaces(bp, S, cam, i, b, Math.max(hh, S.levelH[S.fine[j]]), o);
         }
@@ -512,11 +513,12 @@
         for (const i of S.byLevel[L]) if (S.border[i]) borderFaces(bp, S, cam, i, S.border[i], ht);
         if (bp.length) strokeBorder(ctx, bp);
       }
-      if ((o.roomBorders || o.edgeWarn) && S.roomBits && !PICK) { // a face belongs to the higher of its two tiles (the lower index when they are level)
+      const RB = o.dioOutline && S.roomBitsDio ? S.roomBitsDio : S.roomBits;
+      if ((o.roomBorders || o.edgeWarn || o.dioOutline) && RB && !PICK) { // a face belongs to the higher of its two tiles (the lower index when they are level)
         const bp = [], dd = [[0, -1], [1, 0], [0, 1], [-1, 0]];
         for (const i of S.byLevel[L]) {
-          if (!S.roomBits[i]) continue; const x = i % S.W, y = (i / S.W) | 0;
-          for (let b = 0; b < 4; b++) { if (!(S.roomBits[i] >> b & 1)) continue; const j = (y + dd[b][1]) * S.W + x + dd[b][0]; if (S.fine[j] > L || (S.fine[j] === L && j < i)) continue; roomFaces(bp, S, cam, i, b, ht, o); }
+          if (!RB[i]) continue; const x = i % S.W, y = (i / S.W) | 0;
+          for (let b = 0; b < 4; b++) { if (!(RB[i] >> b & 1)) continue; const j = (y + dd[b][1]) * S.W + x + dd[b][0]; if (S.fine[j] > L || (S.fine[j] === L && j < i)) continue; roomFaces(bp, S, cam, i, b, ht, o); }
         }
         if (bp.length) strokeRoomFaces(ctx, bp);
       }

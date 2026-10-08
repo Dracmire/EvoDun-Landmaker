@@ -331,6 +331,12 @@
       const ty = E.roomTypes.classify(RL, P); S.types = ty; S.roomType = new Uint8Array(n);
       for (let i = 0; i < n; i++) if (!(vd && vd[i])) S.roomType[i] = ty.type[(((i / W) | 0) + S.oy) * S.mapW + (i % W) + S.ox] || 0;
       if (P.cake) E.roomTypes.cake(S, P, RL, q, ty);
+      if (S.roomMap && !pocketIds) { // footprint outline of every Diorama (Display toggle): the faces toward a tile of another room or toward void; roomBitsDio = the border bits plus these
+        const db = new Uint8Array(n), bd = Uint8Array.from(S.roomBits), OFF2 = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+        for (let i = 0; i < n; i++) { const r = S.roomMap[i]; if (r <= 0 || (vd && vd[i])) continue; const o = ty.rooms.get(r); if (!o || o.type !== E.roomTypes.DIORAMA) continue; const x = i % W, y = (i / W) | 0;
+          for (let b = 0; b < 4; b++) { const nx = x + OFF2[b][0], ny = y + OFF2[b][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H || S.roomMap[ny * W + nx] !== r) { db[i] |= 1 << b; bd[i] |= 1 << b; } } }
+        S.dioBits = db; S.roomBitsDio = bd;
+      }
     }
     if (pocketIds) E.pocket.apply(S, P, RL, pocketIds, { ids: seedIds }); // the pocket of a Diorama: the fragment stays, the surroundings change
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
