@@ -1,8 +1,8 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
-  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, roomTint: false, typeTint: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, pocket: false, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
+  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
     { id: 'low', label: 'Low 28°', yaw: 0, pitch: 28 },
@@ -17,7 +17,7 @@
     ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 6, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
-  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
+  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
   const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field']];
 
   const packs = {};
@@ -58,6 +58,8 @@
         const i = l.querySelector('input'); i.checked = P.rooms; i.addEventListener('change', () => { P.rooms = i.checked; refreshMessage(); invalidate(true); }); sl.appendChild(l);
         const lc = document.createElement('label'); lc.className = 'tg'; lc.innerHTML = '<input type="checkbox" id="t-cake"><span>Cake rings (room type Cake; needs Rooms)</span>';
         const ic = lc.querySelector('input'); ic.checked = P.cake; ic.addEventListener('change', () => { P.cake = ic.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lc);
+        const lk = document.createElement('label'); lk.className = 'tg'; lk.innerHTML = '<input type="checkbox" id="t-pocket"><span>Pocket view (a chosen Diorama room is drawn as its pocket; needs Rooms)</span>';
+        const ik = lk.querySelector('input'); ik.checked = !!P.pocket; ik.addEventListener('change', () => { P.pocket = ik.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lk);
         const lp = document.createElement('label'); lp.className = 'sl'; lp.innerHTML = '<span>Rooms preset</span><select id="roomsPreset"><option value="default">Default</option><option value="balanced">Balanced types</option><option value="custom">Custom</option></select>';
         lp.querySelector('select').addEventListener('change', (e) => { if (e.target.value === 'custom') return; applyRoomsPreset(e.target.value); invalidate(true); }); sl.appendChild(lp);
       }
@@ -117,6 +119,7 @@
     $('#stage').addEventListener('pointerup', (e) => {
       const moved = drag ? Math.hypot(e.clientX - drag.x, e.clientY - drag.y) : 99, was = drag; drag = null;
       if (inc.mode && was && !was.shift && e.button === 0 && moved < 4) clickMap(e);
+      else if (!inc.mode && P.pocket && P.rooms && was && !was.shift && e.button === 0 && moved < 4) clickRoom(e);
     });
     $('#stage').addEventListener('dblclick', () => $('#reset').click());
     $('#stage').addEventListener('contextmenu', (e) => e.preventDefault());
@@ -157,6 +160,19 @@
       if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
       const hit = E.pickTile(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top);
       return placeMark(hit.tile);
+    }
+  }
+  /* Pocket view: a click in the world on a Diorama chooses that room (the same as its chip); in the pocket itself a click does nothing (another chip or Whole map goes back) */
+  function clickRoom(e) {
+    if (!S || !S.roomMap || S.pocket) return;
+    const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
+    for (let k = 0; k < figs.length; k++) {
+      const cv = figs[k].querySelector('canvas'), r = cv.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
+      const hit = E.pickTile(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top);
+      const id = hit.tile >= 0 ? S.roomMap[hit.tile] : 0, o = id > 0 && S.types ? S.types.rooms.get(id) : null;
+      if (o && o.type === E.roomTypes.DIORAMA) { sliceSel.whole = false; sliceSel.rooms.clear(); sliceSel.rooms.add(id); syncRoomChips(); refreshMessage(); invalidate(true); }
+      return;
     }
   }
   function placeMark(tile) {
@@ -457,21 +473,20 @@
     const v = S.stairInfo.variants; if (v && v.length > 1) t += ` · ramp variants: ${v.map((k, i) => (i ? S.stairInfo.variantLabels[i] : 'as planned') + ' ' + k).join(', ')}` + (S.unmerged ? ` · ${S.unmerged} pairs not merged (own ramp)` : '');
     return t;
   }
+  function pocketText() {
+    const pi = S.pocketInfo; if (!pi) return P.pocket && sliceSel.rooms.size === 1 && S.types ? ` · Pocket view: room ${[...sliceSel.rooms][0]} is not a Diorama (normal slice)` : '';
+    return ` · <b>POCKET</b> of Diorama room ${pi.ids.join('+')}: fragment ${pi.fragTiles} tiles, pocket ${pi.pocketTiles} tiles (disc radius ${pi.R.toFixed(1)}${S.ox < 0 || S.oy < 0 || S.ox + S.W > S.mapW || S.oy + S.H > S.mapH ? ', window extends past the map edge (void)' : ''}), ${pi.exitRuns} exit${pi.exitRuns === 1 ? '' : 's'} (${pi.exitFaces} faces, ${pi.exitsReached} reached${pi.exitsBent ? `, ${pi.exitsBent} bent` : ''}), pond ${pi.pondTiles} tiles (limit ${pi.pondMax}), backdrop band ${pi.backDepth.toFixed(1)} tiles deep / ${pi.backTiles} tiles, ${pi.seeds} seeds, floors ${pi.floors.length ? pi.floors.join(' + ') : 'none'} (${pi.double ? `double${pi.cliffFacesCamera ? ', cliff facing the camera' : ''}` : 'single'})`;
+  }
   function roomsText() {
     const r = S.rooms; if (!r) return '';
     const rb = S.roomBorderInfo, rbt = rb ? ` · room borders: ${rb.closed} blocking faces (orange) · ${rb.open} open transitions (gap) · ${rb.used} on a tree path (green)` : '';
     const u = r.usage, tr = r.treeReach, ms = st.rooms ? st.rooms.total.toFixed(0) : '?';
     return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree (graph) · largest walkable region ${(Math.max(...S.regionSizes, 0) / S.landTiles * 100).toFixed(0)}% of the ${S.slice ? 'slice' : 'land'}${roomsSliceText()}${connText()}${rbt} · ${ms} ms${st.cold ? ' (cold)' : ''}` + walkText();
   }
-  function bubbleText() { // mock-up (P.dioBubble): the background of a Diorama scene
-    const b = S.bubbleInfo; if (!b) return '';
-    const e = b.edge, pc = (v) => (e.faces ? (v / e.faces * 100).toFixed(0) : 0) + ' %';
-    return `<br><b>Diorama bubble (mock-up)</b>: ${b.tiles} background tiles around the room (${b.roomTiles} tiles, equivalent radius ${b.r.toFixed(1)}, bubble radius ${b.R.toFixed(1)} = ${b.factor} x) · its ${e.faces} perimeter faces: ${e.bubble} toward the bubble (${pc(e.bubble)}), ${e.open} open, transition or ramp (${pc(e.open)}), ${e.void} void` + (e.beyond ? `, ${e.beyond} beyond the radius` : '');
-  }
   function typesText() {
     const t = S.types; if (!t || !(P.cake || O.typeTint)) return ''; // shown with the Cake switch or the type tint on (the canvas size must not change otherwise)
     const c = t.counts, k = S.cake;
-    let x = `<br><b>Room types</b> (V16.4 rule, neighbours instead of lobby platforms): ${c.cake} Cake (${c.bowl} bowls, ${c.pyramid} pyramids) · ${c.diorama} Diorama · ${c.ascension} Ascension of ${t.rooms.size} rooms`;
+    let x = `<br><b>Room types</b> (V16.4 rule, neighbours instead of lobby platforms): ${c.cake} Cake (${c.bowl} bowls, ${c.pyramid} pyramids) · ${c.diorama} Diorama · ${c.ascension} Ascension of ${t.rooms.size} rooms` + (c.dioDemoted ? ` (rule "Diorama never touches Diorama": ${c.dioDemoted} Dioramas of ${c.diorama + c.dioDemoted} became Ascension, ${c.dioDemotedTiles} tiles)` : '');
     if (P.cake && k) x += ` · Cake rings ON: ${k.down} bowl + ${k.up} pyramid links built, ${k.flat} links without rings, ${k.tiles} ring tiles, ${k.levelsAdded} levels added` + (k.conflicts ? `, ${k.conflicts} tiles claimed twice` : '');
     return x;
   }
@@ -490,7 +505,7 @@
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + bubbleText();
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + pocketText();
   }
 
   function init() {
@@ -498,7 +513,7 @@
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

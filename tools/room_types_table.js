@@ -1,4 +1,4 @@
-/* Room types against the generator's EXISTING parameters (no new logic): real map, rooms on, Cake off. For each row: rooms, types Cake/Diorama/Ascension, ramps, main region
+/* Room types against the generator's EXISTING parameters (no new logic): real map, rooms on, Cake off. Types with the plain V16.4 rule and with the rule "Diorama never touches Diorama" (P.dioNoTouch, default ON; connected = at least 3 open transition pairs). For each row: rooms, types Cake/Diorama/Ascension, ramps, main region
    (% of the land), walkable (% of the land), edge problems. Rows 1-6 reproduce the user's table (measured in the viewer); 7-8 add minPlateau 120 / 250 to the balanced preset.
      node tools/room_types_table.js */
 const fs = require('fs'), path = require('path'), vm = require('vm');
@@ -15,6 +15,6 @@ exports.ROWS = ROWS; exports.BASE = BASE;
 exports.run = (mk, extra, over) => { const S = E.shape(mk(), { ...BASE, ...extra, ...(over || {}) }, null), c = S.types.counts, w = S.walkInfo; return { S, rooms: S.types.rooms.size, c, ramps: S.stairs.length, main: w.main, walk: w.walkable, land: S.landTiles, problems: w.problems.length }; };
 if (require.main === module) (async () => {
   const { mk } = await require('./real_pack.js').load(E);
-  console.log('row | rooms | Cake/Diorama/Ascension | ramps | main % of land | walkable % of land | edge problems');
-  for (const [name, extra] of ROWS) { const r = exports.run(mk, extra); console.log(`${name} | ${r.rooms} | ${r.c.cake}/${r.c.diorama}/${r.c.ascension} | ${r.ramps} | ${(r.main / r.land * 100).toFixed(1)} % | ${(r.walk / r.land * 100).toFixed(1)} % | ${r.problems}`); }
+  console.log('row | rooms | Cake/Diorama/Ascension (V16.4 rule) | with "Diorama never touches Diorama" (demoted, tiles) | ramps | main % of land | walkable % of land | edge problems');
+  for (const [name, extra] of ROWS) { const r = exports.run(mk, extra, { dioNoTouch: false }), d = exports.run(mk, extra); console.log(`${name} | ${r.rooms} | ${r.c.cake}/${r.c.diorama}/${r.c.ascension} | ${d.c.cake}/${d.c.diorama}/${d.c.ascension} (${d.c.dioDemoted}, ${d.c.dioDemotedTiles}) | ${r.ramps} | ${(r.main / r.land * 100).toFixed(1)} % | ${(r.walk / r.land * 100).toFixed(1)} % | ${r.problems}`); }
 })();
