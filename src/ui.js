@@ -463,6 +463,11 @@
     const u = r.usage, tr = r.treeReach, ms = st.rooms ? st.rooms.total.toFixed(0) : '?';
     return `<br><b>Rooms</b>: ${r.stats.rooms} rooms · ${r.alive.length} cores (min ${r.prm.minCore} tiles) · tree ${tr.largest} of ${r.reach.length} reachable cores in ${tr.trees} tree${tr.trees === 1 ? '' : 's'} · gates ${u.usedGateGroups} used of ${r.gateStats.groups} candidates · room transitions ${r.expand.transitionPairs} pairs (${u.usedRoomGroups} of ${u.roomGroups} groups on a tree path) · ${(u.bigCoreTiles / r.stats.land * 100).toFixed(0)}% of the land in the largest tree (graph) · largest walkable region ${(Math.max(...S.regionSizes, 0) / S.landTiles * 100).toFixed(0)}% of the ${S.slice ? 'slice' : 'land'}${roomsSliceText()}${connText()}${rbt} · ${ms} ms${st.cold ? ' (cold)' : ''}` + walkText();
   }
+  function bubbleText() { // mock-up (P.dioBubble): the background of a Diorama scene
+    const b = S.bubbleInfo; if (!b) return '';
+    const e = b.edge, pc = (v) => (e.faces ? (v / e.faces * 100).toFixed(0) : 0) + ' %';
+    return `<br><b>Diorama bubble (mock-up)</b>: ${b.tiles} background tiles around the room (${b.roomTiles} tiles, equivalent radius ${b.r.toFixed(1)}, bubble radius ${b.R.toFixed(1)} = ${b.factor} x) · its ${e.faces} perimeter faces: ${e.bubble} toward the bubble (${pc(e.bubble)}), ${e.open} open, transition or ramp (${pc(e.open)}), ${e.void} void` + (e.beyond ? `, ${e.beyond} beyond the radius` : '');
+  }
   function typesText() {
     const t = S.types; if (!t || !(P.cake || O.typeTint)) return ''; // shown with the Cake switch or the type tint on (the canvas size must not change otherwise)
     const c = t.counts, k = S.cake;
@@ -485,7 +490,7 @@
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText();
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + bubbleText();
   }
 
   function init() {

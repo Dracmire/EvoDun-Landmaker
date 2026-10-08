@@ -223,6 +223,11 @@
   E.shape = function (full, P, spec) {
     const RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: the global tree gives the gates, sub-terraces are only visual
     if (RL && spec && spec.rooms && spec.rooms.length) spec = Object.assign({}, spec, { roomMap: RL.room });
+    let bubble = null; // MOCK-UP (diagnostic flag P.dioBubble = factor): a Diorama room as the slice gets a BACKGROUND bubble around it (see E.roomTypes.bubble); the window grows to hold it
+    if (RL && E.roomTypes && P.dioBubble > 0 && spec && spec.rooms && spec.rooms.length === 1) {
+      bubble = E.roomTypes.bubble(RL, spec.rooms[0], P.dioBubble, P);
+      if (bubble) spec = Object.assign({}, spec, { margin: Math.max(spec.margin === undefined || spec.margin === null ? 24 : spec.margin, bubble.need + 1) });
+    }
     const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
     const W = pack.width, H = pack.height, n = W * H, N = P.terraces, K = P.subs;
     const q = quantize(full, P);
@@ -279,6 +284,13 @@
         S.borderKind[i * 4 + b] = kind; S.borderInfo[['', 'barrier', 'pass', 'none', 'mapEdge'][kind]]++;
       }
       S.sliceLoops = E.maskLoops(W, H, (x, y) => mask[y * W + x] === 1);
+      if (bubble) { // the three planes: SCENE (the room = the slice), BACKGROUND (the bubble: not walkable, no marks, painted as a backdrop), VEIL (the rest)
+        S.bg = new Uint8Array(n); S.bgT = new Float32Array(n); const bm = cropArr(bubble.mask, full.width, sl.x0, sl.y0, W, H), bt = cropArr(bubble.t, full.width, sl.x0, sl.y0, W, H);
+        for (let i = 0; i < n; i++) if (bm[i] && !mask[i] && !(vd && vd[i])) { S.bg[i] = 1; S.bgT[i] = bt[i]; }
+        S.openLoops = E.maskLoops(W, H, (x, y) => mask[y * W + x] === 1 || S.bg[y * W + x] === 1);
+        S.bgBands = [0, 0.2, 0.4, 0.6, 0.8].map((th) => E.maskLoops(W, H, (x, y) => S.bg[y * W + x] === 1 && S.bgT[y * W + x] >= th)); // nested polygons: the darkening steps toward the silhouette
+        S.bubbleInfo = { tiles: bubble.tiles, roomTiles: bubble.roomTiles, r: bubble.r, R: bubble.R, factor: bubble.factor, edge: bubble.edge };
+      }
       const warnings = [];
       if (spec.zones && spec.zones.length) {
         const pieces = E.zonePieces(full);

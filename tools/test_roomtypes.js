@@ -79,6 +79,24 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
   ok('a link whose gap is not above the margin builds nothing (flat), never a zero-thickness ring', R.links[0].flat === true && R.claim.size === 0, JSON.stringify(R.links[0]));
 }
 
+/* ---- Diorama bubble (mock-up, P.dioBubble): the background around a Diorama room; hand-made map surrounded by void ---- */
+{
+  const W = 24, H = 14, R = (room, x0, y0, x1, y1) => ({ room, ter: 0, x0, y0, x1, y1 });
+  const RL = fake(W, H, [R(1, 4, 3, 9, 8), R(2, 10, 5, 23, 5), R(5, 0, 5, 3, 6), R(6, 4, 0, 23, 2), R(8, 0, 3, 3, 4), R(9, 0, 7, 3, 8), R(10, 6, 9, 6, 13)], [[6, 8, 6, 9]],
+    [[9, 5, 10, 5], [3, 3, 4, 3], [3, 7, 4, 7]]);
+  // room 10 is a 1-wide corridor under room 1 behind a used gate (void on both sides)
+  RL.h = Float32Array.from(RL.room, (r) => (r > 0 ? 1 : 0));
+  const o = T.classify(RL, P0).rooms.get(1), b = T.bubble(RL, 1, 3, P0), at = (x, y) => y * W + x;
+  ok('bubble: room 1 (3 doors) is a Diorama, and only a Diorama gets a bubble', o.type === T.DIORAMA && T.bubble(RL, 2, 3, P0) === null && T.bubble(RL, 6, 3, P0) === null, o.type);
+  ok('bubble: radius = factor x sqrt(tiles / pi) (36 tiles -> r 3.385, R 10.155)', Math.abs(b.r - Math.sqrt(36 / Math.PI)) < 1e-9 && Math.abs(b.R - 3 * b.r) < 1e-9);
+  ok('bubble: grows across CLOSED borders (the rooms above and to the left of its closed faces)', b.mask[at(6, 2)] && b.mask[at(1, 5)] && b.mask[at(5, 1)]);
+  ok('bubble: never inside the room, never on void, never beyond R from the centroid', (() => { let bad = 0; for (let i = 0; i < W * H; i++) if (b.mask[i]) { const x = i % W + 0.5, y = ((i / W) | 0) + 0.5; if (RL.room[i] === 1 || RL.h[i] <= 0 || Math.hypot(x - 7, y - 6) > b.R + 1e-9) bad++; } return bad === 0; })());
+  ok('bubble: never across a room transition (the corridor of room 2 behind a door, void on both sides, stays out)', !b.mask[at(10, 5)] && !b.mask[at(11, 5)] && !b.mask[at(14, 5)], [b.mask[at(10, 5)], b.mask[at(11, 5)]]);
+  ok('bubble: never across a used gate (a ramp): the corridor of room 10 behind the gate stays out', !b.mask[at(6, 9)] && !b.mask[at(6, 10)], [b.mask[at(6, 9)], b.mask[at(6, 10)]]);
+  ok('bubble: the faces of the perimeter add up (bubble + open + void + beyond = faces)', b.edge.bubble + b.edge.open + b.edge.void + b.edge.beyond === b.edge.faces && b.edge.open >= 3 && b.edge.faces === 24, JSON.stringify(b.edge));
+  ok('bubble: off (factor 0) gives no bubble', T.bubble(RL, 1, 0, P0) === null);
+}
+
 /* ---- the real map (like the viewer) ---- */
 (async () => {
   const { mk } = await require('./real_pack.js').load(E);
@@ -152,6 +170,18 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
     check('Balanced types preset (3 terraces, core 100, radius 5, minPlateau 120)', b0, b1);
     console.log(`  info: Balanced types + Cake: ${b1.cake.down} bowls + ${b1.cake.up} pyramids, ${b1.cake.flat} flat links, ${b1.cake.tiles} ring tiles, ${b1.cake.levelsAdded} levels added (${b0.maxFine + 1} -> ${b1.maxFine + 1})`);
     const d9 = run({ ...P0, rRadius: 9 }); ok('rRadius 9 is the default: the same levels and tiles as without the parameter', d9.fine.every((v, i) => v === base.fine[i]) && JSON.stringify(d9.levelH) === JSON.stringify(base.levelH));
+  }
+  { // Diorama as the slice with the bubble: three planes, the bubble is not walkable and takes no marks; flag off = nothing changes
+    const PB = { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 }, base0 = run(PB), dio = [...base0.types.rooms.values()].filter((r) => r.type === T.DIORAMA).sort((p, q) => p.tiles - q.tiles), id = dio[(dio.length / 2) | 0].id;
+    const a0 = run(PB, { rooms: [id], margin: 6 }), a1 = run({ ...PB, dioBubble: 3 }, { rooms: [id], margin: 6 });
+    ok('bubble flag off: no bubble data on the shape', a0.bg === undefined && a0.bubbleInfo === undefined && a0.openLoops === undefined);
+    ok(`bubble on (Diorama room ${id}): ${a1.bubbleInfo.tiles} background tiles around the ${a1.bubbleInfo.roomTiles} of the room, none of them in the slice, none on void`, a1.bg && a1.bubbleInfo.tiles > 0 && a1.bg.reduce((t, v) => t + v, 0) === a1.bubbleInfo.tiles && a1.bg.every((v, i) => !v || (!a1.slice[i] && !(a1.void && a1.void[i]))));
+    ok('bubble: not walkable (blocked, in no region), takes no mark', a1.bg.every((v, i) => !v || (a1.block[i] === 1 && a1.region[i] < 0 && !E.tileWalkable(a1, i))));
+    ok('bubble: the window is big enough for the whole bubble (grown margin)', a1.W >= a0.W && a1.H >= a0.H);
+    ok('bubble: the scene is the same (walkable, main region, connections, regions)', a0.walkInfo.walkable === a1.walkInfo.walkable && a0.walkInfo.main === a1.walkInfo.main && JSON.stringify(a0.regionSizes) === JSON.stringify(a1.regionSizes) && JSON.stringify([a0.connInfo.ok, a0.connInfo.recomputed, a0.connInfo.unresolved]) === JSON.stringify([a1.connInfo.ok, a1.connInfo.recomputed, a1.connInfo.unresolved]));
+    const nd = base0.types.rooms.size && [...base0.types.rooms.values()].find((r) => r.type !== T.DIORAMA), n1 = run({ ...PB, dioBubble: 3 }, { rooms: [nd.id], margin: 6 });
+    ok('bubble: a room that is not a Diorama gets none', n1.bg === undefined);
+    console.log(`  info: Diorama room ${id}: ${a1.bubbleInfo.roomTiles} tiles, bubble ${a1.bubbleInfo.tiles} tiles (r ${a1.bubbleInfo.r.toFixed(1)}, R ${a1.bubbleInfo.R.toFixed(1)}); perimeter faces ${JSON.stringify(a1.bubbleInfo.edge)}`);
   }
   { const sp = { rooms: [8], margin: 6 }, a = run(P0, sp), b = run({ ...P0, cake: true }, sp); check('slice = room 8', a, b);
     const whole = base.roomType, mi = (i) => (((i / b.W) | 0) + b.oy) * b.mapW + (i % b.W) + b.ox; let diff = 0; for (let i = 0; i < b.n; i++) if (b.roomType[i] !== (b.void && b.void[i] ? 0 : whole[mi(i)])) diff++;
