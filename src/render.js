@@ -18,6 +18,7 @@
   function levelColor(S, L, P) {
     if (DBG) return [128, 128, 128];
     const K = P.subs, m = S.levelMeta[L];
+    if (m.water) return [52, 142, 222]; // pocket water: a level of its own with its own colour
     const at = (ter, mi) => { // colour of terrace `ter`, sub-terrace `mi`
       const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
       const lift = 1 + (mi - (K - 1) / 2) * 0.05;
@@ -35,14 +36,14 @@
   function makeCam(S, P, view, w, h) {
     const yaw = view.yaw * Math.PI / 180, pit = view.pitch * Math.PI / 180;
     const cy = Math.cos(yaw), sy = Math.sin(yaw), sp = Math.sin(pit), cp = Math.cos(pit);
-    const base = S.levelH[0] - P.terH, top = S.levelH[S.maxFine];
+    const base = S.baseH !== undefined ? S.baseH : S.levelH[0] - P.terH, top = S.levelH[S.maxFine]; // S.baseH: a pocket over the void has a deep base of its own
     const raw = (x, y, hh) => {
       const X = x - S.W / 2, Y = y - S.H / 2;
       return [cy * X - sy * Y, (sy * X + cy * Y) * sp - hh * cp];
     };
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     const fb = S.sliceBox ? [S.sliceBox.x0 - 2, S.sliceBox.y0 - 2, S.sliceBox.x1 + 2, S.sliceBox.y1 + 2] : [0, 0, S.W, S.H]; // fit the slice, scenery spills past
-    for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of [base, top + 1.5]) {
+    for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of S.fitH || [base, top + 1.5]) { // S.fitH: a pocket frames the fragment's heights only
       const [a, b] = raw(x, y, hh); x0 = Math.min(x0, a); x1 = Math.max(x1, a); y0 = Math.min(y0, b); y1 = Math.max(y1, b);
     }
     const fit = Math.min((w - 20) / (x1 - x0), (h - 20) / (y1 - y0)), sc = (view.fitSc || fit) * view.zoom; // view.fitSc: the scale of the first panel, shared by all panels
@@ -149,7 +150,7 @@
 
   function tileOverlay(S, P, o, i) {
     const out = [];
-    if (S.pocket && !S.slice[i]) { const r = S.pocketRole[i]; return r === 4 ? ['rgba(52,142,222,0.95)'] : r === 3 ? [ROAD] : []; } // pocket: the decoration takes no tints and no marks; the pond is water, the exits are marked roads
+    if (S.pocket && !S.slice[i]) { const r = S.pocketRole[i]; return r === 3 ? [ROAD] : []; } // pocket: the decoration takes no tints and no marks; the pond is water, the exits are marked roads
     if (o.regions && S.region[i] >= 0) {
       const r = S.region[i], hue = (r * 137.5) % 360;
       out.push(`hsla(${hue},75%,55%,0.42)`);
