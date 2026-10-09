@@ -26,8 +26,7 @@ const PAGE = async ({ nRuns, px, only }) => {
       quad(V(x, y, h), V(x + 1, y, h), V(x + 1, y + 1, h), V(x, y + 1, h), 2);
       for (const [dx, dy, ax, ay, bx, by] of [[0, -1, 0, 0, 1, 0], [1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1], [-1, 0, 0, 1, 0, 0]]) { const nx = x + dx, ny = y + dy, out = nx < 0 || ny < 0 || nx >= W || ny >= H || isVoid(ny * W + nx), hn = out ? cam.base : hOf(ny * W + nx); if (hn >= h - 1e-6) continue; quad(V(x + ax, y + ay, hn), V(x + bx, y + by, hn), V(x + bx, y + by, h), V(x + ax, y + ay, h), 3); } }
     for (const w of S.ascWalls.faces) { // the wall boxes, with the cut of this camera
-      const low = E.roomTypes.ascWallLow(w, cam), T = E.roomTypes, hb = w.hb, ht = hb + (low ? T.ASC_LOW : T.ASC_H), t = T.ASC_T / 2;
-      const x0 = w.dir === 0 ? w.x + 1 - t : w.x, x1 = w.dir === 0 ? w.x + 1 + t : w.x + 1, y0 = w.dir === 0 ? w.y : w.y + 1 - t, y1 = w.dir === 0 ? w.y + 1 : w.y + 1 + t;
+      const low = E.roomTypes.ascWallLow(w, cam), T = E.roomTypes, hb = w.hb, ht = hb + (low ? T.ASC_LOW : S.ascWalls.height), [x0, x1, y0, y1] = T.ascBox(w);
       for (const [ax, ay, bx, by] of [[x0, y0, x1, y0], [x1, y0, x1, y1], [x1, y1, x0, y1], [x0, y1, x0, y0]]) quad(V(ax, ay, hb), V(bx, by, hb), V(bx, by, ht), V(ax, ay, ht), 1);
       quad(V(x0, y0, ht), V(x1, y0, ht), V(x1, y1, ht), V(x0, y1, ht), 1);
     }
@@ -41,7 +40,7 @@ const PAGE = async ({ nRuns, px, only }) => {
         const view = { yaw, pitch, zoom: 1, panX: 0, panY: 0 }; let cam = E.makeCam(S, P, view, CW, CH); view.zoom = px / cam.sc; cam = E.makeCam(S, P, view, CW, CH);
         const c = cam.p(cx, cyy, fm.hb); view.panX = CW / 2 - c[0]; view.panY = CH / 2 - c[1]; cam = E.makeCam(S, P, view, CW, CH);
         E.render(cv, S, P, tech, view, { debug: true }); const img = cv.getContext('2d').getImageData(0, 0, CW, CH).data, ref = reference(S, cam, view);
-        let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (const f of fs) for (const [ox, oy] of f.dir === 0 ? [[f.x + 1, f.y], [f.x + 1, f.y + 1]] : [[f.x, f.y + 1], [f.x + 1, f.y + 1]]) for (const h of [f.hb, f.hb + 0.7]) { const q = cam.p(ox, oy, h); x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
+        let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (const f of fs) for (const [ox, oy] of f.dir === 0 ? [[f.x + 1, f.y], [f.x + 1, f.y + 1]] : [[f.x, f.y + 1], [f.x + 1, f.y + 1]]) for (const h of [f.hb, f.hb + S.ascWalls.height]) { const q = cam.p(ox, oy, h); x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
         const m = 1.5 * cam.sc; x0 = Math.max(2, Math.floor(x0 - m)); y0 = Math.max(2, Math.floor(y0 - m)); x1 = Math.min(CW - 3, Math.ceil(x1 + m)); y1 = Math.min(CH - 3, Math.ceil(y1 + m));
         const isR = (k) => img[k * 4] - img[k * 4 + 1] > 60; let diff = 0, total = 0;
         for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { const k = y * CW + x, a = ref[k] === 1, b = isR(k); let edge = false;
@@ -86,10 +85,11 @@ const argNum = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? +pr
   if (process.argv.includes('--out')) { const fs = require('fs'), d = process.argv[process.argv.indexOf('--out') + 1]; fs.mkdirSync(d, { recursive: true }); for (const [k, f] of [['mask', 'mask'], ['dbg', 'debug'], ['shot', 'shot']]) fs.writeFileSync(path.join(d, `asc_worst_${f}.png`), Buffer.from(r.worst[k].split(',')[1], 'base64')); console.log('worst:', r.worst.desc); }
   // UI: the switch (off = the same picture), the info line, an Ascension room chosen by chip, pick unchanged
   const crypto = require('crypto'), hash = async () => crypto.createHash('md5').update(await a.canvas()).digest('hex');
+  ok('slider "Ascension wall height" 0.5-3, default 1.5', JSON.stringify(await page.$eval('#s-ascHeight', (e) => [+e.min, +e.max, +e.value])) === '[0.5,3,1.5]');
   await page.click('#mode'); await a.idle(); await a.tech('A'); await a.preset('isoE'); await page.click('#wholeRooms'); await a.idle();
   await page.check('#t-ascWalls'); await a.idle(); await page.uncheck('#t-ascWalls'); await a.idle(); // warm-up (the first draw after a slice change differs by a transient)
   const h0 = await hash(); await page.check('#t-ascWalls'); await a.idle(); const h1 = await hash(), info1 = await page.evaluate(() => document.querySelector('#info').textContent);
-  ok('the switch "Ascension walls" changes the picture and the info line reports faces and runs', h1 !== h0 && /Ascension walls: \d+ faces in \d+ runs/.test(info1), (info1.match(/Ascension walls[^·]*/) || [''])[0]);
+  ok('the switch "Ascension walls" changes the picture and the info line reports faces and runs', h1 !== h0 && /Ascension walls: \d+ faces in \d+ (runs|chains)/.test(info1), (info1.match(/Ascension walls[^·]*/) || [''])[0]);
   const sel = await page.evaluate(() => { const S = window.__evo.S(), cnt = new Map(); for (const w of S.ascWalls.faces) for (const t of [w.i, w.j]) { const r = S.roomMap[t]; if (S.types.rooms.get(r).type === 3) cnt.set(r, (cnt.get(r) || 0) + 1); } let br = 0, bv = 0; for (const [r, v] of cnt) if (v > bv) { bv = v; br = r; } return { room: br, faces: bv }; });
   const pickDiff = await page.evaluate(() => { const e = window.__evo, S = e.S(), P = e.P, cv = document.querySelector('#stage canvas'), pk = () => { const out = []; for (let y = 60; y < cv.clientHeight - 40; y += Math.floor(cv.clientHeight / 6)) for (let x = 60; x < cv.clientWidth - 40; x += Math.floor(cv.clientWidth / 6)) out.push(window.EVO.pickTile(S, P, 'A', e.view(), cv.clientWidth, cv.clientHeight, x, y).tile); return out; }; const a = pk(), w = S.ascWalls; S.ascWalls = null; const b = pk(); S.ascWalls = w; return { n: a.length, diff: a.filter((v, i) => v !== b[i]).length }; }); // same shape, same canvas: with and without the walls (the info line changes the canvas size when toggling, so the shape itself is compared)
   await page.uncheck('#t-ascWalls'); await a.idle(); const h2 = await hash();

@@ -16,14 +16,18 @@ const PB = { terraces: 3, subs: 3, terH: 1, subH: 0.22, minPlateau: 120, minSub:
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x, ri = RL.room[i]; if (ri <= 0 || on.void[i]) continue;
     for (const [dx, dy, dir] of [[1, 0, 0], [0, 1, 1]]) { const nx = x + dx, ny = y + dy; if (nx >= W || ny >= H) continue; const j = ny * W + nx, rj = RL.room[j]; if (rj <= 0 || rj === ri || on.void[j]) continue;
       if (RL.rp.has(E.rooms.key(i, j, N))) continue; if (!isAsc(ri) && !isAsc(rj)) continue; if (on.carved[i] || on.carved[j]) continue; cand.push({ i, dir, line: dir === 0 ? x + 1 : y + 1, along: dir === 0 ? y : x }); } }
-  cand.sort((p, q) => p.dir - q.dir || p.line - q.line || p.along - q.along); const want = new Set(); let k = 0, runs = 0;
-  while (k < cand.length) { let e = k + 1; while (e < cand.length && cand[e].dir === cand[k].dir && cand[e].line === cand[k].line && cand[e].along === cand[e - 1].along + 1) e++; if (e - k >= 3) { runs++; for (let q = k; q < e; q++) want.add(cand[q].i * 2 + cand[q].dir); } k = e; }
+  // chains: faces connected by a shared corner, any direction; chains of fewer than 3 faces dropped (independent union-find on corner keys)
+  const vk = (c) => { const x = (c.i % W), y = (c.i / W) | 0; return c.dir === 0 ? [`${x + 1},${y}`, `${x + 1},${y + 1}`] : [`${x},${y + 1}`, `${x + 1},${y + 1}`]; };
+  const par = cand.map((_, q) => q), fnd = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; }, at = new Map();
+  cand.forEach((c, q) => { for (const key of vk(c)) { if (at.has(key)) par[fnd(q)] = fnd(at.get(key)); else at.set(key, q); } });
+  const sz = new Map(); cand.forEach((_, q) => sz.set(fnd(q), (sz.get(fnd(q)) || 0) + 1)); const want = new Set(), rootsKept = new Set(); cand.forEach((c, q) => { if (sz.get(fnd(q)) >= 3) { want.add(c.i * 2 + c.dir); rootsKept.add(fnd(q)); } }); const runs = rootsKept.size;
   const got = new Set(A.faces.map((f) => f.i * 2 + f.dir));
   ok(`the faces are exactly the independent recomputation (${want.size} faces in ${runs} runs)`, want.size === got.size && [...want].every((v) => got.has(v)) && A.runs.length === runs, [want.size, got.size, runs, A.runs.length]);
   ok('only on faces WITHOUT a transition (none on an open transition), an Ascension room on at least one side, none on ramp tiles, none toward void', A.faces.every((f) => !RL.rp.has(E.rooms.key(f.i, f.j, N)) && (isAsc(RL.room[f.i]) || isAsc(RL.room[f.j])) && !on.carved[f.i] && !on.carved[f.j] && !on.void[f.i] && !on.void[f.j] && RL.room[f.i] > 0 && RL.room[f.j] > 0));
   ok('every transition pair between two rooms is a door: no wall on it (counted over all open pairs)', (() => { let doors = 0; for (const kk of RL.rp) { const a = (kk / N) | 0, b = kk % N; if (RL.room[a] > 0 && RL.room[b] > 0 && RL.room[a] !== RL.room[b]) { doors++; const i = Math.min(a, b), j = Math.max(a, b), dir = j === i + 1 ? 0 : 1; if (got.has(i * 2 + dir)) return false; } } return doors > 0; })());
-  ok('runs of 3 faces or more, consecutive on one line', A.runs.every((r) => r.n >= 3) && A.runs.reduce((s, r) => s + r.n, 0) === A.faces.length);
-  ok('the base is the higher of the two tiles; the height is absolute (0.7) and low 0.15', A.faces.every((f) => Math.abs(f.hb - Math.max(on.levelH[on.fine[f.i]], on.levelH[on.fine[f.j]])) < 1e-9) && T.ASC_H === 0.7 && T.ASC_LOW === 0.15);
+  ok('chains of 3 faces or more (connected by corners, following the turns); a chain can have faces in both directions', A.runs.every((r) => r.n >= 3) && A.runs.reduce((s, r) => s + r.n, 0) === A.faces.length && A.runs.some((r) => { const ds = new Set(A.faces.filter((f) => f.run === r.id).map((f) => f.dir)); return ds.size === 2; }));
+  ok('wall footprint: thickness 0.35, the ends extended by half of it only where another face of the chain meets them (corners filled)', T.ASC_T === 0.35 && A.faces.every((f) => { const b = T.ascBox(f), th = f.dir === 0 ? b[1] - b[0] : b[3] - b[2], len = f.dir === 0 ? b[3] - b[2] : b[1] - b[0]; return Math.abs(th - 0.35) < 1e-9 && Math.abs(len - (1 + (f.e0 ? 0.175 : 0) + (f.e1 ? 0.175 : 0))) < 1e-9; }) && A.faces.some((f) => f.e0 || f.e1) && A.faces.some((f) => !f.e0 || !f.e1));
+  ok('the base is the higher of the two tiles; the height is absolute (default 1.5, slider 0.5-3) and low 0.15', A.faces.every((f) => Math.abs(f.hb - Math.max(on.levelH[on.fine[f.i]], on.levelH[on.fine[f.j]])) < 1e-9) && T.ASC_H === 1.5 && A.height === 1.5 && T.ASC_LOW === 0.15);
   // the cut by camera: the outward normal of an Ascension room facing the camera = low
   const view = (yaw) => ({ yaw, pitch: 35, zoom: 1, panX: 0, panY: 0 });
   const cam = (yaw) => E.makeCam ? E.makeCam(on, PB, view(yaw), 800, 600) : { nrm: (nx, ny) => { const a = yaw * Math.PI / 180, c = Math.cos(a), s = Math.sin(a); return [c * nx - s * ny, s * nx + c * ny]; } };
@@ -38,6 +42,7 @@ const PB = { terraces: 3, subs: 3, terH: 1, subH: 0.22, minPlateau: 120, minSub:
     ok(`a face between two Ascension rooms (${both.length}) is full only when it is the back one for both (edge-on), else low`, okBoth); }
   // figures
   const asc = [...ty.rooms.values()].filter((o) => o.type === T.ASCENSION).length, ascFaceN = A.faces.length, lens = A.runs.map((r) => r.n).sort((a, b) => a - b);
-  console.log(`  figures (Balanced types, whole map): ${ty.counts.ascension} Ascension rooms; candidate faces (blocking, with an Ascension side, not ramp, not void) ${A.info.candidates}; walls ${A.info.faces} faces in ${A.info.runs} runs (${A.info.dropped} faces dropped by the minimum run of 3); run length median ${lens[lens.length >> 1]}, max ${lens[lens.length - 1]}`);
+  console.log(`  figures (Balanced types, whole map): ${ty.counts.ascension} Ascension rooms; candidate faces (blocking, with an Ascension side, not ramp, not void) ${A.info.candidates}; walls ${A.info.faces} faces in ${A.info.runs} chains (${A.info.dropped} faces dropped: chains of fewer than 3); chain length median ${lens[lens.length >> 1]}, max ${lens[lens.length - 1]}`);
+  { const hs = E.shape(mk(), { ...PB, ascWalls: true, ascHeight: 2.5 }, null); ok('the height is a parameter (ascHeight) and does not change which faces get a wall', hs.ascWalls.height === 2.5 && hs.ascWalls.faces.length === A.faces.length); }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();

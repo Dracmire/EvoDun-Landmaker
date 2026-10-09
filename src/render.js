@@ -85,14 +85,13 @@
   /* In A / B a wall is cut into BANDS at the heights of the levels it crosses (like the ramps) and each band is drawn in the pass of the level at the top of its band, so a higher slab behind it cannot paint over it;
      the top cap goes with the last band. Returns [{ pass, lo, hi, top }]. */
   function ascBands(S, w, low) {
-    const T = E.roomTypes, hb = w.hb, ht = hb + (low ? T.ASC_LOW : T.ASC_H), bands = []; let lo = hb, L = Math.max(S.fine[w.i], S.fine[w.j]) + 1;
+    const T = E.roomTypes, hb = w.hb, ht = hb + (low ? T.ASC_LOW : S.ascWalls.height), bands = []; let lo = hb, L = Math.max(S.fine[w.i], S.fine[w.j]) + 1;
     while (L <= S.maxFine && S.levelH[L] < ht - 1e-6) { const hi = S.levelH[L]; if (hi > lo + 1e-6) { bands.push({ pass: L, lo, hi, top: false }); lo = hi; } L++; }
     bands.push({ pass: Math.min(L, S.maxFine), lo, hi: ht, top: true }); return bands;
   }
   function drawAscWall(ctx, cam, S, o, w, st, band) {
     if (PICK && !o.pickWalls) return;
-    const low = ascLow(o, cam, w), T = E.roomTypes, hb = band ? band.lo : w.hb, ht = band ? band.hi : w.hb + (low ? T.ASC_LOW : T.ASC_H), t = T.ASC_T / 2;
-    const x0 = w.dir === 0 ? w.x + 1 - t : w.x, x1 = w.dir === 0 ? w.x + 1 + t : w.x + 1, y0 = w.dir === 0 ? w.y : w.y + 1 - t, y1 = w.dir === 0 ? w.y + 1 : w.y + 1 + t;
+    const low = ascLow(o, cam, w), T = E.roomTypes, hb = band ? band.lo : w.hb, ht = band ? band.hi : w.hb + (low ? T.ASC_LOW : S.ascWalls.height), [x0, x1, y0, y1] = T.ascBox(w);
     const veiled = !!(o.veil && S.slice && !S.pocket && !S.slice[w.i] && !S.slice[w.j]), side = DBG ? [255, 0, 0] : veiled ? veilMix(STONE) : STONE, top = DBG ? [255, 0, 0] : veiled ? veilMix(STONE_TOP) : STONE_TOP;
     if (PICK) PKC = pcode(0, 0);
     for (const [ax, ay, bx, by, nx, ny] of [[x0, y0, x1, y0, 0, -1], [x1, y0, x1, y1, 1, 0], [x1, y1, x0, y1, 0, 1], [x0, y1, x0, y0, -1, 0]]) { // the sides that face the camera, then the top
@@ -103,7 +102,7 @@
     const p0 = cam.p(x0, y0, ht), p1 = cam.p(x1, y0, ht), p2 = cam.p(x1, y1, ht), p3 = cam.p(x0, y1, ht);
     ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.lineTo(p3[0], p3[1]); ctx.closePath();
     ctx.fillStyle = PICK ? PKC : rgb(top); ctx.fill();
-    if (!PICK && o.outlines !== false && !DBG) { ctx.strokeStyle = OUT; ctx.lineWidth = 1.1; ctx.lineJoin = 'round'; ctx.stroke(); }
+    if (!PICK && o.outlines !== false && !DBG) { ctx.strokeStyle = 'rgba(24,20,34,0.6)'; ctx.lineWidth = 0.9; ctx.lineJoin = 'round'; ctx.stroke(); }
     st.polys++;
   }
   const ascByKey = (S, keyOf) => { const m = new Map(); if (!S.ascWalls) return m; for (const w of S.ascWalls.faces) { const k = keyOf(w); let a = m.get(k); if (!a) m.set(k, a = []); a.push(w); } return m; };
