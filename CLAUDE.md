@@ -151,6 +151,14 @@ incursion border; stake and way-back path visible.
   (`test_ramp_ui.js`), screenshots (`stairs_shots.js`, `gates_shots.js`, `ramp_shots.js` four directions), cold-cost
   measurement (`measure.js`). Need Playwright and Pillow, see `tools/ui/common.js`; maps from `gen_maps.py`;
   `node tools/test_heights.js` checks the effective sub-terrace height.
+- `tools/verify.sh` (standard verification, results OUTSIDE the repo in `/tmp/evo-verify/<date>/`: `<part>.log|.result|.time`, `summary.txt`, `summary.json`): `tools/verify.sh [node] [ui] [regress] [zbuf] [shots] [--extra chip:<id>|pocket:<id>|walls] [--expect <globs>] [--out <dir>]`
+  (default `node ui regress zbuf`). `node` = every `tools/test_*.js`; `ui` = every `tools/ui/test_*.js` except the two z-buffer tests; `regress` = pixel regression against origin/main in a temporary worktree
+  (removed on exit): stairW 0 and 3 with rooms off, rooms on, and one pass per switch (`regress_rooms.js --toggle cake|pocket|ascWalls`: checked and unchecked before shooting), 0 differences expected, announced ones with `--expect` are
+  reported as "expected"; `zbuf` = `test_ramp_ui.js` + `test_asc_ui.js`; `shots` = `tools/ui/verify_shots.js`, fixed set (real map rooms Default and Balanced types, Snake Mountain, Box/A/B, Iso/Oblique) + extra views;
+  Snake Mountain with rooms on (0 rooms) is a WARNING, not a failure. Parts are slow (a tool call is cut at 10 minutes): run them separately or in the background and poll the log.
+- `.claude/agents/verifier.md`: subagent `verifier` (haiku, read-only: Read, Grep, Glob, Bash). Runs `tools/verify.sh` and AUDITS the tests with `git diff origin/main -- tools/ data/` (new tests informative; changed
+  expectations, loosened thresholds, deleted assertions, modified fixtures reported as "possible symptom hiding" with whether `src/` changed in that area). It does not edit, commit, push or change branch, and it does not replace the
+  visual review (the screenshots are still looked at and sent to the user). A subagent file created in a session may only load in the next one.
 - `tools/build.py` regenerates `data/packs.js`, `index.html`, `dist/viewer.html`. Run it after touching
   `src/` or `data/`.
 
@@ -303,3 +311,5 @@ incursion border; stake and way-back path visible.
 - Verify every change visually (headless browser screenshot, at least two presets) before calling it done,
   and report what was and wasn't checked.
 - Small commits on main with descriptive messages.
+- If a test fails twice in a row after a fix attempt, STOP. Report whether the problem is in the code or in the test. Do not change expectations, thresholds or fixtures without the user's approval.
+- Before reporting a task as done, run the `verifier` subagent (or `tools/verify.sh` if it cannot be loaded) and include its summary and test audit in the report.
