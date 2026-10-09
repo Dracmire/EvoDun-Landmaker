@@ -53,6 +53,23 @@ Repos reviewed (2026-10-09). None generates stylised cliffs procedurally; they a
 - **D4** (2026-10-09) The camera makes little difference (low orthographic vs emulated perspective measured in the mocks).
   Stay orthographic; perspective is for Unity. The real limit is the art.
 - **D5** (2026-10-09) Every crystallizer gets a README in `docs/crystallizers/`.
+- **D6** (2026-10-09, REPLACES D4) The camera is part of each crystallizer, not a global choice. For the Stage it was MEASURED
+  (the reviewer's throwaway code, not in the repo; technique A; share of the screen pixels that are walls, at the same px per tile):
+
+  | scene | Oblique 50 ortho | Low 25 ortho | Perspective FOV 30, pitch 25 | Classic 3/4 oblique (ground 1, height 1) |
+  |---|---|---|---|---|
+  | Shrine-Pier, camera from the sea (yaw 90) | 14.6 % | 24.5 % | 22.0 % | 18.9 % |
+  | Shrine-Pier, profile (yaw 0) | 7.5 % | 18.6 % | 17.2 % | 6.4 % |
+  | Snake Mountain surface (5 terraces) | 3.8 % | 9.2 % | 7.2 % | 6.3 % |
+  | real map, Balanced types, Cake 82 / Diorama 31 / Ascension 57 (Cake + Ascension walls on, 55 px per tile; one value per room) | 4.1 / 1.8 / 2.5 % | 8.7 / 5.7 / 10.1 % | 7.7 / 8.4 / 11.9 % | 6.6 / 2.8 / 3.2 % |
+
+  Configuration notes: perspective = near ground drawn 2.9x bigger than far at that framing. The low camera was measured at pitch 25; Cam 4 of the bank is Low 28 (not re-measured). NOT measured: walkable tiles hidden, painter order under
+  perspective, technique B, taller terraces. The Stage camera is **Cam 6** (perspective, FOV 30, pitch 25, yaw 0). Its yaw will come from the main semantic relation of the scene (Shrine-Pier reads OVERLOOKS from the sea: Pier in front,
+  Shrine behind); that is the next step, until then Cam 6 is at yaw 0. **Cam 7** (Classic 3/4, oblique projection) is noted as the candidate TACTICAL camera (another mode, not the Stage).
+- **D7** (2026-10-09) The cameras are a fixed, DISCRETE bank, Cam 1-7, nothing custom, usable by every crystallizer ([`../README.md`](../README.md) "Camera bank"). The old preset ids keep working (tests and the manifest use them);
+  the manifest `viewer` block takes an optional `camera`.
+- **D8** (2026-10-09) The fixed test set follows the three core examples: numeric (real map, Default and Balanced types), semantic landmarks (Shrine-Pier) and semantic macroform (Snake Mountain surface). The semantic numeric world is the
+  evolution of the vanilla (Perlin) one. The DATA limits verticality as much as the camera: the rooms of the real map have 3-4x less wall per screen than Shrine-Pier with any camera (D6 table).
 
 ## 5. Design (draft, to be agreed point by point)
 
@@ -65,7 +82,7 @@ Repos reviewed (2026-10-09). None generates stylised cliffs procedurally; they a
 - **R4** Height exaggeration is visual only (a stage height multiplier); walking, stake and route do not change.
 
 ### Camera
-- New preset "Stage 3/4": yaw 0, orthographic, pitch to measure against Sea of Stars screenshots (between 40 and 55).
+- Cam 6 "Stage" of the camera bank (D6, D7): PERSPECTIVE, FOV 30, pitch 25, yaw 0 (the yaw will come from the semantic relation of the scene); true division by depth around the ground point under the screen centre at the focus height. Replaces the "Stage 3/4" orthographic preset of the first draft.
 
 ### Rules per type
 - **Cake.** Rings are ledges. Each camera-facing ring edge gets a cliff piece sized by its jump; the top edge gets a lip
@@ -101,7 +118,7 @@ Nothing has a constant thickness; every piece takes it from a local measure the 
 
 ## 7. Verification
 
-Nothing yet. Fixed test set as always: real map Default and Balanced types, Snake Mountain surface.
+No Stage code yet. What exists for it is the camera bank (D7): Cam 6 and Cam 7 are implemented and measured (z-buffer order, picking, face culling, perspective strength: CLAUDE.md limitation 15; `node tools/test_cams.js`; screenshots with `tools/verify.sh shots --extra pocket:31@stage+play --extra shrine@classic+play`). Fixed test set = the three core examples (D8): real map Default and Balanced types, Shrine-Pier, Snake Mountain surface.
 
 ## 8. Mocks (2026-10-09, throwaway, scripts outside the repo)
 
@@ -119,9 +136,17 @@ Nothing yet. Fixed test set as always: real map Default and Balanced types, Snak
 ## 9. Known limits and open questions
 
 - The viewer cannot make the art; it can only place it.
-- **Q1** Pitch of the "Stage 3/4" preset.
+- **Q1** (closed by D6) Pitch of the Stage camera: 25, as measured.
 - **Q2** Final list of piece kinds.
 - **Q3** Where the slots are stored (manifest or a separate export for Unity).
 - **Q4** Ramps and stairs vs climb points and ledge drops (a game decision).
 - **Q5** Does the walk mode need a sprite, or is a marker enough.
 - **Q6** How the Diorama pocket bands change for the frontal camera (today they assume Iso).
+
+## 10. Camera contract
+
+- **Made for**: **Cam 6 Stage** (perspective, FOV 30, pitch 25, yaw 0 for now; the yaw will come from the main semantic relation of the scene, D6). At play scale (about 55 px per tile) the camera dollies with the zoom, so the strength of the
+  perspective on screen is the same at any zoom.
+- **Candidate tactical camera**: **Cam 7 Classic 3/4** (oblique projection, ground scale 1, height scale 1, yaw 0), another mode, not the Stage (D6).
+- **Also usable**: Cam 1-5 (orthographic) as in the other crystallizers; the Pocket and the Cake / walls figures of crystallizer 2 were made for Cam 1.
+- **What does not work yet / how it was measured**: see the camera bank section of [`../../../CLAUDE.md`](../../../CLAUDE.md) (known limitation 15) and the measurements of the PR that added the bank; the Diorama pocket was composed for Cam 1 (Q6).

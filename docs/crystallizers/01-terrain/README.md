@@ -122,3 +122,13 @@ Open questions:
 - Cursor synchronised across the compare panels (hover resolves the visible tile with `E.pickTile` and marks it in the others): POSSIBLE IMPROVEMENT, not done, user's call.
 - Per-pixel depth / WebGL (parked).
 - "Tiles to curves" in the style of Unexplored 2 (CLAUDE.md "LATER PHASE", user's decision, no date): one Voronoi seed per tile displaced by rules at the corners; uses per-tile data only and does not need rooms. Reference in CLAUDE.md: the "Tiles to Curves" devlog by Ludomotion; candidate libraries (Delaunator for the viewer; delaunator-sharp MIT and Clipper2 BSL-1.0 for Unity) with LICENCE TO BE CONFIRMED before adding anything.
+
+## 10. Camera contract
+
+- **Made for**: the five ORTHOGRAPHIC cameras of the bank, Cam 1 Iso 45 (`isoE`), Cam 2 Iso -45 (`isoW`), Cam 3 Oblique 50 (`oblique`, the default), Cam 4 Low 28 (`low`) and Cam 5 Top 80 (`top`): overview cameras to compare the three techniques on the whole map or a slice.
+  The measurements of this README (ramp order, pick, border, stair survival) were taken at Oblique 50 and Iso 45 (four yaws, [`docs/measurements.md`](../../measurements.md) and CLAUDE.md limitation 2).
+- **Pixel regression of the bank**: `tools/ui/regress_cams.js` renders Cam 1-5 x Box, A, B on three scenes (the old Snake Mountain pack with rooms off, the real map with rooms on Default, the real map Balanced types with Cake and Ascension walls on) and
+  `tools/verify.sh regress` compares them with the checkout of origin/main: 45 images, 0 differ when the bank was added.
+- **Cam 6 Stage and Cam 7 Classic 3/4** are NOT part of this crystallizer's contract; the techniques do run under them (same code), and their ramp order, wall order and picking were measured there, with what does not work yet, in CLAUDE.md limitation 15
+  (summary: ramp order <= 1.64 % worst for every technique at 28 and 55 px per tile under Cam 6 and <= 0.38 % under Cam 7; Box tile order under Cam 6 is not an exact painter order, pick 91.0-98.2 % in Box). Crystallizer 3 owns those two cameras
+  ([`../03-stage/README.md`](../03-stage/README.md) D6, D7).
