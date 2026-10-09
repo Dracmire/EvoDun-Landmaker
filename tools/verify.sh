@@ -5,7 +5,7 @@
 #   regress  pixel regression against origin/main in a temporary worktree (EVO_ROOT): stairW 0 and 3 (rooms off), rooms on, and one pass
 #            per new switch (cake, pocket, ascWalls) checked and unchecked again; expectation: 0 images differ
 #   zbuf     painter order against a per-pixel z-buffer: tools/ui/test_ramp_ui.js and tools/ui/test_asc_ui.js
-#   shots    screenshots of the fixed set (real map rooms Default / Balanced types, Snake Mountain; Box, A, B; Iso, Oblique) + --extra views
+#   shots    screenshots of the fixed set (real map rooms Default / Balanced types, Snake Mountain surface; Box, A, B; Iso, Oblique) + --extra views
 # Usage: tools/verify.sh [parts...] [--extra chip:<id>|pocket:<id>|walls]... [--expect <glob>[,<glob>...]] [--out <dir>]
 #   --expect: image names (globs, e.g. 'rooms_*,whole_A_oblique.png') whose regress differences are ANNOUNCED; they are reported as "expected"
 #             and do not fail the part. Unannounced differences fail it.
@@ -108,7 +108,7 @@ part_shots() {
   res=$(grep '^RESULT ' "$log" | tail -1 | cut -c8-)
   if [ $rc -ne 0 ] || [ -z "$res" ]; then S=FAIL; FIG="screenshots failed (exit $rc), see shots.log"; return; fi
   if echo "$res" | grep -q '"warnings":\[\]'; then S=PASS; else S=WARN; fi
-  FIG="$(python3 -c 'import json,sys; r=json.loads(sys.argv[1]); print("%d images in %s; rooms snake/default/balanced = %s/%s/%s; warnings: %s" % (r["images"], r["dir"], r["rooms"]["snake"], r["rooms"]["realDefault"], r["rooms"]["realBalanced"], "; ".join(r["warnings"]) or "none"))' "$res")"
+  FIG="$(python3 -c 'import json,sys; r=json.loads(sys.argv[1]); print("%d images in %s; rooms snake/default/balanced = %s/%s/%s; warnings: %s; not applicable: %s" % (r["images"], r["dir"], r["rooms"]["snake"], r["rooms"]["realDefault"], r["rooms"]["realBalanced"], "; ".join(r["warnings"]) or "none", "; ".join(r.get("notApplicable", [])) or "none"))' "$res")"
 }
 
 for p in "${PARTS[@]}"; do
