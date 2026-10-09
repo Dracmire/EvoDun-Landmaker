@@ -2,7 +2,8 @@ import json,pathlib
 r=pathlib.Path(__file__).resolve().parent.parent
 d=json.loads((r/'data/snake_mountain.json').read_text())
 d2=json.loads((r/'data/snake_mountain_surface.json').read_text())
-(r/'data/packs.js').write_text('window.EVO_PACKS={snake_mountain:'+json.dumps(d,separators=(',',':'))+',snake_mountain_surface:'+json.dumps(d2,separators=(',',':'))+'};\n')
+d3=json.loads((r/'data/shrine_pier.json').read_text())
+(r/'data/packs.js').write_text('window.EVO_PACKS={snake_mountain:'+json.dumps(d,separators=(',',':'))+',snake_mountain_surface:'+json.dumps(d2,separators=(',',':'))+',shrine_pier:'+json.dumps(d3,separators=(',',':'))+'};\n')
 body=(r/'src/app.html').read_text()
 js=''.join((r/f'src/{n}.js').read_text()+'\n' for n in ['png','fields','shape','rooms','roomtypes','pocket','tech','render'])
 packs=(r/'data/packs.js').read_text()

@@ -517,6 +517,7 @@
   function init() {
     setPack('snake_surface', 'Snake Mountain surface (macroform, outer surface only)', window.EVO_PACKS.snake_mountain_surface);
     setPack('snake', 'Snake Mountain (macroform, caves subtracted)', window.EVO_PACKS.snake_mountain);
+    setPack('shrine_pier', 'Shrine-Pier (semantic landmarks)', window.EVO_PACKS.shrine_pier);
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
