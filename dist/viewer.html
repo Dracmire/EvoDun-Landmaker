@@ -836,6 +836,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const ty = E.roomTypes.classify(RL, P); S.types = ty; S.roomType = new Uint8Array(n);
       for (let i = 0; i < n; i++) if (!(vd && vd[i])) S.roomType[i] = ty.type[(((i / W) | 0) + S.oy) * S.mapW + (i % W) + S.ox] || 0;
       if (P.cake) E.roomTypes.cake(S, P, RL, q, ty);
+      if (P.ascWalls && S.roomMap && S.roomKind && !pocketIds) S.ascWalls = E.roomTypes.ascWalls(S, P, RL, ty);
       if (S.roomMap && !pocketIds) { // footprint outline of every Diorama (Display toggle): the faces toward a tile of another room or toward void; roomBitsDio = the border bits plus these
         const db = new Uint8Array(n), bd = Uint8Array.from(S.roomBits), OFF2 = [[0, -1], [1, 0], [0, 1], [-1, 0]];
         for (let i = 0; i < n; i++) { const r = S.roomMap[i]; if (r <= 0 || (vd && vd[i])) continue; const o = ty.rooms.get(r); if (!o || o.type !== E.roomTypes.DIORAMA) continue; const x = i % W, y = (i / W) | 0;
@@ -2060,6 +2061,37 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     S.ringTile = new Uint8Array(n); for (const [i] of claimed) S.ringTile[i] = 1;
     if (S.void) { S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < n; i++) if (S.void[i]) S.fineMask[i] = -1; }
   };
+  /* ASCENSION WALLS (user's decision, Zelda: A Link Between Worlds; `P.ascWalls`, off by default): a thin wall on every room-border face WITHOUT a transition (a face that blocks: S.roomKind 1) that has an Ascension room on at least one side.
+     Never on an open transition (the doors stay open), never on a face of a ramp tile (S.carved), never toward void; only runs of 3 faces or more (consecutive faces on the same line). One face = one wall, tile-exact. The base is the
+     higher of the two tiles; the height is ABSOLUTE (wallH 0.7; the low piece for the cut, lowH 0.15) and does not scale with the terrace height or with Pocket height. Returns { faces: [{ i, j, dir (0 = E face of i, 1 = S face), x, y,
+     ai, aj (that side is an Ascension room), hb, run }], runs, info } (window tiles). The CUT toward the camera is computed at render time (E.ascWallLow). */
+  T.ASC_H = 1.5; T.ASC_LOW = 0.15; T.ASC_T = 0.35; T.ASC_MIN_RUN = 3;
+  T.ascWalls = function (S, P, RL, ty) {
+    const W = S.W, H = S.H, n = S.n, kind = S.roomKind, map = S.roomMap, cand = [], isAsc = (r) => { const o = ty.rooms.get(r); return !!o && o.type === T.ASCENSION; };
+    for (let i = 0; i < n; i++) {
+      if (S.void && S.void[i]) continue; const ri = map[i]; if (ri <= 0) continue; const x = i % W, y = (i / W) | 0;
+      for (const [b, dx, dy] of [[1, 1, 0], [2, 0, 1]]) {
+        const nx = x + dx, ny = y + dy; if (nx >= W || ny >= H) continue; const j = ny * W + nx; if (S.void && S.void[j]) continue; const rj = map[j]; if (rj <= 0 || rj === ri || kind[i * 4 + b] !== 1) continue;
+        const ai = isAsc(ri), aj = isAsc(rj); if (!ai && !aj) continue; if (S.carved && (S.carved[i] || S.carved[j])) continue;
+        cand.push({ i, j, dir: b === 1 ? 0 : 1, x, y, ai, aj, hb: Math.max(S.levelH[S.fine[i]], S.levelH[S.fine[j]]) });
+      }
+    }
+    // CHAINS: faces connected by a shared corner (vertex) along the border, following the turns (a diagonal border is a staircase of faces in two directions); a chain of fewer than 3 faces is dropped
+    const vOf = (f) => (f.dir === 0 ? [[f.x + 1, f.y], [f.x + 1, f.y + 1]] : [[f.x, f.y + 1], [f.x + 1, f.y + 1]]), par = cand.map((_, k) => k), find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; }, at = new Map();
+    cand.forEach((f, k) => { for (const [vx, vy] of vOf(f)) { const key = vx + ',' + vy, o = at.get(key); if (o === undefined) at.set(key, k); else par[find(k)] = find(o); } });
+    const size = new Map(); cand.forEach((_, k) => { const r = find(k); size.set(r, (size.get(r) || 0) + 1); });
+    const faces = [], ids = new Map(), runs = [], deg = new Map();
+    cand.forEach((f, k) => { const r = find(k); if (size.get(r) < T.ASC_MIN_RUN) return; if (!ids.has(r)) { ids.set(r, runs.length); runs.push({ id: runs.length, n: 0 }); } f.run = ids.get(r); runs[f.run].n++; faces.push(f); for (const [vx, vy] of vOf(f)) { const key = vx + ',' + vy; deg.set(key, (deg.get(key) || 0) + 1); } });
+    for (const f of faces) { const [v0, v1] = vOf(f); f.e0 = deg.get(v0[0] + ',' + v0[1]) > 1; f.e1 = deg.get(v1[0] + ',' + v1[1]) > 1; } // an end is extended by half the thickness where another wall meets it (the corner is filled)
+    return { faces, runs, height: P.ascHeight === undefined ? T.ASC_H : P.ascHeight, info: { candidates: cand.length, faces: faces.length, runs: runs.length, dropped: cand.length - faces.length } };
+  };
+  /* the footprint of the wall of a face: [x0, x1, y0, y1] (thickness ASC_T centred on the edge, the ends extended where another face meets it) */
+  T.ascBox = function (w) {
+    const t = T.ASC_T / 2, a0 = w.e0 ? t : 0, a1 = w.e1 ? t : 0;
+    return w.dir === 0 ? [w.x + 1 - t, w.x + 1 + t, w.y - a0, w.y + 1 + a1] : [w.x - a0, w.x + 1 + a1, w.y + 1 - t, w.y + 1 + t];
+  };
+  /* the cut: a face whose wall would stand between the camera and the inside of an Ascension room (the outward normal of that room faces the camera) is drawn low. Both sides count for a face between two Ascension rooms. */
+  T.ascWallLow = function (w, cam) { const dx = w.dir === 0 ? 1 : 0, dy = w.dir === 0 ? 0 : 1; return (w.ai && cam.nrm(dx, dy)[1] > 0.001) || (w.aj && cam.nrm(-dx, -dy)[1] > 0.001); };
 })(window.EVO = window.EVO || {});
 
 /* EvoDun crystal viewer - POCKET (pseudo-space) of a Diorama room: the user's crystallizer for Diorama rooms.
@@ -2776,6 +2808,36 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return [p0, p1];
   }
 
+  /* ---- Ascension walls (S.ascWalls, P.ascWalls): a thin box (0.15 tile) on the edge of a room-border face, tile-exact and the same in Box, A and B. Its base is the higher of the two tiles, its height is absolute (0.7;
+     0.15 for the cut toward the camera, computed here with the camera of the frame). Stone colour, dark outline. Not selectable (the pick render skips it unless o.pickWalls, used to measure what it hides). ---- */
+  const STONE = [166, 158, 146], STONE_TOP = [204, 196, 182];
+  function ascWallDepth(cam, w) { return cam.ry(w.dir === 0 ? w.x + 1 : w.x + 0.5, w.dir === 0 ? w.y + 0.5 : w.y + 1); }
+  const ascLow = (o, cam, w) => !o.ascNoCut && E.roomTypes.ascWallLow(w, cam);
+  /* In A / B a wall is cut into BANDS at the heights of the levels it crosses (like the ramps) and each band is drawn in the pass of the level at the top of its band, so a higher slab behind it cannot paint over it;
+     the top cap goes with the last band. Returns [{ pass, lo, hi, top }]. */
+  function ascBands(S, w, low) {
+    const T = E.roomTypes, hb = w.hb, ht = hb + (low ? T.ASC_LOW : S.ascWalls.height), bands = []; let lo = hb, L = Math.max(S.fine[w.i], S.fine[w.j]) + 1;
+    while (L <= S.maxFine && S.levelH[L] < ht - 1e-6) { const hi = S.levelH[L]; if (hi > lo + 1e-6) { bands.push({ pass: L, lo, hi, top: false }); lo = hi; } L++; }
+    bands.push({ pass: Math.min(L, S.maxFine), lo, hi: ht, top: true }); return bands;
+  }
+  function drawAscWall(ctx, cam, S, o, w, st, band) {
+    if (PICK && !o.pickWalls) return;
+    const low = ascLow(o, cam, w), T = E.roomTypes, hb = band ? band.lo : w.hb, ht = band ? band.hi : w.hb + (low ? T.ASC_LOW : S.ascWalls.height), [x0, x1, y0, y1] = T.ascBox(w);
+    const veiled = !!(o.veil && S.slice && !S.pocket && !S.slice[w.i] && !S.slice[w.j]), side = DBG ? [255, 0, 0] : veiled ? veilMix(STONE) : STONE, top = DBG ? [255, 0, 0] : veiled ? veilMix(STONE_TOP) : STONE_TOP;
+    if (PICK) PKC = pcode(0, 0);
+    for (const [ax, ay, bx, by, nx, ny] of [[x0, y0, x1, y0, 0, -1], [x1, y0, x1, y1, 1, 0], [x1, y1, x0, y1, 0, 1], [x0, y1, x0, y0, -1, 0]]) { // the sides that face the camera, then the top
+      const [rnx, rny] = cam.nrm(nx, ny); if (rny <= 0.001) continue;
+      wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, side, rnx, o, st);
+    }
+    if (band && !band.top) return;
+    const p0 = cam.p(x0, y0, ht), p1 = cam.p(x1, y0, ht), p2 = cam.p(x1, y1, ht), p3 = cam.p(x0, y1, ht);
+    ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.lineTo(p3[0], p3[1]); ctx.closePath();
+    ctx.fillStyle = PICK ? PKC : rgb(top); ctx.fill();
+    if (!PICK && o.outlines !== false && !DBG) { ctx.strokeStyle = 'rgba(24,20,34,0.6)'; ctx.lineWidth = 0.9; ctx.lineJoin = 'round'; ctx.stroke(); }
+    st.polys++;
+  }
+  const ascByKey = (S, keyOf) => { const m = new Map(); if (!S.ascWalls) return m; for (const w of S.ascWalls.faces) { const k = keyOf(w); let a = m.get(k); if (!a) m.set(k, a = []); a.push(w); } return m; };
+
   const AMBIGUOUS = 'rgba(255,0,255,0.75)';
   const VEIL_RGB = [10, 8, 24], VEIL_A = 0.6;               // one band: everything outside the slice
   const VEIL = `rgba(${VEIL_RGB},${VEIL_A})`;
@@ -3069,6 +3131,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const rank = new Int32Array(S.n); order.forEach((t, r) => { rank[t] = r; });
     const ST = hasStairs(S) ? stairTiles(S) : null;
     const face = (i2, b) => { const bp = []; borderFaces(bp, S, cam, i2, 1 << b, S.levelH[S.fine[i2]]); strokeBorder(ctx, bp); };
+    const ASC = ascByKey(S, (w) => (rank[w.i] > rank[w.j] ? w.i : w.j)); // each wall after the later (painter order) of the two tiles of its face
+
     for (const i of order) {
       const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = S.levelH[f], si = ST && ST.get(i), c = si ? stairColor(si) : levelColor(S, f, P);
       const isRamp = !!(si && si.rec);
@@ -3128,6 +3192,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         }
         if (bp.length) strokeRoomFaces(ctx, bp);
       }
+      const aw = ASC.get(i); if (aw) { aw.sort((p, q) => ascWallDepth(cam, p) - ascWallDepth(cam, q)); for (const w of aw) drawAscWall(ctx, cam, S, o, w, st); }
       st.polys++;
     }
   }
@@ -3135,6 +3200,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
   function renderLevels(ctx, cam, S, P, o, st, loopsOf) {
     const ST = hasStairs(S) ? stairTiles(S) : null, PIECES = ST ? rampPieces(S, cam) : new Map(); // ramp pieces by level band
+    const ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) for (const bd of ascBands(S, w, ascLow(o, cam, w))) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
     for (let L = 0; L <= S.maxFine; L++) {
       const loops = loopsOf(S, L, P), pcs = PIECES.get(L) || [];
       if (!loops.length && !pcs.length) continue;
@@ -3226,6 +3292,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         }
         if (bp.length) strokeRoomFaces(ctx, bp);
       }
+      const aw = ASCL.get(L); if (aw) { aw.sort((p, q) => ascWallDepth(cam, p.w) - ascWallDepth(cam, q.w) || p.bd.lo - q.bd.lo); for (const q of aw) drawAscWall(ctx, cam, S, o, q.w, st, q.bd); }
     }
   }
 
@@ -3295,7 +3362,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   const PRESETS = [
     { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
@@ -3308,7 +3375,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 300, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
     ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['stairStyle', 'Style: 0 steps · 1 ramp', 0, 1, 1], ['rampDepth', 'Ramp depth, tiles (fixed)', 1, 4, 1], ['tread', 'Tread rise, sub-terraces (steps only)', 1, 5, 1], ['stairW', 'Stair / ramp width, tiles (0 = none; steps use up to 3)', 0, 5, 1]]],
-    ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 6, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1], ['pocketHeight', 'Pocket height (decoration relief x)', 1, 4, 0.1]]],
+    ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 6, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1], ['pocketHeight', 'Pocket height (decoration relief x)', 1, 4, 0.1], ['ascHeight', 'Ascension wall height (absolute)', 0.5, 3, 0.1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
   const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI']];
@@ -3352,6 +3419,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         const i = l.querySelector('input'); i.checked = P.rooms; i.addEventListener('change', () => { P.rooms = i.checked; refreshMessage(); invalidate(true); }); sl.appendChild(l);
         const lc = document.createElement('label'); lc.className = 'tg'; lc.innerHTML = '<input type="checkbox" id="t-cake"><span>Cake rings (room type Cake; needs Rooms)</span>';
         const ic = lc.querySelector('input'); ic.checked = P.cake; ic.addEventListener('change', () => { P.cake = ic.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lc);
+        const lw = document.createElement('label'); lw.className = 'tg'; lw.innerHTML = '<input type="checkbox" id="t-ascWalls"><span>Ascension walls (thin walls on the blocking faces of Ascension rooms; needs Rooms)</span>';
+        const iw = lw.querySelector('input'); iw.checked = !!P.ascWalls; iw.addEventListener('change', () => { P.ascWalls = iw.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lw);
         const lk = document.createElement('label'); lk.className = 'tg'; lk.innerHTML = '<input type="checkbox" id="t-pocket"><span>Pocket view (a chosen Diorama room is drawn as its pocket; needs Rooms)</span>';
         const ik = lk.querySelector('input'); ik.checked = !!P.pocket; ik.addEventListener('change', () => { P.pocket = ik.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lk);
         const lf = document.createElement('label'); lf.className = 'sl'; lf.innerHTML = '<span>Pocket framing</span><select id="pocketFraming"><option value="auto">Auto</option><option value="hill">Cerro</option><option value="lake">Lago</option><option value="falls">Cascada</option><option value="island">Isla</option><option value="drop">Caída</option></select>';
@@ -3769,6 +3838,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const v = S.stairInfo.variants; if (v && v.length > 1) t += ` · ramp variants: ${v.map((k, i) => (i ? S.stairInfo.variantLabels[i] : 'as planned') + ' ' + k).join(', ')}` + (S.unmerged ? ` · ${S.unmerged} pairs not merged (own ramp)` : '');
     return t;
   }
+  function ascText() { const a = S.ascWalls; return a ? ` · <b>Ascension walls</b>: ${a.info.faces} faces in ${a.info.runs} chains (${a.info.candidates} candidate faces, ${a.info.dropped} dropped: chains of fewer than 3)` : ''; }
   function pocketText() {
     const pi = S.pocketInfo; if (!pi) return P.pocket && sliceSel.rooms.size === 1 && S.types ? ` · Pocket view: room ${[...sliceSel.rooms][0]} is not a Diorama (normal slice)` : '';
     return ` · <b>POCKET</b> of Diorama room ${pi.ids.join('+')}: fragment ${pi.fragTiles} tiles, pocket ${pi.pocketTiles} tiles (disc radius ${pi.R.toFixed(1)}${S.ox < 0 || S.oy < 0 || S.ox + S.W > S.mapW || S.oy + S.H > S.mapH ? ', window extends past the map edge (void)' : ''}), ${pi.exitRuns} exit${pi.exitRuns === 1 ? '' : 's'} (${pi.exitFaces} faces, ${pi.exitsReached} reached${pi.exitsBent ? `, ${pi.exitsBent} bent` : ''}), framing <b>${pi.archetypeName}</b> (${pi.auto ? 'auto: ' : ''}${pi.reason}), Pocket height ${pi.ph}, water ${pi.waterTiles} tiles${pi.archetype === 'hill' ? ` (pond limit ${pi.pondMax})` : ''}${pi.voidTiles ? `, void ${pi.voidTiles} tiles` : ''}${pi.channelTiles ? `, channel ${pi.channelTiles} tiles` : ''}, backdrop band ${pi.backDepth.toFixed(1)} tiles deep / ${pi.backTiles} tiles, ${pi.seeds} seeds, floors ${pi.floors.length ? pi.floors.join(' + ') : 'none'} (${pi.double ? `double${pi.cliffFacesCamera ? ', cliff facing the camera' : ''}` : 'single'})`;
@@ -3801,7 +3871,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + pocketText();
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText();
   }
 
   function init() {

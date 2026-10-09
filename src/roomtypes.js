@@ -192,4 +192,35 @@
     S.ringTile = new Uint8Array(n); for (const [i] of claimed) S.ringTile[i] = 1;
     if (S.void) { S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < n; i++) if (S.void[i]) S.fineMask[i] = -1; }
   };
+  /* ASCENSION WALLS (user's decision, Zelda: A Link Between Worlds; `P.ascWalls`, off by default): a thin wall on every room-border face WITHOUT a transition (a face that blocks: S.roomKind 1) that has an Ascension room on at least one side.
+     Never on an open transition (the doors stay open), never on a face of a ramp tile (S.carved), never toward void; only runs of 3 faces or more (consecutive faces on the same line). One face = one wall, tile-exact. The base is the
+     higher of the two tiles; the height is ABSOLUTE (wallH 0.7; the low piece for the cut, lowH 0.15) and does not scale with the terrace height or with Pocket height. Returns { faces: [{ i, j, dir (0 = E face of i, 1 = S face), x, y,
+     ai, aj (that side is an Ascension room), hb, run }], runs, info } (window tiles). The CUT toward the camera is computed at render time (E.ascWallLow). */
+  T.ASC_H = 1.5; T.ASC_LOW = 0.15; T.ASC_T = 0.35; T.ASC_MIN_RUN = 3;
+  T.ascWalls = function (S, P, RL, ty) {
+    const W = S.W, H = S.H, n = S.n, kind = S.roomKind, map = S.roomMap, cand = [], isAsc = (r) => { const o = ty.rooms.get(r); return !!o && o.type === T.ASCENSION; };
+    for (let i = 0; i < n; i++) {
+      if (S.void && S.void[i]) continue; const ri = map[i]; if (ri <= 0) continue; const x = i % W, y = (i / W) | 0;
+      for (const [b, dx, dy] of [[1, 1, 0], [2, 0, 1]]) {
+        const nx = x + dx, ny = y + dy; if (nx >= W || ny >= H) continue; const j = ny * W + nx; if (S.void && S.void[j]) continue; const rj = map[j]; if (rj <= 0 || rj === ri || kind[i * 4 + b] !== 1) continue;
+        const ai = isAsc(ri), aj = isAsc(rj); if (!ai && !aj) continue; if (S.carved && (S.carved[i] || S.carved[j])) continue;
+        cand.push({ i, j, dir: b === 1 ? 0 : 1, x, y, ai, aj, hb: Math.max(S.levelH[S.fine[i]], S.levelH[S.fine[j]]) });
+      }
+    }
+    // CHAINS: faces connected by a shared corner (vertex) along the border, following the turns (a diagonal border is a staircase of faces in two directions); a chain of fewer than 3 faces is dropped
+    const vOf = (f) => (f.dir === 0 ? [[f.x + 1, f.y], [f.x + 1, f.y + 1]] : [[f.x, f.y + 1], [f.x + 1, f.y + 1]]), par = cand.map((_, k) => k), find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; }, at = new Map();
+    cand.forEach((f, k) => { for (const [vx, vy] of vOf(f)) { const key = vx + ',' + vy, o = at.get(key); if (o === undefined) at.set(key, k); else par[find(k)] = find(o); } });
+    const size = new Map(); cand.forEach((_, k) => { const r = find(k); size.set(r, (size.get(r) || 0) + 1); });
+    const faces = [], ids = new Map(), runs = [], deg = new Map();
+    cand.forEach((f, k) => { const r = find(k); if (size.get(r) < T.ASC_MIN_RUN) return; if (!ids.has(r)) { ids.set(r, runs.length); runs.push({ id: runs.length, n: 0 }); } f.run = ids.get(r); runs[f.run].n++; faces.push(f); for (const [vx, vy] of vOf(f)) { const key = vx + ',' + vy; deg.set(key, (deg.get(key) || 0) + 1); } });
+    for (const f of faces) { const [v0, v1] = vOf(f); f.e0 = deg.get(v0[0] + ',' + v0[1]) > 1; f.e1 = deg.get(v1[0] + ',' + v1[1]) > 1; } // an end is extended by half the thickness where another wall meets it (the corner is filled)
+    return { faces, runs, height: P.ascHeight === undefined ? T.ASC_H : P.ascHeight, info: { candidates: cand.length, faces: faces.length, runs: runs.length, dropped: cand.length - faces.length } };
+  };
+  /* the footprint of the wall of a face: [x0, x1, y0, y1] (thickness ASC_T centred on the edge, the ends extended where another face meets it) */
+  T.ascBox = function (w) {
+    const t = T.ASC_T / 2, a0 = w.e0 ? t : 0, a1 = w.e1 ? t : 0;
+    return w.dir === 0 ? [w.x + 1 - t, w.x + 1 + t, w.y - a0, w.y + 1 + a1] : [w.x - a0, w.x + 1 + a1, w.y + 1 - t, w.y + 1 + t];
+  };
+  /* the cut: a face whose wall would stand between the camera and the inside of an Ascension room (the outward normal of that room faces the camera) is drawn low. Both sides count for a face between two Ascension rooms. */
+  T.ascWallLow = function (w, cam) { const dx = w.dir === 0 ? 1 : 0, dy = w.dir === 0 ? 0 : 1; return (w.ai && cam.nrm(dx, dy)[1] > 0.001) || (w.aj && cam.nrm(-dx, -dy)[1] > 0.001); };
 })(window.EVO = window.EVO || {});

@@ -77,6 +77,36 @@
     return [p0, p1];
   }
 
+  /* ---- Ascension walls (S.ascWalls, P.ascWalls): a thin box (0.15 tile) on the edge of a room-border face, tile-exact and the same in Box, A and B. Its base is the higher of the two tiles, its height is absolute (0.7;
+     0.15 for the cut toward the camera, computed here with the camera of the frame). Stone colour, dark outline. Not selectable (the pick render skips it unless o.pickWalls, used to measure what it hides). ---- */
+  const STONE = [166, 158, 146], STONE_TOP = [204, 196, 182];
+  function ascWallDepth(cam, w) { return cam.ry(w.dir === 0 ? w.x + 1 : w.x + 0.5, w.dir === 0 ? w.y + 0.5 : w.y + 1); }
+  const ascLow = (o, cam, w) => !o.ascNoCut && E.roomTypes.ascWallLow(w, cam);
+  /* In A / B a wall is cut into BANDS at the heights of the levels it crosses (like the ramps) and each band is drawn in the pass of the level at the top of its band, so a higher slab behind it cannot paint over it;
+     the top cap goes with the last band. Returns [{ pass, lo, hi, top }]. */
+  function ascBands(S, w, low) {
+    const T = E.roomTypes, hb = w.hb, ht = hb + (low ? T.ASC_LOW : S.ascWalls.height), bands = []; let lo = hb, L = Math.max(S.fine[w.i], S.fine[w.j]) + 1;
+    while (L <= S.maxFine && S.levelH[L] < ht - 1e-6) { const hi = S.levelH[L]; if (hi > lo + 1e-6) { bands.push({ pass: L, lo, hi, top: false }); lo = hi; } L++; }
+    bands.push({ pass: Math.min(L, S.maxFine), lo, hi: ht, top: true }); return bands;
+  }
+  function drawAscWall(ctx, cam, S, o, w, st, band) {
+    if (PICK && !o.pickWalls) return;
+    const low = ascLow(o, cam, w), T = E.roomTypes, hb = band ? band.lo : w.hb, ht = band ? band.hi : w.hb + (low ? T.ASC_LOW : S.ascWalls.height), [x0, x1, y0, y1] = T.ascBox(w);
+    const veiled = !!(o.veil && S.slice && !S.pocket && !S.slice[w.i] && !S.slice[w.j]), side = DBG ? [255, 0, 0] : veiled ? veilMix(STONE) : STONE, top = DBG ? [255, 0, 0] : veiled ? veilMix(STONE_TOP) : STONE_TOP;
+    if (PICK) PKC = pcode(0, 0);
+    for (const [ax, ay, bx, by, nx, ny] of [[x0, y0, x1, y0, 0, -1], [x1, y0, x1, y1, 1, 0], [x1, y1, x0, y1, 0, 1], [x0, y1, x0, y0, -1, 0]]) { // the sides that face the camera, then the top
+      const [rnx, rny] = cam.nrm(nx, ny); if (rny <= 0.001) continue;
+      wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, side, rnx, o, st);
+    }
+    if (band && !band.top) return;
+    const p0 = cam.p(x0, y0, ht), p1 = cam.p(x1, y0, ht), p2 = cam.p(x1, y1, ht), p3 = cam.p(x0, y1, ht);
+    ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.lineTo(p3[0], p3[1]); ctx.closePath();
+    ctx.fillStyle = PICK ? PKC : rgb(top); ctx.fill();
+    if (!PICK && o.outlines !== false && !DBG) { ctx.strokeStyle = 'rgba(24,20,34,0.6)'; ctx.lineWidth = 0.9; ctx.lineJoin = 'round'; ctx.stroke(); }
+    st.polys++;
+  }
+  const ascByKey = (S, keyOf) => { const m = new Map(); if (!S.ascWalls) return m; for (const w of S.ascWalls.faces) { const k = keyOf(w); let a = m.get(k); if (!a) m.set(k, a = []); a.push(w); } return m; };
+
   const AMBIGUOUS = 'rgba(255,0,255,0.75)';
   const VEIL_RGB = [10, 8, 24], VEIL_A = 0.6;               // one band: everything outside the slice
   const VEIL = `rgba(${VEIL_RGB},${VEIL_A})`;
@@ -370,6 +400,8 @@
     const rank = new Int32Array(S.n); order.forEach((t, r) => { rank[t] = r; });
     const ST = hasStairs(S) ? stairTiles(S) : null;
     const face = (i2, b) => { const bp = []; borderFaces(bp, S, cam, i2, 1 << b, S.levelH[S.fine[i2]]); strokeBorder(ctx, bp); };
+    const ASC = ascByKey(S, (w) => (rank[w.i] > rank[w.j] ? w.i : w.j)); // each wall after the later (painter order) of the two tiles of its face
+
     for (const i of order) {
       const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = S.levelH[f], si = ST && ST.get(i), c = si ? stairColor(si) : levelColor(S, f, P);
       const isRamp = !!(si && si.rec);
@@ -429,6 +461,7 @@
         }
         if (bp.length) strokeRoomFaces(ctx, bp);
       }
+      const aw = ASC.get(i); if (aw) { aw.sort((p, q) => ascWallDepth(cam, p) - ascWallDepth(cam, q)); for (const w of aw) drawAscWall(ctx, cam, S, o, w, st); }
       st.polys++;
     }
   }
@@ -436,6 +469,7 @@
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
   function renderLevels(ctx, cam, S, P, o, st, loopsOf) {
     const ST = hasStairs(S) ? stairTiles(S) : null, PIECES = ST ? rampPieces(S, cam) : new Map(); // ramp pieces by level band
+    const ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) for (const bd of ascBands(S, w, ascLow(o, cam, w))) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
     for (let L = 0; L <= S.maxFine; L++) {
       const loops = loopsOf(S, L, P), pcs = PIECES.get(L) || [];
       if (!loops.length && !pcs.length) continue;
@@ -527,6 +561,7 @@
         }
         if (bp.length) strokeRoomFaces(ctx, bp);
       }
+      const aw = ASCL.get(L); if (aw) { aw.sort((p, q) => ascWallDepth(cam, p.w) - ascWallDepth(cam, q.w) || p.bd.lo - q.bd.lo); for (const q of aw) drawAscWall(ctx, cam, S, o, q.w, st, q.bd); }
     }
   }
 
