@@ -1,6 +1,6 @@
 /* Pixel regression with ROOMS ON on the fixed test set (real map, 5 terraces, rooms on, the rest by default): the room types are classified but, with the Cake switch off and the
    type tint off, the canvases must be identical to the checkout in EVO_ROOT (the commit before the technique).
-     NODE_PATH=$(npm root -g) [EVO_ROOT=<old checkout>] node tools/ui/regress_rooms.js <outDir> [--cake] [--balanced] [--noDD]     (--noDD: rule "Diorama never touches Diorama" off, to compare it with the same checkout, rule on)  then: node tools/ui/compare.js <dirA> <dirB> */
+     NODE_PATH=$(npm root -g) [EVO_ROOT=<old checkout>] node tools/ui/regress_rooms.js <outDir> [--cake] [--balanced] [--noDD] [--toggle cake|pocket|ascWalls]     (--toggle <id>: check and uncheck the switch #t-<id> before shooting, so a switch that leaks state is caught; --noDD: rule "Diorama never touches Diorama" off, to compare it with the same checkout, rule on)  then: node tools/ui/compare.js <dirA> <dirB> */
 const fs = require('fs'), path = require('path');
 const { open } = require('./common');
 (async () => {
@@ -12,6 +12,8 @@ const { open } = require('./common');
   if (process.argv.includes('--balanced')) { await page.selectOption('#roomsPreset', 'balanced'); await a.idle(); }
   if (process.argv.includes('--noDD')) { await page.evaluate(() => { window.__evo.P.dioNoTouch = false; window.__evo.draw(); }); await a.idle(); }
   if (process.argv.includes('--cake')) { await page.check('#t-cake'); await a.idle(); }
+  const ti = process.argv.indexOf('--toggle');
+  if (ti > 0) { const id = process.argv[ti + 1]; await page.check('#t-' + id); await a.idle(); await page.uncheck('#t-' + id); await a.idle(); }
   for (const t of ['box', 'A', 'B']) { await a.tech(t); for (const p of ['oblique', 'isoE']) { await a.preset(p); fs.writeFileSync(path.join(out, `rooms_${t}_${p}.png`), await a.canvas()); } }
   console.log('errors:', a.errs); fs.writeFileSync(path.join(out, 'errors.json'), JSON.stringify(a.errs)); await a.browser.close(); process.exit(a.errs.length ? 1 : 0);
 })();
