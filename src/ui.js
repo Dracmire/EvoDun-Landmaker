@@ -22,7 +22,7 @@
 
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
-  const st = { pack: 'snake', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const st = { pack: 'snake_surface', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -483,6 +483,7 @@
     return ` · <b>POCKET</b> of Diorama room ${pi.ids.join('+')}: fragment ${pi.fragTiles} tiles, pocket ${pi.pocketTiles} tiles (disc radius ${pi.R.toFixed(1)}${S.ox < 0 || S.oy < 0 || S.ox + S.W > S.mapW || S.oy + S.H > S.mapH ? ', window extends past the map edge (void)' : ''}), ${pi.exitRuns} exit${pi.exitRuns === 1 ? '' : 's'} (${pi.exitFaces} faces, ${pi.exitsReached} reached${pi.exitsBent ? `, ${pi.exitsBent} bent` : ''}), framing <b>${pi.archetypeName}</b> (${pi.auto ? 'auto: ' : ''}${pi.reason}), Pocket height ${pi.ph}, water ${pi.waterTiles} tiles${pi.archetype === 'hill' ? ` (pond limit ${pi.pondMax})` : ''}${pi.voidTiles ? `, void ${pi.voidTiles} tiles` : ''}${pi.channelTiles ? `, channel ${pi.channelTiles} tiles` : ''}, backdrop band ${pi.backDepth.toFixed(1)} tiles deep / ${pi.backTiles} tiles, ${pi.seeds} seeds, floors ${pi.floors.length ? pi.floors.join(' + ') : 'none'} (${pi.double ? `double${pi.cliffFacesCamera ? ', cliff facing the camera' : ''}` : 'single'})`;
   }
   function roomsText() {
+    const n0 = S.roomsNone; if (n0) return `<br><b>Rooms</b>: no rooms found (map too small for these parameters: ${n0.W} x ${n0.H}, room radius ${n0.R}) - rooms layer not applied`;
     const r = S.rooms; if (!r) return '';
     const rb = S.roomBorderInfo, rbt = rb ? ` · room borders: ${rb.closed} blocking faces (orange) · ${rb.open} open transitions (gap) · ${rb.used} on a tree path (green)` : '';
     const u = r.usage, tr = r.treeReach, ms = st.rooms ? st.rooms.total.toFixed(0) : '?';
@@ -514,7 +515,8 @@
   }
 
   function init() {
-    setPack('snake', 'Snake Mountain (macroform)', window.EVO_PACKS.snake_mountain);
+    setPack('snake_surface', 'Snake Mountain surface (macroform, outer surface only)', window.EVO_PACKS.snake_mountain_surface);
+    setPack('snake', 'Snake Mountain (macroform, caves subtracted)', window.EVO_PACKS.snake_mountain);
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
