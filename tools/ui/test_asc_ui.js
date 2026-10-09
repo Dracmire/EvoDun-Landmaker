@@ -6,16 +6,16 @@
 const path = require('path');
 const { open } = require('./common');
 const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png');
-const PAGE = async ({ nRuns, px, only }) => {
+const PAGE = async ({ nRuns, px, only, CAM }) => {
   const E = window.EVO, ev = window.__evo, pack = ev.packs[ev.st.pack].pack, CW = 520, CH = 420;
   const cv = document.createElement('canvas'); cv.style.cssText = `position:fixed;left:0;top:0;width:${CW}px;height:${CH}px;z-index:-1`; document.body.appendChild(cv);
-  const views = [['oblique', 0, 50], ['oblique', 90, 50], ['oblique', 180, 50], ['oblique', 270, 50], ['iso', 45, 35], ['iso', 135, 35], ['iso', 225, 35], ['iso', 315, 35]];
+  const views = CAM === 'stage' ? [['stage', 0, 25, 'persp']] : CAM === 'classic' ? [['classic', 0, 0, 'oblique']] : [['oblique', 0, 50], ['oblique', 90, 50], ['oblique', 180, 50], ['oblique', 270, 50], ['iso', 45, 35], ['iso', 135, 35], ['iso', 225, 35], ['iso', 315, 35]]; // --cam stage | classic: the camera bank's Cam 6 / Cam 7 (measured, not enforced)
   const shapes = {}; for (const smooth of [true, false]) { const P = Object.assign({}, ev.P, { ascWalls: true, stairW: 0, pocket: false }, smooth ? {} : { smooth: 0, radius: 0 }); shapes[smooth] = { P, S: E.shape(pack, P, null) }; }
   const S0 = shapes[true].S, runs = S0.ascWalls.runs, step = Math.max(1, Math.floor(runs.length / nRuns)), picks = []; for (let r = 0; r < runs.length && picks.length < nRuns; r += step) picks.push(r);
   if (only >= 0) { picks.length = 0; picks.push(only); }
   function reference(S, cam, view) {
     const W = S.W, H = S.H, yaw = view.yaw * Math.PI / 180, pit = view.pitch * Math.PI / 180, cy = Math.cos(yaw), sy = Math.sin(yaw), sp = Math.sin(pit), cp = Math.cos(pit);
-    const zOf = (x, y, h) => ((sy * (x - W / 2) + cy * (y - H / 2)) * cp + h * sp), zb = new Float32Array(CW * CH).fill(-1e9), own = new Uint8Array(CW * CH);
+    const zOf = cam.persp ? (x, y, h) => 1 / Math.max(cam.D - cam.depth(x, y, h), 1e-6) : (x, y, h) => ((sy * (x - W / 2) + cy * (y - H / 2)) * (view.kind === 'oblique' ? 1 : cp) + h * (view.kind === 'oblique' ? 1 : sp)), zb = new Float32Array(CW * CH).fill(-1e9), own = new Uint8Array(CW * CH); // zOf: perspective stores 1 / z, which is linear in screen space
     const tri = (A, B, C, o) => { const x0 = Math.max(0, Math.floor(Math.min(A[0], B[0], C[0]))), x1 = Math.min(CW - 1, Math.ceil(Math.max(A[0], B[0], C[0]))), y0 = Math.max(0, Math.floor(Math.min(A[1], B[1], C[1]))), y1 = Math.min(CH - 1, Math.ceil(Math.max(A[1], B[1], C[1])));
       const d = (B[1] - C[1]) * (A[0] - C[0]) + (C[0] - B[0]) * (A[1] - C[1]); if (Math.abs(d) < 1e-9) return;
       for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { const px = x + 0.5, py = y + 0.5, l1 = ((B[1] - C[1]) * (px - C[0]) + (C[0] - B[0]) * (py - C[1])) / d, l2 = ((C[1] - A[1]) * (px - C[0]) + (A[0] - C[0]) * (py - C[1])) / d, l3 = 1 - l1 - l2;
@@ -36,9 +36,10 @@ const PAGE = async ({ nRuns, px, only }) => {
   for (const smooth of [true, false]) for (const tech of ['box', 'A', 'B']) {
     if (!smooth && tech === 'box') continue; const { P, S } = shapes[smooth];
     for (const rid of picks) { const run = S.ascWalls.runs[rid], fs = S.ascWalls.faces.filter((f) => f.run === rid), fm = fs[fs.length >> 1], cx = fm.dir === 0 ? fm.x + 1 : fm.x + 0.5, cyy = fm.dir === 0 ? fm.y + 0.5 : fm.y + 1;
-      for (const [vname, yaw, pitch] of views) {
-        const view = { yaw, pitch, zoom: 1, panX: 0, panY: 0 }; let cam = E.makeCam(S, P, view, CW, CH); view.zoom = px / cam.sc; cam = E.makeCam(S, P, view, CW, CH);
+      for (const [vname, yaw, pitch, kind] of views) {
+        const view = { kind, yaw, pitch, zoom: 1, panX: 0, panY: 0 }; let cam = E.makeCam(S, P, view, CW, CH); view.zoom = px / cam.sc; cam = E.makeCam(S, P, view, CW, CH);
         const c = cam.p(cx, cyy, fm.hb); view.panX = CW / 2 - c[0]; view.panY = CH / 2 - c[1]; cam = E.makeCam(S, P, view, CW, CH);
+        if (cam.persp) { const pf = cam.panFor(cx, cyy, fm.hb); view.panX = pf[0]; view.panY = pf[1]; cam = E.makeCam(S, P, view, CW, CH); } // Cam 6: the pan moves the camera over the ground, so the centring comes from panFor
         E.render(cv, S, P, tech, view, { debug: true }); const img = cv.getContext('2d').getImageData(0, 0, CW, CH).data, ref = reference(S, cam, view);
         let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (const f of fs) for (const [ox, oy] of f.dir === 0 ? [[f.x + 1, f.y], [f.x + 1, f.y + 1]] : [[f.x, f.y + 1], [f.x + 1, f.y + 1]]) for (const h of [f.hb, f.hb + S.ascWalls.height]) { const q = cam.p(ox, oy, h); x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
         const m = 1.5 * cam.sc; x0 = Math.max(2, Math.floor(x0 - m)); y0 = Math.max(2, Math.floor(y0 - m)); x1 = Math.min(CW - 3, Math.ceil(x1 + m)); y1 = Math.min(CH - 3, Math.ceil(y1 + m));
@@ -68,10 +69,10 @@ const VIS = async () => { // what the walls hide: Balanced types, Iso 45, whole 
 };
 const argNum = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? +process.argv[i + 1] : d; };
 (async () => {
-  const a = await open({ w: 900, h: 700 }), page = a.page, ok = a.ok;
+  const a = await open({ w: 900, h: 700 }), page = a.page, CAMARG = process.argv.includes('--cam') ? process.argv[process.argv.indexOf('--cam') + 1] : '', ok = CAMARG ? (name, cond, extra) => console.log(`MEASURED (not enforced, --cam ${CAMARG}) ${cond ? 'within' : 'outside'}: ${name}  ${extra === undefined ? '' : extra}`) : a.ok;
   await page.setInputFiles('#file', [IMG]); await page.waitForTimeout(1500); await a.idle();
   await page.check('#t-rooms'); await a.idle(); await page.selectOption('#roomsPreset', 'balanced'); await a.idle();
-  const r = await page.evaluate(PAGE, { nRuns: argNum('--runs', 10), px: argNum('--px', 30), only: argNum('--only', -1) });
+  const r = await page.evaluate(PAGE, { nRuns: argNum('--runs', 10), px: argNum('--px', 30), only: argNum('--only', -1), CAM: CAMARG });
   console.log(`${r.runs} runs of walls, ${r.picks} tested x ${r.total / r.picks} renders`);
   const groups = {}; for (const [key, v] of Object.entries(r.rows)) { const [sm, tech, vname] = key.split('|'); const g = `${sm} | ${tech}`; (groups[g] || (groups[g] = {}))[vname] = v; }
   console.log('\n| smoothing | technique | mean % over views | worst % (any view) | worst view |\n|---|---|---:|---:|---|');

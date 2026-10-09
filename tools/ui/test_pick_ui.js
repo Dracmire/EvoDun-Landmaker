@@ -6,7 +6,7 @@
      NODE_PATH=$(npm root -g) node tools/ui/test_pick_ui.js [--n 400] */
 const { open } = require('./common');
 
-const PAGE = async ({ nPts }) => {
+const PAGE = async ({ nPts, CAM }) => {
   const E = window.EVO;
   const mk = (W, H, f) => { const el = new Float32Array(W * H); let mn = 1e9, mx = -1e9; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const v = el[y * W + x] = f(x, y); mn = Math.min(mn, v); mx = Math.max(mx, v); } return { name: 't', width: W, height: H, elevation: el, elevRange: [mn, mx], masks: {}, markers: [], fields: {} }; };
   const relief = mk(72, 56, (x, y) => 100 + 600 * (0.5 + 0.5 * Math.sin(x / 9) * Math.cos(y / 7)) + x * 3);
@@ -18,7 +18,7 @@ const PAGE = async ({ nPts }) => {
     const W = S.W, H = S.H, ST = new Map();
     for (const st of S.stairs) if (st.ramp) for (const step of st.steps) for (const t of step.tiles) ST.set(t, st);
     const yaw = view.yaw * Math.PI / 180, pit = view.pitch * Math.PI / 180, cy = Math.cos(yaw), sy = Math.sin(yaw), sp = Math.sin(pit), cp = Math.cos(pit);
-    const zOf = (x, y, h) => (sy * (x - W / 2) + cy * (y - H / 2)) * cp + h * sp;
+    const zOf = cam.persp ? (x, y, h) => 1 / Math.max(cam.D - cam.depth(x, y, h), 1e-6) : (x, y, h) => ((sy * (x - W / 2) + cy * (y - H / 2)) * (view.kind === 'oblique' ? 1 : cp) + h * (view.kind === 'oblique' ? 1 : sp)); // persp: 1 / z is linear in screen space
     const zb = new Float32Array(CW * CH).fill(-1e9), own = new Int32Array(CW * CH).fill(-1), kind = new Uint8Array(CW * CH), lev = new Int32Array(CW * CH).fill(-1);
     const tri = (A, B, C, o, k, L) => {
       const x0 = Math.max(0, Math.floor(Math.min(A[0], B[0], C[0]))), x1 = Math.min(CW - 1, Math.ceil(Math.max(A[0], B[0], C[0])));
@@ -49,7 +49,7 @@ const PAGE = async ({ nPts }) => {
   }
 
   const out = {}; const cv = document.createElement('canvas'); cv.width = CW; cv.height = CH;
-  const views = [['oblique', 0, 50], ['oblique', 90, 50], ['oblique', 180, 50], ['oblique', 270, 50], ['iso', 45, 35], ['iso', 135, 35], ['iso', 225, 35], ['iso', 315, 35]];
+  const views = CAM === 'stage' ? [['stage', 0, 25, 'persp']] : CAM === 'classic' ? [['classic', 0, 0, 'oblique']] : [['oblique', 0, 50], ['oblique', 90, 50], ['oblique', 180, 50], ['oblique', 270, 50], ['iso', 45, 35], ['iso', 135, 35], ['iso', 225, 35], ['iso', 315, 35]]; // --cam stage | classic: the camera bank's Cam 6 / Cam 7 (measured, not enforced)
   const configs = [['ramps', BASE], ['steps', Object.assign({}, BASE, { stairStyle: 0 })], ['ramps, no smoothing', Object.assign({}, BASE, { smooth: 0, radius: 0 })]];
   const worst = []; const fails = [], wfails = [];
   for (const [cname, P] of configs) {
@@ -57,8 +57,8 @@ const PAGE = async ({ nPts }) => {
     for (const tech of ['box', 'A', 'B']) {
       if (cname === 'steps' && tech === 'box' && false) continue;
       let tot = 0, ok = 0, naiveOk = 0, hidTot = 0, hidOk = 0, hidNaive = 0, wallTot = 0, wallOk = 0, filtered = 0;
-      for (const [vname, yaw, pitch] of views) {
-        const view = { yaw, pitch, zoom: 1.6, panX: 0, panY: 0 }, cam = E.makeCam(S, P, view, CW, CH), ref = reference(S, view, cam);
+      for (const [vname, yaw, pitch, kind] of views) {
+        const view = { kind, yaw, pitch, zoom: 1.6, panX: 0, panY: 0 }, cam = E.makeCam(S, P, view, CW, CH), ref = reference(S, view, cam);
         const sc = cam.sc, r = 0.9 * sc, DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [.7, .7], [-.7, .7], [.7, -.7], [-.7, -.7]];
         const naive = (x, y) => { const g = cam.unp(x, y, S.levelH[0]), ix = Math.floor(g[0]), iy = Math.floor(g[1]); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? iy * S.W + ix : -1; };
         let tries = 0, got = 0;
@@ -106,17 +106,17 @@ const PAGE = async ({ nPts }) => {
 
 (async () => {
   const ni = process.argv.indexOf('--n'), nPts = ni > 0 ? +process.argv[ni + 1] : 120;
-  const a = await open({ w: 900, h: 700 });
-  const r = await a.page.evaluate(PAGE, { nPts });
+  const a = await open({ w: 900, h: 700 }), CAMARG = process.argv.includes('--cam') ? process.argv[process.argv.indexOf('--cam') + 1] : '', okf = CAMARG ? (name, cond, extra) => console.log(`MEASURED (not enforced, --cam ${CAMARG}) ${cond ? 'within' : 'outside'}: ${name}  ${extra === undefined ? '' : extra}`) : a.ok;
+  const r = await a.page.evaluate(PAGE, { nPts, CAM: process.argv.includes('--cam') ? process.argv[process.argv.indexOf('--cam') + 1] : '' });
   console.log('| configuration | technique | cap/ramp points | correct | naive picker (control) | hidden tile centres: correct / naive | wall points: correct |\n|---|---|---:|---:|---:|---|---|');
   console.log(r.__fails.join('\n')); console.log('box cap failures by painter order:', JSON.stringify(r.__bf || [])); delete r.__fails; delete r.__bf;
   for (const [k, v] of Object.entries(r)) {
     const [c, t] = k.split(' | '), pc = (x, y) => (y ? (100 * x / y).toFixed(1) + ' %' : '-');
     console.log(`| ${c} | ${t} | ${v.tot} | ${v.ok} (${pc(v.ok, v.tot)}) | ${pc(v.naiveOk, v.tot)} | ${v.hidTot ? `${v.hidOk}/${v.hidTot} / ${v.hidNaive}/${v.hidTot}` : '-'} | ${v.wallTot ? `${v.wallOk}/${v.wallTot}` : '-'} |`);
-    a.ok(`${k}: >= 98 % of the cap/ramp points resolve to the tile that the reference shows (the rest are 1-2 px edge cases, see header)`, v.tot > 100 && v.ok >= 0.98 * v.tot, `${v.ok}/${v.tot}`);
-    a.ok(`${k}: the naive picker (control) is clearly worse`, v.naiveOk < 0.9 * v.tot, `${v.naiveOk}/${v.tot}`);
-    if (v.hidTot) a.ok(`${k}: tiles hidden behind higher terrain are not picked (>= 75 %)`, v.hidOk >= 0.75 * v.hidTot, `${v.hidOk}/${v.hidTot}`);
-    if (v.wallTot && (t === 'box' || c === 'ramps, no smoothing')) a.ok(`${k}: wall points resolve to the tile that owns the wall (Box >= 95 %, A/B without smoothing >= 85 %: the rest are pixels of the lower edge of a wall that vote for the cap below)`, v.wallOk >= (t === 'box' ? 0.95 : 0.85) * v.wallTot, `${v.wallOk}/${v.wallTot}`);
+    okf(`${k}: >= 98 % of the cap/ramp points resolve to the tile that the reference shows (the rest are 1-2 px edge cases, see header)`, v.tot > 100 && v.ok >= 0.98 * v.tot, `${v.ok}/${v.tot}`);
+    okf(`${k}: the naive picker (control) is clearly worse`, v.naiveOk < 0.9 * v.tot, `${v.naiveOk}/${v.tot}`);
+    if (v.hidTot) okf(`${k}: tiles hidden behind higher terrain are not picked (>= 75 %)`, v.hidOk >= 0.75 * v.hidTot, `${v.hidOk}/${v.hidTot}`);
+    if (v.wallTot && (t === 'box' || c === 'ramps, no smoothing')) okf(`${k}: wall points resolve to the tile that owns the wall (Box >= 95 %, A/B without smoothing >= 85 %: the rest are pixels of the lower edge of a wall that vote for the cap below)`, v.wallOk >= (t === 'box' ? 0.95 : 0.85) * v.wallTot, `${v.wallOk}/${v.wallTot}`);
   }
   console.log('errors:', a.errs); await a.browser.close();
 })();
