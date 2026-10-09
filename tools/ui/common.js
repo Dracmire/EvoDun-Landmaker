@@ -33,7 +33,10 @@ exports.open = async (opts = {}) => {
         const ev = window.__evo, cv = document.querySelector('#stage canvas'), w = cv.clientWidth, hh = cv.clientHeight;
         const v = ev.view(); v.zoom = zoom; v.panX = 0; v.panY = 0;
         const p = window.EVO.makeCam(ev.S(), ev.P, v, w, hh).p(x, y, h);
-        ev.st.zoom = zoom; ev.st.panX = w / 2 - p[0]; ev.st.panY = hh / 2 - p[1]; ev.draw();
+        ev.st.zoom = zoom; ev.st.panX = w / 2 - p[0]; ev.st.panY = hh / 2 - p[1];
+        const cam0 = window.EVO.makeCam(ev.S(), ev.P, ev.view(), w, hh);
+        if (cam0.persp) { const pf = cam0.panFor(x, y, h); ev.st.panX = pf[0]; ev.st.panY = pf[1]; } // Cam 6: the pan moves the camera over the ground, so the centring comes from panFor
+        ev.draw();
       }, { x, y, h, zoom });
       await api.idle();
     },
