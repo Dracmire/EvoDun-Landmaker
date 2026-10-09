@@ -19,7 +19,7 @@ Time limit: one Bash call is cut at 10 minutes and the parts are slow (node ~2 m
 
 Options: `--expect <globs>` when the task announced pixel differences (reported as "expected"; only unannounced ones fail); `--extra chip:<id>|pocket:<id>|walls` for the `shots` part. Screenshots go outside the repo (`/tmp/evo-verify/<date>/shots/`); never copy them into the repo.
 
-Known warning, not a failure: Snake Mountain with rooms on gives 0 rooms and a non-walkable map (pending the user's decision). Report it as a WARNING with that reason.
+Not applicable, not a warning: the Snake Mountain SURFACE pack (40x40) with rooms on and the Default parameters finds no room, so the rooms layer is not applied and the picture is the rooms-off one (the info line says so). Report it as "not applicable" with that reason. Any other warning is reported as a WARNING.
 
 ## 2. Audit the tests
 
