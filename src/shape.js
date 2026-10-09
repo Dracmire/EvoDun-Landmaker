@@ -221,7 +221,9 @@
   /* pack: the whole map; spec: see E.sliceOf (omit for the whole map as one slice). Terraces use the global
      elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
   E.shape = function (full, P, spec) {
-    const RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: the global tree gives the gates, sub-terraces are only visual
+    let RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: the global tree gives the gates, sub-terraces are only visual
+    let roomsNone = null; // rooms on but the layer found no room (e.g. a 40x40 map with the Default radius): the layer is not applied, the shape is the one with rooms off
+    if (RL && RL.stats.rooms === 0) { roomsNone = { W: full.width, H: full.height, R: P.rRadius === undefined ? 9 : P.rRadius }; RL = null; }
     if (RL && spec && spec.rooms && spec.rooms.length) spec = Object.assign({}, spec, { roomMap: RL.room });
     let pocketIds = null, seedIds = null, pocketWin = null; // POCKET (Pocket view, P.pocket): a Diorama room is drawn as its pocket. The shape is the WHOLE map shape (no slice, so the gates, ramps and walkable regions are the world's, with no patch connections)
     if (RL && E.pocket && P.pocket && spec && spec.rooms && spec.rooms.length === 1) { // and the pocket then keeps only the fragment and what surrounds it
@@ -297,7 +299,7 @@
       }
       S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rooms: spec.rooms ? spec.rooms.slice() : [], rect: spec.rect || null, warnings };
     }
-    S.rooms = RL; S.subFree = !!RL;
+    S.rooms = RL; S.roomsNone = roomsNone; S.subFree = !!RL;
     if (RL) { computeGatesRooms(S, P, full, RL, sl); computeRoomFaces(S, full, RL); } else computeGates(S, P, full, q);
     const snap = RL ? { fine: S.fine.slice(), levelH: S.levelH.slice(), levelMeta: S.levelMeta.slice(), maxFine: S.maxFine, byLevel: S.byLevel.map((a) => a.slice()) } : null;
     const build = () => { for (const c of S.conns || []) if (c.old) { c.path = c.old; c.old = null; } /* a re-carve starts again from the tree paths, not from an earlier recompute */ carveStairs(S, P); if (RL) checkConnections(S, P); computeRegions(S, P); if (RL) classifyWalk(S, P, RL); };
