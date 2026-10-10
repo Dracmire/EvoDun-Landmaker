@@ -28,6 +28,11 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
   const nShrine = await chips(), shrineInfo = await page.$eval('#info', (e) => e.textContent);
   if (nShrine === 0) { if (shrineInfo.includes('rooms layer not applied')) notApplicable.push('shrine pier: rooms layer not applied (no rooms found: map too small for the Default parameters); drawn as with rooms off'); else warnings.push('shrine pier: 0 rooms and the info does not say the layer was not applied'); }
   await sweep('shrine_rooms');
+  // Shrine-Pier x4 (decompressed, derived), rooms on (still on): 40x40 may find rooms
+  await page.selectOption('#src', 'shrine_pier_x4'); await a.idle();
+  const nShrine4 = await chips(), shrine4Info = await page.$eval('#info', (e) => e.textContent);
+  if (nShrine4 === 0) { if (shrine4Info.includes('rooms layer not applied')) notApplicable.push('shrine pier x4: rooms layer not applied (no rooms found for the Default parameters); drawn as with rooms off'); else warnings.push('shrine pier x4: 0 rooms and the info does not say the layer was not applied'); }
+  await sweep('shrine4_rooms');
   await page.uncheck('#t-rooms'); await a.idle();
   // real map
   await page.setInputFiles('#file', [IMG]); await page.waitForTimeout(1500); await a.idle();
@@ -47,7 +52,7 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     await a.focus(info.x, info.y, info.h, 55 / info.fit); await shot(name);
   };
   const camOf = (ex) => { const m = ex.match(/@([A-Za-z0-9]+)/); return m ? m[1] : 'isoE'; };
-  extras.sort((p, q) => (p.startsWith('shrine') ? 1 : 0) - (q.startsWith('shrine') ? 1 : 0)); // shrine changes the source (the room chips go away), so it runs last
+  const lastKinds = (e) => (e.startsWith('shrine') || e.startsWith('x4stage') ? 1 : 0); extras.sort((p, q) => lastKinds(p) - lastKinds(q)); // shrine and x4stage change the source (the room chips go away), so they run last
   for (const ex of extras) {
     const [kind, arg0] = ex.replace(/@.*$/, '').split(':'), arg = arg0, cam = camOf(ex), play = ex.includes('+play'), tag = cam === 'isoE' ? '' : '_' + cam;
     const doView = async (name) => { for (const t of ['box', 'A', 'B']) { await a.tech(t); await a.preset(cam); await shot(`${name}${tag}_${t}_${cam}`); if (play && t !== 'B') await playShot(`${name}${tag}_${t}_${cam}_play`); } };
@@ -55,12 +60,26 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       if (kind === 'chip') { await page.click(`#roomChips .chip[data-id="${arg}"]`); await a.idle(); await doView(`extra_chip${arg}`); await page.click('#wholeRooms'); await a.idle(); }
       else if (kind === 'pocket') { await page.check('#t-pocket'); await a.idle(); await page.click(`#roomChips .chip[data-id="${arg}"]`); await a.idle(); await doView(`extra_pocket${arg}`); await page.click('#wholeRooms'); await a.idle(); await page.uncheck('#t-pocket'); await a.idle(); }
       else if (kind === 'walls') { await page.check('#t-ascWalls'); await a.idle(); await doView('extra_walls'); await page.uncheck('#t-ascWalls'); await a.idle(); }
+      else if (kind === 'x4stage') { // Shrine-Pier x4 in the Stage preset: contract off / on, fitted and at play scale with the stake placed on the way up (a ramp tile between the Pier and the Shrine)
+        await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', 'shrine_pier_x4'); await a.idle(); await page.click('#stagePreset'); await a.idle();
+        const stake = await page.evaluate(() => { const e = window.__evo, S = e.S(), L = S.landmarks, sh = [L.shrine.c[0] - S.ox, L.shrine.c[1] - S.oy], pi = [L.pier.c[0] - S.ox, L.pier.c[1] - S.oy]; let best = -1, bd = 1e9;
+          for (let i = 0; i < S.n; i++) { if (!S.carved[i]) continue; const x = i % S.W + 0.5, y = (i / S.W | 0) + 0.5, d = Math.hypot(x - (pi[0] * 0.45 + sh[0] * 0.55), y - (pi[1] * 0.45 + sh[1] * 0.55)); if (d < bd) { bd = d; best = i; } }
+          if (best < 0) return null; e.inc.stake = { x: S.ox + best % S.W, y: S.oy + (best / S.W | 0) }; e.draw(); return [best % S.W + 0.5, (best / S.W | 0) + 0.5]; });
+        await a.idle(); if (!stake) warnings.push('x4stage: no ramp tile for the stake');
+        for (const on of [false, true]) { await (on ? page.check('#t-contract') : page.uncheck('#t-contract')); await a.idle(); const tag = `extra_x4stage_${on ? 'contract_on' : 'contract_off'}`; await a.preset('stage'); await shot(tag + '_fit'); if (stake) await playShot(tag + '_play', stake); }
+        await page.uncheck('#t-contract'); await a.idle(); await page.evaluate(() => { window.__evo.inc.stake = null; });
+      }
+      else if (kind === 'diorama31stage') { // Diorama 31 (Balanced types) in the Stage preset (terraces left at 3: the rooms change with the terraces) with the contract on
+        await page.selectOption('#src', 'image'); await a.idle(); await page.check('#t-rooms'); await a.idle(); await page.selectOption('#roomsPreset', 'balanced'); await a.idle();
+        await page.click('#roomChips .chip[data-id="31"]'); await a.idle(); await page.click('#stagePreset'); await a.idle(); await a.slider('terraces', 3); await a.idle(); await page.check('#t-contract'); await a.idle();
+        await a.preset('stage'); await shot('extra_diorama31stage_fit'); await playShot('extra_diorama31stage_play'); await page.uncheck('#t-contract'); await a.idle();
+      }
       else if (kind === 'shrine') { await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', 'shrine_pier'); await a.idle(); await doView('extra_shrine'); }
       else warnings.push('unknown extra view: ' + ex);
     } catch (e) { warnings.push(`extra ${ex} failed: ${e.message.split('\n')[0]}`); }
   }
   fs.writeFileSync(path.join(out, 'errors.json'), JSON.stringify(a.errs));
   await a.browser.close();
-  console.log('RESULT ' + JSON.stringify({ images: files.length, rooms: { snake: nSnake, shrine: nShrine, realDefault: nDef, realBalanced: nBal }, warnings, notApplicable, errors: a.errs, dir: out }));
+  console.log('RESULT ' + JSON.stringify({ images: files.length, rooms: { snake: nSnake, shrine: nShrine, shrine4: nShrine4, realDefault: nDef, realBalanced: nBal }, warnings, notApplicable, errors: a.errs, dir: out }));
   process.exit(a.errs.length ? 1 : 0);
 })();

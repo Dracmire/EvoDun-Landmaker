@@ -3,7 +3,7 @@
 #   node     every tools/test_*.js
 #   ui       every tools/ui/test_*.js except the two z-buffer tests (they run in zbuf)
 #   regress  pixel regression against origin/main in a temporary worktree (EVO_ROOT): stairW 0 and 3 (rooms off), rooms on, one pass
-#            per new switch (cake, pocket, ascWalls) checked and unchecked again, and the camera bank Cam 1-5 (regress_cams.js); expectation: 0 images differ
+#            per new switch (cake, pocket, ascWalls, contract) checked and unchecked again, and the camera bank Cam 1-5 (regress_cams.js); expectation: 0 images differ
 #   zbuf     painter order against a per-pixel z-buffer: tools/ui/test_ramp_ui.js and tools/ui/test_asc_ui.js
 #   shots    screenshots of the fixed set = the three core examples (real map rooms Default / Balanced types; Shrine-Pier; Snake Mountain surface; Box, A, B; Iso, Oblique) + --extra views
 #            (chip:<id>, pocket:<id>, walls, shrine; suffix @<camera id> and +play, e.g. pocket:31@stage+play)
@@ -82,7 +82,7 @@ part_regress() {
     done
     EVO_ROOT="$WT" node tools/ui/regress_rooms.js "$r/old_rooms" 2>&1 | tail -1; node tools/ui/regress_rooms.js "$r/new_rooms" 2>&1 | tail -1
     cmp_pass "rooms on, switches off" "$r/old_rooms" "$r/new_rooms"
-    for sw in cake pocket ascWalls; do
+    for sw in cake pocket ascWalls contract; do
       node tools/ui/regress_rooms.js "$r/new_$sw" --toggle "$sw" 2>&1 | tail -1
       cmp_pass "rooms on, $sw toggled on and off" "$r/old_rooms" "$r/new_$sw"
     done
@@ -111,7 +111,7 @@ part_shots() {
   res=$(grep '^RESULT ' "$log" | tail -1 | cut -c8-)
   if [ $rc -ne 0 ] || [ -z "$res" ]; then S=FAIL; FIG="screenshots failed (exit $rc), see shots.log"; return; fi
   if echo "$res" | grep -q '"warnings":\[\]'; then S=PASS; else S=WARN; fi
-  FIG="$(python3 -c 'import json,sys; r=json.loads(sys.argv[1]); print("%d images in %s; rooms snake/shrine/default/balanced = %s/%s/%s/%s; warnings: %s; not applicable: %s" % (r["images"], r["dir"], r["rooms"]["snake"], r["rooms"]["shrine"], r["rooms"]["realDefault"], r["rooms"]["realBalanced"], "; ".join(r["warnings"]) or "none", "; ".join(r.get("notApplicable", [])) or "none"))' "$res")"
+  FIG="$(python3 -c 'import json,sys; r=json.loads(sys.argv[1]); print("%d images in %s; rooms snake/shrine/shrine4/default/balanced = %s/%s/%s/%s/%s; warnings: %s; not applicable: %s" % (r["images"], r["dir"], r["rooms"]["snake"], r["rooms"]["shrine"], r["rooms"]["shrine4"], r["rooms"]["realDefault"], r["rooms"]["realBalanced"], "; ".join(r["warnings"]) or "none", "; ".join(r.get("notApplicable", [])) or "none"))' "$res")"
 }
 
 for p in "${PARTS[@]}"; do
