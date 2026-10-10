@@ -17,8 +17,8 @@ const EPS = 1e-9;
 {
   const P = Object.assign({}, BASE, { spread: 1.5 }), c = 6;
   const up = [6, 7, 8, 9, 10].map((j) => E.terGap(j, P, c)), down = [5, 4, 3, 2, 1].map((j) => E.terGap(j, P, c));
-  ok('gaps above the centre: 1, 1.5, 2.5, 2.5, 2.5 (capped from distance 3)', up.every((g, i) => Math.abs(g - [1, 1.5, 2.5, 2.5, 2.5][i]) < EPS), up.join());
-  ok('gaps below the centre: the same, mirrored', down.every((g, i) => Math.abs(g - [1, 1.5, 2.5, 2.5, 2.5][i]) < EPS), down.join());
+  ok('gaps above the centre: 1, 1.5, 2.5, 4, 6 (T(d) = (d - 1) * d / 2, no cap: the user\'s extreme-heights rule; it was 1, 1.5, 2.5, 2.5, 2.5 capped from distance 3)', up.every((g, i) => Math.abs(g - [1, 1.5, 2.5, 4, 6][i]) < EPS), up.join());
+  ok('gaps below the centre: the same, mirrored', down.every((g, i) => Math.abs(g - [1, 1.5, 2.5, 4, 6][i]) < EPS), down.join());
   ok('base(t) is the sum of the gaps, base(0) = 0', Math.abs(E.terBase(0, P, c)) < EPS && Math.abs(E.terBase(9, P, c) - ([0, 1, 2, 3, 4, 5].map((j) => E.terGap(j, P, c)).reduce((a, b) => a + b, 0) + [6, 7, 8].map((j) => E.terGap(j, P, c)).reduce((a, b) => a + b, 0))) < EPS);
   const u = Object.assign({}, BASE, { spread: 1 });
   ok('spread 1 (or no centre): uniform, t * terH, bit for bit', [0, 3, 11].every((t) => E.terBase(t, u, 6) === t * 1 && E.terBase(t, P, undefined) === t * 1) && E.hOf(7, u, 6) === E.hOf(7, BASE), E.hOf(7, u, 6));

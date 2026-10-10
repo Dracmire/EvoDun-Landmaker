@@ -74,14 +74,14 @@
   E.subHeight = function (P) { return Math.min(P.subH, P.terH / (P.subs + P.climb - 0.5)); };
 
   /* Height of the bottom of terrace t. P.spread (Height spread, 1 = uniform) widens the jump between neighbouring terraces
-     the farther it is from the central terrace c (the one with most tiles on the whole map): the jump j -> j+1 is
-     terH * (1 + (spread - 1) * T(min(d - 1, 2))) with d = distance of that jump from c (1 = next to it) and T = 0, 1, 3, so with
-     spread 1.5 the jumps are 1, 1.5, 2.5, 2.5, ... times terH. Without c, or with spread 1, terraces are t * terH. */
+     GRADUALLY and WITHOUT a cap the farther it is from the central terrace c (the one with most tiles on the whole map), on both sides: the jump
+     j -> j+1 is terH * (1 + (spread - 1) * T(d)) with d = distance of that jump from c (1 = next to it) and T(d) = (d - 1) * d / 2 = 0, 1, 3, 6, 10..., so with
+     spread 1.5 the jumps are 1, 1.5, 2.5, 4, 6, ... times terH (user's "extreme heights" rule; the first version capped T at 3). Without c, or with spread 1, terraces are t * terH. */
   E.terGap = function (j, P, c) {
     const sp = P.spread === undefined ? 1 : P.spread;
     if (!(sp > 1) || c === undefined) return P.terH;
-    const d = j >= c ? j - c + 1 : c - j, k = Math.min(d - 1, 2);
-    return P.terH * (1 + (sp - 1) * [0, 1, 3][k]);
+    const d = j >= c ? j - c + 1 : c - j;
+    return P.terH * (1 + (sp - 1) * (d - 1) * d / 2);
   };
   E.terBase = function (t, P, c) {
     if (!(P.spread > 1) || c === undefined) return t * P.terH;
