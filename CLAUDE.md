@@ -115,7 +115,13 @@ old pipeline (Unity, C#) are reference only.
   are reserved instead. Result: feet enclosed 78 -> 0, heads enclosed 2 -> 0, 796 of 15205 ring tiles lost (1007 corridor tiles). `P.cakeCorridor === false` = diagnostic, no corridor (`tools/diag_cake_ramps.js`); empty rings are dropped and the rest renumbered; step = min(step, (gap - margin) / n); rings replace the sub-terraces on the tiles they take; walking,
   stake and route are unchanged (rooms walking does not depend on levels). A tile claimed by two links keeps the smaller ring index (tie: lower link). Wall offsets of Diorama / Ascension (their wall encloses the room; the viewer has no room walls) are PHASE 2 with a design of their own.
 - Visual target: Sea of Stars / 2D-HD readability, Unexplored 2 style stage modelling. Flat colour per
-  level, gradient on cliffs, outlines. Orthographic camera with predefined angles and zoom, no free rotation.
+  level, gradient on cliffs, outlines. CAMERA BANK (user's decision): a fixed, DISCRETE set of saved cameras, nothing custom, usable by every crystallizer; the button labels are "Cam 1".."Cam 7" (A and B are technique names), the
+  ids are the old preset ids. Cam 1 Iso 45 (`isoE`), Cam 2 Iso -45 (`isoW`), Cam 3 Oblique 50 (`oblique`, the default), Cam 4 Low 28 (`low`), Cam 5 Top 80 (`top`): orthographic, unchanged (pixel regression `tools/ui/regress_cams.js`, 45 images, 0 differ).
+  Cam 6 Stage (`stage`): PERSPECTIVE, FOV 30, pitch 25, yaw 0 (the yaw will come from the main semantic relation of the scene), true division by depth around a pivot = the ground point under the screen centre at the focus height;
+  the camera DOLLIES with the zoom (D = (visible height in tiles / 2) / tan(FOV / 2), from the first panel so the compare panels agree), so the strength of the perspective on screen is the same at any zoom (ground scale at the bottom row / top row of the panel
+  = sin 40 / sin 10 = 3.70); the pan moves the camera over the ground (`cam.panFor` gives the pan that centres a point); the face culling uses a per-position facing test (face normal against the vector to the camera). Cam 7 Classic 3/4 (`classic`):
+  OBLIQUE projection, ground scale 1 and height scale 1 independent of any pitch, yaw 0 (candidate tactical camera, no drag variation). The screen -> ground inverse (picking, marks, focus) is exact for the three types (`node tools/test_cams.js`).
+  The manifest `viewer` block takes an optional `camera` (`docs/pack-format.md`). Each crystallizer README has a "Camera contract" section (`docs/crystallizers/`).
 - Same style pass for every technique so the comparison is fair.
 
 ## Criteria to judge a technique
@@ -130,7 +136,7 @@ incursion border; stake and way-back path visible.
   `node tools/test_slice.js`, `node tools/test_stairs.js`, `node tools/test_gates.js`, `node tools/test_ramp.js`, `node tools/test_spread.js`, `node tools/test_border.js`, `node tools/test_route.js`.
 - `src/tech.js`: technique A (per-level tile outline -> simplify -> Chaikin) and B (signed distance field ->
   blur -> marching squares).
-- `src/render.js`: camera, extruded walls, caps, overlays, markers. Stairs (steps) are terrain; ramps have their own surface renderer. Includes Box technique (one
+- `src/render.js`: camera (`makeCam`: ortho / oblique / `makePersp`), extruded walls, caps, overlays, markers. Stairs (steps) are terrain; ramps have their own surface renderer. Includes Box technique (one
   column per tile) as reference.
 - `src/png.js`: own PNG decoder (`E.decodePng`, raw samples per channel, 8/16 bit). `node tools/test_png.js`.
 - `src/fields.js`: channels R,G,B,A,H,S,V, roles (elevation / zone / edge / path / vegetation / POI), categorical
@@ -150,6 +156,10 @@ incursion border; stake and way-back path visible.
   "Snake Mountain surface (macroform, outer surface only)" (id `snake_surface`), the DEFAULT source of the viewer and the Snake Mountain of the fixed test set. `tools/build.py` packs both into `data/packs.js`.
   ROOMS WITH ZERO ROOMS (user's decision, `E.shape`): if the rooms layer finds no room (40x40 with the Default radius), the layer is NOT applied: the viewer draws exactly as with rooms off (same pixels, the map is not marked
   non-walkable) and the info says "Rooms: no rooms found (map too small for these parameters: W x H, room radius R) - rooms layer not applied" (`S.roomsNone`). `node tools/test_norooms.js`, `tools/ui/test_norooms_ui.js`.
+- `data/shrine_pier.json`: Shrine-Pier (core example 2, semantic landmarks, 10x10, from the user's spreadsheets: elevation = Semantic_Integration_Fix_Step3 Result!B12:K21, bodies / canopy / forest density carried): the sea is 0 in the sheet and 0 is VOID in the
+  viewer, so sea cells are set to (lowest land - 0.5) = 0.723229 and marked in the `water` mask; relation: the Shrine OVERLOOKS the Pier; canopy, bodies and forestDensity are carried for later stages (dressing) and NOT drawn. Built-in source
+  "Shrine-Pier (semantic landmarks)" (id `shrine_pier`); with rooms on and the Default parameters it finds no room (10x10), same rule as the Snake Mountain surface. The three CORE EXAMPLES of the fixed test set: numeric (real map), semantic landmarks
+  (Shrine-Pier), semantic macroform (Snake Mountain surface).
 - `tools/ui/`: headless UI tests (`test_roles.js`, `test_slice_ui.js`, `test_stairs_ui.js`), pixel regression
   (`regress.js` + `compare.js`, `EVO_ROOT` tests an older checkout), ramp painter order against a z-buffer
   (`test_ramp_ui.js`), screenshots (`stairs_shots.js`, `gates_shots.js`, `ramp_shots.js` four directions), cold-cost
@@ -157,9 +167,9 @@ incursion border; stake and way-back path visible.
   `node tools/test_heights.js` checks the effective sub-terrace height.
 - `tools/verify.sh` (standard verification, results OUTSIDE the repo in `/tmp/evo-verify/<date>/`: `<part>.log|.result|.time`, `summary.txt`, `summary.json`): `tools/verify.sh [node] [ui] [regress] [zbuf] [shots] [--extra chip:<id>|pocket:<id>|walls] [--expect <globs>] [--out <dir>]`
   (default `node ui regress zbuf`). `node` = every `tools/test_*.js`; `ui` = every `tools/ui/test_*.js` except the two z-buffer tests; `regress` = pixel regression against origin/main in a temporary worktree
-  (removed on exit): stairW 0 and 3 with rooms off, rooms on, and one pass per switch (`regress_rooms.js --toggle cake|pocket|ascWalls`: checked and unchecked before shooting), 0 differences expected, announced ones with `--expect` are
-  reported as "expected"; `zbuf` = `test_ramp_ui.js` + `test_asc_ui.js`; `shots` = `tools/ui/verify_shots.js`, fixed set (real map rooms Default and Balanced types, Snake Mountain, Box/A/B, Iso/Oblique) + extra views;
-  Snake Mountain surface with rooms on (no rooms found, layer not applied) is reported as "not applicable", not a warning or a failure. Parts are slow (a tool call is cut at 10 minutes): run them separately or in the background and poll the log.
+  (removed on exit): stairW 0 and 3 with rooms off, rooms on, and one pass per switch (`regress_rooms.js --toggle cake|pocket|ascWalls`: checked and unchecked before shooting), 0 differences expected (also the camera bank Cam 1-5, `regress_cams.js`), announced ones with `--expect` are
+  reported as "expected"; `zbuf` = `test_ramp_ui.js` + `test_asc_ui.js`; `shots` = `tools/ui/verify_shots.js`, fixed set = the three core examples (real map rooms Default and Balanced types, Shrine-Pier, Snake Mountain surface; Box/A/B, Iso/Oblique) + extra views (`chip:<id>`, `pocket:<id>`, `walls`, `shrine`, with a camera suffix `@stage` / `@classic` and `+play` for 55 px per tile: `pocket:31@stage+play`; `shrine` last);
+  Snake Mountain surface and Shrine-Pier with rooms on (no rooms found, layer not applied) are reported as "not applicable", not a warning or a failure. Parts are slow (a tool call is cut at 10 minutes): run them separately or in the background and poll the log.
 - `docs/crystallizers/`: one README per crystallizer (`01-terrain`, `02-room-types`, `03-stage` design draft) with its decisions, history, figures and mocks; CLAUDE.md keeps the short rules, the long text lives there (`docs/room-types.md`, `docs/rooms.md`, `docs/measurements.md` stay where they are and are linked from it).
 - `.claude/agents/verifier.md`: subagent `verifier` (haiku, read-only: Read, Grep, Glob, Bash). Runs `tools/verify.sh` and AUDITS the tests with `git diff origin/main -- tools/ data/` (new tests informative; changed
   expectations, loosened thresholds, deleted assertions, modified fixtures reported as "possible symptom hiding" with whether `src/` changed in that area). It does not edit, commit, push or change branch, and it does not replace the
@@ -211,7 +221,7 @@ incursion border; stake and way-back path visible.
    the first panels / to all three (`tools/ui/measure_compare.js`, 5x3, 12x3, 24x3 terraces): zone 6: 0.17 / 0.60 s, 0.22 / 1.24 s, 0.34 / 2.2 s; whole
    map: 0.78 / 2.8 s, 1.3 / 6.0 s, 1.7 / 10.2 s. Moving the camera does not recompute (cached contours). POSSIBLE IMPROVEMENT (not done, user's call):
    a cursor synchronised across panels (hover resolves the visible tile with `E.pickTile` and marks it in the others). B is not split by levels.
-7. Only three built-in sources: Snake Mountain surface (default), the old Snake Mountain with the caves subtracted, and filler noise. THE REAL SNAKE MOUNTAIN IS MULTI-LEVEL (snake body, interior caves as an SDF) and cannot be expressed as a heightmap: only its OUTER SURFACE is a pack. It is the test case of the future SDF / volume crystallizer. Missing: Shrine-Pier pack and real 256x256 maps. Roles
+7. Four built-in sources: Snake Mountain surface (default), Shrine-Pier, the old Snake Mountain with the caves subtracted, and filler noise. THE REAL SNAKE MOUNTAIN IS MULTI-LEVEL (snake body, interior caves as an SDF) and cannot be expressed as a heightmap: only its OUTER SURFACE is a pack. It is the test case of the future SDF / volume crystallizer. Shrine-Pier is now a pack (`data/shrine_pier.json`, 10x10; see Repo state). Missing: real 256x256 maps other than the user's height map. Roles
    were tested with synthetic images; no real Unity `EncodeToPNG` file yet (to be added under `data/samples/`).
 8. Verified in headless Chromium only: image loading, mouse drag/zoom/pan, roles, slice. Not
    verified: touch input, non-Chromium browsers, GPU timings. Measurements are in `docs/measurements.md`.
@@ -225,6 +235,20 @@ incursion border; stake and way-back path visible.
     user's normalization; a decision (exclude the coast from the range?) is still to be taken with the user.
 13. The "not walkable" tone (rooms on) looks jagged over the Cake rings: it is drawn per tile like every overlay (same cause as limitation 1, PARKED).
 14. Cold cost with Cake rings on (real map, whole map, compare mode): 3.7 s to the first panels and 10.0 s to the three (rooms on without Cake: 2.7 s and 5.2 s); B grows with the number of levels (15 -> 41).
+15. CAMERA BANK, Cam 6 Stage and Cam 7 Classic: MEASURED, NOT ENFORCED (`--cam stage|classic` of `tools/ui/test_ramp_ui.js`, `test_asc_ui.js`, `test_pick_ui.js`; the reference rasterizer interpolates 1 / z for the perspective; headless Chromium, `tools/verify.sh zbuf`).
+    Ramp order against the z-buffer (relief test map, 5 terraces, spread 1, default smoothing, one view at yaw 0; mean range over the four ramp kinds / worst %): Cam 6 at 28 px per tile: Box 0 / 0, A 0 / 0, B 0.00-0.36 / 0.69; at 55 px per tile: Box <= 0.01 / 0.03,
+    A <= 0.04 / 0.15, B 0.07-0.89 / 1.64; Cam 7: Box 0 / 0, A 0 / 0, B 0.00-0.21 / 0.38. Ascension walls (10 chains, real map Balanced types, 30 px per tile; mean / worst %): Cam 6: Box 0.08 / 0.19, A and B 0.46 / 1.60; Cam 7: Box 0.32 / 0.57, A and B 0.35 / 1.82
+    (the ortho reference: Box 0.18 / 0.57, A and B 0.35 / 2.78). Pick (relief map, zoom 1.6, share of cap / ramp points that resolve to the tile the reference shows): Cam 6: Box 91.0-98.2 % (the failures are Box tiles drawn in the wrong order under perspective: "the reference tile is drawn before the
+    picked one"; steps worst 91.0 %), A 100 %, B 99.0-100 % (only 10-12 sample points for A and B in the steps and ramps rows), the naive picker (control) 0-0.9 %; Cam 7: 99.2-100 %, naive picker 3.5-26.7 %. The first measurement of Cam 6 (before the pan moved the camera) was worse (walls 2.9 % mean, 14 % worst):
+    an image shift left the camera over the map centre and put far focus points behind it.
+    FACE CULLING under Cam 6 (fixed in this PR, perspective branch only): face tests per frame that change state against the constant normal of the ortho cameras, and wall quads drawn on the canvas with the facing test / with the constant normal (Box; A in brackets), whole-map frame at the fitted view /
+    at 55 px per tile centred on the room (real map: room 31; Snake surface: the slice box centre; Shrine-Pier: the Shrine): Snake surface 134 of 1202 face tests, 278 vs 217 quads at the fit, 120 vs 62 at play scale (A: 213 of 2585, 509 vs 456; 190 vs 129); Shrine-Pier 12 of 124, 36 vs 24 at the fit, 38 vs 24 at play
+    (A: 47 of 493, 197 vs 172; 203 vs 172); real map Default 6346 of 27545, 12269 vs 6481 at the fit, 386 vs 191 at play (A: 13616 of 137006, 60928 vs 54364; 1097 vs 970); real map Balanced types + Cake + Ascension walls 6783 of 28307, 12585 vs 6490 at the fit, 416 vs 209 at play (A: 31957 of 241365, 103093 vs 88378;
+    2649 vs 2156). The constant normal loses about half of the lateral walls of Box (screenshot: `E.camConstFacing = true` in the page).
+    PERSPECTIVE STRENGTH: ground scale at the bottom row / top row of the panel is 3.70 at any zoom and in any scene (by construction: sin 40 deg / sin 10 deg); at the whole-map fit the nearest / farthest map edge is 1.73 (real map), 1.71 (Snake surface), 1.61 (Shrine-Pier). The reviewer's 2.9x was for their own framing.
+    WHAT DOES NOT WORK YET: (1) Box tile order is the ortho one (depth along the ground, then level): not an exact painter order under perspective (pick figures above); (2) marks, labels and line widths use `cam.sc`, they do not shrink with distance; (3) tiles behind or at the camera are clamped at 5 % of D (off screen in practice,
+    no artifact seen in the screenshots); (4) the Pocket was composed for Cam 1 (Iso): under Cam 6 / Cam 7 its bands and backdrop do not line up with the view axis (`docs/crystallizers/02-room-types/README.md`); (5) the wheel zoom is limited to 0.5-4x of the fit, so 55 px per tile on the whole real map needs the focus tools (`a.focus`), not the wheel;
+    (6) Cam 6 at yaw 0 shows Shrine-Pier from the south: the Shrine (4, 7) and the Pier (8, 7) are side by side and the sea is the right edge; "Pier in front" needs the semantic yaw (next step, not added); (7) the drag variation of yaw / pitch applies to Cam 1-6, not to Cam 7.
 
 ## Pending, in this order
 1. (Done, PR #1) Verify the first limitations.

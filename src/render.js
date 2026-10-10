@@ -33,9 +33,13 @@
   }
   const OUT = 'rgba(24,20,34,0.92)';
 
+  /* CAMERA BANK (Cam 1-7, `view.kind`): 'ortho' (Cam 1-5: yaw / pitch, the original code path, unchanged), 'oblique' (Cam 7 Classic 3/4: ground scale 1 and height scale 1 independent of any pitch, yaw 0;
+     the same affine code with sp = cp = 1) and 'persp' (Cam 6 Stage, makePersp). Every camera offers p / unp / ry / nrm / sc / fit / base; nrm takes the face position as optional extra arguments (only the
+     perspective camera uses them: the facing of a face depends on where it is). */
   function makeCam(S, P, view, w, h) {
+    if (view.kind === 'persp') return makePersp(S, P, view, w, h);
     const yaw = view.yaw * Math.PI / 180, pit = view.pitch * Math.PI / 180;
-    const cy = Math.cos(yaw), sy = Math.sin(yaw), sp = Math.sin(pit), cp = Math.cos(pit);
+    const cy = Math.cos(yaw), sy = Math.sin(yaw), sp = view.kind === 'oblique' ? 1 : Math.sin(pit), cp = view.kind === 'oblique' ? 1 : Math.cos(pit);
     const base = S.baseH !== undefined ? S.baseH : S.levelH[0] - P.terH, top = S.levelH[S.maxFine]; // S.baseH: a pocket over the void has a deep base of its own
     const raw = (x, y, hh) => {
       const X = x - S.W / 2, Y = y - S.H / 2;
@@ -51,10 +55,65 @@
     return {
       sc, base, fit,
       p: (x, y, hh) => { const [a, b] = raw(x, y, hh); return [a * sc + ox, b * sc + oy]; },
+      panFor: (x, y, hh) => { const [a, b] = raw(x, y, hh); return [w / 2 - (a * sc + ox - view.panX), h / 2 - (b * sc + oy - view.panY)]; }, // the pan (px) that brings the point to the screen centre
       unp: (px, py, hh) => { const a = (px - ox) / sc, b = (py - oy) / sc + hh * cp, c = b / sp; return [cy * a + sy * c + S.W / 2, -sy * a + cy * c + S.H / 2]; }, // screen point -> ground point on the plane at height hh
       ry: (x, y) => sy * (x - S.W / 2) + cy * (y - S.H / 2),
       nrm: (nx, ny) => [cy * nx - sy * ny, sy * nx + cy * ny]
     };
+  }
+
+  /* Cam 6 Stage: PERSPECTIVE with true division by depth. View space around a pivot P0 (the centre of the fit box on the ground, at the focus height hF = middle of the fit heights):
+     a = screen right, v = u*sp - hp*cp (screen down), n = u*cp + hp*sp (toward the camera), the camera at n = D on the view axis; z = D - n; screen = (a, v) * (D / z) * sc, so the scale at the pivot is sc.
+     FOV 30: the DOLLY follows the zoom: sc * D = f = (panel height / 2) / tan(FOV / 2), i.e. D = (visible height in tiles / 2) / tan(FOV / 2) with visible height = panel height / sc, computed from the FIRST panel
+     (view.persH, like view.fitSc) so every compare panel has the same camera; the perspective strength on screen is the same at any zoom. PAN moves the camera over the ground (see the end of makePersp). */
+  const PERSP_FOV = 30 * Math.PI / 180;
+  function makePersp(S, P, view, w, h) {
+    const yaw = view.yaw * Math.PI / 180, pit = view.pitch * Math.PI / 180, cy = Math.cos(yaw), sy = Math.sin(yaw), sp = Math.sin(pit), cp = Math.cos(pit);
+    const base = S.baseH !== undefined ? S.baseH : S.levelH[0] - P.terH, top = S.levelH[S.maxFine];
+    const fb = S.sliceBox ? [S.sliceBox.x0 - 2, S.sliceBox.y0 - 2, S.sliceBox.x1 + 2, S.sliceBox.y1 + 2] : [0, 0, S.W, S.H], hs = S.fitH || [base, top + 1.5];
+    const hF = (Math.min(...hs) + Math.max(...hs)) / 2, tanH = Math.tan(PERSP_FOV / 2);
+    const relTo = (X0, Y0) => (x, y, hh) => { const X = x - X0, Y = y - Y0, hp = hh - hF, u = sy * X + cy * Y; return [cy * X - sy * Y, u * sp - hp * cp, u * cp + hp * sp]; }; // [a, v, n] around the pivot
+    const cornersAt = (X0, Y0) => { const rel = relTo(X0, Y0), c = []; for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of hs) c.push(rel(x, y, hh)); return c; };
+    const extentOf = (corners, D) => { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const [a, v, n] of corners) { const k = D / Math.max(D - n, 0.05 * D), px = a * k, py = v * k; x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py); } return [x0, x1, y0, y1]; };
+    const f = ((view.persH || h) / 2) / tanH, avail = [w - 20, h - 20], sc1 = view.fitSc || 0;
+    // THE PIVOT is the ground point under the screen centre (at the focus height hF, the middle of the fit heights): at zoom 1 it is chosen so that the box is centred. Alternate between the
+    // fit scale (when no shared one is given), D = f / sc and the pivot until they agree (a few passes). With a shared fit scale (compare panels) every panel gets the same pivot.
+    let X0 = (fb[0] + fb[2]) / 2, Y0 = (fb[1] + fb[3]) / 2, sc0 = 0;
+    { const e = extentOf(cornersAt(X0, Y0), 1e9); sc0 = Math.min(avail[0] / (e[1] - e[0]), avail[1] / (e[3] - e[2])); }
+    for (let it = 0; it < 14; it++) {
+      const corners = cornersAt(X0, Y0), dMin = Math.max(...corners.map((c) => c[2])) + 1, D = Math.max(f / (sc1 || sc0), dMin), e = extentOf(corners, D);
+      const ecx = (e[0] + e[1]) / 2, ecy = (e[2] + e[3]) / 2, hp = 0, u1 = (ecy * D) / (D * sp + ecy * cp), n1 = u1 * cp, a1 = ecx * (D - n1) / D; // the ground point (on the plane hF) that the centre of the box has on screen, relative to the pivot
+      X0 += cy * a1 + sy * u1; Y0 += -sy * a1 + cy * u1;
+      if (!sc1) sc0 = Math.min(avail[0] / (e[1] - e[0]), avail[1] / (e[3] - e[2]));
+      if (Math.abs(a1) + Math.abs(u1) < 1e-9) break;
+    }
+    const fit = sc0, sc = (sc1 || sc0) * view.zoom, D = f / sc, ox = w / 2, oy = h / 2, zMin = 0.05 * D, Xb = X0, Yb = Y0;
+    const mk = (X0, Y0) => { const rel = relTo(X0, Y0), proj = (x, y, hh) => { const [a, v, n] = rel(x, y, hh), k = D / Math.max(D - n, zMin); return [a * k * sc + ox, v * k * sc + oy]; }; return {
+      sc, base, fit, D, persp: true, pivot: [X0, Y0, hF],
+      p: proj,
+      unp: (px, py, hh) => { // exact: the ray of the pixel meets the plane at height hh (u is linear in the pixel row)
+        const xs = (px - ox) / sc, vs = (py - oy) / sc, hp = hh - hF, u = (vs * (D - hp * sp) + D * hp * cp) / (D * sp + vs * cp), z = D - u * cp - hp * sp, a = xs * z / D;
+        return [cy * a + sy * u + X0, -sy * a + cy * u + Y0];
+      },
+      depth: (x, y, hh) => rel(x, y, hh)[2], // toward the camera: larger = nearer (the z-buffer tests use 1 / (D - depth))
+      ry: (x, y) => sy * (x - S.W / 2) + cy * (y - S.H / 2),
+      nrm: (nx, ny, px, py) => { // [shading component, facing]; with a position the facing is the face normal against the vector from the face to the camera
+        const rnx = cy * nx - sy * ny;
+        if (px === undefined || E.camConstFacing) return [rnx, sy * nx + cy * ny]; // E.camConstFacing (diagnostic, off): the constant-normal culling of the orthographic cameras, to show what the facing test changes
+        const cu = D * cp, cx = X0 + sy * cu, cyy = Y0 + cy * cu, dx = cx - px, dy = cyy - py, len = Math.hypot(dx, dy) || 1;
+        const r = (nx * dx + ny * dy) / len, cst = E.camStats; // E.camStats (a test sets it): how many face tests the position changes compared with the constant normal
+        if (cst) { const flip = (r > 0.001) !== ((sy * nx + cy * ny) > 0.001), q = proj(px, py, hF), on = q[0] >= 0 && q[0] <= w && q[1] >= 0 && q[1] <= h; cst.faces++; if (flip) cst.flipped++; if (on) { cst.onscreen = (cst.onscreen || 0) + 1; if (flip) cst.flippedOnscreen = (cst.flippedOnscreen || 0) + 1; } }
+        return [rnx, r];
+      }
+    }; };
+    // PAN moves the CAMERA over the ground (not the image): the pan is the displacement of the pivot at its own scale, s = (-panX / sc, -panY / (sc * sp)) along (screen right, toward camera), so the pivot is always the ground point
+    // under the screen centre and the dolly distance D is measured to what is on screen (an image shift would leave the camera over the map centre and put a far-away focus point behind the camera at play scale).
+    const c0 = mk(Xb, Yb), rel0 = relTo(Xb, Yb);
+    // panFor: the pan (px) that brings the point (x, y, hh) to the screen centre, in closed form (the point must be at u' = hp * cp / sp and a' = 0 from the new pivot)
+    c0.panFor = (x, y, hh) => { const [aT] = rel0(x, y, hh), hp = hh - hF, uT = sy * (x - Xb) + cy * (y - Yb), u1 = hp * cp / sp; return [-aT * sc, -(uT - u1) * sc * sp]; };
+    if (!view.panX && !view.panY) return c0;
+    const sa = -view.panX / sc, su = -view.panY / (sc * sp);
+    const c1 = mk(Xb + cy * sa + sy * su, Yb - sy * sa + cy * su); c1.panFor = c0.panFor; return c1;
   }
 
   function wallFill(ctx, c, k, y0, y1, o) {
@@ -69,7 +128,8 @@
   function wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, c, rnx, o, st, strong) {
     const hb0 = Array.isArray(hb) ? hb[0] : hb, hb1 = Array.isArray(hb) ? hb[1] : hb, ht0 = Array.isArray(ht) ? ht[0] : ht, ht1 = Array.isArray(ht) ? ht[1] : ht;
     const p0 = cam.p(ax, ay, ht0), p1 = cam.p(bx, by, ht1), p2 = cam.p(bx, by, hb1), p3 = cam.p(ax, ay, hb0);
-    const k = clamp(0.92 + 0.28 * -rnx, 0.65, 1.2);
+    const k = clamp(0.92 + 0.28 * -rnx, 0.65, 1.2), cs = E.camStats; // E.camStats (a test sets it): wall quads drawn that touch the canvas
+    if (cs && Math.max(p0[0], p1[0], p2[0], p3[0]) >= 0 && Math.min(p0[0], p1[0], p2[0], p3[0]) <= ctx.canvas.width && Math.max(p0[1], p1[1], p2[1], p3[1]) >= 0 && Math.min(p0[1], p1[1], p2[1], p3[1]) <= ctx.canvas.height) cs.quads = (cs.quads || 0) + 1;
     const f = wallFill(ctx, c, k, Math.min(p0[1], p1[1]), Math.max(p2[1], p3[1]), o);
     ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.lineTo(p3[0], p3[1]); ctx.closePath();
     ctx.fillStyle = f; ctx.fill(); ctx.strokeStyle = f; ctx.lineWidth = 0.8; ctx.stroke();
@@ -95,7 +155,7 @@
     const veiled = !!(o.veil && S.slice && !S.pocket && !S.slice[w.i] && !S.slice[w.j]), side = DBG ? [255, 0, 0] : veiled ? veilMix(STONE) : STONE, top = DBG ? [255, 0, 0] : veiled ? veilMix(STONE_TOP) : STONE_TOP;
     if (PICK) PKC = pcode(0, 0);
     for (const [ax, ay, bx, by, nx, ny] of [[x0, y0, x1, y0, 0, -1], [x1, y0, x1, y1, 1, 0], [x1, y1, x0, y1, 0, 1], [x0, y1, x0, y0, -1, 0]]) { // the sides that face the camera, then the top
-      const [rnx, rny] = cam.nrm(nx, ny); if (rny <= 0.001) continue;
+      const [rnx, rny] = cam.nrm(nx, ny, (ax + bx) / 2, (ay + by) / 2); if (rny <= 0.001) continue;
       wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, side, rnx, o, st);
     }
     if (band && !band.top) return;
@@ -306,7 +366,7 @@
     for (const [dx, dy, ax, ay, bx, by, onB] of EDGES) { // side walls where the surface is above the neighbour
       if (!onB) continue;
       const nx = x + dx, ny = y + dy, out = nx < 0 || ny < 0 || nx >= S.W || ny >= S.H || (S.void && S.void[ny * S.W + nx]), j = out ? -1 : ny * S.W + nx, nj = j >= 0 ? ST.get(j) : null;
-      const [rnx, rny] = cam.nrm(dx, dy);   // (a neighbour of the same ramp gets a wall only where its column is shifted and the surfaces differ)
+      const [rnx, rny] = cam.nrm(dx, dy, (ax + bx) / 2, (ay + by) / 2);   // (a neighbour of the same ramp gets a wall only where its column is shifted and the surfaces differ)
       if (rny <= 0.001) continue;
       const e0 = hc(ax, ay), e1 = hc(bx, by);
       const hn0 = out ? cam.base : nj ? E.rampHeight(nj.rec, ax, ay, j) : S.levelH[S.fine[j]], hn1 = out ? cam.base : nj ? E.rampHeight(nj.rec, bx, by, j) : hn0; // beside another ramp: its surface
@@ -412,7 +472,7 @@
         const nx = x + dx, ny = y + dy;
         const hn = nx < 0 || ny < 0 || nx >= W || ny >= H || (S.void && S.void[ny * W + nx]) ? cam.base : S.levelH[S.fine[ny * W + nx]];
         if (hn >= hh - 1e-6) continue;
-        const [rnx, rny] = cam.nrm(dx, dy);
+        const [rnx, rny] = cam.nrm(dx, dy, x + (ax + bx) / 2, y + (ay + by) / 2);
         if (rny <= 0.001) continue;
         const sj = ST && (si || ST.get(ny * W + nx)); // a wall that belongs to a stair (riser or flank) takes its colour
         const inside = nx >= 0 && ny >= 0 && nx < W && ny < H, nr = inside && ST && ST.get(ny * W + nx);
@@ -480,7 +540,7 @@
       const tileIdx = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? iy * S.W + ix : -1; };
       const tileOf = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? ST.get(iy * S.W + ix) : undefined; };
       const mkSeg = (a, b, dx, dy, len) => {
-        const rnxy = cam.nrm(dy / len, -dx / len), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+        const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, rnxy = cam.nrm(dy / len, -dx / len, mx, my);
         if (rnxy[1] <= 0.001) return null;
         const seg = { a, b, rnx: rnxy[0], d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !S.pocket && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)), stair: null, own: tileIdx(mx - 0.2 * dy / len, my + 0.2 * dx / len) };
         if (ST) { // a wall touching a carved tile (also the diagonal corner cells of B): part of the rigid footprint

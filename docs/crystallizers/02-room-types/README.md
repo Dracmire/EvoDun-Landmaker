@@ -156,3 +156,13 @@ Open questions / pending for later (CLAUDE.md "Pending" 4 and 5):
 - A LATER step (user's decision): fewer ramps or ramps only in X rooms to even the types out; AFTER it: HD-2D layered terraces, SDF exterior mesh for Snake Mountain, RuleTile skin / modular kits.
 - Possible improvement (user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
 - The stage over the whole pipeline is the design draft of crystallizer 3: [`../03-stage/README.md`](../03-stage/README.md).
+
+## 10. Camera contract
+
+- **Made for**: **Cam 1 Iso 45** (`isoE`). The Pocket was composed for it (disc centred 1 r toward the camera, backdrop bands by distance along the camera axis, Iso yaw 45; [`docs/room-types.md`](../../room-types.md)) and the Cake figures, the Ascension-wall cut and the
+  wall z-buffer figures of this README were measured at Oblique 50 and Iso 45 (CLAUDE.md, [`docs/room-types.md`](../../room-types.md)). Cam 3 Oblique 50 (`oblique`, the default) is the other camera these were checked at (the wall order test uses Oblique 50 and four Iso 45 directions).
+- **Does not work: the low camera with the Pocket.** The real Diorama pocket seen from a low camera does not work, it was designed for Iso ([`../03-stage/README.md`](../03-stage/README.md) section 8, mock 5, and Q6 there).
+- **Not looked at**: Cam 2 Iso -45 (the mirror of Cam 1) and Cam 5 Top 80 with the Pocket, Cake and the walls.
+- **Cam 6 Stage and Cam 7 Classic 3/4** (added with the camera bank, PR of crystallizer 3 groundwork): looked at with Diorama 31 (Balanced types, Pocket on): under Cam 6 the pocket reads as a disc seen head-on with the pond in front, but its backdrop bands (built along the Iso axis) do not line up with the
+  view axis, so the "stage" is flat; under Cam 7 it is a nearly top-down disc with the heights shifted up and the front and back bands cannot be told apart. The Ascension walls under both cameras: the Zelda cut is recomputed per camera (per-position facing under Cam 6) and the wall order was measured against the
+  z-buffer (Cam 6: Box mean 0.08 % / worst 0.19 %, A and B 0.46 % / 1.60 %; Cam 7: Box 0.32 % / 0.57 %, A and B 0.35 % / 1.82 %; real map, Balanced types, 10 chains, 30 px per tile; CLAUDE.md limitation 15). Cake rings and the full Pocket composition under Cam 6 / Cam 7 are NOT measured.

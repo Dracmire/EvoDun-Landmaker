@@ -3,12 +3,16 @@
   const $ = (s) => document.querySelector(s);
   const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
+  /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
+     persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
   const PRESETS = [
-    { id: 'oblique', label: 'Oblique 50°', yaw: 0, pitch: 50 },
-    { id: 'low', label: 'Low 28°', yaw: 0, pitch: 28 },
-    { id: 'isoE', label: 'Iso 45°', yaw: 45, pitch: 35 },
-    { id: 'isoW', label: 'Iso −45°', yaw: -45, pitch: 35 },
-    { id: 'top', label: 'Top 80°', yaw: 0, pitch: 80 }
+    { id: 'isoE', cam: 1, label: 'Cam 1', title: 'Cam 1 · Iso 45° (orthographic, yaw 45, pitch 35)', yaw: 45, pitch: 35, kind: 'ortho' },
+    { id: 'isoW', cam: 2, label: 'Cam 2', title: 'Cam 2 · Iso −45° (orthographic, yaw −45, pitch 35)', yaw: -45, pitch: 35, kind: 'ortho' },
+    { id: 'oblique', cam: 3, label: 'Cam 3', title: 'Cam 3 · Oblique 50° (orthographic, yaw 0)', yaw: 0, pitch: 50, kind: 'ortho' },
+    { id: 'low', cam: 4, label: 'Cam 4', title: 'Cam 4 · Low 28° (orthographic, yaw 0)', yaw: 0, pitch: 28, kind: 'ortho' },
+    { id: 'top', cam: 5, label: 'Cam 5', title: 'Cam 5 · Top 80° (orthographic, yaw 0)', yaw: 0, pitch: 80, kind: 'ortho' },
+    { id: 'stage', cam: 6, label: 'Cam 6', title: 'Cam 6 · Stage (perspective, FOV 30, pitch 25, yaw 0)', yaw: 0, pitch: 25, kind: 'persp' },
+    { id: 'classic', cam: 7, label: 'Cam 7', title: 'Cam 7 · Classic 3/4 (oblique projection, ground scale 1, height scale 1)', yaw: 0, pitch: 0, kind: 'oblique' }
   ];
   const SLIDERS = [
     ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 300, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
@@ -41,12 +45,13 @@
     sel.value = Object.keys(ROOMS_PRESETS).find((n) => Object.entries(ROOMS_PRESETS[n]).every(([k, v]) => P[k] === v)) || 'custom';
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
-  function viewerBlock() { return { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; }
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; return b; } // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
     for (const k of ['terraces', 'roomsMinCore', 'rRadius', 'minPlateau']) setParam(k, w[k]);
     syncRoomsPreset();
+    st.preset = PRESETS.some((x) => x.id === w.camera) ? w.camera : 'oblique'; st.yawOff = st.pitchOff = 0; // absent = the default camera
   }
 
   function build() {
@@ -87,7 +92,7 @@
     }
     const pb = $('#presets');
     for (const p of PRESETS) {
-      const b = document.createElement('button'); b.textContent = p.label; b.dataset.id = p.id;
+      const b = document.createElement('button'); b.textContent = p.label; b.title = p.title; b.dataset.id = p.id;
       b.addEventListener('click', () => { st.preset = p.id; st.yawOff = 0; st.pitchOff = 0; st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
       pb.appendChild(b);
     }
@@ -403,7 +408,8 @@
 
   function view() {
     const p = PRESETS.find((x) => x.id === st.preset);
-    return { yaw: p.yaw + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc };
+    if (p.kind === 'oblique') return { kind: 'oblique', yaw: 0, pitch: 0, zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc }; // Cam 7 has no angle: the drag variation does not apply
+    return { kind: p.kind, yaw: p.yaw + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc, persH: st.persH };
   }
 
   function draw() {
@@ -428,7 +434,7 @@
     }
     [...stage.children].forEach((f, i) => { f.hidden = i >= techs.length; });
     // one camera for every panel: the same scale (px per tile, fitted to the first panel) around the same point of the map
-    const f0 = stage.children[0]; st.fitSc = E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight);
+    const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
     const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
     const bKey = 'Bready:' + P.radius + ':' + P.anchor, needB = techs.includes('B') && !S.cache[bKey];
     const paint = (t, i) => {
@@ -517,6 +523,7 @@
   function init() {
     setPack('snake_surface', 'Snake Mountain surface (macroform, outer surface only)', window.EVO_PACKS.snake_mountain_surface);
     setPack('snake', 'Snake Mountain (macroform, caves subtracted)', window.EVO_PACKS.snake_mountain);
+    setPack('shrine_pier', 'Shrine-Pier (semantic landmarks)', window.EVO_PACKS.shrine_pier);
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);

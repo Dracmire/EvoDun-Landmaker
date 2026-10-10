@@ -222,5 +222,5 @@
     return w.dir === 0 ? [w.x + 1 - t, w.x + 1 + t, w.y - a0, w.y + 1 + a1] : [w.x - a0, w.x + 1 + a1, w.y + 1 - t, w.y + 1 + t];
   };
   /* the cut: a face whose wall would stand between the camera and the inside of an Ascension room (the outward normal of that room faces the camera) is drawn low. Both sides count for a face between two Ascension rooms. */
-  T.ascWallLow = function (w, cam) { const dx = w.dir === 0 ? 1 : 0, dy = w.dir === 0 ? 0 : 1; return (w.ai && cam.nrm(dx, dy)[1] > 0.001) || (w.aj && cam.nrm(-dx, -dy)[1] > 0.001); };
+  T.ascWallLow = function (w, cam) { const dx = w.dir === 0 ? 1 : 0, dy = w.dir === 0 ? 0 : 1, mx = w.dir === 0 ? w.x + 1 : w.x + 0.5, my = w.dir === 0 ? w.y + 0.5 : w.y + 1; return (w.ai && cam.nrm(dx, dy, mx, my)[1] > 0.001) || (w.aj && cam.nrm(-dx, -dy, mx, my)[1] > 0.001); }; // the face position only matters to the perspective camera
 })(window.EVO = window.EVO || {});

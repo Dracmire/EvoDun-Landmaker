@@ -2,10 +2,11 @@
 # Standard verification of the viewer. Parts (default: node ui regress zbuf):
 #   node     every tools/test_*.js
 #   ui       every tools/ui/test_*.js except the two z-buffer tests (they run in zbuf)
-#   regress  pixel regression against origin/main in a temporary worktree (EVO_ROOT): stairW 0 and 3 (rooms off), rooms on, and one pass
-#            per new switch (cake, pocket, ascWalls) checked and unchecked again; expectation: 0 images differ
+#   regress  pixel regression against origin/main in a temporary worktree (EVO_ROOT): stairW 0 and 3 (rooms off), rooms on, one pass
+#            per new switch (cake, pocket, ascWalls) checked and unchecked again, and the camera bank Cam 1-5 (regress_cams.js); expectation: 0 images differ
 #   zbuf     painter order against a per-pixel z-buffer: tools/ui/test_ramp_ui.js and tools/ui/test_asc_ui.js
-#   shots    screenshots of the fixed set (real map rooms Default / Balanced types, Snake Mountain surface; Box, A, B; Iso, Oblique) + --extra views
+#   shots    screenshots of the fixed set = the three core examples (real map rooms Default / Balanced types; Shrine-Pier; Snake Mountain surface; Box, A, B; Iso, Oblique) + --extra views
+#            (chip:<id>, pocket:<id>, walls, shrine; suffix @<camera id> and +play, e.g. pocket:31@stage+play)
 # Usage: tools/verify.sh [parts...] [--extra chip:<id>|pocket:<id>|walls]... [--expect <glob>[,<glob>...]] [--out <dir>]
 #   --expect: image names (globs, e.g. 'rooms_*,whole_A_oblique.png') whose regress differences are ANNOUNCED; they are reported as "expected"
 #             and do not fail the part. Unannounced differences fail it.
@@ -85,6 +86,8 @@ part_regress() {
       node tools/ui/regress_rooms.js "$r/new_$sw" --toggle "$sw" 2>&1 | tail -1
       cmp_pass "rooms on, $sw toggled on and off" "$r/old_rooms" "$r/new_$sw"
     done
+    EVO_ROOT="$WT" node tools/ui/regress_cams.js "$r/old_cams" 2>&1 | tail -1; node tools/ui/regress_cams.js "$r/new_cams" 2>&1 | tail -1
+    cmp_pass "camera bank Cam 1-5 (isoE isoW oblique low top), Box A B, three scenes" "$r/old_cams" "$r/new_cams"
   } >> "$log" 2>&1
   git worktree remove --force "$WT" >/dev/null 2>&1; rm -rf "$(dirname "$WT")"; WT=""; git worktree prune
   [ $UNEXP -eq 0 ] && S=PASS || S=FAIL
@@ -108,7 +111,7 @@ part_shots() {
   res=$(grep '^RESULT ' "$log" | tail -1 | cut -c8-)
   if [ $rc -ne 0 ] || [ -z "$res" ]; then S=FAIL; FIG="screenshots failed (exit $rc), see shots.log"; return; fi
   if echo "$res" | grep -q '"warnings":\[\]'; then S=PASS; else S=WARN; fi
-  FIG="$(python3 -c 'import json,sys; r=json.loads(sys.argv[1]); print("%d images in %s; rooms snake/default/balanced = %s/%s/%s; warnings: %s; not applicable: %s" % (r["images"], r["dir"], r["rooms"]["snake"], r["rooms"]["realDefault"], r["rooms"]["realBalanced"], "; ".join(r["warnings"]) or "none", "; ".join(r.get("notApplicable", [])) or "none"))' "$res")"
+  FIG="$(python3 -c 'import json,sys; r=json.loads(sys.argv[1]); print("%d images in %s; rooms snake/shrine/default/balanced = %s/%s/%s/%s; warnings: %s; not applicable: %s" % (r["images"], r["dir"], r["rooms"]["snake"], r["rooms"]["shrine"], r["rooms"]["realDefault"], r["rooms"]["realBalanced"], "; ".join(r["warnings"]) or "none", "; ".join(r.get("notApplicable", [])) or "none"))' "$res")"
 }
 
 for p in "${PARTS[@]}"; do

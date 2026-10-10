@@ -10,6 +10,14 @@ the short rules; the long history and the reasons live here.
 | 2 | Room types: Cake / Diorama (pocket) / Ascension (walls) | Closed (PR #7-#13; its data source, the rooms layer, PR #5-#6) | [02-room-types](02-room-types/README.md) |
 | 3 | Stage: framing and dressing as an art-piece contract, Sea of Stars reference | Design draft | [03-stage](03-stage/README.md) |
 
+## Core examples
+
+The fixed test set of every crystallizer follows the three CORE EXAMPLES: numeric (the real map, rooms on, Default and Balanced types), semantic landmarks (Shrine-Pier) and semantic macroform (Snake Mountain surface). The semantic numeric world is the evolution of the vanilla (Perlin) one.
+
+## Camera bank
+
+Every crystallizer is made for some cameras of ONE fixed, discrete bank (nothing custom): Cam 1 Iso 45 (`isoE`), Cam 2 Iso -45 (`isoW`), Cam 3 Oblique 50 (`oblique`), Cam 4 Low 28 (`low`), Cam 5 Top 80 (`top`), Cam 6 Stage (perspective, FOV 30, pitch 25, yaw 0; `stage`), Cam 7 Classic 3/4 (oblique projection, ground scale 1 and height scale 1; `classic`). "A" and "B" are technique names, so the cameras are numbered. Each README says which of them it is made for in its "Camera contract" section.
+
 ## README template
 
 Every crystallizer README uses these sections, in this order:
@@ -21,7 +29,8 @@ Every crystallizer README uses these sections, in this order:
    number that says which one it replaces.
 5. **Design**: the rules, in the viewer's terms (tiles, levels, rooms, slice).
 6. **Viewer vs Unity**: what the viewer computes and draws, what is left to Unity.
-7. **Verification**: tests, measured figures, screenshots (fixed test set: real map Default and Balanced types,
-   Snake Mountain surface).
+7. **Verification**: tests, measured figures, screenshots (fixed test set = the three core examples: real map
+   Default and Balanced types, Shrine-Pier, Snake Mountain surface).
 8. **Mocks**: throwaway mock-ups made before the design, what each showed and why it was kept or dropped.
 9. **Known limits** and **Open questions**.
+10. **Camera contract**: which cameras of the bank the crystallizer is made for, which ones were tried and what does not work. (Added last so the older section numbers and cross-references stay valid.)
