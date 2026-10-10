@@ -12,7 +12,7 @@ the short rules; the long history and the reasons live here.
 
 ## Core examples
 
-The fixed test set of every crystallizer follows the three CORE EXAMPLES: numeric (the real map, rooms on, Default and Balanced types), semantic landmarks (Shrine-Pier) and semantic macroform (Snake Mountain surface). The semantic numeric world is the evolution of the vanilla (Perlin) one.
+The fixed test set of every crystallizer follows the three CORE EXAMPLES: numeric (the real map, rooms on, Default and Balanced types), semantic landmarks (Shrine-Pier) and semantic macroform (Snake Mountain surface). The semantic numeric world is the evolution of the vanilla (Perlin) one. Shrine-Pier also has a DECOMPRESSED version for the Stage (Shrine-Pier x4, 40x40, derived data with its script, `stageYaw` 90; 03-stage D13); it is part of the fixed test set next to the 10x10 pack.
 
 ## Camera bank
 

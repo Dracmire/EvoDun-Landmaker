@@ -17,8 +17,8 @@ const EPS = 1e-9;
 {
   const P = Object.assign({}, BASE, { spread: 1.5 }), c = 6;
   const up = [6, 7, 8, 9, 10].map((j) => E.terGap(j, P, c)), down = [5, 4, 3, 2, 1].map((j) => E.terGap(j, P, c));
-  ok('gaps above the centre: 1, 1.5, 2.5, 2.5, 2.5 (capped from distance 3)', up.every((g, i) => Math.abs(g - [1, 1.5, 2.5, 2.5, 2.5][i]) < EPS), up.join());
-  ok('gaps below the centre: the same, mirrored', down.every((g, i) => Math.abs(g - [1, 1.5, 2.5, 2.5, 2.5][i]) < EPS), down.join());
+  ok('gaps above the centre: 1, 1.5, 2.5, 4, 6 (T(d) = (d - 1) * d / 2, no cap: the user\'s extreme-heights rule; it was 1, 1.5, 2.5, 2.5, 2.5 capped from distance 3)', up.every((g, i) => Math.abs(g - [1, 1.5, 2.5, 4, 6][i]) < EPS), up.join());
+  ok('gaps below the centre: the same, mirrored', down.every((g, i) => Math.abs(g - [1, 1.5, 2.5, 4, 6][i]) < EPS), down.join());
   ok('base(t) is the sum of the gaps, base(0) = 0', Math.abs(E.terBase(0, P, c)) < EPS && Math.abs(E.terBase(9, P, c) - ([0, 1, 2, 3, 4, 5].map((j) => E.terGap(j, P, c)).reduce((a, b) => a + b, 0) + [6, 7, 8].map((j) => E.terGap(j, P, c)).reduce((a, b) => a + b, 0))) < EPS);
   const u = Object.assign({}, BASE, { spread: 1 });
   ok('spread 1 (or no centre): uniform, t * terH, bit for bit', [0, 3, 11].every((t) => E.terBase(t, u, 6) === t * 1 && E.terBase(t, P, undefined) === t * 1) && E.hOf(7, u, 6) === E.hOf(7, BASE), E.hOf(7, u, 6));
@@ -43,6 +43,16 @@ const relief = mk(96, 72, (x, y) => 100 + 800 * (0.5 + 0.5 * Math.sin(x / 11) * 
   ok('(control) the slice alone would have another most populated terrace', zc.indexOf(Math.max(...zc)) !== want);
   // levels: strictly increasing, base heights follow terBase
   ok('levels strictly increasing; level heights follow terBase + sub * subH', Sp.levelH.every((h, L) => L === 0 || h > Sp.levelH[L - 1]) && Sp.levelH.every((h, L) => Math.abs(h - E.hOf(L, Object.assign({}, BASE, { spread: 1.5 }), Sp.center)) < EPS || Sp.levelMeta[L].bridge));
+}
+
+// spreadCentre: 'largest' (default) is today's rule; 'middle' = floor((terraces - 1) / 2), whatever the map
+{
+  const Pm = Object.assign({}, BASE, { spread: 1.5, spreadCentre: 'middle' }), Sm = E.shape(relief, Pm), Sd = E.shape(relief, Object.assign({}, BASE, { spread: 1.5 })), Sl = E.shape(relief, Object.assign({}, BASE, { spread: 1.5, spreadCentre: 'largest' }));
+  ok("spreadCentre 'middle': the centre is floor((terraces - 1) / 2)", Sm.center === Math.floor((BASE.terraces - 1) / 2), Sm.center);
+  ok("spreadCentre absent = 'largest' (same levels, no pixel change)", JSON.stringify(Sd.levelH) === JSON.stringify(Sl.levelH) && Sd.center === Sl.center);
+  const P5 = Object.assign({}, BASE, { terraces: 7, spread: 1.5, spreadCentre: 'middle' }), S7 = E.shape(relief, P5);
+  ok("middle, 7 terraces: centre 3, jumps 2.5, 1.5, 1, 1, 1.5, 2.5 (symmetric around the centre)", S7.center === 3 && [2.5, 1.5, 1, 1, 1.5, 2.5].every((g, j) => Math.abs(E.terGap(j, P5, S7.center) - g) < EPS), S7.center);
+  ok("middle: spread 1 changes nothing", JSON.stringify(E.shape(relief, Object.assign({}, BASE, { spreadCentre: 'middle' })).levelH) === JSON.stringify(E.shape(relief, BASE).levelH));
 }
 
 // ramps and sub-terraces with uneven jumps

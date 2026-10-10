@@ -640,10 +640,19 @@
       if (o.passes) drawPassMarks(ctx, cam, S, P);
       if (o.markers) drawMarkers(ctx, cam, S, P);
       if (o.incursion) drawIncursion(ctx, cam, S, o.incursion);
+      if (o.contract && E.contract) S.contractInfo = Object.assign(S.contractInfo || {}, { [tech]: E.contract.draw(ctx, cam, S, P, tech, view, o, w, h) }); // art contract placeholders (switch off = nothing here)
     }
     st.ms = performance.now() - t0; DBG = false; PICK = false;
     return { st, cam };
   }
+
+  /* The Box pick render as an image (CSS pixels, one code per pixel: walls kind 2 by tile, caps kind 4 by tile): the visibility test of the art contract. */
+  E.pickBuffer = (S, P, view, w, h) => {
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d', { willReadFrequently: true }); ctx.antialias = false;
+    drawScene(ctx, w, h, S, P, 'box', view, { pick: true });
+    return { data: ctx.getImageData(0, 0, w, h).data, w, h };
+  };
 
   E.render = function (cv, S, P, tech, view, o) {
     const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
