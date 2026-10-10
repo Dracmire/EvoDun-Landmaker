@@ -1,7 +1,7 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
      persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
@@ -71,8 +71,8 @@
         lf.querySelector('select').value = P.pocketFraming; lf.querySelector('select').addEventListener('change', (e) => { P.pocketFraming = e.target.value; refreshMessage(); invalidate(true); }); sl.appendChild(lf);
         const lp = document.createElement('label'); lp.className = 'sl'; lp.innerHTML = '<span>Rooms preset</span><select id="roomsPreset"><option value="default">Default</option><option value="balanced">Balanced types</option><option value="custom">Custom</option></select>';
         lp.querySelector('select').addEventListener('change', (e) => { if (e.target.value === 'custom') return; applyRoomsPreset(e.target.value); invalidate(true); }); sl.appendChild(lp);
-        const lg = document.createElement('div'); lg.className = 'row'; lg.innerHTML = '<button id="stagePreset" title="Stage preset: Cam 6 (perspective), technique B, terraces 7, height spread 1.5. It only sets existing parameters and the camera.">Stage preset</button>';
-        lg.querySelector('button').addEventListener('click', () => { st.preset = 'stage'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.tech = 'B'; st.mode = 'single'; setParam('terraces', 7); setParam('spread', 1.5); syncRoomsPreset(); invalidate(true); }); sl.appendChild(lg);
+        const lg = document.createElement('div'); lg.className = 'row'; lg.innerHTML = '<button id="stagePreset" title="Stage preset: Cam 6 (perspective), technique B, terraces 7, height spread 1.5 around the middle terrace. It only sets existing parameters and the camera.">Stage preset</button>';
+        lg.querySelector('button').addEventListener('click', () => { st.preset = 'stage'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.tech = 'B'; st.mode = 'single'; setParam('terraces', 7); setParam('spread', 1.5); setParam('spreadCentre', 'middle'); syncRoomsPreset(); invalidate(true); }); sl.appendChild(lg);
       }
       for (const [k, label, mn, mx, step] of list) {
         const row = document.createElement('label'); row.className = 'sl';
@@ -489,7 +489,7 @@
   function contractText() { // counts of the pieces drawn per kind (switch "Art contract")
     const ci = S.contractInfo; if (!O.contract || !ci) return '';
     return (st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech]).filter((t) => ci[t]).map((t) => { const c = ci[t];
-      return ` · <b>Art contract</b> (${t === 'box' ? 'Box' : t}): body low ${c.body.low} · mid ${c.body.mid} · high ${c.body.high} · masonry ${c.body.masonry} · edge ${c.body.edge}; wrapper rim ${c.rim} · base ${c.base} · corner ${c.corner}; footprint ${c.footprint}; props trees ${c.trees} · landmarks ${c.landmarks}${c.faded ? ` (${c.faded} faded)` : ''}`; }).join('');
+      return ` · <b>Art contract</b> (${t === 'box' ? 'Box' : t}): body low ${c.body.low} · mid ${c.body.mid} · high ${c.body.high} · masonry ${c.body.masonry} · edge ${c.body.edge}; wrapper drop ${c.wrapper.drop} · border ${c.wrapper.border} · shore ${c.wrapper.shore}; footprint ${c.footprint}; props trees ${c.trees} · landmarks ${c.landmarks}${c.faded ? ` (${c.faded} faded)` : ''}`; }).join('');
   }
   function ascText() { const a = S.ascWalls; return a ? ` · <b>Ascension walls</b>: ${a.info.faces} faces in ${a.info.runs} chains (${a.info.candidates} candidate faces, ${a.info.dropped} dropped: chains of fewer than 3)` : ''; }
   function pocketText() {

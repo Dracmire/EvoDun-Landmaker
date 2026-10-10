@@ -74,7 +74,7 @@
   E.subHeight = function (P) { return Math.min(P.subH, P.terH / (P.subs + P.climb - 0.5)); };
 
   /* Height of the bottom of terrace t. P.spread (Height spread, 1 = uniform) widens the jump between neighbouring terraces
-     GRADUALLY and WITHOUT a cap the farther it is from the central terrace c (the one with most tiles on the whole map), on both sides: the jump
+     GRADUALLY and WITHOUT a cap the farther it is from the central terrace c (P.spreadCentre 'largest' = the one with most tiles on the whole map, default; 'middle' = terrace floor((terraces - 1) / 2), the Stage preset), on both sides: the jump
      j -> j+1 is terH * (1 + (spread - 1) * T(d)) with d = distance of that jump from c (1 = next to it) and T(d) = (d - 1) * d / 2 = 0, 1, 3, 6, 10..., so with
      spread 1.5 the jumps are 1, 1.5, 2.5, 4, 6, ... times terH (user's "extreme heights" rule; the first version capped T at 3). Without c, or with spread 1, terraces are t * terH. */
   E.terGap = function (j, P, c) {
@@ -188,7 +188,7 @@
   /* Terraces and sub-terraces of the WHOLE map (U = raw-range position after pre-smoothing), cached on the pack by the
      shaping parameters and then cropped to the window, so a slice never changes them. */
   function quantize(full, P) {
-    const key = [P.terraces, P.subs, P.minPlateau, P.minSub, P.pre].join('|');
+    const key = [P.terraces, P.subs, P.minPlateau, P.minSub, P.pre, P.spreadCentre === 'middle' ? 'mid' : 'big'].join('|');
     if (full._q && full._q.key === key) return full._q;
     const W = full.width, H = full.height, n = W * H, N = P.terraces, K = P.subs;
     const lf = E.landFill(full.elevation, W, H), vd = lf.void;
@@ -214,6 +214,7 @@
     if (vd) { const g1 = new Int16Array(n); for (let i = 0; i < n; i++) g1[i] = ter[i] + (vd[i] ? 1000 : 0); cleanup(W, H, sub, g1, P.minSub); } else cleanup(W, H, sub, ter, P.minSub);
     const cnt = new Int32Array(N); for (let i = 0; i < n; i++) if (!vd || !vd[i]) cnt[ter[i]]++;
     let center = 0; for (let t = 1; t < N; t++) if (cnt[t] > cnt[center]) center = t; // the terrace with most land tiles on the whole map (ties: the lower)
+    if (P.spreadCentre === 'middle') center = Math.floor((N - 1) / 2); // on a stage the largest terrace is always the base: the centre is the middle terrace (user's decision)
     return (full._q = { key, U, ter, sub, trans: {}, range: [mn, mx], center, void: vd, raw: lf.el });
   }
   E.quantize = quantize;

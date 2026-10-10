@@ -45,6 +45,16 @@ const relief = mk(96, 72, (x, y) => 100 + 800 * (0.5 + 0.5 * Math.sin(x / 11) * 
   ok('levels strictly increasing; level heights follow terBase + sub * subH', Sp.levelH.every((h, L) => L === 0 || h > Sp.levelH[L - 1]) && Sp.levelH.every((h, L) => Math.abs(h - E.hOf(L, Object.assign({}, BASE, { spread: 1.5 }), Sp.center)) < EPS || Sp.levelMeta[L].bridge));
 }
 
+// spreadCentre: 'largest' (default) is today's rule; 'middle' = floor((terraces - 1) / 2), whatever the map
+{
+  const Pm = Object.assign({}, BASE, { spread: 1.5, spreadCentre: 'middle' }), Sm = E.shape(relief, Pm), Sd = E.shape(relief, Object.assign({}, BASE, { spread: 1.5 })), Sl = E.shape(relief, Object.assign({}, BASE, { spread: 1.5, spreadCentre: 'largest' }));
+  ok("spreadCentre 'middle': the centre is floor((terraces - 1) / 2)", Sm.center === Math.floor((BASE.terraces - 1) / 2), Sm.center);
+  ok("spreadCentre absent = 'largest' (same levels, no pixel change)", JSON.stringify(Sd.levelH) === JSON.stringify(Sl.levelH) && Sd.center === Sl.center);
+  const P5 = Object.assign({}, BASE, { terraces: 7, spread: 1.5, spreadCentre: 'middle' }), S7 = E.shape(relief, P5);
+  ok("middle, 7 terraces: centre 3, jumps 2.5, 1.5, 1, 1, 1.5, 2.5 (symmetric around the centre)", S7.center === 3 && [2.5, 1.5, 1, 1, 1.5, 2.5].every((g, j) => Math.abs(E.terGap(j, P5, S7.center) - g) < EPS), S7.center);
+  ok("middle: spread 1 changes nothing", JSON.stringify(E.shape(relief, Object.assign({}, BASE, { spreadCentre: 'middle' })).levelH) === JSON.stringify(E.shape(relief, BASE).levelH));
+}
+
 // ramps and sub-terraces with uneven jumps
 for (const [subs, climb] of [[1, 1], [3, 2], [6, 2], [6, 5]]) {
   const P = Object.assign({}, BASE, { spread: 1.5, subs, climb }), S = E.shape(relief, P), s = E.subHeight(P);

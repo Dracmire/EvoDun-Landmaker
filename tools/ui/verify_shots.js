@@ -43,13 +43,13 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
   const nBal = await chips(); if (nBal === 0) warnings.push('real map, Balanced types: 0 rooms');
   await sweep('real_balanced');
   // play scale: 55 px per tile centred on the room (centroid of the slice / the chosen room) or on the Shrine
-  const playShot = async (name, spot) => {
+  const playShot = async (name, spot, px = 55) => {
     const info = await page.evaluate((spot) => {
       const e = window.__evo, S = e.S(); let x = S.W / 2, y = S.H / 2;
       if (spot) { x = spot[0]; y = spot[1]; } else if (S.sliceBox) { x = (S.sliceBox.x0 + S.sliceBox.x1) / 2; y = (S.sliceBox.y0 + S.sliceBox.y1) / 2; } else if (S.slice) { let sx = 0, sy = 0, n = 0; for (let i = 0; i < S.n; i++) if (S.slice[i]) { sx += i % S.W; sy += (i / S.W) | 0; n++; } if (n) { x = sx / n; y = sy / n; } }
       const i = Math.min(S.n - 1, Math.max(0, (Math.floor(y) * S.W + Math.floor(x)))); return { x: x + 0.5, y: y + 0.5, h: S.levelH[S.fine[i]], fit: e.st.fitSc };
     }, spot || null);
-    await a.focus(info.x, info.y, info.h, 55 / info.fit); await shot(name);
+    await a.focus(info.x, info.y, info.h, px / info.fit); await shot(name);
   };
   const camOf = (ex) => { const m = ex.match(/@([A-Za-z0-9]+)/); return m ? m[1] : 'isoE'; };
   const lastKinds = (e) => (e.startsWith('shrine') || e.startsWith('x4stage') ? 1 : 0); extras.sort((p, q) => lastKinds(p) - lastKinds(q)); // shrine and x4stage change the source (the room chips go away), so they run last
@@ -60,13 +60,13 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       if (kind === 'chip') { await page.click(`#roomChips .chip[data-id="${arg}"]`); await a.idle(); await doView(`extra_chip${arg}`); await page.click('#wholeRooms'); await a.idle(); }
       else if (kind === 'pocket') { await page.check('#t-pocket'); await a.idle(); await page.click(`#roomChips .chip[data-id="${arg}"]`); await a.idle(); await doView(`extra_pocket${arg}`); await page.click('#wholeRooms'); await a.idle(); await page.uncheck('#t-pocket'); await a.idle(); }
       else if (kind === 'walls') { await page.check('#t-ascWalls'); await a.idle(); await doView('extra_walls'); await page.uncheck('#t-ascWalls'); await a.idle(); }
-      else if (kind === 'x4stage') { // Shrine-Pier x4 in the Stage preset: contract off / on, fitted and at play scale with the stake placed on the way up (a ramp tile between the Pier and the Shrine)
+      else if (kind === 'x4stage') { // Shrine-Pier x4 in the Stage preset: contract off / on, techniques A and B, fitted and at about 30 px per tile with the stake placed on the way up (a ramp tile between the Pier and the Shrine)
         await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', 'shrine_pier_x4'); await a.idle(); await page.click('#stagePreset'); await a.idle();
         const stake = await page.evaluate(() => { const e = window.__evo, S = e.S(), L = S.landmarks, sh = [L.shrine.c[0] - S.ox, L.shrine.c[1] - S.oy], pi = [L.pier.c[0] - S.ox, L.pier.c[1] - S.oy]; let best = -1, bd = 1e9;
           for (let i = 0; i < S.n; i++) { if (!S.carved[i]) continue; const x = i % S.W + 0.5, y = (i / S.W | 0) + 0.5, d = Math.hypot(x - (pi[0] * 0.45 + sh[0] * 0.55), y - (pi[1] * 0.45 + sh[1] * 0.55)); if (d < bd) { bd = d; best = i; } }
           if (best < 0) return null; e.inc.stake = { x: S.ox + best % S.W, y: S.oy + (best / S.W | 0) }; e.draw(); return [best % S.W + 0.5, (best / S.W | 0) + 0.5]; });
         await a.idle(); if (!stake) warnings.push('x4stage: no ramp tile for the stake');
-        for (const on of [false, true]) { await (on ? page.check('#t-contract') : page.uncheck('#t-contract')); await a.idle(); const tag = `extra_x4stage_${on ? 'contract_on' : 'contract_off'}`; await a.preset('stage'); await shot(tag + '_fit'); if (stake) await playShot(tag + '_play', stake); }
+        for (const on of [false, true]) { await (on ? page.check('#t-contract') : page.uncheck('#t-contract')); await a.idle(); for (const t of ['A', 'B']) { const tag = `extra_x4stage_${t}_${on ? 'contract_on' : 'contract_off'}`; await a.tech(t); await a.preset('stage'); await shot(tag + '_fit'); if (stake) await playShot(tag + '_30px', stake, 30); } }
         await page.uncheck('#t-contract'); await a.idle(); await page.evaluate(() => { window.__evo.inc.stake = null; });
       }
       else if (kind === 'diorama31stage') { // Diorama 31 (Balanced types) in the Stage preset (terraces left at 3: the rooms change with the terraces) with the contract on

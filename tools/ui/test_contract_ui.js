@@ -5,12 +5,12 @@ const crypto = require('crypto');
 const { open } = require('./common');
 (async () => {
   const a = await open({ w: 1500, h: 900 }), page = a.page, ok = a.ok, hash = async () => crypto.createHash('md5').update(await a.canvas()).digest('hex');
-  const st = () => page.evaluate(() => { const e = window.__evo; return { preset: e.st.preset, tech: e.st.tech, mode: e.st.mode, terraces: e.P.terraces, spread: e.P.spread, yaw: e.view().yaw, kind: e.view().kind, minCore: e.P.roomsMinCore, rooms: e.P.rooms, cake: e.P.cake }; });
+  const st = () => page.evaluate(() => { const e = window.__evo; return { preset: e.st.preset, tech: e.st.tech, mode: e.st.mode, terraces: e.P.terraces, spread: e.P.spread, centre: e.P.spreadCentre, yaw: e.view().yaw, kind: e.view().kind, minCore: e.P.roomsMinCore, rooms: e.P.rooms, cake: e.P.cake }; });
   const info = () => page.$eval('#info', (e) => e.textContent);
   // the Stage preset
   await page.selectOption('#src', 'shrine_pier'); await a.idle();
   const before = await st(); await page.click('#stagePreset'); await a.idle(); const s1 = await st();
-  ok('Stage preset: Cam 6 (stage), technique B, single view, terraces 7, spread 1.5', s1.preset === 'stage' && s1.tech === 'B' && s1.mode === 'single' && s1.terraces === 7 && s1.spread === 1.5 && s1.kind === 'persp', JSON.stringify(s1));
+  ok('Stage preset: Cam 6 (stage), technique B, single view, terraces 7, spread 1.5, spread centre middle', s1.preset === 'stage' && s1.tech === 'B' && s1.mode === 'single' && s1.terraces === 7 && s1.spread === 1.5 && s1.centre === 'middle' && s1.kind === 'persp', JSON.stringify(s1));
   ok('Stage preset sets nothing else (rooms parameters and switches untouched)', s1.minCore === before.minCore && s1.rooms === before.rooms && s1.cake === before.cake);
   ok('a pack without stageYaw: Cam 6 at yaw 0', s1.yaw === 0, s1.yaw);
   await page.selectOption('#src', 'shrine_pier_x4'); await a.idle(); const s2 = await st();
@@ -25,8 +25,8 @@ const { open } = require('./common');
   for (const t of ['box', 'A', 'B']) { await a.tech(t); on[t] = await hash(); txt[t] = await info(); }
   for (const t of ['box', 'A', 'B']) {
     ok(`${t}: the contract changes the picture`, on[t] !== off[t]);
-    const m = txt[t].match(/Art contract<?[^:]*\(([A-Za-z]+)\): body low (\d+) · mid (\d+) · high (\d+) · masonry (\d+) · edge (\d+); wrapper rim (\d+) · base (\d+) · corner (\d+); footprint (\d+); props trees (\d+) · landmarks (\d+)/);
-    ok(`${t}: the info line has the counts per kind (body classes, wrapper strips, footprint, props)`, !!m && +m[2] + +m[3] + +m[4] > 0 && +m[7] > 0 && +m[10] === 2 && +m[11] > 0 && +m[12] === 2, m ? m.slice(1).join(' ') : txt[t].slice(-260));
+    const m = txt[t].match(/Art contract<?[^:]*\(([A-Za-z]+)\): body low (\d+) · mid (\d+) · high (\d+) · masonry (\d+) · edge (\d+); wrapper drop (\d+) · border (\d+) · shore (\d+); footprint (\d+); props trees (\d+) · landmarks (\d+)/);
+    ok(`${t}: the info line has the counts per kind (body classes, wrapper drop / border / shore, footprint, props)`, !!m && +m[2] + +m[3] + +m[4] > 0 && +m[7] + +m[8] + +m[9] > 0 && +m[8] > 0 && +m[10] === 2 && +m[11] > 0 && +m[12] === 2, m ? m.slice(1).join(' ') : txt[t].slice(-260));
   }
   await page.uncheck('#t-contract'); await a.idle();
   for (const t of ['box', 'A', 'B']) { await a.tech(t); ok(`${t}: switch off again = identical pixels`, (await hash()) === off[t]); }
