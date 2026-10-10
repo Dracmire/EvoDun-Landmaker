@@ -257,6 +257,7 @@
       snake: masks.snake || null, cave: masks.cave || null, waterfall: masks.waterfall || null,
       markers: pack.markers || [], name: pack.name, fields: pack.fields || {}, cache: {},
       mapW: full.width, mapH: full.height, ox: sl ? sl.x0 : 0, oy: sl ? sl.y0 : 0,
+      landmarks: full.landmarks || null, trees: full.trees || null, stageYaw: full.stageYaw || 0, // map coordinates (a window offset S.ox / S.oy is subtracted when drawing): landmarks {shrine, pier: {c, solid, foot, rej, infl, h}}, trees [[x, y]], the Stage yaw in degrees
       slice: null, sliceBox: null, border: null, sliceLoops: null, sliceInfo: null
     };
     if (vd) { S.fineMask = Int16Array.from(fine); for (let i = 0; i < n; i++) if (vd[i]) S.fineMask[i] = -1; } // level membership: void belongs to no level
