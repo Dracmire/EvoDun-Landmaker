@@ -26,7 +26,7 @@
   const par = (P, k) => (P[k] === undefined ? DEF[k] : P[k]);
   const KEYS = ['wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter'];
   const wkey = (P) => par(P, 'wallPass') + ':' + KEYS.map((k) => par(P, k)).join(':');
-  const BAND = 0.35, REACH = 0.45, MIN_JUMP = 0.5, ATOM = 0.5, ATOM_JIT = 0.3, LMAX = 3.6, FINE = 1 / 16;
+  const BAND = 0.35, REACH = 0.45, MIN_JUMP = 0.5, ATOM = 0.5, ATOM_JIT = 0.3, LMAX = 3.6, FULLMIN = 0.15, FINE = 1 / 16;
   const hash = (a, b, c, d) => E.curves.hash(a, b, c, d);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const area2 = (x, y) => { let a = 0; for (let k = 0, n = x.length; k < n; k++) { const j = (k + 1) % n; a += x[k] * y[j] - x[j] * y[k]; } return a; }; // twice the signed area
@@ -165,17 +165,17 @@
         for (let i = 0; i < m.length; i++) for (const o of m[i].nb.keys()) if (!seen.has(o) && o.s === r.s) { seen.add(o); m.push(o); }
         let area = 0, border = 0, lx = 0, ly = 0; const cols = new Map();
         for (const q of m) { area += q.area; lx += q.lx; ly += q.ly; border += q.floor; for (const [o, l] of q.nb) if (o.s !== q.s) border += l; let c = cols.get(q.col); if (!c) cols.set(q.col, c = { lx: 0, ly: 0, n: 0, m: [] }); c.lx += q.lx; c.ly += q.ly; c.n++; c.m.push(q); }
-        out.push({ m, s: r.s, K: r.K, area, border, lx: lx / m.length, ly: ly / m.length, cols });
+        out.push({ m, s: r.s, K: r.K, H: r.H, area, border, lx: lx / m.length, ly: ly / m.length, cols });
       }
       return out;
     };
-    const measure = (isl) => ({ islands: isl.length, slivers: isl.filter((q) => q.s < q.K && q.area < 0.30).length, thin: isl.filter((q) => q.border > 0 && q.area / q.border < 0.10).length, spans: isl.filter((q) => q.cols.size * colSp > LMAX).length, meanSpan: isl.length ? isl.reduce((t, q) => t + q.cols.size * colSp, 0) / isl.length : 0, maxSpan: isl.reduce((t, q) => Math.max(t, q.cols.size * colSp), 0) });
+    const measure = (isl) => ({ islands: isl.length, slivers: isl.filter((q) => q.s < q.K && q.area < 0.30).length, thin: isl.filter((q) => q.H >= 1.5 * th && q.border > 0 && q.area / q.border < 0.10).length, thinAll: isl.filter((q) => q.border > 0 && q.area / q.border < 0.10).length, tinyFull: isl.filter((q) => q.s === q.K && q.area < FULLMIN).length, spans: isl.filter((q) => q.cols.size * colSp > LMAX).length, meanSpan: isl.length ? isl.reduce((t, q) => t + q.cols.size * colSp, 0) / isl.length : 0, maxSpan: isl.reduce((t, q) => Math.max(t, q.cols.size * colSp), 0) });
     stats.before = measure(islands());
     let rounds = 0;
     for (; rounds < 20; rounds++) {
       const isl = islands(); let changed = 0; const set = new Map();
       for (const q of isl) {
-        if (q.s < q.K && (q.area < 0.30 || (q.border > 0 && q.area / q.border < 0.10))) { // (a) a sliver or a thin island takes the s of the neighbour with the longest shared border
+        if ((q.s < q.K && (q.area < 0.30 || (q.border > 0 && q.area / q.border < 0.10)))) { // (a) a sliver or a thin island takes the s of the neighbour with the longest shared border
           const by = new Map(); by.set(0, 0); for (const r of q.m) { by.set(0, by.get(0) + r.floor); for (const [o, l] of r.nb) if (o.s !== q.s) by.set(o.s, (by.get(o.s) || 0) + l); }
           let bs = 0, bl = -1; for (const [sv, l] of by) if (l > bl || (l === bl && sv < bs)) { bl = l; bs = sv; } for (const r of q.m) set.set(r, bs); continue;
         }
@@ -187,6 +187,16 @@
       for (const [r, v] of set) if (r.s !== v) { r.s = v; changed++; }
       changed += support(); if (!changed) break;
     }
+    // final cleanup (after the rounds, so that single atoms have already merged into their islands): a TINY full-height island (s = K, area < FULLMIN = 0.15 tile², about a 0.4 tile square before the extrusion; the real map has a continuous spread of them, median 0.04-0.08) is a free-standing plate at the end of a spur or a corner (seen on the real map near (96, 68)); it takes the s of the neighbour with the longest shared border like a sliver
+    for (let it = 0; it < 3; it++) {
+      let changed = 0;
+      for (const q of islands()) {
+        if (q.s !== q.K || q.area >= FULLMIN) continue;
+        const by = new Map(); by.set(0, 0); for (const r of q.m) { by.set(0, by.get(0) + r.floor); for (const [o, l] of r.nb) if (o.s !== q.s) by.set(o.s, (by.get(o.s) || 0) + l); }
+        let bs = 0, bl = -1; for (const [sv, l] of by) if (l > bl || (l === bl && sv < bs)) { bl = l; bs = sv; } for (const r of q.m) { r.s = bs; changed++; }
+      }
+      if (!changed) break; support();
+    }
     stats.rounds = rounds; stats.after = measure(islands());
     // ---- geometry ----
     const byHi = new Map(), top = (r, s) => S.levelH[r.lo] + r.H * s / r.K, ensure = (hi) => { let a = byHi.get(hi); if (!a) byHi.set(hi, a = { faces: [], tops: [] }); return a; };
@@ -195,20 +205,26 @@
     for (const r of inst) {
       if (r.s <= 0) continue; const dst = ensure(r.hi), th0 = top(r, r.s);
       for (const p of r.pieces) {
-        const X = p.poly.x, Y = p.poly.y, n = X.length, sign = area2(X, Y) >= 0 ? 1 : -1, ring = [];
+        const X = p.poly.x, Y = p.poly.y, n = X.length, sign = area2(X, Y) >= 0 ? 1 : -1, ring = [], sg = []; // sg: every sub-segment of the ring in order (face or not) for the vertex normals
         for (let k = 0; k < n; k++) {
           const j = (k + n - 1) % n, tg = p.poly.t[k]; let lowTop = null; // the edge from vertex j to vertex k
           if (tg >= 0) { const o = imap.get(tg * 1024 + r.lo); const so = o && o.group === r.group ? o.s : 0; if (so < r.s) lowTop = top(r, so); }
           else if (tg === -12) lowTop = S.levelH[r.lo];
           const pts = subdiv(X[j], Y[j], X[k], Y[k]).map((v) => mapV(r, v[0], v[1]));
           for (let q = 0; q < pts.length - 1; q++) ring.push(pts[q]);
-          if (lowTop === null || th0 - lowTop < 1e-6) continue;
+          const has = !(lowTop === null || th0 - lowTop < 1e-6);
           for (let q = 0; q < pts.length - 1; q++) {
             const a = pts[q], b = pts[q + 1], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); if (l < 1e-9) continue;
-            dst.faces.push({ ax: a[0], ay: a[1], bx: b[0], by: b[1], zlo: lowTop, zhi: th0, nx: sign * dy / l, ny: -sign * dx / l, hi: r.hi, tot: r.H / th, top: r.s === r.K, wx: wox + Math.floor((a[0] + b[0]) / 2), wy: woy + Math.floor((a[1] + b[1]) / 2) });
+            const f = has ? { ax: a[0], ay: a[1], bx: b[0], by: b[1], zlo: lowTop, zhi: th0, nx: sign * dy / l, ny: -sign * dx / l, lo: r.lo, hi: r.hi, tot: r.H / th, top: r.s === r.K, wx: wox + Math.floor((a[0] + b[0]) / 2), wy: woy + Math.floor((a[1] + b[1]) / 2) } : null;
+            sg.push({ n: [sign * dy / l, -sign * dx / l], f }); if (f) dst.faces.push(f);
           }
         }
-        let cx = 0, cy = 0; for (const v of ring) { cx += v[0]; cy += v[1]; } dst.tops.push({ pts: ring, z: th0, zb: S.levelH[r.lo], hi: r.hi, ledge: r.s < r.K, cx: cx / ring.length, cy: cy / ring.length });
+        for (let i = 0; i < sg.length; i++) { // vertex normals along the ring (the dressing shades a face as a gradient between the shades of its two vertex normals, like the slab walls of C): the average with the next / previous sub-segment when that one is a face and turns less than 60 degrees
+          const f = sg[i].f; if (!f) continue; const pv = sg[(i + sg.length - 1) % sg.length], nx = sg[(i + 1) % sg.length], me = sg[i].n;
+          const vn = (o) => { if (!o.f || o.n[0] * me[0] + o.n[1] * me[1] < 0.5) return me; const x = me[0] + o.n[0], y = me[1] + o.n[1], l = Math.hypot(x, y) || 1; return [x / l, y / l]; };
+          f.na = vn(pv); f.nb = vn(nx);
+        }
+        let cx = 0, cy = 0; for (const v of ring) { cx += v[0]; cy += v[1]; } dst.tops.push({ pts: ring, z: th0, zb: S.levelH[r.lo], lo: r.lo, hi: r.hi, ledge: r.s < r.K, cx: cx / ring.length, cy: cy / ring.length });
         stats.pieces++;
       }
     }
@@ -251,16 +267,16 @@
             const base = ss.map((s) => at(s)), front = base.map((b) => [b.x + b.n[0] * d, b.y + b.n[1] * d]);
             for (let q = 0; q < base.length - 1; q++) {
               const a = front[q], b = front[q + 1], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); if (l < 1e-9) continue;
-              dst.faces.push({ ax: a[0], ay: a[1], bx: b[0], by: b[1], zlo: z0, zhi: z1, nx: dy / l, ny: -dx / l, hi, tot: H / th, top: topRow, wx: wox + Math.floor((a[0] + b[0]) / 2), wy: woy + Math.floor((a[1] + b[1]) / 2), dep: d, grp: gj0, row: k, chain: ch, maxD });
+              dst.faces.push({ ax: a[0], ay: a[1], bx: b[0], by: b[1], zlo: z0, zhi: z1, nx: dy / l, ny: -dx / l, na: base[q].n, nb: base[q + 1].n, lo, hi, tot: H / th, top: topRow, wx: wox + Math.floor((a[0] + b[0]) / 2), wy: woy + Math.floor((a[1] + b[1]) / 2), dep: d, grp: gj0, row: k, chain: ch, maxD });
             }
             for (const [side, nb] of [[0, i - 1], [1, i + 1]]) { // the end faces, only where the neighbouring cell's block of the same row is shallower
               const dn = nb >= 0 && nb < cells.length ? dep[nb][k] : 0; if (d - dn < 1e-4) continue;
               const bp = side ? base[base.length - 1] : base[0], tx = side ? 1 : -1, tg = [segN[Math.min(segN.length - 1, bp.k - 1)][1] * -1, segN[Math.min(segN.length - 1, bp.k - 1)][0]]; // tangent (the chain direction): n = (dy, -dx) -> t = (-n.y, n.x)
               const a = [bp.x + bp.n[0] * dn, bp.y + bp.n[1] * dn], b = [bp.x + bp.n[0] * d, bp.y + bp.n[1] * d];
-              dst.faces.push({ ax: a[0], ay: a[1], bx: b[0], by: b[1], zlo: z0, zhi: z1, nx: tg[0] * tx, ny: tg[1] * tx, hi, tot: H / th, top: topRow, wx: wox + Math.floor(a[0]), wy: woy + Math.floor(a[1]) });
+              dst.faces.push({ ax: a[0], ay: a[1], bx: b[0], by: b[1], zlo: z0, zhi: z1, nx: tg[0] * tx, ny: tg[1] * tx, lo, hi, tot: H / th, top: topRow, wx: wox + Math.floor(a[0]), wy: woy + Math.floor(a[1]) });
             }
             const ring = base.map((b) => [b.x, b.y]).concat(front.slice().reverse()); let cx = 0, cy = 0; for (const v of ring) { cx += v[0]; cy += v[1]; }
-            dst.tops.push({ pts: ring, z: z1, zb: z0, hi, ledge: !topRow, cx: cx / ring.length, cy: cy / ring.length }); stats.blocks++;
+            dst.tops.push({ pts: ring, z: z1, zb: z0, lo, hi, ledge: !topRow, cx: cx / ring.length, cy: cy / ring.length }); stats.blocks++;
           }
         });
       }
@@ -278,5 +294,5 @@
     return (S.cache[key] = res);
   }
 
-  E.wallc = { DEF, KEYS, key: wkey, get, par, BAND, REACH, LMAX, MIN_JUMP, nearest };
+  E.wallc = { DEF, KEYS, key: wkey, get, par, BAND, REACH, LMAX, FULLMIN, MIN_JUMP, nearest };
 })(window.EVO = window.EVO || {});

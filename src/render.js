@@ -125,12 +125,14 @@
   }
 
   /* hb / ht: a number, or [at a, at b] for a wall whose bottom or top is sloped (ramp flanks) */
-  function wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, c, rnx, o, st, strong) {
+  function wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, c, rnx, o, st, strong, band) {
     const hb0 = Array.isArray(hb) ? hb[0] : hb, hb1 = Array.isArray(hb) ? hb[1] : hb, ht0 = Array.isArray(ht) ? ht[0] : ht, ht1 = Array.isArray(ht) ? ht[1] : ht;
     const p0 = cam.p(ax, ay, ht0), p1 = cam.p(bx, by, ht1), p2 = cam.p(bx, by, hb1), p3 = cam.p(ax, ay, hb0);
     const k = clamp(0.92 + 0.28 * -rnx, 0.65, 1.2), cs = E.camStats; // E.camStats (a test sets it): wall quads drawn that touch the canvas
     if (cs && Math.max(p0[0], p1[0], p2[0], p3[0]) >= 0 && Math.min(p0[0], p1[0], p2[0], p3[0]) <= ctx.canvas.width && Math.max(p0[1], p1[1], p2[1], p3[1]) >= 0 && Math.min(p0[1], p1[1], p2[1], p3[1]) <= ctx.canvas.height) cs.quads = (cs.quads || 0) + 1;
-    const f = wallFill(ctx, c, k, Math.min(p0[1], p1[1]), Math.max(p2[1], p3[1]), o);
+    let gy0 = Math.min(p0[1], p1[1]), gy1 = Math.max(p2[1], p3[1]);
+    if (band) { const t0 = cam.p(ax, ay, band[1]), t1 = cam.p(bx, by, band[1]), b0 = cam.p(ax, ay, band[0]), b1 = cam.p(bx, by, band[0]); gy0 = Math.min(t0[1], t1[1]); gy1 = Math.max(b0[1], b1[1]); } // the gradient of the whole band of the slab wall (the block face is a part of it)
+    const f = wallFill(ctx, c, k, gy0, gy1, o);
     ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.lineTo(p3[0], p3[1]); ctx.closePath();
     ctx.fillStyle = f; ctx.fill(); ctx.strokeStyle = f; ctx.lineWidth = 0.8; ctx.stroke();
     st.walls++;
@@ -672,15 +674,22 @@
         if (s.pf) { // a block face: the cliff colour of the upper level, with the dressing when it is on (no foot: the base is not on the lower cap)
           const f = s.pf, veiled = !!(o.veil && S.slice && !S.pocket && !inSlice(S, (f.ax + f.bx) / 2, (f.ay + f.by) / 2));
           if (DBG) { const q = [cam.p(f.ax, f.ay, f.zhi), cam.p(f.bx, f.by, f.zhi), cam.p(f.bx, f.by, f.zlo), cam.p(f.ax, f.ay, f.zlo)]; ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(q[k][0], q[k][1]); ctx.closePath(); ctx.fillStyle = '#ff0000'; ctx.fill(); continue; } // test mode: pure red, like the ramps
-          wallQuad(ctx, cam, f.ax, f.ay, f.bx, f.by, f.zlo, f.zhi, veiled ? cv : c, s.rnx, o, st);
-          if (DRESS) dressWall(ctx, cam, S, P, st, { ax: f.ax, ay: f.ay, bx: f.bx, by: f.by, hb: f.zlo, ht: f.zhi, k: 0, top: f.top, tot: f.tot, wx: f.wx, wy: f.wy });
+          for (let m = f.lo + 1; m <= f.hi; m++) { // the face takes the gradient of the slab wall behind it, band by band (a wall of the level m spans levelH[m - 1] .. levelH[m]): the same colour at the same height
+            const bb = m === 0 ? cam.base : S.levelH[m - 1], bt = S.levelH[m], z0 = Math.max(f.zlo, bb), z1 = Math.min(f.zhi, bt); if (z1 - z0 < 1e-6) continue;
+            wallQuad(ctx, cam, f.ax, f.ay, f.bx, f.by, z0, z1, veiled ? cv : c, s.rnx, o, st, false, [bb, bt]);
+          }
+          if (DRESS) { // the same dressing as the slab wall: shade smoothed along the contour (vertex normals), strata at absolute heights (they continue across the faces)
+            const kk = (n, px, py) => clamp(0.92 + 0.28 * -cam.nrm(n[0], n[1], px, py)[0], 0.65, 1.2);
+            dressWall(ctx, cam, S, P, st, { ax: f.ax, ay: f.ay, bx: f.bx, by: f.by, hb: f.zlo, ht: f.zhi, k: clamp(0.92 + 0.28 * -s.rnx, 0.65, 1.2), kA: f.na ? kk(f.na, f.ax, f.ay) : undefined, kB: f.nb ? kk(f.nb, f.bx, f.by) : undefined, top: f.top, tot: f.tot, wx: f.wx, wy: f.wy });
+          }
           continue;
         }
-        if (s.pt) { // the top of a block: ledges (0 < s < K) the upper cap colour x 0.92, full height the upper cap colour, separated by the outline
+        if (s.pt) { // the top of a block: ledges (0 < s < K) the upper cap colour x 0.92 without outline, full height the upper cap colour with the silhouette line
           const t = s.pt, veiled = !!(o.veil && S.slice && !S.pocket && !inSlice(S, t.cx, t.cy));
           ctx.beginPath(); t.pts.forEach((v, k) => { const q = cam.p(v[0], v[1], t.z); k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.closePath();
           ctx.fillStyle = DBG ? '#ff0000' : rgb(veiled ? cv : c, t.ledge ? 0.92 : 1); ctx.fill();
-          if (o.outlines) { ctx.strokeStyle = 'rgba(24,20,34,0.55)'; ctx.lineWidth = 0.8; ctx.stroke(); }
+          if (t.ledge || DBG) { if (!DBG) { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.6; ctx.stroke(); } } // ledges: filled, NO outline (a thin ledge drew as a bare outline); the stroke in the fill colour only closes the seams between pieces
+          else if (o.outlines) { ctx.strokeStyle = 'rgba(24,20,34,0.55)'; ctx.lineWidth = 0.8; ctx.stroke(); } // the full-height tops (the continuation of the cap) keep the silhouette line
           st.polys++; continue;
         }
         if (s.piece) { rampPiece(ctx, cam, S, o, s.piece.tile, s.piece.rec, ST, st, s.piece.sa, s.piece.sb); continue; }

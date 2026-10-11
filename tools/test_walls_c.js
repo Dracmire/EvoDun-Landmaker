@@ -24,6 +24,8 @@ const load = (f) => JSON.parse(fs.readFileSync(path.join(__dirname, '../data', f
   let bad = 0, n = 0;
   for (const r of w3.inst) { if (r.lip || r.s === 0) continue; let m = 0; for (const o of r.nb.keys()) if (o.u < r.u) m = Math.max(m, o.s); n++; if (r.s > m) bad++; }
   ok(`the support rule holds for every atom that does not touch the lip (${n} atoms)`, bad === 0, bad);
+  ok(`no tiny full-height island survives the fusion (s = K and area < ${E.wallc.FULLMIN}): the free-standing plate at the end of a spur`, w3.stats.after.tinyFull === 0, w3.stats.after.tinyFull);
+  ok('every face and top carries its lower level and lies between the heights of lo and hi', [...w3.byHi.values()].every((v) => v.faces.every((f) => f.lo >= 0 && f.lo < f.hi && f.zlo >= S.levelH[f.lo] - 1e-9 && f.zhi <= S.levelH[f.hi] + 1e-9 && f.na && f.nb) && v.tops.every((t) => t.lo >= 0 && t.lo < t.hi)));
   ok('strata: 0 <= s <= K and K = max(2, round(jumpTerH * 3))', w3.inst.every((r) => r.s >= 0 && r.s <= r.K && r.K === Math.max(2, Math.round(r.H / 1 * 3))));
   ok('u is in [0, 1) for every band atom', w3.inst.every((r) => r.u >= 0 && r.u < 1));
   // exemptions: no atom piece on an exempt tile (ramp footprints and their ring, Ascension faces, Cake rings), nor over void
@@ -59,11 +61,11 @@ const load = (f) => JSON.parse(fs.readFileSync(path.join(__dirname, '../data', f
     for (const r of b.inst) { const wx = (r.a.x + Sz.ox), wy = (r.a.y + Sz.oy); if (wx - Sz.ox < 5 || wy - Sz.oy < 5 || Sz.ox + Sz.W - wx < 5 || Sz.oy + Sz.H - wy < 5) continue; const o = mapA.get(key(r, Sz)); n2++; if (!o || o.s !== r.s || o.hi !== r.hi) diff++; }
     ok(`the same atoms and strata in the interior of a slice as on the whole map (${n2} atoms compared)`, n2 > 100 && diff <= Math.max(2, n2 * 0.005), diff); }
   // the figures of the fusion on the maps (measured, not enforced)
-  console.log('\nFUSION FIGURES (T3, Natural, extrude 0.25; islands before -> after the rules, slivers (s < K and area < 0.30), thin (area / border < 0.10), islands over LMAX = 3.6 tiles, mean / max span in tiles, rounds, ms):');
+  console.log('\nFUSION FIGURES (T3, Natural, extrude 0.25; islands before -> after the rules, slivers (s < K and area < 0.30), thin (area / border < 0.10; reported for walls of 1.5 terH or more, the metric on H = 1 walls is dominated by the narrow band), tiny full-height islands (s = K and area < 0.30), islands over LMAX = 3.6 tiles, mean / max span in tiles, rounds, ms):');
   const rows = [['real map 5 terraces', mk, P0], ['real map 7 terraces spread 1.5 middle', mk, Object.assign({}, P0, STAGE)], ['real map 12 terraces', mk, Object.assign({}, P0, { terraces: 12 })], ['Snake surface 5 terraces', snake, P0], ['Snake surface 7 terraces', snake, Object.assign({}, P0, STAGE)], ['Shrine-Pier x4 7 terraces', x4, Object.assign({}, P0, STAGE)]];
   for (const [name, f, Pp] of rows) {
     const Pw = Object.assign({}, Pp, { wallPass: 't3' }), Sx = E.shape(f(), Pw, null), t0 = Date.now(), w = E.wallc.get(Sx, Pw), q = w.stats;
-    console.log(`  ${name}: wall edges ${q.edges}, band atoms ${q.band}, islands ${q.before.islands} -> ${q.after.islands}, slivers ${q.before.slivers} -> ${q.after.slivers}, thin ${q.before.thin} -> ${q.after.thin}, over LMAX ${q.before.spans} -> ${q.after.spans}, span mean ${q.before.meanSpan.toFixed(2)} -> ${q.after.meanSpan.toFixed(2)} max ${q.before.maxSpan.toFixed(1)} -> ${q.after.maxSpan.toFixed(1)}, rounds ${q.rounds}, faces ${q.faces}, ${Date.now() - t0} ms`);
+    console.log(`  ${name}: wall edges ${q.edges}, band atoms ${q.band}, islands ${q.before.islands} -> ${q.after.islands}, slivers ${q.before.slivers} -> ${q.after.slivers}, thin (walls >= 1.5 terH) ${q.before.thin} -> ${q.after.thin}, thin of every wall ${q.before.thinAll} -> ${q.after.thinAll}, tiny full-height ${q.before.tinyFull} -> ${q.after.tinyFull}, over LMAX ${q.before.spans} -> ${q.after.spans}, span mean ${q.before.meanSpan.toFixed(2)} -> ${q.after.meanSpan.toFixed(2)} max ${q.before.maxSpan.toFixed(1)} -> ${q.after.maxSpan.toFixed(1)}, rounds ${q.rounds}, faces ${q.faces}, ${Date.now() - t0} ms`);
     if (name.startsWith('real map 5')) ok('on the real map the fusion removes the slivers', q.after.slivers <= q.before.slivers * 0.1 + 2, [q.before.slivers, q.after.slivers]);
   }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
