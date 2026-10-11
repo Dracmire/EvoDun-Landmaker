@@ -12,9 +12,10 @@ const { open } = require('./common');
   const setArg = process.argv.indexOf('--set') > 0 ? process.argv[process.argv.indexOf('--set') + 1] : '';
   for (const kv of setArg.split(',').filter(Boolean)) { const [k, v] = kv.split('='); await a.slider(k, +v); await a.idle(); } // slider values: shaping parameters
   const shot = async (name) => fs.writeFileSync(path.join(out, name + '.png'), await a.canvas());
-  const techs = ['box', 'A', 'B'], presets = ['oblique', 'isoE'];
+  const techs = ['box', 'A', 'B', 'C'], presets = ['oblique', 'isoE']; // C with the wall pass OFF (the C of phase 1: identical pixels expected; an older checkout ignores the parameter)
   const sweep = async (tag) => { for (const t of techs) { await a.tech(t); for (const p of presets) { await a.preset(p); await shot(`${tag}_${t}_${p}`); } } };
   await a.page.click('#mode');                                     // single-technique view
+  await a.page.evaluate(() => { window.__evo.P.wallPass = 'off'; });
   await a.page.selectOption('#src', 'noise'); await a.idle(); await sweep('noise');
   await a.page.selectOption('#src', 'snake'); await a.idle(); await sweep('snake');
   await a.load('maps'); await a.zone(6); await sweep('zone6');

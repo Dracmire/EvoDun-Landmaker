@@ -671,6 +671,7 @@
       for (const s of segs) {
         if (s.pf) { // a block face: the cliff colour of the upper level, with the dressing when it is on (no foot: the base is not on the lower cap)
           const f = s.pf, veiled = !!(o.veil && S.slice && !S.pocket && !inSlice(S, (f.ax + f.bx) / 2, (f.ay + f.by) / 2));
+          if (DBG) { const q = [cam.p(f.ax, f.ay, f.zhi), cam.p(f.bx, f.by, f.zhi), cam.p(f.bx, f.by, f.zlo), cam.p(f.ax, f.ay, f.zlo)]; ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(q[k][0], q[k][1]); ctx.closePath(); ctx.fillStyle = '#ff0000'; ctx.fill(); continue; } // test mode: pure red, like the ramps
           wallQuad(ctx, cam, f.ax, f.ay, f.bx, f.by, f.zlo, f.zhi, veiled ? cv : c, s.rnx, o, st);
           if (DRESS) dressWall(ctx, cam, S, P, st, { ax: f.ax, ay: f.ay, bx: f.bx, by: f.by, hb: f.zlo, ht: f.zhi, k: 0, top: f.top, tot: f.tot, wx: f.wx, wy: f.wy });
           continue;
@@ -678,7 +679,7 @@
         if (s.pt) { // the top of a block: ledges (0 < s < K) the upper cap colour x 0.92, full height the upper cap colour, separated by the outline
           const t = s.pt, veiled = !!(o.veil && S.slice && !S.pocket && !inSlice(S, t.cx, t.cy));
           ctx.beginPath(); t.pts.forEach((v, k) => { const q = cam.p(v[0], v[1], t.z); k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.closePath();
-          ctx.fillStyle = rgb(veiled ? cv : c, t.ledge ? 0.92 : 1); ctx.fill();
+          ctx.fillStyle = DBG ? '#ff0000' : rgb(veiled ? cv : c, t.ledge ? 0.92 : 1); ctx.fill();
           if (o.outlines) { ctx.strokeStyle = 'rgba(24,20,34,0.55)'; ctx.lineWidth = 0.8; ctx.stroke(); }
           st.polys++; continue;
         }

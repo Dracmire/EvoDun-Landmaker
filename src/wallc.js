@@ -208,7 +208,7 @@
             dst.faces.push({ ax: a[0], ay: a[1], bx: b[0], by: b[1], zlo: lowTop, zhi: th0, nx: sign * dy / l, ny: -sign * dx / l, hi: r.hi, tot: r.H / th, top: r.s === r.K, wx: wox + Math.floor((a[0] + b[0]) / 2), wy: woy + Math.floor((a[1] + b[1]) / 2) });
           }
         }
-        let cx = 0, cy = 0; for (const v of ring) { cx += v[0]; cy += v[1]; } dst.tops.push({ pts: ring, z: th0, hi: r.hi, ledge: r.s < r.K, cx: cx / ring.length, cy: cy / ring.length });
+        let cx = 0, cy = 0; for (const v of ring) { cx += v[0]; cy += v[1]; } dst.tops.push({ pts: ring, z: th0, zb: S.levelH[r.lo], hi: r.hi, ledge: r.s < r.K, cx: cx / ring.length, cy: cy / ring.length });
         stats.pieces++;
       }
     }
@@ -260,7 +260,7 @@
               dst.faces.push({ ax: a[0], ay: a[1], bx: b[0], by: b[1], zlo: z0, zhi: z1, nx: tg[0] * tx, ny: tg[1] * tx, hi, tot: H / th, top: topRow, wx: wox + Math.floor(a[0]), wy: woy + Math.floor(a[1]) });
             }
             const ring = base.map((b) => [b.x, b.y]).concat(front.slice().reverse()); let cx = 0, cy = 0; for (const v of ring) { cx += v[0]; cy += v[1]; }
-            dst.tops.push({ pts: ring, z: z1, hi, ledge: !topRow, cx: cx / ring.length, cy: cy / ring.length }); stats.blocks++;
+            dst.tops.push({ pts: ring, z: z1, zb: z0, hi, ledge: !topRow, cx: cx / ring.length, cy: cy / ring.length }); stats.blocks++;
           }
         });
       }
