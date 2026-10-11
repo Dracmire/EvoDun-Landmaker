@@ -608,6 +608,7 @@
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
   function renderLevels(ctx, cam, S, P, o, st, loopsOf, tech) {
     const DRESS = !!o.dress && !PICK, lvl = S.fineMask || S.fine, th = P.terH; // wall dressing: the same pass as in Box
+    const WP = tech === 'C' && !PICK && E.wallc ? E.wallc.get(S, P) : null; // the wall pass of technique C (null: off); the pick render never sees it
     const ST = hasStairs(S) ? stairTiles(S) : null, PIECES = ST ? rampPieces(S, cam) : new Map(); // ramp pieces by level band
     const ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) for (const bd of ascBands(S, w, ascLow(o, cam, w))) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
     for (let L = 0; L <= S.maxFine; L++) {
@@ -661,8 +662,26 @@
         }
       }
       for (const pc of pcs) segs.push({ piece: pc, d: pc.d });
+      const wl = WP && WP.byHi.get(L); // the blocks of the wall pass in front of the walls of this level: by depth with them, before the cap
+      if (wl) {
+        for (const f of wl.faces) { const mx = (f.ax + f.bx) / 2, my = (f.ay + f.by) / 2, rr = cam.nrm(f.nx, f.ny, mx, my); if (rr[1] > 0.001) segs.push({ pf: f, rnx: rr[0], d: cam.ry(mx, my) }); }
+        for (const t of wl.tops) segs.push({ pt: t, d: cam.ry(t.cx, t.cy) });
+      }
       segs.sort((p, q) => p.d - q.d);
       for (const s of segs) {
+        if (s.pf) { // a block face: the cliff colour of the upper level, with the dressing when it is on (no foot: the base is not on the lower cap)
+          const f = s.pf, veiled = !!(o.veil && S.slice && !S.pocket && !inSlice(S, (f.ax + f.bx) / 2, (f.ay + f.by) / 2));
+          wallQuad(ctx, cam, f.ax, f.ay, f.bx, f.by, f.zlo, f.zhi, veiled ? cv : c, s.rnx, o, st);
+          if (DRESS) dressWall(ctx, cam, S, P, st, { ax: f.ax, ay: f.ay, bx: f.bx, by: f.by, hb: f.zlo, ht: f.zhi, k: 0, top: f.top, tot: f.tot, wx: f.wx, wy: f.wy });
+          continue;
+        }
+        if (s.pt) { // the top of a block: ledges (0 < s < K) the upper cap colour x 0.92, full height the upper cap colour, separated by the outline
+          const t = s.pt, veiled = !!(o.veil && S.slice && !S.pocket && !inSlice(S, t.cx, t.cy));
+          ctx.beginPath(); t.pts.forEach((v, k) => { const q = cam.p(v[0], v[1], t.z); k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.closePath();
+          ctx.fillStyle = rgb(veiled ? cv : c, t.ledge ? 0.92 : 1); ctx.fill();
+          if (o.outlines) { ctx.strokeStyle = 'rgba(24,20,34,0.55)'; ctx.lineWidth = 0.8; ctx.stroke(); }
+          st.polys++; continue;
+        }
         if (s.piece) { rampPiece(ctx, cam, S, o, s.piece.tile, s.piece.rec, ST, st, s.piece.sa, s.piece.sb); continue; }
         let hbs = hb;
         if (s.clip) { hbs = [Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.a[0], s.a[1], s.clipT))), Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.b[0], s.b[1], s.clipT)))]; if (hbs[0] >= ht - 1e-6 && hbs[1] >= ht - 1e-6) continue; }
