@@ -136,6 +136,16 @@ the labels are now Box / A · Contour / B · Distance / C · Curves); zbuf PASS 
 - Screenshots (`tools/verify.sh shots --extra curves`): the five fixed-set sources (real map Default and Balanced types, Shrine-Pier, Shrine-Pier x4, Snake Mountain surface) with C in Ordered / Balanced / Natural, dressing off / on, Cam 1 Iso and Cam 6 Stage; Box, A and B with the dressing on (Iso). Cam 7 was not shot.
 - NOT verified: touch input, non-Chromium browsers, GPU timings; frame cost of the dressing on the real map; pick of C against A / B for the walkable semantics near displaced cell borders (up to 0.55 tile); the dressing with Pocket / Cake combined.
 
+### Phase 2 (wall pass of C)
+
+- `node tools/test_walls_c.js` (16 checks): determinism, support rule (109 atoms), strata range, u in [0, 1), no piece on exempt tiles or void, band depth <= (0.35 H + atom reach 0.45) * extrude (also at extrude 1.0; the bound includes the reach because atoms are accepted whole by MEAN distance), cache key, T2 without fusion and with depth levels per (group, pass) (levels 1 : 2 : 3 = 0.38 : 0.39 : 0.23 normalised on the real map), whole-map hashing (1786 atoms compared).
+- FUSION FIGURES (T3, Natural, extrude 0.25; islands before -> after, slivers, thin, rounds): real map 5 terraces 1568 -> 502, slivers 1066 -> 0, thin 1225 -> 371, 1 round; real map 7 terraces (Stage) 3526 -> 892, slivers 2636 -> 5, over LMAX 2 -> 0, 20 rounds; real map 12 terraces 8079 -> 2071, slivers 6011 -> 11, over LMAX 5 -> 0, 20 rounds;
+  Snake surface 5 / 7 terraces 136 -> 37 / 486 -> 123; Shrine-Pier x4 7 terraces 559 -> 143, slivers 424 -> 1, over LMAX 0 -> 1 (max span 4.8). Fusion often stops at the 20-round cap without converging (measured, not enforced).
+- Z-BUFFER (`tools/ui/test_wallc_ui.js`, ray-marched solid reference, MEASURED, not enforced; mean % differing / mean % beyond the 1 px edge band): T2 at 40 px per tile, 7 terraces spread 1.5: oblique 49.6 / 5.2, iso 49.6 / 8.4, Cam 6 41.5 / 13.0 (worst 14.6), Cam 7 26.0 / 2.1. T2 overhangs are not a heightfield, so part of the mismatch is the reference model, not an order error.
+- COLD COST (`tools/ui/measure_wall.js`, ms, software rasteriser +-30 %, one run): T3 / Off 1.2-1.9x at 5 terraces and 1.7-2.0x at 12 terraces (real map, whole map; Ordered 741 -> 1427 and 1557 -> 3168, Balanced 1950 -> 2376 and 3040 -> 6000, Natural 1581 -> 2431 and 3250 -> 5530). T3 roughly doubles C at 12 terraces. T2 is cheaper than T3.
+- `tools/ui/test_wallpass_ui.js`: default T3, T3 / T2 / Off three pictures, Box / A / B pixel-identical in every mode, sliders only redraw, pick render never sees the blocks, manifest writes only non-default values and rejects wrong ones. `regress` keeps C at `wallPass: 'off'`, so Off is pixel-identical to phase 1.
+- Screenshots (`tools/verify.sh shots --extra wallpass`): x4, Snake surface, real map Default and Balanced, Cam 1 / 3 / 6, T3 0.10 / 0.25 and T2 0.25, dressing off / on, fitted and at 60 px per tile on a camera-facing wall. Cam 7 not shot.
+
 ## 8. Mocks (the reviewer's throwaway scripts, outside the repo: a Node ray-marched heightfield on Shrine-Pier x4, Snake Mountain surface and the real map)
 
 - planar passes and presets: kept (E, D, F);
@@ -154,6 +164,7 @@ Known limit: the mock renderer itself.
 - Pick with C: the tile shown is the owner of the cell, which lies up to 0.55 tile from the tile under the point, so against the reference tile (Box geometry) C scores below A and B (measured, not enforced; section 7).
 - The dressing is tile-exact on Box and follows the contour on A / B / C; where a wall is cut per tile (next to a ramp) the vertex shades are not smoothed. The wobble of the strata and the stones are placeholders.
 - OPEN: the vertical pass (phase 2, D6-D9); whether the foot and the rocks should be clipped to the lower cap (today a foot strip can reach a neighbouring cell of another level inside 0.55 tile).
+- WALL PASS: the band depth bound includes the atom reach (0.45 tile); the dressing foot and rocks are not relocated to the prism base; fusion often hits the 20-round cap; the z-buffer mismatch under Cam 6 is higher than under the ortho cameras; T2 overhangs are not a heightfield; on the real map at 5 terraces the walls are weak (H = 1, depth about 0.09 tile at 0.25) and there are 0 rocks. Compare shows the band only in C; Off gives the like-for-like view.
 
 ## 10. Camera contract
 
