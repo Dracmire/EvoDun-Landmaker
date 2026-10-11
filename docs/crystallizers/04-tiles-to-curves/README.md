@@ -2,7 +2,7 @@
 
 ## 1. Status
 
-PHASE 1 IN PROGRESS (2026-10-11): the planar technique **C**, its three presets and the **wall dressing** (switch). The vertical pass (phase 2) is NOT approved and is not built. Nothing is exported to Unity (03-stage D15).
+PHASE 1 IMPLEMENTED (2026-10-11), waiting for the user's review: the planar technique **C**, its three presets and the **wall dressing** (switch). The vertical pass (phase 2) is NOT approved and is not built. Nothing is exported to Unity (03-stage D15).
 
 ## 2. Goal
 
@@ -79,7 +79,35 @@ contour, the strata / lip / foot as a wall material, the rocks as a prefab scatt
 
 ## 7. Verification
 
-(figures are filled in at the end of the phase: see the PR)
+`tools/verify.sh` (all parts) on the final commit: node 25 scripts PASS; ui 285 PASS / 0 FAIL; regress PASS, 131 images, 0 differences (single-technique pixels are the ones of main with C unselected and the dressing off; the `dress` switch toggled on and off is identical; the tech bar had to keep one row for that:
+the labels are now Box / A · Contour / B · Distance / C · Curves); zbuf PASS (ramp order of C included); shots PASS (125 images, 75 of them the `curves` extra).
+
+- `node tools/test_curves.js` (30 checks): corner rule (tip and opposite move away, along the diagonal, by max; a lone tile cancels), cap respected in every seed of the three presets, determinism, exempt seeds and their pass-2 sub-cells unmoved (11 752 / 47 008 exempt cells on the real map), the footprint and its ring exempt,
+  the loops of every level enclose exactly the cells of level >= L (5 405 point tests per preset) and level L + 1 is nested in L, `E.cellTileAt` = owner of the nearest seed, the interior of a slice has the whole-map seeds (away from ramps), exemption sources (Ascension faces, Cake rings, `P.anchor`), `meander` 0 = identity.
+- STAIR SURVIVAL (`tools/ui/test_curves_ui.js`): 100 % with every preset, nothing lost, nothing degraded: Shrine-Pier x4 (28 ramps / 29 steps) and the synthetic map zone 6 at 12 terraces (97 ramps / 100 steps), Ordered, Balanced and Natural.
+- RAMP PAINTER ORDER against the z-buffer (`test_ramp_ui.js --tech C`, 5 terraces, spread 1; mean / worst % of the ramp's pixels that differ): cut clean 0.00 / 0.01, cut mixed 0.00 / 0.02, fill clean 0.00 / 0.08, fill mixed 0.01 / 0.17 (A: 0.00-0.02 / 0.4, B: 0.02-0.14 / 1.0).
+  The presets give the same figures, because a ramp is inside its exempt footprint.
+- PICKING against the z-buffer (`test_pick_ui.js`, share of cap / ramp points that resolve to the reference tile; C is MEASURED, not enforced: the tile shown is the cell owner): ramps 98.6 % (A 100, B 100), steps 97.5 % (A 100, B 100), ramps without smoothing 93.4 % (A 99.7, B 99.8).
+- WALL DRESSING against the Box id render (`tools/ui/test_dress_ui.js`, Shrine-Pier x4 in the Stage preset, 36 px per tile; anchors of foot strips / rocks: visible in the reference and changed / hidden in the reference but changed ("shows through") / visible but not changed ("missing")):
+  Box oblique 50: foot 41 / 0 / 0, rocks 47 / 0 / 0; Box iso 45: 63 / 9 / 0, 63 / 9 / 0; Box stage: 11 / 0 / 0, 18 / 3 / 0. A, B and C: shows-through 2-18 % of the foot strips and 10-40 % of the rocks (C worst: iso 45 foot 98 / 16 / 0, rocks 42 / 16 / 0; stage rocks 13 / 10 / 0), missing 0-4 pieces.
+  Part of "shows through" is legitimate (the dome of a rock peeks over a lower wall, edge pixels); the figures are a measurement, not a threshold. A / B / C are compared with the TILE geometry of Box.
+- COLD COST (`tools/ui/measure_curves.js 2`, headless Chromium, software rasteriser +-30 %; cold render of one technique with an empty contour cache, ms; A / B / C Ordered / C Balanced / C Natural):
+
+  | source | terraces | A | B | C ord. | C bal. | C nat. |
+  |---|---:|---:|---:|---:|---:|---:|
+  | synthetic maps, zone 6 | 5 | 23 | 397 | 72 | 296 | 147 |
+  | synthetic maps, zone 6 | 12 | 69 | 1086 | 104 | 492 | 587 |
+  | synthetic maps, whole | 5 | 208 | 1648 | 375 | 653 | 704 |
+  | synthetic maps, whole | 12 | 345 | 4324 | 577 | 1474 | 1281 |
+  | real map, whole | 5 | 585 | 2095 | 738 | 1456 | 1328 |
+  | real map, whole | 12 | 1293 | 5506 | 1284 | 2768 | 2619 |
+
+  Compare (Box | A | B | C, cold, from the slider release; first panels = shape + Box + A / all four), Ordered / Balanced / Natural: synthetic zone 6, 5 terraces 230 / 875, 228 / 1048, 214 / 986 ms; 12 terraces 241 / 1430, 265 / 1749, 256 / 1826; synthetic whole, 5 terraces 971 / 3661, 890 / 4300, 892 / 4370;
+  12 terraces 1355 / 6814, 1311 / 7985, 1352 / 8647; real map whole, 5 terraces 1917 / 6439, 1899 / 7556, 1928 / 7367; 12 terraces 3362 / 11084, 2792 / 13936, 3073 / 14193. C is a late panel like B ("computing…"); B stays the most expensive technique.
+- CHANGED EXPECTATIONS (consequence of the 2 x 2 compare): `tools/ui/test_compare_ui.js` (4 panels, 2 x 2 grid, no columns / rows selector; the pending panels are B and C; coverage text of B and C; four clicks) and `tools/ui/test_pocket_ui.js` (compare draws four panels). `test_ramp_ui.js` and `test_pick_ui.js` list C; `test_ramp_ui.js` skips
+  its "no smoothing" pass for C. Nothing was loosened for A, B or Box.
+- Screenshots (`tools/verify.sh shots --extra curves`): the five fixed-set sources (real map Default and Balanced types, Shrine-Pier, Shrine-Pier x4, Snake Mountain surface) with C in Ordered / Balanced / Natural, dressing off / on, Cam 1 Iso and Cam 6 Stage; Box, A and B with the dressing on (Iso). Cam 7 was not shot.
+- NOT verified: touch input, non-Chromium browsers, GPU timings; frame cost of the dressing on the real map; pick of C against A / B for the walkable semantics near displaced cell borders (up to 0.55 tile); the dressing with Pocket / Cake combined.
 
 ## 8. Mocks (the reviewer's throwaway scripts, outside the repo: a Node ray-marched heightfield on Shrine-Pier x4, Snake Mountain surface and the real map)
 
