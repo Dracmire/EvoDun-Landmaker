@@ -2808,7 +2808,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   /* one displacement pass over a grid of gw x gh cells (size `cell` tiles). Returns the displaced seed positions. wk: world cells per window cell offset (ox * k). */
   function displace(g, cfg, pass, S, jump, meander) {
-    const { gw, gh, cell, lev, ex, bx, by } = g, n = gw * gh, k = cell === 1 ? 1 : 2;
+    const { gw, gh, cell, lev, ex, bx, by } = g, n = gw * gh, k = Math.round(1 / cell); // grid cells per tile along one axis (1, 2, 4...)
     const dX = new Float64Array(n), dY = new Float64Array(n), mx = cfg.max;
     for (let vy = 1; vy < gh; vy++) for (let vx = 1; vx < gw; vx++) {
       const i0 = (vy - 1) * gw + vx - 1, i1 = i0 + 1, i2 = i0 + gw, i3 = i2 + 1, l0 = lev[i0], l1 = lev[i1], l2 = lev[i2], l3 = lev[i3];
@@ -2852,7 +2852,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   /* Build the whole structure for a shape: seeds of the last pass, the Voronoi edges between cells of different levels. cfg overrides the preset (tests). */
   function build(S, P, cfg0) {
-    const t0 = Date.now(), cfg = cfg0 || PRESETS[P.curves] || PRESETS.ordered, W = S.W, H = S.H, lvl = S.fineMask || S.fine, meander = P.meander > 0 ? P.meander : 0;
+    const t0 = Date.now(), cfg = cfg0 || PRESETS[P.curves] || PRESETS.ordered,  W = S.W, H = S.H, lvl = S.fineMask || S.fine, meander = P.meander > 0 ? P.meander : 0;
+    if (!(cfg.passes >= 1 && cfg.passes <= 3)) throw new Error('curves: passes must be 1 to 3 (the 5x5 owner search and the hashing are tested for up to 3)');
     const exT = exemptTiles(S, P), jump = jumpTiles(S, P);
     let g = { gw: W, gh: H, cell: 1, lev: Int16Array.from(lvl), own: Int32Array.from({ length: S.n }, (_, i) => i), ex: Uint8Array.from(exT), bx: new Float64Array(S.n), by: new Float64Array(S.n) };
     for (let i = 0; i < S.n; i++) { g.bx[i] = (i % W) + 0.5; g.by[i] = ((i / W) | 0) + 0.5; }
@@ -3142,6 +3143,13 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const g = ctx.createLinearGradient(mx[0], mx[1], ex[0], ex[1]), al = Math.min(0.45, 0.16 + 0.1 * Math.min(jump, 3));
       g.addColorStop(0, `rgba(14,10,22,${al.toFixed(3)})`); g.addColorStop(0.5, `rgba(14,10,22,${(al * 0.45).toFixed(3)})`); g.addColorStop(1, 'rgba(14,10,22,0)');
       ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.lineTo(pb2[0], pb2[1]); ctx.lineTo(pa2[0], pa2[1]); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); st.dress.foot++; if (st.dress.items) st.dress.items.push({ k: 'foot', x: (f.ax + f.bx) / 2 + f.nax * 0.2, y: (f.ay + f.by) / 2 + f.nay * 0.2, z: f.hb });
+    }
+    if (f.sect) { // the gap of a convex vertex between two strips with different normals: a sector of the same darkening, radial in the ground frame (the ground circle is an ellipse on screen)
+      const q = f.sect, o0 = cam.p(q.px, q.py, z), ex = cam.p(q.px + DR.foot, q.py, z), ey = cam.p(q.px, q.py + DR.foot, z), al = Math.min(0.45, 0.16 + 0.1 * Math.min(jump, 3));
+      ctx.save(); ctx.transform((ex[0] - o0[0]) / DR.foot, (ex[1] - o0[1]) / DR.foot, (ey[0] - o0[0]) / DR.foot, (ey[1] - o0[1]) / DR.foot, o0[0], o0[1]);
+      const a1 = Math.atan2(q.n1[1], q.n1[0]), da = Math.atan2(q.n1[0] * q.n2[1] - q.n1[1] * q.n2[0], q.n1[0] * q.n2[0] + q.n1[1] * q.n2[1]), g = ctx.createRadialGradient(0, 0, 0, 0, 0, DR.foot);
+      g.addColorStop(0, `rgba(14,10,22,${al.toFixed(3)})`); g.addColorStop(0.5, `rgba(14,10,22,${(al * 0.45).toFixed(3)})`); g.addColorStop(1, 'rgba(14,10,22,0)');
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, DR.foot, a1, a1 + da); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); ctx.restore();
     }
     if (jump < DR.rockJump) return;
     const len = Math.hypot(f.bx - f.ax, f.by - f.ay), tall = jump >= DR.tallJump, n = Math.round(len * (tall ? 2.6 : 1.6) * (0.6 + 0.8 * dhash(f.wx, f.wy, 1, 10)));
@@ -3566,7 +3574,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const tileIdx = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? iy * S.W + ix : -1; };
       const tileC = tech === 'C' ? (px, py) => E.cellTileAt(S, P, px, py) : tileIdx; // technique C: the tile of the Voronoi cell, not the tile under the point
       const tileOf = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? ST.get(iy * S.W + ix) : undefined; };
-      const mkSeg = (a, b, dx, dy, len, va, vb) => {
+      const mkSeg = (a, b, dx, dy, len, va, vb, pn) => {
         const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, rnxy = cam.nrm(dy / len, -dx / len, mx, my);
         if (rnxy[1] <= 0.001) return null;
         const seg = { a, b, rnx: rnxy[0], d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !S.pocket && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)), stair: null, own: tileC(mx - 0.2 * dy / len, my + 0.2 * dx / len) };
@@ -3578,7 +3586,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         }
         if (DRESS && !seg.stair && !seg.clip) { // wall dressing: the cliff this piece belongs to (levels inside and outside, from the cells / tiles on both sides) and the shades of its two vertex normals
           const tOut = tileC(mx + 0.2 * dy / len, my - 0.2 * dx / len), lvIn = seg.own >= 0 ? lvl[seg.own] : L, lvOut = tOut >= 0 ? lvl[tOut] : -1, base = S.baseH !== undefined ? S.baseH : S.levelH[0] - th, kk = (n, p) => clamp(0.92 + 0.28 * -cam.nrm(n[0], n[1], p[0], p[1])[0], 0.65, 1.2);
-          seg.na = va || null; seg.nb = vb || null; seg.dr = { lvIn, lvOut, tot: (S.levelH[Math.max(lvIn, 0)] - (lvOut >= 0 ? S.levelH[lvOut] : base)) / th, k: clamp(0.92 + 0.28 * -rnxy[0], 0.65, 1.2), kA: va ? kk(va, a) : undefined, kB: vb ? kk(vb, b) : undefined, mx, my };
+          seg.na = va || null; seg.nb = vb || null; seg.pn = pn || null; seg.dr = { lvIn, lvOut, tot: (S.levelH[Math.max(lvIn, 0)] - (lvOut >= 0 ? S.levelH[lvOut] : base)) / th, k: clamp(0.92 + 0.28 * -rnxy[0], 0.65, 1.2), kA: va ? kk(va, a) : undefined, kB: vb ? kk(vb, b) : undefined, mx, my };
         }
         return seg;
       };
@@ -3602,7 +3610,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
             for (let q = 0; q + 1 < pts.length; q++) { const p0 = at(pts[q]), p1 = at(pts[q + 1]); pieces.push(mkSeg(p0, p1, p1[0] - p0[0], p1[1] - p0[1], Math.hypot(p1[0] - p0[0], p1[1] - p0[1]))); }
             if (PICK || pieces.some((q) => q && (q.clip || q.stair))) { for (const q of pieces) if (q) segs.push(q); continue; }
           }
-          const seg = mkSeg(a, b, dx, dy, len, vn && vn[k], vn && vn[(k + 1) % n]); if (seg) segs.push(seg);
+          let pn = null; if (vn) { const pr = loop[(k + n - 1) % n], pdx = a[0] - pr[0], pdy = a[1] - pr[1], pl = Math.hypot(pdx, pdy); if (pl > 1e-6) pn = [pdy / pl, -pdx / pl]; } // outward normal of the previous segment (the foot sector at a convex vertex)
+          const seg = mkSeg(a, b, dx, dy, len, vn && vn[k], vn && vn[(k + 1) % n], pn); if (seg) segs.push(seg);
         }
       }
       for (const pc of pcs) segs.push({ piece: pc, d: pc.d });
@@ -3618,7 +3627,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
           dressWall(ctx, cam, S, P, st, { ax: s.a[0], ay: s.a[1], bx: s.b[0], by: s.b[1], hb: hbs, ht, k: d.k, kA: d.kA, kB: d.kB, top: d.lvIn <= L, tot: d.tot, wx: S.ox + Math.floor(d.mx), wy: S.oy + Math.floor(d.my) });
           if (d.lvOut >= 0 && d.lvOut === L - 1) {
             const dx = s.b[0] - s.a[0], dy = s.b[1] - s.a[1], l = Math.hypot(dx, dy) || 1, nm = [dy / l, -dx / l]; // outward normal of the piece; the ends use the vertex normals when they are known
-            dressFoot(ctx, cam, S, P, st, { ax: s.a[0], ay: s.a[1], bx: s.b[0], by: s.b[1], nax: s.na ? s.na[0] : nm[0], nay: s.na ? s.na[1] : nm[1], nbx: s.nb ? s.nb[0] : nm[0], nby: s.nb ? s.nb[1] : nm[1], hb, jump: d.tot, wx: S.ox + Math.floor(d.mx), wy: S.oy + Math.floor(d.my), c: col });
+            const turn = s.pn ? s.pn[0] * nm[1] - s.pn[1] * nm[0] : 0, sect = s.pn && turn > 1e-3 ? { px: s.a[0], py: s.a[1], n1: s.pn, n2: nm } : null; // convex vertex: the outward normals diverge
+            dressFoot(ctx, cam, S, P, st, { ax: s.a[0], ay: s.a[1], bx: s.b[0], by: s.b[1], nax: nm[0], nay: nm[1], nbx: nm[0], nby: nm[1], sect, hb, jump: d.tot, wx: S.ox + Math.floor(d.mx), wy: S.oy + Math.floor(d.my), c: col }); // per-segment normal (vertex normals folded the strips at sharp corners) + a fill sector at convex vertices
           }
         }
       }

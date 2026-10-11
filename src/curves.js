@@ -66,7 +66,7 @@
 
   /* one displacement pass over a grid of gw x gh cells (size `cell` tiles). Returns the displaced seed positions. wk: world cells per window cell offset (ox * k). */
   function displace(g, cfg, pass, S, jump, meander) {
-    const { gw, gh, cell, lev, ex, bx, by } = g, n = gw * gh, k = cell === 1 ? 1 : 2;
+    const { gw, gh, cell, lev, ex, bx, by } = g, n = gw * gh, k = Math.round(1 / cell); // grid cells per tile along one axis (1, 2, 4...)
     const dX = new Float64Array(n), dY = new Float64Array(n), mx = cfg.max;
     for (let vy = 1; vy < gh; vy++) for (let vx = 1; vx < gw; vx++) {
       const i0 = (vy - 1) * gw + vx - 1, i1 = i0 + 1, i2 = i0 + gw, i3 = i2 + 1, l0 = lev[i0], l1 = lev[i1], l2 = lev[i2], l3 = lev[i3];
@@ -110,7 +110,8 @@
 
   /* Build the whole structure for a shape: seeds of the last pass, the Voronoi edges between cells of different levels. cfg overrides the preset (tests). */
   function build(S, P, cfg0) {
-    const t0 = Date.now(), cfg = cfg0 || PRESETS[P.curves] || PRESETS.ordered, W = S.W, H = S.H, lvl = S.fineMask || S.fine, meander = P.meander > 0 ? P.meander : 0;
+    const t0 = Date.now(), cfg = cfg0 || PRESETS[P.curves] || PRESETS.ordered,  W = S.W, H = S.H, lvl = S.fineMask || S.fine, meander = P.meander > 0 ? P.meander : 0;
+    if (!(cfg.passes >= 1 && cfg.passes <= 3)) throw new Error('curves: passes must be 1 to 3 (the 5x5 owner search and the hashing are tested for up to 3)');
     const exT = exemptTiles(S, P), jump = jumpTiles(S, P);
     let g = { gw: W, gh: H, cell: 1, lev: Int16Array.from(lvl), own: Int32Array.from({ length: S.n }, (_, i) => i), ex: Uint8Array.from(exT), bx: new Float64Array(S.n), by: new Float64Array(S.n) };
     for (let i = 0; i < S.n; i++) { g.bx[i] = (i % W) + 0.5; g.by[i] = ((i / W) | 0) + 0.5; }
