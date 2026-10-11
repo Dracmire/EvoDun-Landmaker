@@ -205,6 +205,6 @@
     return best < 0 ? -1 : g.own[best];
   }
 
-  E.curves = { PRESETS, build, struct, tileAt, hash, exemptTiles };
+  E.curves = { PRESETS, build, struct, tileAt, hash, exemptTiles, key: ckey };
   E.cellTileAt = tileAt;
 })(window.EVO = window.EVO || {});

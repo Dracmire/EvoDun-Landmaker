@@ -1,7 +1,7 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
      persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
@@ -22,7 +22,7 @@
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
   const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI'], ['contract', 'Art contract (Stage placeholders: body, wrapper, footprint, props)']];
-  const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field']];
+  const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field'], ['C', 'C · Tiles to curves']], ALL_TECH = TECH.map((t) => t[0]);
 
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
@@ -45,13 +45,14 @@
     sel.value = Object.keys(ROOMS_PRESETS).find((n) => Object.entries(ROOMS_PRESETS[n]).every(([k, v]) => P[k] === v)) || 'custom';
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; return b; } // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (P.curves !== 'ordered') b.curves = P.curves; return b; } // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
     for (const k of ['terraces', 'roomsMinCore', 'rRadius', 'minPlateau']) setParam(k, w[k]);
     syncRoomsPreset();
     st.preset = PRESETS.some((x) => x.id === w.camera) ? w.camera : 'oblique'; st.yawOff = st.pitchOff = 0; // absent = the default camera
+    P.curves = E.curves.PRESETS[w.curves] ? w.curves : 'ordered'; const cs = $('#curvesPreset'); if (cs) cs.value = P.curves; // absent = Ordered
   }
 
   function build() {
@@ -73,6 +74,10 @@
         lp.querySelector('select').addEventListener('change', (e) => { if (e.target.value === 'custom') return; applyRoomsPreset(e.target.value); invalidate(true); }); sl.appendChild(lp);
         const lg = document.createElement('div'); lg.className = 'row'; lg.innerHTML = '<button id="stagePreset" title="Stage preset: Cam 6 (perspective), technique B, terraces 7, height spread 1.5 around the middle terrace. It only sets existing parameters and the camera.">Stage preset</button>';
         lg.querySelector('button').addEventListener('click', () => { st.preset = 'stage'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.tech = 'B'; st.mode = 'single'; setParam('terraces', 7); setParam('spread', 1.5); setParam('spreadCentre', 'middle'); syncRoomsPreset(); invalidate(true); }); sl.appendChild(lg);
+      }
+      if (title === 'Shaping') { // technique C: the preset of the displacement rules (Ordered E / Balanced D / Natural F)
+        const lc = document.createElement('label'); lc.className = 'tg'; lc.innerHTML = '<span>Curves preset (technique C)</span><select id="curvesPreset"><option value="ordered">Ordered</option><option value="balanced">Balanced</option><option value="natural">Natural</option></select>';
+        lc.querySelector('select').value = P.curves; lc.querySelector('select').addEventListener('change', (e) => { P.curves = e.target.value; invalidate(false); }); sl.appendChild(lc);
       }
       for (const [k, label, mn, mx, step] of list) {
         const row = document.createElement('label'); row.className = 'sl';
@@ -165,7 +170,7 @@
     const stage = document.getElementById('stage'); if (stage) stage.classList.toggle('picking', !!m);
   }
   function clickMap(e) {
-    const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
+    const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
     for (let k = 0; k < figs.length; k++) {
       const cv = figs[k].querySelector('canvas'), r = cv.getBoundingClientRect();
       if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
@@ -176,7 +181,7 @@
   /* Pocket view: a click in the world on a Diorama chooses that room (the same as its chip); in the pocket itself a click does nothing (another chip or Whole map goes back) */
   function clickRoom(e) {
     if (!S || !S.roomMap || S.pocket) return;
-    const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
+    const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
     for (let k = 0; k < figs.length; k++) {
       const cv = figs[k].querySelector('canvas'), r = cv.getBoundingClientRect();
       if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
@@ -428,10 +433,10 @@
     }
     const incursion = computeIncursion(); O.incursion = incursion;
     $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');
-    const techs = st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech];
+    const techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
     const layout = st.layout === 'auto' ? (st.preset.startsWith('iso') ? 'rows' : 'columns') : st.layout; // rows in isometric: the diamond is twice as wide as tall
-    stage.dataset.layout = layout; $('#layout').hidden = st.mode !== 'compare';
+    stage.dataset.layout = layout; $('#layout').hidden = st.mode !== 'compare' || techs.length > 3; // four panels are always a 2x2 grid
     while (stage.children.length < techs.length) {
       const f = document.createElement('figure'); f.innerHTML = '<canvas></canvas><figcaption></figcaption>'; stage.appendChild(f);
     }
@@ -439,17 +444,17 @@
     // one camera for every panel: the same scale (px per tile, fitted to the first panel) around the same point of the map
     const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
     const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
-    const bKey = 'Bready:' + P.radius + ':' + P.anchor, needB = techs.includes('B') && !S.cache[bKey];
+    const lateKey = (t) => (t === 'B' ? 'Bready:' + P.radius + ':' + P.anchor : 'Cready:' + E.curves.key(P)), late = techs.filter((t) => (t === 'B' || t === 'C') && !S.cache[lateKey(t)]), needB = late.length > 0; // B and C: the first draw is the slow one, painted after the other panels
     const paint = (t, i) => {
       const f = stage.children[i], cv = f.querySelector('canvas'), pend = f.querySelector('.pending');
       if (pend) pend.remove();
       const r = E.render(cv, S, P, t, v, O);
       f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ms.toFixed(0)} ms</span>`;
-      if (t === 'B') S.cache[bKey] = true;
+      if (t === 'B' || t === 'C') S.cache[lateKey(t)] = true;
     };
-    const surv = {}, survOf = (t, late) => { if (t !== 'box' && techs.includes(t) && (late || !(t === 'B' && needB))) surv[t] = E.stairSurvival(S, P, t); };
+    const surv = {}, survOf = (t, now) => { if (t !== 'box' && techs.includes(t) && (now || !late.includes(t))) surv[t] = E.stairSurvival(S, P, t); };
     techs.forEach((t, i) => {
-      if (t === 'B' && needB) { // painted after the other panels: the first draw of B is the slow one
+      if (late.includes(t)) { // painted after the other panels: the first draw of B and C is the slow one
         const f = stage.children[i], cv = f.querySelector('canvas'), ctx = cv.getContext('2d'), dpr = window.devicePixelRatio || 1;
         cv.width = f.clientWidth * dpr | 0; cv.height = f.clientHeight * dpr | 0; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#171424'; ctx.fillRect(0, 0, cv.width, cv.height);
         if (!f.querySelector('.pending')) { const d = document.createElement('div'); d.className = 'pending'; d.textContent = 'computing…'; f.appendChild(d); }
@@ -461,7 +466,7 @@
     st.timing = { cold: !!st.cold, first: firstMs, all: needB ? null : firstMs, layout, techs: techs.slice() };
     const finish = () => {
       if (token !== drawToken || !S) return;
-      if (needB) { techs.forEach((t, i) => { if (t === 'B') paint(t, i); }); survOf('B', true); st.timing.all = performance.now() - t0; }
+      if (needB) { techs.forEach((t, i) => { if (late.includes(t)) paint(t, i); }); for (const t of late) survOf(t, true); st.timing.all = performance.now() - t0; }
       info(surv, techs); $('#busy').hidden = true;
     };
     if (needB) { info(surv, techs); requestAnimationFrame(() => setTimeout(finish, 0)); } else finish();
@@ -488,8 +493,12 @@
   }
   function contractText() { // counts of the pieces drawn per kind (switch "Art contract")
     const ci = S.contractInfo; if (!O.contract || !ci) return '';
-    return (st.mode === 'compare' ? ['box', 'A', 'B'] : [st.tech]).filter((t) => ci[t]).map((t) => { const c = ci[t];
+    return (st.mode === 'compare' ? ALL_TECH : [st.tech]).filter((t) => ci[t]).map((t) => { const c = ci[t];
       return ` · <b>Art contract</b> (${t === 'box' ? 'Box' : t}): body low ${c.body.low} · mid ${c.body.mid} · high ${c.body.high} · masonry ${c.body.masonry} · edge ${c.body.edge}; wrapper drop ${c.wrapper.drop} · border ${c.wrapper.border} · shore ${c.wrapper.shore}; footprint ${c.footprint}; props trees ${c.trees} · landmarks ${c.landmarks}${c.faded ? ` (${c.faded} faded)` : ''}`; }).join('');
+  }
+  function curvesText() { // technique C: preset, passes, seeds, contour edges and exempt cells of the last build
+    const t = S && (st.mode === 'compare' ? ALL_TECH : [st.tech]).includes('C') ? S.cache['Cs:' + E.curves.key(P)] : null; if (!t) return '';
+    return ` · <b>Curves C</b> (${P.curves}): ${t.info.passes} pass${t.info.passes > 1 ? 'es' : ''} · ${t.info.cells} seeds · ${t.info.edges} contour edges · ${t.info.exemptCells} exempt (ramps, walls, rings) · ${t.info.ms} ms`;
   }
   function ascText() { const a = S.ascWalls; return a ? ` · <b>Ascension walls</b>: ${a.info.faces} faces in ${a.info.runs} chains (${a.info.candidates} candidate faces, ${a.info.dropped} dropped: chains of fewer than 3)` : ''; }
   function pocketText() {
@@ -519,13 +528,13 @@
     note.hidden = eff >= P.subH - 1e-9;
     note.textContent = `Sub-terrace height limited to ${eff.toFixed(3)} (set ${P.subH}) so the gap to the next terrace stays above the climb limit.`;
     const sv = (t) => (!surv[t] && techs.includes(t) ? '…' : surv[t] ? `${(surv[t].coverage * 100).toFixed(1)}%` + (surv[t].lost ? `, ${surv[t].lost}/${surv[t].n} lost` : '') + (surv[t].degraded ? `, ${surv[t].degraded} degraded` : '') : '–');
-    const sinf = S.stairInfo, stairText = `${sinf.gates} gates · ${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · stair coverage A ${sv('A')} · B ${sv('B')}`;
+    const sinf = S.stairInfo, stairText = `${sinf.gates} gates · ${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · stair coverage A ${sv('A')} · B ${sv('B')} · C ${sv('C')}`;
     const bi = S.borderInfo, borderText = bi ? ` · slice border faces: ${bi.barrier} barrier (red) · ${bi.pass} pass (cyan) · ${bi.none} unmarked (yellow) · ${bi.mapEdge} map edge (white)` : '';
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText();
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + curvesText();
   }
 
   function init() {

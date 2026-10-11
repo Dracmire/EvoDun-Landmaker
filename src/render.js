@@ -690,7 +690,9 @@
     if (kind === 3) return { tile: v < S.n ? v : -1, kind: 'ramp' };
     if (kind === 4) return { tile: v < S.n ? v : -1, kind: 'cap' };
     if (kind === 1 && v <= S.maxFine) {
-      const [gx, gy] = cam.unp(px, py, S.levelH[v]), ix = Math.floor(gx), iy = Math.floor(gy);
+      const [gx, gy] = cam.unp(px, py, S.levelH[v]);
+      if (tech === 'C') { const t = E.cellTileAt(S, P, gx, gy); return t >= 0 ? { tile: t, kind: 'cap' } : { tile: -1, kind: 'none' }; } // the tile of the Voronoi cell under the point (the owner of the nearest seed)
+      const ix = Math.floor(gx), iy = Math.floor(gy);
       return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? { tile: iy * S.W + ix, kind: 'cap' } : { tile: -1, kind: 'none' };
     }
     return { tile: -1, kind: 'none' };
