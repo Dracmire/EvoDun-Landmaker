@@ -231,7 +231,7 @@
   };
 
   /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
-  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera']; // the optional `viewer` block of the manifest
+  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves']; // the optional `viewer` block of the manifest
   E.parseManifest = function (json) {
     if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
     const known = new Set([...E.ROLES.map((r) => r[0]), ...E.RESERVED_ROLES]), roles = {}, notes = [];
@@ -255,6 +255,7 @@
       if (typeof v !== 'object') throw new Error('Manifest: viewer must be an object.');
       if (v.preset !== undefined && !['default', 'balanced', 'custom'].includes(v.preset)) throw new Error('Manifest: viewer.preset must be "default", "balanced" or "custom".');
       if (v.camera !== undefined && !['isoE', 'isoW', 'oblique', 'low', 'top', 'stage', 'classic'].includes(v.camera)) throw new Error('Manifest: viewer.camera must be one of the camera bank ids (isoE, isoW, oblique, low, top, stage, classic).');
+      if (v.curves !== undefined && !['ordered', 'balanced', 'natural'].includes(v.curves)) throw new Error('Manifest: viewer.curves must be "ordered", "balanced" or "natural".');
       for (const k of ['rooms', 'cake']) if (v[k] !== undefined && typeof v[k] !== 'boolean') throw new Error(`Manifest: viewer.${k} must be true or false.`);
       num('terraces', 2, 24); num('roomsMinCore', 5, 250); num('rRadius', 3, 30); num('minPlateau', 1, 300);
       viewer = {}; for (const k of E.VIEWER_KEYS) if (v[k] !== undefined) viewer[k] = v[k];

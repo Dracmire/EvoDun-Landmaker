@@ -94,7 +94,7 @@
 
   /* nearest point on the loops of level L (a grid of segments, once per technique and level) */
   function snapper(S, P, tech) {
-    const cache = S.cache['contractSnap_' + tech] || (S.cache['contractSnap_' + tech] = new Map()), fn = tech === 'A' ? E.loopsA : E.loopsB;
+    const cache = S.cache['contractSnap_' + tech] || (S.cache['contractSnap_' + tech] = new Map()), fn = E.loopsOf(tech);
     return (L, x, y) => {
       let g = cache.get(L);
       if (!g) {

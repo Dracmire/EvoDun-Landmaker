@@ -63,7 +63,7 @@
      Coverage of a tile = share of its area (4x4 samples) that is well drawn. A tread is closed when the mean coverage of
      its tiles is below 0.5; a stair is lost when any tread is closed and degraded when only some tile is below 0.9. */
   E.stairSurvival = function (S, P, tech) {
-    const loopsOf = tech === 'A' ? E.loopsA : E.loopsB, memo = new Map();
+    const loopsOf = E.loopsOf(tech), memo = new Map();
     const get = (L) => { // loops of a level with their boxes, for a quick rejection in the point tests
       if (L > S.maxFine) return [];
       if (!memo.has(L)) memo.set(L, loopsOf(S, L, P).map((lp) => { let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (const q of lp) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); } return { lp, x0, y0, x1, y1 }; }));
@@ -91,6 +91,9 @@
     });
     return { n: S.stairs.length, lost, degraded, tilesFailed: failed, tiles, lostIdx, coverage: tiles ? area / tiles : 1, worst };
   };
+
+  E.dropCollinear = dropCollinear;
+  E.loopsOf = (tech) => (tech === 'A' ? E.loopsA : tech === 'C' ? E.loopsC : E.loopsB); // the contour function of a technique
 
   /* closed tile-exact loops of a mask, collinear points dropped (used for the slice border) */
   E.maskLoops = function (W, H, inside) { return traceMask(W, H, inside).map(dropCollinear); };

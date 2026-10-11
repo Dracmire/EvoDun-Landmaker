@@ -10,11 +10,11 @@
 const fs = require('fs'), path = require('path');
 const { open } = require('./common');
 
-const PAGE = async ({ nPer, px, only, techs, spread, terraces, width, CAM }) => {
+const PAGE = async ({ nPer, px, only, techs, spread, terraces, width, CAM, curves }) => {
   const E = window.EVO;
   const mk = (W, H, f) => { const el = new Float32Array(W * H); let mn = 1e9, mx = -1e9; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const v = el[y * W + x] = f(x, y); mn = Math.min(mn, v); mx = Math.max(mx, v); } return { name: 't', width: W, height: H, elevation: el, elevRange: [mn, mx], masks: {}, markers: [], fields: {} }; };
   const relief = mk(72, 56, (x, y) => 100 + 600 * (0.5 + 0.5 * Math.sin(x / 9) * Math.cos(y / 7)) + x * 3);
-  const BASE = { spread, terraces, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: width, stairStyle: 1, gateThr: 0.05, gateMin: 3 };
+  const BASE = { spread, terraces, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, stairW: width, stairStyle: 1, gateThr: 0.05, gateMin: 3, curves };
   const CW = 520, CH = 420, PX = px;
   const cv = document.createElement('canvas'); cv.style.cssText = `position:fixed;left:0;top:0;width:${CW}px;height:${CH}px;z-index:-1`; document.body.appendChild(cv);
   const views = CAM === 'stage' ? [['stage', 0, 25, 'persp']] : CAM === 'classic' ? [['classic', 0, 0, 'oblique']] : [['oblique', 0, 50], ['oblique', 90, 50], ['oblique', 180, 50], ['oblique', 270, 50], ['iso', 45, 35], ['iso', 135, 35], ['iso', 225, 35], ['iso', 315, 35]]; // --cam stage | classic: the camera bank's Cam 6 / Cam 7 (measured, not enforced)
@@ -90,7 +90,7 @@ const PAGE = async ({ nPer, px, only, techs, spread, terraces, width, CAM }) => 
   const ctx2 = (n) => { const c = document.createElement('canvas'); c.width = CW; c.height = CH; return c; };
   const rows = {};
   for (const smooth of [true, false]) for (const tech of techs) {
-    if (!smooth && tech === 'box') continue; // Box has no smoothing
+    if (!smooth && (tech === 'box' || tech === 'C')) continue; // Box and C have no smoothing slider (C: the presets are its look)
     const { P, S } = shapes[smooth];
     for (const pk of picks) {
       const rec = S.stairs[pk.i], cx = rec.top[0] % S.W + 0.5, cyy = ((rec.top[0] / S.W) | 0) + 0.5, hh = S.levelH[S.fine[rec.top[0]]];
@@ -142,7 +142,7 @@ const argNum = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? +pr
   const ni = process.argv.indexOf('--n'), nPer = ni > 0 ? +process.argv[ni + 1] : 4;
   const a = await open({ w: 900, h: 700 });
     const pi = process.argv.indexOf('--px'), oi = process.argv.indexOf('--only');
-  const r = await a.page.evaluate(PAGE, { nPer, px: pi > 0 ? +process.argv[pi + 1] : 28, only: oi > 0 ? +process.argv[oi + 1] : -1, CAM: process.argv.includes('--cam') ? process.argv[process.argv.indexOf('--cam') + 1] : '', spread: argNum('--spread', 1), terraces: argNum('--terraces', 5), width: argNum('--width', 3), techs: process.argv.indexOf('--tech') > 0 ? [process.argv[process.argv.indexOf('--tech') + 1]] : ['box', 'A', 'B'] });
+  const r = await a.page.evaluate(PAGE, { nPer, px: pi > 0 ? +process.argv[pi + 1] : 28, only: oi > 0 ? +process.argv[oi + 1] : -1, CAM: process.argv.includes('--cam') ? process.argv[process.argv.indexOf('--cam') + 1] : '', spread: argNum('--spread', 1), terraces: argNum('--terraces', 5), width: argNum('--width', 3), techs: process.argv.indexOf('--tech') > 0 ? [process.argv[process.argv.indexOf('--tech') + 1]] : ['box', 'A', 'B'], curves: process.argv.includes('--curves') ? process.argv[process.argv.indexOf('--curves') + 1] : 'ordered' });
   console.log(`ramps available: cut clean ${r.counts.cut.clean}, cut mixed ${r.counts.cut.mixed}, fill clean ${r.counts.fill.clean}, fill mixed ${r.counts.fill.mixed}; ${r.picks} tested x ${r.total / r.picks} renders`);
   // table: per smoothing, tech, mode/category: mean and max % of differing ramp pixels over the 8 directions
   const groups = {};
@@ -157,7 +157,8 @@ const argNum = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? +pr
   if (r.probe) console.log('probe:', JSON.stringify(r.probe));
   console.log('\ntop cases:\n' + r.top.join('\n'));
   for (const sm of ['true', 'false']) {
-    const w = r.worstBy[sm]; console.log('  ref kinds at mismatches (1 ramp top, 2 other top, 3 wall touching a ramp, 4 other wall):', JSON.stringify(r.worstBy[sm].hist));
+    const w = r.worstBy[sm]; if (!w) continue; // C has no 'no smoothing' run
+    console.log('  ref kinds at mismatches (1 ramp top, 2 other top, 3 wall touching a ramp, 4 other wall):', JSON.stringify(r.worstBy[sm].hist));
     console.log(`\nworst case, ${sm === 'true' ? 'default smoothing' : 'no smoothing'}:`, w.desc, w.pct.toFixed(2) + '%', w.diff + ' px');
     if (outDir) { fs.mkdirSync(outDir, { recursive: true }); for (const [k, f] of [['mask', 'mask'], ['dbg', 'debug'], ['shot', 'shot']]) fs.writeFileSync(path.join(outDir, `ramp_worst_${sm === 'true' ? 'smooth' : 'exact'}_${f}.png`), Buffer.from(w[k].split(',')[1], 'base64')); }
   }

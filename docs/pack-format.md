@@ -23,6 +23,8 @@ So that a saved pack reproduces the same picture when it is loaded again. Writte
 `preset` is "default", "balanced" (Balanced types: terraces 3, min core 100, room radius 5, min plateau 120) or "custom"; `rooms` / `cake` are the switches (Cake needs rooms); `terraces` 2-24 (default 5), `roomsMinCore` 5-250 (20), `rRadius` 3-30 (9), `minPlateau` 1-300 (5), integers. Any field may be missing (= its default).
 `camera` (optional, 8th field) is one of the CAMERA BANK ids: `isoE` (Cam 1), `isoW` (Cam 2), `oblique` (Cam 3, the default), `low` (Cam 4), `top` (Cam 5), `stage` (Cam 6, perspective), `classic` (Cam 7, oblique projection); "Save pack.json" writes it only when it is not the default, so a pack saved before the bank is unchanged; any other value is rejected.
 
+`curves` (optional, 9th field) is the preset of technique C (Tiles to Curves): "ordered" (the default), "balanced" or "natural"; "Save pack.json" writes it only when it is not the default, so a pack saved before technique C is unchanged. A pack may also declare `stageYaw` (see the Stage camera).
+
 ## 0.2 (channels as fields)
 A pack is a small JSON manifest plus PNG images that are selected together in the viewer. Images are decoded
 by our own decoder (`src/png.js`): raw samples, no colour management, no alpha premultiplication, 8 or 16 bit,

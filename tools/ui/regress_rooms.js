@@ -1,6 +1,6 @@
 /* Pixel regression with ROOMS ON on the fixed test set (real map, 5 terraces, rooms on, the rest by default): the room types are classified but, with the Cake switch off and the
    type tint off, the canvases must be identical to the checkout in EVO_ROOT (the commit before the technique).
-     NODE_PATH=$(npm root -g) [EVO_ROOT=<old checkout>] node tools/ui/regress_rooms.js <outDir> [--cake] [--balanced] [--noDD] [--toggle cake|pocket|ascWalls]     (--toggle <id>: check and uncheck the switch #t-<id> before shooting, so a switch that leaks state is caught; --noDD: rule "Diorama never touches Diorama" off, to compare it with the same checkout, rule on)  then: node tools/ui/compare.js <dirA> <dirB> */
+     NODE_PATH=$(npm root -g) [EVO_ROOT=<old checkout>] node tools/ui/regress_rooms.js <outDir> [--cake] [--balanced] [--noDD] [--toggle cake|pocket|ascWalls|contract|dress]     (--toggle <id>: check and uncheck the switch #t-<id> before shooting, so a switch that leaks state is caught; --noDD: rule "Diorama never touches Diorama" off, to compare it with the same checkout, rule on)  then: node tools/ui/compare.js <dirA> <dirB> */
 const fs = require('fs'), path = require('path');
 const { open } = require('./common');
 (async () => {
