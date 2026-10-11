@@ -43,6 +43,13 @@ const fake = (W, H, fine) => ({ W, H, n: W * H, fine: Int16Array.from(fine), lev
       for (const L of Ls.filter((v) => picks.includes(v) || v === l)) { const ins = inLoops(E.loopsC(S, L, PP), x, y); tested++; if (ins !== (l >= L)) wrong++; if (ins && !prev) nest++; prev = ins; }
     }
     ok(`${name}: the loops of every level enclose exactly the cells of level >= L (${tested} tests), and level L + 1 is inside level L`, wrong === 0 && nest === 0, [wrong, nest]);
+    let tileBad = 0, far = 0; seed = 777;
+    for (let k = 0; k < 800; k++) { // the tile of the cell under a point is the OWNER of the nearest seed, and lies within about a tile of the point
+      const x = 0.01 + rnd() * (S.W - 0.02), y = 0.01 + rnd() * (S.H - 0.02), t = E.cellTileAt(S, PP, x, y), gx = Math.floor(x / g.cell), gy = Math.floor(y / g.cell); let best = -1, bd = 1e9;
+      for (let yy = Math.max(0, gy - 3); yy <= Math.min(g.gh - 1, gy + 3); yy++) for (let xx = Math.max(0, gx - 3); xx <= Math.min(g.gw - 1, gx + 3); xx++) { const q = yy * g.gw + xx, d = (g.sx[q] - x) ** 2 + (g.sy[q] - y) ** 2; if (d < bd) { bd = d; best = q; } }
+      if (t !== g.own[best]) tileBad++; if (Math.hypot((t % S.W) + 0.5 - x, ((t / S.W) | 0) + 0.5 - y) > 1.9) far++;
+    }
+    ok(`${name}: E.cellTileAt returns the owner tile of the nearest seed (also in pass 2) and it lies within 1.9 tiles of the point`, tileBad === 0 && far === 0, [tileBad, far]);
     const sub = E.loopsC(S, Ls[0], PP); ok(`${name}: loops have at least 3 vertices`, sub.length > 0 && sub.every((l) => l.length >= 3));
     console.log(`INFO ${name}: ${JSON.stringify(Object.assign({}, st.info, { buildMs: tb }))}`);
   }

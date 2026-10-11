@@ -3141,7 +3141,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     if (Math.hypot(ex[0] - mx[0], ex[1] - mx[1]) > 0.5) {
       const g = ctx.createLinearGradient(mx[0], mx[1], ex[0], ex[1]), al = Math.min(0.45, 0.16 + 0.1 * Math.min(jump, 3));
       g.addColorStop(0, `rgba(14,10,22,${al.toFixed(3)})`); g.addColorStop(0.5, `rgba(14,10,22,${(al * 0.45).toFixed(3)})`); g.addColorStop(1, 'rgba(14,10,22,0)');
-      ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.lineTo(pb2[0], pb2[1]); ctx.lineTo(pa2[0], pa2[1]); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); st.dress.foot++;
+      ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.lineTo(pb2[0], pb2[1]); ctx.lineTo(pa2[0], pa2[1]); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); st.dress.foot++; if (st.dress.items) st.dress.items.push({ k: 'foot', x: (f.ax + f.bx) / 2 + f.nax * 0.2, y: (f.ay + f.by) / 2 + f.nay * 0.2, z: f.hb });
     }
     if (jump < DR.rockJump) return;
     const len = Math.hypot(f.bx - f.ax, f.by - f.ay), tall = jump >= DR.tallJump, n = Math.round(len * (tall ? 2.6 : 1.6) * (0.6 + 0.8 * dhash(f.wx, f.wy, 1, 10)));
@@ -3152,7 +3152,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const rx = Math.max(1.2, (Math.hypot(cx[0] - c0[0], cx[1] - c0[1]) + Math.hypot(cy[0] - c0[0], cy[1] - c0[1])) / 2), hp = Math.max(1.5, Math.abs(c0[1] - ct[1])), shade = 0.5 + 0.2 * dhash(f.wx, f.wy, i, 14);
       ctx.beginPath(); ctx.ellipse(c0[0], c0[1], rx, rx * 0.5, 0, 0, Math.PI); ctx.ellipse(c0[0], c0[1], rx, hp, 0, Math.PI, 2 * Math.PI); ctx.closePath();
       ctx.fillStyle = rgb(f.c, shade); ctx.fill(); ctx.strokeStyle = 'rgba(18,14,28,0.62)'; ctx.lineWidth = 0.8; ctx.stroke();
-      ctx.beginPath(); ctx.ellipse(c0[0] - rx * 0.25, c0[1] - hp * 0.45, rx * 0.4, hp * 0.3, 0, 0, 2 * Math.PI); ctx.fillStyle = 'rgba(255,250,236,0.16)'; ctx.fill(); st.dress.rocks++;
+      ctx.beginPath(); ctx.ellipse(c0[0] - rx * 0.25, c0[1] - hp * 0.45, rx * 0.4, hp * 0.3, 0, 0, 2 * Math.PI); ctx.fillStyle = 'rgba(255,250,236,0.16)'; ctx.fill(); st.dress.rocks++; if (st.dress.items) st.dress.items.push({ k: 'rock', x, y, z: f.hb });
     }
   }
 
@@ -3671,7 +3671,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   function drawScene(ctx, w, h, S, P, tech, view, o) {
     DBG = !!o.debug; PICK = !!o.pick;
-    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, dress: { walls: 0, strata: 0, lips: 0, foot: 0, rocks: 0 } };
+    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, dress: { walls: 0, strata: 0, lips: 0, foot: 0, rocks: 0, items: o.dressItems ? [] : null } }; // o.dressItems (tests): the anchor points of the foot strips and the rocks, to compare them with a reference
     const cam = makeCam(S, P, view, w, h);
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     if (tech === 'box') renderBox(ctx, cam, S, P, o, st);

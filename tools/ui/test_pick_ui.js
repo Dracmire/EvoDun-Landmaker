@@ -54,7 +54,7 @@ const PAGE = async ({ nPts, CAM }) => {
   const worst = []; const fails = [], wfails = [];
   for (const [cname, P] of configs) {
     const S = E.shape(relief, P);
-    for (const tech of ['box', 'A', 'B']) {
+    for (const tech of ['box', 'A', 'B', 'C']) {
       if (cname === 'steps' && tech === 'box' && false) continue;
       let tot = 0, ok = 0, naiveOk = 0, hidTot = 0, hidOk = 0, hidNaive = 0, wallTot = 0, wallOk = 0, filtered = 0;
       for (const [vname, yaw, pitch, kind] of views) {
@@ -106,12 +106,12 @@ const PAGE = async ({ nPts, CAM }) => {
 
 (async () => {
   const ni = process.argv.indexOf('--n'), nPts = ni > 0 ? +process.argv[ni + 1] : 120;
-  const a = await open({ w: 900, h: 700 }), CAMARG = process.argv.includes('--cam') ? process.argv[process.argv.indexOf('--cam') + 1] : '', okf = CAMARG ? (name, cond, extra) => console.log(`MEASURED (not enforced, --cam ${CAMARG}) ${cond ? 'within' : 'outside'}: ${name}  ${extra === undefined ? '' : extra}`) : a.ok;
+  const a = await open({ w: 900, h: 700 }), okC = (name, cond, extra) => console.log(`MEASURED (not enforced, technique C) ${cond ? 'within' : 'outside'}: ${name}  ${extra === undefined ? '' : extra}`), CAMARG = process.argv.includes('--cam') ? process.argv[process.argv.indexOf('--cam') + 1] : '', okf0 = CAMARG ? (name, cond, extra) => console.log(`MEASURED (not enforced, --cam ${CAMARG}) ${cond ? 'within' : 'outside'}: ${name}  ${extra === undefined ? '' : extra}`) : a.ok;
   const r = await a.page.evaluate(PAGE, { nPts, CAM: process.argv.includes('--cam') ? process.argv[process.argv.indexOf('--cam') + 1] : '' });
   console.log('| configuration | technique | cap/ramp points | correct | naive picker (control) | hidden tile centres: correct / naive | wall points: correct |\n|---|---|---:|---:|---:|---|---|');
   console.log(r.__fails.join('\n')); console.log('box cap failures by painter order:', JSON.stringify(r.__bf || [])); delete r.__fails; delete r.__bf;
   for (const [k, v] of Object.entries(r)) {
-    const [c, t] = k.split(' | '), pc = (x, y) => (y ? (100 * x / y).toFixed(1) + ' %' : '-');
+    const [c, t] = k.split(' | '), pc = (x, y) => (y ? (100 * x / y).toFixed(1) + ' %' : '-'), okf = t === 'C' ? okC : okf0; // technique C: MEASURED, not enforced (the tile shown is the owner of the cell, which lies up to 0.55 tile from the reference tile under the point)
     console.log(`| ${c} | ${t} | ${v.tot} | ${v.ok} (${pc(v.ok, v.tot)}) | ${pc(v.naiveOk, v.tot)} | ${v.hidTot ? `${v.hidOk}/${v.hidTot} / ${v.hidNaive}/${v.hidTot}` : '-'} | ${v.wallTot ? `${v.wallOk}/${v.wallTot}` : '-'} |`);
     okf(`${k}: >= 98 % of the cap/ramp points resolve to the tile that the reference shows (the rest are 1-2 px edge cases, see header)`, v.tot > 100 && v.ok >= 0.98 * v.tot, `${v.ok}/${v.tot}`);
     okf(`${k}: the naive picker (control) is clearly worse`, v.naiveOk < 0.9 * v.tot, `${v.naiveOk}/${v.tot}`);
