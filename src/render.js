@@ -635,7 +635,7 @@
     const cam = makeCam(S, P, view, w, h);
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
-    else renderLevels(ctx, cam, S, P, o, st, tech === 'A' ? E.loopsA : E.loopsB);
+    else renderLevels(ctx, cam, S, P, o, st, E.loopsOf(tech));
     if (!PICK) {
       if (o.passes) drawPassMarks(ctx, cam, S, P);
       if (o.markers) drawMarkers(ctx, cam, S, P);
