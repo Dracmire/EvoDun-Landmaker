@@ -2,7 +2,7 @@
 
 ## 1. Status
 
-PHASE 1 IMPLEMENTED (2026-10-11), waiting for the user's review: the planar technique **C**, its three presets and the **wall dressing** (switch). The vertical pass (phase 2) is NOT approved and is not built. Nothing is exported to Unity (03-stage D15).
+PHASE 1 merged (PR #17: technique C, three presets, wall dressing). PHASE 2, THE WALL PASS, IMPLEMENTED (2026-10-11), waiting for the user's review: T3 (default) and T2 (alternative) as blocks built OUTWARD on the lower ground in front of the walls of technique C. Nothing is exported to Unity (03-stage D15).
 
 ## 2. Goal
 
@@ -35,6 +35,19 @@ Take the same tile data and give it the organic plan shape of Unexplored 2: one 
   after all the corner shifts, then the cap.
 - **D12** (2026-10-11) `meander` is a diagnostic parameter only (`P.meander`, default 0, no UI, no manifest, in no preset). Box keeps a flat normal per face in the wall dressing. Walls under 0.5 terH are not dressed (base rocks stay at jumps of 1.5 terH or more). Compare mode becomes
   Box | A | B | C in a 2 x 2 grid. Window-edge vertices get no corner rule (known limit). The painter order of the foot and the rocks (right after the wall, in the turn of the lower band) is accepted.
+
+- **D13** (2026-10-11) Technique 1 (nested masses) is DISCARDED. It lost clearly in the reviewer's mocks.
+- **D14** (2026-10-11) Technique 3 is the DEFAULT wall technique (the Unexplored 2 look): a cliff band of Voronoi blocks with strata fusion. "If I had to pick for Unexplored 2, technique 3."
+- **D15** (2026-10-11) The EXTRUSION SCALE of technique 3 is a design control and "very relevant". Small extrusion (10-25 % of the band of the reviewer's mock 4) makes walls read as walls. It is a slider (0.10-0.40, default 0.25; the parameter goes to 1.0 in tests).
+- **D16** (2026-10-11) Technique 2 (Voronoi blocks on the wall surface moved by groups in N height passes) is KEPT as an alternative for implementations that need massive groups to shape the stone ("Sea of Stars: give a 'face' to the stone by deforming the Voronoi blocks, probably with more jitter").
+  The fusion step is good for T3, NOT for T2: T2 has no fusion step, and its mock looked too fused (long horizontal bands).
+- **D17** (2026-10-11) D6 revised: the upper floor and its lip stay intact; the wall band is built OUTWARD on the edge of the lower terrace. Visual only: walking, regions, gates and ramps do not change.
+- **D18** (2026-10-11) D7 (fixed large blocks of about 2 tiles) and D9 (T1 / T2 undecided) are superseded by D13-D16.
+- **D19** (2026-10-11, confirmed by the user) The wall pass is part of technique C's geometry, because it needs sub-tile resolution. Box, A and B do not get it. The wall DRESSING stays the same pass for all four techniques. In compare mode the band is therefore shown only in C; "Wall pass: Off" gives the like-for-like view.
+- **D20** (2026-10-11, user's answers to the phase 2 plan) T3 is the default selection, and Off must be pixel-identical to PR #17's C (regress, 0 differences). The pieces of an atom are clipped to the LOW-SIDE C cell: the parts of a prism inside the upper terrace would not always be hidden by its cap near the lip
+  (the claim "its cap hides them" does not hold there), so no clipping toward the lip is needed afterwards. Carry-overs of PR #17: the foot strip of the dressing uses the per-segment normal plus a fill sector at convex vertices (vertex normals folded the strips into streaky fans at sharp corners, Natural, Cam 6;
+  it changes Box / A / B / C pixels only at the foot and only with the dressing on); the rock threshold stays at 1.5 terH (the real map at 5 terraces has no jump that large: max 1.00 terH, 0 edges; at 7 terraces spread 1.5 `middle`: 801 edges, 108 of 2.2 or more); `displace()` uses `k = round(1 / cell)` and `passes <= 3` is checked.
+
 
 ## 5. Design
 
@@ -71,6 +84,20 @@ One function (`dressWall`, `dressFoot` in `src/render.js`), never in the pick re
   placeholders (domes). They do not repeat the art contract stones (03-stage D19), which sit on the TOP cap edge.
 - **Painter order**: foot and rocks are drawn right after the wall, in the turn of the lower band (Box: in the turn of the lower tile, after its cap), so a wall drawn later cannot cover them and nearer things drawn later do.
 - Outlines at depth discontinuities are unchanged. The info line counts walls, strata, lips, foot strips and rocks per technique.
+
+### Wall pass of C (`src/wallc.js`, `E.wallc.get(S, P)`; selector "Wall pass (technique C)": T3 default / T2 / Off)
+Blocks built OUTWARD on the lower ground in front of every wall; the slab wall of C stays behind them, the upper floor and its lip are intact (D17). Visual only. The blocks are faces (vertical quads with an outward normal) and tops (polygons at a height) grouped by the upper level `hi`; `renderLevels` draws them in the pass of level `hi`,
+after the walls of that level and before its cap, sorted by depth with the walls. Not selectable (the pick render never sees them). Side faces take the cliff colour of the upper level and the dressing when it is on (no foot: the base is not on the lower cap); ledge tops (0 < s < K) take the upper cap colour x 0.92, full-height tops the upper cap colour, separated by the outline.
+- **Walls**: every Voronoi edge of C with a jump of 0.5 terH or more (the threshold of the dressing), H = the jump in tiles; edges next to an exempt cell (ramp / stair footprints + 1 ring, Ascension faces, Cake rings) are dropped, and so is every atom piece that touches an exempt tile: the band is interrupted. "The nearest higher ground IS the terrace a" holds by construction: a low point is tied to the nearest wall edge of its own level.
+- **T3 atoms**: a jittered grid of 0.5 tile (jitter +-0.3 of the cell, hashed by whole-map coordinates), cells = Voronoi of the seeds (3 x 3 neighbours), each cell clipped to the LOW-SIDE C cell of level lo (convex x convex with the same Sutherland-Hodgman, no library): the pieces of an atom. `E.curves.cellPolygon` and `E.curves.clip` are shared with C.
+- **T3 band**: mean distance of the pieces (7 sample points each) to the wall edges < 0.35 H, with all the samples tied to the same upper level; u = mean / (0.35 H); an atom touches the lip when one of its edges lies on a wall edge. Columns: coarse Worley (spacing 1.2, slider) on the lip point. Strata K = max(2, round(jumpTerH * 3)) (slider 2-4).
+  Column profile (hashed): buttress 0.20, step 0.55, recess 0.25 with the formulas of the mock, off = U(-0.25, 0.25). SUPPORT RULE after every change. FUSION, at most 20 rounds: (a) a sliver (s < K and area < 0.30 tile^2) or a thin island (area / border < 0.10) takes the s of the neighbour with the longest shared border; (b) an island over LMAX = 3.6 tiles
+  (columns * column width) has its middle column lowered by 1; then the support rule again. Block top = lower ground + H * s / K.
+- **T3 extrusion** (D15): `v' = lip(v) + (v - lip(v)) * extrude`, the same mapping for every vertex (shared vertices stay shared, edges are cut every 0.5 tile from a canonical end). The layout along the wall does not change, only the depth. NOTE: the band is 0.35 H deep by MEAN distance and the atoms are accepted whole, so the far vertices of an atom reach about 0.45 tile beyond:
+  the world depth is at most (0.35 H + 0.45) * extrude (measured), not 0.35 H * extrude. At 0.25 and H = 1 that is about 0.2 tile, 11 px at 55 px per tile.
+- **T2** (D16, NO fusion): the wall edges of one (lo, hi) are chained; lateral seeds every 0.9 tile (jittered by `T2 jitter`, default 0.4, higher than the atoms' 0.3), NP = 6 height passes (5-10) with jittered row boundaries per lateral cell; groups = coarse 1D Worley (1.0 tile); depth level per (group, pass) in 0..3 with p = 0.35 / 0.25 / 0.25 / 0.15,
+  depth = level / 3 * maxDepth, maxDepth = 0.35 H * extrude; block = lateral cell footprint from the lip out to its depth, z in its row; overhangs allowed; the end faces only where the neighbouring block of the same row is shallower.
+- **Cache**: `S.cache['Cw:' + curves key + '|' + wall key]`; the key has the mode and EVERY wall parameter; the wall sliders only redraw. Manifest: `viewer.wallPass`, `wallExtrude`, `wallStrata`, `wallColumn`, `t2Spacing`, `t2Rows`, `t2Group`, `t2Jitter`, written only when they are not the default.
 
 ## 6. Viewer vs Unity
 
