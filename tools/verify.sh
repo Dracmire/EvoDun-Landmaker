@@ -3,7 +3,7 @@
 #   node     every tools/test_*.js
 #   ui       every tools/ui/test_*.js except the two z-buffer tests (they run in zbuf)
 #   regress  pixel regression against origin/main in a temporary worktree (EVO_ROOT): stairW 0 and 3 (rooms off), rooms on, one pass
-#            per new switch (cake, pocket, ascWalls, contract) checked and unchecked again, and the camera bank Cam 1-5 (regress_cams.js); expectation: 0 images differ
+#            per new switch (cake, pocket, ascWalls, contract, dress) checked and unchecked again, and the camera bank Cam 1-5 (regress_cams.js); expectation: 0 images differ
 #   zbuf     painter order against a per-pixel z-buffer: tools/ui/test_ramp_ui.js and tools/ui/test_asc_ui.js
 #   shots    screenshots of the fixed set = the three core examples (real map rooms Default / Balanced types; Shrine-Pier; Snake Mountain surface; Box, A, B; Iso, Oblique) + --extra views
 #            (chip:<id>, pocket:<id>, walls, shrine; suffix @<camera id> and +play, e.g. pocket:31@stage+play)
@@ -82,7 +82,7 @@ part_regress() {
     done
     EVO_ROOT="$WT" node tools/ui/regress_rooms.js "$r/old_rooms" 2>&1 | tail -1; node tools/ui/regress_rooms.js "$r/new_rooms" 2>&1 | tail -1
     cmp_pass "rooms on, switches off" "$r/old_rooms" "$r/new_rooms"
-    for sw in cake pocket ascWalls contract; do
+    for sw in cake pocket ascWalls contract dress; do
       node tools/ui/regress_rooms.js "$r/new_$sw" --toggle "$sw" 2>&1 | tail -1
       cmp_pass "rooms on, $sw toggled on and off" "$r/old_rooms" "$r/new_$sw"
     done

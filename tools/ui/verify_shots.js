@@ -15,7 +15,7 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
   const extras = process.argv.reduce((l, v, i, A) => (v === '--extra' && A[i + 1] ? l.concat(A[i + 1]) : l), []);
   const a = await open({ w: 1500, h: 900 }), page = a.page, files = [], warnings = [], notApplicable = [];
   const shot = async (name) => { const f = path.join(out, name + '.png'); fs.writeFileSync(f, await a.canvas()); files.push(f); };
-  const sweep = async (tag, presets = ['isoE', 'oblique']) => { for (const t of ['box', 'A', 'B']) { await a.tech(t); for (const p of presets) { await a.preset(p); await shot(`${tag}_${t}_${p}`); } } };
+  const sweep = async (tag, presets = ['isoE', 'oblique']) => { for (const t of ['box', 'A', 'B', 'C']) { await a.tech(t); for (const p of presets) { await a.preset(p); await shot(`${tag}_${t}_${p}`); } } };
   const chips = () => page.$$eval('#roomChips .chip', (c) => c.length);
   await page.click('#mode'); await a.idle();                       // single-technique view
   // Snake Mountain, rooms on
@@ -52,7 +52,7 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     await a.focus(info.x, info.y, info.h, px / info.fit); await shot(name);
   };
   const camOf = (ex) => { const m = ex.match(/@([A-Za-z0-9]+)/); return m ? m[1] : 'isoE'; };
-  const lastKinds = (e) => (e.startsWith('shrine') || e.startsWith('x4stage') ? 1 : 0); extras.sort((p, q) => lastKinds(p) - lastKinds(q)); // shrine and x4stage change the source (the room chips go away), so they run last
+  const lastKinds = (e) => (e.startsWith('curves') ? 2 : e.startsWith('shrine') || e.startsWith('x4stage') ? 1 : 0); extras.sort((p, q) => lastKinds(p) - lastKinds(q)); // shrine and x4stage change the source (the room chips go away), so they run last
   for (const ex of extras) {
     const [kind, arg0] = ex.replace(/@.*$/, '').split(':'), arg = arg0, cam = camOf(ex), play = ex.includes('+play'), tag = cam === 'isoE' ? '' : '_' + cam;
     const doView = async (name) => { for (const t of ['box', 'A', 'B']) { await a.tech(t); await a.preset(cam); await shot(`${name}${tag}_${t}_${cam}`); if (play && t !== 'B') await playShot(`${name}${tag}_${t}_${cam}_play`); } };
@@ -73,6 +73,19 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
         await page.selectOption('#src', 'image'); await a.idle(); await page.check('#t-rooms'); await a.idle(); await page.selectOption('#roomsPreset', 'balanced'); await a.idle();
         await page.click('#roomChips .chip[data-id="31"]'); await a.idle(); await page.click('#stagePreset'); await a.idle(); await a.slider('terraces', 3); await a.idle(); await page.check('#t-contract'); await a.idle();
         await a.preset('stage'); await shot('extra_diorama31stage_fit'); await playShot('extra_diorama31stage_play'); await page.uncheck('#t-contract'); await a.idle();
+      }
+      else if (kind === 'curves') { // technique C on the fixed set: presets Ordered / Balanced / Natural x dressing off / on x Cam 1 Iso and Cam 6 Stage; plus Box, A and B with the dressing on (Iso). Changes the source: runs last
+        const small = (id) => async () => { await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', id); await a.idle(); };
+        const real = (pre) => async () => { await page.setInputFiles('#file', [IMG]); await page.waitForTimeout(1500); await a.idle(); await page.check('#t-rooms'); await a.idle(); await page.selectOption('#roomsPreset', pre); await a.idle(); };
+        for (const [name, setup] of [['snake', small('snake_surface')], ['shrine', small('shrine_pier')], ['shrine4', small('shrine_pier_x4')], ['real_default', real('default')], ['real_balanced', real('balanced')]]) {
+          await setup(); await page.uncheck('#t-dress'); await a.idle();
+          await a.tech('C');
+          for (const camId of ['isoE', 'stage']) for (const pr of ['ordered', 'balanced', 'natural']) for (const dr of [false, true]) {
+            await page.selectOption('#curvesPreset', pr); await (dr ? page.check('#t-dress') : page.uncheck('#t-dress')); await a.idle(); await a.preset(camId); await shot(`curves_${name}_C_${pr}_${dr ? 'dress' : 'plain'}_${camId}`);
+          }
+          await page.check('#t-dress'); await a.idle(); for (const t of ['box', 'A', 'B']) { await a.tech(t); await a.preset('isoE'); await shot(`curves_${name}_${t}_dress_isoE`); }
+          await page.uncheck('#t-dress'); await a.idle();
+        }
       }
       else if (kind === 'shrine') { await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', 'shrine_pier'); await a.idle(); await doView('extra_shrine'); }
       else warnings.push('unknown extra view: ' + ex);
