@@ -76,7 +76,7 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       }
       else if (kind === 'curves') { // technique C on the fixed set: presets Ordered / Balanced / Natural x dressing off / on x Cam 1 Iso and Cam 6 Stage; plus Box, A and B with the dressing on (Iso). Changes the source: runs last
         const small = (id) => async () => { await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', id); await a.idle(); };
-        const real = (pre) => async () => { await page.setInputFiles('#file', [IMG]); await page.waitForFunction(() => { const S = window.__evo.S(); return S && S.mapW === 256; }, null, { timeout: 90000 }); await a.idle(); await page.check('#t-rooms'); await a.idle(); await page.selectOption('#roomsPreset', pre); await a.idle(); };
+        const real = (pre) => async () => { await page.selectOption('#src', 'image'); await a.idle(); /* the real map was loaded by the fixed set (the same file cannot be set again) */ await page.check('#t-rooms'); await a.idle(); await page.selectOption('#roomsPreset', pre); await a.idle(); };
         for (const [name, setup] of [['snake', small('snake_surface')], ['shrine', small('shrine_pier')], ['shrine4', small('shrine_pier_x4')], ['real_default', real('default')], ['real_balanced', real('balanced')]]) {
           await setup(); await page.uncheck('#t-dress'); await a.idle();
           await a.tech('C');
