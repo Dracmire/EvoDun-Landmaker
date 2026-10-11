@@ -96,8 +96,8 @@ part_regress() {
 
 part_zbuf() {
   local log="$D/zbuf.log" bad=""; : > "$log"
-  for f in test_ramp_ui test_asc_ui; do
-    out=$(node tools/ui/$f.js 2>&1); rc=$?; { echo "== $f (exit $rc)"; echo "$out"; } >> "$log"
+  for spec in "test_ramp_ui:" "test_ramp_ui:--tech C" "test_asc_ui:"; do
+    f="${spec%%:*}"; extra="${spec#*:}"; out=$(node tools/ui/$f.js $extra 2>&1); rc=$?; { echo "== $f $extra (exit $rc)"; echo "$out"; } >> "$log"
     { [ $rc -ne 0 ] || echo "$out" | grep -q '^FAIL'; } && bad="$bad $f"
   done
   [ -z "$bad" ] && S=PASS || S=FAIL
