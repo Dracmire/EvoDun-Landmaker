@@ -2,7 +2,7 @@
 (function (E) {
   const $ = (s) => document.querySelector(s);
   const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
-  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
+  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, dress: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
      persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
   const PRESETS = [
@@ -21,7 +21,7 @@
     ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 6, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1], ['pocketHeight', 'Pocket height (decoration relief x)', 1, 4, 0.1], ['ascHeight', 'Ascension wall height (absolute)', 0.5, 3, 0.1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
-  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI'], ['contract', 'Art contract (Stage placeholders: body, wrapper, footprint, props)']];
+  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI'], ['contract', 'Art contract (Stage placeholders: body, wrapper, footprint, props)'], ['dress', 'Wall dressing (strata, lip, foot, base rocks; Box, A, B, C)']];
   const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field'], ['C', 'C · Tiles to curves']], ALL_TECH = TECH.map((t) => t[0]);
 
   const packs = {};
@@ -500,6 +500,10 @@
     const t = S && (st.mode === 'compare' ? ALL_TECH : [st.tech]).includes('C') ? S.cache['Cs:' + E.curves.key(P)] : null; if (!t) return '';
     return ` · <b>Curves C</b> (${P.curves}): ${t.info.passes} pass${t.info.passes > 1 ? 'es' : ''} · ${t.info.cells} seeds · ${t.info.edges} contour edges · ${t.info.exemptCells} exempt (ramps, walls, rings) · ${t.info.ms} ms`;
   }
+  function dressText() { // counts of the wall dressing pieces drawn per technique (switch "Wall dressing")
+    const di = S && S.dressInfo; if (!O.dress || !di) return '';
+    return (st.mode === 'compare' ? ALL_TECH : [st.tech]).filter((t) => di[t]).map((t) => { const c = di[t]; return ` · <b>Wall dressing</b> (${t === 'box' ? 'Box' : t}): ${c.walls} walls · strata ${c.strata} · lips ${c.lips} · foot ${c.foot} · rocks ${c.rocks}`; }).join('');
+  }
   function ascText() { const a = S.ascWalls; return a ? ` · <b>Ascension walls</b>: ${a.info.faces} faces in ${a.info.runs} chains (${a.info.candidates} candidate faces, ${a.info.dropped} dropped: chains of fewer than 3)` : ''; }
   function pocketText() {
     const pi = S.pocketInfo; if (!pi) return P.pocket && sliceSel.rooms.size === 1 && S.types ? ` · Pocket view: room ${[...sliceSel.rooms][0]} is not a Diorama (normal slice)` : '';
@@ -534,7 +538,7 @@
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + curvesText();
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText();
   }
 
   function init() {

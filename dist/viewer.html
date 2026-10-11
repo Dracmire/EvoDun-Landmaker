@@ -3090,6 +3090,72 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return [p0, p1];
   }
 
+  /* ---- WALL DRESSING (switch o.dress, crystallizer 4; the SAME pass for Box, A, B and C; never in the pick renders, never on ramp / stair walls). Applies to a cliff whose total height is at least 0.5 terH.
+     Per wall piece: shading by the plan normal smoothed along the contour (A / B / C: a gradient between the shades of the two vertex normals; Box keeps its flat normal per face), STRATA (thin dark lines every 0.34 terH at
+     absolute heights with a small wobble that follows the world position, a slightly different tone per stratum), LIP (lighter band on the top 0.22 terH, at most 40 % of the wall, with a dark line at its edge; only on the
+     top band of a cliff). On the LOWER cap, right after the wall (Box: in the turn of the lower tile, after its cap; A / B / C: in the turn of the band whose base is the lower cap): FOOT (a darkening of 0.55 tile scaled by
+     the jump) and, for jumps of 1.5 terH or more, BASE ROCKS (placeholder domes along the foot). The rocks do not repeat the art contract stones, which sit on the TOP edge. ---- */
+  const DR = { strata: 0.34, lip: 0.22, minJump: 0.5, rockJump: 1.5, tallJump: 2.2, foot: 0.55 };
+  const dhash = (a, b, c, d) => E.curves.hash(a, b, c, d);
+  /* w: ax, ay, bx, by, hb, ht, k (base shade), kA, kB (vertex shades, optional), top, tot (total cliff height in terH), c (wall colour), wx, wy (world tile of the piece, only for tones) */
+  function dressWall(ctx, cam, S, P, st, w) {
+    const th = P.terH, hgt = w.ht - w.hb; if (hgt <= 1e-6 || w.tot < DR.minJump) return;
+    const quad = (z0, z1) => { const q = [cam.p(w.ax, w.ay, z1), cam.p(w.bx, w.by, z1), cam.p(w.bx, w.by, z0), cam.p(w.ax, w.ay, z0)]; ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); ctx.lineTo(q[1][0], q[1][1]); ctx.lineTo(q[2][0], q[2][1]); ctx.lineTo(q[3][0], q[3][1]); ctx.closePath(); return q; };
+    st.dress.walls++;
+    if (w.kA !== undefined && w.kB !== undefined) { // shading smoothed along the contour: the vertex shades relative to the shade of the piece, as a darkening and a lightening gradient
+      const q = quad(w.hb, w.ht), dx = q[1][0] - q[0][0], dy = q[1][1] - q[0][1];
+      if (dx * dx + dy * dy > 0.25) for (const sgn of [-1, 1]) {
+        const a0 = Math.max(0, sgn * (w.kA - w.k) * (sgn < 0 ? 0.9 : 0.5)), a1 = Math.max(0, sgn * (w.kB - w.k) * (sgn < 0 ? 0.9 : 0.5)); if (a0 < 0.004 && a1 < 0.004) continue;
+        const g = ctx.createLinearGradient(q[0][0], q[0][1], q[1][0], q[1][1]), col = sgn < 0 ? '16,12,26' : '255,250,240';
+        g.addColorStop(0, `rgba(${col},${Math.min(0.4, a0).toFixed(3)})`); g.addColorStop(1, `rgba(${col},${Math.min(0.4, a1).toFixed(3)})`);
+        quad(w.hb, w.ht); ctx.fillStyle = g; ctx.fill();
+      }
+    }
+    const step = DR.strata * th, k0 = Math.ceil((w.hb + 1e-6) / step), k1 = Math.floor((w.ht - 1e-6) / step), len = Math.hypot(w.bx - w.ax, w.by - w.ay), m = Math.max(2, Math.ceil(len * 3));
+    for (let q = k0 - 1; q <= k1; q++) { // the tone of each stratum (a band of 0.34 terH) varies a little
+      const z0 = Math.max(w.hb, q * step), z1 = Math.min(w.ht, (q + 1) * step); if (z1 - z0 < 0.03 * th) continue;
+      const tone = dhash(q, (w.wx + w.wy) >> 2, 3, 9); if (tone > 0.5) { quad(z0, z1); ctx.fillStyle = tone > 0.75 ? 'rgba(255,250,235,0.07)' : 'rgba(16,12,26,0.06)'; ctx.fill(); }
+    }
+    ctx.lineWidth = 1; ctx.lineJoin = 'round';
+    for (let q = k0; q <= k1; q++) {
+      const z = q * step; if (z <= w.hb + 0.04 * th || z >= w.ht - 0.04 * th) continue;
+      ctx.strokeStyle = `rgba(18,14,28,${(0.16 + 0.14 * dhash(q, (w.wx + w.wy) >> 2, 4, 8)).toFixed(3)})`; ctx.beginPath();
+      for (let i = 0; i <= m; i++) {
+        const t = i / m, x = w.ax + (w.bx - w.ax) * t, y = w.ay + (w.by - w.ay) * t, X = x + S.ox, Y = y + S.oy; // wobble by world position: continuous across the pieces of a contour
+        const wob = th * (0.022 * Math.sin(X * 1.9 + Y * 2.3 + q * 2.1) + 0.012 * Math.sin(X * 5.1 - Y * 4.3 + q * 3.7)), p = cam.p(x, y, Math.min(w.ht - 0.02 * th, Math.max(w.hb + 0.02 * th, z + wob)));
+        i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]);
+      }
+      ctx.stroke(); st.dress.strata++;
+    }
+    if (w.top) { // lip
+      const lipH = Math.min(DR.lip * th, 0.4 * hgt), z = w.ht - lipH; quad(z, w.ht); ctx.fillStyle = 'rgba(255,250,236,0.17)'; ctx.fill();
+      const a = cam.p(w.ax, w.ay, z), b = cam.p(w.bx, w.by, z); ctx.strokeStyle = 'rgba(18,14,28,0.36)'; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); st.dress.lips++;
+    }
+  }
+  /* foot and base rocks along the edge a -> b on the lower cap (height hb); (nax, nay) / (nbx, nby): unit normals at the ends, pointing away from the wall onto the lower cap */
+  function dressFoot(ctx, cam, S, P, st, f) {
+    const th = P.terH, jump = f.jump; if (jump < DR.minJump) return;
+    const A2 = [f.ax + f.nax * DR.foot, f.ay + f.nay * DR.foot], B2 = [f.bx + f.nbx * DR.foot, f.by + f.nby * DR.foot], z = f.hb + 0.003 * th;
+    const pa = cam.p(f.ax, f.ay, z), pb = cam.p(f.bx, f.by, z), pb2 = cam.p(B2[0], B2[1], z), pa2 = cam.p(A2[0], A2[1], z);
+    const mx = [(pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2], ex = [(pa2[0] + pb2[0]) / 2, (pa2[1] + pb2[1]) / 2];
+    if (Math.hypot(ex[0] - mx[0], ex[1] - mx[1]) > 0.5) {
+      const g = ctx.createLinearGradient(mx[0], mx[1], ex[0], ex[1]), al = Math.min(0.45, 0.16 + 0.1 * Math.min(jump, 3));
+      g.addColorStop(0, `rgba(14,10,22,${al.toFixed(3)})`); g.addColorStop(0.5, `rgba(14,10,22,${(al * 0.45).toFixed(3)})`); g.addColorStop(1, 'rgba(14,10,22,0)');
+      ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.lineTo(pb2[0], pb2[1]); ctx.lineTo(pa2[0], pa2[1]); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); st.dress.foot++;
+    }
+    if (jump < DR.rockJump) return;
+    const len = Math.hypot(f.bx - f.ax, f.by - f.ay), tall = jump >= DR.tallJump, n = Math.round(len * (tall ? 2.6 : 1.6) * (0.6 + 0.8 * dhash(f.wx, f.wy, 1, 10)));
+    for (let i = 0; i < n; i++) {
+      const t = dhash(f.wx, f.wy, i, 11), r = (0.09 + 0.12 * dhash(f.wx, f.wy, i, 12)) * (tall ? 1.25 : 1), off = (0.3 + 0.5 * dhash(f.wx, f.wy, i, 13)) * r;
+      let nx = f.nax + (f.nbx - f.nax) * t, ny = f.nay + (f.nby - f.nay) * t; const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
+      const x = f.ax + (f.bx - f.ax) * t + nx * off, y = f.ay + (f.by - f.ay) * t + ny * off, c0 = cam.p(x, y, f.hb), cx = cam.p(x + r, y, f.hb), cy = cam.p(x, y + r, f.hb), ct = cam.p(x, y, f.hb + 1.25 * r);
+      const rx = Math.max(1.2, (Math.hypot(cx[0] - c0[0], cx[1] - c0[1]) + Math.hypot(cy[0] - c0[0], cy[1] - c0[1])) / 2), hp = Math.max(1.5, Math.abs(c0[1] - ct[1])), shade = 0.5 + 0.2 * dhash(f.wx, f.wy, i, 14);
+      ctx.beginPath(); ctx.ellipse(c0[0], c0[1], rx, rx * 0.5, 0, 0, Math.PI); ctx.ellipse(c0[0], c0[1], rx, hp, 0, Math.PI, 2 * Math.PI); ctx.closePath();
+      ctx.fillStyle = rgb(f.c, shade); ctx.fill(); ctx.strokeStyle = 'rgba(18,14,28,0.62)'; ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(c0[0] - rx * 0.25, c0[1] - hp * 0.45, rx * 0.4, hp * 0.3, 0, 0, 2 * Math.PI); ctx.fillStyle = 'rgba(255,250,236,0.16)'; ctx.fill(); st.dress.rocks++;
+    }
+  }
+
   /* ---- Ascension walls (S.ascWalls, P.ascWalls): a thin box (0.15 tile) on the edge of a room-border face, tile-exact and the same in Box, A and B. Its base is the higher of the two tiles, its height is absolute (0.7;
      0.15 for the cut toward the camera, computed here with the camera of the frame). Stone colour, dark outline. Not selectable (the pick render skips it unless o.pickWalls, used to measure what it hides). ---- */
   const STONE = [166, 158, 146], STONE_TOP = [204, 196, 182];
@@ -3431,6 +3497,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         const inside = nx >= 0 && ny >= 0 && nx < W && ny < H, nr = inside && ST && ST.get(ny * W + nx);
         const hbw = nr && nr.rec ? [Math.min(hh, E.rampHeight(nr.rec, x + ax, y + ay, ny * W + nx)), Math.min(hh, E.rampHeight(nr.rec, x + bx, y + by, ny * W + nx))] : hn; // beside a ramp the wall stops at its surface
         wallQuad(ctx, cam, x + ax, y + ay, x + bx, y + by, hbw, hh, sj && inside ? stairColor(sj) : cc, rnx, o, st);
+        if (o.dress && !PICK && !sj && !(nr && nr.rec)) dressWall(ctx, cam, S, P, st, { ax: x + ax, ay: y + ay, bx: x + bx, by: y + by, hb: hn, ht: hh, k: 0, top: true, tot: (hh - hn) / P.terH, wx: S.ox + x, wy: S.oy + y }); // Box: one flat wall per face, no shade gradient
       }
       const ov = isRamp ? [] : tileOverlay(S, P, o, i);
       if (!isRamp) {
@@ -3439,6 +3506,11 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         for (const col of ov) { tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = col; ctx.fill(); }
         if (veiled && ov.length) { tileQuad(ctx, cam, x, y, hh); ctx.fillStyle = VEIL; ctx.fill(); }
         if (ST) drawStairEdges(ctx, cam, S, i, hh);
+        if (o.dress && !PICK && !(S.carved && S.carved[i])) for (const [dx, dy, ax, ay, bx, by] of dirs) { // foot and rocks of the walls of the higher neighbours that face the camera, on this (lower) cap
+          const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if ((S.void && S.void[j]) || (S.carved && S.carved[j])) continue;
+          const hj = S.levelH[S.fine[j]]; if ((hj - hh) / P.terH < DR.minJump - 1e-9 || cam.nrm(-dx, -dy, x + (ax + bx) / 2, y + (ay + by) / 2)[1] <= 0.001) continue;
+          dressFoot(ctx, cam, S, P, st, { ax: x + ax, ay: y + ay, bx: x + bx, by: y + by, nax: -dx, nay: -dy, nbx: -dx, nby: -dy, hb: hh, jump: (hj - hh) / P.terH, wx: S.ox + nx, wy: S.oy + ny, c: cc });
+        }
       }
       if (o.outlines && !isRamp) { // rim only where a lower neighbour exists
         for (const [dx, dy, ax, ay, bx, by] of dirs) {
@@ -3480,7 +3552,8 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   }
 
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
-  function renderLevels(ctx, cam, S, P, o, st, loopsOf) {
+  function renderLevels(ctx, cam, S, P, o, st, loopsOf, tech) {
+    const DRESS = !!o.dress && !PICK, lvl = S.fineMask || S.fine, th = P.terH; // wall dressing: the same pass as in Box
     const ST = hasStairs(S) ? stairTiles(S) : null, PIECES = ST ? rampPieces(S, cam) : new Map(); // ramp pieces by level band
     const ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) for (const bd of ascBands(S, w, ascLow(o, cam, w))) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
     for (let L = 0; L <= S.maxFine; L++) {
@@ -3491,21 +3564,27 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const terraceLevel = L === 0 || (!S.levelMeta[L].bridge && S.levelMeta[L].sub === 0);
       const c = levelColor(S, L, P), cv = veilMix(c), segs = [];
       const tileIdx = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? iy * S.W + ix : -1; };
+      const tileC = tech === 'C' ? (px, py) => E.cellTileAt(S, P, px, py) : tileIdx; // technique C: the tile of the Voronoi cell, not the tile under the point
       const tileOf = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? ST.get(iy * S.W + ix) : undefined; };
-      const mkSeg = (a, b, dx, dy, len) => {
+      const mkSeg = (a, b, dx, dy, len, va, vb) => {
         const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, rnxy = cam.nrm(dy / len, -dx / len, mx, my);
         if (rnxy[1] <= 0.001) return null;
-        const seg = { a, b, rnx: rnxy[0], d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !S.pocket && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)), stair: null, own: tileIdx(mx - 0.2 * dy / len, my + 0.2 * dx / len) };
+        const seg = { a, b, rnx: rnxy[0], d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !S.pocket && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)), stair: null, own: tileC(mx - 0.2 * dy / len, my + 0.2 * dx / len) };
         if (ST) { // a wall touching a carved tile (also the diagonal corner cells of B): part of the rigid footprint
           const inn = tileOf(mx - 0.2 * dy / len, my + 0.2 * dx / len), outn = tileOf(mx + 0.2 * dy / len, my - 0.2 * dx / len);
           if (inn && inn.rec) return null;                  // the ramp draws its own side walls
           seg.stair = inn || outn || null;
           if (outn && outn.rec) { seg.clip = outn.rec; seg.clipT = outn.t; }        // a wall beside a ramp stops at the ramp surface
         }
+        if (DRESS && !seg.stair && !seg.clip) { // wall dressing: the cliff this piece belongs to (levels inside and outside, from the cells / tiles on both sides) and the shades of its two vertex normals
+          const tOut = tileC(mx + 0.2 * dy / len, my - 0.2 * dx / len), lvIn = seg.own >= 0 ? lvl[seg.own] : L, lvOut = tOut >= 0 ? lvl[tOut] : -1, base = S.baseH !== undefined ? S.baseH : S.levelH[0] - th, kk = (n, p) => clamp(0.92 + 0.28 * -cam.nrm(n[0], n[1], p[0], p[1])[0], 0.65, 1.2);
+          seg.na = va || null; seg.nb = vb || null; seg.dr = { lvIn, lvOut, tot: (S.levelH[Math.max(lvIn, 0)] - (lvOut >= 0 ? S.levelH[lvOut] : base)) / th, k: clamp(0.92 + 0.28 * -rnxy[0], 0.65, 1.2), kA: va ? kk(va, a) : undefined, kB: vb ? kk(vb, b) : undefined, mx, my };
+        }
         return seg;
       };
       for (const loop of loops) {
         const n = loop.length; st.verts += n;
+        const vn = DRESS ? loop.map((p, k) => { const pr = loop[(k + n - 1) % n], nx = loop[(k + 1) % n], vx = (p[1] - pr[1]) + (nx[1] - p[1]), vy = -(p[0] - pr[0]) - (nx[0] - p[0]), l = Math.hypot(vx, vy); return l > 1e-9 ? [vx / l, vy / l] : [nx[1] - p[1], -(nx[0] - p[0])]; }) : null; // outward normals (dy, -dx) summed over the two segments of a vertex (longer segment weighs more)
         for (let k = 0; k < n; k++) {
           const a = loop[k], b = loop[(k + 1) % n], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
           if (len < 1e-6) continue;
@@ -3523,7 +3602,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
             for (let q = 0; q + 1 < pts.length; q++) { const p0 = at(pts[q]), p1 = at(pts[q + 1]); pieces.push(mkSeg(p0, p1, p1[0] - p0[0], p1[1] - p0[1], Math.hypot(p1[0] - p0[0], p1[1] - p0[1]))); }
             if (PICK || pieces.some((q) => q && (q.clip || q.stair))) { for (const q of pieces) if (q) segs.push(q); continue; }
           }
-          const seg = mkSeg(a, b, dx, dy, len); if (seg) segs.push(seg);
+          const seg = mkSeg(a, b, dx, dy, len, vn && vn[k], vn && vn[(k + 1) % n]); if (seg) segs.push(seg);
         }
       }
       for (const pc of pcs) segs.push({ piece: pc, d: pc.d });
@@ -3534,6 +3613,14 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
         if (s.clip) { hbs = [Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.a[0], s.a[1], s.clipT))), Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.b[0], s.b[1], s.clipT)))]; if (hbs[0] >= ht - 1e-6 && hbs[1] >= ht - 1e-6) continue; }
         if (PICK) PKC = pcode(2, Math.max(0, s.own));
         wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], hbs, ht, s.stair ? stairColor(s.stair) : s.veiled ? cv : c, s.rnx, o, st);
+        if (DRESS && s.dr && !Array.isArray(hbs)) { // dressing of this piece; foot and rocks right after the wall of the band whose base is the lower cap
+          const d = s.dr, col = s.veiled ? cv : c;
+          dressWall(ctx, cam, S, P, st, { ax: s.a[0], ay: s.a[1], bx: s.b[0], by: s.b[1], hb: hbs, ht, k: d.k, kA: d.kA, kB: d.kB, top: d.lvIn <= L, tot: d.tot, wx: S.ox + Math.floor(d.mx), wy: S.oy + Math.floor(d.my) });
+          if (d.lvOut >= 0 && d.lvOut === L - 1) {
+            const dx = s.b[0] - s.a[0], dy = s.b[1] - s.a[1], l = Math.hypot(dx, dy) || 1, nm = [dy / l, -dx / l]; // outward normal of the piece; the ends use the vertex normals when they are known
+            dressFoot(ctx, cam, S, P, st, { ax: s.a[0], ay: s.a[1], bx: s.b[0], by: s.b[1], nax: s.na ? s.na[0] : nm[0], nay: s.na ? s.na[1] : nm[1], nbx: s.nb ? s.nb[0] : nm[0], nby: s.nb ? s.nb[1] : nm[1], hb, jump: d.tot, wx: S.ox + Math.floor(d.mx), wy: S.oy + Math.floor(d.my), c: col });
+          }
+        }
       }
       const path = new Path2D();
       for (const loop of loops) {
@@ -3584,15 +3671,16 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   function drawScene(ctx, w, h, S, P, tech, view, o) {
     DBG = !!o.debug; PICK = !!o.pick;
-    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0 };
+    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, dress: { walls: 0, strata: 0, lips: 0, foot: 0, rocks: 0 } };
     const cam = makeCam(S, P, view, w, h);
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
-    else renderLevels(ctx, cam, S, P, o, st, E.loopsOf(tech));
+    else renderLevels(ctx, cam, S, P, o, st, E.loopsOf(tech), tech);
     if (!PICK) {
       if (o.passes) drawPassMarks(ctx, cam, S, P);
       if (o.markers) drawMarkers(ctx, cam, S, P);
       if (o.incursion) drawIncursion(ctx, cam, S, o.incursion);
+      if (o.dress) S.dressInfo = Object.assign(S.dressInfo || {}, { [tech]: st.dress }); // wall dressing counts per technique
       if (o.contract && E.contract) S.contractInfo = Object.assign(S.contractInfo || {}, { [tech]: E.contract.draw(ctx, cam, S, P, tech, view, o, w, h) }); // art contract placeholders (switch off = nothing here)
     }
     st.ms = performance.now() - t0; DBG = false; PICK = false;
@@ -3873,7 +3961,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 (function (E) {
   const $ = (s) => document.querySelector(s);
   const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
-  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
+  const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, dress: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
      persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
   const PRESETS = [
@@ -3892,7 +3980,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 6, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1], ['pocketHeight', 'Pocket height (decoration relief x)', 1, 4, 0.1], ['ascHeight', 'Ascension wall height (absolute)', 0.5, 3, 0.1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
-  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI'], ['contract', 'Art contract (Stage placeholders: body, wrapper, footprint, props)']];
+  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI'], ['contract', 'Art contract (Stage placeholders: body, wrapper, footprint, props)'], ['dress', 'Wall dressing (strata, lip, foot, base rocks; Box, A, B, C)']];
   const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field'], ['C', 'C · Tiles to curves']], ALL_TECH = TECH.map((t) => t[0]);
 
   const packs = {};
@@ -4371,6 +4459,10 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const t = S && (st.mode === 'compare' ? ALL_TECH : [st.tech]).includes('C') ? S.cache['Cs:' + E.curves.key(P)] : null; if (!t) return '';
     return ` · <b>Curves C</b> (${P.curves}): ${t.info.passes} pass${t.info.passes > 1 ? 'es' : ''} · ${t.info.cells} seeds · ${t.info.edges} contour edges · ${t.info.exemptCells} exempt (ramps, walls, rings) · ${t.info.ms} ms`;
   }
+  function dressText() { // counts of the wall dressing pieces drawn per technique (switch "Wall dressing")
+    const di = S && S.dressInfo; if (!O.dress || !di) return '';
+    return (st.mode === 'compare' ? ALL_TECH : [st.tech]).filter((t) => di[t]).map((t) => { const c = di[t]; return ` · <b>Wall dressing</b> (${t === 'box' ? 'Box' : t}): ${c.walls} walls · strata ${c.strata} · lips ${c.lips} · foot ${c.foot} · rocks ${c.rocks}`; }).join('');
+  }
   function ascText() { const a = S.ascWalls; return a ? ` · <b>Ascension walls</b>: ${a.info.faces} faces in ${a.info.runs} chains (${a.info.candidates} candidate faces, ${a.info.dropped} dropped: chains of fewer than 3)` : ''; }
   function pocketText() {
     const pi = S.pocketInfo; if (!pi) return P.pocket && sliceSel.rooms.size === 1 && S.types ? ` · Pocket view: room ${[...sliceSel.rooms][0]} is not a Diorama (normal slice)` : '';
@@ -4405,7 +4497,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + curvesText();
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText();
   }
 
   function init() {
