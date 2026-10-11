@@ -157,7 +157,8 @@ const argNum = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? +pr
   if (r.probe) console.log('probe:', JSON.stringify(r.probe));
   console.log('\ntop cases:\n' + r.top.join('\n'));
   for (const sm of ['true', 'false']) {
-    const w = r.worstBy[sm]; console.log('  ref kinds at mismatches (1 ramp top, 2 other top, 3 wall touching a ramp, 4 other wall):', JSON.stringify(r.worstBy[sm].hist));
+    const w = r.worstBy[sm]; if (!w) continue; // C has no 'no smoothing' run
+    console.log('  ref kinds at mismatches (1 ramp top, 2 other top, 3 wall touching a ramp, 4 other wall):', JSON.stringify(r.worstBy[sm].hist));
     console.log(`\nworst case, ${sm === 'true' ? 'default smoothing' : 'no smoothing'}:`, w.desc, w.pct.toFixed(2) + '%', w.diff + ' px');
     if (outDir) { fs.mkdirSync(outDir, { recursive: true }); for (const [k, f] of [['mask', 'mask'], ['dbg', 'debug'], ['shot', 'shot']]) fs.writeFileSync(path.join(outDir, `ramp_worst_${sm === 'true' ? 'smooth' : 'exact'}_${f}.png`), Buffer.from(w[k].split(',')[1], 'base64')); }
   }

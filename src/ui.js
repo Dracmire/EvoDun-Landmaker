@@ -22,7 +22,7 @@
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
   const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI'], ['contract', 'Art contract (Stage placeholders: body, wrapper, footprint, props)'], ['dress', 'Wall dressing (strata, lip, foot, base rocks; Box, A, B, C)']];
-  const TECH = [['box', 'Box (reference)'], ['A', 'A · Contour polygons'], ['B', 'B · Distance field'], ['C', 'C · Tiles to curves']], ALL_TECH = TECH.map((t) => t[0]);
+  const TECH = [['box', 'Box'], ['A', 'A · Contour'], ['B', 'B · Distance'], ['C', 'C · Curves']], ALL_TECH = TECH.map((t) => t[0]);
 
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
@@ -532,7 +532,7 @@
     note.hidden = eff >= P.subH - 1e-9;
     note.textContent = `Sub-terrace height limited to ${eff.toFixed(3)} (set ${P.subH}) so the gap to the next terrace stays above the climb limit.`;
     const sv = (t) => (!surv[t] && techs.includes(t) ? '…' : surv[t] ? `${(surv[t].coverage * 100).toFixed(1)}%` + (surv[t].lost ? `, ${surv[t].lost}/${surv[t].n} lost` : '') + (surv[t].degraded ? `, ${surv[t].degraded} degraded` : '') : '–');
-    const sinf = S.stairInfo, stairText = `${sinf.gates} gates · ${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · stair coverage A ${sv('A')} · B ${sv('B')} · C ${sv('C')}`;
+    const sinf = S.stairInfo, stairText = `${sinf.gates} gates · ${sinf.placed} stairs of ${sinf.sites} sites` + (sinf.dropped ? `, ${sinf.dropped} not carved` : '') + (sinf.narrowed ? `, ${sinf.narrowed} narrowed` : '') + (sinf.fills ? `, ${sinf.fills} built up` : '') + ` · stair coverage A ${sv('A')} · B ${sv('B')}` + (techs.includes('C') ? ` · C ${sv('C')}` : '');
     const bi = S.borderInfo, borderText = bi ? ` · slice border faces: ${bi.barrier} barrier (red) · ${bi.pass} pass (cyan) · ${bi.none} unmarked (yellow) · ${bi.mapEdge} map edge (white)` : '';
     const rs = S.regionSizes, tot = rs.reduce((a, b) => a + b, 0), big = Math.max(...rs, 0);
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
