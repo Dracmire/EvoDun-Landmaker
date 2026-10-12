@@ -265,6 +265,8 @@ incursion border; stake and way-back path visible.
     no artifact seen in the screenshots); (4) the Pocket was composed for Cam 1 (Iso): under Cam 6 / Cam 7 its bands and backdrop do not line up with the view axis (`docs/crystallizers/02-room-types/README.md`); (5) the wheel zoom is limited to 0.5-4x of the fit, so 55 px per tile on the whole real map needs the focus tools (`a.focus`), not the wheel;
     (6) Cam 6 at yaw 0 shows Shrine-Pier from the south: the Shrine (4, 7) and the Pier (8, 7) are side by side and the sea is the right edge; "Pier in front" needs the semantic yaw (next step, not added); (7) the drag variation of yaw / pitch applies to Cam 1-6, not to Cam 7.
 
+16. FLOORS CUTAWAY PAINT ORDER (crystallizer 5, `tools/ui/test_cut_ui.js`, MEASURED, NOT ENFORCED; `docs/crystallizers/05-floors/README.md` 5c): differing front-most layer per pixel against a z-buffer, Cam 1 / Cam 3, yaw offsets 0 / +10 / -10 (mean / worst): Box 0.00 / 0.00 and 0.14 / 0.23, A 1.92 / 1.96 and 1.37 / 1.46, B 3.23 / 3.43 and 2.47 / 2.67, C 2.01 / 2.06 and 1.49 / 1.53; tile-exact A / B about 1.9 / 1.4. About 1.5 points of B are smoothing, about 1.9 remain without smoothing: layers are drawn whole, so the deep skirt of floor 2 (A / B / C walls hang to the lowest grid level, Box has a thin slab) paints over the near edge of floor 1.
+
 ## Pending, in this order
 1. (Done, PR #1) Verify the first limitations.
 2. (Done, PR #2) Channel input: own PNG decoder, roles per channel, native resolution, `evodun-pack/0.2`,
@@ -350,7 +352,7 @@ incursion border; stake and way-back path visible.
    PARKED (user's decision): per-pixel depth/WebGL, platforms, size classes.
 6. CRYSTALLIZER 4, TILES TO CURVES: CLOSED (PR #17, #18). Phase 1 (planar technique C + presets + wall dressing, PR #17) and phase 2, the wall pass (PR #18; D13-D22: T1 discarded, T3 default at extrusion 0.25, T2 alternative, C-only geometry): see Repo state and `docs/crystallizers/04-tiles-to-curves/README.md`. The vertical pass (D6-D9) is not approved and not built. Nothing is exported to Unity until every crystallizer is done (03-stage D15).
 
-7. CRYSTALLIZER 5, FLOORS: built (data, declared links, Floors view) and in review; see Repo state and `docs/crystallizers/05-floors/README.md`. Pending for later (not approved): arc / spiral link, stepped crater wall, a stair mark on the floor-2 opening, quadrant cutaway (per-pixel depth), a third floor.
+7. CRYSTALLIZER 5, FLOORS: built (data, declared links, Floors view) and in review; see Repo state and `docs/crystallizers/05-floors/README.md`. Floor-2 opening: railing + 'Stairs down' marker (Ascension wall renderer); it still reads as a railed pit (README 5c). Pending for later (not approved): a stairwell showing floor 1's ramp inside the opening, arc / spiral link, stepped crater wall, a stair mark on the floor-2 opening, quadrant cutaway (per-pixel depth), a third floor.
 
 ## How to work with the user
 - Do not write code until the design is agreed. For each point: read the relevant code, propose the

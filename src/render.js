@@ -798,7 +798,7 @@
     if (cv.width !== (w * dpr | 0) || cv.height !== (h * dpr | 0)) { cv.width = w * dpr; cv.height = h * dpr; }
     const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424');
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+    if (o.noBg) ctx.clearRect(0, 0, w, h); else { ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); } // noBg (tests): a transparent canvas, so the coverage of a layer can be read
     const sum = { walls: 0, polys: 0, verts: 0, ms: 0 };
     for (const L of layers) {
       const oo = Object.assign({}, o, { zShift: L.dz || 0, incursion: null });

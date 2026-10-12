@@ -19,6 +19,21 @@ const { open } = require('./common');
   const hs = {};
   for (const k of [0, 1, 2]) { await page.click(`#floorChips button[data-floor="${k}"]`); await a.idle(); await page.waitForTimeout(150); hs[k] = await hash(); const t = await info(); if (k === 1) ok('floor 1: the declared link is carved (ramp 3 x 2) and no warning', /link: declared ramp 3 x 2 carved/.test(t) && !/floor link missing/.test(t), t.slice(-200)); if (k === 2) ok('floor 2 is its own shape', /Floor 2/.test(await ev(() => window.__evo.S().name))); }
   ok('the exterior and the two floors are three different pictures', new Set(Object.values(hs)).size === 3);
+  // the railing of the floor-2 opening: drawn in Box / A / B / C, not pickable, only on floor 2 (also kept by the layers of the stack and the cutaway)
+  await page.click('#floorChips button[data-floor="2"]'); await a.idle();
+  for (const t of ['box', 'A', 'B', 'C']) {
+    const r = await ev((t) => { const e = window.__evo, S = e.S(), E = window.EVO, v = e.view(), W = 900, H = 600, mk = () => { const cv = document.createElement('canvas'); cv.style.cssText = `position:fixed;left:0;top:0;width:${W}px;height:${H}px;visibility:hidden`; document.body.appendChild(cv); return cv; },
+      shot = (S2) => { const cv = mk(); E.render(cv, S2, e.P, t, v, {}); const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; cv.remove(); return d; }, cnt = (x, y) => { let d = 0; for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) d++; return d; },
+      sNo = Object.create(S); sNo.ascWalls = null; const pk = (S2) => E.pickBuffer(S2, e.P, v, W, H).data;
+      return { has: !!(S.ascWalls && S.ascWalls.rails), picture: cnt(shot(S), shot(sNo)), pick: cnt(pk(S), pk(sNo)) }; }, t);
+    ok(`${t}: floor 2 draws the railing (${r.picture} bytes differ without it) and the pick buffer is identical with and without it (${r.pick})`, r.has && r.picture > 100 && r.pick === 0, JSON.stringify(r));
+  }
+  for (const k of [0, 1]) { await page.click(`#floorChips button[data-floor="${k}"]`); await a.idle(); ok(`layer ${k} has no railing`, !(await ev(() => !!window.__evo.S().ascWalls))); }
+  await page.selectOption('#floorsView', 'stack'); await a.idle(); await page.waitForTimeout(150);
+  ok('the stack keeps the railing on floor 2 only', (await ev(() => window.__evo.st.floorsLayers.list.map((l) => (l.S.ascWalls && l.S.ascWalls.rails ? 1 : 0)).join())) === '0,1,0');
+  await page.selectOption('#floorsView', 'cut'); await a.idle(); await page.waitForTimeout(150);
+  ok('the cutaway keeps the railing only on its floor-2 half (floor 1 and the exterior none)', (await ev(() => window.__evo.st.floorsLayers.list.map((l) => (l.S.ascWalls && l.S.ascWalls.rails ? l.S.ascWalls.faces.length : 0)).join(','))).split(',').map(Number).every((v, i) => (i === 2 ? v >= 0 : v === 0)));
+  await page.selectOption('#floorsView', 'single'); await a.idle(); await a.tech('A'); await page.waitForTimeout(100);
   // exploded stack and cutaway
   await page.selectOption('#floorsView', 'stack'); await a.idle(); await page.waitForTimeout(200); const hStack = await hash(); const tS = await info();
   ok('the exploded stack draws the three layers (floor 1, floor 2, the ghosted exterior)', (await ev(() => window.__evo.st.floorsLayers.list.map((l) => l.name).join('|'))) === 'Floor 1|Floor 2|Exterior (lid)' && /exploded stack/.test(tS));

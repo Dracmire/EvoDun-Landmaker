@@ -8,7 +8,7 @@ Rules (all numbers are starting values, see docs/crystallizers/05-floors/README.
   3. floor heights: z_k plus a small deterministic bump (<= AMP, no random numbers) that is zero in the link box so the landing is exactly at the level of floor 2;
   4. the link (floor 1 -> floor 2) is DECLARED in the pack (`links`), not detected: along -x from the shaft, the ring of floor 1 (z1) at x 11..13, then a FLAT landing at Z2 (x 14..17, plus x 18 where
      r >= 2.5, lanes y 18..22, a cliff to the ring); the ramp is carved by a forced site at the pair a = (13, 20), b = (14, 20) with the link's own width x depth (3 x 2: the viewer's defaults for
-     stairW and rampDepth), so its footprint is x 14..15, y 19..21. Floor 2 has a void OPENING over exactly that footprint (6 tiles); the arrival (landing tiles beyond the footprint, x 16..17) is floor 2;
+     stairW and rampDepth), so its footprint is x 14..15, y 19..21. Floor 2 has a void OPENING over exactly that footprint (6 tiles); the arrival (landing tiles beyond the footprint, x 16..17) is floor 2; the viewer puts a low RAILING on the three sides of the opening that do not face the arrival and the marker D 'Stairs down' sits on the arrival edge tile (16, 20);
   5. everything uses the package's GLOBAL height frame `elevFrame` (the surface range) so terrace heights agree between floors.
 Markers: the head `H` is moved to the high end of the spiral (22, 16) in THIS pack only; W, P, E stay where they are (placed for the old head).
 Usage: python3 tools/derive_snake_floors.py   (needs numpy only; reproduces the committed JSON bit for bit)"""
@@ -108,7 +108,7 @@ out = {
         {'id': 1, 'name': 'Floor 1', 'z': Z1, 'elevation': rnd(f1),
          'markers': [{'x': 12, 'y': 20, 'code': 'L', 'label': 'Floor link: foot'}]},
         {'id': 2, 'name': 'Floor 2', 'z': Z2, 'elevation': rnd(f2),
-         'markers': [{'x': 16, 'y': 20, 'code': 'A', 'label': 'Portal (landing)'}]},
+         'markers': [{'x': 16, 'y': 20, 'code': 'D', 'label': 'Stairs down (floor link)'}, {'x': 17, 'y': 20, 'code': 'A', 'label': 'Portal (landing)'}]},
     ],
     'links': [{'from': 1, 'to': 2, 'dir': '-x', 'site': {'a': list(SITE_A), 'b': list(SITE_B)}, 'width': LINK_W, 'depth': LINK_D,
                'landing': {'x': list(LAND_X), 'y': [LANE0, LANE1]}, 'footprint': {'x': list(FOOT_X), 'y': list(FOOT_Y)},

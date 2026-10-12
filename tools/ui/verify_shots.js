@@ -104,12 +104,15 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       else if (kind === 'floors') { // crystallizer 5: the Snake Mountain floors package (viewer block: terraces 5, minPlateau 5). Cam 1 and Cam 3, Box / A / B / C: the exterior with the sheer crater pit, floor 1 (the declared link, its landing),
         // floor 2 (the opening and the ARRIVAL ledge between the opening and the shaft), the exploded stack and the cutaway (fitted, and at game scale on the crater, the link, the arrival ledge and the cut face). Changes the source: runs last
         await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', 'snake_floors'); await a.idle(); await page.uncheck('#t-dress'); await a.idle();
-        for (const camId of ['isoE', 'oblique']) {
+        for (const camId of ['isoE', 'oblique', 'isoW', 'low', 'classic']) { // Cam 1, 3 (the first set) and Cam 2, 4, 7 (single / stack / cutaway, fitted)
           for (const t of ['box', 'A', 'B', 'C']) {
             await a.tech(t); await a.preset(camId);
             for (const [chip, nm] of [[0, 'exterior'], [1, 'floor1'], [2, 'floor2']]) { await page.click(`#floorChips button[data-floor="${chip}"]`); await a.idle(); await shot(`floors_${nm}_${t}_${camId}`); }
             for (const view of ['stack', 'cut']) { await page.selectOption('#floorsView', view); await a.idle(); await shot(`floors_${view}_${t}_${camId}`); await page.selectOption('#floorsView', 'single'); await a.idle(); }
           }
+          if (camId !== 'isoE' && camId !== 'oblique') continue;
+          // the floor-2 OPENING close-up at game scale (50 px per tile), Single view on Floor 2: railing, 'Stairs down' marker and the arrival ledge, Box / A / B / C
+          for (const t of ['box', 'A', 'B', 'C']) { await a.tech(t); await a.preset(camId); await page.click('#floorChips button[data-floor="2"]'); await a.idle(); await playShot(`floors_opening_${t}_${camId}_game`, [15.5, 20.5], 50); }
           // game scale (A and C, 45 px per tile): the crater, the link on floor 1, the arrival ledge on floor 2, and the cut face
           for (const t of ['A', 'B', 'C']) {
             await a.tech(t); await a.preset(camId);
