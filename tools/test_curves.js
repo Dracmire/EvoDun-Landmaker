@@ -75,5 +75,20 @@ const fake = (W, H, fine) => ({ W, H, n: W * H, fine: Int16Array.from(fine), lev
     const S4 = fake(12, 12, new Array(144).fill(0)), cfg = { passes: 1, max: 0.3, jit: 0, jitTall: 0 }, a = E.curves.build(S4, P, cfg).grid, b = E.curves.build(S4, Object.assign({}, P, { meander: 1 }), cfg).grid;
     ok('meander 0: the seeds stay on the tile centres; meander 1 moves them within the raised cap 0.5', a.sx.every((v, k) => v === a.bx[k]) && b.sx.some((v, k) => v !== b.bx[k]) && b.sx.every((v, k) => Math.hypot(v - b.bx[k], b.sy[k] - b.by[k]) <= 0.5 + 1e-9));
   }
+  { // a seed that LEAVES the window (Ordered: max .55 > the .5 between a border tile centre and the border): the window-border edge of its cell must keep its orientation, so every level contour closes ALONG the border
+    // (before: the edge was oriented by the seed, which was on the wrong side of the border line, came out reversed, and the big loop of the level stayed open: the fill closed it with a chord, a mis-filled wedge on the real map)
+    const W = 6, H = 6, lv = new Array(W * H).fill(0); lv[5 * W + 3] = 1; // land everywhere (level 0), a lone level-1 tile on the bottom row
+    const S5 = fake(W, H, lv), cfg = { passes: 1, max: 0.9, jit: 0, jitTall: 0 }, st = E.curves.build(S5, P, cfg), g = st.grid, e = st.edges, i = 5 * W + 3;
+    S5.cache['Cs:cfgtest:a:0'] = st; // loopsC reads the structure of a preset: the test seeds its own (max .9) under the name 'cfgtest'
+    ok('precondition: the seed of the bottom-row tile (3, 5) lies OUTSIDE the window (y > 6)', g.sy[i] > H + 0.1, g.sy[i]);
+    const QK = 1e5, key = (x, y) => Math.round(x * QK) * 134217728 + Math.round(y * QK); let openVerts = 0;
+    for (const [L, ids] of st.byLevel) { const ends = new Set(); for (const q of ids) ends.add(key(e.x1[q], e.y1[q])); for (const q of ids) if (!ends.has(key(e.x0[q], e.y0[q]))) openVerts++; }
+    ok('every level contour is CLOSED: each edge start has an edge that ends there (no open end at the window border)', openVerts === 0, openVerts + ' open ends');
+    let wrong = 0, tested = 0; const nearest = (x, y) => { let b = -1, bd = 1e9; for (let c = 0; c < g.sx.length; c++) { const d = (g.sx[c] - x) ** 2 + (g.sy[c] - y) ** 2; if (d < bd) { bd = d; b = c; } } return b; };
+    for (let y = 0.07; y < H; y += 0.131) for (let x = 0.07; x < W; x += 0.131) { const lev = lv[nearest(x, y)]; for (const L of [0, 1]) { tested++; if (inLoops(E.loopsC(S5, L, Object.assign({}, P, { curves: 'cfgtest' })), x, y) !== (lev >= L)) wrong++; } }
+    ok('the even-odd inside of the loops of every level equals the level of the nearest seed (the wedge is gone)', wrong === 0, wrong + ' of ' + tested + ' samples wrong');
+    const lp1 = E.loopsC(S5, 1, Object.assign({}, P, { curves: 'cfgtest' })), along = lp1.some((lp) => lp.some((p, k) => p[1] === H && lp[(k + 1) % lp.length][1] === H));
+    ok('the level-1 contour of the cell that left the window runs ALONG the window border (two consecutive vertices on y = H)', along);
+  }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();
