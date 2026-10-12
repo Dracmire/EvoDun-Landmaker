@@ -1,4 +1,4 @@
-/* ART CONTRACT (crystallizer 3, Stage; switch "Art contract", off by default = identical pixels; Box, A and B). Placeholders drawn on top of the scene, only where the piece is visible, with a count per kind.
+/* ART CONTRACT (crystallizer 3, Stage; switch "Art contract", off by default = identical pixels; Box, A, B and C: render.js calls it for every technique). Placeholders drawn on top of the scene, only where the piece is visible, with a count per kind.
    Vocabulary (user's): cap = the top surface; body = the mass with its base texture; wrapper = terminations and boundary (it frames the body where the cap would otherwise touch the background or a different material);
    footprint = where a structure is inserted. MVP pieces:
      body       one per terrace face of a tile (a tile above a lower neighbour of another terrace, or at the border of the map / void), classed by its jump in terH units (low < 1.2, mid < 2.2, high), "masonry"

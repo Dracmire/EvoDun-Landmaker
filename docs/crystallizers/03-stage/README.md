@@ -125,7 +125,7 @@ Repos reviewed (2026-10-09). None generates stylised cliffs procedurally; they a
 - **R1 Traversal.** The map can be walked in the viewer at play scale: a walker moves over the walkable graph (the same
   edges as `E.route`), the camera follows it with the stage preset. No piece blocks a walkable tile, a ramp or a door;
   on walkable tiles only floor-level pieces (paving, grass, rugs).
-- **R2** Same pieces and placeholders in Box, A and B.
+- **R2** Same pieces and placeholders in Box, A, B and C (`render.js` draws the contract for every technique; measured on the C panel).
 - **R3** Switch off = identical pixels (pixel regression).
 - **R4** Height exaggeration is visual only (a stage height multiplier); walking, stake and route do not change.
 
@@ -160,7 +160,7 @@ Nothing has a constant thickness; every piece takes it from a local measure the 
 ### Vocabulary (user's)
 - **cap** = the top surface; **body** = the mass with its base texture; **wrapper** = terminations and boundary (it frames the body and keeps it from spilling); **footprint** = where a structure is inserted (D18: rendered as a soft shade).
 
-### MVP: switch "Art contract" (implemented, `src/contract.js`; off by default, off = identical pixels; Box, A and B)
+### MVP: switch "Art contract" (implemented, `src/contract.js`; off by default, off = identical pixels; Box, A, B and C)
 Placeholders drawn on top of the scene, only where the piece is visible, with a count per kind in the info line. Nothing is exported (D15).
 - **Visibility**: one Box pick render per frame with the switch on. Every column paints its walls with its tile code and its cap with the tile cap code; a body face is visible if >= half of its sample points (three, at mid height) hit its OWN tile code, a prop, a shade tile (>= 3 of 5 points) or a stone if the cap
   (or ramp) code of the tile under it is there. The same id render serves the three techniques (A and B have no per-face id), so in A and B the placeholders sit on the tile geometry and differ slightly from the smoothed walls.
