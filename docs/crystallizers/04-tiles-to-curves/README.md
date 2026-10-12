@@ -2,7 +2,7 @@
 
 ## 1. Status
 
-PHASE 1 merged (PR #17: technique C, three presets, wall dressing). PHASE 2, THE WALL PASS, IMPLEMENTED (2026-10-11), waiting for the user's review: T3 (default) and T2 (alternative) as blocks built OUTWARD on the lower ground in front of the walls of technique C. Nothing is exported to Unity (03-stage D15).
+CLOSED (PR #17, #18). PHASE 1 (PR #17): technique C, three presets, wall dressing. PHASE 2, THE WALL PASS (PR #18): T3 (default, extrusion 0.25, D22) and T2 (alternative) as blocks built OUTWARD on the lower ground in front of the walls of technique C. The vertical pass (old phase 2, D6-D9) stays not approved and not built. Nothing is exported to Unity (03-stage D15).
 
 ## 2. Goal
 

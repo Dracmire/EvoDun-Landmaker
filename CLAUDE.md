@@ -347,7 +347,7 @@ incursion border; stake and way-back path visible.
    LATER PHASE (user's decision, no date): "tiles to curves" in the style of Unexplored 2: one Voronoi seed per tile, displaced by rules at the corners (by type and by height), at most 40 % of the tile; borders dressed with pieces. It uses per-tile data only, it does NOT need rooms.
    Reference: the "Tiles to Curves" devlog by Ludomotion. Candidate libraries, LICENCE TO BE CONFIRMED before adding anything: Delaunator (JS) for the viewer; delaunator-sharp (MIT) and Clipper2 (BSL-1.0) for Unity.
    PARKED (user's decision): per-pixel depth/WebGL, platforms, size classes.
-6. CRYSTALLIZER 4, TILES TO CURVES, PHASE 1 (planar technique C + presets + wall dressing; this PR): see Repo state and `docs/crystallizers/04-tiles-to-curves/README.md` (D1-D12). PHASE 2, THE WALL PASS, IS IMPLEMENTED (D13-D20: T1 discarded, T3 default, T2 alternative, extrusion slider, C-only geometry). Nothing is exported to Unity until every crystallizer is done (03-stage D15).
+6. CRYSTALLIZER 4, TILES TO CURVES: CLOSED (PR #17, #18). Phase 1 (planar technique C + presets + wall dressing, PR #17) and phase 2, the wall pass (PR #18; D13-D22: T1 discarded, T3 default at extrusion 0.25, T2 alternative, C-only geometry): see Repo state and `docs/crystallizers/04-tiles-to-curves/README.md`. The vertical pass (D6-D9) is not approved and not built. Nothing is exported to Unity until every crystallizer is done (03-stage D15).
 
 ## How to work with the user
 - Do not write code until the design is agreed. For each point: read the relevant code, propose the
