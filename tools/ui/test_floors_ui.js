@@ -57,7 +57,7 @@ const { open } = require('./common');
   ok('Cam 6 (perspective) is not supported in the stack and the cutaway: it says so and shows the selected floor', /Cam 6 \(perspective\) is not supported/.test(await info()) && ((await ev(() => window.__evo.st.floorsLayers)) === null));
   await a.preset('isoE'); await a.idle();
   // stake only in the single-floor views
-  await page.evaluate(() => window.__evo.setIncMode('stake')); await page.mouse.click(cx, cy); // Place stake is greyed in the cutaway: the mode is set directly await page.waitForTimeout(300);
+  await page.evaluate(() => window.__evo.setIncMode('stake')); /* Place stake is greyed in the cutaway: the mode is set directly */ await page.mouse.click(cx, cy); await page.waitForTimeout(300);
   ok('the stake is not placed in the cutaway (message, nothing placed)', (await ev(() => window.__evo.inc.stake)) === null && /single-floor views/.test(await page.$eval('#msg', (e) => e.textContent)));
   await page.keyboard.press('Escape');
   // compare mode: four panels in both views
