@@ -2,7 +2,7 @@
 
 ## 1. Status
 
-IN PROGRESS. Data, pack format, `elevFrame`, declared links and tests done (steps B and B2); the Floors view (single floor, exploded stack, cutaway) is not built yet. Nothing is exported to Unity.
+IN PROGRESS. Data, pack format, `elevFrame`, declared links (steps B, B2) and the Floors view (single floor, exploded stack, cutaway; step C) are built and tested; waiting for the user's review. Nothing is exported to Unity. Nothing is exported to Unity.
 
 ## 2. Goal
 
@@ -36,11 +36,29 @@ Geometry (`tools/derive_snake_floors.py`): the ring of floor 1 at z1 (x 11..13),
 ### The knife-edge attempt (dropped)
 Step B first tried to let the gate detection find the link: a sloped strip rising to the landing. Measured on the viewer pipeline: two flat plateaus give no gate (the criterion compares band-normalised slopes: 0.245 vs 0.255 for z1 and z2 at 5 terraces, difference -0.01 < `gateThr` 0.05); strips narrower than 5 lose the gate to the pre-smoothing (the gate group falls under `gateMin` 3); with 3 slope tiles (the spike's geometry) the depth-2 ramp was dropped on this package; one slope tile at z = 4.4 worked, but only because it sat exactly on the band edge of 5 terraces (4.39995), a float tie that breaks with the pre-smoothing, `gateThr`, `gateMin` or the bumps (values 3.8 .. 4.2 gave 0 of 20 combinations). It also depended on the number of terraces (3 and 5 only) and on `minPlateau`. It was dropped for declared links.
 
+## 5b. The Floors view (step C, `src/floors.js`, `E.renderLayers` in `src/render.js`, controls in `src/ui.js`)
+
+Selector "Floors view" (only for a floors package) + chips Exterior / Floor 1 / Floor 2:
+- SINGLE FLOOR: the existing pipeline on `E.floorPack(raw, k)` (Box / A / B / C, compare mode as always). The package-wide camera frame (`S.fitH`) and thin floor slabs (`S.baseH` a little under the lowest level, the precedent of the Pocket) are the same in every layer, so switching layers never rescales.
+- EXPLODED STACK: floor 1, floor 2 and the exterior drawn bottom to top by the normal pipeline of the technique, each raised by a height offset (`zShift`, a rigid screen translation for the orthographic cameras), the exterior on top as a GHOST lid (drawn on a transparent canvas and composited once at 0.42, so overlapping polygons do not accumulate). The gap is the floor-1 extent along the view depth times tan(pitch), clamped 6-30.
+- CUTAWAY: a PLANE perpendicular to the view through the shaft axis: `cam.ry(x, y) = cam.ry(axis)` (the camera depth coordinate, so it follows the preset yaw AND the drag variation). The BACK half of the exterior is drawn first, then the floors cropped to the FRONT half at their true heights. Painter-exact (argued, not measured against a z-buffer): a point behind the plane that shares a ray with one in front can only be lower, hence farther. The cut is a tile mask (void) per yaw, rebuilt on drag RELEASE (not on every move) and cached by yaw; a quadrant wedge is not possible under the painter's algorithm (the wings of the exterior interleave with the floors in depth; it needs per-pixel depth, parked).
+- Orthographic cameras only (Cam 1-5 and 7); with Cam 6 the stack and the cutaway say so and show the selected floor. Stake and objectives are placed in the single-floor views only (the stack and the cutaway say so).
+- The info line names the view and the layer, the declared link ("declared ramp 3 x 2 carved (cut)") and warns when a declared link was not built.
+- A floors package shares ONE centre terrace (`elevFrame` implies the 'middle' centre in `quantize`), so the layer heights agree whatever the spread.
+Measured (`node tools/test_floors.js` 32 checks, `tools/ui/test_floors_ui.js` 19 checks): compare mode, all four panels, cold: 0.42 s (stack) and 0.45 s (cutaway) to the last panel; the cut plane tiles are all behind / in front (800 exterior tiles, 185 floor tiles at the first yaw).
+HOW IT READS (screenshots `tools/verify.sh shots --extra floors`, Cam 1 and Cam 3, Box / A / B / C; 45-55 px per tile at game scale):
+- the CRATER (sheer pit, A at 45 px): a clear dark hole in the plateau with the tan floor 1 at the bottom; at the whole-map fit it is only a few pixels and the markers C and S overlap. A stepped inner wall (a later option) would give it depth.
+- the LINK on floor 1: a raised tan landing (5 wide, a 1.6 cliff to the ring) with the cream ramp (3 wide, cross lines) cut into it: locatable at once.
+- the ARRIVAL LEDGE on floor 2: two tiles of floor between the opening and the shaft; it reads as a narrow neck between two holes, a bridge. The opening itself reads as a second pit: nothing says "the stairs go down here" (the ramp is in floor 1's map); a marker, a rail or a stair mark is the obvious later addition.
+- the CUT FACE (game scale): Box a tile-exact staircase; A a wavy edge with the sub-level banding of the wall; B a smooth edge; C a slightly eroded edge (its corner rule displaces the cut like any other contour). In all of them the floors read as slabs in front of the cut, floating (no solid material between the floors, the exterior is a heightfield): a limit of the representation.
+- the STACK: the floors are separate and readable, the ghost lid shows where the mountain sits; the marker labels of the lid and of the floors overlap.
+
 ## 6. Known limits
 
 - MEASURED (`node tools/test_floors.js`): the declared link is carved (3 columns x depth 2) and walkable from the foot to the arrival for terraces 2-12 x pre 0-3 (44 combinations), also for stairW 0-5 x rampDepth 1-4 and for minPlateau 120 / minSub 100: a jump of 1, 2 or 3 terraces carves the same (`planRamp` is generic in the terraces of its two tiles). Floors at 3.6 / 5.2; terrace jump of the pair: 1 at 2-5 terraces, 2 at 6, 1 at 7, 2 at 8-9, 3 at 10, 2 at 11, 3 at 12.
 - The floors' OWN rings are ordinary terrain: at 10 terraces z1 = 3.6 lies on a band edge (3.614), the bumps and the smoothing split floor 1's ring into terraces and, with `pre` 2-3, the ring tile next to the ramp's foot is cut from it by a cliff ("ring cut" in the printed table). The link itself still works. Bands at 5 terraces: 1.26 / 2.83 / 4.40 / 5.97 / 7.54 / 9.12; at 7: 1.26 / 2.38 / 3.50 / 4.62 / 5.75 / 6.87 / 7.99 / 9.12.
-- The Floors view warns only when a declared link was not built in the lower floor (`E.floorWarnings(pack, S)`: the pair in void, the ramp did not fit): no slider setting is a reason to warn any more. The view itself is Step C.
+- The Floors view warns only when a declared link was not built in the lower floor (`E.floorWarnings(pack, S)`: the pair in void, the ramp did not fit): no slider setting is a reason to warn any more.
+- The cutaway is orthographic only, plane-based and recomputed on release; its painter order is argued, not measured against a per-pixel reference; the floors float in front of the cut; stack and cutaway build three shapes per layer set (cost measured above).
 - The ring tiles next to the landing read its raw 5.2 in the pre-smoothing blur and can change terrace (cosmetic; a natural stair may appear at that cliff, never on the link's tiles).
 - With the opening sized exactly to the declared footprint, a link whose `width` / `depth` the pack changes needs the derivation to be re-run (the opening and the data stay in step).
 - The link is a straight radial ramp, not an arc or a spiral.
