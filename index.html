@@ -49,6 +49,13 @@ figure canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 figcaption{position:absolute;left:8px;top:6px;right:8px;display:flex;flex-direction:column;gap:1px;font-size:12px;pointer-events:none;text-shadow:0 1px 3px #000}
 figcaption span{color:var(--mut);font-size:11px}
 .hint{color:var(--mut);font-size:11px}
+.inactive{opacity:.45}
+.inactive .inact,.inact{color:var(--mut);font-style:normal;font-size:10.5px;border:1px solid var(--line);border-radius:8px;padding:0 6px;margin-left:6px}
+.bdg{font-size:10px;background:#2a2543;border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-right:6px;color:var(--acc)}
+section.grp,details.grp{margin-top:6px}
+details.grp>summary{cursor:pointer;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin:10px 0 2px}
+.scn{display:flex;flex-wrap:wrap;gap:4px}
+.scn button{font-size:11px;padding:4px 7px}
 @media (max-width:820px){
  .app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);height:auto;min-height:100%}
  aside{border-right:0;border-bottom:1px solid var(--line);max-height:42vh;padding-inline:16px}
@@ -61,6 +68,7 @@ figcaption span{color:var(--mut);font-size:11px}
 <div class="app">
  <aside>
   <h1>EvoDun Crystal Viewer<small>Materialization test · same data, several crystallizations</small></h1>
+  <div id="scenarios"><h3>Scenarios</h3><div class="scn"></div></div>
   <div><h3>Source</h3>
    <div class="row"><select id="src"></select></div>
    <div class="row" style="margin-top:6px"><input type="file" id="file" accept=".png,.json,image/png,application/json" multiple style="max-width:100%"></div>
@@ -118,5 +126,6 @@ figcaption span{color:var(--mut);font-size:11px}
 <script src="src/render.js"></script>
 <script src="src/contract.js"></script>
 <script src="src/floors.js"></script>
+<script src="src/controls.js"></script>
 <script src="src/ui.js"></script>
 </body></html>
