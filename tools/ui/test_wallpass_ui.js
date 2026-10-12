@@ -10,7 +10,7 @@ const { open } = require('./common');
   await page.click('#mode'); await a.idle(); // single technique
   const pics = {}; for (const t of ['box', 'A', 'B', 'C']) { await a.tech(t); await a.preset('oblique'); await a.idle(); } // warm-up: the info line (and the canvas height) settles once each technique has its stair coverage
   for (const t of ['box', 'A', 'B', 'C']) { await a.tech(t); await a.preset('oblique'); await a.idle(); await page.waitForTimeout(300); pics['on_' + t] = await hash(); }
-  for (const m of ['t2', 'off']) { await a.tech('box'); await page.selectOption('#wallPass', m); await a.idle(); await page.waitForTimeout(300); for (const t of ['box', 'A', 'B', 'C']) { await a.tech(t); await a.idle(); await page.waitForTimeout(300); pics[m + '_' + t] = await hash(); } }
+  for (const m of ['t2', 'off']) { await a.tech('box'); await page.$eval('#wallPass', (e, v) => { e.value = v; e.dispatchEvent(new Event('change', { bubbles: true })); }, m); await a.idle(); /* Wall pass is greyed while C is not shown: set by a script change event */ await page.waitForTimeout(300); for (const t of ['box', 'A', 'B', 'C']) { await a.tech(t); await a.idle(); await page.waitForTimeout(300); pics[m + '_' + t] = await hash(); } }
   ok('C: T3, T2 and Off are three different pictures', new Set([pics.on_C, pics.t2_C, pics.off_C]).size === 3, JSON.stringify([pics.on_C, pics.t2_C, pics.off_C]));
   ok('Box, A and B are identical with the wall pass on (T3), T2 and Off: the band is C-only geometry', ['box', 'A', 'B'].every((t) => pics['on_' + t] === pics['off_' + t] && pics['t2_' + t] === pics['off_' + t]), JSON.stringify(pics));
   // the info line

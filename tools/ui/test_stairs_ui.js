@@ -21,7 +21,7 @@ const { open } = require('./common');
   await a.slider('tread', 2); await a.idle();
   for (const sub of [3, 6]) { await a.slider('subs', sub); await a.idle(); s = await st(); ok(`${sub} sub-terraces: stairs placed and no console errors`, s.n > 0 && a.errs.length === 0, JSON.stringify(a.errs)); }
   await a.slider('subs', 3); await a.idle();
-  await (await page.$('#t-passes')).click(); await a.idle();           // stair marks use the stair chains
+  await page.$eval('#t-passes', (e) => e.click()); await a.idle();           // stair marks use the stair chains
   await a.tech('box'); await a.tech('A');
   ok('no console errors (stair marks, all techniques)', a.errs.length === 0, JSON.stringify(a.errs));
   await a.browser.close();

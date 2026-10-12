@@ -88,7 +88,7 @@ const { open } = require('./common');
   }
   await a.tech('A'); await a.preset('oblique');
   const warnPx = () => page.evaluate(() => { const cv = document.querySelector('#stage canvas'), d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] < 80 && d[i + 1] > 90 && d[i + 1] < 140 && d[i + 2] > 235) n++; return n; });
-  const mOn = await warnPx(); await page.uncheck('#t-edgeWarn'); await a.idle(); const mOff = await warnPx(); await page.check('#t-edgeWarn'); await a.idle();
+  const mOn = await warnPx(); await page.$eval('#t-edgeWarn', (e) => e.click()); await a.idle(); const mOff = await warnPx(); await page.$eval('#t-edgeWarn', (e) => e.click()); await a.idle(); // the toggle may sit in a folded group: clicked by script
   ok('the edge-problem outline is drawn (electric blue) and the toggle removes it', mOn > 30 && mOff < 5, [mOn, mOff]);
   const isoTile = await page.evaluate(() => { const S = window.__evo.S(); for (let i = 0; i < S.n; i++) if (S.isolated[i]) return i; return -1; });
   await page.evaluate((t) => { const ev = window.__evo; ev.setIncMode('stake'); ev.placeMark(t); }, isoTile);
