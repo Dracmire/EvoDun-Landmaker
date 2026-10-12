@@ -10,6 +10,7 @@ the short rules; the long history and the reasons live here.
 | 2 | Room types: Cake / Diorama (pocket) / Ascension (walls) | Closed (PR #7-#13; its data source, the rooms layer, PR #5-#6) | [02-room-types](02-room-types/README.md) |
 | 3 | Stage: framing and dressing as an art-piece contract, Sea of Stars reference | Design draft | [03-stage](03-stage/README.md) |
 | 4 | Tiles to Curves (Unexplored 2): technique C (planar Voronoi) + wall dressing | Closed (PR #17, #18) | [04-tiles-to-curves](04-tiles-to-curves/README.md) |
+| 5 | Floors: a multi-floor macroform (Snake Mountain, crater shaft, 2 interior floors) shown as single floor / exploded stack / cutaway | In progress (step B: data and tests) | [05-floors](05-floors/README.md) |
 
 ## Core examples
 

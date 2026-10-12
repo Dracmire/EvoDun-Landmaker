@@ -165,7 +165,7 @@
       else fields[k] = { values: c(f.values) };
     }
     const markers = (pack.markers || []).filter((m) => m.x >= x0 && m.x < sl.x1 && m.y >= y0 && m.y < sl.y1).map((m) => Object.assign({}, m, { x: m.x - x0, y: m.y - y0 }));
-    return { name: pack.name, width: w, height: h, elevation: c(pack.elevation), elevRange: pack.elevRange, masks, markers, fields };
+    return { name: pack.name, width: w, height: h, elevation: c(pack.elevation), elevRange: pack.elevRange, elevFrame: pack.elevFrame, masks, markers, fields };
   }
 
   /* Void: elevation <= 0 is NOT terrain (a black pixel of the height image), never a low terrace. landFill returns the elevation with every
@@ -195,7 +195,8 @@
     let el = Float32Array.from(lf.el);
     for (let p = 0; p < P.pre; p++) el = blur3(el, W, H);
     let mn = Infinity, mx = -Infinity;
-    if (vd) { mn = lf.range[0]; mx = lf.range[1]; } // terraces over the land only
+    if (full.elevFrame) { mn = full.elevFrame[0]; mx = full.elevFrame[1]; } // opt-in (crystallizer 5, floors): the GLOBAL height frame of a package, also with void, so every floor of a package has the same terrace bands
+    else if (vd) { mn = lf.range[0]; mx = lf.range[1]; } // terraces over the land only
     else if (full.elevRange) { mn = full.elevRange[0]; mx = full.elevRange[1]; }
     else for (const v of el) { if (v < mn) mn = v; if (v > mx) mx = v; }
     const U = new Float32Array(n), ter = new Int16Array(n), sub = new Int16Array(n), g0 = new Int16Array(n);

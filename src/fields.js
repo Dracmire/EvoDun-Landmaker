@@ -287,4 +287,36 @@
     if (m.objectives && m.objectives.length) out.objectives = m.objectives.map((o) => Object.assign({ x: o.x, y: o.y }, o.label ? { label: o.label } : {}));
     return out;
   };
+
+  /* ---- floors package (crystallizer 5; optional keys of a built-in pack, old packs are unaffected): floors [{ id, name, z, elevation[], markers? }] (same width x height, 0 = void; floors are NOT zones),
+     shaft { c, r, top }, links [{ from, to, lanes, width, foot, landing, landingX, slopeX, slopeZ }], elevFrame [min, max] (the package's GLOBAL height frame: quantize uses it even where a map has void) ---- */
+  E.hasFloors = (pack) => !!(pack && Array.isArray(pack.floors) && pack.floors.length);
+  E.validateFloors = function (pack) { // [] when fine, else the problems (the viewer shows them, the tests assert none)
+    const errs = [], n = pack.width * pack.height;
+    if (!E.hasFloors(pack)) return ['no floors'];
+    if (!Array.isArray(pack.elevFrame) || pack.elevFrame.length !== 2 || !(pack.elevFrame[1] > pack.elevFrame[0])) errs.push('elevFrame must be [min, max]');
+    if (!pack.shaft || !Array.isArray(pack.shaft.c) || !(pack.shaft.r > 0)) errs.push('shaft { c, r } is missing');
+    pack.floors.forEach((f, k) => {
+      if (!f.elevation || f.elevation.length !== n) errs.push(`floor ${k + 1}: elevation must have width x height values`);
+      if (!(f.z > 0)) errs.push(`floor ${k + 1}: z must be positive`);
+    });
+    for (const l of pack.links || []) if (!pack.floors.some((f) => f.id === l.from) || !pack.floors.some((f) => f.id === l.to)) errs.push('a link names a floor that does not exist');
+    return errs;
+  };
+  /* the pack of one layer for E.shape: k = 0 the exterior, k >= 1 the floor with id k; every layer carries the package's elevFrame (the same terrace bands) and no slice */
+  E.floorPack = function (pack, k) {
+    const f = k === 0 ? null : pack.floors.find((x) => x.id === k); if (k !== 0 && !f) throw new Error('No floor ' + k);
+    return { name: pack.name + (f ? ' - ' + f.name : ' - exterior'), width: pack.width, height: pack.height, elevation: f ? f.elevation : pack.elevation, elevFrame: pack.elevFrame, masks: f ? {} : (pack.masks || {}), markers: f ? (f.markers || []) : (pack.markers || []), fields: {} };
+  };
+  /* The Floors view warns when the link between floors may be missing: the link needs a terrace edge between the floors (terraces 3 or 5 for the default floor heights, the others move the floors to other bands),
+     a minimum plateau not larger than the landing, and ramps switched on. Returns the messages (empty = fine). P: the viewer parameters. */
+  E.floorWarnings = function (pack, P) {
+    const out = [], l = (pack.links || [])[0]; if (!l) return out;
+    const f1 = pack.floors.find((f) => f.id === l.from), f2 = pack.floors.find((f) => f.id === l.to);
+    const landing = f1 ? f1.elevation.reduce((n, v) => n + (f2 && Math.abs(v - f2.z) < 1e-9 ? 1 : 0), 0) : 0;
+    if (P.terraces !== 3 && P.terraces !== 5) out.push(`terraces ${P.terraces}: the floors may fall in bands without a terrace edge between them (floor link may be missing; use 3 or 5)`);
+    if (P.minPlateau > landing) out.push(`minPlateau ${P.minPlateau} is larger than the landing (${landing} tiles): the plateau cleanup deletes it (floor link missing)`);
+    if (!(P.stairW > 0)) out.push('stairW 0: ramps are off (floor link missing)');
+    return out;
+  };
 })(window.EVO = window.EVO || {});

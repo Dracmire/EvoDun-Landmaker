@@ -118,7 +118,7 @@
     }
     $('#layout').addEventListener('change', (e) => { st.layout = e.target.value; invalidate(false); });
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
-    $('#src').addEventListener('change', (e) => { st.pack = e.target.value; for (const id of cropIds) $('#' + id).value = ''; onPackChanged(); refreshMessage(); invalidate(true); }); // a crop belongs to one map
+    $('#src').addEventListener('change', (e) => { st.pack = e.target.value; const vk = packs[st.pack] && packs[st.pack].pack && packs[st.pack].pack.viewer; if (vk) applyViewerBlock(vk); /* a built-in pack may declare its viewer block (floors: terraces 5 and minPlateau 5) */ for (const id of cropIds) $('#' + id).value = ''; onPackChanged(); refreshMessage(); invalidate(true); }); // a crop belongs to one map
     buildRoles();
     $('#wholeRooms').addEventListener('click', () => { sliceSel.rooms.clear(); sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); syncRoomChips(); refreshMessage(); invalidate(true); });
     $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
@@ -557,6 +557,7 @@
     setPack('snake', 'Snake Mountain (macroform, caves subtracted)', window.EVO_PACKS.snake_mountain);
     setPack('shrine_pier', 'Shrine-Pier (semantic landmarks)', window.EVO_PACKS.shrine_pier);
     setPack('shrine_pier_x4', 'Shrine-Pier x4 (decompressed, derived)', window.EVO_PACKS.shrine_pier_x4);
+    setPack('snake_floors', 'Snake Mountain floors (shaft + 2 floors, derived)', window.EVO_PACKS.snake_mountain_floors);
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
