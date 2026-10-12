@@ -80,6 +80,11 @@ figcaption span{color:var(--mut);font-size:11px}
    <div class="crop"><input type="number" id="cx0" min="0" placeholder="x0"><input type="number" id="cy0" min="0" placeholder="y0"><input type="number" id="cx1" min="0" placeholder="x1"><input type="number" id="cy1" min="0" placeholder="y1"></div>
    <div class="hint" id="sliceInfo"></div>
   </div>
+  <div id="floors" hidden><h3>Floors</h3>
+   <div class="row"><select id="floorsView" title="Floors view"><option value="single">Single floor</option><option value="stack">Exploded stack</option><option value="cut">Cutaway</option></select></div>
+   <div id="floorChips" class="chips"></div>
+   <div class="hint" id="floorHint">Stack and cutaway: orthographic cameras only (Cam 1-5, 7); stake and objectives are placed in the single-floor views. The cutaway plane follows the camera yaw (the cut is recomputed when a drag is released).</div>
+  </div>
   <div id="incursion"><h3>Incursion</h3>
    <div class="row"><button id="m-stake">Place stake</button><button id="m-obj">Add objective</button><button id="m-rm">Remove</button><button id="m-clear">Clear</button></div>
    <div class="hint" id="incHint">Pick a mode, then click the map (Esc cancels). The route runs from each objective to the stake over the walkable tiles, ramps included.</div>
@@ -524,24 +529,26 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       if (!f.elevation || f.elevation.length !== n) errs.push(`floor ${k + 1}: elevation must have width x height values`);
       if (!(f.z > 0)) errs.push(`floor ${k + 1}: z must be positive`);
     });
-    for (const l of pack.links || []) if (!pack.floors.some((f) => f.id === l.from) || !pack.floors.some((f) => f.id === l.to)) errs.push('a link names a floor that does not exist');
+    for (const l of pack.links || []) {
+      if (!pack.floors.some((f) => f.id === l.from) || !pack.floors.some((f) => f.id === l.to)) errs.push('a link names a floor that does not exist');
+      const pt = (v) => Array.isArray(v) && v.length === 2 && v.every(Number.isInteger), rect = (r) => r && Array.isArray(r.x) && Array.isArray(r.y) && r.x.length === 2 && r.y.length === 2;
+      if (!l.site || !pt(l.site.a) || !pt(l.site.b) || Math.abs(l.site.a[0] - l.site.b[0]) + Math.abs(l.site.a[1] - l.site.b[1]) !== 1) errs.push('a link needs site { a, b }: two 4-neighbour tiles (a = the low one)');
+      if (!(l.width >= 1 && l.width <= 5 && Number.isInteger(l.width)) || !(l.depth >= 1 && l.depth <= 4 && Number.isInteger(l.depth))) errs.push('a link needs its own width (1-5) and depth (1-4)');
+      if (!rect(l.landing) || !rect(l.footprint)) errs.push('a link needs landing { x, y } and footprint { x, y } (inclusive tile rectangles)');
+    }
     return errs;
   };
-  /* the pack of one layer for E.shape: k = 0 the exterior, k >= 1 the floor with id k; every layer carries the package's elevFrame (the same terrace bands) and no slice */
+  /* the pack of one layer for E.shape: k = 0 the exterior, k >= 1 the floor with id k; every layer carries the package's elevFrame (the same terrace bands) and no slice; the floor a link starts from carries it (declared links, see shape.js) */
   E.floorPack = function (pack, k) {
     const f = k === 0 ? null : pack.floors.find((x) => x.id === k); if (k !== 0 && !f) throw new Error('No floor ' + k);
-    return { name: pack.name + (f ? ' - ' + f.name : ' - exterior'), width: pack.width, height: pack.height, elevation: f ? f.elevation : pack.elevation, elevFrame: pack.elevFrame, masks: f ? {} : (pack.masks || {}), markers: f ? (f.markers || []) : (pack.markers || []), fields: {} };
+    if (!pack._fp) Object.defineProperty(pack, '_fp', { value: {} }); const memo = pack._fp; if (memo[k]) return memo[k]; // the same object every time: the shapes cache their quantization on it
+    return memo[k] = { name: pack.name + (f ? ' - ' + f.name : ' - exterior'), width: pack.width, height: pack.height, elevation: f ? f.elevation : pack.elevation, elevFrame: pack.elevFrame, masks: f ? {} : (pack.masks || {}), markers: f ? (f.markers || []) : (pack.markers || []), fields: {}, links: (pack.links || []).filter((l) => l.from === k) }; // a link is carved in the map of the LOWER floor (its `from`)
   };
-  /* The Floors view warns when the link between floors may be missing: the link needs a terrace edge between the floors (terraces 3 or 5 for the default floor heights, the others move the floors to other bands),
-     a minimum plateau not larger than the landing, and ramps switched on. Returns the messages (empty = fine). P: the viewer parameters. */
-  E.floorWarnings = function (pack, P) {
-    const out = [], l = (pack.links || [])[0]; if (!l) return out;
-    const f1 = pack.floors.find((f) => f.id === l.from), f2 = pack.floors.find((f) => f.id === l.to);
-    const landing = f1 ? f1.elevation.reduce((n, v) => n + (f2 && Math.abs(v - f2.z) < 1e-9 ? 1 : 0), 0) : 0;
-    if (P.terraces !== 3 && P.terraces !== 5) out.push(`terraces ${P.terraces}: the floors may fall in bands without a terrace edge between them (floor link may be missing; use 3 or 5)`);
-    if (P.minPlateau > landing) out.push(`minPlateau ${P.minPlateau} is larger than the landing (${landing} tiles): the plateau cleanup deletes it (floor link missing)`);
-    if (!(P.stairW > 0)) out.push('stairW 0: ramps are off (floor link missing)');
-    return out;
+  /* The Floors view warns when a DECLARED link was not built in the shape of its lower floor (the pair lies in void or the ramp did not fit): `S` = the shape of the floor the link starts from.
+     Declared links are structure (protected from the smoothing and the plateau cleanup, built even with stairW 0), so no slider setting is a reason to warn; this only reports what really failed. Returns the messages. */
+  E.floorWarnings = function (pack, S) {
+    const want = (pack.links || []).length, got = (S && S.stairs ? S.stairs : []).filter((r) => r.site && r.site.declared).length;
+    return got < want ? [`floor link missing: ${got} of ${want} declared link(s) carved in the lower floor`] : [];
   };
 })(window.EVO = window.EVO || {});
 
@@ -780,7 +787,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     if (vd) { const g1 = new Int16Array(n); for (let i = 0; i < n; i++) g1[i] = ter[i] + (vd[i] ? 1000 : 0); cleanup(W, H, sub, g1, P.minSub, prot); } else cleanup(W, H, sub, ter, P.minSub, prot);
     const cnt = new Int32Array(N); for (let i = 0; i < n; i++) if (!vd || !vd[i]) cnt[ter[i]]++;
     let center = 0; for (let t = 1; t < N; t++) if (cnt[t] > cnt[center]) center = t; // the terrace with most land tiles on the whole map (ties: the lower)
-    if (P.spreadCentre === 'middle') center = Math.floor((N - 1) / 2); // on a stage the largest terrace is always the base: the centre is the middle terrace (user's decision)
+    if (P.spreadCentre === 'middle' || full.elevFrame) center = Math.floor((N - 1) / 2); // a floors package (elevFrame) shares ONE centre terrace, so the heights of its layers agree whatever the spread; on a stage the largest terrace is always the base: the centre is the middle terrace (user's decision)
     return (full._q = { key, U, ter, sub, trans: {}, range: [mn, mx], center, void: vd, raw: lf.el });
   }
   E.quantize = quantize;
@@ -980,8 +987,9 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
       const a = win(l.site.a[0], l.site.a[1]), b = win(l.site.b[0], l.site.b[1]); if (a < 0 || b < 0 || S.block[a] || S.block[b]) continue;
       const gi = S.gates.length; S.gates.push({ kind: 'terrace', size: l.width || 1, tiles: [{ a, b }], declared: true });
       const site = { a, b, gate: gi, kind: 'terrace', alts: [], exact: true, declared: true, width: Math.max(1, Math.min(5, l.width || 1)), depth: Math.max(1, Math.min(4, l.depth || 1)) };
-      S.passes.push(site); S.declared.push(site);
+      S.declared.push(site);
     }
+    S.passes = [...S.declared, ...S.passes]; // structure first: a declared link claims its tiles before any natural stair (carveStairs takes the passes in order)
   }
 
   /* Gates inside the slice and the stair sites on them: one stair per gate at the tile nearest the centroid; long gates
@@ -4087,6 +4095,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     DBG = !!o.debug; PICK = !!o.pick;
     const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, dress: { walls: 0, strata: 0, lips: 0, foot: 0, rocks: 0, items: o.dressItems ? [] : null } }; // o.dressItems (tests): the anchor points of the foot strips and the rocks, to compare them with a reference
     const cam = makeCam(S, P, view, w, h);
+    if (o.zShift) { const p0 = cam.p, zs = o.zShift; cam.p = (x, y, hh) => p0(x, y, hh + zs); } // a layer of the floors views (exploded stack): every height raised, the camera is the same
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
     else renderLevels(ctx, cam, S, P, o, st, E.loopsOf(tech), tech);
@@ -4117,6 +4126,26 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424');
     ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
     return drawScene(ctx, w, h, S, P, tech, view, o).st;
+  };
+
+  /* The layers of the floors views (src/floors.js), bottom to top: [{ S, dz, ghost }]. Each layer is drawn by the normal pipeline of the technique on its own shape, raised by dz (exploded stack); a ghost layer is drawn
+     on a transparent canvas and composited once with its opacity (so overlapping polygons do not accumulate). The caller guarantees an orthographic camera and one fit (`S.fitH`) for every layer. */
+  E.renderLayers = function (cv, layers, P, tech, view, o) {
+    const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+    if (cv.width !== (w * dpr | 0) || cv.height !== (h * dpr | 0)) { cv.width = w * dpr; cv.height = h * dpr; }
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+    const sum = { walls: 0, polys: 0, verts: 0, ms: 0 };
+    for (const L of layers) {
+      const oo = Object.assign({}, o, { zShift: L.dz || 0, incursion: null });
+      let target = ctx, off = null;
+      if (L.ghost) { off = document.createElement('canvas'); off.width = cv.width; off.height = cv.height; target = off.getContext('2d'); target.setTransform(dpr, 0, 0, dpr, 0, 0); }
+      const r = drawScene(target, w, h, L.S, P, tech, view, oo).st;
+      if (off) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = L.ghost; ctx.drawImage(off, 0, 0); ctx.restore(); }
+      sum.walls += r.walls; sum.polys += r.polys; sum.verts += r.verts; sum.ms += r.ms;
+    }
+    return sum;
   };
 
   /* The tile under a screen point, as seen: the same renderer draws every surface with a code colour (walls and ramps and
@@ -4371,6 +4400,65 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   };
 })(window.EVO = window.EVO || {});
 
+/* EvoDun crystal viewer - crystallizer 5, FLOORS: the layers of a floors package (exterior + interior floors, `E.hasFloors`) and the two multi-layer views.
+   Single floor: the existing pipeline on `E.floorPack(raw, k)`. Exploded stack: the layers are drawn bottom to top, each one raised by a screen-space height offset (the exterior on top, ghosted, so the floors under it stay
+   readable). Cutaway: a PLANE perpendicular to the view through the shaft axis (cam.ry(x, y) = cam.ry(axis): it follows the preset yaw AND the drag variation); the back half of the exterior is drawn first, then the floors
+   cropped to the front half, at their true heights. Painter-exact: a point behind the plane that shares a ray with one in front can only be lower, hence farther. Orthographic cameras only (Cam 1-5 and 7); a
+   quadrant wedge is not possible under the painter's algorithm (the wings of the exterior interleave with the floors in depth; it needs per-pixel depth, parked).
+   All layers share one window (the whole map, no slice), one fit (`S.fitH`) and thin slabs (`S.baseH`, the precedent of the Pocket), so one camera frames them all. */
+(function (E) {
+  const GHOST = 0.42;                                   // opacity of the exterior lid in the exploded stack
+  const lowH = (S) => { for (let L = 0; L <= S.maxFine; L++) if (S.byLevel[L] && S.byLevel[L].length) return S.levelH[L]; return S.levelH[0]; };
+  const baseOf = (S, P) => (S.baseH !== undefined ? S.baseH : S.levelH[0] - P.terH);
+  const store = (S) => S.cache.floors || (S.cache.floors = { shapes: {}, cuts: {} });
+
+  /* the shape of layer k of the package (0 = the exterior), cached on the primary shape S; a floor is a thin slab (baseH a little under its lowest level) */
+  function shapeOf(S, raw, P, k) {
+    if (S.floorLayer === k) return S;
+    const c = store(S); if (c.shapes[k]) return c.shapes[k];
+    const T = E.shape(E.floorPack(raw, k), P, null); T.floorLayer = k; if (k > 0) T.baseH = lowH(T) - 0.4 * P.terH;
+    return (c.shapes[k] = T);
+  }
+  /* the package-wide camera frame: every layer of every view gets the same `fitH`, so switching layers or views never rescales */
+  function frame(S, raw, P, extra) {
+    const all = [0, ...raw.floors.map((f) => f.id)].map((k) => shapeOf(S, raw, P, k)); let lo = 1e9, hi = -1e9;
+    for (const T of all) { const dz = extra && extra[T.floorLayer] || 0; lo = Math.min(lo, baseOf(T, P) + dz); hi = Math.max(hi, T.levelH[T.maxFine] + dz); }
+    for (const T of all) T.fitH = [lo, hi + 1.5];
+    return all;
+  }
+  /* the primary shape was just built for layer k (0 in the multi-layer views): its constants */
+  function prepare(S, raw, P, k) { S.floorLayer = k; if (k > 0) S.baseH = lowH(S) - 0.4 * P.terH; store(S).shapes[k] = S; frame(S, raw, P); }
+
+  function rotKey(v) { return Math.round(v.yaw * 10); }
+  function cutPack(raw, k, ry, c, keep) { // the pack of layer k with the tiles of the other half of the plane made void
+    const base = E.floorPack(raw, k), el = Float64Array.from(base.elevation), N = raw.width;
+    for (let i = 0; i < el.length; i++) { const front = ry((i % N) + 0.5, Math.floor(i / N) + 0.5) >= c - 1e-9; if (front !== (keep === 'front')) el[i] = 0; }
+    const o = Object.assign({}, base, { elevation: el }); delete o._q; return o; // the copy must not inherit the quantization cached on the unmasked pack
+  }
+
+  /* The layers to draw, bottom to top: [{ S, dz, ghost }]. mode 'stack' | 'cut'. `hold` (a drag in progress): keep the last cut, it is recomputed on release. dirty = new shapes were built (B and C recompute). */
+  function layers(S, raw, P, v, mode, hold) {
+    const c = store(S), ids = raw.floors.map((f) => f.id), cam = E.makeCam(S, P, Object.assign({}, v, { fitSc: 0, zoom: 1, panX: 0, panY: 0 }), 100, 100), ry = cam.ry;
+    if (mode === 'stack') {
+      const S1 = shapeOf(S, raw, P, ids[0]); let mn = 1e9, mx = -1e9; for (let i = 0; i < S1.n; i++) if (!S1.void || !S1.void[i]) { const r = ry((i % S1.W) + 0.5, Math.floor(i / S1.W) + 0.5); mn = Math.min(mn, r); mx = Math.max(mx, r); }
+      const tanp = v.kind === 'oblique' ? 1 : Math.tan(v.pitch * Math.PI / 180), dz = Math.max(6, Math.min(30, (mx - mn) * tanp + 1.5)), shift = {}; ids.forEach((k, i) => { shift[k] = dz * i; }); shift[0] = dz * ids.length;
+      frame(S, raw, P, shift);
+      return { mode, dirty: false, dz, list: [...ids.map((k) => ({ S: shapeOf(S, raw, P, k), dz: shift[k], name: 'Floor ' + k })), { S, dz: shift[0], ghost: GHOST, name: 'Exterior (lid)' }] };
+    }
+    // cutaway: the plane through the shaft axis
+    const key = rotKey(v); if (hold && c.lastCut) return Object.assign({}, c.lastCut, { dirty: false });
+    frame(S, raw, P);
+    if (c.lastCut && c.lastCut.key === key) return Object.assign({}, c.lastCut, { dirty: false });
+    const axis = raw.shaft ? raw.shaft.c : [raw.width / 2, raw.height / 2], plane = ry(axis[0], axis[1]), mk = (k, keep) => { const T = E.shape(cutPack(raw, k, ry, plane, keep), P, null); T.floorLayer = k; T.markers = T.markers.filter((m) => !(T.void && T.void[m.y * T.W + m.x])); /* no mark floats over the removed half */ if (k > 0) T.baseH = lowH(T) - 0.4 * P.terH; return T; };
+    const list = [{ S: mk(0, 'back'), dz: 0, name: 'Exterior (back half)' }, ...ids.map((k) => ({ S: mk(k, 'front'), dz: 0, name: 'Floor ' + k + ' (front half)' }))];
+    const all = [0, ...ids].map((k) => shapeOf(S, raw, P, k)); let lo = 1e9, hi = -1e9; for (const T of all) { lo = Math.min(lo, baseOf(T, P)); hi = Math.max(hi, T.levelH[T.maxFine]); } for (const l of list) l.S.fitH = [lo, hi + 1.5];
+    c.lastCut = { mode, key, list, plane, dirty: true };
+    return Object.assign({}, c.lastCut);
+  }
+
+  E.floors = { shapeOf, frame, prepare, layers, cutPack, GHOST };
+})(window.EVO = window.EVO || {});
+
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
@@ -4401,7 +4489,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
-  const st = { pack: 'snake_surface', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const st = { floors: 'single', layer: 0, pack: 'snake_surface', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -4501,10 +4589,11 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     document.getElementById('m-clear').addEventListener('click', () => { inc.stake = null; inc.objectives = []; setIncMode(null); invalidate(false); });
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && inc.mode) setIncMode(null); });
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
+    $('#floorsView').addEventListener('change', (e) => { st.floors = e.target.value; invalidate(true); }); // single floor / exploded stack / cutaway (the shape of the primary layer changes)
     window.addEventListener('resize', () => invalidate(false));
     $('#stage').addEventListener('wheel', (e) => { e.preventDefault(); st.zoom = Math.max(0.5, Math.min(4, st.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); invalidate(false); }, { passive: false });
     let drag = null;
-    $('#stage').addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, yo: st.yawOff, po: st.pitchOff, px: st.panX, py: st.panY, shift: e.shiftKey || e.button === 2 }; e.currentTarget.setPointerCapture(e.pointerId); });
+    $('#stage').addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, yo: st.yawOff, po: st.pitchOff, px: st.panX, py: st.panY, shift: e.shiftKey || e.button === 2 }; st.dragging = !drag.shift; e.currentTarget.setPointerCapture(e.pointerId); });
     $('#stage').addEventListener('pointermove', (e) => {
       if (!drag) return;
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
@@ -4514,6 +4603,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     });
     $('#stage').addEventListener('pointerup', (e) => {
       const moved = drag ? Math.hypot(e.clientX - drag.x, e.clientY - drag.y) : 99, was = drag; drag = null;
+      if (st.dragging) { st.dragging = false; if (E.hasFloors(packs[st.pack].pack) && st.floors === 'cut') invalidate(false); } // the cutaway plane follows the yaw: recomputed on release, not on every move
       if (inc.mode && was && !was.shift && e.button === 0 && moved < 4) clickMap(e);
       else if (!inc.mode && P.pocket && P.rooms && was && !was.shift && e.button === 0 && moved < 4) clickRoom(e);
     });
@@ -4550,6 +4640,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const stage = document.getElementById('stage'); if (stage) stage.classList.toggle('picking', !!m);
   }
   function clickMap(e) {
+    if (E.hasFloors(packs[st.pack].pack) && st.floors !== 'single') { message('Stake and objectives are placed in the single-floor views.'); return; }
     const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
     for (let k = 0; k < figs.length; k++) {
       const cv = figs[k].querySelector('canvas'), r = cv.getBoundingClientRect();
@@ -4651,6 +4742,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
   }
   function refreshMessage() { const p = packs[st.pack] && packs[st.pack].pack; message(p && p.warnings ? p.warnings.join(' ') : ''); }
   function onPackChanged() {
+    st.floors = 'single'; st.layer = 0; buildFloorChips();
     buildChips(packs[st.pack].pack);
     inc.stake = null; inc.objectives = []; setIncMode(null);
     if (st.pack === 'image' && manifest) { inc.stake = manifest.stake ? Object.assign({}, manifest.stake) : null; inc.objectives = manifest.objectives.map((o) => Object.assign({}, o)); }
@@ -4802,13 +4894,15 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
 
   function draw() {
     raf = 0;
+    const raw = packs[st.pack].pack, fl = E.hasFloors(raw); // a floors package (crystallizer 5): the shape is the one of the selected layer (the exterior in the stack and cutaway views)
     if (!S) {
-      const pack = packs[st.pack].pack;
+      const pack = fl ? E.floorPack(raw, st.floors === 'single' ? st.layer : 0) : raw;
       try {
-        S = E.shape(pack, P, sliceSpec());
+        S = E.shape(pack, P, fl ? null : sliceSpec());
+        if (fl) E.floors.prepare(S, raw, P, st.floors === 'single' ? st.layer : 0);
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
-      buildRoomChips();
+      buildRoomChips(); buildFloorChips();
       st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
     }
     const incursion = computeIncursion(); O.incursion = incursion;
@@ -4822,13 +4916,15 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     }
     [...stage.children].forEach((f, i) => { f.hidden = i >= techs.length; });
     // one camera for every panel: the same scale (px per tile, fitted to the first panel) around the same point of the map
+    const multi = fl && st.floors !== 'single' && view().kind !== 'persp'; // the stack and the cutaway are orthographic only: Cam 6 shows the selected floor
+    const FLS = multi ? E.floors.layers(S, raw, P, view(), st.floors, !!st.dragging) : null; O.incursion = FLS ? null : O.incursion; st.floorsLayers = FLS;
     const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
     const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
-    const lateKey = (t) => (t === 'B' ? 'Bready:' + P.radius + ':' + P.anchor : 'Cready:' + E.curves.key(P)), late = techs.filter((t) => (t === 'B' || t === 'C') && !S.cache[lateKey(t)]), needB = late.length > 0; // B and C: the first draw is the slow one, painted after the other panels
+    const lateKey = (t) => (t === 'B' ? 'Bready:' + P.radius + ':' + P.anchor : 'Cready:' + E.curves.key(P)), late = techs.filter((t) => (t === 'B' || t === 'C') && (!S.cache[lateKey(t)] || (FLS && FLS.dirty))), needB = late.length > 0; // B and C: the first draw is the slow one, painted after the other panels
     const paint = (t, i) => {
       const f = stage.children[i], cv = f.querySelector('canvas'), pend = f.querySelector('.pending');
       if (pend) pend.remove();
-      const r = E.render(cv, S, P, t, v, O);
+      const r = FLS ? E.renderLayers(cv, FLS.list, P, t, v, O) : E.render(cv, S, P, t, v, O);
       f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ms.toFixed(0)} ms</span>`;
       if (t === 'B' || t === 'C') S.cache[lateKey(t)] = true;
     };
@@ -4876,6 +4972,25 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     return (st.mode === 'compare' ? ALL_TECH : [st.tech]).filter((t) => ci[t]).map((t) => { const c = ci[t];
       return ` · <b>Art contract</b> (${t === 'box' ? 'Box' : t}): body low ${c.body.low} · mid ${c.body.mid} · high ${c.body.high} · masonry ${c.body.masonry} · edge ${c.body.edge}; wrapper drop ${c.wrapper.drop} · border ${c.wrapper.border} · shore ${c.wrapper.shore}; footprint ${c.footprint}; props trees ${c.trees} · landmarks ${c.landmarks}${c.faded ? ` (${c.faded} faded)` : ''}`; }).join('');
   }
+  /* crystallizer 5: the Floors chips (Exterior / Floor 1 / Floor 2: single-floor view only) and the info line of a floors package */
+  function buildFloorChips() {
+    const raw = packs[st.pack] && packs[st.pack].pack, on = E.hasFloors(raw), box = $('#floors'); box.hidden = !on; if (!on) return;
+    $('#floorsView').value = st.floors;
+    const chips = $('#floorChips'); chips.hidden = st.floors !== 'single'; chips.innerHTML = '';
+    [['Exterior', 0], ...raw.floors.map((f) => [f.name, f.id])].forEach(([label, k]) => {
+      const b = document.createElement('button'); b.className = 'chip' + (st.layer === k ? ' on' : ''); b.textContent = label; b.dataset.id = k; b.dataset.floor = k;
+      b.addEventListener('click', () => { st.layer = k; st.floors = 'single'; invalidate(true); }); chips.appendChild(b);
+    });
+  }
+  function floorsText() {
+    const raw = packs[st.pack] && packs[st.pack].pack; if (!E.hasFloors(raw)) return '';
+    const multi = st.floors !== 'single' && view().kind !== 'persp', ids = raw.floors.map((f) => f.id), S1 = E.floors.shapeOf(S, raw, P, ids[0]);
+    const view1 = multi ? (st.floors === 'stack' ? 'exploded stack (floors raised, the exterior ghosted on top)' : 'cutaway (plane through the shaft axis, perpendicular to the view)') : `single floor: ${st.layer === 0 ? 'exterior' : (raw.floors.find((f) => f.id === st.layer) || {}).name}`;
+    const rec = S1.stairs.find((r) => r.site && r.site.declared), warn = E.floorWarnings(raw, S1);
+    let t = `<br><b>Floors</b>: ${view1}` + (st.floors !== 'single' && !multi ? ' · Cam 6 (perspective) is not supported in this view: showing the selected floor' : '') + (rec ? ` · link: declared ramp ${rec.cols.length} x ${rec.ramp.len} carved (${rec.mode})` : '');
+    if (warn.length) t += ` · <b>${warn.join('; ')}</b>`;
+    return t;
+  }
   function wallText() { // the wall pass of C: mode, band, islands, faces and cost
     const t = S && (st.mode === 'compare' ? ALL_TECH : [st.tech]).includes('C') && P.wallPass !== 'off' ? S.cache['Cw:' + E.curves.key(P) + '|' + E.wallc.key(P)] : null; if (!t) return '';
     const q = t.stats; return ` · <b>Wall pass</b> (C ${q.mode.toUpperCase()}, extrusion ${P.wallExtrude}): ${q.edges} wall edges` + (q.mode === 't3' ? ` · ${q.band} band atoms · ${q.after.islands} islands (${q.before.islands} before the fusion, ${q.after.slivers} slivers, ${q.after.spans} over ${E.wallc.LMAX} tiles)` : ` · ${q.chains} chains · ${q.blocks} blocks`) + ` · ${q.faces} faces · ${q.ms} ms`;
@@ -4922,7 +5037,7 @@ window.EVO_PACKS={snake_mountain:{"format":"evodun-pack/0.1","name":"Snake Mount
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText();
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText();
   }
 
   function init() {

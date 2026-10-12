@@ -312,7 +312,8 @@
   /* the pack of one layer for E.shape: k = 0 the exterior, k >= 1 the floor with id k; every layer carries the package's elevFrame (the same terrace bands) and no slice; the floor a link starts from carries it (declared links, see shape.js) */
   E.floorPack = function (pack, k) {
     const f = k === 0 ? null : pack.floors.find((x) => x.id === k); if (k !== 0 && !f) throw new Error('No floor ' + k);
-    return { name: pack.name + (f ? ' - ' + f.name : ' - exterior'), width: pack.width, height: pack.height, elevation: f ? f.elevation : pack.elevation, elevFrame: pack.elevFrame, masks: f ? {} : (pack.masks || {}), markers: f ? (f.markers || []) : (pack.markers || []), fields: {}, links: (pack.links || []).filter((l) => l.from === k) }; // a link is carved in the map of the LOWER floor (its `from`)
+    if (!pack._fp) Object.defineProperty(pack, '_fp', { value: {} }); const memo = pack._fp; if (memo[k]) return memo[k]; // the same object every time: the shapes cache their quantization on it
+    return memo[k] = { name: pack.name + (f ? ' - ' + f.name : ' - exterior'), width: pack.width, height: pack.height, elevation: f ? f.elevation : pack.elevation, elevFrame: pack.elevFrame, masks: f ? {} : (pack.masks || {}), markers: f ? (f.markers || []) : (pack.markers || []), fields: {}, links: (pack.links || []).filter((l) => l.from === k) }; // a link is carved in the map of the LOWER floor (its `from`)
   };
   /* The Floors view warns when a DECLARED link was not built in the shape of its lower floor (the pair lies in void or the ramp did not fit): `S` = the shape of the floor the link starts from.
      Declared links are structure (protected from the smoothing and the plateau cleanup, built even with stairW 0), so no slider setting is a reason to warn; this only reports what really failed. Returns the messages. */

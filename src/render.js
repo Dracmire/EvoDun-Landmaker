@@ -758,6 +758,7 @@
     DBG = !!o.debug; PICK = !!o.pick;
     const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, dress: { walls: 0, strata: 0, lips: 0, foot: 0, rocks: 0, items: o.dressItems ? [] : null } }; // o.dressItems (tests): the anchor points of the foot strips and the rocks, to compare them with a reference
     const cam = makeCam(S, P, view, w, h);
+    if (o.zShift) { const p0 = cam.p, zs = o.zShift; cam.p = (x, y, hh) => p0(x, y, hh + zs); } // a layer of the floors views (exploded stack): every height raised, the camera is the same
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
     else renderLevels(ctx, cam, S, P, o, st, E.loopsOf(tech), tech);
@@ -788,6 +789,26 @@
     const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424');
     ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
     return drawScene(ctx, w, h, S, P, tech, view, o).st;
+  };
+
+  /* The layers of the floors views (src/floors.js), bottom to top: [{ S, dz, ghost }]. Each layer is drawn by the normal pipeline of the technique on its own shape, raised by dz (exploded stack); a ghost layer is drawn
+     on a transparent canvas and composited once with its opacity (so overlapping polygons do not accumulate). The caller guarantees an orthographic camera and one fit (`S.fitH`) for every layer. */
+  E.renderLayers = function (cv, layers, P, tech, view, o) {
+    const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+    if (cv.width !== (w * dpr | 0) || cv.height !== (h * dpr | 0)) { cv.width = w * dpr; cv.height = h * dpr; }
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+    const sum = { walls: 0, polys: 0, verts: 0, ms: 0 };
+    for (const L of layers) {
+      const oo = Object.assign({}, o, { zShift: L.dz || 0, incursion: null });
+      let target = ctx, off = null;
+      if (L.ghost) { off = document.createElement('canvas'); off.width = cv.width; off.height = cv.height; target = off.getContext('2d'); target.setTransform(dpr, 0, 0, dpr, 0, 0); }
+      const r = drawScene(target, w, h, L.S, P, tech, view, oo).st;
+      if (off) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = L.ghost; ctx.drawImage(off, 0, 0); ctx.restore(); }
+      sum.walls += r.walls; sum.polys += r.polys; sum.verts += r.verts; sum.ms += r.ms;
+    }
+    return sum;
   };
 
   /* The tile under a screen point, as seen: the same renderer draws every surface with a code colour (walls and ramps and

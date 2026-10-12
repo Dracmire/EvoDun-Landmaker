@@ -52,7 +52,7 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     await a.focus(info.x, info.y, info.h, px / info.fit); await shot(name);
   };
   const camOf = (ex) => { const m = ex.match(/@([A-Za-z0-9]+)/); return m ? m[1] : 'isoE'; };
-  const lastKinds = (e) => (e.startsWith('curves') || e.startsWith('wallpass') ? 2 : e.startsWith('shrine') || e.startsWith('x4stage') ? 1 : 0); extras.sort((p, q) => lastKinds(p) - lastKinds(q)); // shrine and x4stage change the source (the room chips go away), so they run last
+  const lastKinds = (e) => (e.startsWith('curves') || e.startsWith('wallpass') || e.startsWith('floors') ? 2 : e.startsWith('shrine') || e.startsWith('x4stage') ? 1 : 0); extras.sort((p, q) => lastKinds(p) - lastKinds(q)); // shrine and x4stage change the source (the room chips go away), so they run last
   for (const ex of extras) {
     const [kind, arg0] = ex.replace(/@.*$/, '').split(':'), arg = arg0, cam = camOf(ex), play = ex.includes('+play'), tag = cam === 'isoE' ? '' : '_' + cam;
     const doView = async (name) => { for (const t of ['box', 'A', 'B']) { await a.tech(t); await a.preset(cam); await shot(`${name}${tag}_${t}_${cam}`); if (play && t !== 'B') await playShot(`${name}${tag}_${t}_${cam}_play`); } };
@@ -99,6 +99,25 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
             if (spot) await playShot(tag + '_game', spot, 60);
           }
           await page.uncheck('#t-dress'); await page.selectOption('#wallPass', 't3'); await page.evaluate(() => { window.__evo.P.wallExtrude = 0.25; }); await a.idle();
+        }
+      }
+      else if (kind === 'floors') { // crystallizer 5: the Snake Mountain floors package (viewer block: terraces 5, minPlateau 5). Cam 1 and Cam 3, Box / A / B / C: the exterior with the sheer crater pit, floor 1 (the declared link, its landing),
+        // floor 2 (the opening and the ARRIVAL ledge between the opening and the shaft), the exploded stack and the cutaway (fitted, and at game scale on the crater, the link, the arrival ledge and the cut face). Changes the source: runs last
+        await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', 'snake_floors'); await a.idle(); await page.uncheck('#t-dress'); await a.idle();
+        for (const camId of ['isoE', 'oblique']) {
+          for (const t of ['box', 'A', 'B', 'C']) {
+            await a.tech(t); await a.preset(camId);
+            for (const [chip, nm] of [[0, 'exterior'], [1, 'floor1'], [2, 'floor2']]) { await page.click(`#floorChips button[data-floor="${chip}"]`); await a.idle(); await shot(`floors_${nm}_${t}_${camId}`); }
+            for (const view of ['stack', 'cut']) { await page.selectOption('#floorsView', view); await a.idle(); await shot(`floors_${view}_${t}_${camId}`); await page.selectOption('#floorsView', 'single'); await a.idle(); }
+          }
+          // game scale (A and C, 45 px per tile): the crater, the link on floor 1, the arrival ledge on floor 2, and the cut face
+          for (const t of ['A', 'B', 'C']) {
+            await a.tech(t); await a.preset(camId);
+            await page.click('#floorChips button[data-floor="0"]'); await a.idle(); await playShot(`floors_crater_${t}_${camId}_game`, [20.5, 20.5], 45);
+            await page.click('#floorChips button[data-floor="1"]'); await a.idle(); await playShot(`floors_link_${t}_${camId}_game`, [15, 20.5], 55);
+            await page.click('#floorChips button[data-floor="2"]'); await a.idle(); await playShot(`floors_arrival_${t}_${camId}_game`, [15.5, 20.5], 55);
+            await page.selectOption('#floorsView', 'cut'); await a.idle(); await playShot(`floors_cutface_${t}_${camId}_game`, [20.5, 20.5], 40); await page.selectOption('#floorsView', 'single'); await a.idle();
+          }
         }
       }
       else if (kind === 'shrine') { await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', 'shrine_pier'); await a.idle(); await doView('extra_shrine'); }

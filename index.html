@@ -83,6 +83,11 @@ figcaption span{color:var(--mut);font-size:11px}
    <div class="crop"><input type="number" id="cx0" min="0" placeholder="x0"><input type="number" id="cy0" min="0" placeholder="y0"><input type="number" id="cx1" min="0" placeholder="x1"><input type="number" id="cy1" min="0" placeholder="y1"></div>
    <div class="hint" id="sliceInfo"></div>
   </div>
+  <div id="floors" hidden><h3>Floors</h3>
+   <div class="row"><select id="floorsView" title="Floors view"><option value="single">Single floor</option><option value="stack">Exploded stack</option><option value="cut">Cutaway</option></select></div>
+   <div id="floorChips" class="chips"></div>
+   <div class="hint" id="floorHint">Stack and cutaway: orthographic cameras only (Cam 1-5, 7); stake and objectives are placed in the single-floor views. The cutaway plane follows the camera yaw (the cut is recomputed when a drag is released).</div>
+  </div>
   <div id="incursion"><h3>Incursion</h3>
    <div class="row"><button id="m-stake">Place stake</button><button id="m-obj">Add objective</button><button id="m-rm">Remove</button><button id="m-clear">Clear</button></div>
    <div class="hint" id="incHint">Pick a mode, then click the map (Esc cancels). The route runs from each objective to the stake over the walkable tiles, ramps included.</div>
@@ -112,5 +117,6 @@ figcaption span{color:var(--mut);font-size:11px}
 <script src="src/wallc.js"></script>
 <script src="src/render.js"></script>
 <script src="src/contract.js"></script>
+<script src="src/floors.js"></script>
 <script src="src/ui.js"></script>
 </body></html>

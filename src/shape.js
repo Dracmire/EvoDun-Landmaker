@@ -233,7 +233,7 @@
     if (vd) { const g1 = new Int16Array(n); for (let i = 0; i < n; i++) g1[i] = ter[i] + (vd[i] ? 1000 : 0); cleanup(W, H, sub, g1, P.minSub, prot); } else cleanup(W, H, sub, ter, P.minSub, prot);
     const cnt = new Int32Array(N); for (let i = 0; i < n; i++) if (!vd || !vd[i]) cnt[ter[i]]++;
     let center = 0; for (let t = 1; t < N; t++) if (cnt[t] > cnt[center]) center = t; // the terrace with most land tiles on the whole map (ties: the lower)
-    if (P.spreadCentre === 'middle') center = Math.floor((N - 1) / 2); // on a stage the largest terrace is always the base: the centre is the middle terrace (user's decision)
+    if (P.spreadCentre === 'middle' || full.elevFrame) center = Math.floor((N - 1) / 2); // a floors package (elevFrame) shares ONE centre terrace, so the heights of its layers agree whatever the spread; on a stage the largest terrace is always the base: the centre is the middle terrace (user's decision)
     return (full._q = { key, U, ter, sub, trans: {}, range: [mn, mx], center, void: vd, raw: lf.el });
   }
   E.quantize = quantize;
