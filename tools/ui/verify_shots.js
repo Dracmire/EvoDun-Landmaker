@@ -52,7 +52,7 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     await a.focus(info.x, info.y, info.h, px / info.fit); await shot(name);
   };
   const camOf = (ex) => { const m = ex.match(/@([A-Za-z0-9]+)/); return m ? m[1] : 'isoE'; };
-  const lastKinds = (e) => (e.startsWith('curves') ? 2 : e.startsWith('shrine') || e.startsWith('x4stage') ? 1 : 0); extras.sort((p, q) => lastKinds(p) - lastKinds(q)); // shrine and x4stage change the source (the room chips go away), so they run last
+  const lastKinds = (e) => (e.startsWith('curves') || e.startsWith('wallpass') ? 2 : e.startsWith('shrine') || e.startsWith('x4stage') ? 1 : 0); extras.sort((p, q) => lastKinds(p) - lastKinds(q)); // shrine and x4stage change the source (the room chips go away), so they run last
   for (const ex of extras) {
     const [kind, arg0] = ex.replace(/@.*$/, '').split(':'), arg = arg0, cam = camOf(ex), play = ex.includes('+play'), tag = cam === 'isoE' ? '' : '_' + cam;
     const doView = async (name) => { for (const t of ['box', 'A', 'B']) { await a.tech(t); await a.preset(cam); await shot(`${name}${tag}_${t}_${cam}`); if (play && t !== 'B') await playShot(`${name}${tag}_${t}_${cam}_play`); } };
@@ -85,6 +85,20 @@ const IMG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
           }
           await page.check('#t-dress'); await a.idle(); for (const t of ['box', 'A', 'B']) { await a.tech(t); await a.preset('isoE'); await shot(`curves_${name}_${t}_dress_isoE`); }
           await page.uncheck('#t-dress'); await a.idle();
+        }
+      }
+      else if (kind === 'wallpass') { // the wall pass of C on the fixed set: T3 at extrusion 0.10 and 0.25, T2 at 0.25, dressing off / on, Cam 1 Iso, Cam 3 Oblique and Cam 6 Stage, fitted and at game scale (60 px per tile) on the tallest wall. Changes the source: runs last
+        const small = (id) => async () => { await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', id); await a.idle(); };
+        const real = (pre) => async () => { await page.selectOption('#src', 'image'); await a.idle(); await page.check('#t-rooms'); await a.idle(); await page.selectOption('#roomsPreset', pre); await a.idle(); };
+        for (const [name, setup] of [['x4', small('shrine_pier_x4')], ['snake', small('snake_surface')], ['real_default', real('default')], ['real_balanced', real('balanced')]]) {
+          await setup(); await page.uncheck('#t-dress'); await a.idle(); await a.tech('C'); await page.selectOption('#curvesPreset', 'natural');
+          for (const camId of ['isoE', 'oblique', 'stage']) for (const [mode, ext] of [['t3', 0.10], ['t3', 0.25], ['t2', 0.25]]) for (const dr of [false, true]) {
+            await page.selectOption('#wallPass', mode); await page.evaluate((e) => { window.__evo.P.wallExtrude = e; }, ext); await (dr ? page.check('#t-dress') : page.uncheck('#t-dress')); await a.idle(); await a.preset(camId);
+            const tag = `wall_${name}_${mode}${Math.round(ext * 100)}_${dr ? 'dress' : 'plain'}_${camId}`; await shot(tag + '_fit');
+            const spot = await page.evaluate(() => { const e = window.__evo, S = e.S(), E = window.EVO, W = E.wallc.get(S, e.P); if (!W) return null; const cv = document.querySelector('#stage canvas'), cam = E.makeCam(S, e.P, e.view(), cv.clientWidth, cv.clientHeight); let fs = []; for (const v of W.byHi.values()) for (const f of v.faces) if (cam.nrm(f.nx, f.ny, (f.ax + f.bx) / 2, (f.ay + f.by) / 2)[1] > 0.5) fs.push(f); if (!fs.length) return null; const mx = Math.max(...fs.map((f) => f.tot)), top = fs.filter((f) => f.tot >= 0.9 * mx).sort((p, q) => p.ax - q.ax || p.ay - q.ay), f = top[top.length >> 1]; return [f.ax, f.ay]; }); // the tallest walls that FACE the camera
+            if (spot) await playShot(tag + '_game', spot, 60);
+          }
+          await page.uncheck('#t-dress'); await page.selectOption('#wallPass', 't3'); await page.evaluate(() => { window.__evo.P.wallExtrude = 0.25; }); await a.idle();
         }
       }
       else if (kind === 'shrine') { await page.uncheck('#t-rooms'); await a.idle(); await page.selectOption('#src', 'shrine_pier'); await a.idle(); await doView('extra_shrine'); }

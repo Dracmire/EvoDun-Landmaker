@@ -91,6 +91,8 @@ const { open } = require('./common');
   // real clicks in each panel place the same tile
   await a.preset('oblique'); await page.click('#m-clear');
   const target = await page.evaluate(() => { const S = window.__evo.S(); for (let i = S.n / 2 | 0; i < S.n; i++) if (!S.block[i] && S.slice[i] && !S.carved[i]) return i; return -1; });
+  { const f = await page.evaluate((t) => { const ev = window.__evo, S = ev.S(); return { x: t % S.W + 0.5, y: ((t / S.W) | 0) + 0.5, h: S.levelH[S.fine[t]], fit: ev.st.fitSc }; }, target); await a.focus(f.x, f.y, f.h, 24 / f.fit); } // 24 px per tile: at the fitted scale (about 4 px per tile) the Box id render of a pixel is a blend of neighbouring tile codes and the click lands on a boundary
+  await a.idle(); await page.waitForTimeout(600); // the late panels (B, C with the wall pass) change the info line and so the canvas size: let the layout settle before projecting the click points
   const placed = [];
   for (let k = 0; k < 4; k++) {
     await page.click('#m-stake');

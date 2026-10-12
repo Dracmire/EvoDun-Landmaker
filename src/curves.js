@@ -66,7 +66,7 @@
 
   /* one displacement pass over a grid of gw x gh cells (size `cell` tiles). Returns the displaced seed positions. wk: world cells per window cell offset (ox * k). */
   function displace(g, cfg, pass, S, jump, meander) {
-    const { gw, gh, cell, lev, ex, bx, by } = g, n = gw * gh, k = cell === 1 ? 1 : 2;
+    const { gw, gh, cell, lev, ex, bx, by } = g, n = gw * gh, k = Math.round(1 / cell); // grid cells per tile along one axis (1, 2, 4...)
     const dX = new Float64Array(n), dY = new Float64Array(n), mx = cfg.max;
     for (let vy = 1; vy < gh; vy++) for (let vx = 1; vx < gw; vx++) {
       const i0 = (vy - 1) * gw + vx - 1, i1 = i0 + 1, i2 = i0 + gw, i3 = i2 + 1, l0 = lev[i0], l1 = lev[i1], l2 = lev[i2], l3 = lev[i3];
@@ -108,9 +108,26 @@
     return o;
   }
 
+  /* the polygon of cell c of grid g (tags: the neighbour cell index, -2 window border): the cell square clipped by the bisectors against the neighbours inside radius R and by the window */
+  function cellPolygon(g, c, R, W, H) {
+    const { gw, gh, sx, sy } = g, cx = c % gw, cy = (c / gw) | 0, s0x = sx[c], s0y = sy[c], hs = (R + 1) * g.cell;
+    let poly = { x: [s0x - hs, s0x + hs, s0x + hs, s0x - hs], y: [s0y - hs, s0y - hs, s0y + hs, s0y + hs], t: [-3, -3, -3, -3] };
+    poly = clip(poly, 1, 0, 0, -2); poly = clip(poly, -1, 0, W, -2); poly = clip(poly, 0, 1, 0, -2); poly = clip(poly, 0, -1, H, -2); // the window
+    let r2 = 0; for (let k = 0; k < poly.x.length; k++) r2 = Math.max(r2, (poly.x[k] - s0x) ** 2 + (poly.y[k] - s0y) ** 2);
+    for (let yy = Math.max(0, cy - R); yy <= Math.min(gh - 1, cy + R); yy++) for (let xx = Math.max(0, cx - R); xx <= Math.min(gw - 1, cx + R); xx++) {
+      const q = yy * gw + xx; if (q === c) continue;
+      const dx = s0x - sx[q], dy = s0y - sy[q], dd = dx * dx + dy * dy; if (dd / 4 > r2) continue; // the bisector cannot cut the polygon
+      poly = clip(poly, dx, dy, -(dx * (s0x + sx[q]) + dy * (s0y + sy[q])) / 2, q);
+      if (poly.x.length < 3) break;
+      r2 = 0; for (let k = 0; k < poly.x.length; k++) r2 = Math.max(r2, (poly.x[k] - s0x) ** 2 + (poly.y[k] - s0y) ** 2);
+    }
+    return poly;
+  }
+
   /* Build the whole structure for a shape: seeds of the last pass, the Voronoi edges between cells of different levels. cfg overrides the preset (tests). */
   function build(S, P, cfg0) {
-    const t0 = Date.now(), cfg = cfg0 || PRESETS[P.curves] || PRESETS.ordered, W = S.W, H = S.H, lvl = S.fineMask || S.fine, meander = P.meander > 0 ? P.meander : 0;
+    const t0 = Date.now(), cfg = cfg0 || PRESETS[P.curves] || PRESETS.ordered,  W = S.W, H = S.H, lvl = S.fineMask || S.fine, meander = P.meander > 0 ? P.meander : 0;
+    if (!(cfg.passes >= 1 && cfg.passes <= 3)) throw new Error('curves: passes must be 1 to 3 (the 5x5 owner search and the hashing are tested for up to 3)');
     const exT = exemptTiles(S, P), jump = jumpTiles(S, P);
     let g = { gw: W, gh: H, cell: 1, lev: Int16Array.from(lvl), own: Int32Array.from({ length: S.n }, (_, i) => i), ex: Uint8Array.from(exT), bx: new Float64Array(S.n), by: new Float64Array(S.n) };
     for (let i = 0; i < S.n; i++) { g.bx[i] = (i % W) + 0.5; g.by[i] = ((i / W) | 0) + 0.5; }
@@ -129,7 +146,7 @@
       d = displace(g, cfg, p, S, jump, meander); g.sx = d.sx; g.sy = d.sy; g.dX = d.dX; g.dY = d.dY; g.cap = d.cap; g.passes = null;
     }
     // cells: only those with a neighbour of another level inside the radius
-    const { gw, gh, lev, sx, sy } = g, R = cfg.R || ((cfg.max > 0.25 || meander > 0) ? 2 : 1), E_ = { x0: [], y0: [], x1: [], y1: [], lo: [], hi: [], ci: [] };
+    const { gw, gh, lev, sx, sy } = g, R = cfg.R || ((cfg.max > 0.25 || meander > 0) ? 2 : 1), E_ = { x0: [], y0: [], x1: [], y1: [], lo: [], hi: [], ci: [], co: [] };
     let built = 0;
     for (let cy = 0; cy < gh; cy++) for (let cx = 0; cx < gw; cx++) {
       const c = cy * gw + cx, lc = lev[c]; let bd = false;
@@ -137,17 +154,7 @@
       const atBorder = cx === 0 || cy === 0 || cx === gw - 1 || cy === gh - 1;
       if (!bd && !(atBorder && lc >= 0)) continue;
       built++;
-      const s0x = sx[c], s0y = sy[c], hs = (R + 1) * g.cell;
-      let poly = { x: [s0x - hs, s0x + hs, s0x + hs, s0x - hs], y: [s0y - hs, s0y - hs, s0y + hs, s0y + hs], t: [-3, -3, -3, -3] };
-      poly = clip(poly, 1, 0, 0, -2); poly = clip(poly, -1, 0, W, -2); poly = clip(poly, 0, 1, 0, -2); poly = clip(poly, 0, -1, H, -2); // the window
-      let r2 = 0; for (let k = 0; k < poly.x.length; k++) r2 = Math.max(r2, (poly.x[k] - s0x) ** 2 + (poly.y[k] - s0y) ** 2);
-      for (let yy = Math.max(0, cy - R); yy <= Math.min(gh - 1, cy + R); yy++) for (let xx = Math.max(0, cx - R); xx <= Math.min(gw - 1, cx + R); xx++) {
-        const q = yy * gw + xx; if (q === c) continue;
-        const dx = s0x - sx[q], dy = s0y - sy[q], dd = dx * dx + dy * dy; if (dd / 4 > r2) continue; // the bisector cannot cut the polygon
-        poly = clip(poly, dx, dy, -(dx * (s0x + sx[q]) + dy * (s0y + sy[q])) / 2, q);
-        if (poly.x.length < 3) break;
-        r2 = 0; for (let k = 0; k < poly.x.length; k++) r2 = Math.max(r2, (poly.x[k] - s0x) ** 2 + (poly.y[k] - s0y) ** 2);
-      }
+      const poly = cellPolygon(g, c, R, W, H), s0x = sx[c], s0y = sy[c];
       const m = poly.x.length; if (m < 3) continue;
       for (let k = 0; k < m; k++) {
         const tg = poly.t[k], p = (k + m - 1) % m; let a = [poly.x[p], poly.y[p]], b = [poly.x[k], poly.y[k]], lo, hi, inside = c;
@@ -157,7 +164,7 @@
         else continue;
         const dx = b[0] - a[0], dy = b[1] - a[1], nx = dy, ny = -dx, mxp = (a[0] + b[0]) / 2, myp = (a[1] + b[1]) / 2;
         if (nx * (mxp - sx[inside]) + ny * (myp - sy[inside]) < 0) { const t = a; a = b; b = t; } // outward normal (dy, -dx) points away from the inside cell
-        E_.x0.push(a[0]); E_.y0.push(a[1]); E_.x1.push(b[0]); E_.y1.push(b[1]); E_.lo.push(lo); E_.hi.push(hi); E_.ci.push(inside);
+        E_.x0.push(a[0]); E_.y0.push(a[1]); E_.x1.push(b[0]); E_.y1.push(b[1]); E_.lo.push(lo); E_.hi.push(hi); E_.ci.push(inside); E_.co.push(tg >= 0 ? (inside === c ? tg : c) : -1); // co: the cell on the low side (-1: the window)
       }
     }
     const byLevel = new Map();
@@ -205,6 +212,6 @@
     return best < 0 ? -1 : g.own[best];
   }
 
-  E.curves = { PRESETS, build, struct, tileAt, hash, exemptTiles, key: ckey };
+  E.curves = { PRESETS, build, struct, tileAt, hash, exemptTiles, key: ckey, clip, cellPolygon };
   E.cellTileAt = tileAt;
 })(window.EVO = window.EVO || {});

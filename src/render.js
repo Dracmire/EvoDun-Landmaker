@@ -125,12 +125,14 @@
   }
 
   /* hb / ht: a number, or [at a, at b] for a wall whose bottom or top is sloped (ramp flanks) */
-  function wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, c, rnx, o, st, strong) {
+  function wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, c, rnx, o, st, strong, band) {
     const hb0 = Array.isArray(hb) ? hb[0] : hb, hb1 = Array.isArray(hb) ? hb[1] : hb, ht0 = Array.isArray(ht) ? ht[0] : ht, ht1 = Array.isArray(ht) ? ht[1] : ht;
     const p0 = cam.p(ax, ay, ht0), p1 = cam.p(bx, by, ht1), p2 = cam.p(bx, by, hb1), p3 = cam.p(ax, ay, hb0);
     const k = clamp(0.92 + 0.28 * -rnx, 0.65, 1.2), cs = E.camStats; // E.camStats (a test sets it): wall quads drawn that touch the canvas
     if (cs && Math.max(p0[0], p1[0], p2[0], p3[0]) >= 0 && Math.min(p0[0], p1[0], p2[0], p3[0]) <= ctx.canvas.width && Math.max(p0[1], p1[1], p2[1], p3[1]) >= 0 && Math.min(p0[1], p1[1], p2[1], p3[1]) <= ctx.canvas.height) cs.quads = (cs.quads || 0) + 1;
-    const f = wallFill(ctx, c, k, Math.min(p0[1], p1[1]), Math.max(p2[1], p3[1]), o);
+    let gy0 = Math.min(p0[1], p1[1]), gy1 = Math.max(p2[1], p3[1]);
+    if (band) { const t0 = cam.p(ax, ay, band[1]), t1 = cam.p(bx, by, band[1]), b0 = cam.p(ax, ay, band[0]), b1 = cam.p(bx, by, band[0]); gy0 = Math.min(t0[1], t1[1]); gy1 = Math.max(b0[1], b1[1]); } // the gradient of the whole band of the slab wall (the block face is a part of it)
+    const f = wallFill(ctx, c, k, gy0, gy1, o);
     ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.lineTo(p3[0], p3[1]); ctx.closePath();
     ctx.fillStyle = f; ctx.fill(); ctx.strokeStyle = f; ctx.lineWidth = 0.8; ctx.stroke();
     st.walls++;
@@ -189,6 +191,13 @@
       const g = ctx.createLinearGradient(mx[0], mx[1], ex[0], ex[1]), al = Math.min(0.45, 0.16 + 0.1 * Math.min(jump, 3));
       g.addColorStop(0, `rgba(14,10,22,${al.toFixed(3)})`); g.addColorStop(0.5, `rgba(14,10,22,${(al * 0.45).toFixed(3)})`); g.addColorStop(1, 'rgba(14,10,22,0)');
       ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.lineTo(pb2[0], pb2[1]); ctx.lineTo(pa2[0], pa2[1]); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); st.dress.foot++; if (st.dress.items) st.dress.items.push({ k: 'foot', x: (f.ax + f.bx) / 2 + f.nax * 0.2, y: (f.ay + f.by) / 2 + f.nay * 0.2, z: f.hb });
+    }
+    if (f.sect) { // the gap of a convex vertex between two strips with different normals: a sector of the same darkening, radial in the ground frame (the ground circle is an ellipse on screen)
+      const q = f.sect, o0 = cam.p(q.px, q.py, z), ex = cam.p(q.px + DR.foot, q.py, z), ey = cam.p(q.px, q.py + DR.foot, z), al = Math.min(0.45, 0.16 + 0.1 * Math.min(jump, 3));
+      ctx.save(); ctx.transform((ex[0] - o0[0]) / DR.foot, (ex[1] - o0[1]) / DR.foot, (ey[0] - o0[0]) / DR.foot, (ey[1] - o0[1]) / DR.foot, o0[0], o0[1]);
+      const a1 = Math.atan2(q.n1[1], q.n1[0]), da = Math.atan2(q.n1[0] * q.n2[1] - q.n1[1] * q.n2[0], q.n1[0] * q.n2[0] + q.n1[1] * q.n2[1]), g = ctx.createRadialGradient(0, 0, 0, 0, 0, DR.foot);
+      g.addColorStop(0, `rgba(14,10,22,${al.toFixed(3)})`); g.addColorStop(0.5, `rgba(14,10,22,${(al * 0.45).toFixed(3)})`); g.addColorStop(1, 'rgba(14,10,22,0)');
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, DR.foot, a1, a1 + da); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); ctx.restore();
     }
     if (jump < DR.rockJump) return;
     const len = Math.hypot(f.bx - f.ax, f.by - f.ay), tall = jump >= DR.tallJump, n = Math.round(len * (tall ? 2.6 : 1.6) * (0.6 + 0.8 * dhash(f.wx, f.wy, 1, 10)));
@@ -601,6 +610,7 @@
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
   function renderLevels(ctx, cam, S, P, o, st, loopsOf, tech) {
     const DRESS = !!o.dress && !PICK, lvl = S.fineMask || S.fine, th = P.terH; // wall dressing: the same pass as in Box
+    const WP = tech === 'C' && !PICK && E.wallc ? E.wallc.get(S, P) : null; // the wall pass of technique C (null: off); the pick render never sees it
     const ST = hasStairs(S) ? stairTiles(S) : null, PIECES = ST ? rampPieces(S, cam) : new Map(); // ramp pieces by level band
     const ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) for (const bd of ascBands(S, w, ascLow(o, cam, w))) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
     for (let L = 0; L <= S.maxFine; L++) {
@@ -613,7 +623,7 @@
       const tileIdx = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? iy * S.W + ix : -1; };
       const tileC = tech === 'C' ? (px, py) => E.cellTileAt(S, P, px, py) : tileIdx; // technique C: the tile of the Voronoi cell, not the tile under the point
       const tileOf = (px, py) => { const ix = Math.floor(px), iy = Math.floor(py); return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? ST.get(iy * S.W + ix) : undefined; };
-      const mkSeg = (a, b, dx, dy, len, va, vb) => {
+      const mkSeg = (a, b, dx, dy, len, va, vb, pn) => {
         const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, rnxy = cam.nrm(dy / len, -dx / len, mx, my);
         if (rnxy[1] <= 0.001) return null;
         const seg = { a, b, rnx: rnxy[0], d: cam.ry(mx, my), veiled: !!(o.veil && S.slice && !S.pocket && !inSlice(S, mx - 0.2 * dy / len, my + 0.2 * dx / len)), stair: null, own: tileC(mx - 0.2 * dy / len, my + 0.2 * dx / len) };
@@ -625,7 +635,7 @@
         }
         if (DRESS && !seg.stair && !seg.clip) { // wall dressing: the cliff this piece belongs to (levels inside and outside, from the cells / tiles on both sides) and the shades of its two vertex normals
           const tOut = tileC(mx + 0.2 * dy / len, my - 0.2 * dx / len), lvIn = seg.own >= 0 ? lvl[seg.own] : L, lvOut = tOut >= 0 ? lvl[tOut] : -1, base = S.baseH !== undefined ? S.baseH : S.levelH[0] - th, kk = (n, p) => clamp(0.92 + 0.28 * -cam.nrm(n[0], n[1], p[0], p[1])[0], 0.65, 1.2);
-          seg.na = va || null; seg.nb = vb || null; seg.dr = { lvIn, lvOut, tot: (S.levelH[Math.max(lvIn, 0)] - (lvOut >= 0 ? S.levelH[lvOut] : base)) / th, k: clamp(0.92 + 0.28 * -rnxy[0], 0.65, 1.2), kA: va ? kk(va, a) : undefined, kB: vb ? kk(vb, b) : undefined, mx, my };
+          seg.na = va || null; seg.nb = vb || null; seg.pn = pn || null; seg.dr = { lvIn, lvOut, tot: (S.levelH[Math.max(lvIn, 0)] - (lvOut >= 0 ? S.levelH[lvOut] : base)) / th, k: clamp(0.92 + 0.28 * -rnxy[0], 0.65, 1.2), kA: va ? kk(va, a) : undefined, kB: vb ? kk(vb, b) : undefined, mx, my };
         }
         return seg;
       };
@@ -649,12 +659,39 @@
             for (let q = 0; q + 1 < pts.length; q++) { const p0 = at(pts[q]), p1 = at(pts[q + 1]); pieces.push(mkSeg(p0, p1, p1[0] - p0[0], p1[1] - p0[1], Math.hypot(p1[0] - p0[0], p1[1] - p0[1]))); }
             if (PICK || pieces.some((q) => q && (q.clip || q.stair))) { for (const q of pieces) if (q) segs.push(q); continue; }
           }
-          const seg = mkSeg(a, b, dx, dy, len, vn && vn[k], vn && vn[(k + 1) % n]); if (seg) segs.push(seg);
+          let pn = null; if (vn) { const pr = loop[(k + n - 1) % n], pdx = a[0] - pr[0], pdy = a[1] - pr[1], pl = Math.hypot(pdx, pdy); if (pl > 1e-6) pn = [pdy / pl, -pdx / pl]; } // outward normal of the previous segment (the foot sector at a convex vertex)
+          const seg = mkSeg(a, b, dx, dy, len, vn && vn[k], vn && vn[(k + 1) % n], pn); if (seg) segs.push(seg);
         }
       }
       for (const pc of pcs) segs.push({ piece: pc, d: pc.d });
+      const wl = WP && WP.byHi.get(L); // the blocks of the wall pass in front of the walls of this level: by depth with them, before the cap
+      if (wl) {
+        for (const f of wl.faces) { const mx = (f.ax + f.bx) / 2, my = (f.ay + f.by) / 2, rr = cam.nrm(f.nx, f.ny, mx, my); if (rr[1] > 0.001) segs.push({ pf: f, rnx: rr[0], d: cam.ry(mx, my) }); }
+        for (const t of wl.tops) segs.push({ pt: t, d: cam.ry(t.cx, t.cy) });
+      }
       segs.sort((p, q) => p.d - q.d);
       for (const s of segs) {
+        if (s.pf) { // a block face: the cliff colour of the upper level, with the dressing when it is on (no foot: the base is not on the lower cap)
+          const f = s.pf, veiled = !!(o.veil && S.slice && !S.pocket && !inSlice(S, (f.ax + f.bx) / 2, (f.ay + f.by) / 2));
+          if (DBG) { const q = [cam.p(f.ax, f.ay, f.zhi), cam.p(f.bx, f.by, f.zhi), cam.p(f.bx, f.by, f.zlo), cam.p(f.ax, f.ay, f.zlo)]; ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(q[k][0], q[k][1]); ctx.closePath(); ctx.fillStyle = '#ff0000'; ctx.fill(); continue; } // test mode: pure red, like the ramps
+          for (let m = f.lo + 1; m <= f.hi; m++) { // the face takes the gradient of the slab wall behind it, band by band (a wall of the level m spans levelH[m - 1] .. levelH[m]): the same colour at the same height
+            const bb = m === 0 ? cam.base : S.levelH[m - 1], bt = S.levelH[m], z0 = Math.max(f.zlo, bb), z1 = Math.min(f.zhi, bt); if (z1 - z0 < 1e-6) continue;
+            wallQuad(ctx, cam, f.ax, f.ay, f.bx, f.by, z0, z1, veiled ? cv : c, s.rnx, o, st, false, [bb, bt]);
+          }
+          if (DRESS) { // the same dressing as the slab wall: shade smoothed along the contour (vertex normals), strata at absolute heights (they continue across the faces)
+            const kk = (n, px, py) => clamp(0.92 + 0.28 * -cam.nrm(n[0], n[1], px, py)[0], 0.65, 1.2);
+            dressWall(ctx, cam, S, P, st, { ax: f.ax, ay: f.ay, bx: f.bx, by: f.by, hb: f.zlo, ht: f.zhi, k: clamp(0.92 + 0.28 * -s.rnx, 0.65, 1.2), kA: f.na ? kk(f.na, f.ax, f.ay) : undefined, kB: f.nb ? kk(f.nb, f.bx, f.by) : undefined, top: f.top, tot: f.tot, wx: f.wx, wy: f.wy });
+          }
+          continue;
+        }
+        if (s.pt) { // the top of a block: ledges (0 < s < K) the upper cap colour x 0.92 without outline, full height the upper cap colour with the silhouette line
+          const t = s.pt, veiled = !!(o.veil && S.slice && !S.pocket && !inSlice(S, t.cx, t.cy));
+          ctx.beginPath(); t.pts.forEach((v, k) => { const q = cam.p(v[0], v[1], t.z); k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.closePath();
+          ctx.fillStyle = DBG ? '#ff0000' : rgb(veiled ? cv : c, t.ledge ? 0.92 : 1); ctx.fill();
+          if (t.ledge || DBG) { if (!DBG) { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.6; ctx.stroke(); } } // ledges: filled, NO outline (a thin ledge drew as a bare outline); the stroke in the fill colour only closes the seams between pieces
+          else if (o.outlines) { ctx.strokeStyle = 'rgba(24,20,34,0.55)'; ctx.lineWidth = 0.8; ctx.stroke(); } // the full-height tops (the continuation of the cap) keep the silhouette line
+          st.polys++; continue;
+        }
         if (s.piece) { rampPiece(ctx, cam, S, o, s.piece.tile, s.piece.rec, ST, st, s.piece.sa, s.piece.sb); continue; }
         let hbs = hb;
         if (s.clip) { hbs = [Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.a[0], s.a[1], s.clipT))), Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.b[0], s.b[1], s.clipT)))]; if (hbs[0] >= ht - 1e-6 && hbs[1] >= ht - 1e-6) continue; }
@@ -665,7 +702,8 @@
           dressWall(ctx, cam, S, P, st, { ax: s.a[0], ay: s.a[1], bx: s.b[0], by: s.b[1], hb: hbs, ht, k: d.k, kA: d.kA, kB: d.kB, top: d.lvIn <= L, tot: d.tot, wx: S.ox + Math.floor(d.mx), wy: S.oy + Math.floor(d.my) });
           if (d.lvOut >= 0 && d.lvOut === L - 1) {
             const dx = s.b[0] - s.a[0], dy = s.b[1] - s.a[1], l = Math.hypot(dx, dy) || 1, nm = [dy / l, -dx / l]; // outward normal of the piece; the ends use the vertex normals when they are known
-            dressFoot(ctx, cam, S, P, st, { ax: s.a[0], ay: s.a[1], bx: s.b[0], by: s.b[1], nax: s.na ? s.na[0] : nm[0], nay: s.na ? s.na[1] : nm[1], nbx: s.nb ? s.nb[0] : nm[0], nby: s.nb ? s.nb[1] : nm[1], hb, jump: d.tot, wx: S.ox + Math.floor(d.mx), wy: S.oy + Math.floor(d.my), c: col });
+            const turn = s.pn ? s.pn[0] * nm[1] - s.pn[1] * nm[0] : 0, sect = s.pn && turn > 1e-3 ? { px: s.a[0], py: s.a[1], n1: s.pn, n2: nm } : null; // convex vertex: the outward normals diverge
+            dressFoot(ctx, cam, S, P, st, { ax: s.a[0], ay: s.a[1], bx: s.b[0], by: s.b[1], nax: nm[0], nay: nm[1], nbx: nm[0], nby: nm[1], sect, hb, jump: d.tot, wx: S.ox + Math.floor(d.mx), wy: S.oy + Math.floor(d.my), c: col }); // per-segment normal (vertex normals folded the strips at sharp corners) + a fill sector at convex vertices
           }
         }
       }

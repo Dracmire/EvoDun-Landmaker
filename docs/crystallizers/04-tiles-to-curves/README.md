@@ -2,7 +2,7 @@
 
 ## 1. Status
 
-PHASE 1 IMPLEMENTED (2026-10-11), waiting for the user's review: the planar technique **C**, its three presets and the **wall dressing** (switch). The vertical pass (phase 2) is NOT approved and is not built. Nothing is exported to Unity (03-stage D15).
+PHASE 1 merged (PR #17: technique C, three presets, wall dressing). PHASE 2, THE WALL PASS, IMPLEMENTED (2026-10-11), waiting for the user's review: T3 (default) and T2 (alternative) as blocks built OUTWARD on the lower ground in front of the walls of technique C. Nothing is exported to Unity (03-stage D15).
 
 ## 2. Goal
 
@@ -35,6 +35,23 @@ Take the same tile data and give it the organic plan shape of Unexplored 2: one 
   after all the corner shifts, then the cap.
 - **D12** (2026-10-11) `meander` is a diagnostic parameter only (`P.meander`, default 0, no UI, no manifest, in no preset). Box keeps a flat normal per face in the wall dressing. Walls under 0.5 terH are not dressed (base rocks stay at jumps of 1.5 terH or more). Compare mode becomes
   Box | A | B | C in a 2 x 2 grid. Window-edge vertices get no corner rule (known limit). The painter order of the foot and the rocks (right after the wall, in the turn of the lower band) is accepted.
+
+- **D13** (2026-10-11) Technique 1 (nested masses) is DISCARDED. It lost clearly in the reviewer's mocks.
+- **D14** (2026-10-11) Technique 3 is the DEFAULT wall technique (the Unexplored 2 look): a cliff band of Voronoi blocks with strata fusion. "If I had to pick for Unexplored 2, technique 3."
+- **D15** (2026-10-11) The EXTRUSION SCALE of technique 3 is a design control and "very relevant". Small extrusion (10-25 % of the band of the reviewer's mock 4) makes walls read as walls. It is a slider (0.10-0.40, default 0.25; the parameter goes to 1.0 in tests).
+- **D16** (2026-10-11) Technique 2 (Voronoi blocks on the wall surface moved by groups in N height passes) is KEPT as an alternative for implementations that need massive groups to shape the stone ("Sea of Stars: give a 'face' to the stone by deforming the Voronoi blocks, probably with more jitter").
+  The fusion step is good for T3, NOT for T2: T2 has no fusion step, and its mock looked too fused (long horizontal bands).
+- **D17** (2026-10-11) D6 revised: the upper floor and its lip stay intact; the wall band is built OUTWARD on the edge of the lower terrace. Visual only: walking, regions, gates and ramps do not change.
+- **D18** (2026-10-11) D7 (fixed large blocks of about 2 tiles) and D9 (T1 / T2 undecided) are superseded by D13-D16.
+- **D19** (2026-10-11, confirmed by the user) The wall pass is part of technique C's geometry, because it needs sub-tile resolution. Box, A and B do not get it. The wall DRESSING stays the same pass for all four techniques. In compare mode the band is therefore shown only in C; "Wall pass: Off" gives the like-for-like view.
+- **D20** (2026-10-11, user's answers to the phase 2 plan) T3 is the default selection, and Off must be pixel-identical to PR #17's C (regress, 0 differences). The pieces of an atom are clipped to the LOW-SIDE C cell: the parts of a prism inside the upper terrace would not always be hidden by its cap near the lip
+  (the claim "its cap hides them" does not hold there), so no clipping toward the lip is needed afterwards. Carry-overs of PR #17: the foot strip of the dressing uses the per-segment normal plus a fill sector at convex vertices (vertex normals folded the strips into streaky fans at sharp corners, Natural, Cam 6;
+  it changes Box / A / B / C pixels only at the foot and only with the dressing on); the rock threshold stays at 1.5 terH (the real map at 5 terraces has no jump that large: max 1.00 terH, 0 edges; at 7 terraces spread 1.5 `middle`: 801 edges, 108 of 2.2 or more); `displace()` uses `k = round(1 / cell)` and `passes <= 3` is checked.
+- **D21** (2026-10-11, review of PR #18, judged at 70 px per tile on the real map, Stage settings, Natural, dressing on, near tile (89.5, 73.7), Cam 1 and Cam 6) VISUAL FOLLOW-UP, picked here: (1) the block faces take the shading of the slab wall behind them: the gradient of the BAND of the slab wall (levelH[m - 1] .. levelH[m], one sub-quad per band) instead of one gradient per face, so the same colour at the same height, the foot darkening included; with the dressing on, the same smoothed shade (vertex normals along the ring) and the strata at absolute heights, so they continue across the faces. The foot strip and the rocks stay on the lower cap at the base of the SLAB wall (not relocated to the prism base; known limit).
+  (2) Thin ledge tops: PICKED "fill, no outline" (not "merge into the face below"): a ledge is filled with the upper cap colour x 0.92 and a stroke in the fill colour that only closes the seams; the full-height tops keep the silhouette line (they continue the cap). (3) The thin dark plate at the upper right of the Cam 6 shot was a TINY FULL-HEIGHT ISLAND: three atoms of the low-side cell with areas 0.023, 0.04 and 0.036 (K = 5, `lip`, H = 1.5 terH, near (96.0, 68.2), a spur end), all s = K. The sliver rule only looked at s < K, so full-height islands of any size survived and stood as a free-standing plate in front of the end of the wall. A final cleanup after the rounds gives a full-height island of area < FULLMIN = 0.15 tile^2 the s of its neighbour with the longest shared border (then the support rule). The real map has a continuous spread of them (median 0.04-0.08 before the extrusion), so the cleanup removes many small teeth: faces on the real map at 5 / 7 / 12 terraces 2354 / 6622 / 13666 -> 755 / 4992 / 9558.
+  (4) The thin-island figure is reported for walls of 1.5 terH or more only (on H = 1 walls it is dominated by the narrow band); the all-walls figure is kept as `thinAll`.
+- **D22** (2026-10-12, user's verdict on PR #18) DEFAULT CONFIRMED: wall pass T3, extrusion 0.25, FULLMIN = 0.15 tile^2. No code change; T2 stays as an alternative (D16).
+
 
 ## 5. Design
 
@@ -71,6 +88,20 @@ One function (`dressWall`, `dressFoot` in `src/render.js`), never in the pick re
   placeholders (domes). They do not repeat the art contract stones (03-stage D19), which sit on the TOP cap edge.
 - **Painter order**: foot and rocks are drawn right after the wall, in the turn of the lower band (Box: in the turn of the lower tile, after its cap), so a wall drawn later cannot cover them and nearer things drawn later do.
 - Outlines at depth discontinuities are unchanged. The info line counts walls, strata, lips, foot strips and rocks per technique.
+
+### Wall pass of C (`src/wallc.js`, `E.wallc.get(S, P)`; selector "Wall pass (technique C)": T3 default / T2 / Off)
+Blocks built OUTWARD on the lower ground in front of every wall; the slab wall of C stays behind them, the upper floor and its lip are intact (D17). Visual only. The blocks are faces (vertical quads with an outward normal) and tops (polygons at a height) grouped by the upper level `hi`; `renderLevels` draws them in the pass of level `hi`,
+after the walls of that level and before its cap, sorted by depth with the walls. Not selectable (the pick render never sees them). Side faces take the cliff colour of the upper level and the dressing when it is on (no foot: the base is not on the lower cap); ledge tops (0 < s < K) take the upper cap colour x 0.92, full-height tops the upper cap colour, separated by the outline.
+- **Walls**: every Voronoi edge of C with a jump of 0.5 terH or more (the threshold of the dressing), H = the jump in tiles; edges next to an exempt cell (ramp / stair footprints + 1 ring, Ascension faces, Cake rings) are dropped, and so is every atom piece that touches an exempt tile: the band is interrupted. "The nearest higher ground IS the terrace a" holds by construction: a low point is tied to the nearest wall edge of its own level.
+- **T3 atoms**: a jittered grid of 0.5 tile (jitter +-0.3 of the cell, hashed by whole-map coordinates), cells = Voronoi of the seeds (3 x 3 neighbours), each cell clipped to the LOW-SIDE C cell of level lo (convex x convex with the same Sutherland-Hodgman, no library): the pieces of an atom. `E.curves.cellPolygon` and `E.curves.clip` are shared with C.
+- **T3 band**: mean distance of the pieces (7 sample points each) to the wall edges < 0.35 H, with all the samples tied to the same upper level; u = mean / (0.35 H); an atom touches the lip when one of its edges lies on a wall edge. Columns: coarse Worley (spacing 1.2, slider) on the lip point. Strata K = max(2, round(jumpTerH * 3)) (slider 2-4).
+  Column profile (hashed): buttress 0.20, step 0.55, recess 0.25 with the formulas of the mock, off = U(-0.25, 0.25). SUPPORT RULE after every change. FUSION, at most 20 rounds: (a) a sliver (s < K and area < 0.30 tile^2) or a thin island (area / border < 0.10) takes the s of the neighbour with the longest shared border; (b) an island over LMAX = 3.6 tiles
+  (columns * column width) has its middle column lowered by 1; then the support rule again. Block top = lower ground + H * s / K.
+- **T3 extrusion** (D15): `v' = lip(v) + (v - lip(v)) * extrude`, the same mapping for every vertex (shared vertices stay shared, edges are cut every 0.5 tile from a canonical end). The layout along the wall does not change, only the depth. NOTE: the band is 0.35 H deep by MEAN distance and the atoms are accepted whole, so the far vertices of an atom reach about 0.45 tile beyond:
+  the world depth is at most (0.35 H + 0.45) * extrude (measured), not 0.35 H * extrude. At 0.25 and H = 1 that is about 0.2 tile, 11 px at 55 px per tile.
+- **T2** (D16, NO fusion): the wall edges of one (lo, hi) are chained; lateral seeds every 0.9 tile (jittered by `T2 jitter`, default 0.4, higher than the atoms' 0.3), NP = 6 height passes (5-10) with jittered row boundaries per lateral cell; groups = coarse 1D Worley (1.0 tile); depth level per (group, pass) in 0..3 with p = 0.35 / 0.25 / 0.25 / 0.15,
+  depth = level / 3 * maxDepth, maxDepth = 0.35 H * extrude; block = lateral cell footprint from the lip out to its depth, z in its row; overhangs allowed; the end faces only where the neighbouring block of the same row is shallower.
+- **Cache**: `S.cache['Cw:' + curves key + '|' + wall key]`; the key has the mode and EVERY wall parameter; the wall sliders only redraw. Manifest: `viewer.wallPass`, `wallExtrude`, `wallStrata`, `wallColumn`, `t2Spacing`, `t2Rows`, `t2Group`, `t2Jitter`, written only when they are not the default.
 
 ## 6. Viewer vs Unity
 
@@ -109,6 +140,17 @@ the labels are now Box / A · Contour / B · Distance / C · Curves); zbuf PASS 
 - Screenshots (`tools/verify.sh shots --extra curves`): the five fixed-set sources (real map Default and Balanced types, Shrine-Pier, Shrine-Pier x4, Snake Mountain surface) with C in Ordered / Balanced / Natural, dressing off / on, Cam 1 Iso and Cam 6 Stage; Box, A and B with the dressing on (Iso). Cam 7 was not shot.
 - NOT verified: touch input, non-Chromium browsers, GPU timings; frame cost of the dressing on the real map; pick of C against A / B for the walkable semantics near displaced cell borders (up to 0.55 tile); the dressing with Pocket / Cake combined.
 
+### Phase 2 (wall pass of C)
+
+- `node tools/test_walls_c.js` (16 checks): determinism, support rule (109 atoms), strata range, u in [0, 1), no piece on exempt tiles or void, band depth <= (0.35 H + atom reach 0.45) * extrude (also at extrude 1.0; the bound includes the reach because atoms are accepted whole by MEAN distance), cache key, T2 without fusion and with depth levels per (group, pass) (levels 1 : 2 : 3 = 0.38 : 0.39 : 0.23 normalised on the real map), whole-map hashing (1786 atoms compared).
+- FUSION FIGURES (T3, Natural, extrude 0.25; islands before -> after, slivers, thin only for walls >= 1.5 terH (all walls in brackets), tiny full-height islands, over LMAX, rounds; after D21): real map 5 terraces 1568 -> 85, slivers 1066 -> 0, thin 0 -> 0 (1225 -> 1), tiny full-height 417 -> 0, 1 round, 755 faces; real map 7 terraces (Stage) 3526 -> 460, slivers 2636 -> 5, thin 155 -> 0 (1994 -> 3), tiny full-height 433 -> 0, over LMAX 2 -> 2, 20 rounds, 4992 faces;
+  real map 12 terraces 8079 -> 957, slivers 6011 -> 11, thin 9 -> 0 (5097 -> 9), tiny full-height 1119 -> 0, over LMAX 5 -> 2, 20 rounds, 9558 faces; Snake surface 5 / 7 terraces 136 -> 21 / 486 -> 112; Shrine-Pier x4 7 terraces 559 -> 119, slivers 424 -> 1, thin 89 -> 0, over LMAX 0 -> 1 (max span 4.8). Fusion often stops at the 20-round cap without converging (measured, not enforced); the final cleanup can re-merge islands, so over LMAX is 2 on the real map at 7 terraces (0 before D21).
+- Z-BUFFER (`tools/ui/test_wallc_ui.js`, ray-marched solid reference, MEASURED, not enforced; mean % differing / mean % beyond the 1 px edge band): T2 at 40 px per tile, 7 terraces spread 1.5: oblique 49.6 / 5.2, iso 49.6 / 8.4, Cam 6 41.5 / 13.0 (worst 14.6), Cam 7 26.0 / 2.1. T2 overhangs are not a heightfield, so part of the mismatch is the reference model, not an order error.
+- COLD COST (`tools/ui/measure_wall.js`, ms, software rasteriser +-30 %, one run): T3 / Off 1.2-1.9x at 5 terraces and 1.7-2.0x at 12 terraces (real map, whole map; Ordered 741 -> 1427 and 1557 -> 3168, Balanced 1950 -> 2376 and 3040 -> 6000, Natural 1581 -> 2431 and 3250 -> 5530). T3 roughly doubles C at 12 terraces. T2 is cheaper than T3.
+- `tools/ui/test_wallpass_ui.js`: default T3, T3 / T2 / Off three pictures, Box / A / B pixel-identical in every mode, sliders only redraw, pick render never sees the blocks, manifest writes only non-default values and rejects wrong ones. `regress` keeps C at `wallPass: 'off'`, so Off is pixel-identical to phase 1.
+- Review shots of D21: `tools/ui/wall_spot.js <outDir>` (real map, Stage settings, Natural, dressing on, 70 px per tile at (89.5, 73.7), Cam 1 and Cam 6, T3 0.25 / 0.40, T2 0.25, Off).
+- Screenshots (`tools/verify.sh shots --extra wallpass`): x4, Snake surface, real map Default and Balanced, Cam 1 / 3 / 6, T3 0.10 / 0.25 and T2 0.25, dressing off / on, fitted and at 60 px per tile on a camera-facing wall. Cam 7 not shot.
+
 ## 8. Mocks (the reviewer's throwaway scripts, outside the repo: a Node ray-marched heightfield on Shrine-Pier x4, Snake Mountain surface and the real map)
 
 - planar passes and presets: kept (E, D, F);
@@ -127,6 +169,9 @@ Known limit: the mock renderer itself.
 - Pick with C: the tile shown is the owner of the cell, which lies up to 0.55 tile from the tile under the point, so against the reference tile (Box geometry) C scores below A and B (measured, not enforced; section 7).
 - The dressing is tile-exact on Box and follows the contour on A / B / C; where a wall is cut per tile (next to a ramp) the vertex shades are not smoothed. The wobble of the strata and the stones are placeholders.
 - OPEN: the vertical pass (phase 2, D6-D9); whether the foot and the rocks should be clipped to the lower cap (today a foot strip can reach a neighbouring cell of another level inside 0.55 tile).
+- WALL PASS: the band depth bound includes the atom reach (0.45 tile); the dressing foot and rocks are not relocated to the prism base; fusion often hits the 20-round cap; the z-buffer mismatch under Cam 6 is higher than under the ortho cameras; T2 overhangs are not a heightfield; on the real map at 5 terraces the walls are weak (H = 1, depth about 0.09 tile at 0.25) and there are 0 rocks. Compare shows the band only in C; Off gives the like-for-like view.
+- WALL PASS, from the reviewer's pass of PR #18 (D21 / D22): (1) narrow full-height tops still draw as outline-only lines in Cam 6 (the ledges are filled, the full-height tops keep the silhouette line); (2) T3 leaves stretches of wall without a band (atoms accepted only below 0.35 H by mean distance, exempt tiles, and the cleanup of tiny full-height islands); (3) the foot strip and the rocks of the dressing are not relocated to the base of the blocks (they stay at the base of the slab wall behind them).
+- NOTE FOR LATER (T2): T2 repeats the same shape at different heights, because every row of a lateral cell shares the same lateral footprint and only the depth varies (`buildT2`). Possible fix: vary the lateral boundaries per row. T3 does not have this problem and reads better, so T2 stays an alternative (D16, D22).
 
 ## 10. Camera contract
 

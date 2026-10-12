@@ -1,7 +1,7 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', wallPass: 't3', wallExtrude: 0.25, wallStrata: 3, wallColumn: 1.2, t2Spacing: 0.9, t2Rows: 6, t2Group: 1.0, t2Jitter: 0.4, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, dress: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
      persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
@@ -16,12 +16,14 @@
   ];
   const SLIDERS = [
     ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 300, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
+    ['Wall pass (technique C)', [['wallExtrude', 'Wall extrusion', 0.10, 0.40, 0.01], ['wallStrata', 'T3 · Strata per terrace', 2, 4, 1], ['wallColumn', 'T3 · Column spacing (tiles)', 0.8, 2.0, 0.1], ['t2Spacing', 'T2 · Lateral spacing (tiles)', 0.6, 1.5, 0.05], ['t2Rows', 'T2 · Height passes', 5, 10, 1], ['t2Group', 'T2 · Group width (tiles)', 0.6, 2.0, 0.1], ['t2Jitter', 'T2 · Jitter', 0, 0.6, 0.05]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
     ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['stairStyle', 'Style: 0 steps · 1 ramp', 0, 1, 1], ['rampDepth', 'Ramp depth, tiles (fixed)', 1, 4, 1], ['tread', 'Tread rise, sub-terraces (steps only)', 1, 5, 1], ['stairW', 'Stair / ramp width, tiles (0 = none; steps use up to 3)', 0, 5, 1]]],
     ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 6, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1], ['pocketHeight', 'Pocket height (decoration relief x)', 1, 4, 0.1], ['ascHeight', 'Ascension wall height (absolute)', 0.5, 3, 0.1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
   const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI'], ['contract', 'Art contract (Stage placeholders: body, wrapper, footprint, props)'], ['dress', 'Wall dressing (strata, lip, foot, base rocks; Box, A, B, C)']];
+  const WALL_KEYS = new Set(['wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter']);
   const TECH = [['box', 'Box'], ['A', 'A · Contour'], ['B', 'B · Distance'], ['C', 'C · Curves']], ALL_TECH = TECH.map((t) => t[0]);
 
   const packs = {};
@@ -45,7 +47,7 @@
     sel.value = Object.keys(ROOMS_PRESETS).find((n) => Object.entries(ROOMS_PRESETS[n]).every(([k, v]) => P[k] === v)) || 'custom';
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (P.curves !== 'ordered') b.curves = P.curves; return b; } // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
@@ -53,6 +55,7 @@
     syncRoomsPreset();
     st.preset = PRESETS.some((x) => x.id === w.camera) ? w.camera : 'oblique'; st.yawOff = st.pitchOff = 0; // absent = the default camera
     P.curves = E.curves.PRESETS[w.curves] ? w.curves : 'ordered'; const cs = $('#curvesPreset'); if (cs) cs.value = P.curves; // absent = Ordered
+    P.wallPass = ['t3', 't2', 'off'].includes(w.wallPass) ? w.wallPass : E.wallc.DEF.wallPass; const wsel = $('#wallPass'); if (wsel) wsel.value = P.wallPass; for (const k of WALL_KEYS) setParam(k, w[k] !== undefined ? w[k] : E.wallc.DEF[k]); // absent = the defaults
   }
 
   function build() {
@@ -75,6 +78,10 @@
         const lg = document.createElement('div'); lg.className = 'row'; lg.innerHTML = '<button id="stagePreset" title="Stage preset: Cam 6 (perspective), technique B, terraces 7, height spread 1.5 around the middle terrace. It only sets existing parameters and the camera.">Stage preset</button>';
         lg.querySelector('button').addEventListener('click', () => { st.preset = 'stage'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.tech = 'B'; st.mode = 'single'; setParam('terraces', 7); setParam('spread', 1.5); setParam('spreadCentre', 'middle'); syncRoomsPreset(); invalidate(true); }); sl.appendChild(lg);
       }
+      if (title === 'Wall pass (technique C)') { // T3 (default, the Unexplored 2 look) / T2 (alternative, no fusion) / Off (the C of phase 1); compare shows the band only in C: Off gives the like-for-like view
+        const lw = document.createElement('label'); lw.className = 'tg'; lw.innerHTML = '<span>Wall pass</span><select id="wallPass"><option value="t3">T3 · Strata blocks</option><option value="t2">T2 · Voronoi blocks</option><option value="off">Off</option></select>';
+        lw.querySelector('select').value = P.wallPass; lw.querySelector('select').addEventListener('change', (e) => { P.wallPass = e.target.value; invalidate(false); }); sl.appendChild(lw);
+      }
       if (title === 'Shaping') { // technique C: the preset of the displacement rules (Ordered E / Balanced D / Natural F)
         const lc = document.createElement('label'); lc.className = 'tg'; lc.innerHTML = '<span>Curves preset (technique C)</span><select id="curvesPreset"><option value="ordered">Ordered</option><option value="balanced">Balanced</option><option value="natural">Natural</option></select>';
         lc.querySelector('select').value = P.curves; lc.querySelector('select').addEventListener('change', (e) => { P.curves = e.target.value; invalidate(false); }); sl.appendChild(lc);
@@ -86,7 +93,7 @@
         const inp = row.querySelector('input'), out = row.querySelector('output');
         inp.value = P[k]; out.textContent = P[k];
         inp.addEventListener('input', () => { out.textContent = inp.value; }); // label only while dragging
-        inp.addEventListener('change', () => { P[k] = +inp.value; out.textContent = P[k]; syncRoomsPreset(); refreshMessage(); invalidate(true); }); // recompute on release
+        inp.addEventListener('change', () => { P[k] = +inp.value; out.textContent = P[k]; syncRoomsPreset(); refreshMessage(); invalidate(!WALL_KEYS.has(k)); }); // recompute on release (the wall pass only redraws: its parameters are in the cache key)
       }
     }
     const tg = $('#toggles');
@@ -496,6 +503,10 @@
     return (st.mode === 'compare' ? ALL_TECH : [st.tech]).filter((t) => ci[t]).map((t) => { const c = ci[t];
       return ` · <b>Art contract</b> (${t === 'box' ? 'Box' : t}): body low ${c.body.low} · mid ${c.body.mid} · high ${c.body.high} · masonry ${c.body.masonry} · edge ${c.body.edge}; wrapper drop ${c.wrapper.drop} · border ${c.wrapper.border} · shore ${c.wrapper.shore}; footprint ${c.footprint}; props trees ${c.trees} · landmarks ${c.landmarks}${c.faded ? ` (${c.faded} faded)` : ''}`; }).join('');
   }
+  function wallText() { // the wall pass of C: mode, band, islands, faces and cost
+    const t = S && (st.mode === 'compare' ? ALL_TECH : [st.tech]).includes('C') && P.wallPass !== 'off' ? S.cache['Cw:' + E.curves.key(P) + '|' + E.wallc.key(P)] : null; if (!t) return '';
+    const q = t.stats; return ` · <b>Wall pass</b> (C ${q.mode.toUpperCase()}, extrusion ${P.wallExtrude}): ${q.edges} wall edges` + (q.mode === 't3' ? ` · ${q.band} band atoms · ${q.after.islands} islands (${q.before.islands} before the fusion, ${q.after.slivers} slivers, ${q.after.spans} over ${E.wallc.LMAX} tiles)` : ` · ${q.chains} chains · ${q.blocks} blocks`) + ` · ${q.faces} faces · ${q.ms} ms`;
+  }
   function curvesText() { // technique C: preset, passes, seeds, contour edges and exempt cells of the last build
     const t = S && (st.mode === 'compare' ? ALL_TECH : [st.tech]).includes('C') ? S.cache['Cs:' + E.curves.key(P)] : null; if (!t) return '';
     return ` · <b>Curves C</b> (${P.curves}): ${t.info.passes} pass${t.info.passes > 1 ? 'es' : ''} · ${t.info.cells} seeds · ${t.info.edges} contour edges · ${t.info.exemptCells} exempt (ramps, walls, rings) · ${t.info.ms} ms`;
@@ -538,7 +549,7 @@
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText();
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText();
   }
 
   function init() {
@@ -549,7 +560,7 @@
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     build();
     invalidate(true);
-    window.__evo = { clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { viewerBlock, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});
