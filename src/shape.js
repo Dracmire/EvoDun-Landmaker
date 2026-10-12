@@ -24,13 +24,14 @@
   }
 
   /* merge tiny equal-value regions into the majority neighbour (minimum plateau width) */
-  function cleanup(W, H, val, grp, minArea) {
+  function cleanup(W, H, val, grp, minArea, protect) { // protect (opt-in, declared links): a component with a protected tile is never merged away
     if (minArea <= 1) return;
     for (let pass = 0; pass < 8; pass++) {
       const { list } = comps(W, H, val, grp);
       let changed = false;
       for (const l of list) {
         if (l.length >= minArea) continue;
+        if (protect && l.some((i) => protect[i])) continue;
         const g = grp[l[0]], v0 = val[l[0]], cnt = new Map();
         for (const i of l) {
           const x = i % W, y = (i / W) | 0;
@@ -187,13 +188,30 @@
 
   /* Terraces and sub-terraces of the WHOLE map (U = raw-range position after pre-smoothing), cached on the pack by the
      shaping parameters and then cropped to the window, so a slice never changes them. */
+  /* DECLARED LINKS (crystallizer 5, floors; opt-in: only a pack with `links` has any): links [{ site: { a, b }, width, depth, landing: { x: [x0, x1], y: [y0, y1] }, footprint: { x, y } }] in tiles of the whole map.
+     The pair `site` (a = the low tile, b = the high tile next to it) is where the link's ramp is carved, by its own width x depth, whatever the gate detection says. linkProtect = the tiles that are structure
+     (the landing, the footprint and the ring foot tiles of the ramp columns): no pre-smoothing, no plateau cleanup. */
+  const ORDER_C = [0, 1, -1, 2, -2];
+  function linkProtect(full) {
+    const W = full.width, H = full.height, m = new Uint8Array(W * H), mark = (x, y) => { if (x >= 0 && y >= 0 && x < W && y < H) m[y * W + x] = 1; };
+    for (const l of full.links || []) {
+      for (const r of [l.landing, l.footprint]) if (r) for (let y = r.y[0]; y <= r.y[1]; y++) for (let x = r.x[0]; x <= r.x[1]; x++) mark(x, y);
+      const [ax, ay] = l.site.a, [bx, by] = l.site.b, dx = bx - ax, dy = by - ay;
+      for (const c of ORDER_C.slice(0, l.width || 1)) { mark(ax - dy * c, ay + dx * c); mark(bx - dy * c, by + dx * c); }
+    }
+    return m;
+  }
+  E.linkProtect = linkProtect;
+
   function quantize(full, P) {
     const key = [P.terraces, P.subs, P.minPlateau, P.minSub, P.pre, P.spreadCentre === 'middle' ? 'mid' : 'big'].join('|');
     if (full._q && full._q.key === key) return full._q;
     const W = full.width, H = full.height, n = W * H, N = P.terraces, K = P.subs;
     const lf = E.landFill(full.elevation, W, H), vd = lf.void;
     let el = Float32Array.from(lf.el);
+    const prot = full.links && full.links.length ? linkProtect(full) : null; // declared links (floors): their tiles are structure, never smoothed or cleaned away
     for (let p = 0; p < P.pre; p++) el = blur3(el, W, H);
+    if (prot) for (let i = 0; i < n; i++) if (prot[i]) el[i] = lf.el[i];
     let mn = Infinity, mx = -Infinity;
     if (full.elevFrame) { mn = full.elevFrame[0]; mx = full.elevFrame[1]; } // opt-in (crystallizer 5, floors): the GLOBAL height frame of a package, also with void, so every floor of a package has the same terrace bands
     else if (vd) { mn = lf.range[0]; mx = lf.range[1]; } // terraces over the land only
@@ -205,14 +223,14 @@
       U[i] = Math.max(0, (el[i] - mn) / (mx - mn || 1) * N);
       ter[i] = Math.min(N - 1, Math.floor(U[i]));
     }
-    cleanup(W, H, ter, g0, P.minPlateau);
+    cleanup(W, H, ter, g0, P.minPlateau, prot);
     for (let i = 0; i < n; i++) {
       const t0 = Math.min(N - 1, Math.floor(U[i]));
       if (K <= 1) sub[i] = 0;
       else if (ter[i] === t0) sub[i] = Math.min(K - 1, Math.floor((U[i] - t0) * K));
       else sub[i] = ter[i] > t0 ? 0 : K - 1;
     }
-    if (vd) { const g1 = new Int16Array(n); for (let i = 0; i < n; i++) g1[i] = ter[i] + (vd[i] ? 1000 : 0); cleanup(W, H, sub, g1, P.minSub); } else cleanup(W, H, sub, ter, P.minSub);
+    if (vd) { const g1 = new Int16Array(n); for (let i = 0; i < n; i++) g1[i] = ter[i] + (vd[i] ? 1000 : 0); cleanup(W, H, sub, g1, P.minSub, prot); } else cleanup(W, H, sub, ter, P.minSub, prot);
     const cnt = new Int32Array(N); for (let i = 0; i < n; i++) if (!vd || !vd[i]) cnt[ter[i]]++;
     let center = 0; for (let t = 1; t < N; t++) if (cnt[t] > cnt[center]) center = t; // the terrace with most land tiles on the whole map (ties: the lower)
     if (P.spreadCentre === 'middle') center = Math.floor((N - 1) / 2); // on a stage the largest terrace is always the base: the centre is the middle terrace (user's decision)
@@ -303,7 +321,7 @@
       S.sliceInfo = { tiles: sl.tiles, window: { x0: sl.x0, y0: sl.y0, w: W, h: H }, bbox: b, zones: spec.zones ? spec.zones.slice() : [], rooms: spec.rooms ? spec.rooms.slice() : [], rect: spec.rect || null, warnings };
     }
     S.rooms = RL; S.roomsNone = roomsNone; S.subFree = !!RL;
-    if (RL) { computeGatesRooms(S, P, full, RL, sl); computeRoomFaces(S, full, RL); } else computeGates(S, P, full, q);
+    if (RL) { computeGatesRooms(S, P, full, RL, sl); computeRoomFaces(S, full, RL); } else { computeGates(S, P, full, q); if (full.links && full.links.length) addDeclaredLinks(S, full); }
     const snap = RL ? { fine: S.fine.slice(), levelH: S.levelH.slice(), levelMeta: S.levelMeta.slice(), maxFine: S.maxFine, byLevel: S.byLevel.map((a) => a.slice()) } : null;
     const build = () => { for (const c of S.conns || []) if (c.old) { c.path = c.old; c.old = null; } /* a re-carve starts again from the tree paths, not from an earlier recompute */ carveStairs(S, P); if (RL) checkConnections(S, P); computeRegions(S, P); if (RL) classifyWalk(S, P, RL); };
     build();
@@ -403,6 +421,22 @@
     return (q.trans[key] = { partner, groups });
   }
   E.gateTransitions = (full, P, kind) => transitions(full, quantize(full, P), P, kind);
+
+  /* DECLARED LINKS: each link of the pack is a gate + a forced site at its declared pair (bypassing the gate detection), with its own width and depth. Natural gate sites that touch the link's tiles are dropped
+     (the declared link owns that edge). The sites carry `declared`: carveStairs builds them as ramps even when stairW is 0 (structure, not detected stairs). Opt-in: only a pack with `links` gets here. */
+  function addDeclaredLinks(S, full) {
+    const prot = linkProtect(full), W = S.W, fw = full.width, win = (x, y) => { const wx = x - S.ox, wy = y - S.oy; return wx < 0 || wy < 0 || wx >= W || wy >= S.H ? -1 : wy * W + wx; };
+    const touches = (i) => { const x = i % W + S.ox, y = ((i / W) | 0) + S.oy; return prot[y * fw + x] === 1; };
+    S.passes = S.passes.filter((x) => !touches(x.a) && !touches(x.b)); for (const x of S.passes) x.alts = x.alts.filter((o) => !touches(o.a) && !touches(o.b));
+    S.declared = [];
+    for (const l of full.links) {
+      const a = win(l.site.a[0], l.site.a[1]), b = win(l.site.b[0], l.site.b[1]); if (a < 0 || b < 0 || S.block[a] || S.block[b]) continue;
+      const gi = S.gates.length; S.gates.push({ kind: 'terrace', size: l.width || 1, tiles: [{ a, b }], declared: true });
+      const site = { a, b, gate: gi, kind: 'terrace', alts: [], exact: true, declared: true, width: Math.max(1, Math.min(5, l.width || 1)), depth: Math.max(1, Math.min(4, l.depth || 1)) };
+      S.declared.push(site);
+    }
+    S.passes = [...S.declared, ...S.passes]; // structure first: a declared link claims its tiles before any natural stair (carveStairs takes the passes in order)
+  }
 
   /* Gates inside the slice and the stair sites on them: one stair per gate at the tile nearest the centroid; long gates
      get floor(length / passGap) stairs spread along their main axis. Each site keeps the rest of its gate as fallbacks
@@ -521,7 +555,7 @@
   function carveStairs(S, P) {
     const { W, H, n } = S, K = S.subs, N = S.N, s = E.subHeight(P), EPS = 1e-9;
     const tread = Math.max(1, Math.min(P.climb, Math.round(P.tread === undefined ? P.climb : P.tread))), reachPlain = tread * s, reach = reachPlain + EPS; // each tread rises at most `tread` sub-terraces
-    if (P.stairW === 0) { // diagnostic: no carving at all (stair sites stay unconnected)
+    if (P.stairW === 0 && !S.passes.some((p) => p.declared)) { // diagnostic: no carving at all (stair sites stay unconnected); declared links (floors) are structure and are still built
       S.carved = new Uint8Array(n); S.stairs = []; S.stairInfo = { gates: S.gates.length, sites: S.passes.length, placed: 0, dropped: 0, narrowed: 0, fills: 0, width: 0 }; return;
     }
     const wReq = Math.round(P.stairW === undefined ? 2 : P.stairW), width = Math.max(1, Math.min(3, wReq)), rwidth = Math.max(1, Math.min(5, wReq)); // steps: 1-3 columns, ramp: 1-5
@@ -646,12 +680,14 @@
     if (ramp && keep) { for (let d = depthDefault; d >= 1; d--) ladder.push([d, rwidthDefault]); if (rwidthDefault > 1) for (let d = depthDefault; d >= 1; d--) ladder.push([d, 1]); } else ladder.push(ramp ? [depthDefault, rwidthDefault] : [0, 0]);
     const variantHist = new Array(ladder.length).fill(0); let variantsChanged = 0;
     for (const pass of S.passes) {
+      if (P.stairW === 0 && !pass.declared) continue; // stairW 0 switches off the natural stairs only
       if (pass.noRamp) continue; // its ramp would end up in isolated terrain (rooms on)
       let rec = null, variant = 0;   // cut into the upper terrace, or build up the lower one: the wider result wins (ties: cut)
       for (const site of pass.exact ? [pass] : [pass, ...pass.alts]) {   // the centred tile first, then the rest of the gate, nearest first
-        for (let vi = 0; vi < ladder.length && !rec; vi++) {
+        const lad = pass.declared ? [[pass.depth, pass.width]] : ladder; // a declared link has its own width and depth and is always a ramp
+        for (let vi = 0; vi < lad.length && !rec; vi++) {
           const cand = [];
-          for (const mode of ['cut', 'fill']) { const r = ramp ? planRamp(site, mode, ladder[vi][0], ladder[vi][1]) : plan(site, mode); if (r) cand.push(r); }
+          for (const mode of ['cut', 'fill']) { const r = ramp || pass.declared ? planRamp(site, mode, lad[vi][0], lad[vi][1]) : plan(site, mode); if (r) cand.push(r); }
           if (vi === 0 && !cand.length) break;   // nothing fits here at all: the next site of the gate (variants are for a ramp that fits but would cut a path)
           cand.sort((p, q) => q.cols.length - p.cols.length || (p.mode === 'cut' ? -1 : 1));
           for (const r of cand) if (walkOK(r)) { rec = r; variant = vi; break; }
@@ -668,7 +704,7 @@
       for (const [a, b] of recLinks(rec)) links.add(lk(a, b));
       stairs.push(rec);
     }
-    if (ramp) { // a cut ramp lowers its footprint to the level of the low end (a hole in every slab above); a built-up one keeps its tiles
+    if (ramp || stairs.some((r) => r.ramp)) { // a cut ramp lowers its footprint to the level of the low end (a hole in every slab above); a built-up one keeps its tiles
       for (const rec of stairs) if (rec.mode === 'cut') for (const st of rec.steps) for (const t of st.tiles) S.fine[t] = rec.level;
       S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []);
       for (let i = 0; i < n; i++) if (!S.void || !S.void[i]) S.byLevel[S.fine[i]].push(i);

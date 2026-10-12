@@ -300,23 +300,24 @@
       if (!f.elevation || f.elevation.length !== n) errs.push(`floor ${k + 1}: elevation must have width x height values`);
       if (!(f.z > 0)) errs.push(`floor ${k + 1}: z must be positive`);
     });
-    for (const l of pack.links || []) if (!pack.floors.some((f) => f.id === l.from) || !pack.floors.some((f) => f.id === l.to)) errs.push('a link names a floor that does not exist');
+    for (const l of pack.links || []) {
+      if (!pack.floors.some((f) => f.id === l.from) || !pack.floors.some((f) => f.id === l.to)) errs.push('a link names a floor that does not exist');
+      const pt = (v) => Array.isArray(v) && v.length === 2 && v.every(Number.isInteger), rect = (r) => r && Array.isArray(r.x) && Array.isArray(r.y) && r.x.length === 2 && r.y.length === 2;
+      if (!l.site || !pt(l.site.a) || !pt(l.site.b) || Math.abs(l.site.a[0] - l.site.b[0]) + Math.abs(l.site.a[1] - l.site.b[1]) !== 1) errs.push('a link needs site { a, b }: two 4-neighbour tiles (a = the low one)');
+      if (!(l.width >= 1 && l.width <= 5 && Number.isInteger(l.width)) || !(l.depth >= 1 && l.depth <= 4 && Number.isInteger(l.depth))) errs.push('a link needs its own width (1-5) and depth (1-4)');
+      if (!rect(l.landing) || !rect(l.footprint)) errs.push('a link needs landing { x, y } and footprint { x, y } (inclusive tile rectangles)');
+    }
     return errs;
   };
-  /* the pack of one layer for E.shape: k = 0 the exterior, k >= 1 the floor with id k; every layer carries the package's elevFrame (the same terrace bands) and no slice */
+  /* the pack of one layer for E.shape: k = 0 the exterior, k >= 1 the floor with id k; every layer carries the package's elevFrame (the same terrace bands) and no slice; the floor a link starts from carries it (declared links, see shape.js) */
   E.floorPack = function (pack, k) {
     const f = k === 0 ? null : pack.floors.find((x) => x.id === k); if (k !== 0 && !f) throw new Error('No floor ' + k);
-    return { name: pack.name + (f ? ' - ' + f.name : ' - exterior'), width: pack.width, height: pack.height, elevation: f ? f.elevation : pack.elevation, elevFrame: pack.elevFrame, masks: f ? {} : (pack.masks || {}), markers: f ? (f.markers || []) : (pack.markers || []), fields: {} };
+    return { name: pack.name + (f ? ' - ' + f.name : ' - exterior'), width: pack.width, height: pack.height, elevation: f ? f.elevation : pack.elevation, elevFrame: pack.elevFrame, masks: f ? {} : (pack.masks || {}), markers: f ? (f.markers || []) : (pack.markers || []), fields: {}, links: (pack.links || []).filter((l) => l.from === k) }; // a link is carved in the map of the LOWER floor (its `from`)
   };
-  /* The Floors view warns when the link between floors may be missing: the link needs a terrace edge between the floors (terraces 3 or 5 for the default floor heights, the others move the floors to other bands),
-     a minimum plateau not larger than the landing, and ramps switched on. Returns the messages (empty = fine). P: the viewer parameters. */
-  E.floorWarnings = function (pack, P) {
-    const out = [], l = (pack.links || [])[0]; if (!l) return out;
-    const f1 = pack.floors.find((f) => f.id === l.from), f2 = pack.floors.find((f) => f.id === l.to);
-    const landing = f1 ? f1.elevation.reduce((n, v) => n + (f2 && Math.abs(v - f2.z) < 1e-9 ? 1 : 0), 0) : 0;
-    if (P.terraces !== 3 && P.terraces !== 5) out.push(`terraces ${P.terraces}: the floors may fall in bands without a terrace edge between them (floor link may be missing; use 3 or 5)`);
-    if (P.minPlateau > landing) out.push(`minPlateau ${P.minPlateau} is larger than the landing (${landing} tiles): the plateau cleanup deletes it (floor link missing)`);
-    if (!(P.stairW > 0)) out.push('stairW 0: ramps are off (floor link missing)');
-    return out;
+  /* The Floors view warns when a DECLARED link was not built in the shape of its lower floor (the pair lies in void or the ramp did not fit): `S` = the shape of the floor the link starts from.
+     Declared links are structure (protected from the smoothing and the plateau cleanup, built even with stairW 0), so no slider setting is a reason to warn; this only reports what really failed. Returns the messages. */
+  E.floorWarnings = function (pack, S) {
+    const want = (pack.links || []).length, got = (S && S.stairs ? S.stairs : []).filter((r) => r.site && r.site.declared).length;
+    return got < want ? [`floor link missing: ${got} of ${want} declared link(s) carved in the lower floor`] : [];
   };
 })(window.EVO = window.EVO || {});
