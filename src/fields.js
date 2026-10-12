@@ -317,6 +317,12 @@
   };
   /* The Floors view warns when a DECLARED link was not built in the shape of its lower floor (the pair lies in void or the ramp did not fit): `S` = the shape of the floor the link starts from.
      Declared links are structure (protected from the smoothing and the plateau cleanup, built even with stairW 0), so no slider setting is a reason to warn; this only reports what really failed. Returns the messages. */
+  /* a PNG as a single-image pack, built EXACTLY like the viewer does for a loaded file: decodePng -> imageChannels -> packFromRoles (elevation = channel V, no maxnode). Used by the built-in real map
+     (tools/test_realmap_pack.js checks it against tools/real_pack.js). data: ArrayBuffer / Uint8Array / Buffer. */
+  E.packFromPng = async function (data, name, flipY) {
+    const dec = await E.decodePng(data), im = Object.assign({ name, dec }, E.imageChannels(dec, !!flipY));
+    return E.packFromRoles([im], { elevation: { image: 0, channel: 'V' } }, { name, maxnode: 0, markers: [] });
+  };
   E.floorWarnings = function (pack, S) {
     const want = (pack.links || []).length, got = (S && S.stairs ? S.stairs : []).filter((r) => r.site && r.site.declared).length;
     return got < want ? [`floor link missing: ${got} of ${want} declared link(s) carved in the lower floor`] : [];

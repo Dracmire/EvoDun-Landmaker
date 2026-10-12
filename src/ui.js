@@ -37,6 +37,44 @@
     if (!o) { o = document.createElement('option'); o.value = id; $('#src').appendChild(o); }
     o.textContent = label;
   }
+  /* the REAL MAP built in: the PNG of data/samples/ (embedded as base64 in data/packs.js) goes through the SAME path as a loaded file: E.decodePng -> E.imageChannels -> E.packFromRoles (elevation = channel V, no maxnode),
+     so the numbers equal tools/real_pack.js (tools/test_realmap_pack.js). Decoded once, on the first selection. */
+  async function realMapPack() {
+    const b = atob(window.EVO_REAL_PNG), u = new Uint8Array(b.length); for (let k = 0; k < b.length; k++) u[k] = b.charCodeAt(k);
+    return E.packFromPng(u.buffer, 'skeleton_heightmap_256.png');
+  }
+  /* choose a source: the built-in real map is decoded on its first selection; a built-in pack may declare its viewer block (floors: terraces 5 and minPlateau 5); a crop belongs to one map */
+  async function selectSource(id) {
+    if (id === 'real_map' && !packs.real_map.pack) { message('Decoding the real map…'); try { packs.real_map.pack = await realMapPack(); message(''); } catch (err) { message(err.message); $('#src').value = st.pack; return false; } }
+    $('#src').value = id; st.pack = id;
+    const vk = packs[st.pack] && packs[st.pack].pack && packs[st.pack].pack.viewer; if (vk) applyViewerBlock(vk);
+    for (const c of cropIds) $('#' + c).value = '';
+    onPackChanged(); refreshMessage(); invalidate(true); return true;
+  }
+  /* SCENARIOS (user's decision): one click that only SETS existing parameters (like ROOMS_PRESETS): source, preset, switches, room chip, technique, camera. No logic of its own. */
+  const SCENARIOS = [
+    { id: 'real_default', label: 'Real map · Default', src: 'real_map', rooms: true, preset: 'default' },
+    { id: 'real_balanced', label: 'Real map · Balanced types', src: 'real_map', rooms: true, preset: 'balanced' },
+    { id: 'pocket31', label: 'Pocket · Diorama 31', src: 'real_map', rooms: true, preset: 'balanced', pocket: true, room: 31, cam: 'isoE' },
+    { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage', src: 'shrine_pier_x4', stage: true, contract: true },
+    { id: 'snake_curves', label: 'Snake surface · Curves C', src: 'snake_surface', tech: 'C', cam: 'oblique' },
+    { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors' }
+  ];
+  async function applyScenario(sc) {
+    if (!(await selectSource(sc.src))) return;
+    const tick = (id, v) => { const el = $('#' + id); if (el) el.checked = v; };
+    // the base every scenario starts from (so the same click always gives the same state): the defaults of the parameters the scenarios touch
+    setParam('terraces', 5); setParam('spread', 1); setParam('minPlateau', 5); P.spreadCentre = 'largest'; P.cake = false; P.ascWalls = false; O.contract = false; tick('t-cake', false); tick('t-ascWalls', false); tick('t-contract', false);
+    st.tech = 'A'; st.mode = 'compare'; st.preset = 'oblique'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.floors = 'single'; st.layer = 0;
+    P.rooms = !!sc.rooms; tick('t-rooms', P.rooms); P.pocket = !!sc.pocket; tick('t-pocket', P.pocket);
+    if (sc.preset) applyRoomsPreset(sc.preset);
+    sliceSel.rooms.clear(); if (sc.room) { sliceSel.whole = false; sliceSel.rooms.add(sc.room); } else sliceSel.whole = true;
+    if (sc.stage) $('#stagePreset').click(); // the Stage preset sets Cam 6, B, single view, terraces 7, spread 1.5
+    if (sc.contract) { O.contract = true; tick('t-contract', true); }
+    if (sc.cam) st.preset = sc.cam;
+    if (sc.tech) { st.tech = sc.tech; st.mode = 'single'; }
+    syncChips(); syncRoomChips(); refreshMessage(); invalidate(true);
+  }
   function message(text) { const m = $('#msg'); m.textContent = text || ''; m.hidden = !text; }
 
   /* rooms presets (user's decision): they only SET existing parameters, no logic. Balanced types = the generator's parameters that even out Cake / Diorama / Ascension (real map: 29 / 30 / 29 of 88 rooms, 48 ramps) */
@@ -104,6 +142,7 @@
       i.addEventListener('change', () => { O[k] = i.checked; invalidate(false); });
       tg.appendChild(l);
     }
+    const sb = $('#scenarios .scn'); for (const sc of SCENARIOS) { const b = document.createElement('button'); b.textContent = sc.label; b.dataset.id = sc.id; b.addEventListener('click', () => applyScenario(sc)); sb.appendChild(b); }
     const pb = $('#presets');
     for (const p of PRESETS) {
       const b = document.createElement('button'); b.textContent = p.label; b.title = p.title; b.dataset.id = p.id;
@@ -118,7 +157,7 @@
     }
     $('#layout').addEventListener('change', (e) => { st.layout = e.target.value; invalidate(false); });
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
-    $('#src').addEventListener('change', (e) => { st.pack = e.target.value; const vk = packs[st.pack] && packs[st.pack].pack && packs[st.pack].pack.viewer; if (vk) applyViewerBlock(vk); /* a built-in pack may declare its viewer block (floors: terraces 5 and minPlateau 5) */ for (const id of cropIds) $('#' + id).value = ''; onPackChanged(); refreshMessage(); invalidate(true); }); // a crop belongs to one map
+    $('#src').addEventListener('change', (e) => selectSource(e.target.value)); // a crop belongs to one map
     buildRoles();
     $('#wholeRooms').addEventListener('click', () => { sliceSel.rooms.clear(); sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); syncRoomChips(); refreshMessage(); invalidate(true); });
     $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
@@ -561,6 +600,14 @@
     if (P.cake && k) x += ` · Cake rings ON: ${k.down} bowl + ${k.up} pyramid links built, ${k.flat} links without rings, ${k.tiles} ring tiles, ${k.levelsAdded} levels added` + (k.conflicts ? `, ${k.conflicts} tiles claimed twice` : '');
     return x;
   }
+  /* the live state the control requirements are evaluated from (src/controls.js): after every recompute / redraw */
+  function controlsCtx() {
+    const raw = packs[st.pack] && packs[st.pack].pack, T = S && S.types ? S.types.counts : null, F = (S && S.fields) || {}, any = (a) => !!(a && a.some((v) => v));
+    return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket,
+      techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
+      packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
+      floors: E.hasFloors(raw), floorsView: st.floors, camKind: view().kind };
+  }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
     document.querySelectorAll('#techs button').forEach((b) => b.classList.toggle('on', st.mode === 'single' && b.dataset.id === st.tech));
@@ -577,6 +624,7 @@
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
     $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText();
+    E.controls.refresh(document, controlsCtx()); // requirements of every control, from the live state
   }
 
   function init() {
@@ -586,9 +634,10 @@
     setPack('shrine_pier_x4', 'Shrine-Pier x4 (decompressed, derived)', window.EVO_PACKS.shrine_pier_x4);
     setPack('snake_floors', 'Snake Mountain floors (shaft + 2 floors, derived)', window.EVO_PACKS.snake_mountain_floors);
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
-    build();
+    setPack('real_map', 'Real map 256 (height only)', null); // decoded on the first selection (realMapPack)
+    build(); E.controls.layout(document); E.controls.badges(document);
     invalidate(true);
-    window.__evo = { viewerBlock, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

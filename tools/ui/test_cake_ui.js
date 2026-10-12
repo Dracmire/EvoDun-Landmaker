@@ -33,7 +33,7 @@ const { open } = require('./common');
     ok(`${tech}: a click on the centre of a ring tile that no taller neighbour hides resolves to that tile (top view)`, r.tot > 100 && r.got / r.tot >= 0.95, JSON.stringify(r));
   }
   // rooms off: the switch does nothing
-  await page.uncheck('#t-rooms'); await a.idle(); await a.tech('A'); await a.preset('oblique'); const ro = hash(await a.canvas()); await page.uncheck('#t-cake'); await a.idle();
+  await page.uncheck('#t-rooms'); await a.idle(); await a.tech('A'); await a.preset('oblique'); const ro = hash(await a.canvas()); await page.evaluate(() => { window.__evo.P.cake = false; document.querySelector('#t-cake').checked = false; window.__evo.draw(); }); await a.idle(); // the Cake switch is greyed with Rooms off: set by P.cake, not by a click
   ok('rooms off: the Cake switch changes nothing (identical canvas) and there is no type text', ro === hash(await a.canvas()) && !/Room types/.test(await info()));
   console.log('errors:', JSON.stringify(a.errs)); ok('no console errors', a.errs.length === 0); await a.browser.close();
 })();
