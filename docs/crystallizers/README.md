@@ -9,7 +9,8 @@ the short rules; the long history and the reasons live here.
 | 1 | Terrain techniques: Box (reference), A (contour polygons), B (distance field) | Closed (base, PR #1-#4) | [01-terrain](01-terrain/README.md) |
 | 2 | Room types: Cake / Diorama (pocket) / Ascension (walls) | Closed (PR #7-#13; its data source, the rooms layer, PR #5-#6) | [02-room-types](02-room-types/README.md) |
 | 3 | Stage: framing and dressing as an art-piece contract, Sea of Stars reference | Design draft | [03-stage](03-stage/README.md) |
-| 4 | Tiles to Curves (Unexplored 2): technique C (planar Voronoi) + wall dressing | Phase 1 merged (PR #17); phase 2 (wall pass T3 / T2) implemented, in review | [04-tiles-to-curves](04-tiles-to-curves/README.md) |
+| 4 | Tiles to Curves (Unexplored 2): technique C (planar Voronoi) + wall dressing | Closed (PR #17, #18) | [04-tiles-to-curves](04-tiles-to-curves/README.md) |
+| 5 | Floors: a multi-floor macroform (Snake Mountain, crater shaft, 2 interior floors) shown as single floor / exploded stack / cutaway | In progress (data, declared links and the Floors view built; in review) | [05-floors](05-floors/README.md) |
 
 ## Core examples
 

@@ -287,4 +287,38 @@
     if (m.objectives && m.objectives.length) out.objectives = m.objectives.map((o) => Object.assign({ x: o.x, y: o.y }, o.label ? { label: o.label } : {}));
     return out;
   };
+
+  /* ---- floors package (crystallizer 5; optional keys of a built-in pack, old packs are unaffected): floors [{ id, name, z, elevation[], markers? }] (same width x height, 0 = void; floors are NOT zones),
+     shaft { c, r, top }, links [{ from, to, lanes, width, foot, landing, landingX, slopeX, slopeZ }], elevFrame [min, max] (the package's GLOBAL height frame: quantize uses it even where a map has void) ---- */
+  E.hasFloors = (pack) => !!(pack && Array.isArray(pack.floors) && pack.floors.length);
+  E.validateFloors = function (pack) { // [] when fine, else the problems (the viewer shows them, the tests assert none)
+    const errs = [], n = pack.width * pack.height;
+    if (!E.hasFloors(pack)) return ['no floors'];
+    if (!Array.isArray(pack.elevFrame) || pack.elevFrame.length !== 2 || !(pack.elevFrame[1] > pack.elevFrame[0])) errs.push('elevFrame must be [min, max]');
+    if (!pack.shaft || !Array.isArray(pack.shaft.c) || !(pack.shaft.r > 0)) errs.push('shaft { c, r } is missing');
+    pack.floors.forEach((f, k) => {
+      if (!f.elevation || f.elevation.length !== n) errs.push(`floor ${k + 1}: elevation must have width x height values`);
+      if (!(f.z > 0)) errs.push(`floor ${k + 1}: z must be positive`);
+    });
+    for (const l of pack.links || []) {
+      if (!pack.floors.some((f) => f.id === l.from) || !pack.floors.some((f) => f.id === l.to)) errs.push('a link names a floor that does not exist');
+      const pt = (v) => Array.isArray(v) && v.length === 2 && v.every(Number.isInteger), rect = (r) => r && Array.isArray(r.x) && Array.isArray(r.y) && r.x.length === 2 && r.y.length === 2;
+      if (!l.site || !pt(l.site.a) || !pt(l.site.b) || Math.abs(l.site.a[0] - l.site.b[0]) + Math.abs(l.site.a[1] - l.site.b[1]) !== 1) errs.push('a link needs site { a, b }: two 4-neighbour tiles (a = the low one)');
+      if (!(l.width >= 1 && l.width <= 5 && Number.isInteger(l.width)) || !(l.depth >= 1 && l.depth <= 4 && Number.isInteger(l.depth))) errs.push('a link needs its own width (1-5) and depth (1-4)');
+      if (!rect(l.landing) || !rect(l.footprint)) errs.push('a link needs landing { x, y } and footprint { x, y } (inclusive tile rectangles)');
+    }
+    return errs;
+  };
+  /* the pack of one layer for E.shape: k = 0 the exterior, k >= 1 the floor with id k; every layer carries the package's elevFrame (the same terrace bands) and no slice; the floor a link starts from carries it (declared links, see shape.js) */
+  E.floorPack = function (pack, k) {
+    const f = k === 0 ? null : pack.floors.find((x) => x.id === k); if (k !== 0 && !f) throw new Error('No floor ' + k);
+    if (!pack._fp) Object.defineProperty(pack, '_fp', { value: {} }); const memo = pack._fp; if (memo[k]) return memo[k]; // the same object every time: the shapes cache their quantization on it
+    return memo[k] = { name: pack.name + (f ? ' - ' + f.name : ' - exterior'), width: pack.width, height: pack.height, elevation: f ? f.elevation : pack.elevation, elevFrame: pack.elevFrame, masks: f ? {} : (pack.masks || {}), markers: f ? (f.markers || []) : (pack.markers || []), fields: {}, links: (pack.links || []).filter((l) => l.from === k) }; // a link is carved in the map of the LOWER floor (its `from`)
+  };
+  /* The Floors view warns when a DECLARED link was not built in the shape of its lower floor (the pair lies in void or the ramp did not fit): `S` = the shape of the floor the link starts from.
+     Declared links are structure (protected from the smoothing and the plateau cleanup, built even with stairW 0), so no slider setting is a reason to warn; this only reports what really failed. Returns the messages. */
+  E.floorWarnings = function (pack, S) {
+    const want = (pack.links || []).length, got = (S && S.stairs ? S.stairs : []).filter((r) => r.site && r.site.declared).length;
+    return got < want ? [`floor link missing: ${got} of ${want} declared link(s) carved in the lower floor`] : [];
+  };
 })(window.EVO = window.EVO || {});
