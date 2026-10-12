@@ -65,9 +65,14 @@ HOW IT READS (screenshots `tools/verify.sh shots --extra floors`, Cam 1 and Cam 
 
 ## 5d. Later phases
 
-- Option 2, camera-fixed BACKDROP (HD-2D style), built on the Pocket machinery (`src/pocket.js`): the next phase of Floors.
+- Option 2, camera-fixed BACKDROP (HD-2D style), built on the Pocket machinery (`src/pocket.js`): the next phase of Floors. It is the real fix for the shell reading (floors read as inside a shell).
 - Option 3, classic per-floor view with framing: already covered by the Single floor view plus the Pocket framing archetypes.
 - Option 4, castle mode (separate spaces, exterior seen from the interior, transition scenes): a game / Unity staging note, not viewer work.
+- The floor-2 opening as a STAIRWELL (floor 1's ramp seen through the opening): goes with option 2. The opening stays as it is for now (railing + 'Stairs down' marker; it reads as a railed pit with a label, not as stairs).
+
+### Experiment discarded: ghost exterior in the Cutaway
+
+Tried in scratch (nothing applied): the back half of the exterior drawn as the translucent ghost of the Stack lid (opacity 0.42), (a) ghost first (same order as now) and (b) ghost last (over the floors), in Box / A / C, Cam 1 and Cam 3, fitted and at 50 px per tile. Discarded: (a) leaves the shell BEHIND the floors as a pale backdrop, so the floors still read as slabs in front of the cut, not as inside a shell; (b) breaks the painter order (the exterior behind the plane would be drawn over the floors in front of it); and the back half of the floors is cropped, so nothing of the interior behind the plane is shown. A full ghost exterior over whole floors is just the Stack lid, no longer a cut. Cost if ever wanted: `E.renderLayers` already supports `ghost` (mark the first layer of the cut list with `ghost: GHOST` in `layers()` of `src/floors.js`; one more line to reorder for (b)); `tools/ui/test_cut_ui.js` measures coverage with alpha >= 128 and the ghost composites at about 107, so that layer would have to be rendered without the ghost for the mask.
 
 ## 6. Known limits
 
