@@ -90,9 +90,9 @@ part_regress() {
     cmp_pass "floors package, single floor 1 and 2, backdrop off" "$r/old_floors" "$r/new_floors"
     node tools/ui/regress_floors.js "$r/new_backdrop" --toggle backdrop 2>&1 | tail -1
     cmp_pass "floors package, backdrop toggled on and off" "$r/old_floors" "$r/new_backdrop"
-    for vm in real mirror v1 v2 v3; do
-      node tools/ui/regress_floors.js "$r/new_backdrop_$vm" --toggle backdrop --mode "$vm" 2>&1 | tail -1
-      cmp_pass "floors package, backdrop variant $vm toggled on and off" "$r/old_floors" "$r/new_backdrop_$vm"
+    for vm in "real" "mirror" "wall" "wall --gap 4"; do
+      vt="${vm// /_}"; node tools/ui/regress_floors.js "$r/new_backdrop_$vt" --toggle backdrop --mode $vm 2>&1 | tail -1
+      cmp_pass "floors package, backdrop mode $vm toggled on and off" "$r/old_floors" "$r/new_backdrop_$vt"
     done
     EVO_ROOT="$WT" node tools/ui/regress_cams.js "$r/old_cams" 2>&1 | tail -1; node tools/ui/regress_cams.js "$r/new_cams" 2>&1 | tail -1
     cmp_pass "camera bank Cam 1-5 (isoE isoW oblique low top), Box A B, three scenes" "$r/old_cams" "$r/new_cams"

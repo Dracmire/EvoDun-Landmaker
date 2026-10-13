@@ -224,3 +224,58 @@ Today the wall is a cliff to a height (real mirror, min 2) with a flat top: a dr
 2. Default gap 0 with the apron kept as the gap > 0 option (recommended), or remove the apron entirely (simpler, no bay tiles on the apron side).
 3. Profile defaults n = 3 treads, risers 2 then 1 terrace, taper 2 tiles per step: start there and tune with screenshots (recommended), or choose now.
 4. Fog baked by altitude into the level palette (recommended: same in all techniques, no overlay, no screen-space pass) or a screen-space gradient overlay (smoother, but not geometry and invisible to the pick render).
+
+## N. Phases 2a + 2b implemented: single gap, bay fix, stepped profile (`E.backdrop.planAttached`, mode `wall`)
+
+SCOPE: phases 2a (gap + holes) and 2b (profile) only. NOT done: 2c (tone + fog), 2d (stripes). **All tests and measurements of this section are at Cam 1 only** (the backdrop is built on the Cam 1 axis; at Cam 2 / 3 / 4 / 5 / 7 it can hide the floor: a known bug, fixed in a separate PR, not here).
+
+### What changed
+- One `gap` parameter (slider "Backdrop gap", 0-8, default 0). Gap 0 = no apron, the wall starts at the floor edge; gap > 0 keeps the apron (floor-edge height). `v1` / `v2` / `v3` are gone: `P.backdropMode` is `wall` (default), `real` or `mirror` (phase 1, tests only).
+- Bay tiles (void notches of the floor silhouette enclosed by >= 3 neighbours, touching a floor tile) are filled at slab base + 0.05 terH (exact, part 3). Section M proposed + 0.1 terH; see "Decisions taken with the user".
+- Stepped profile: n steps (default 3) over the depth D (default 9), step k rises to `mult x (minRise + (k-1) x riser)` (minRise = 2 = characterTiles x terH, riser 1 terH), the step shrinks laterally by the taper (default 2 tiles per step), and the REAL mirror is the lower bound: `height = base + max(profile, mult x (exterior - base))`. Optional deterministic noise (`backdropNoise`, 0 / 1, no UI) moves step boundaries by +-1 tile and only LOWERS a tile, so the hard rule holds. `backdropSteps`, `backdropRiser`, `backdropTaper`, `backdropDepth` have no UI (parameters of the experiment; the n = 5 variant is steps 5, riser 0.5, depth 10).
+- Info line: "STEPPED PROFILE ... STYLIZATION", wall tiles from the profile vs from the real MIRROR, the lower bound, what the multiplier does. Default numbers (gap 0 x2, 5 terraces): floor 1 wall 158 tiles = 132 profile + 26 mirror, 2 bays; floor 2 wall 112 = 112 profile + 0 mirror, 1 bay. On floor 2 the whole profile is stylization (flat real data), as the user accepted.
+
+### Decisions taken with the user
+- Bay height: section M said slab base + 0.1 terH with a 0.02 % skirt allowance. Measured at 0.1: 99 covered skirt px at ~50 px per tile (0.0282 %, floor 1), above the allowance. CORRECTION: section M's 0.009 % figure counted interior pixels only and left the join pixels out. The user decided: bay at + 0.05 terH, the 0.02 % bound unchanged. Measured now: 10 px (0.0028 %) floor 1 and 10 px (0.0051 %) floor 2 at ~50 px per tile, 0 px fitted; 0 bay caps.
+- Join + blend bound of the attached wall: raised from 0.05 % to 0.06 % of the floor pixels BY THE USER'S DECISION. Measured 0.0520 %: 14 px, floor 2 fitted, all on the skirt face (kind 2) of floor tile (15, 13) (level 8, height 2.22) at its edge with the bay (16, 13) (height 1.87); 7 pass to background and 7 to blended antialiasing codes of no tile (image x 644-651, y 308-316). They are blends, not join codes of the backdrop. Everything else is under the old bound (floor 1 fitted 0.0423 %, ~50 px 0.0285 %; floor 2 ~50 px 0.0284 %). No other threshold, expectation or fixture was changed.
+
+### Structural asserts (enforced)
+`tools/test_backdrop.js` (314 checks): wall / apron tiles never have a floor tile behind them within 0.8 tile laterally; bay tiles at exactly base + 0.05 terH; enclosed void untouched; profile monotonic, taper and mirror lower bound, noise only lowers; level budget <= 10 levels added at 5 terraces and <= 24 at 12 (measured max 8 and 20). `tools/ui/test_backdrop_ui.js` (Box pick render, Cam 1, fitted and ~50 px per tile, floors 1 and 2, gap 0 x1 / x2 / x4, gap 4, n5, noise, plus the real / mirror strict identity): 0 interior floor pixels covered by apron / wall, 0 bay caps, bays only on kind-2 pixels, join + blend <= 0.06 %, the opening of floor 2 stays an opening, control with the band on the camera side (yaw 225) is caught.
+
+### Silhouette ratio (measured, NOT enforced; `tools/ui/measure_backdrop.js`)
+Top width / base width of the backdrop pixels (top 15 % of its rows vs bottom 15 %), fitted Cam 1, Box pick. 1 = drum, < 1 = tapers. BEFORE = origin/main (phase 1b `v2`, a drum) via `EVO_ROOT`; AFTER = this branch.
+
+| floor | state | before | after |
+|---|---|---|---|
+| 1 | x1 | 1.30 | 1.43 |
+| 1 | x2 (default) | 1.18 | 1.20 |
+| 1 | x3 | 1.10 | 1.23 (touches the top of the frame) |
+| 1 | x2, n = 5 | (same as x2) | 1.00 |
+| 1 | x2, noise | (same as x2) | 1.20 |
+| 1 | x2, no taper | (same as x2) | 1.44 |
+| 2 | x1 | 1.29 | 0.92 |
+| 2 | x2 (default) | 1.33 | 0.78 |
+| 2 | x3 | 1.35 | 0.83 (touches the top) |
+| 2 | x2, n = 5 | (same as x2) | 0.86 |
+| 2 | x2, noise | (same as x2) | 0.78 |
+| 2 | x2, no taper | (same as x2) | 1.32 |
+
+On floor 2 the profile tapers (1.33 -> 0.78). On floor 1 the ratio does NOT improve at the default (1.18 -> 1.20): the metric is dominated by the wide, low base rows of the lateral wall, which is wider than the floor. The ratio is blind to how the tiers read; trust the screenshots over it.
+
+### Levels and cold cost (40x40 pack, compare mode Box / A / B / C, fresh browser, 3 samples, headless Chromium with a software rasteriser, +-30 %; NOT extrapolable to a 256x256 map)
+| floor | state | levels added | time to first panels (ms) | time to all four (ms) |
+|---|---|---|---|---|
+| 1 | off | 0 | 29-33 | 97-132 |
+| 1 | phase 1b v2 | 4 | 48-56 | 201-248 |
+| 1 | new default | 6 | 56-80 | 255-321 |
+| 2 | off | 0 | 25-34 | 89-124 |
+| 2 | phase 1b v2 | 2 | 48-57 | 162-173 |
+| 2 | new default | 4 | 49-68 | 193-209 |
+The profile adds about 2 levels over the drum and about 50-80 ms to the whole compare view.
+
+### Screenshots and honest reading (floors 1 and 2, Box / A / B / C, fitted and ~50 px per tile, off / default x2 / x1 / x3, n = 5, noise)
+What I see FIRST: it does not read as a mountain yet. It reads as a tiered cylinder: a tall vertical cliff straight above the floor (vertical gradient stripes, a slightly curved curtain) with two or three narrower tiers on top. On floor 2 it reads as a bottle or a wedding cake (a wide shaft with a smaller cap), the clearest cake of all. Floor 1 at x1 is a low cliff with one thin ledge; at x3 the top tier leaves the frame at the fitted view.
+- Better than the drum: the silhouette is no longer a straight cylinder with a flat lid, the tiers break the outline and floor 2 narrows with height.
+- Still a stack of rock / cake: the lowest tier is by far the tallest part (minRise 2 terH x multiplier plus the mirror), so almost all the mass is a vertical wall and the tiers are small caps; risers are equal, so the steps look machined. n = 5 with finer risers reads even more as a wedding cake on floor 1 (ratio 1.00) and slightly softer on floor 2. Boundary noise ragged the top (Box / A show broken, blocky tiers; B / C show jagged pixel-steps): it hides the regularity but looks like damage, not erosion.
+- At ~50 px per tile the profile is NOT visible: the wall's first tier fills the frame as a plain curtain; only the cliff, the apron-less join and the stripes are seen.
+What the screenshots do NOT show: no other camera than Cam 1 (the known bug), no 256x256 floor, no fog or tone (2c), no deep-skin stripes (2d), no motion or stake / route views, no per-technique pixel numbers beyond the Box pick render.
