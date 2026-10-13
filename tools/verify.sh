@@ -94,6 +94,10 @@ part_regress() {
       vt="${vm// /_}"; node tools/ui/regress_floors.js "$r/new_backdrop_$vt" --toggle backdrop --mode $vm 2>&1 | tail -1
       cmp_pass "floors package, backdrop mode $vm toggled on and off" "$r/old_floors" "$r/new_backdrop_$vt"
     done
+    EVO_ROOT="$WT" node tools/ui/regress_backdrop_on.js "$r/old_bdon" 2>&1 | tail -1; node tools/ui/regress_backdrop_on.js "$r/new_bdon" 2>&1 | tail -1
+    cmp_pass "floors package, backdrop ON at Cam 1, floor 1 and 2, Box A B" "$r/old_bdon/cam1" "$r/new_bdon/cam1"
+    node tools/ui/regress_backdrop_on.js "$r/rt_bdon" --roundtrip 2>&1 | tail -1
+    cmp_pass "floors package, backdrop ON, Cam 1 -> Cam 3 -> Cam 1 round trip equals the first Cam 1 image" "$r/rt_bdon/first" "$r/rt_bdon/after"
     EVO_ROOT="$WT" node tools/ui/regress_cams.js "$r/old_cams" 2>&1 | tail -1; node tools/ui/regress_cams.js "$r/new_cams" 2>&1 | tail -1
     cmp_pass "camera bank Cam 1-5 (isoE isoW oblique low top), Box A B, three scenes" "$r/old_cams" "$r/new_cams"
   } >> "$log" 2>&1

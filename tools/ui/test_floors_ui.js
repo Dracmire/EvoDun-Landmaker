@@ -63,6 +63,22 @@ const { open } = require('./common');
   // compare mode: four panels in both views
   await page.click('#mode'); await a.idle(); await page.waitForTimeout(500);
   for (const v of ['stack', 'cut']) { await page.selectOption('#floorsView', v); await a.idle(); await page.waitForTimeout(400); const n = await page.$$eval('#stage figure', (f) => f.filter((x) => !x.hidden).length), caps = await page.$$eval('#stage figcaption', (c) => c.map((x) => x.textContent)); ok(`compare mode: four painted panels in the ${v} view`, n === 4 && caps.every((c) => !/computing/.test(c)), caps); }
+  // incursion marks of a floors package belong to a LAYER: placed on Floor 1, they are not shown (nor routed) on Floor 2 or on the Exterior, the info lists them, and there is never an "outside the slice" text
+  await page.selectOption('#floorsView', 'single'); await a.idle();
+  const walk = () => ev(() => { const S = window.__evo.S(), o = []; for (let i = 0; i < S.n && o.length < 400; i++) if (!S.block[i] && (!S.void || !S.void[i])) o.push(i); return [o[40], o[300]]; });
+  const place = async (mode, tile) => { await ev(({ mode, tile }) => { window.__evo.setIncMode(mode); window.__evo.placeMark(tile); window.__evo.setIncMode(null); }, { mode, tile }); await a.idle(); };
+  const incTxt = () => page.$eval('#incInfo', (e) => e.textContent), shown = () => ev(() => ({ stake: window.__evo.O.incursion.stake, objs: window.__evo.O.incursion.objectives.length, routes: window.__evo.O.incursion.objectives.filter((o) => o.route).length }));
+  await ev(() => { window.__evo.inc.stake = null; window.__evo.inc.objectives = []; });
+  await page.click('#floorChips button[data-floor="1"]'); await a.idle(); const [t1, t2] = await walk(); await place('stake', t1); await place('obj', t2);
+  ok('on Floor 1 the marks are placed with their layer and shown (stake and one objective)', (await ev(() => [window.__evo.inc.stake.layer, window.__evo.inc.objectives[0].layer])).join() === '1,1' && (await shown()).stake !== null && (await shown()).objs === 1, await incTxt());
+  for (const [k, name] of [[2, 'Floor 2'], [0, 'the Exterior']]) {
+    await page.click(`#floorChips button[data-floor="${k}"]`); await a.idle(); const t = await incTxt(), sh = await shown();
+    ok(`on ${name} the Floor 1 marks are not shown and not routed; the info lists them ("on Floor 1, not shown here"), no "outside the slice", no route`, sh.stake === null && sh.objs === 0 && /Stake: on Floor 1, not shown here/.test(t) && /Objective 1: on Floor 1, not shown here/.test(t) && !/outside the slice|route of|no route/.test(t), t);
+  }
+  await page.click('#floorChips button[data-floor="2"]'); await a.idle(); const [u1] = await walk(); await place('obj', u1);
+  { const t = await incTxt(), sh = await shown(); ok('an objective placed on Floor 2 with the stake on Floor 1: shown, no stake on this layer, never a route between layers', sh.objs === 1 && sh.routes === 0 && /no stake on this layer/.test(t) && !/route of|no route|outside the slice/.test(t), t); }
+  await page.click('#floorChips button[data-floor="1"]'); await a.idle(); { const t = await incTxt(), sh = await shown(); ok('back on Floor 1 the Floor 1 marks are shown again and the Floor 2 objective is listed as not shown here', sh.stake !== null && sh.objs === 1 && /Objective 2: on Floor 2, not shown here/.test(t), t); }
+  await ev(() => { window.__evo.inc.stake = null; window.__evo.inc.objectives = []; });
   // back to the default source: the same picture as before
   await page.click('#mode'); await a.idle(); await page.selectOption('#src', 'snake_surface'); await a.idle(); await a.tech('A'); await a.preset('isoE'); await a.idle(); await page.waitForTimeout(150);
   ok('back on the default source: no Floors controls, the same picture as before', (await page.$eval('#floors', (e) => e.hidden)) && (await hash()) === h0);

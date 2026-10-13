@@ -68,6 +68,37 @@ const { open } = require('./common');
   await page.selectOption('#floorsView', 'stack'); await a.idle(); ok('the exploded stack has no backdrop and the switch and the sliders are greyed (Requires: Single floor)', !(await ev(() => !!window.__evo.S().backdrop)) && (await ev(() => document.querySelector('#t-backdrop').disabled && document.querySelector('#s-backdropHeight').disabled)));
   await page.selectOption('#floorsView', 'cut'); await a.idle(); ok('the cutaway has no backdrop', !(await ev(() => !!window.__evo.S().backdrop)));
   await page.selectOption('#floorsView', 'single'); await a.idle(); await a.preset('stage'); await a.idle(); ok('Cam 6 (perspective): no backdrop and the switch is greyed', !(await ev(() => !!window.__evo.S().backdrop)) && (await ev(() => document.querySelector('#t-backdrop').disabled)));
+  // click guard: a click on a backdrop tile (S.backdrop.role === 2) with the stake mode on is refused ("decoration (floor backdrop): not walkable") and places no mark
+  await page.click('#floorChips button[data-floor="1"]'); await a.idle(); await a.preset('isoE'); await sw(true); await ev(() => { window.__evo.inc.stake = null; window.__evo.inc.objectives = []; });
+  { const r = await ev(() => { const e = window.__evo, S = e.S(), bd = S.backdrop; let t = -1; for (let i = 0; i < S.n && t < 0; i++) if (bd && bd.role[i] === 2) t = i; if (t < 0) return { t }; e.setIncMode('stake'); e.placeMark(t); e.setIncMode(null); return { t, stake: e.inc.stake, objs: e.inc.objectives.length, txt: document.getElementById('incInfo').textContent }; });
+    ok('a click on a backdrop tile with the stake mode on is refused ("is decoration (floor backdrop): not walkable") and places no mark', r.t >= 0 && r.stake === null && r.objs === 0 && /is decoration \(floor backdrop\): not walkable/.test(r.txt), r); }
+  await sw(false);
+  // Cam 1 only: the backdrop is composed for the Cam 1 axis, so at Cam 2 / 3 / 4 / 5 / 6 / 7 the switch and its sliders are greyed ("Requires: use Cam 1") and nothing is built, even with the switch on
+  for (const [cam, id] of [['Cam 2', 'isoW'], ['Cam 3', 'oblique'], ['Cam 4', 'low'], ['Cam 5', 'top'], ['Cam 6', 'stage'], ['Cam 7', 'classic']]) {
+    await a.preset(id); await a.idle(); await sw(true); await a.idle();
+    const r = await ev(() => ({ bd: !!window.__evo.S().backdrop, dis: ['t-backdrop', 's-backdropGap', 's-backdropHeight'].map((i) => document.getElementById(i).disabled), tip: document.getElementById('t-backdrop').closest('label').title }));
+    ok(`${cam}: the switch and both sliders are greyed ("Requires: use Cam 1") and S.backdrop is absent with the switch on`, !r.bd && r.dis.every(Boolean) && /Cam 1/.test(r.tip), r);
+  }
+  await a.preset('isoE'); await a.idle(); await sw(true); ok('back at Cam 1 the backdrop is built again (switch kept)', await ev(() => !!window.__evo.S().backdrop && !document.getElementById('t-backdrop').disabled)); await sw(false);
+  /* Drag yaw offsets at Cam 1. The backdrop is built on the Cam 1 axis (yaw 45), and with gap 0 its wall touches the floor contour, so off-axis the side of the wall occludes a thin strip (2-4 px) of the floor edge: correct occlusion by a wall
+     adjacent to the floor edge, not a painter-order error (before the gap-0 default the apron kept the wall away from the contour). The merged rule (interior hidden 0, join + blend <= 0.06 %, bay skirt <= 0.02 %, 0 bay caps) is ENFORCED only at the
+     yaws listed in ENFORCE; at the others the numbers are MEASURED and PRINTED, NOT ASSERTED (user's decision, option B): a future regression that covers more at those yaws would NOT fail this test, only the printed line shows it. */
+  const ENFORCE = [0], MEASURE = [5, -5, 10, -10, 20, -20];
+  for (const k of [1, 2]) for (const dy of [...ENFORCE, ...MEASURE]) {
+    await page.click(`#floorChips button[data-floor="${k}"]`); await a.idle(); await sw(false); await a.tech('box'); await a.preset('isoE');
+    await ev((dy) => { window.__evo.st.yawOff = dy; window.__evo.draw(); }, dy); await a.idle();
+    const off = await pick(null), fr = new Set(); for (let i = 0; i < off.n; i++) if (off.frag[i]) fr.add(i);
+    await sw(true); const on = await pick({ w: off.w, h: off.h, v: off.v }); const isF = (q) => { const c = off.codes[q]; return c >= 0 && ((c >> 20) === 2 || (c >> 20) === 4) && fr.has(c & 0xfffff); };
+    let cov = 0, hidIn = 0, hidJoin = 0, blend = 0, bayWall = 0, bayCap = 0; const depth = {};
+    for (let q = 0; q < off.codes.length; q++) { if (!isF(q)) continue; cov++; const c = off.codes[q], c2 = on.codes[q]; if (c2 === c) continue; const k2 = c2 < 0 ? -1 : c2 >> 20, v2 = c2 < 0 ? -1 : c2 & 0xfffff, part = (k2 === 2 || k2 === 4) && v2 < on.n ? on.add[v2] : 0;
+      if (part === 3) { if ((c >> 20) === 4) bayCap++; else bayWall++; continue; } if (!part) { blend++; continue; }
+      const x = q % off.w, y = (q / off.w) | 0; let d = 0; for (let r = 1; r <= 8 && !d; r++) for (let ddy = -r; ddy <= r && !d; ddy++) for (let ddx = -r; ddx <= r; ddx++) { if (Math.max(Math.abs(ddx), Math.abs(ddy)) !== r) continue; const xx = x + ddx, yy = y + ddy; if (xx < 0 || yy < 0 || xx >= off.w || yy >= off.h || !isF(yy * off.w + xx)) { d = r; break; } }
+      if (d === 1) hidJoin++; else hidIn++; depth[d || '>8'] = (depth[d || '>8'] || 0) + 1; }
+    const covered = hidIn + hidJoin + bayWall, line = `floor ${k}, Cam 1 yaw ${dy > 0 ? '+' : ''}${dy}: ${cov} floor pixels, ${covered} show an added tile (${(100 * covered / cov).toFixed(4)} %: ${hidIn} deeper than 1 px from the silhouette, ${hidJoin} on the join, ${bayWall} bay skirt), ${blend} blended, ${bayCap} bay caps; depth histogram of the covered strip (px from the silhouette) ${JSON.stringify(depth)}; join + blend ${(100 * (hidJoin + blend) / cov).toFixed(4)} %, bay skirt ${(100 * bayWall / cov).toFixed(4)} %`;
+    if (ENFORCE.includes(dy)) ok(`HARD RULE (enforced) ${line}`, cov > 1000 && hidIn === 0 && bayCap === 0 && hidJoin + blend <= 0.0006 * cov && bayWall <= 0.0002 * cov, { cov, hidIn, hidJoin, blend, bayWall, bayCap });
+    else console.log(`MEASURED (not asserted) ${line}`);
+    await ev(() => { window.__evo.st.yawOff = 0; window.__evo.draw(); }); await a.idle(); await sw(false);
+  }
   await a.preset('isoE'); await a.idle(); await sw(false);
   console.log('errors:', a.errs); ok('no page errors', a.errs.length === 0); await a.browser.close();
 })();

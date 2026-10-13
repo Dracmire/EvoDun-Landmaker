@@ -58,7 +58,7 @@
     { id: 'pocket31', label: 'Pocket · Diorama 31', src: 'real_map', rooms: true, preset: 'balanced', pocket: true, room: 31, cam: 'isoE' },
     { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage', src: 'shrine_pier_x4', stage: true, contract: true },
     { id: 'snake_curves', label: 'Snake surface · Curves C', src: 'snake_surface', tech: 'C', cam: 'oblique' },
-    { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors' }
+    { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors', cam: 'isoE' }
   ];
   async function applyScenario(sc) {
     if (!(await selectSource(sc.src))) return;
@@ -146,7 +146,7 @@
     const pb = $('#presets');
     for (const p of PRESETS) {
       const b = document.createElement('button'); b.textContent = p.label; b.title = p.title; b.dataset.id = p.id;
-      b.addEventListener('click', () => { const wasPersp = PRESETS.find((x) => x.id === st.preset).kind === 'persp'; st.preset = p.id; st.yawOff = 0; st.pitchOff = 0; st.panX = st.panY = 0; st.zoom = 1; invalidate(!!P.backdrop && wasPersp !== (p.kind === 'persp')); }); // the floor backdrop is part of the shape and is not built for Cam 6: crossing between Cam 6 and the others rebuilds it
+      b.addEventListener('click', () => { const wasCam1 = st.preset === 'isoE'; st.preset = p.id; st.yawOff = 0; st.pitchOff = 0; st.panX = st.panY = 0; st.zoom = 1; invalidate(!!P.backdrop && wasCam1 !== (p.id === 'isoE')); }); // the floor backdrop is part of the shape and is composed for Cam 1 only: crossing into or out of Cam 1 rebuilds it
       pb.appendChild(b);
     }
     const tb = $('#techs');
@@ -197,16 +197,24 @@
     const i = y * S.W + x; return S.block[i] ? -1 : i;
   };
   const regionName = (r) => `R${r + 1}`;
+  /* a floors package (crystallizer 5): a mark belongs to the LAYER it was placed on (0 = the exterior, k = floor k); other packs keep marks without a layer (same pixels, same manifest) */
+  const incFloors = () => !!(packs[st.pack] && E.hasFloors(packs[st.pack].pack)), curLayer = () => (st.floors === 'single' ? st.layer : 0);
+  const onLayer = (m) => !incFloors() || (m.layer || 0) === curLayer();
+  const layerName = (k) => (k ? `Floor ${k}` : 'the Exterior');
   function computeIncursion() {
-    const out = { stake: null, objectives: [], lines: [] };
+    const out = { stake: null, objectives: [], lines: [] }, fl = incFloors();
     if (!S) return out;
-    const stake = inc.stake ? incIdx(inc.stake) : -1;
-    if (inc.stake) { if (stake >= 0) out.stake = stake; else out.lines.push('Stake: outside the slice (kept in the pack, not shown).'); }
+    const gone = (name, m) => (fl ? `${name}: on ${layerName(m.layer || 0)}, not shown here.` : null);
+    const stakeHere = inc.stake && onLayer(inc.stake), stake = stakeHere ? incIdx(inc.stake) : -1;
+    if (inc.stake && !stakeHere) out.lines.push(gone('Stake', inc.stake));
+    if (stakeHere) { if (stake >= 0) out.stake = stake; else out.lines.push(fl ? 'Stake: on a tile that is not walkable in this layer (kept in the pack, not shown).' : 'Stake: outside the slice (kept in the pack, not shown).'); }
     inc.objectives.forEach((o, k) => {
-      const i = incIdx(o), name = o.label || `Objective ${k + 1}`;
-      if (i < 0) { out.lines.push(`${name}: outside the slice (kept in the pack, not shown).`); return; }
+      const name = o.label || `Objective ${k + 1}`;
+      if (!onLayer(o)) { out.lines.push(gone(name, o)); return; }
+      const i = incIdx(o);
+      if (i < 0) { out.lines.push(fl ? `${name}: on a tile that is not walkable in this layer (kept in the pack, not shown).` : `${name}: outside the slice (kept in the pack, not shown).`); return; }
       const ob = { i, route: null }; out.objectives.push(ob);
-      if (stake < 0) { out.lines.push(`${name} at (${o.x}, ${o.y}): no stake yet.`); return; }
+      if (stake < 0) { out.lines.push(`${name} at (${o.x}, ${o.y}): no stake ${fl && inc.stake ? 'on this layer' : 'yet'}.`); return; }
       ob.route = E.route(S, P, i, stake);
       if (ob.route) { out.lines.push(`${name}: route of ${ob.route.length} tiles to the stake.`); return; }
       const g = E.regionGap(S, i, stake), xy = (t) => `(${S.ox + (t % S.W)}, ${S.oy + ((t / S.W) | 0)})`;
@@ -248,13 +256,15 @@
     const x = S.ox + (tile % S.W), y = S.oy + ((tile / S.W) | 0);
     if (inc.mode === 'rm') {
       const near = (m) => Math.hypot(m.x - x, m.y - y) <= 1.5;
-      if (inc.stake && near(inc.stake)) inc.stake = null; else { const k = inc.objectives.findIndex(near); if (k >= 0) inc.objectives.splice(k, 1); else return note('No mark there.'); }
+      if (inc.stake && onLayer(inc.stake) && near(inc.stake)) inc.stake = null; else { const k = inc.objectives.findIndex((m) => onLayer(m) && near(m)); if (k >= 0) inc.objectives.splice(k, 1); else return note('No mark there.'); }
     } else {
+      if (S.backdrop && S.backdrop.role[tile] === 2) return note(`(${x}, ${y}) is decoration (floor backdrop): not walkable, no stake or objective there.`);
       if (S.slice && !S.slice[tile]) return note(`(${x}, ${y}) is outside the slice: movement is limited to the slice.`);
       if (S.block[tile]) return note(`(${x}, ${y}) is not walkable (water or void).`);
       if (S.isolated && S.isolated[tile]) return note(`(${x}, ${y}) is isolated terrain (a walkable region under ${S.walkInfo.limit} tiles): decorative, no stake or objective there.`);
       if (!E.tileWalkable(S, tile)) return note(`(${x}, ${y}) is in the margin of a wall, a cliff or a steep slope: not walkable with rooms on. Pick a tile a little further in.`);
-      if (inc.mode === 'stake') inc.stake = { x, y }; else inc.objectives.push({ x, y });
+      const mk = incFloors() ? { x, y, layer: curLayer() } : { x, y }; // floors packs: the mark remembers its layer
+      if (inc.mode === 'stake') inc.stake = mk; else inc.objectives.push(mk);
     }
     invalidate(false);
   }
@@ -480,7 +490,7 @@
       try {
         S = E.shape(pack, P, fl ? null : sliceSpec());
         if (fl) E.floors.prepare(S, raw, P, st.floors === 'single' ? st.layer : 0);
-        if (fl && P.backdrop && E.backdrop && st.floors === 'single' && st.layer > 0 && view().kind !== 'persp') E.backdrop.apply(S, P, raw, st.layer); // Floor backdrop (crystallizer 5, Option 2, phase 1): a band of the mountain behind the floor
+        if (fl && P.backdrop && E.backdrop && st.floors === 'single' && st.layer > 0 && st.preset === 'isoE') E.backdrop.apply(S, P, raw, st.layer); // Floor backdrop (crystallizer 5, Option 2, phase 1): a band of the mountain behind the floor
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
       buildRoomChips(); buildFloorChips();
@@ -612,7 +622,7 @@
     return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket,
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
-      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind };
+      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset };
   }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
