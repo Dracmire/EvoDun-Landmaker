@@ -14,6 +14,6 @@ const { open } = require('./common');
   if (process.argv.includes('--cake')) { await page.check('#t-cake'); await a.idle(); }
   const ti = process.argv.indexOf('--toggle');
   if (ti > 0) { const id = process.argv[ti + 1]; const tog = (on) => page.$eval('#t-' + id, (e, v) => { e.checked = v; e.dispatchEvent(new Event('change', { bubbles: true })); }, on); /* a switch may be greyed (Pocket without Diorama rooms): set by a script change event, the same in both trees */ await tog(true); await a.idle(); await tog(false); await a.idle(); }
-  for (const t of ['box', 'A', 'B']) { await a.tech(t); for (const p of ['oblique', 'isoE']) { await a.preset(p); fs.writeFileSync(path.join(out, `rooms_${t}_${p}.png`), await a.canvas()); } }
+  for (const t of ['box', 'A', 'B', 'C']) { await a.tech(t); /* C: the real map with rooms on; the fix of the window-border edges of C changes only these panels (a seed that leaves the window), announced one by one in verify.sh */ for (const p of ['oblique', 'isoE']) { await a.preset(p); fs.writeFileSync(path.join(out, `rooms_${t}_${p}.png`), await a.canvas()); } }
   console.log('errors:', a.errs); fs.writeFileSync(path.join(out, 'errors.json'), JSON.stringify(a.errs)); await a.browser.close(); process.exit(a.errs.length ? 1 : 0);
 })();

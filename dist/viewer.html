@@ -2991,6 +2991,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       built++;
       const poly = cellPolygon(g, c, R, W, H), s0x = sx[c], s0y = sy[c];
       const m = poly.x.length; if (m < 3) continue;
+      let pcx = 0, pcy = 0; for (let k = 0; k < m; k++) { pcx += poly.x[k]; pcy += poly.y[k]; } pcx /= m; pcy /= m; // the centroid of the (convex) cell polygon: always inside the cell
       for (let k = 0; k < m; k++) {
         const tg = poly.t[k], p = (k + m - 1) % m; let a = [poly.x[p], poly.y[p]], b = [poly.x[k], poly.y[k]], lo, hi, inside = c;
         if (Math.hypot(b[0] - a[0], b[1] - a[1]) < 1e-9) continue;
@@ -2998,7 +2999,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         else if (tg === -2) { if (lc < 0) continue; lo = -1; hi = lc; }
         else continue;
         const dx = b[0] - a[0], dy = b[1] - a[1], nx = dy, ny = -dx, mxp = (a[0] + b[0]) / 2, myp = (a[1] + b[1]) / 2;
-        if (nx * (mxp - sx[inside]) + ny * (myp - sy[inside]) < 0) { const t = a; a = b; b = t; } // outward normal (dy, -dx) points away from the inside cell
+        const rx = tg === -2 ? pcx : sx[inside], ry = tg === -2 ? pcy : sy[inside]; // a window-border edge is oriented by the cell's own polygon, NOT by its seed: a displaced seed can lie OUTSIDE the window (Ordered: max .55 > .5), on the wrong side of the border line, and the edge came out reversed (an open contour: the fill closed it with a chord, a mis-filled wedge). Bisector edges keep the seed (a bisector always separates the two seeds)
+        if (nx * (mxp - rx) + ny * (myp - ry) < 0) { const t = a; a = b; b = t; } // outward normal (dy, -dx) points away from the inside cell
         E_.x0.push(a[0]); E_.y0.push(a[1]); E_.x1.push(b[0]); E_.y1.push(b[1]); E_.lo.push(lo); E_.hi.push(hi); E_.ci.push(inside); E_.co.push(tg >= 0 ? (inside === c ? tg : c) : -1); // co: the cell on the low side (-1: the window)
       }
     }
