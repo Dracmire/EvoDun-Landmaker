@@ -1,7 +1,7 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', wallPass: 't3', wallExtrude: 0.25, wallStrata: 3, wallColumn: 1.2, t2Spacing: 0.9, t2Rows: 6, t2Group: 1.0, t2Jitter: 0.4, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, backdrop: false, backdropGap: 4, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', wallPass: 't3', wallExtrude: 0.25, wallStrata: 3, wallColumn: 1.2, t2Spacing: 0.9, t2Rows: 6, t2Group: 1.0, t2Jitter: 0.4, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, backdrop: false, backdropGap: 4, backdropHeight: 2, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, dress: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
      persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
@@ -167,6 +167,7 @@
     document.getElementById('m-clear').addEventListener('click', () => { inc.stake = null; inc.objectives = []; setIncMode(null); invalidate(false); });
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && inc.mode) setIncMode(null); });
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
+    for (const k of ['backdropGap', 'backdropHeight']) { const inp = $('#s-' + k), out = $('#o-' + k); inp.value = P[k]; out.textContent = P[k]; inp.addEventListener('input', () => { out.textContent = inp.value; }); inp.addEventListener('change', () => { P[k] = +inp.value; out.textContent = P[k]; invalidate(true); }); } // the backdrop is part of the shape of the floor: recompute on release
     $('#t-backdrop').addEventListener('change', (e) => { P.backdrop = e.target.checked; invalidate(true); }); // the backdrop is part of the shape of the floor
     $('#floorsView').addEventListener('change', (e) => { st.floors = e.target.value; invalidate(true); }); // single floor / exploded stack / cutaway (the shape of the primary layer changes)
     window.addEventListener('resize', () => invalidate(false));
@@ -569,7 +570,9 @@
     const rec = S1.stairs.find((r) => r.site && r.site.declared), warn = E.floorWarnings(raw, S1);
     let t = `<br><b>Floors</b>: ${view1}` + (st.floors !== 'single' && !multi ? ' · Cam 6 (perspective) is not supported in this view: showing the selected floor' : '') + (rec ? ` · link: declared ramp ${rec.cols.length} x ${rec.ramp.len} carved (${rec.mode})` : '');
     if (warn.length) t += ` · <b>${warn.join('; ')}</b>`;
-    const bd = S.backdrop && S.backdrop.info; if (bd) t += ` · <b>Backdrop</b>: ${bd.plain} plain + ${bd.band} band tiles (gap ${bd.gap}, band depth reached ${bd.maxDepth.toFixed(1)} of ${bd.depth} tiles, ${bd.dropped} lower than the plain left empty), ${bd.levelsAdded} levels added`;
+    const bd = S.backdrop && S.backdrop.info;
+    if (bd && bd.variant) t += ` · <b>Backdrop (prototype ${bd.variant.toUpperCase()}, the cavity wall attached to the floor)</b>: ${bd.apron} apron + ${bd.wall} wall tiles (gap ${bd.gap}, depth ${bd.depth}); wall heights are REAL data (the exterior surface over the floor) placed by a MIRROR across the back edge; the rise is max(real rise, ${bd.minRise} = characterTiles x terH, the minimum visible fall; ${bd.minRiseTiles} wall tiles are at the minimum) x ${bd.mult} (Backdrop height: stylization, it multiplies only the rise above the apron); ${bd.enclosed} enclosed void tiles untouched; ${bd.levelsAdded} levels added`;
+    else if (bd) t += ` · <b>Backdrop</b>: ${bd.plain} plain + ${bd.band} band tiles (gap ${bd.gap}, band depth reached ${bd.maxDepth.toFixed(1)} of ${bd.depth} tiles, ${bd.dropped} lower than the plain left empty), ${bd.levelsAdded} levels added`;
     return t;
   }
   function wallText() { // the wall pass of C: mode, band, islands, faces and cost
@@ -609,7 +612,7 @@
     return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket,
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
-      floors: E.hasFloors(raw), floorsView: st.floors, camKind: view().kind };
+      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind };
   }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));

@@ -39,6 +39,7 @@
     images: { ok: (c) => c.images, text: 'load PNG images' },
     floors: { ok: (c) => c.floors, text: 'load a pack with floors (Snake Mountain floors)' },
     singleFloor: { ok: (c) => !c.floors || c.floorsView === 'single', text: 'set Floors view to Single floor' },
+    backdropOn: { ok: (c) => c.backdrop, text: 'turn on Floor backdrop' },
     ortho: { ok: (c) => c.camKind !== 'persp', text: 'use an orthographic camera (not Cam 6)' }
   };
   const CAKE = ['rooms', 'roomsFound', 'cakeRoom'], ASC = ['rooms', 'roomsFound', 'ascRoom'], POCKET = ['rooms', 'roomsFound', 'dioRoom'], RM = ['rooms', 'roomsFound'];
@@ -119,6 +120,8 @@
     // ---- 5 Floors
     e('floorsView', '#floorsView', '5 Floors', ALL, ['floors'], 'Single floor, exploded stack or cutaway of the landmark\'s floors (the stack and the cutaway need an orthographic camera). The floors are interior levels inside a shell; the cutaway is a schematic of stacked section maps.', { options: { stack: ['ortho'], cut: ['ortho'] } }),
     e('t-backdrop', '#t-backdrop', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho'], 'Floor backdrop (Option 2, phase 1): behind the chosen floor, a low plain and then a band of the mountain (the real exterior heights, drawn with the decoration palette) so the floor reads as inside a shell. The floor itself does not change. Composed for Cam 1 (Iso 45); the Exterior layer has none.'),
+    e('backdropGap', '#s-backdropGap', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho', 'backdropOn'], 'Backdrop gap, 2-8 tiles (default 4 = two characters): ground tiles between the floor and the foot of the backdrop wall (the apron, at the height of the floor edge, not walkable).'),
+    e('backdropHeight', '#s-backdropHeight', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho', 'backdropOn'], 'Backdrop height, 1-4: multiplies ONLY the rise of the wall above the apron (never the floor). The wall rise is the real exterior height over the floor, mirrored across the back edge, with a minimum of one character (2 tiles); the multiplier is stylization.'),
     // ---- Shared passes
     e('outlines', '#t-outlines', 'Shared passes', ALL, [], 'Dark outlines on caps and walls.'),
     e('gradient', '#t-gradient', 'Shared passes', ALL, [], 'Shading gradient on cliffs.'),
