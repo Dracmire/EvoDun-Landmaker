@@ -2,6 +2,8 @@
 
 ## 1. Status
 
+Default camera: Cam 1 (Iso 45), user decision 2026-10-13.
+
 MERGED (PR #19). Steps A, B, B2, C and E are in main: data, declared links, the Floors view (Single / Stack / Cutaway), the floor-2 railing and 'Stairs down' marker, cutaway paint order measured against a z-buffer (Cam 1 and Cam 3). Option 2 (camera-fixed backdrop, `option2-backdrop.md`): phases 0, 1, 1b (PR #23, #24) and 2a + 2b (PR #26: single gap, bay fix, stepped profile) are merged; 2c (tone + fog) and 2d (stripes) are NOT started. The backdrop is composed for Cam 1 only: its control is greyed at any other camera and it is not built there. Incursion marks of a floors package belong to the layer they were placed on. Nothing is exported to Unity.
 
 ## 2. Goal

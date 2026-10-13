@@ -4903,7 +4903,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     { id: 'pocket31', label: 'Pocket · Diorama 31', src: 'real_map', rooms: true, preset: 'balanced', pocket: true, room: 31, cam: 'isoE' },
     { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage', src: 'shrine_pier_x4', stage: true, contract: true },
     { id: 'snake_curves', label: 'Snake surface · Curves C', src: 'snake_surface', tech: 'C', cam: 'oblique' },
-    { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors' }
+    { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors', cam: 'isoE' }
   ];
   async function applyScenario(sc) {
     if (!(await selectSource(sc.src))) return;

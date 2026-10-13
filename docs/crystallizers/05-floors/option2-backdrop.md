@@ -279,3 +279,22 @@ What I see FIRST: it does not read as a mountain yet. It reads as a tiered cylin
 - Still a stack of rock / cake: the lowest tier is by far the tallest part (minRise 2 terH x multiplier plus the mirror), so almost all the mass is a vertical wall and the tiers are small caps; risers are equal, so the steps look machined. n = 5 with finer risers reads even more as a wedding cake on floor 1 (ratio 1.00) and slightly softer on floor 2. Boundary noise ragged the top (Box / A show broken, blocky tiers; B / C show jagged pixel-steps): it hides the regularity but looks like damage, not erosion.
 - At ~50 px per tile the profile is NOT visible: the wall's first tier fills the frame as a plain curtain; only the cliff, the apron-less join and the stripes are seen.
 What the screenshots do NOT show: no other camera than Cam 1 (the known bug), no 256x256 floor, no fog or tone (2c), no deep-skin stripes (2d), no motion or stake / route views, no per-technique pixel numbers beyond the Box pick render.
+
+### N.1 Drag yaw at Cam 1 (fix pass after PR #26; enforced at yaw 0, measured beyond: option B)
+The backdrop is built on the Cam 1 axis (yaw 45) and Cam 1 (Iso 45) is the default camera of Floors (user, 2026-10-13); at any other camera the control is greyed and nothing is built (`cam1` requirement). With a drag yaw offset at Cam 1 the picture is no longer on the axis the backdrop was composed for. CAUSE (verified against the pre-#26 tree): before 2a the apron kept the wall away from the floor contour and no floor pixel showed a backdrop tile at +-20; with gap 0 the wall touches the floor contour, so off-axis its side occludes a 2-4 px strip of the floor edge. This is correct occlusion by a wall adjacent to the floor edge, not a painter-order error.
+
+Floor pixels that show an added backdrop tile (Box pick render, `tools/ui/test_backdrop_ui.js`, the same count as the reviewer's probe; my own split of it into "deeper than 1 px from the silhouette" and "on the join" is in the printed line):
+
+| yaw | floor 1 | floor 2 |
+|---|---|---|
+| 0 | 0 | 0 |
+| +5 | 5 | 0 |
+| -5 | 5 | 0 |
+| +10 | 26 | 18 |
+| -10 | 25 | 0 |
+| +20 | 81 | 81 |
+| -20 | 86 | 0 |
+
+Depth of the covered strip from the silhouette at +-20 (floor 1, +20): 1 px 40, 2 px 32, 3 px 8, 4 px 1. Join + blend share at +-5: floor 1 0.0656 % / 0.0601 %, floor 2 0.0659 % / 0.0331 %, above the merged 0.06 % bound in three of the four cases, so +-5 is NOT enforced either. (My first run counted only the pixels deeper than 1 px: 41 / 45 at floor 1 +-20, which is the interior part of the 81 / 86.)
+
+CONSEQUENCE: the hard rule (interior hidden 0, join + blend <= 0.06 %, bay skirt <= 0.02 %, 0 bay caps) is ENFORCED at Cam 1 yaw 0 only; at +-5, +-10 and +-20 the test PRINTS the numbers and asserts nothing. A future regression that covers more at +-10..20 would NOT fail a test: only the printed "MEASURED (not asserted)" lines show it. A fix would need an apron or a taper of the first wall row off-axis (a camera phase, not done).

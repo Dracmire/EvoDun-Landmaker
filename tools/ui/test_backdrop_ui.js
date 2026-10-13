@@ -75,16 +75,23 @@ const { open } = require('./common');
     ok(`${cam}: the switch and both sliders are greyed ("Requires: use Cam 1") and S.backdrop is absent with the switch on`, !r.bd && r.dis.every(Boolean) && /Cam 1/.test(r.tip), r);
   }
   await a.preset('isoE'); await a.idle(); await sw(true); ok('back at Cam 1 the backdrop is built again (switch kept)', await ev(() => !!window.__evo.S().backdrop && !document.getElementById('t-backdrop').disabled)); await sw(false);
-  // the hard rule at Cam 1 with the drag yaw +-20 (the camera variation the preset allows): no floor pixel in the interior shows the backdrop, join + blend under the same bound as at the preset yaw
-  for (const k of [1, 2]) for (const dy of [20, -20]) {
+  /* Drag yaw offsets at Cam 1. The backdrop is built on the Cam 1 axis (yaw 45), and with gap 0 its wall touches the floor contour, so off-axis the side of the wall occludes a thin strip (2-4 px) of the floor edge: correct occlusion by a wall
+     adjacent to the floor edge, not a painter-order error (before the gap-0 default the apron kept the wall away from the contour). The merged rule (interior hidden 0, join + blend <= 0.06 %, bay skirt <= 0.02 %, 0 bay caps) is ENFORCED only at the
+     yaws listed in ENFORCE; at the others the numbers are MEASURED and PRINTED, NOT ASSERTED (user's decision, option B): a future regression that covers more at those yaws would NOT fail this test, only the printed line shows it. */
+  const ENFORCE = [0], MEASURE = [5, -5, 10, -10, 20, -20];
+  for (const k of [1, 2]) for (const dy of [...ENFORCE, ...MEASURE]) {
     await page.click(`#floorChips button[data-floor="${k}"]`); await a.idle(); await sw(false); await a.tech('box'); await a.preset('isoE');
     await ev((dy) => { window.__evo.st.yawOff = dy; window.__evo.draw(); }, dy); await a.idle();
     const off = await pick(null), fr = new Set(); for (let i = 0; i < off.n; i++) if (off.frag[i]) fr.add(i);
     await sw(true); const on = await pick({ w: off.w, h: off.h, v: off.v }); const isF = (q) => { const c = off.codes[q]; return c >= 0 && ((c >> 20) === 2 || (c >> 20) === 4) && fr.has(c & 0xfffff); };
-    let cov = 0, hidIn = 0, jb = 0, bayCap = 0; for (let q = 0; q < off.codes.length; q++) { if (!isF(q)) continue; cov++; const c = off.codes[q], c2 = on.codes[q]; if (c2 === c) continue; const k2 = c2 < 0 ? -1 : c2 >> 20, v2 = c2 < 0 ? -1 : c2 & 0xfffff, part = (k2 === 2 || k2 === 4) && v2 < on.n ? on.add[v2] : 0;
-      if (part === 3) { if ((c >> 20) === 4) bayCap++; continue; } const x = q % off.w, y = (q / off.w) | 0; let join = false; for (let ddy = -1; ddy <= 1 && !join; ddy++) for (let ddx = -1; ddx <= 1; ddx++) { const xx = x + ddx, yy = y + ddy; if (xx < 0 || yy < 0 || xx >= off.w || yy >= off.h || !isF(yy * off.w + xx)) { join = true; break; } }
-      if (part && !join) hidIn++; else jb++; }
-    ok(`floor ${k}, Cam 1 yaw ${dy > 0 ? '+' : ''}${dy}: HARD RULE in pixels: ${cov} floor pixels, ${hidIn} interior pixels show the backdrop, ${jb} join / blend pixels (${(100 * jb / cov).toFixed(4)} %, bound 0.06 %), ${bayCap} bay caps`, cov > 1000 && hidIn === 0 && bayCap === 0 && jb <= 0.0006 * cov, { cov, hidIn, jb, bayCap });
+    let cov = 0, hidIn = 0, hidJoin = 0, blend = 0, bayWall = 0, bayCap = 0; const depth = {};
+    for (let q = 0; q < off.codes.length; q++) { if (!isF(q)) continue; cov++; const c = off.codes[q], c2 = on.codes[q]; if (c2 === c) continue; const k2 = c2 < 0 ? -1 : c2 >> 20, v2 = c2 < 0 ? -1 : c2 & 0xfffff, part = (k2 === 2 || k2 === 4) && v2 < on.n ? on.add[v2] : 0;
+      if (part === 3) { if ((c >> 20) === 4) bayCap++; else bayWall++; continue; } if (!part) { blend++; continue; }
+      const x = q % off.w, y = (q / off.w) | 0; let d = 0; for (let r = 1; r <= 8 && !d; r++) for (let ddy = -r; ddy <= r && !d; ddy++) for (let ddx = -r; ddx <= r; ddx++) { if (Math.max(Math.abs(ddx), Math.abs(ddy)) !== r) continue; const xx = x + ddx, yy = y + ddy; if (xx < 0 || yy < 0 || xx >= off.w || yy >= off.h || !isF(yy * off.w + xx)) { d = r; break; } }
+      if (d === 1) hidJoin++; else hidIn++; depth[d || '>8'] = (depth[d || '>8'] || 0) + 1; }
+    const covered = hidIn + hidJoin + bayWall, line = `floor ${k}, Cam 1 yaw ${dy > 0 ? '+' : ''}${dy}: ${cov} floor pixels, ${covered} show an added tile (${(100 * covered / cov).toFixed(4)} %: ${hidIn} deeper than 1 px from the silhouette, ${hidJoin} on the join, ${bayWall} bay skirt), ${blend} blended, ${bayCap} bay caps; depth histogram of the covered strip (px from the silhouette) ${JSON.stringify(depth)}; join + blend ${(100 * (hidJoin + blend) / cov).toFixed(4)} %, bay skirt ${(100 * bayWall / cov).toFixed(4)} %`;
+    if (ENFORCE.includes(dy)) ok(`HARD RULE (enforced) ${line}`, cov > 1000 && hidIn === 0 && bayCap === 0 && hidJoin + blend <= 0.0006 * cov && bayWall <= 0.0002 * cov, { cov, hidIn, hidJoin, blend, bayWall, bayCap });
+    else console.log(`MEASURED (not asserted) ${line}`);
     await ev(() => { window.__evo.st.yawOff = 0; window.__evo.draw(); }); await a.idle(); await sw(false);
   }
   await a.preset('isoE'); await a.idle(); await sw(false);
