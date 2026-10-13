@@ -91,6 +91,7 @@ details.grp>summary{cursor:pointer;font-size:10.5px;text-transform:uppercase;let
   <div id="floors" hidden><h3>Floors</h3>
    <div class="row"><select id="floorsView" title="Floors view"><option value="single">Single floor</option><option value="stack">Exploded stack</option><option value="cut">Cutaway</option></select></div>
    <div id="floorChips" class="chips"></div>
+   <label class="tg"><input type="checkbox" id="t-backdrop"><span>Floor backdrop (single floor: a band of the mountain behind the floor; composed for Cam 1)</span></label>
    <div class="hint" id="floorHint">Stack and cutaway: orthographic cameras only (Cam 1-5, 7); stake and objectives are placed in the single-floor views. The cutaway plane follows the camera yaw (the cut is recomputed when a drag is released).</div>
   </div>
   <div id="incursion"><h3>Incursion</h3>
@@ -2444,31 +2445,17 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     return { arch: 'island', reason: `middle: exits all around (largest arc without exits ${arc.toFixed(0)} deg < 180)`, stats };
   };
 
-  /* APPLY to a shape S (the WORLD shape, reframed to the window of the pocket) of a Diorama: everything outside the pocket becomes void (not drawn), the decoration gets levels of its own, the water gets levels of its own (own colour),
-     the paths are marked. Sets S.pocket (true), S.pocketRole (Uint8 per window tile: 1 fragment, 2 decoration, 3 path, 4 water), S.pocketInfo. The fragment is not touched (same fine levels, same walkability).
-     P.pocketFraming ('auto' or an archetype), P.pocketHeight (multiplies the decoration offsets). S.sliceBox / S.fitH frame the fragment and ~2 r around it; island and drop set S.baseH (the walls over the void go down to it). */
-  P_.apply = function (S, P, RL, ids, opts) {
-    const n = S.n, W = S.W, H = S.H, K = S.subs, idsSet = new Set(ids), fw = S.mapW, frag = new Uint8Array(n);
-    const mapOf = (i) => { const x = (i % W) + S.ox, y = ((i / W) | 0) + S.oy; return x < 0 || y < 0 || x >= fw || y >= S.mapH ? -1 : y * fw + x; }; // -1: outside the map (the border of void of a padded pocket)
-    for (let i = 0; i < n; i++) if (idsSet.has(RL.room[mapOf(i)]) && !(S.void && S.void[i])) frag[i] = 1; // the room's tiles of the WORLD shape (whole map, no slice)
-    // exits: faces of the fragment border across an open room transition (nb = the neighbouring room, x / y = the face in window tiles)
-    const exits = [];
-    for (let i = 0; i < n; i++) { if (!frag[i]) continue; const x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (frag[j]) continue; const rb = RL.room[mapOf(j)]; if (rb <= 0 || idsSet.has(rb)) continue; if (RL.rp.has(E.rooms.key(mapOf(i), mapOf(j), RL.W * RL.H))) exits.push({ a: i, dx, dy, nb: rb, x: x + S.ox + 0.5 + dx * 0.5, y: y + S.oy + 0.5 + dy * 0.5 }); } }
-    // floors first (they need the shape as the world made it): the double / archetype and the heights the framing refers to
-    const fl = P_.floors(S, frag, (i) => RL.forb[mapOf(i)] !== 1 && RL.h[mapOf(i)] > 0 && S.region[i] >= 0), dbl = fl.length >= 2;
-    const fragH = []; for (let i = 0; i < n; i++) if (frag[i]) fragH.push(S.levelH[S.fine[i]]);
-    const fSorted = fl.slice().sort((a, b) => a.h - b.h), lowFloor = fSorted[0], highFloor = fSorted[fSorted.length - 1], lowH = lowFloor ? lowFloor.h : Math.min(...fragH);
-    let highMask = null, highH = lowH; if (dbl) { highMask = new Uint8Array(n); const hs = new Set(highFloor.ters); for (let i = 0; i < n; i++) if (frag[i] && hs.has(S.ter[i])) highMask[i] = 1; const hv = []; for (let i = 0; i < n; i++) if (highMask[i]) hv.push(S.levelH[S.fine[i]]); hv.sort((a, b) => a - b); highH = hv[hv.length >> 1]; }
-    const want = P.pocketFraming || 'auto', pick = want !== 'auto' && P_.ARCH.includes(want) ? { arch: want, reason: 'chosen manually' } : P_.chooseArchetype(RL, S.types, [...idsSet][0], P, dbl, exits);
-    const PH = P.pocketHeight === undefined ? P_.defaults.ph : P.pocketHeight, jump = P.terH, plan = P_.plan(W, H, frag, (i) => S.levelH[S.fine[i]], exits, Object.assign({ ids, jump, sub: E.subHeight(P), arch: pick.arch, ph: PH, lowH, highH, highMask }, opts));
-    const d = plan.disc, truncated = d.cx - d.R < 0 || d.cy - d.R < 0 || d.cx + d.R > W || d.cy + d.R > H;
+  /* ADD LEVELS (shared by the Pocket and the floor backdrop): the tiles with plan.role >= 2 (decoration, path, water) get the heights of plan.height (plan.decoHeight is snapped too); `plan` = { role, height, decoHeight [, keep: Uint8 per tile, 1 = the height is exact, not snapped] }.
+     Steps: snap DOWN to the level grid, insert the heights as levels of their own (palette meta `deco` / `water`), reassign S.fine, remap the ramps' levels. Sets S.levelH, S.levelMeta, S.maxFine; returns { added } (levels added). */
+  P_.addLevels = function (S, P, plan) {
+    const n = S.n, K = S.subs;
     /* QUANTIZE to the existing grid of heights (user's decision, B costs per level): the decoration and the paths snap DOWN (never higher: the hard rule holds) to the levels of the world (terraces x sub-terraces, the cake rings if on)
        extended beyond the lowest and highest terrace with the same spacing; the jitter then moves a cell between existing sub-levels and creates no new level. */
     { const Kk = S.subs, Nn = S.N, sh = E.subHeight(P), jm = P.terH, bT = (t) => (t < 0 ? E.terBase(0, P, S.center) + t * jm : t >= Nn ? E.terBase(Nn - 1, P, S.center) + (t - Nn + 1) * jm : E.terBase(t, P, S.center)), gs = S.levelH.slice();
       for (let t = -16; t < Nn + 12; t++) for (let q = 0; q < Kk; q++) gs.push(bT(t) + q * sh);
       gs.sort((a, b) => a - b); const G = gs.filter((v, i) => i === 0 || v - gs[i - 1] > 1e-5);
       const snap = (h) => { let lo = 0, hi = G.length - 1; if (h <= G[0]) return G[0]; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (G[m] <= h + 1e-5) lo = m; else hi = m - 1; } return G[lo]; };
-      for (let i = 0; i < n; i++) if (plan.role[i] >= 2) { plan.height[i] = snap(plan.height[i]); plan.decoHeight[i] = snap(plan.decoHeight[i]); } }
+      for (let i = 0; i < n; i++) if (plan.role[i] >= 2 && !(plan.keep && plan.keep[i])) { plan.height[i] = snap(plan.height[i]); plan.decoHeight[i] = snap(plan.decoHeight[i]); } }
     /* levels: the heights of the decoration and the paths are inserted in the ranking as levels of their own (never shared with the fragment: a height that equals an existing level is nudged up by 0.003); the water gets levels of its
        own too (+0.006), with their own colour (meta.water), so it is flat and smooth in A and B and the wall under a water tile that falls to another level is water-coloured (the waterfall) */
     const eps = 1e-6, old = S.levelH, hs = new Set(), wk = new Set();
@@ -2489,6 +2476,28 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     for (let i = 0; i < n; i++) fine[i] = plan.role[i] >= 2 ? hIdx.get(Math.round(plan.height[i] / eps)) : remap[S.fine[i]];
     S.fine.set(fine); for (const rec of S.stairs || []) if (rec.level !== undefined) rec.level = remap[rec.level];
     S.levelH = newH; S.levelMeta = newMeta; S.maxFine = newH.length - 1;
+    return { added: newH.length - old.length };
+  };
+
+  /* APPLY to a shape S (the WORLD shape, reframed to the window of the pocket) of a Diorama: everything outside the pocket becomes void (not drawn), the decoration gets levels of its own, the water gets levels of its own (own colour),
+     the paths are marked. Sets S.pocket (true), S.pocketRole (Uint8 per window tile: 1 fragment, 2 decoration, 3 path, 4 water), S.pocketInfo. The fragment is not touched (same fine levels, same walkability).
+     P.pocketFraming ('auto' or an archetype), P.pocketHeight (multiplies the decoration offsets). S.sliceBox / S.fitH frame the fragment and ~2 r around it; island and drop set S.baseH (the walls over the void go down to it). */
+  P_.apply = function (S, P, RL, ids, opts) {
+    const n = S.n, W = S.W, H = S.H, K = S.subs, idsSet = new Set(ids), fw = S.mapW, frag = new Uint8Array(n);
+    const mapOf = (i) => { const x = (i % W) + S.ox, y = ((i / W) | 0) + S.oy; return x < 0 || y < 0 || x >= fw || y >= S.mapH ? -1 : y * fw + x; }; // -1: outside the map (the border of void of a padded pocket)
+    for (let i = 0; i < n; i++) if (idsSet.has(RL.room[mapOf(i)]) && !(S.void && S.void[i])) frag[i] = 1; // the room's tiles of the WORLD shape (whole map, no slice)
+    // exits: faces of the fragment border across an open room transition (nb = the neighbouring room, x / y = the face in window tiles)
+    const exits = [];
+    for (let i = 0; i < n; i++) { if (!frag[i]) continue; const x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (frag[j]) continue; const rb = RL.room[mapOf(j)]; if (rb <= 0 || idsSet.has(rb)) continue; if (RL.rp.has(E.rooms.key(mapOf(i), mapOf(j), RL.W * RL.H))) exits.push({ a: i, dx, dy, nb: rb, x: x + S.ox + 0.5 + dx * 0.5, y: y + S.oy + 0.5 + dy * 0.5 }); } }
+    // floors first (they need the shape as the world made it): the double / archetype and the heights the framing refers to
+    const fl = P_.floors(S, frag, (i) => RL.forb[mapOf(i)] !== 1 && RL.h[mapOf(i)] > 0 && S.region[i] >= 0), dbl = fl.length >= 2;
+    const fragH = []; for (let i = 0; i < n; i++) if (frag[i]) fragH.push(S.levelH[S.fine[i]]);
+    const fSorted = fl.slice().sort((a, b) => a.h - b.h), lowFloor = fSorted[0], highFloor = fSorted[fSorted.length - 1], lowH = lowFloor ? lowFloor.h : Math.min(...fragH);
+    let highMask = null, highH = lowH; if (dbl) { highMask = new Uint8Array(n); const hs = new Set(highFloor.ters); for (let i = 0; i < n; i++) if (frag[i] && hs.has(S.ter[i])) highMask[i] = 1; const hv = []; for (let i = 0; i < n; i++) if (highMask[i]) hv.push(S.levelH[S.fine[i]]); hv.sort((a, b) => a - b); highH = hv[hv.length >> 1]; }
+    const want = P.pocketFraming || 'auto', pick = want !== 'auto' && P_.ARCH.includes(want) ? { arch: want, reason: 'chosen manually' } : P_.chooseArchetype(RL, S.types, [...idsSet][0], P, dbl, exits);
+    const PH = P.pocketHeight === undefined ? P_.defaults.ph : P.pocketHeight, jump = P.terH, plan = P_.plan(W, H, frag, (i) => S.levelH[S.fine[i]], exits, Object.assign({ ids, jump, sub: E.subHeight(P), arch: pick.arch, ph: PH, lowH, highH, highMask }, opts));
+    const d = plan.disc, truncated = d.cx - d.R < 0 || d.cy - d.R < 0 || d.cx + d.R > W || d.cy + d.R > H;
+    const lv = P_.addLevels(S, P, plan);
     // void: everything outside the pocket (fragment + decoration + water + paths) is not drawn; the ring of void of island and drop is not drawn either
     const vd = new Uint8Array(n); for (let i = 0; i < n; i++) vd[i] = plan.role[i] === 0 ? 1 : 0; S.void = vd;
     S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []); for (let i = 0; i < n; i++) if (!vd[i]) S.byLevel[S.fine[i]].push(i);
@@ -2504,7 +2513,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     S.pocket = true; S.pocketRole = plan.role; S.pocketPlan = plan;
     let faces = null;
     if (dbl) { const hi2 = fl.slice().sort((a, b) => b.h - a.h), A = hi2[0], B = hi2[hi2.length - 1], u = plan.disc.u; faces = (A.cx - B.cx) * u[0] + (A.cy - B.cy) * u[1] < 0; } // the higher floor is farther from the camera: the cliff between them faces the camera
-    S.pocketInfo = Object.assign({}, plan.info, { ids: ((opts && opts.ids) || ids).slice(), archetype: pick.arch, archetypeName: P_.ARCH_NAME[pick.arch], reason: pick.reason, auto: want === 'auto', stats: pick.stats || null, ph: PH, perTerrace: fl.perTerrace, R: d.R, r: d.r, floors: fl.map((f) => f.tiles), double: dbl, cliffFacesCamera: faces, truncated, levelsAdded: newH.length - old.length, baseH: S.baseH });
+    S.pocketInfo = Object.assign({}, plan.info, { ids: ((opts && opts.ids) || ids).slice(), archetype: pick.arch, archetypeName: P_.ARCH_NAME[pick.arch], reason: pick.reason, auto: want === 'auto', stats: pick.stats || null, ph: PH, perTerrace: fl.perTerrace, R: d.R, r: d.r, floors: fl.map((f) => f.tiles), double: dbl, cliffFacesCamera: faces, truncated, levelsAdded: lv.added, baseH: S.baseH });
     return S.pocketInfo;
   };
 })(window.EVO = window.EVO || {});
@@ -4496,6 +4505,68 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   E.floors = { shapeOf, frame, prepare, layers, cutPack, rails, GHOST, RAIL_H };
 })(window.EVO = window.EVO || {});
 
+/* EvoDun crystal viewer - crystallizer 5, FLOORS, Option 2 (docs/crystallizers/05-floors/option2-backdrop.md), PHASE 1: the camera-fixed BACKDROP of a single floor.
+   The floor is drawn by the normal pipeline, tile for tile as the single-floor view. BEHIND it (farther from the camera, along the camera axis) a band of terrain geometry is added: a low PLAIN (the gap, `gap` tiles deep)
+   and then the BACKDROP band, whose heights are the REAL heights of the exterior layer (the mountain section a person standing on the floor would see behind the playable space). Both are decoration: not walkable,
+   the levels of their own with the palette of the Pocket decoration (`levelMeta.deco`), written only on tiles that are void in the floor's shape.
+   Phase 1 scope: single floor, the Cam 1 axis (yaw 45, like the Pocket), no fog, no tone multiplier. HARD RULE: nothing hides the floor: every added tile lies behind the back edge of the floor along the axis (s < sBack), so it is
+   drawn before (and under) any tile of the floor in every orthographic painter order. INVARIANT: the floor's tiles are not touched (same levels, same walking); only void tiles are written.
+   Not exported to Unity. */
+(function (E) {
+  const B_ = E.backdrop = {};
+  B_.defaults = { yaw: 45, gap: 4, depth: 9, lat0: 2, flare: 0.75, plainUp: 0.1, bandMin: 0.5, characterTiles: 2 };
+  /* PLAN (pure): W, H window; frag Uint8Array (1 = a tile of the floor); extH Float32Array (height of the real exterior at each tile, NaN = void); opts { yaw, gap, depth, lat0, flare, jump, plainH, bandMin }.
+     Axis u = (sin yaw, cos yaw) points TOWARD the camera (the Pocket's convention); s(i) = tile centre . u; sBack = the smallest s of the floor (its back edge). A tile is
+       - PLAIN  (part 1) if 0 < sBack - s <= gap: the gap between the floor and the band; height = plainH;
+       - BAND   (part 2) if gap < sBack - s <= gap + depth and the real exterior there is at least plainH + bandMin x jump (lower exterior is not a mountain section: left empty); height = the exterior height;
+     and, in both, its lateral position l (along v = (-u1, u0)) lies in [lmin - (lat0 + flare x sd), lmax + (lat0 + flare x sd)], sd = sBack - s (the window of the floor widened as it recedes, so the band fills the frame).
+     Tiles without exterior data (NaN) are never written. Returns { role (0 none, 1 floor, 2 added), part, height, u, sBack, info }. */
+  B_.plan = function (W, H, frag, extH, opts) {
+    const o = Object.assign({}, B_.defaults, opts), n = W * H, yaw = o.yaw * Math.PI / 180, u = [Math.sin(yaw), Math.cos(yaw)], v = [-u[1], u[0]], jump = o.jump || 1;
+    const role = new Uint8Array(n), part = new Uint8Array(n), height = new Float32Array(n).fill(NaN);
+    let sBack = Infinity, lmin = Infinity, lmax = -Infinity, cnt = 0;
+    for (let i = 0; i < n; i++) if (frag[i]) { const x = (i % W) + 0.5, y = ((i / W) | 0) + 0.5, s = x * u[0] + y * u[1], l = x * v[0] + y * v[1]; role[i] = 1; cnt++; if (s < sBack) sBack = s; if (l < lmin) lmin = l; if (l > lmax) lmax = l; }
+    const info = { floorTiles: cnt, plain: 0, band: 0, dropped: 0, maxDepth: 0, gap: o.gap, depth: o.depth };
+    if (!cnt) return { role, part, height, u, sBack, info };
+    for (let i = 0; i < n; i++) {
+      if (frag[i] || !(extH[i] === extH[i])) continue; // a floor tile, or no exterior data
+      const x = (i % W) + 0.5, y = ((i / W) | 0) + 0.5, sd = sBack - (x * u[0] + y * u[1]); if (sd <= 0 || sd > o.gap + o.depth) continue;
+      const l = x * v[0] + y * v[1], w = o.lat0 + o.flare * sd; if (l < lmin - w || l > lmax + w) continue;
+      if (sd <= o.gap) { role[i] = 2; part[i] = 1; height[i] = o.plainH; info.plain++; }
+      else if (extH[i] >= o.plainH + o.bandMin * jump) { role[i] = 2; part[i] = 2; height[i] = extH[i]; info.band++; if (sd - o.gap > info.maxDepth) info.maxDepth = sd - o.gap; }
+      else info.dropped++;
+    }
+    return { role, part, height, u, sBack, info };
+  };
+  /* APPLY to the primary shape S of floor k (k > 0) of a floors package `raw`, right after `E.shape` + `E.floors.prepare`: the real exterior heights come from the exterior layer's shape (`E.floors.shapeOf(S, raw, P, 0)`, the same
+     global height frame, so the heights agree). The plain sits on the floor's own thin slab (`S.baseH` + plainUp x terH, kept exact: it must stay above the base) and the floor keeps its skirt. Sets S.backdrop = { role, part, info }. */
+  B_.apply = function (S, P, raw, k, opts) {
+    if (!(k > 0) || !E.hasFloors(raw) || S.backdrop) return null;
+    const S0 = E.floors.shapeOf(S, raw, P, 0), n = S.n, W = S.W, H = S.H, frag = new Uint8Array(n), extH = new Float32Array(n).fill(NaN), jump = P.terH, o = Object.assign({}, B_.defaults, opts);
+    if (S0.W !== W || S0.H !== H) return null;
+    for (let i = 0; i < n; i++) { frag[i] = S.void && S.void[i] ? 0 : 1; if (!(S0.void && S0.void[i])) extH[i] = S0.levelH[S0.fine[i]]; }
+    /* DIAGNOSTIC `P.backdropMirror` (no UI, like P.anchor; the phase 1 finding, see the PR): the real exterior BEHIND a floor is the low outer slope of the mountain (the floors lie inside it), far below the floor, so the band of real
+       heights is empty. In this mode the band takes the exterior height at the tile reflected through the back edge of the floor (the real mountain that stands over the floor, seen as if it were behind it): real data, placed by reflection. */
+    if (P.backdropMirror) { const yw = o.yaw * Math.PI / 180, ux = Math.sin(yw), uy = Math.cos(yw); let sB = Infinity; for (let i = 0; i < n; i++) if (frag[i]) sB = Math.min(sB, ((i % W) + 0.5) * ux + (((i / W) | 0) + 0.5) * uy);
+      const e2 = new Float32Array(n).fill(NaN); for (let i = 0; i < n; i++) { if (frag[i]) continue; const x = (i % W) + 0.5, y = ((i / W) | 0) + 0.5, sd = sB - (x * ux + y * uy); if (!(sd > 0)) continue; const qx = Math.floor(x + 2 * sd * ux), qy = Math.floor(y + 2 * sd * uy); if (qx < 0 || qy < 0 || qx >= W || qy >= H) continue; const j = qy * W + qx; if (!(S0.void && S0.void[j])) e2[i] = S0.levelH[S0.fine[j]]; }
+      extH.set(e2); }
+    const baseH = S.baseH !== undefined ? S.baseH : S.levelH[0] - jump, gap = P.backdropGap === undefined ? o.gap : P.backdropGap;
+    const pl = B_.plan(W, H, frag, extH, Object.assign({}, o, { gap, jump, plainH: baseH + o.plainUp * jump }));
+    const added = pl.info.plain + pl.info.band; let levelsAdded = 0;
+    if (added) {
+      S.void = Uint8Array.from(S.void); S.fine = Int16Array.from(S.fine); // own copies: `S.void` is shared with the quantization cached on the pack (writing it in place would change the next shape built from the same pack)
+      const keep = new Uint8Array(n); for (let i = 0; i < n; i++) if (pl.part[i] === 1) keep[i] = 1; // the plain keeps its exact height (a snap down could go under the slab base)
+      const plan = { role: pl.role, height: Float32Array.from(pl.height), decoHeight: Float32Array.from(pl.height), keep };
+      levelsAdded = E.pocket.addLevels(S, P, plan).added;
+      const vd = S.void; for (let i = 0; i < n; i++) if (pl.role[i] === 2) { vd[i] = 0; S.block[i] = 1; } // decoration: drawn, not walkable
+      S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []); for (let i = 0; i < n; i++) if (!vd[i]) S.byLevel[S.fine[i]].push(i);
+      S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < n; i++) if (vd[i]) S.fineMask[i] = -1;
+    }
+    S.backdrop = { role: pl.role, part: pl.part, u: pl.u, sBack: pl.sBack, info: Object.assign({}, pl.info, { levelsAdded, plainH: baseH + o.plainUp * jump }) };
+    return S.backdrop;
+  };
+})(window.EVO = window.EVO || {});
+
 /* EvoDun crystal viewer - CONTROLS TABLE: the single source of truth for every control of the panel (id, group, techniques, requirements, help).
    - A requirement that is NOT met: the control is disabled (not interactable), greyed, and its tooltip lists ONLY what to activate ("Requires: turn on Rooms · ...").
      A control that holds a non-default value (a toggle that is ON...) keeps it, shows "inactive", and its effect returns with the requirement. Nothing is recomputed and no parameter changes.
@@ -4616,6 +4687,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     e('t2Jitter', '#s-t2Jitter', '4 Curves (C)', ['C'], ['techC', 'wallT2'], 'T2: jitter.', { badge: 'C' }),
     // ---- 5 Floors
     e('floorsView', '#floorsView', '5 Floors', ALL, ['floors'], 'Single floor, exploded stack or cutaway of the landmark\'s floors (the stack and the cutaway need an orthographic camera). The floors are interior levels inside a shell; the cutaway is a schematic of stacked section maps.', { options: { stack: ['ortho'], cut: ['ortho'] } }),
+    e('t-backdrop', '#t-backdrop', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho'], 'Floor backdrop (Option 2, phase 1): behind the chosen floor, a low plain and then a band of the mountain (the real exterior heights, drawn with the decoration palette) so the floor reads as inside a shell. The floor itself does not change. Composed for Cam 1 (Iso 45); the Exterior layer has none.'),
     // ---- Shared passes
     e('outlines', '#t-outlines', 'Shared passes', ALL, [], 'Dark outlines on caps and walls.'),
     e('gradient', '#t-gradient', 'Shared passes', ALL, [], 'Shading gradient on cliffs.'),
@@ -4712,7 +4784,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', wallPass: 't3', wallExtrude: 0.25, wallStrata: 3, wallColumn: 1.2, t2Spacing: 0.9, t2Rows: 6, t2Group: 1.0, t2Jitter: 0.4, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
+  const P = { terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', wallPass: 't3', wallExtrude: 0.25, wallStrata: 3, wallColumn: 1.2, t2Spacing: 0.9, t2Rows: 6, t2Group: 1.0, t2Jitter: 0.4, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, backdrop: false, backdropGap: 4, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
   const O = { outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, dress: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
      persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
@@ -4857,7 +4929,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const pb = $('#presets');
     for (const p of PRESETS) {
       const b = document.createElement('button'); b.textContent = p.label; b.title = p.title; b.dataset.id = p.id;
-      b.addEventListener('click', () => { st.preset = p.id; st.yawOff = 0; st.pitchOff = 0; st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
+      b.addEventListener('click', () => { const wasPersp = PRESETS.find((x) => x.id === st.preset).kind === 'persp'; st.preset = p.id; st.yawOff = 0; st.pitchOff = 0; st.panX = st.panY = 0; st.zoom = 1; invalidate(!!P.backdrop && wasPersp !== (p.kind === 'persp')); }); // the floor backdrop is part of the shape and is not built for Cam 6: crossing between Cam 6 and the others rebuilds it
       pb.appendChild(b);
     }
     const tb = $('#techs');
@@ -4878,6 +4950,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     document.getElementById('m-clear').addEventListener('click', () => { inc.stake = null; inc.objectives = []; setIncMode(null); invalidate(false); });
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && inc.mode) setIncMode(null); });
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
+    $('#t-backdrop').addEventListener('change', (e) => { P.backdrop = e.target.checked; invalidate(true); }); // the backdrop is part of the shape of the floor
     $('#floorsView').addEventListener('change', (e) => { st.floors = e.target.value; invalidate(true); }); // single floor / exploded stack / cutaway (the shape of the primary layer changes)
     window.addEventListener('resize', () => invalidate(false));
     $('#stage').addEventListener('wheel', (e) => { e.preventDefault(); st.zoom = Math.max(0.5, Math.min(4, st.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); invalidate(false); }, { passive: false });
@@ -5189,6 +5262,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       try {
         S = E.shape(pack, P, fl ? null : sliceSpec());
         if (fl) E.floors.prepare(S, raw, P, st.floors === 'single' ? st.layer : 0);
+        if (fl && P.backdrop && E.backdrop && st.floors === 'single' && st.layer > 0 && view().kind !== 'persp') E.backdrop.apply(S, P, raw, st.layer); // Floor backdrop (crystallizer 5, Option 2, phase 1): a band of the mountain behind the floor
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
       buildRoomChips(); buildFloorChips();
@@ -5278,6 +5352,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const rec = S1.stairs.find((r) => r.site && r.site.declared), warn = E.floorWarnings(raw, S1);
     let t = `<br><b>Floors</b>: ${view1}` + (st.floors !== 'single' && !multi ? ' · Cam 6 (perspective) is not supported in this view: showing the selected floor' : '') + (rec ? ` · link: declared ramp ${rec.cols.length} x ${rec.ramp.len} carved (${rec.mode})` : '');
     if (warn.length) t += ` · <b>${warn.join('; ')}</b>`;
+    const bd = S.backdrop && S.backdrop.info; if (bd) t += ` · <b>Backdrop</b>: ${bd.plain} plain + ${bd.band} band tiles (gap ${bd.gap}, band depth reached ${bd.maxDepth.toFixed(1)} of ${bd.depth} tiles, ${bd.dropped} lower than the plain left empty), ${bd.levelsAdded} levels added`;
     return t;
   }
   function wallText() { // the wall pass of C: mode, band, islands, faces and cost
