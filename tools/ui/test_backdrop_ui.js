@@ -55,11 +55,11 @@ const { open } = require('./common');
     }
     await sw(false, 'real');
   }
-  { // CONTROL of the pixel check: the same plan on the OPPOSITE axis (yaw 225: the band in FRONT of the floor, toward the camera) must be caught by it
+  for (const cmode of ['mirror', 'v1']) { // CONTROL of the pixel check: the same plan on the OPPOSITE axis (yaw 225: the band in FRONT of the floor, toward the camera) must be caught by it, also by the refined interior metric of the attached variant
     await page.click('#floorChips button[data-floor="1"]'); await a.idle(); await sw(false, 'real'); await a.tech('box'); await a.preset('isoE'); const off = await pick(null), fr = new Set(); for (let i = 0; i < off.n; i++) if (off.frag[i]) fr.add(i);
-    await ev(() => { window.EVO.backdrop.defaults.yaw = 225; }); await sw(true, 'mirror'); const on = await pick({ w: off.w, h: off.h, v: off.v }); await ev(() => { window.EVO.backdrop.defaults.yaw = 45; });
-    let cov = 0, bad = 0; for (let p = 0; p < off.codes.length; p++) { const c = off.codes[p]; if (c < 0) continue; const kind = c >> 20, v = c & 0xfffff; if ((kind === 2 || kind === 4) && fr.has(v)) { cov++; if (on.codes[p] !== c) bad++; } }
-    ok(`control: with the band on the camera side (yaw 225) the pixel check catches it (${bad} of ${cov} floor pixels hidden)`, bad > 100, { cov, bad }); await sw(false, 'real'); }
+    await ev(() => { window.EVO.backdrop.defaults.yaw = 225; }); await sw(true, cmode, 2); const on = await pick({ w: off.w, h: off.h, v: off.v }); await ev(() => { window.EVO.backdrop.defaults.yaw = 45; });
+    let cov = 0, bad = 0, hid = 0; for (let p = 0; p < off.codes.length; p++) { const c = off.codes[p]; if (c < 0) continue; const kind = c >> 20, v = c & 0xfffff; if ((kind === 2 || kind === 4) && fr.has(v)) { cov++; const c2 = on.codes[p]; if (c2 !== c) { bad++; const k2 = c2 < 0 ? -1 : c2 >> 20, v2 = c2 < 0 ? -1 : c2 & 0xfffff; if ((k2 === 2 || k2 === 4) && v2 < on.n && on.add[v2]) hid++; } } }
+    ok(`control (${cmode}): with the band on the camera side (yaw 225) the pixel check catches it (${bad} of ${cov} floor pixels changed, ${hid} show a backdrop tile)`, cmode === 'mirror' ? bad > 100 : hid > 100, { cov, bad, hid }); await sw(false, 'real'); }
   // the Exterior layer has none; the stack and the cutaway grey the switch; Cam 6 greys it
   await sw(true, 'v1', 2); await page.click('#floorChips button[data-floor="0"]'); await a.idle(); ok('the Exterior layer has no backdrop', !(await ev(() => !!window.__evo.S().backdrop)));
   await page.click('#floorChips button[data-floor="1"]'); await a.idle(); ok('floor 1 has it again when the switch is on', await ev(() => !!window.__evo.S().backdrop));
