@@ -68,6 +68,11 @@ const { open } = require('./common');
   await page.selectOption('#floorsView', 'stack'); await a.idle(); ok('the exploded stack has no backdrop and the switch and the sliders are greyed (Requires: Single floor)', !(await ev(() => !!window.__evo.S().backdrop)) && (await ev(() => document.querySelector('#t-backdrop').disabled && document.querySelector('#s-backdropHeight').disabled)));
   await page.selectOption('#floorsView', 'cut'); await a.idle(); ok('the cutaway has no backdrop', !(await ev(() => !!window.__evo.S().backdrop)));
   await page.selectOption('#floorsView', 'single'); await a.idle(); await a.preset('stage'); await a.idle(); ok('Cam 6 (perspective): no backdrop and the switch is greyed', !(await ev(() => !!window.__evo.S().backdrop)) && (await ev(() => document.querySelector('#t-backdrop').disabled)));
+  // click guard: a click on a backdrop tile (S.backdrop.role === 2) with the stake mode on is refused ("decoration (floor backdrop): not walkable") and places no mark
+  await page.click('#floorChips button[data-floor="1"]'); await a.idle(); await a.preset('isoE'); await sw(true); await ev(() => { window.__evo.inc.stake = null; window.__evo.inc.objectives = []; });
+  { const r = await ev(() => { const e = window.__evo, S = e.S(), bd = S.backdrop; let t = -1; for (let i = 0; i < S.n && t < 0; i++) if (bd && bd.role[i] === 2) t = i; if (t < 0) return { t }; e.setIncMode('stake'); e.placeMark(t); e.setIncMode(null); return { t, stake: e.inc.stake, objs: e.inc.objectives.length, txt: document.getElementById('incInfo').textContent }; });
+    ok('a click on a backdrop tile with the stake mode on is refused ("is decoration (floor backdrop): not walkable") and places no mark', r.t >= 0 && r.stake === null && r.objs === 0 && /is decoration \(floor backdrop\): not walkable/.test(r.txt), r); }
+  await sw(false);
   // Cam 1 only: the backdrop is composed for the Cam 1 axis, so at Cam 2 / 3 / 4 / 5 / 6 / 7 the switch and its sliders are greyed ("Requires: use Cam 1") and nothing is built, even with the switch on
   for (const [cam, id] of [['Cam 2', 'isoW'], ['Cam 3', 'oblique'], ['Cam 4', 'low'], ['Cam 5', 'top'], ['Cam 6', 'stage'], ['Cam 7', 'classic']]) {
     await a.preset(id); await a.idle(); await sw(true); await a.idle();
