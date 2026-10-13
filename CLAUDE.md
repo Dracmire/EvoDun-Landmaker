@@ -125,7 +125,7 @@ old pipeline (Unity, C#) are reference only.
 
 ## Criteria to judge a technique
 Distinguishable levels; walkable vs not; stairs and passes locatable; recognisable landmark; readable
-incursion border; stake and way-back path visible.
+incursion border; stake and way-back path visible; geometry offers stylization hooks (falls as labelled surfaces with lip, foot, flow and u / v coordinates, smooth silhouettes, a material tag per surface, separate render passes: audit per technique in `docs/crystallizers/05-floors/option2-backdrop.md` section F).
 
 ## Repo state
 - `index.html` opens from file://, no dependencies. Own canvas 2D renderer, painter's algorithm (no three.js).

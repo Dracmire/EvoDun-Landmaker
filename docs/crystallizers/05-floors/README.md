@@ -65,6 +65,8 @@ HOW IT READS (screenshots `tools/verify.sh shots --extra floors`, Cam 1 and Cam 
 
 ## 5d. Later phases
 
+Later phases: Option 2 (camera-fixed backdrop) is the planned fix for the Cutaway's "floating plates" reading and for the floor-2 opening that still reads as a railed pit (a stairwell window); design document, waiting for approval: [`option2-backdrop.md`](option2-backdrop.md).
+
 - Option 2, camera-fixed BACKDROP (HD-2D style), built on the Pocket machinery (`src/pocket.js`): the next phase of Floors. It is the real fix for the shell reading (floors read as inside a shell).
 - Option 3, classic per-floor view with framing: already covered by the Single floor view plus the Pocket framing archetypes.
 - Option 4, castle mode (separate spaces, exterior seen from the interior, transition scenes): a game / Unity staging note, not viewer work.

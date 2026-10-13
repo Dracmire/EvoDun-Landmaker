@@ -1,0 +1,146 @@
+# Crystallizer 5 - Floors, Option 2: camera-fixed BACKDROP (design document)
+
+STATUS: DESIGN ONLY, waiting for the user's approval. No code in `src/`, nothing changed in `tools/` or `data/`. Nothing is exported to Unity.
+
+What was read for this document: `src/pocket.js` (all), `src/floors.js` (all), `docs/crystallizers/05-floors/README.md` (all), `dressWall` / `dressFoot` / `drawAscWall` / `levelColor` / `E.pickBuffer` / `E.pickTile` / `E.renderLayers` in `src/render.js`, the C wall pass geometry (`buildT2` chains and the T3 face records) in `src/wallc.js`, the Ascension chain code (`src/roomtypes.js` lines ~196-217, by grep), the requirement table and the Pocket / Floors rows of `src/controls.js`, `docs/controls.md` (head), the Pocket sections of `docs/room-types.md`, and the Floors / Pocket wiring of `src/ui.js` and `src/shape.js` (by grep). NOT read: the A / B / C contour code in `src/tech.js` and `src/curves.js` (their silhouette behaviour is taken from CLAUDE.md and the other READMEs), `tools/derive_snake_floors.py`, the bodies of the UI tests, the GDD. One measurement was made for this document (section B, how it was made is stated there); every other number is quoted from a repo document or marked ESTIMATE.
+
+## A. Goal and non-goals
+
+Problem (README 05, 5b / 5d): the Cutaway is a schematic of stacked section maps. The volume between layers is not modelled, so the floors read as plates floating in rock, and the floor-2 opening still reads as a railed pit (5c). The ghost-exterior experiment was discarded (5d).
+
+Option 2 fixes the reading, not the representation. While the player is on ONE floor, that floor is drawn by the normal pipeline (the playable plane, tile for tile the real floor). Behind it, relative to the camera, a BACKDROP band of terrain geometry is added: the part of the mountain that a person standing on that floor would see behind the playable space, derived from the pack's real exterior data. It is the HD-2D backdrop of a diorama: partial solid kept fixed in front of the camera.
+
+Fixes: the "floating plates" reading of a floor (a floor now sits in front of a mountain section, not in front of nothing); the shell reading of the exterior; the floor-2 opening (section J, phase 5, stairwell window).
+
+Non-goals: no volume model (still heightfields), no characters, no WebGL / per-pixel depth, no Unity export, no change to walking, regions, stake, objectives or the declared link, no new terrain generation (the backdrop uses real data; nothing is invented except where the data runs out, section B). The Cutaway and the Stack stay as they are.
+
+The backdrop is TERRAIN GEOMETRY (levels of the shape), not a screen-space billboard, so Box, A, B and C draw it through their own pipelines and the comparison stays fair.
+
+## B. Data flow
+
+Per pack, the inputs already exist for any floors package (`E.hasFloors`): the exterior layer (k = 0, the shell: the surface with the shaft pit) and the interior floors, all in ONE global height frame (`elevFrame`, README D4), so heights of different layers are comparable and quantize to the same terrace grid. The backdrop of floor k is built from layer 0 (the exterior) and, when it is higher, the next floor k + 1.
+
+Snake floors (the test case, 40x40; `data/snake_mountain_floors.json`): exterior 1.26-9.12 with a plateau 7.0-7.5 and a sheer crater down to 3.6 (README D1, D7); floor 1 at z 3.6 (264 tiles), floor 2 at z 5.2 (135-136 tiles); shaft r 2.5 around (20.5, 20.5).
+
+Derivation of the "mountain section behind" for floor k:
+1. FRAGMENT = the non-void tiles of the floor's own shape (`E.shape(E.floorPack(raw, k))`, the existing single-floor shape; nothing in it changes).
+2. Camera axis u (section G) gives, for every tile, its depth s along the axis; the fragment's back edge is its minimum s.
+3. BACKDROP tiles = the tiles with s in [back edge - gap - depth, back edge - gap] (behind the fragment, farther from the camera), inside a lateral window = the fragment's lateral extent widened by a flare so the band fills the frame width at game scale. `gap` = slider "Backdrop gap" (2-8 tiles, default 4 = 2 characters). `depth` = enough to cover the panel above the fragment at game scale (about 8-10 ground tiles, ESTIMATE, to tune), capped by the pack.
+4. HEIGHT of a backdrop tile = the REAL exterior elevation at that tile (layer 0, already quantized in the global frame), and for a floor below the top floor also the next floor's height where its footprint is higher than the exterior there (not the case in the demo pack, where every floor lies under the shell). Heights then snap to the level grid (section C). Nothing is generated: for floor 1 the band is the real interior flank of the mountain, for floor 2 across the shaft it is the real far wall of the crater (3.6 up to ~7.4); expected, to be confirmed by the first screenshots.
+5. GAP tiles (between the fragment and the band): by default a low plain at (the floor's lowest height - 1 terrace), snapped, marked as decoration (not walkable). This keeps the fragment's own thin slab (`baseH` = lowest level - 0.4 terH) untouched. Alternative (open question 1): void with a deep base like Isla / Caída; it needs a per-wall base because `S.baseH` is one value per shape and would also thicken the fragment's own walls.
+
+Pack edge (measured, how: a one-off node script, not committed, for every non-void tile of a floor it walks a ray along -u in 0.5-tile steps inside the 40x40 map and records the farthest exterior tile met; the figures are for the tiles within 1.5 tiles of the back-most tile of the floor, min / median / max, in tiles): Cam 1 axis (yaw 45): floor 1 14.5 / 17.5 / 20.5, floor 2 17.5 / 19 / 21.5; Cam 3 axis (yaw 0): floor 1 10.5 / 11.5 / 11.5, floor 2 13.5 / 14.5 / 14.5. So with gap 4 and depth 8 the band fits at Cam 1 and is tight at Cam 3; the slider maximum (8) leaves only 2.5 tiles of band at Cam 3. Rule: the band stops where the exterior data stops (map edge or void); beyond it nothing is drawn (the canvas background is the haze colour of section E). An invented continuation (the Pocket's weighted Voronoi) is NOT used for the default; it is reserved for the exterior-vista alternative below.
+
+Alternative content, later and only if the exterior reads well (precedent: Ocarina of Time): an EXTERIOR VISTA behind the floor (lighter, washed, section E) instead of the interior section. Only noted here.
+
+The Exterior layer (k = 0) gets no backdrop (it is the whole mountain), and the Stack and the Cutaway are unchanged (open question 4).
+
+## C. Geometry (reuse of the Pocket)
+
+What the Pocket gives and what is reused (`src/pocket.js`):
+- REUSED as it is: the idea that the shape is the real shape and only the surroundings are added after it (`P_.apply` after `E.shape`); the quantization of added heights DOWN to the level grid extended beyond the lowest / highest terrace (`apply`, lines 268-274); the insertion of the added heights as levels of their own with `levelMeta.deco` so the palette treats them as decoration (lines 275-294, `levelColor` in `src/render.js`); `S.block = 1` for decoration (not walkable) and the `S.pocketRole` convention (1 fragment, 2 decoration, 3 path, 4 water) with the same marks / tint rule (decoration takes no tints and no marks, `render.js` 318); the hard-rule test pattern of `tools/test_pocket.js` (line 32 and 102).
+- NOT reused: the weighted Voronoi cells and their band offsets (`P_.plan`, lines 86-109). Recommendation: a SIMPLER BAND. Reasons: (a) the Pocket invents its relief (cells + offsets by distance); here the heights are real data, so there is nothing for cells to decide; (b) the Voronoi's neighbour-differs-by-one-band smoothing and the seeds exist to make invented relief plausible; (c) a band is deterministic from the pack and the camera, easy to test tile by tile; (d) fewer distinct heights than a Voronoi with jitter, so fewer levels for B. The Voronoi stays available for the exterior-vista alternative or to extend the band past the pack edge.
+- Refactor needed first (phase 0): the quantize + insert-levels block of `P_.apply` is inline; it must be extracted into a helper that both Pocket and backdrop call, with the Pocket output unchanged (`tools/verify.sh regress` pocket pass, `tools/test_pocket.js`).
+
+Heights snap to the existing grid: `G` = the world levels + terrace x sub-terrace values extended beyond the palette with the same spacing; `snap(h)` = the highest grid value <= h (never higher). The backdrop's levels are inserted as levels of their own (a height equal to an existing level is nudged by +0.003 so the palette can treat it as decoration, exactly as the Pocket does). Because the exterior is already quantized in the same frame, the distinct heights of a band are at most terraces x subs (15 at 5 terraces x 3 subs): an upper bound on levels added, ESTIMATE ~10-15. Measured precedent (Pocket, real map, Balanced types, compare mode, B in all panels; `docs/room-types.md` line 86): rooms 31 / 7 / 64 / 25 / 20 add 14 / 19 / 12 / 12 / 14 levels and cost 0.6 / 1.9 / 1.3 / 0.2 / 0.5 s. A 40x40 floor shape is smaller than the Pocket's windows, so the cost should be at the low end; to be MEASURED at implementation (section I).
+
+HARD RULE (adapted): "nothing hides the fragment". The Pocket caps decoration in front of the fragment (a ray away from the camera, lines 136-142). The backdrop is only BEHIND the fragment (s < back edge - gap) and the lateral window never reaches the fragment's sides, so by construction no backdrop tile can stand between the camera and a fragment tile. The gap plain is lower than the fragment's back edge by construction. Enforced check anyway (section I): every pixel covered by the fragment in the floor-alone render is still the fragment in the floor + backdrop render (`E.pickBuffer`).
+
+INVARIANT: the fragment is identical to the floor tile by tile (height, terrace, sub-terrace, walkable, ramps, regions, markers). The backdrop writes only tiles that are void in the floor's shape. Test pattern: `tools/test_pocket.js` (fragment identical to the full-map shape).
+
+Where the code would live: a new `src/backdrop.js` (`E.backdrop.plan` pure, `E.backdrop.apply(S, P, raw, k, view)`), called by `E.floors.shapeOf` / the single-floor path after `E.shape`, cached on `S.cache.floors` with the camera axis in the key (like `rotKey` of the Cutaway).
+
+## D. Scale
+
+APPROVED convention (Sea of Stars): characterHeightTiles = 2 (a character is 2 tiles tall; 2 tiles = 1 normal character). characterOccupancy (how much of those 2 tiles the character fills) is a Unity-port parameter only; the viewer does not implement it. The viewer has no characters: `P.characterTiles` (default 2, no UI, optional manifest key later) is a documented constant that defines the gap default (gap = 2 x characterTiles = 4 tiles) and the minimum screen height of the fall (below).
+
+Game scale in the viewer: Sea of Stars has the character at about 11-12 % of the frame height, so the visible vertical extent is about 14-17 tiles, about 43 px per tile at a ~750 px panel (user's figures). Arithmetic check: 750 / 55 = 13.6 and 750 / 43 = 17.4 tiles, the same range as the viewer's existing game scale (45-55 px per tile, CLAUDE.md, known limitation 15 and the `+play` shots). The existing controls cover it: the fit (`E.fitScale`, px per tile at zoom 1), the wheel zoom (0.5-4x of the fit) and the test helper `a.focus`. For the 40x40 floors pack the fit is about 15-19 px per tile (ESTIMATE from a ~750 px panel and the 40-tile window), so the wheel's 4x reaches game scale without `a.focus` (to be confirmed; limitation 15(5) is about the 256x256 map). No new scale control is proposed.
+
+Slider "Backdrop gap" (2-8 tiles, default 4): the ground distance along the camera axis between the fragment's back edge and the foot of the backdrop. 2 = one character (a character standing on the back edge touches the backdrop's foot), 4 = two (default), 8 = four. On screen the separation is gap x sin(pitch) x px per tile for the orthographic presets: Cam 1 (pitch 35) 0.57, Cam 3 (50) 0.77, Cam 4 (28) 0.47, Cam 7 (ground scale 1) 1.0 (derived from the preset table in `src/ui.js`). Gap 4 at Cam 4 therefore reads as 1.9 tiles on screen.
+
+How to tune the 2-8 estimate with screenshots (at implementation, phase 2): Single floor 1 and floor 2, techniques Box / A / B / C, Cam 1 and Cam 3, 50 px per tile, gap 2 / 4 / 6 / 8; for each: (a) the fragment's back-edge silhouette stays readable against the backdrop (no merge of tones: measured as the luminance difference across the edge), (b) the on-screen gap is at least one character height (2 tiles x sin(pitch) x px per tile), (c) the backdrop still fills the frame above the fragment at gap 8, (d) the info line reports the available depth (section B). The default is the smallest gap that passes (a) and (b) in both cameras.
+
+## E. Look and transition
+
+PALETTE RULE. Interior backdrop: darker and desaturated. Value ratio 0.5-0.65 of the fragment palette (the user's figure, measured by hand on reference frames, scale by eye, +-30 %): STARTING VALUE 0.58, tunable. Today's decoration palette (`levelColor`, `render.js` 28-33) mixes 60 % toward the luminance, multiplies by 0.8 and caps the brightest channel at 150, i.e. a Value ratio around 0.8 (ESTIMATE); the backdrop needs an extra tone multiplier (about 0.72 to land at 0.58, ESTIMATE) as a new parameter, not a change of the Pocket's look. Exterior-vista alternative (later): lighter and washed, V about 1.4 and S about 0.5-0.7 of the fragment palette (same hand-measured status, starting values only).
+
+TRANSITION fragment -> backdrop, three stages:
+1. Precise contour: the fragment's own silhouette in each technique (tile-exact in Box, stepped in A, smooth in B and C). Nothing new.
+2. FALL: the wall that rises from the gap plain to the top of the backdrop, facing the camera. It uses the existing wall renderer with the gradient (`gradient` switch, `dressWall`) and carries the stylization hooks of section F. Its minimum visible height is one character (characterTiles x terH) so it never degenerates into a line.
+3. DISTANCE FOG: a mix toward a haze colour by distance from the fragment (the canvas background gradient #2a2540 -> #171424 for the interior). Flat colour per level makes a per-tile continuous mix impossible in the level pipeline; recommendation: 3 fog steps per distance band applied as an overlay on the backdrop caps and falls, clipped per level exactly like the veil (`veilPath` fill, `render.js` ~728), plus a vertical fog gradient on the fall (like the wall gradient). No extra levels. Fog strength = slider.
+
+REUSE of the shared passes: wall dressing (strata, lip, foot, rocks) applies to the fall as to any cliff >= 0.5 terH when the switch is on (no change); the art contract (`src/contract.js`) does NOT touch backdrop tiles (decoration takes no tints, no props, no wrapper: same rule as the Pocket). NEW: the tone multiplier, the fog steps, the fall-specific gradient and the surface labelling of F.
+
+## F. Stylization hooks audit (new criterion: "geometry offers stylization hooks")
+
+A stylization pass (for example a Hades-style lava fall) needs geometry that accepts it. If everything is blocky, stylization is impossible. State today (have = usable as it is, partial = exists but not as data or not in every technique, missing):
+
+| hook | Box | A | B | C |
+|---|---|---|---|---|
+| falls as a labelled surface (lip, foot, flow direction, u along the run, v down the height) | partial: wall quads per tile face with lip / foot / strata drawn by `dressWall` / `dressFoot` (`render.js` 150-221, calls at 556 and 568); no record of a fall, flow direction and (u, v) are implicit (the face normal; `wx, wy` hash coordinates and absolute z for v) | partial: wall segments per loop edge by level band (`render.js` 626-709), same `dressWall` / `dressFoot` calls (702, 706); no fall record | partial: as A | partial: as A for the slab walls, plus C's wall-pass blocks (T3 / T2 faces in `src/wallc.js`) that DO carry `chain`, `row`, `grp`, `dep`, `lo`, `hi`, `tot`, `top` (line 270): a chain id, an along-chain order and a depth row, which is the nearest thing to (u, v) in the code. Not exposed as a surface type |
+| smooth continuous silhouette | missing (blocky tile edges) | partial (stepped border by decision; Chaikin-smoothed contour, CLAUDE.md "Terrain edges are NOT touched") | have (SDF + blur + marching squares, smooth border) | have (Voronoi cells with corner displacement, organic contour) |
+| material tag per surface (rock / water / lava) | partial: level palette; water as a level of its own (`levelMeta.water`, own colour, so a wall under water is water-coloured, the Pocket waterfall, `render.js` 21); overlay masks `S.water` / `S.waterfall` / `S.cave` are drawn as tinted TILES, not as materials (`render.js` 318-325; known limitation 1, blocky over A / B / C) | same as Box | same | same; the wall-pass blocks take the cliff colour of the upper level (no tag) |
+| separate render passes (cap, wall, foot, fall) | partial: drawn in one canvas in a fixed code order per tile (wall, dressing, foot, cap); no per-kind target | partial: per level, walls sorted by depth then cap then stroke; foot and rocks inline right after their wall (`render.js` 673-709) | same as A | same as A; wall-pass blocks are their own segments in the same sort (667-671) |
+
+Existing pieces inspected for reuse: Ascension wall chains (`src/roomtypes.js` ~196-217: faces grouped in `runs` with an id and an order, i.e. a chain with an along-run index; thin boxes, not falls), `dressWall` / `dressFoot` (lip and foot as drawn bands, `st.dress.items` lists foot and rock positions for tests only), Pocket Cascada (`falls` archetype: a 2-tile water channel at the cornice running to its end, role 4, plus water levels; the fall is the wall under the water tile), water / waterfall masks (tile overlays), `E.renderLayers` (an offscreen canvas per layer, the precedent for separate passes).
+
+What is MISSING for the hooks, to build in phase 4 only if approved (the backdrop's fall is the natural first labelled surface): a record per fall chain `{ id, type, lip: polyline at the top, foot: polyline at the bottom, flow: unit vector (the outward normal), u: arclength along the run, v: 0 at the lip to 1 at the foot, material }` produced from the loop edges (A / B / C) or tile faces (Box) the fall is made of; a `material` tag on the level meta (rock | water | lava) read by the wall colour; a render hook that lets a pass draw one kind (cap | wall | foot | fall) onto its own target. Nothing is built by this document.
+
+## G. Cameras
+
+First phase: orthographic (Cam 1-5 and 7). The Pocket is composed for Cam 1 only: `P_.defaults.yaw = 45`, and `windowOf` / `plan` take `u = (sin yaw, cos yaw)` from it; `shape.js` calls `windowOf(RL, o)` without a yaw, so it is always 45 (`src/pocket.js` 20, 27, 63; `src/shape.js` 253).
+
+Generalization plan:
+1. The backdrop takes the axis from the LIVE camera, not from a constant: the gradient of `cam.ry` (the camera depth coordinate, constant for orthographic cameras; the Cutaway already builds its plane from `cam.ry` and follows the preset yaw plus the drag variation, `src/floors.js` 59-70). Sign convention (u toward the camera) checked at implementation against `cam.ry`.
+2. Recompute on drag RELEASE, keyed like the Cutaway (`rotKey`, yaw x 10); during a drag keep the last band (`hold`). Compare mode: all panels share one camera, so one band per floor.
+3. Responsiveness: R0 = the band is fixed per floor (anchored at the fragment's back edge for the current yaw). R1 = re-anchored with hysteresis following the focus (stake / unit): the band is recomputed only when the focus has moved more than a threshold (STARTING VALUE 4 tiles = 2 characters, and 15 degrees of yaw change, both ESTIMATES) so it does not crawl. R2 = parallax: Unity only (a note, not designed).
+4. Per camera: Cam 1 and Cam 2 (yaw +-45): the band is a diagonal slab; Cam 3 / 4 / 5 (yaw 0): a straight slab; Cam 5 (Top 80) shows almost no backdrop (allowed, documented). Cam 7 Classic (oblique projection, ground scale 1 and height scale 1, no drag variation): the geometry is the same as Cam 3; the gap reads 1.0 tile per tile on screen and a tall backdrop rises straight up from its foot; nothing in front can be hidden by something behind.
+5. Cam 6 (perspective) LATER. What would break: (a) the axis is not constant, "behind" depends on the pixel (the Pocket's `rayD`, `zoneOf` and the hard-rule rays all assume a constant u); (b) the Box tile order is not an exact painter order under perspective (limitation 15 (1)), so a tall backdrop could be drawn in the wrong order against the fragment's edge; (c) fog bands by ground distance are not equal on screen; (d) the dolly with the zoom changes how much of the band is visible; (e) `E.floors.layers` already falls back to the selected floor for Cam 6, which is the right behaviour until then. The Floors view keeps its "orthographic only" requirement (`ortho` in `src/controls.js`).
+
+## H. UI / controls
+
+New entries for the table in `src/controls.js` (group "5 Floors", all techniques, same requirement vocabulary as the existing rows; `docs/controls.md` is regenerated by `tools/build.py`; `tools/test_controls.js` checks integrity). New requirement: `backdropOn: { ok: (c) => c.backdrop, text: 'turn on Floor backdrop' }` (`ctx.backdrop` set in `ui.js` next to `floorsView`).
+
+| id | dom | requires | help |
+|---|---|---|---|
+| t-backdrop | #t-backdrop | floors, singleFloor, ortho | Floor backdrop: behind the chosen floor, a band of the mountain (real exterior heights, darker and hazed) so the floor reads as inside a shell. The floor itself does not change. |
+| backdropGap | #s-backdropGap | floors, singleFloor, ortho, backdropOn | Backdrop gap, 2-8 tiles (default 4 = two characters): ground distance from the floor's back edge to the foot of the backdrop. |
+| backdropTone | #s-backdropTone | floors, singleFloor, ortho, backdropOn | Backdrop tone: brightness of the backdrop relative to the floor palette (starting value 0.58). |
+| backdropHaze | #s-backdropHaze | floors, singleFloor, ortho, backdropOn | Backdrop haze: strength of the distance fog toward the background colour. |
+
+Not in the UI: `P.characterTiles` (2) and diagnostic flags (like `P.anchor`): `P.backdropFall` (draw the fall flat for the hooks tests). Manifest `viewer` block (optional keys, only non-default values written): `backdrop`, `backdropGap`. Scenarios: one new button "Snake Floors + backdrop" (only SETS existing parameters: source Snake floors, Floors view Single, chip Floor 1, backdrop on, Cam 1, game zoom through the existing view state). Conventions kept: a control whose requirement is lost keeps its value and shows "inactive"; with Cam 6, the Stack or the Cutaway the backdrop switch is greyed with "Requires: ..." and nothing recomputes.
+
+## I. Tests and measurements (at implementation time)
+
+ENFORCED (fail the build):
+- fragment identical to the floor tile by tile with the backdrop on (height, terrace, sub-terrace, walkable, ramps, regions, markers, declared link): `node tools/test_backdrop.js` (pattern of `tools/test_pocket.js`), terraces 2-12.
+- switch off = identical pixels: `tools/verify.sh regress` gets a backdrop pass (a floors-package pass; the current rooms passes use the real map, so a small `tools/ui/regress_floors.js` or a `--floors` mode is needed), checked and unchecked before shooting, 0 differences; plus the existing Pocket pass after the phase 0 refactor.
+- the backdrop never hides the fragment: pixels covered by the fragment in the floor-alone Box pick render (`E.pickBuffer`) are still the fragment's codes in the floor + backdrop render, for Cam 1, 2, 3, 4, 5, 7 and yaw offsets +-10; plus the analytic check on the shape (no backdrop tile with s >= back edge - gap).
+- levels added: B stays inside a budget measured at implementation (the Pocket's 12-19 is the reference, not a threshold).
+- `node tools/test_controls.js` (new rows, doc in sync), `node tools/test_floors.js` unchanged.
+
+MEASURED, NOT ENFORCED:
+- B cost cold, compare mode, floor 1 and floor 2, with the backdrop (against the Pocket's 0.2-1.9 s).
+- Backdrop depth available per camera (the pack-edge figures of section B, for every preset).
+- Contrast of the fragment edge against the backdrop at gap 2 / 4 / 6 / 8 (the tuning of section D).
+- Painter order of the backdrop against a z-buffer in the style of `tools/ui/test_cut_ui.js` (mean / worst %, like limitation 16).
+- Hooks audit of section F re-run per technique when phase 4 exists.
+
+SCREENSHOTS (looked at, not automated): Box / A / B / C at Cam 1 and Cam 3, fitted and at 50 px per tile, floor 1 and floor 2, backdrop off / on; the opening of floor 2 (phase 5); added to `tools/verify.sh shots --extra floors`.
+
+## J. Phases (smallest first) and open questions
+
+0. REFACTOR, no visible change. Extract the quantize + insert-levels block of `P_.apply` into a shared helper. Proves: the Pocket is pixel-identical (regress pocket pass, `test_pocket.js`).
+1. GEOMETRY. `E.backdrop.plan / apply` for the single floor, Cam 1 axis only, real exterior heights, the existing decoration palette, no fog. Proves: the invariant (fragment identical), the hard rule (pick buffer), the levels added and B cost, switch off = identical pixels, in all four techniques at once.
+2. LOOK AND SCALE. Tone multiplier, fog steps, fall gradient, gap slider, the tuning screenshots at game scale. Proves: the gap default and the tone / haze starting values (replaces the estimates with chosen values).
+3. CAMERAS. Axis from `cam.ry`, all orthographic presets, recompute on release. Proves: the hard-rule test at six cameras and yaw offsets; the depth available per camera.
+4. HOOKS (only if approved). Fall records (lip, foot, flow, u, v), a material tag per level, a per-kind pass hook, and one debug material on the fall to show the geometry accepts a stylization. Proves: the new criterion in all four techniques.
+5. STAIRWELL WINDOW. Fill the floor-2 opening with floor 1's real tiles under it (the arrival footprint and ramp at their true heights, as decoration role) so the opening shows the way down: the planned fix for the railed pit. Proves: the opening reads as stairs in the four techniques; walking and the declared link unchanged.
+6. LATER. R1 re-anchoring; exterior-vista content; Cam 6; Voronoi extension past the pack edge.
+
+OPEN QUESTIONS (max 5, each with a recommendation):
+1. Gap treatment: a low plain (default of this document, keeps the fragment's thin slab) or void with a deep base like Isla / Caída (a sheerer fall, needs a per-wall base). Recommendation: the low plain; revisit if the fall reads too short.
+2. Cutaway and Stack after Option 2: keep both (labelled as schematic views) or retire the Cutaway. Recommendation: keep both; Option 2 is the play-like view, the Cutaway is the structural diagram.
+3. Gap measured in ground tiles (default) or in on-screen tiles per camera (the Cam 4 gap reads 1.9 tiles). Recommendation: ground tiles, tuned at Cam 1 and Cam 3 first.
+4. Backdrop in the Stack and the Cutaway, and for the Exterior layer: no. Recommendation: no (the Exterior is the whole mountain; the multi-layer views have their own composition).
+5. `characterHeightTiles`: a documented constant (`P.characterTiles`, no UI) or an optional manifest key. Recommendation: constant now, manifest key only when the Unity port needs a per-landmark value.
