@@ -247,31 +247,17 @@
     return { arch: 'island', reason: `middle: exits all around (largest arc without exits ${arc.toFixed(0)} deg < 180)`, stats };
   };
 
-  /* APPLY to a shape S (the WORLD shape, reframed to the window of the pocket) of a Diorama: everything outside the pocket becomes void (not drawn), the decoration gets levels of its own, the water gets levels of its own (own colour),
-     the paths are marked. Sets S.pocket (true), S.pocketRole (Uint8 per window tile: 1 fragment, 2 decoration, 3 path, 4 water), S.pocketInfo. The fragment is not touched (same fine levels, same walkability).
-     P.pocketFraming ('auto' or an archetype), P.pocketHeight (multiplies the decoration offsets). S.sliceBox / S.fitH frame the fragment and ~2 r around it; island and drop set S.baseH (the walls over the void go down to it). */
-  P_.apply = function (S, P, RL, ids, opts) {
-    const n = S.n, W = S.W, H = S.H, K = S.subs, idsSet = new Set(ids), fw = S.mapW, frag = new Uint8Array(n);
-    const mapOf = (i) => { const x = (i % W) + S.ox, y = ((i / W) | 0) + S.oy; return x < 0 || y < 0 || x >= fw || y >= S.mapH ? -1 : y * fw + x; }; // -1: outside the map (the border of void of a padded pocket)
-    for (let i = 0; i < n; i++) if (idsSet.has(RL.room[mapOf(i)]) && !(S.void && S.void[i])) frag[i] = 1; // the room's tiles of the WORLD shape (whole map, no slice)
-    // exits: faces of the fragment border across an open room transition (nb = the neighbouring room, x / y = the face in window tiles)
-    const exits = [];
-    for (let i = 0; i < n; i++) { if (!frag[i]) continue; const x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (frag[j]) continue; const rb = RL.room[mapOf(j)]; if (rb <= 0 || idsSet.has(rb)) continue; if (RL.rp.has(E.rooms.key(mapOf(i), mapOf(j), RL.W * RL.H))) exits.push({ a: i, dx, dy, nb: rb, x: x + S.ox + 0.5 + dx * 0.5, y: y + S.oy + 0.5 + dy * 0.5 }); } }
-    // floors first (they need the shape as the world made it): the double / archetype and the heights the framing refers to
-    const fl = P_.floors(S, frag, (i) => RL.forb[mapOf(i)] !== 1 && RL.h[mapOf(i)] > 0 && S.region[i] >= 0), dbl = fl.length >= 2;
-    const fragH = []; for (let i = 0; i < n; i++) if (frag[i]) fragH.push(S.levelH[S.fine[i]]);
-    const fSorted = fl.slice().sort((a, b) => a.h - b.h), lowFloor = fSorted[0], highFloor = fSorted[fSorted.length - 1], lowH = lowFloor ? lowFloor.h : Math.min(...fragH);
-    let highMask = null, highH = lowH; if (dbl) { highMask = new Uint8Array(n); const hs = new Set(highFloor.ters); for (let i = 0; i < n; i++) if (frag[i] && hs.has(S.ter[i])) highMask[i] = 1; const hv = []; for (let i = 0; i < n; i++) if (highMask[i]) hv.push(S.levelH[S.fine[i]]); hv.sort((a, b) => a - b); highH = hv[hv.length >> 1]; }
-    const want = P.pocketFraming || 'auto', pick = want !== 'auto' && P_.ARCH.includes(want) ? { arch: want, reason: 'chosen manually' } : P_.chooseArchetype(RL, S.types, [...idsSet][0], P, dbl, exits);
-    const PH = P.pocketHeight === undefined ? P_.defaults.ph : P.pocketHeight, jump = P.terH, plan = P_.plan(W, H, frag, (i) => S.levelH[S.fine[i]], exits, Object.assign({ ids, jump, sub: E.subHeight(P), arch: pick.arch, ph: PH, lowH, highH, highMask }, opts));
-    const d = plan.disc, truncated = d.cx - d.R < 0 || d.cy - d.R < 0 || d.cx + d.R > W || d.cy + d.R > H;
+  /* ADD LEVELS (shared by the Pocket and the floor backdrop): the tiles with plan.role >= 2 (decoration, path, water) get the heights of plan.height (plan.decoHeight is snapped too); `plan` = { role, height, decoHeight [, keep: Uint8 per tile, 1 = the height is exact, not snapped] }.
+     Steps: snap DOWN to the level grid, insert the heights as levels of their own (palette meta `deco` / `water`), reassign S.fine, remap the ramps' levels. Sets S.levelH, S.levelMeta, S.maxFine; returns { added } (levels added). */
+  P_.addLevels = function (S, P, plan) {
+    const n = S.n, K = S.subs;
     /* QUANTIZE to the existing grid of heights (user's decision, B costs per level): the decoration and the paths snap DOWN (never higher: the hard rule holds) to the levels of the world (terraces x sub-terraces, the cake rings if on)
        extended beyond the lowest and highest terrace with the same spacing; the jitter then moves a cell between existing sub-levels and creates no new level. */
     { const Kk = S.subs, Nn = S.N, sh = E.subHeight(P), jm = P.terH, bT = (t) => (t < 0 ? E.terBase(0, P, S.center) + t * jm : t >= Nn ? E.terBase(Nn - 1, P, S.center) + (t - Nn + 1) * jm : E.terBase(t, P, S.center)), gs = S.levelH.slice();
       for (let t = -16; t < Nn + 12; t++) for (let q = 0; q < Kk; q++) gs.push(bT(t) + q * sh);
       gs.sort((a, b) => a - b); const G = gs.filter((v, i) => i === 0 || v - gs[i - 1] > 1e-5);
       const snap = (h) => { let lo = 0, hi = G.length - 1; if (h <= G[0]) return G[0]; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (G[m] <= h + 1e-5) lo = m; else hi = m - 1; } return G[lo]; };
-      for (let i = 0; i < n; i++) if (plan.role[i] >= 2) { plan.height[i] = snap(plan.height[i]); plan.decoHeight[i] = snap(plan.decoHeight[i]); } }
+      for (let i = 0; i < n; i++) if (plan.role[i] >= 2 && !(plan.keep && plan.keep[i])) { plan.height[i] = snap(plan.height[i]); plan.decoHeight[i] = snap(plan.decoHeight[i]); } }
     /* levels: the heights of the decoration and the paths are inserted in the ranking as levels of their own (never shared with the fragment: a height that equals an existing level is nudged up by 0.003); the water gets levels of its
        own too (+0.006), with their own colour (meta.water), so it is flat and smooth in A and B and the wall under a water tile that falls to another level is water-coloured (the waterfall) */
     const eps = 1e-6, old = S.levelH, hs = new Set(), wk = new Set();
@@ -292,6 +278,28 @@
     for (let i = 0; i < n; i++) fine[i] = plan.role[i] >= 2 ? hIdx.get(Math.round(plan.height[i] / eps)) : remap[S.fine[i]];
     S.fine.set(fine); for (const rec of S.stairs || []) if (rec.level !== undefined) rec.level = remap[rec.level];
     S.levelH = newH; S.levelMeta = newMeta; S.maxFine = newH.length - 1;
+    return { added: newH.length - old.length };
+  };
+
+  /* APPLY to a shape S (the WORLD shape, reframed to the window of the pocket) of a Diorama: everything outside the pocket becomes void (not drawn), the decoration gets levels of its own, the water gets levels of its own (own colour),
+     the paths are marked. Sets S.pocket (true), S.pocketRole (Uint8 per window tile: 1 fragment, 2 decoration, 3 path, 4 water), S.pocketInfo. The fragment is not touched (same fine levels, same walkability).
+     P.pocketFraming ('auto' or an archetype), P.pocketHeight (multiplies the decoration offsets). S.sliceBox / S.fitH frame the fragment and ~2 r around it; island and drop set S.baseH (the walls over the void go down to it). */
+  P_.apply = function (S, P, RL, ids, opts) {
+    const n = S.n, W = S.W, H = S.H, K = S.subs, idsSet = new Set(ids), fw = S.mapW, frag = new Uint8Array(n);
+    const mapOf = (i) => { const x = (i % W) + S.ox, y = ((i / W) | 0) + S.oy; return x < 0 || y < 0 || x >= fw || y >= S.mapH ? -1 : y * fw + x; }; // -1: outside the map (the border of void of a padded pocket)
+    for (let i = 0; i < n; i++) if (idsSet.has(RL.room[mapOf(i)]) && !(S.void && S.void[i])) frag[i] = 1; // the room's tiles of the WORLD shape (whole map, no slice)
+    // exits: faces of the fragment border across an open room transition (nb = the neighbouring room, x / y = the face in window tiles)
+    const exits = [];
+    for (let i = 0; i < n; i++) { if (!frag[i]) continue; const x = i % W, y = (i / W) | 0; for (const [dx, dy] of N4) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (frag[j]) continue; const rb = RL.room[mapOf(j)]; if (rb <= 0 || idsSet.has(rb)) continue; if (RL.rp.has(E.rooms.key(mapOf(i), mapOf(j), RL.W * RL.H))) exits.push({ a: i, dx, dy, nb: rb, x: x + S.ox + 0.5 + dx * 0.5, y: y + S.oy + 0.5 + dy * 0.5 }); } }
+    // floors first (they need the shape as the world made it): the double / archetype and the heights the framing refers to
+    const fl = P_.floors(S, frag, (i) => RL.forb[mapOf(i)] !== 1 && RL.h[mapOf(i)] > 0 && S.region[i] >= 0), dbl = fl.length >= 2;
+    const fragH = []; for (let i = 0; i < n; i++) if (frag[i]) fragH.push(S.levelH[S.fine[i]]);
+    const fSorted = fl.slice().sort((a, b) => a.h - b.h), lowFloor = fSorted[0], highFloor = fSorted[fSorted.length - 1], lowH = lowFloor ? lowFloor.h : Math.min(...fragH);
+    let highMask = null, highH = lowH; if (dbl) { highMask = new Uint8Array(n); const hs = new Set(highFloor.ters); for (let i = 0; i < n; i++) if (frag[i] && hs.has(S.ter[i])) highMask[i] = 1; const hv = []; for (let i = 0; i < n; i++) if (highMask[i]) hv.push(S.levelH[S.fine[i]]); hv.sort((a, b) => a - b); highH = hv[hv.length >> 1]; }
+    const want = P.pocketFraming || 'auto', pick = want !== 'auto' && P_.ARCH.includes(want) ? { arch: want, reason: 'chosen manually' } : P_.chooseArchetype(RL, S.types, [...idsSet][0], P, dbl, exits);
+    const PH = P.pocketHeight === undefined ? P_.defaults.ph : P.pocketHeight, jump = P.terH, plan = P_.plan(W, H, frag, (i) => S.levelH[S.fine[i]], exits, Object.assign({ ids, jump, sub: E.subHeight(P), arch: pick.arch, ph: PH, lowH, highH, highMask }, opts));
+    const d = plan.disc, truncated = d.cx - d.R < 0 || d.cy - d.R < 0 || d.cx + d.R > W || d.cy + d.R > H;
+    const lv = P_.addLevels(S, P, plan);
     // void: everything outside the pocket (fragment + decoration + water + paths) is not drawn; the ring of void of island and drop is not drawn either
     const vd = new Uint8Array(n); for (let i = 0; i < n; i++) vd[i] = plan.role[i] === 0 ? 1 : 0; S.void = vd;
     S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []); for (let i = 0; i < n; i++) if (!vd[i]) S.byLevel[S.fine[i]].push(i);
@@ -307,7 +315,7 @@
     S.pocket = true; S.pocketRole = plan.role; S.pocketPlan = plan;
     let faces = null;
     if (dbl) { const hi2 = fl.slice().sort((a, b) => b.h - a.h), A = hi2[0], B = hi2[hi2.length - 1], u = plan.disc.u; faces = (A.cx - B.cx) * u[0] + (A.cy - B.cy) * u[1] < 0; } // the higher floor is farther from the camera: the cliff between them faces the camera
-    S.pocketInfo = Object.assign({}, plan.info, { ids: ((opts && opts.ids) || ids).slice(), archetype: pick.arch, archetypeName: P_.ARCH_NAME[pick.arch], reason: pick.reason, auto: want === 'auto', stats: pick.stats || null, ph: PH, perTerrace: fl.perTerrace, R: d.R, r: d.r, floors: fl.map((f) => f.tiles), double: dbl, cliffFacesCamera: faces, truncated, levelsAdded: newH.length - old.length, baseH: S.baseH });
+    S.pocketInfo = Object.assign({}, plan.info, { ids: ((opts && opts.ids) || ids).slice(), archetype: pick.arch, archetypeName: P_.ARCH_NAME[pick.arch], reason: pick.reason, auto: want === 'auto', stats: pick.stats || null, ph: PH, perTerrace: fl.perTerrace, R: d.R, r: d.r, floors: fl.map((f) => f.tiles), double: dbl, cliffFacesCamera: faces, truncated, levelsAdded: lv.added, baseH: S.baseH });
     return S.pocketInfo;
   };
 })(window.EVO = window.EVO || {});
