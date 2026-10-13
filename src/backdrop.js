@@ -34,7 +34,7 @@
   };
   /* PLAN of the ATTACHED backdrop (phases 1b, 2a, 2b: the cavity wall with a stepped profile; pure). W, H window; frag Uint8Array (1 = a tile of the floor); fragH Float32Array (height of each floor tile); extH Float32Array (real exterior
      height of each tile, NaN = none); opts { yaw, gap (0-8, 0 = no apron), attDepth (D, depth of the wall), steps (n), riser (terraces of the risers after the first), taper (tiles per step), noise (0 / 1), jump (terH), mult (Backdrop height),
-     minRise (characterTiles x terH), bayH (the height of the bay tiles, slab base + 0.1 terH) }.
+     minRise (characterTiles x terH), bayH (the height of the bay tiles, slab base + 0.05 terH) }.
      OUTSIDE tiles = the tiles that are not floor and are 4-connected to the map border through non-floor tiles: the void tiles ENCLOSED by the floor (the shaft, the floor-2 opening, any inner hole) are never written.
      A tile is BEHIND the floor when a ray from its centre toward the camera (+u, step 0.25) meets a floor tile within gap + D and the three parallel rays (lateral offsets -0.7, 0, +0.7) AWAY from the camera meet none (nothing of the
      floor lies behind it, so it cannot hide any of it). d = the distance of the centre ray to the first floor tile (the local back contour), hit = that tile, base = the height of `hit`.
@@ -44,7 +44,7 @@
               profile = mult x (minRise + (k - 1) x riser x jump); the REAL MIRROR (the exterior height at the tile reflected across the back contour, section L) is a LOWER BOUND: height = base + max(profile, mult x (mirror - base)).
               The profile is stylization, the mirror is real data placed by a reflection: `info.profileTiles` / `info.mirrorTiles` count which one decided each wall tile.
        BAY   (part 3): a void tile of the floor's own silhouette that three or more of its 4-neighbours (floor, apron or wall) enclose and that touches the floor: height = bayH (exact). It stands in front of a floor lobe, so it may cover
-              the lowest 0.1 terH of that lobe's own skirt and nothing else (section M, 4).
+              the lowest 0.05 terH of that lobe's own skirt and nothing else (section M, 4).
      Returns { role (0 none, 1 floor, 2 added), part, height, u, outside, info }. */
   B_.planAttached = function (W, H, frag, fragH, extH, opts) {
     const o = Object.assign({}, B_.defaults, opts), n = W * H, yaw = o.yaw * Math.PI / 180, u = [Math.sin(yaw), Math.cos(yaw)], v = [-u[1], u[0]], gap = o.gap, jump = o.jump || 1;
