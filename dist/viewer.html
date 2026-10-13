@@ -91,7 +91,7 @@ details.grp>summary{cursor:pointer;font-size:10.5px;text-transform:uppercase;let
   <div id="floors" hidden><h3>Floors</h3>
    <div class="row"><select id="floorsView" title="Floors view"><option value="single">Single floor</option><option value="stack">Exploded stack</option><option value="cut">Cutaway</option></select></div>
    <div id="floorChips" class="chips"></div>
-   <label class="tg"><input type="checkbox" id="t-backdrop"><span>Floor backdrop (single floor: a band of the mountain behind the floor; composed for Cam 1)</span></label>
+   <label class="tg"><input type="checkbox" id="t-backdrop"><span>Floor backdrop (single floor: a wall attached to the floor, real heights placed by a mirror, height multiplier = stylization; Cam 1 only)</span></label>
    <label class="sl"><span>Backdrop gap, tiles</span><output id="o-backdropGap"></output><input type="range" id="s-backdropGap" min="0" max="8" step="1"></label>
    <label class="sl"><span>Backdrop height</span><output id="o-backdropHeight"></output><input type="range" id="s-backdropHeight" min="1" max="4" step="0.5"></label>
    <div class="hint" id="floorHint">Stack and cutaway: orthographic cameras only (Cam 1-5, 7); stake and objectives are placed in the single-floor views. The cutaway plane follows the camera yaw (the cut is recomputed when a drag is released).</div>
@@ -4667,6 +4667,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     floors: { ok: (c) => c.floors, text: 'load a pack with floors (Snake Mountain floors)' },
     singleFloor: { ok: (c) => !c.floors || c.floorsView === 'single', text: 'set Floors view to Single floor' },
     backdropOn: { ok: (c) => c.backdrop, text: 'turn on Floor backdrop' },
+    cam1: { ok: (c) => c.preset === 'isoE', text: 'use Cam 1: the backdrop is composed for Cam 1 until its camera phase' },
     ortho: { ok: (c) => c.camKind !== 'persp', text: 'use an orthographic camera (not Cam 6)' }
   };
   const CAKE = ['rooms', 'roomsFound', 'cakeRoom'], ASC = ['rooms', 'roomsFound', 'ascRoom'], POCKET = ['rooms', 'roomsFound', 'dioRoom'], RM = ['rooms', 'roomsFound'];
@@ -4746,9 +4747,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     e('t2Jitter', '#s-t2Jitter', '4 Curves (C)', ['C'], ['techC', 'wallT2'], 'T2: jitter.', { badge: 'C' }),
     // ---- 5 Floors
     e('floorsView', '#floorsView', '5 Floors', ALL, ['floors'], 'Single floor, exploded stack or cutaway of the landmark\'s floors (the stack and the cutaway need an orthographic camera). The floors are interior levels inside a shell; the cutaway is a schematic of stacked section maps.', { options: { stack: ['ortho'], cut: ['ortho'] } }),
-    e('t-backdrop', '#t-backdrop', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho'], 'Floor backdrop (Option 2, phase 1): behind the chosen floor, a low plain and then a band of the mountain (the real exterior heights, drawn with the decoration palette) so the floor reads as inside a shell. The floor itself does not change. Composed for Cam 1 (Iso 45); the Exterior layer has none.'),
-    e('backdropGap', '#s-backdropGap', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho', 'backdropOn'], 'Backdrop gap, 0-8 ground tiles (default 0): 0 = the wall rises from the floor edge; above 0 an apron at the height of the floor edge (not walkable) is inserted between the floor and the foot of the wall.'),
-    e('backdropHeight', '#s-backdropHeight', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho', 'backdropOn'], 'Backdrop height, 1-4: multiplies the whole rise of the wall above the floor edge (never the floor). The wall is a stepped profile (stylization: first riser one character = 2 tiles, then one terrace, 3 treads, tapering) with the real exterior height over the floor, mirrored across the back edge, as a lower bound.'),
+    e('t-backdrop', '#t-backdrop', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1'], 'Floor backdrop (Option 2): a wall attached to the chosen floor (no gap by default) with a stepped profile that rises behind it, so the floor reads as inside a shell. Heights are the real exterior heights over the floor, placed by a mirror across the back edge; the height multiplier is stylization (on floor 2 the whole profile is). Decoration only: not walkable. The floor itself does not change. Cam 1 only (composed for the Cam 1 axis); the Exterior layer has none.'),
+    e('backdropGap', '#s-backdropGap', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1', 'backdropOn'], 'Backdrop gap, 0-8 ground tiles (default 0): 0 = the wall rises from the floor edge; above 0 an apron at the height of the floor edge (not walkable) is inserted between the floor and the foot of the wall.'),
+    e('backdropHeight', '#s-backdropHeight', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1', 'backdropOn'], 'Backdrop height, 1-4: multiplies the whole rise of the wall above the floor edge (never the floor). The wall is a stepped profile (stylization: first riser one character = 2 tiles, then one terrace, 3 treads, tapering) with the real exterior height over the floor, mirrored across the back edge, as a lower bound.'),
     // ---- Shared passes
     e('outlines', '#t-outlines', 'Shared passes', ALL, [], 'Dark outlines on caps and walls.'),
     e('gradient', '#t-gradient', 'Shared passes', ALL, [], 'Shading gradient on cliffs.'),
@@ -4990,7 +4991,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const pb = $('#presets');
     for (const p of PRESETS) {
       const b = document.createElement('button'); b.textContent = p.label; b.title = p.title; b.dataset.id = p.id;
-      b.addEventListener('click', () => { const wasPersp = PRESETS.find((x) => x.id === st.preset).kind === 'persp'; st.preset = p.id; st.yawOff = 0; st.pitchOff = 0; st.panX = st.panY = 0; st.zoom = 1; invalidate(!!P.backdrop && wasPersp !== (p.kind === 'persp')); }); // the floor backdrop is part of the shape and is not built for Cam 6: crossing between Cam 6 and the others rebuilds it
+      b.addEventListener('click', () => { const wasCam1 = st.preset === 'isoE'; st.preset = p.id; st.yawOff = 0; st.pitchOff = 0; st.panX = st.panY = 0; st.zoom = 1; invalidate(!!P.backdrop && wasCam1 !== (p.id === 'isoE')); }); // the floor backdrop is part of the shape and is composed for Cam 1 only: crossing into or out of Cam 1 rebuilds it
       pb.appendChild(b);
     }
     const tb = $('#techs');
@@ -5041,16 +5042,24 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const i = y * S.W + x; return S.block[i] ? -1 : i;
   };
   const regionName = (r) => `R${r + 1}`;
+  /* a floors package (crystallizer 5): a mark belongs to the LAYER it was placed on (0 = the exterior, k = floor k); other packs keep marks without a layer (same pixels, same manifest) */
+  const incFloors = () => !!(packs[st.pack] && E.hasFloors(packs[st.pack].pack)), curLayer = () => (st.floors === 'single' ? st.layer : 0);
+  const onLayer = (m) => !incFloors() || (m.layer || 0) === curLayer();
+  const layerName = (k) => (k ? `Floor ${k}` : 'the Exterior');
   function computeIncursion() {
-    const out = { stake: null, objectives: [], lines: [] };
+    const out = { stake: null, objectives: [], lines: [] }, fl = incFloors();
     if (!S) return out;
-    const stake = inc.stake ? incIdx(inc.stake) : -1;
-    if (inc.stake) { if (stake >= 0) out.stake = stake; else out.lines.push('Stake: outside the slice (kept in the pack, not shown).'); }
+    const gone = (name, m) => (fl ? `${name}: on ${layerName(m.layer || 0)}, not shown here.` : null);
+    const stakeHere = inc.stake && onLayer(inc.stake), stake = stakeHere ? incIdx(inc.stake) : -1;
+    if (inc.stake && !stakeHere) out.lines.push(gone('Stake', inc.stake));
+    if (stakeHere) { if (stake >= 0) out.stake = stake; else out.lines.push(fl ? 'Stake: on a tile that is not walkable in this layer (kept in the pack, not shown).' : 'Stake: outside the slice (kept in the pack, not shown).'); }
     inc.objectives.forEach((o, k) => {
-      const i = incIdx(o), name = o.label || `Objective ${k + 1}`;
-      if (i < 0) { out.lines.push(`${name}: outside the slice (kept in the pack, not shown).`); return; }
+      const name = o.label || `Objective ${k + 1}`;
+      if (!onLayer(o)) { out.lines.push(gone(name, o)); return; }
+      const i = incIdx(o);
+      if (i < 0) { out.lines.push(fl ? `${name}: on a tile that is not walkable in this layer (kept in the pack, not shown).` : `${name}: outside the slice (kept in the pack, not shown).`); return; }
       const ob = { i, route: null }; out.objectives.push(ob);
-      if (stake < 0) { out.lines.push(`${name} at (${o.x}, ${o.y}): no stake yet.`); return; }
+      if (stake < 0) { out.lines.push(`${name} at (${o.x}, ${o.y}): no stake ${fl && inc.stake ? 'on this layer' : 'yet'}.`); return; }
       ob.route = E.route(S, P, i, stake);
       if (ob.route) { out.lines.push(`${name}: route of ${ob.route.length} tiles to the stake.`); return; }
       const g = E.regionGap(S, i, stake), xy = (t) => `(${S.ox + (t % S.W)}, ${S.oy + ((t / S.W) | 0)})`;
@@ -5092,13 +5101,15 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const x = S.ox + (tile % S.W), y = S.oy + ((tile / S.W) | 0);
     if (inc.mode === 'rm') {
       const near = (m) => Math.hypot(m.x - x, m.y - y) <= 1.5;
-      if (inc.stake && near(inc.stake)) inc.stake = null; else { const k = inc.objectives.findIndex(near); if (k >= 0) inc.objectives.splice(k, 1); else return note('No mark there.'); }
+      if (inc.stake && onLayer(inc.stake) && near(inc.stake)) inc.stake = null; else { const k = inc.objectives.findIndex((m) => onLayer(m) && near(m)); if (k >= 0) inc.objectives.splice(k, 1); else return note('No mark there.'); }
     } else {
+      if (S.backdrop && S.backdrop.role[tile] === 2) return note(`(${x}, ${y}) is decoration (floor backdrop): not walkable, no stake or objective there.`);
       if (S.slice && !S.slice[tile]) return note(`(${x}, ${y}) is outside the slice: movement is limited to the slice.`);
       if (S.block[tile]) return note(`(${x}, ${y}) is not walkable (water or void).`);
       if (S.isolated && S.isolated[tile]) return note(`(${x}, ${y}) is isolated terrain (a walkable region under ${S.walkInfo.limit} tiles): decorative, no stake or objective there.`);
       if (!E.tileWalkable(S, tile)) return note(`(${x}, ${y}) is in the margin of a wall, a cliff or a steep slope: not walkable with rooms on. Pick a tile a little further in.`);
-      if (inc.mode === 'stake') inc.stake = { x, y }; else inc.objectives.push({ x, y });
+      const mk = incFloors() ? { x, y, layer: curLayer() } : { x, y }; // floors packs: the mark remembers its layer
+      if (inc.mode === 'stake') inc.stake = mk; else inc.objectives.push(mk);
     }
     invalidate(false);
   }
@@ -5324,7 +5335,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       try {
         S = E.shape(pack, P, fl ? null : sliceSpec());
         if (fl) E.floors.prepare(S, raw, P, st.floors === 'single' ? st.layer : 0);
-        if (fl && P.backdrop && E.backdrop && st.floors === 'single' && st.layer > 0 && view().kind !== 'persp') E.backdrop.apply(S, P, raw, st.layer); // Floor backdrop (crystallizer 5, Option 2, phase 1): a band of the mountain behind the floor
+        if (fl && P.backdrop && E.backdrop && st.floors === 'single' && st.layer > 0 && st.preset === 'isoE') E.backdrop.apply(S, P, raw, st.layer); // Floor backdrop (crystallizer 5, Option 2, phase 1): a band of the mountain behind the floor
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
       buildRoomChips(); buildFloorChips();
@@ -5456,7 +5467,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket,
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
-      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind };
+      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset };
   }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));

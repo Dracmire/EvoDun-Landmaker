@@ -40,6 +40,7 @@
     floors: { ok: (c) => c.floors, text: 'load a pack with floors (Snake Mountain floors)' },
     singleFloor: { ok: (c) => !c.floors || c.floorsView === 'single', text: 'set Floors view to Single floor' },
     backdropOn: { ok: (c) => c.backdrop, text: 'turn on Floor backdrop' },
+    cam1: { ok: (c) => c.preset === 'isoE', text: 'use Cam 1: the backdrop is composed for Cam 1 until its camera phase' },
     ortho: { ok: (c) => c.camKind !== 'persp', text: 'use an orthographic camera (not Cam 6)' }
   };
   const CAKE = ['rooms', 'roomsFound', 'cakeRoom'], ASC = ['rooms', 'roomsFound', 'ascRoom'], POCKET = ['rooms', 'roomsFound', 'dioRoom'], RM = ['rooms', 'roomsFound'];
@@ -119,9 +120,9 @@
     e('t2Jitter', '#s-t2Jitter', '4 Curves (C)', ['C'], ['techC', 'wallT2'], 'T2: jitter.', { badge: 'C' }),
     // ---- 5 Floors
     e('floorsView', '#floorsView', '5 Floors', ALL, ['floors'], 'Single floor, exploded stack or cutaway of the landmark\'s floors (the stack and the cutaway need an orthographic camera). The floors are interior levels inside a shell; the cutaway is a schematic of stacked section maps.', { options: { stack: ['ortho'], cut: ['ortho'] } }),
-    e('t-backdrop', '#t-backdrop', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho'], 'Floor backdrop (Option 2, phase 1): behind the chosen floor, a low plain and then a band of the mountain (the real exterior heights, drawn with the decoration palette) so the floor reads as inside a shell. The floor itself does not change. Composed for Cam 1 (Iso 45); the Exterior layer has none.'),
-    e('backdropGap', '#s-backdropGap', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho', 'backdropOn'], 'Backdrop gap, 0-8 ground tiles (default 0): 0 = the wall rises from the floor edge; above 0 an apron at the height of the floor edge (not walkable) is inserted between the floor and the foot of the wall.'),
-    e('backdropHeight', '#s-backdropHeight', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho', 'backdropOn'], 'Backdrop height, 1-4: multiplies the whole rise of the wall above the floor edge (never the floor). The wall is a stepped profile (stylization: first riser one character = 2 tiles, then one terrace, 3 treads, tapering) with the real exterior height over the floor, mirrored across the back edge, as a lower bound.'),
+    e('t-backdrop', '#t-backdrop', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1'], 'Floor backdrop (Option 2): a wall attached to the chosen floor (no gap by default) with a stepped profile that rises behind it, so the floor reads as inside a shell. Heights are the real exterior heights over the floor, placed by a mirror across the back edge; the height multiplier is stylization (on floor 2 the whole profile is). Decoration only: not walkable. The floor itself does not change. Cam 1 only (composed for the Cam 1 axis); the Exterior layer has none.'),
+    e('backdropGap', '#s-backdropGap', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1', 'backdropOn'], 'Backdrop gap, 0-8 ground tiles (default 0): 0 = the wall rises from the floor edge; above 0 an apron at the height of the floor edge (not walkable) is inserted between the floor and the foot of the wall.'),
+    e('backdropHeight', '#s-backdropHeight', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1', 'backdropOn'], 'Backdrop height, 1-4: multiplies the whole rise of the wall above the floor edge (never the floor). The wall is a stepped profile (stylization: first riser one character = 2 tiles, then one terrace, 3 treads, tapering) with the real exterior height over the floor, mirrored across the back edge, as a lower bound.'),
     // ---- Shared passes
     e('outlines', '#t-outlines', 'Shared passes', ALL, [], 'Dark outlines on caps and walls.'),
     e('gradient', '#t-gradient', 'Shared passes', ALL, [], 'Shading gradient on cliffs.'),

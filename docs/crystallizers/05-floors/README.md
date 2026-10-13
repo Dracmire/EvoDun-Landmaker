@@ -2,7 +2,7 @@
 
 ## 1. Status
 
-IN REVIEW (PR not opened yet: two problems found in the last screenshots, see 5c). Steps A, B, B2 and C done (B2 = declared links; step B's knife-edge geometry c2c2dda is superseded; step C = a457d5e + f1d4fd9). Step E (this branch, after C): low railing and 'Stairs down' marker on floor 2, cutaway paint order measured against a z-buffer (Cam 1 and Cam 3, Box / A / B / C), screenshots of Single / Stack / Cutaway in Cam 2, 4 and 7 and close-ups of the floor-2 opening. Pending: the user's decision on the opening, README limits (done below), PR. Nothing is exported to Unity.
+MERGED (PR #19). Steps A, B, B2, C and E are in main: data, declared links, the Floors view (Single / Stack / Cutaway), the floor-2 railing and 'Stairs down' marker, cutaway paint order measured against a z-buffer (Cam 1 and Cam 3). Option 2 (camera-fixed backdrop, `option2-backdrop.md`): phases 0, 1, 1b (PR #23, #24) and 2a + 2b (PR #26: single gap, bay fix, stepped profile) are merged; 2c (tone + fog) and 2d (stripes) are NOT started. The backdrop is composed for Cam 1 only: its control is greyed at any other camera and it is not built there. Incursion marks of a floors package belong to the layer they were placed on. Nothing is exported to Unity.
 
 ## 2. Goal
 
@@ -65,9 +65,9 @@ HOW IT READS (screenshots `tools/verify.sh shots --extra floors`, Cam 1 and Cam 
 
 ## 5d. Later phases
 
-Option 2 phases 0 and 1 are implemented (`src/backdrop.js`; measured findings in `option2-backdrop.md` section K: the real exterior behind a floor is the low outer slope, so the approved derivation gives an empty band; waiting for the user's review). Later phases: Option 2 (camera-fixed backdrop) is the planned fix for the Cutaway's "floating plates" reading and for the floor-2 opening that still reads as a railed pit (a stairwell window); design document, waiting for approval: [`option2-backdrop.md`](option2-backdrop.md).
+Option 2 phases 0, 1, 1b (the attached cavity wall) and 2a + 2b (single gap, bays, stepped profile) are merged (`src/backdrop.js`; sections K, L and N of [`option2-backdrop.md`](option2-backdrop.md)); phase 2c (tone + fog) and 2d (stripes) are not started (section M, approved), and the backdrop only exists at Cam 1 (a camera phase is still to be designed). Later phases: Option 2 (camera-fixed backdrop) is the planned fix for the Cutaway's "floating plates" reading and for the floor-2 opening that still reads as a railed pit (a stairwell window).
 
-- Option 2, camera-fixed BACKDROP (HD-2D style), built on the Pocket machinery (`src/pocket.js`): the next phase of Floors. It is the real fix for the shell reading (floors read as inside a shell).
+- Option 2, camera-fixed BACKDROP (HD-2D style), built on the Pocket machinery (`src/pocket.js`): in progress (phases 0-2b merged, 2c / 2d / camera phase pending). It is the real fix for the shell reading (floors read as inside a shell).
 - Option 3, classic per-floor view with framing: already covered by the Single floor view plus the Pocket framing archetypes.
 - Option 4, castle mode (separate spaces, exterior seen from the interior, transition scenes): a game / Unity staging note, not viewer work.
 - The floor-2 opening as a STAIRWELL (floor 1's ramp seen through the opening): goes with option 2. The opening stays as it is for now (railing + 'Stairs down' marker; it reads as a railed pit with a label, not as stairs).
