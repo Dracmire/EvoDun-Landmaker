@@ -24,9 +24,9 @@ Each crystallizer needs a default camera. Today there is a bank of seven cameras
 | 2 Room types (Cake, Ascension, Pocket) | Pocket scenario: Cam 1 (the Pocket is composed for that axis); the rest uses the default | repo, scenario `pocket31` |
 | 3 Stage (HD-2D) | Cam 6 Stage, from the Stage preset | repo, scenario `x4_stage` |
 | 4 Tiles to Curves (C) | Cam 3, scenario `snake_curves` | repo |
-| 5 Floors | none set by its scenario; the floor backdrop only works at Cam 1 | repo, scenario `snake_floors` |
+| 5 Floors | **Cam 1 Iso 45** (user decision, 2026-10-13: the default camera, a good fit for all; the floor backdrop is composed for its axis). The scenario `snake_floors` sets no camera yet | user; repo, scenario `snake_floors` |
 
-PROPOSAL, to confirm: make the default camera an explicit field of each crystallizer (first row of its README and of its scenario), and make a control that is only valid at some camera say so (the floor backdrop at Cam 1 only).
+Floors is the first one confirmed. PROPOSAL, to confirm for the rest: make the default camera an explicit field of each crystallizer (first row of its README and of its scenario), and make a control that is only valid at some camera say so (the floor backdrop at Cam 1 only).
 
 ## The five that exist
 

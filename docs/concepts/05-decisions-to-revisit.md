@@ -18,7 +18,8 @@ This list collects what the repo itself marks as provisional, parked, a deviatio
 | Stage | Design draft; the user said it felt like a defeat | DRAFT, to be revisited | [03-crystallizers.md](03-crystallizers.md) |
 | Tiles to Curves | Vertical pass of the wall dressing | NOT approved, not built | `CLAUDE.md`, Repo state |
 | Floors | Floor connections are DECLARED (reserved), not detected; the shaft replaces the serpent tube (deviation from GDD 4.1); no entrance from the exterior yet (the snake's mouth) | RESERVED / DEVIATION / PENDING | `CLAUDE.md`, FLOORS |
-| Floors | The floor backdrop is built on the Cam 1 axis and its profile is stylization | by design for now | `docs/crystallizers/05-floors/option2-backdrop.md` |
+| Floors | The floor backdrop is built on the Cam 1 axis (Cam 1 is the default camera of Floors, user, 2026-10-13) and its profile is stylization; the other cameras are not supported by it (fixed axis) | by design for now | `docs/crystallizers/05-floors/option2-backdrop.md` |
+| Floors | The hard rule "the backdrop never hides the floor" is enforced at the Cam 1 axis with drag yaw 0 and +-5 degrees; from +-10 degrees it is only MEASURED (the wall touching the floor edge covers a 2-4 px strip: 0.05-0.3 % of the floor pixels at +-10..20 degrees) | user decision (option B), 2026-10-13: a test that would not fail on a regression there | `docs/crystallizers/05-floors/option2-backdrop.md` section N |
 | Unity | Nothing is exported until every crystallizer is done | user rule | [04-handoff-to-unity.md](04-handoff-to-unity.md) |
 
 Add a row when a decision is taken to simplify; remove it only when the user says it has been reviewed.
