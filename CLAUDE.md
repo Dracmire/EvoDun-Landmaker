@@ -5,6 +5,8 @@ EvoDun is an SRPG with an overworld. This repo (EvoDun-Landmaker) holds a web vi
 MATERIALIZATION (crystallization) of 2.5D isometric maps. The goal is NOT to generate terrain: it is to
 take the same data and express it with several techniques to compare which reads best. Generation and the
 old pipeline (Unity, C#) are reference only.
+CONCEPTS (what the project is for and what things are called): `docs/concepts/` (start at its README). It holds the three creation mechanisms (Semantic Macroform, Semantic Landmark, Numeric World),
+the semantic pass, what a crystallizer is (it is only meaningful against a visual scope, and each one has a default camera) and the handoff to Unity. Read it before proposing work; if a concept changes it changes there first.
 
 ## Agreed design (do not change without asking the user)
 - Build unit: one complete continuous slice; zones only split it.
