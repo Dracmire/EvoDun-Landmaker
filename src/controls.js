@@ -118,6 +118,7 @@
     e('t2Jitter', '#s-t2Jitter', '4 Curves (C)', ['C'], ['techC', 'wallT2'], 'T2: jitter.', { badge: 'C' }),
     // ---- 5 Floors
     e('floorsView', '#floorsView', '5 Floors', ALL, ['floors'], 'Single floor, exploded stack or cutaway of the landmark\'s floors (the stack and the cutaway need an orthographic camera). The floors are interior levels inside a shell; the cutaway is a schematic of stacked section maps.', { options: { stack: ['ortho'], cut: ['ortho'] } }),
+    e('t-backdrop', '#t-backdrop', '5 Floors', ALL, ['floors', 'singleFloor', 'ortho'], 'Floor backdrop (Option 2, phase 1): behind the chosen floor, a low plain and then a band of the mountain (the real exterior heights, drawn with the decoration palette) so the floor reads as inside a shell. The floor itself does not change. Composed for Cam 1 (Iso 45); the Exterior layer has none.'),
     // ---- Shared passes
     e('outlines', '#t-outlines', 'Shared passes', ALL, [], 'Dark outlines on caps and walls.'),
     e('gradient', '#t-gradient', 'Shared passes', ALL, [], 'Shading gradient on cliffs.'),

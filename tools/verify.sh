@@ -86,6 +86,10 @@ part_regress() {
       node tools/ui/regress_rooms.js "$r/new_$sw" --toggle "$sw" 2>&1 | tail -1
       cmp_pass "rooms on, $sw toggled on and off" "$r/old_rooms" "$r/new_$sw"
     done
+    EVO_ROOT="$WT" node tools/ui/regress_floors.js "$r/old_floors" 2>&1 | tail -1; node tools/ui/regress_floors.js "$r/new_floors" 2>&1 | tail -1
+    cmp_pass "floors package, single floor 1 and 2, backdrop off" "$r/old_floors" "$r/new_floors"
+    node tools/ui/regress_floors.js "$r/new_backdrop" --toggle backdrop 2>&1 | tail -1
+    cmp_pass "floors package, backdrop toggled on and off" "$r/old_floors" "$r/new_backdrop"
     EVO_ROOT="$WT" node tools/ui/regress_cams.js "$r/old_cams" 2>&1 | tail -1; node tools/ui/regress_cams.js "$r/new_cams" 2>&1 | tail -1
     cmp_pass "camera bank Cam 1-5 (isoE isoW oblique low top), Box A B, three scenes" "$r/old_cams" "$r/new_cams"
   } >> "$log" 2>&1
