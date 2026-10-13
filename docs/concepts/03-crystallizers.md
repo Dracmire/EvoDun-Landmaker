@@ -40,6 +40,12 @@ PROPOSAL, to confirm: make the default camera an explicit field of each crystall
 
 Details of each live in `docs/crystallizers/NN-.../README.md`.
 
+## Why techniques are compared, and what is deferred (user, 2026-10-13)
+
+The original reason for comparing techniques stands: terrain needs evaluation, and the viewer exists to see which technique reads best. Some combinations are really bad. Example (user): our walls with extrusion are mostly the Unexplored 2 look and do not fit all modes.
+
+That means a later task: GROUP which tools combine with which crystallizer. It is **not for now** (user): for now only the concepts and the decisions are kept, and when everything is finished they are reviewed (see [05-decisions-to-revisit.md](05-decisions-to-revisit.md)). The repo `CLAUDE.md` Context paragraph ("compare which reads best") stays as it is.
+
 ## Open questions
 
 1. Is the default camera a property of the crystallizer only, or also of the mechanism (the same landmark seen from the same camera in any crystallizer)?

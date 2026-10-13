@@ -23,6 +23,7 @@ The work concentrates on solving the CREATION MECHANISMS: **Semantic Macroform**
 | [02-semantic-pass.md](02-semantic-pass.md) | How a semantic statement becomes rules on the numeric world (the part that is NOT yet well expressed) |
 | [03-crystallizers.md](03-crystallizers.md) | What a crystallizer is, scope to crystallizer, the default camera of each |
 | [04-handoff-to-unity.md](04-handoff-to-unity.md) | What goes to Unity and how |
+| [05-decisions-to-revisit.md](05-decisions-to-revisit.md) | Decisions taken to simplify, to review when every crystallizer is finished |
 
 Add a file here for every new concept; keep each one short and keep the open questions at the end.
 
