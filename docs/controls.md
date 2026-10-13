@@ -111,6 +111,8 @@ Techniques: Box, A, B, C = the panels the control changes; a badge [A] / [B] / [
 |---|---|---|---|
 | floorsView | all | load a pack with floors (Snake Mountain floors) | Single floor, exploded stack or cutaway of the landmark's floors (the stack and the cutaway need an orthographic camera). The floors are interior levels inside a shell; the cutaway is a schematic of stacked section maps. |
 | t-backdrop | all | load a pack with floors (Snake Mountain floors) · set Floors view to Single floor · use an orthographic camera (not Cam 6) | Floor backdrop (Option 2, phase 1): behind the chosen floor, a low plain and then a band of the mountain (the real exterior heights, drawn with the decoration palette) so the floor reads as inside a shell. The floor itself does not change. Composed for Cam 1 (Iso 45); the Exterior layer has none. |
+| backdropGap | all | load a pack with floors (Snake Mountain floors) · set Floors view to Single floor · use an orthographic camera (not Cam 6) · turn on Floor backdrop | Backdrop gap, 2-8 tiles (default 4 = two characters): ground tiles between the floor and the foot of the backdrop wall (the apron, at the height of the floor edge, not walkable). |
+| backdropHeight | all | load a pack with floors (Snake Mountain floors) · set Floors view to Single floor · use an orthographic camera (not Cam 6) · turn on Floor backdrop | Backdrop height, 1-4: multiplies ONLY the rise of the wall above the apron (never the floor). The wall rise is the real exterior height over the floor, mirrored across the back edge, with a minimum of one character (2 tiles); the multiplier is stylization. |
 
 ## Shared passes
 
