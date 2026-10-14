@@ -1,7 +1,7 @@
 /* Crystallizer 6 (Macroform): the derived package data/snake_mountain_macroform.json, checked INDEPENDENTLY of the Python script (the data only), plus the Python reference test.
    Format: `elevation` = the outer surface of snake_mountain_surface, `masks.snake`, `volume` (per column the SOLID intervals [z0, z1, mat] in ELEVATION units, z_tiles / vScale), `macro` (floors, ramp, shaft, head).
    Checks: column intervals sorted / disjoint / on the voxel grid; the exterior is unchanged outside the shaft (top solid = the surface within DZ); material voxel counts (the spike's); the walk graph rebuilt from `macro`
-   (floor nodes + ramp nodes, 4-neighbour, step <= 0.75) reaches every floor (>= 94 %: floor 2 is 94.7 %), each floor reaches the shaft ring, the ramp 100 %; max ramp slope <= 0.65 (PROVISIONAL cap); headroom >= HEAD - DZ.
+   (floor nodes + ramp nodes, 4-neighbour, step <= 0.75) reaches every floor (>= 94 %: floor 2 is 94.7 %; user decision 2026-10-14, the exact counts below stay the real guard), each floor reaches the shaft ring, the ramp 100 %; max ramp slope <= 0.65 (PROVISIONAL cap); headroom >= HEAD - DZ.
    Then tools/test_macroform.py (the numbers of the spike, determinism); SKIP when python3 / numpy / scipy are missing. Run: node tools/test_macroform.js */
 const fs = require('fs'), path = require('path'), cp = require('child_process');
 let pass = 0, fail = 0;

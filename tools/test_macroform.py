@@ -1,6 +1,6 @@
 """Crystallizer 6 (Macroform), the derivation: tools/derive_snake_macroform.py against the numbers of the scratch spike (docs/crystallizers/06-macroform/README.md section 9).
 Reference numbers = the spike's s1_run2.log; the script reproduces them exactly with the default arguments. ENFORCED: determinism (the committed JSON is reproduced bit for bit), the spike numbers, max ramp slope <= 0.65 (my PROVISIONAL cap),
-walk reachability (floors >= 95 %, shaft ring, ramp 100 %). MEASURED, NOT ENFORCED: the minimum 3D shell thickness after the tube carve.
+walk reachability (floors >= 94 % (user decision 2026-10-14; floor 2 is 144/152 = 94.7 %, the exact counts 276/279, 144/152, 94/98 are asserted too), shaft ring, ramp 100 %), headroom >= HEAD - DZ (user decision: voxel resolution, HEAD 2.5 nominal). MEASURED, NOT ENFORCED: the minimum 3D shell thickness after the tube carve.
 Run: python3 tools/test_macroform.py     (needs numpy and scipy; tools/test_macroform.js runs it and SKIPs when they are missing)"""
 import os, sys, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

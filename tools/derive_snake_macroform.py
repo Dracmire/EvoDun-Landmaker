@@ -71,7 +71,9 @@ def derive(P=None, es=None, sn=None, skeleton=None):
         return bool(hollow[zi(z0 + 1e-6):zi(z1 - 1e-6) + 1, cy, cx].all())
 
     # serpent centreline from the head end outward
-    pts = set(skeleton if skeleton is not None else SKELETON_RC); cur = START; order = [cur]; seen = {cur}
+    pts = set(skeleton if skeleton is not None else SKELETON_RC)
+    assert all(sn[r, c] for r, c in pts), 'the frozen skeleton has tiles outside the snake mask: the mask changed, regenerate SKELETON_RC'
+    cur = START; order = [cur]; seen = {cur}
     while True:
         nx = [(cur[0] + dy, cur[1] + dx) for dy in (-1, 0, 1) for dx in (-1, 0, 1) if (dy or dx) and (cur[0] + dy, cur[1] + dx) in pts and (cur[0] + dy, cur[1] + dx) not in seen]
         if not nx: break
