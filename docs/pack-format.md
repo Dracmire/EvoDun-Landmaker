@@ -30,6 +30,18 @@ A pack may carry several stacked heightmaps of ONE landmark: `floors: [{ id, nam
 `quantize` uses it for the terrace bands even where a map has void (without it a map with void quantizes over its own land range), so every layer of the package has the same bands. `E.floorPack(pack, k)` gives the pack of one layer (k = 0 the exterior). A `viewer` block in a built-in pack is applied when the source is chosen (floors: `{ terraces: 5, minPlateau: 5 }`).
 A DECLARED LINK (`links`, carried by the floor it starts from, `from`) is structure, not detected: `site` = two 4-neighbour tiles of the whole map (a = the low tile, b = the high one) where a forced site carves a ramp with the link's own `width` (1-5) and `depth` (1-4), even when stairW is 0; `landing` / `footprint` are inclusive tile rectangles `{ x: [x0, x1], y: [y0, y1] }`; the landing, the footprint and the ring foot tiles are excluded from the pre-smoothing and from the plateau cleanup. A pack without `links` takes the old code paths unchanged. `data/snake_mountain_floors.json`, `docs/crystallizers/05-floors/README.md`.
 
+### Macroform package (crystallizer 6, optional keys of a built-in pack; old packs are unaffected)
+A pack may carry ONE landmark as a VOLUME: several solid intervals per column instead of one height. `elevation` keeps the OUTER SURFACE (so every existing technique draws the exterior of the source exactly like the plain surface pack); the volume is extra keys:
+```json
+"volume": { "vScale": 2, "dz": 0.125, "nz": 79, "materials": ["air","rock","serpent","slab","ramp","ground"], "columns": [ [[z0, z1, mat], ...], ... ] },
+"macro":  { "params": {...}, "floors": [{ "id": 1, "z": 1.69, "zTiles": 3.38, "tiles": [[x, y], ...] }], "ramp": { "width": 1.0, "path": [[x, y, z, t], ...], "tiles": [[x, y, z, t], ...] },
+            "shaft": { "c": [20.5, 20.5], "r": 2.5 }, "head": { "x": 21, "y": 15 } }
+```
+- `columns` has `width x height` entries (row-major, index = y*width + x). Each lists the SOLID intervals of the column bottom up, `z0 < z1`, in ELEVATION units; `mat` indexes `materials` (0 = air is never stored). A column with several intervals has hollow space between them (a floor, a tube). `dz` is the voxel height in elevation units (a multiple of it is exact in binary for `vScale` 2); `nz` is the number of voxel layers the derivation used (air voxel count = nz x width x height - solid voxels).
+- VERTICAL UNIT: `z_tiles = z x vScale`. The viewer's height unit is the elevation unit (the one terraces are quantized from); the volume view draws a voxel as a cube, one tile wide and `1 / vScale` elevation units high. Outside the shaft, the top of the highest interval of every column equals `elevation` (within one voxel).
+- `macro.params` are the derivation constants (all PROVISIONAL: docs/crystallizers/06-macroform/README.md); `floors[].z` is the floor level in elevation units (`zTiles` in tiles) and `tiles` its walkable tiles (after the openings); `ramp.path` the smoothed serpent centreline sampled every 0.25 tile with the ramp surface `z` (elevation units) and the arc length `t`; `ramp.tiles` the tiles of the ramp lane with the surface under them; `head` the marker of the snake head (a landmark of its own, no geometry here).
+- Nothing in the viewer reads these keys yet (PR B of the crystallizer). Built-in source id `snake_macroform` (`data/snake_mountain_macroform.json`, `tools/derive_snake_macroform.py`).
+
 ## 0.2 (channels as fields)
 A pack is a small JSON manifest plus PNG images that are selected together in the viewer. Images are decoded
 by our own decoder (`src/png.js`): raw samples, no colour management, no alpha premultiplication, 8 or 16 bit,
