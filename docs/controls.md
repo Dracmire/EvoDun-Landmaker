@@ -114,6 +114,12 @@ Techniques: Box, A, B, C = the panels the control changes; a badge [A] / [B] / [
 | backdropGap | all | load a pack with floors (Snake Mountain floors) · set Floors view to Single floor · use Cam 1: the backdrop is composed for Cam 1 until its camera phase · turn on Floor backdrop | Backdrop gap, 0-8 ground tiles (default 0): 0 = the wall rises from the floor edge; above 0 an apron at the height of the floor edge (not walkable) is inserted between the floor and the foot of the wall. |
 | backdropHeight | all | load a pack with floors (Snake Mountain floors) · set Floors view to Single floor · use Cam 1: the backdrop is composed for Cam 1 until its camera phase · turn on Floor backdrop | Backdrop height, 1-4: multiplies the whole rise of the wall above the floor edge (never the floor). The wall is a stepped profile (stylization: first riser one character = 2 tiles, then one terrace, 3 treads, tapering) with the real exterior height over the floor, mirrored across the back edge, as a lower bound. |
 
+## 6 Macroform
+
+| id | techniques | requires | help |
+|---|---|---|---|
+| macroView | all | load a pack with a volume (Snake Mountain macroform) | Macroform view of the volume (crystallizer 6): Off = the heightmap exterior of the same source (quantized terraces); Exterior, Quadrant removed (the quadrant facing the camera), Interior only (floors, ramp, shaft) and a Horizontal cut at floor 1 / 2 / 3 are drawn from the column intervals, one block per voxel run, Box-style. One view (no compare grid). Cam 1-5 only (Cam 6 and Cam 7 show the heightmap). The volume uses 1 tile of height = 1 tile of width, the heightmap uses terraces, so their vertical scales differ. |
+
 ## Shared passes
 
 | id | techniques | requires | help |

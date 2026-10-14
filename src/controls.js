@@ -6,7 +6,7 @@
    - docs/controls.md is GENERATED from this table (tools/gen_controls_doc.js, run by tools/build.py); tools/test_controls.js checks that it is in sync.
    `dom` = CSS selector of the control element(s) that are disabled; the tooltip and the greyed look go on the label / row that holds them. `keep` = the control already has its own tooltip (cameras, Stage preset): not touched. */
 (function (E) {
-  const GROUPS = ['Scenarios', 'View bar', 'Source & slice', '1 Terrain', '2 Room types', '3 Stage', '4 Curves (C)', '5 Floors', 'Shared passes', 'Overlays', 'Incursion', 'Diagnostics'];
+  const GROUPS = ['Scenarios', 'View bar', 'Source & slice', '1 Terrain', '2 Room types', '3 Stage', '4 Curves (C)', '5 Floors', '6 Macroform', 'Shared passes', 'Overlays', 'Incursion', 'Diagnostics'];
   const T = (c, t) => c.techs.includes(t);
   /* requirements: ok(ctx) and the human text of what to do. A "found" / "present" requirement is treated as met while its prerequisite switch is off (the first text already says what to do). */
   const R = {
@@ -41,6 +41,8 @@
     singleFloor: { ok: (c) => !c.floors || c.floorsView === 'single', text: 'set Floors view to Single floor' },
     backdropOn: { ok: (c) => c.backdrop, text: 'turn on Floor backdrop' },
     cam1: { ok: (c) => c.preset === 'isoE', text: 'use Cam 1: the backdrop is composed for Cam 1 until its camera phase' },
+    macroform: { ok: (c) => c.macro, text: 'load a pack with a volume (Snake Mountain macroform)' },
+    cam15: { ok: (c) => c.camKind === 'ortho', text: 'use Cam 1-5 (an orthographic camera, not Cam 6 or Cam 7)' },
     ortho: { ok: (c) => c.camKind !== 'persp', text: 'use an orthographic camera (not Cam 6)' }
   };
   const CAKE = ['rooms', 'roomsFound', 'cakeRoom'], ASC = ['rooms', 'roomsFound', 'ascRoom'], POCKET = ['rooms', 'roomsFound', 'dioRoom'], RM = ['rooms', 'roomsFound'];
@@ -123,6 +125,8 @@
     e('t-backdrop', '#t-backdrop', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1'], 'Floor backdrop (Option 2): a wall attached to the chosen floor (no gap by default) with a stepped profile that rises behind it, so the floor reads as inside a shell. Heights are the real exterior heights over the floor, placed by a mirror across the back edge; the height multiplier is stylization (on floor 2 the whole profile is). Decoration only: not walkable. The floor itself does not change. Cam 1 only (composed for the Cam 1 axis); the Exterior layer has none.'),
     e('backdropGap', '#s-backdropGap', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1', 'backdropOn'], 'Backdrop gap, 0-8 ground tiles (default 0): 0 = the wall rises from the floor edge; above 0 an apron at the height of the floor edge (not walkable) is inserted between the floor and the foot of the wall.'),
     e('backdropHeight', '#s-backdropHeight', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1', 'backdropOn'], 'Backdrop height, 1-4: multiplies the whole rise of the wall above the floor edge (never the floor). The wall is a stepped profile (stylization: first riser one character = 2 tiles, then one terrace, 3 treads, tapering) with the real exterior height over the floor, mirrored across the back edge, as a lower bound.'),
+    // ---- 6 Macroform
+    e('macroView', '#macroView', '6 Macroform', ALL, ['macroform'], 'Macroform view of the volume (crystallizer 6): Off = the heightmap exterior of the same source (quantized terraces); Exterior, Quadrant removed (the quadrant facing the camera), Interior only (floors, ramp, shaft) and a Horizontal cut at floor 1 / 2 / 3 are drawn from the column intervals, one block per voxel run, Box-style. One view (no compare grid). Cam 1-5 only (Cam 6 and Cam 7 show the heightmap). The volume uses 1 tile of height = 1 tile of width, the heightmap uses terraces, so their vertical scales differ.', { options: { exterior: ['cam15'], quad: ['cam15'], interior: ['cam15'], cut: ['cam15'] } }),
     // ---- Shared passes
     e('outlines', '#t-outlines', 'Shared passes', ALL, [], 'Dark outlines on caps and walls.'),
     e('gradient', '#t-gradient', 'Shared passes', ALL, [], 'Shading gradient on cliffs.'),
@@ -190,8 +194,9 @@
       const els = [...root.querySelectorAll(en.dom)]; if (!els.length) continue;
       put(en.id === 'margin' ? 'Source & slice' : en.group, holder(els[0]));
     }
-    const fl = root.querySelector('#floors'), inc = root.querySelector('#incursion'), disp = toggles && toggles.parentNode;
+    const fl = root.querySelector('#floors'), mc = root.querySelector('#macro'), inc = root.querySelector('#incursion'), disp = toggles && toggles.parentNode;
     if (fl && disp) aside.insertBefore(fl, disp); // 5 Floors after the crystallizer blocks, before the shared passes and the overlays
+    if (mc && disp) aside.insertBefore(mc, disp); // 6 Macroform right after 5 Floors
     if (inc && box.Diagnostics) toggles.insertBefore(inc, box.Diagnostics); // Incursion before the folded Diagnostics
     for (const h of root.querySelectorAll('#sliders > h3')) h.remove(); // the old per-block headers (Shaping, Passes, ...)
     const dh = toggles && toggles.previousElementSibling; if (dh && dh.tagName === 'H3' && dh.textContent === 'Display') dh.remove();
