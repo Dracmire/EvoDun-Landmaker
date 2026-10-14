@@ -145,7 +145,7 @@ Techniques: Box, A, B, C = the panels the control changes; a badge [A] / [B] / [
 
 | id | techniques | requires | help |
 |---|---|---|---|
-| incursion | all | set Floors view to Single floor | Place the stake, add or remove objectives; the route runs from each objective to the stake over the walkable tiles, ramps included. |
+| incursion | all | set Floors view to Single floor · set Macroform view to Off | Place the stake, add or remove objectives; the route runs from each objective to the stake over the walkable tiles, ramps included. |
 
 ## Diagnostics
 

@@ -230,7 +230,9 @@
     for (const [id, k] of [['m-stake', 'stake'], ['m-obj', 'obj'], ['m-rm', 'rm']]) { const b = document.getElementById(id); if (b) b.classList.toggle('on', m === k); }
     const stage = document.getElementById('stage'); if (stage) stage.classList.toggle('picking', !!m);
   }
+  const VOL_MSG = 'Stake and objectives are placed in the heightmap view (Macroform: Off).'; // the volume view has its own camera: a click cannot be resolved against the heightmap shape
   function clickMap(e) {
+    if (volActive()) { message(VOL_MSG); return; }
     if (E.hasFloors(packs[st.pack].pack) && st.floors !== 'single') { message('Stake and objectives are placed in the single-floor views.'); return; }
     const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
     for (let k = 0; k < figs.length; k++) {
@@ -242,6 +244,7 @@
   }
   /* Pocket view: a click in the world on a Diorama chooses that room (the same as its chip); in the pocket itself a click does nothing (another chip or Whole map goes back) */
   function clickRoom(e) {
+    if (volActive()) { message(VOL_MSG); return; }
     if (!S || !S.roomMap || S.pocket) return;
     const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
     for (let k = 0; k < figs.length; k++) {
@@ -648,7 +651,7 @@
     return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket,
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
-      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset, macro: !!(E.volume && E.volume.has(raw)), macroView: st.macro };
+      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset, macro: !!(E.volume && E.volume.has(raw)), macroView: st.macro, volOn: volActive() };
   }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));

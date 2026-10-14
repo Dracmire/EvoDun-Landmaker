@@ -42,6 +42,7 @@
     backdropOn: { ok: (c) => c.backdrop, text: 'turn on Floor backdrop' },
     cam1: { ok: (c) => c.preset === 'isoE', text: 'use Cam 1: the backdrop is composed for Cam 1 until its camera phase' },
     macroform: { ok: (c) => c.macro, text: 'load a pack with a volume (Snake Mountain macroform)' },
+    heightmapView: { ok: (c) => !c.volOn, text: 'set Macroform view to Off' },
     cam15: { ok: (c) => c.camKind === 'ortho', text: 'use Cam 1-5 (an orthographic camera, not Cam 6 or Cam 7)' },
     ortho: { ok: (c) => c.camKind !== 'persp', text: 'use an orthographic camera (not Cam 6)' }
   };
@@ -141,7 +142,7 @@
     e('veil', '#t-veil', 'Overlays', ALL, ['slice'], 'Veil over the scenery outside the slice.'),
     e('border', '#t-border', 'Overlays', ALL, ['slice'], 'Slice border, coloured from the edge map: red barrier, cyan pass, yellow unmarked, white map edge.'),
     // ---- Incursion
-    e('incursion', '#m-stake, #m-obj, #m-rm, #m-clear', 'Incursion', ALL, ['singleFloor'], 'Place the stake, add or remove objectives; the route runs from each objective to the stake over the walkable tiles, ramps included.'),
+    e('incursion', '#m-stake, #m-obj, #m-rm, #m-clear', 'Incursion', ALL, ['singleFloor', 'heightmapView'], 'Place the stake, add or remove objectives; the route runs from each objective to the stake over the walkable tiles, ramps included.'),
     // ---- Diagnostics (folded)
     e('regions', '#t-regions', 'Diagnostics', ALL, [], 'Colour each walkable region: what is connected to what.'),
     e('passes', '#t-passes', 'Diagnostics', ALL, ['passes'], 'Stair marks.'),

@@ -53,6 +53,68 @@ const crypto = require('crypto'), { open } = require('./common');
   const rev = await shoot('exterior', 1, 'isoE', 0, 'reversed'), cen = await shoot('exterior', 1, 'isoE', 0, 'centre'), cenQ = await shoot('quad', 1, 'oblique', 10, 'centre');
   ok(`control: the reference catches a wrong order (reversed list: ${pct(rev).toFixed(2)} % of the pixels differ)`, pct(rev) > 5, pct(rev));
   console.log(`MEASURED control (not enforced): painter by the projected depth of the face centre instead of the exact order: exterior Cam 1 ${pct(cen).toFixed(3)} %, quadrant Cam 3 yaw +10 ${pct(cenQ).toFixed(3)} % differ`);
+  // SECOND REFERENCE (independent of E.volume.faces): a voxel-column RAY CAST. For every sample point of the screen the orthographic ray is marched down through the columns (2D DDA on the plan, intervals tested directly)
+  // and the first solid interval it meets gives the id (column, material) of what must be visible; the painter's picture (the faces in list order, overwritten) must show the same id at every sample. A missing or an extra face,
+  // or a wrong order, shows here, which the z-buffer over the SAME faces cannot see. The view filters (quadrant wedge, interior, cut) are re-implemented in the test from the pack, not taken from src/volume.js.
+  // Subset to stay cheap: Cam 1 and Cam 3, yaw offsets 0 / +10 / -10, the six view kinds, 320 x 240, sample point off the pixel centre (no ties on edges); the mutation controls run on ONE combination (exterior, Cam 1, yaw 0).
+  const rayCast = async (kind, floor, pre, dy, mut) => ev(({ kind, floor, pre, dy, mut }) => {
+    const E = window.EVO, e = window.__evo, pack = e.packs[e.st.pack].pack, W = 320, H = 240, OX = 0.0371, OY = 0.0553, EPS = 1e-6;
+    const yawOf = { isoE: 45, isoW: -45, oblique: 0, low: 0, top: 0 }, pit = { isoE: 35, isoW: 35, oblique: 50, low: 28, top: 80 };
+    const view = { kind: 'ortho', yaw: yawOf[pre] + dy, pitch: pit[pre], zoom: 1, panX: 0, panY: 0 }, vol = E.volume.prep(pack), shape = E.volume.camShape(vol), MW = vol.W, MH = vol.H;
+    view.fitSc = E.fitScale(shape, { terH: 1 }, view, W, H); const cam = E.makeCam(shape, { terH: 1 }, view, W, H), pr = view.pitch * Math.PI / 180;
+    // the columns of the view, from the pack (own filters)
+    let cols = vol.cols;
+    if (kind === 'interior') cols = cols.map((iv) => iv.filter((x) => x[2] >= 3));
+    else if (kind === 'cut') { const cz = vol.floors[floor - 1] + 2; cols = cols.map((iv) => iv.filter((x) => x[0] < cz - EPS).map((x) => (x[1] > cz + EPS ? [x[0], cz, x[2]] : x))); }
+    else if (kind === 'quad') { const yw = view.yaw * Math.PI / 180, sy = Math.sin(yw), cy = Math.cos(yw), c = pack.macro.shaft.c; cols = cols.map((iv, i) => { const dx = i % MW + 0.5 - c[0], dyy = Math.floor(i / MW) + 0.5 - c[1], d = dx * sy + dyy * cy, l = Math.abs(dx * cy - dyy * sy); return d > 1e-9 && d >= l - 1e-9 ? [] : iv; }); }
+    // the camera is affine: p(x, y, z) = o + M [x y z]; the ray of a sample point is the null direction of M, pointing to the camera
+    const o = cam.p(0, 0, 0), ex = cam.p(1, 0, 0), ey = cam.p(0, 1, 0), ez = cam.p(0, 0, 1), a = [ex[0] - o[0], ey[0] - o[0], ez[0] - o[0]], b = [ex[1] - o[1], ey[1] - o[1], ez[1] - o[1]];
+    let d = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; const nr = (x, y, z) => cam.ry(x, y) * Math.cos(pr) + z * Math.sin(pr), g = [nr(1, 0, 0) - nr(0, 0, 0), nr(0, 1, 0) - nr(0, 0, 0), nr(0, 0, 1) - nr(0, 0, 0)];
+    if (d[0] * g[0] + d[1] * g[1] + d[2] * g[2] < 0) d = d.map((v) => -v);
+    const kx = -d[0] / d[2], ky = -d[1] / d[2], zTop = vol.top + 1, det = a[0] * b[1] - a[1] * b[0], ray = new Int32Array(W * H);
+    for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) {
+      const sx = px + 0.5 + OX, sy2 = py + 0.5 + OY, rx = sx - o[0] - a[2] * zTop, ry2 = sy2 - o[1] - b[2] * zTop;
+      const x0 = (rx * b[1] - a[1] * ry2) / det, y0 = (a[0] * ry2 - rx * b[0]) / det; // the ray at z = zTop (u = 0); u = distance DOWN from zTop
+      let u = 0, cx = Math.floor(x0), cy2 = Math.floor(y0), hit = 0;
+      const sX = kx > 0 ? 1 : -1, sY = ky > 0 ? 1 : -1;
+      for (let it = 0; it < 600 && u < zTop; it++) {
+        const ux = kx === 0 ? 1e30 : ((kx > 0 ? cx + 1 : cx) - x0) / kx, uy = ky === 0 ? 1e30 : ((ky > 0 ? cy2 + 1 : cy2) - y0) / ky, uo = Math.min(ux, uy, zTop);
+        if (cx >= 0 && cy2 >= 0 && cx < MW && cy2 < MH) {
+          const iv = cols[cy2 * MW + cx], zA = zTop - uo, zB = zTop - u; // the ray is inside this column for z in [zA, zB]
+          for (let k = iv.length - 1; k >= 0; k--) { const z0 = iv[k][0], z1 = iv[k][1]; if (z1 >= zA - 1e-12 && z0 <= zB + 1e-12) { hit = (cy2 * MW + cx) * 16 + iv[k][2]; break; } }
+          if (hit) break;
+        }
+        u = uo; if (ux <= uy) cx += sX; else cy2 += sY;
+      }
+      ray[py * W + px] = hit;
+    }
+    // the painter's picture: the faces of the product in list order, overwritten
+    const F = E.volume.faces(pack, { kind, floor }, view); let faces = F.faces;
+    if (mut === 'dropped') faces = faces.filter((f, i) => i % 11 !== 0);
+    else if (mut === 'reversed') faces = faces.slice().reverse();
+    else if (mut === 'zfirst') faces = faces.map((f, i) => [f, i]).sort((p, q) => p[0].z0 - q[0].z0 || p[1] - q[1]).map((p) => p[0]);
+    else if (mut === 'topdown') { const top = new Map(); faces.forEach((f) => { const c = f.y * MW + f.x; top.set(c, Math.max(top.get(c) || 0, f.z1)); }); faces = faces.map((f, i) => [f, i]).sort((p, q) => top.get(q[0].y * MW + q[0].x) - top.get(p[0].y * MW + p[0].x) || p[1] - q[1]).map((p) => p[0]); } // columns taken tallest first (a height-first order)
+    const pa = new Int32Array(W * H);
+    for (const f of faces) {
+      const sp = f.pts.map(([x, y, z]) => cam.p(x, y, z)), key = (f.y * MW + f.x) * 16 + f.mat; let minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
+      for (const p of sp) { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); miny = Math.min(miny, p[1]); maxy = Math.max(maxy, p[1]); }
+      const area = (sp[1][0] - sp[0][0]) * (sp[2][1] - sp[0][1]) - (sp[2][0] - sp[0][0]) * (sp[1][1] - sp[0][1]); if (Math.abs(area) < 1e-6) continue; const sg = area > 0 ? 1 : -1;
+      for (let py = Math.max(0, Math.floor(miny)); py <= Math.min(H - 1, Math.ceil(maxy)); py++) for (let px = Math.max(0, Math.floor(minx)); px <= Math.min(W - 1, Math.ceil(maxx)); px++) {
+        const cx = px + 0.5 + OX, cy = py + 0.5 + OY; let inside = true;
+        for (let i = 0; i < 4 && inside; i++) { const uu = sp[i], vv = sp[(i + 1) % 4]; if (sg * ((vv[0] - uu[0]) * (cy - uu[1]) - (vv[1] - uu[1]) * (cx - uu[0])) < -1e-9) inside = false; }
+        if (inside) pa[py * W + px] = key;
+      }
+    }
+    let diff = 0, cov = 0; for (let k = 0; k < W * H; k++) { if (ray[k] || pa[k]) { cov++; if (ray[k] !== pa[k]) diff++; } }
+    return { diff, cov };
+  }, { kind, floor, pre, dy, mut });
+  const t0 = Date.now(); let rcov = 0, rdiff = 0, rn = 0;
+  for (const [kind, floor] of KINDS) for (const pre of ['isoE', 'oblique']) for (const dy of DY) { const r = await rayCast(kind, floor, pre, dy, null); rn++; rcov += r.cov; rdiff += r.diff; }
+  const tRay = (Date.now() - t0) / 1000;
+  ok(`ENFORCED: the ray cast over the voxel columns (independent of E.volume.faces) and the painter show the same column and material at every sample: ${rdiff} mismatches of ${rcov} covered samples over ${rn} combinations`, rdiff === 0 && rcov > 100000, { rdiff, rcov });
+  const mutRes = {}; for (const m of ['dropped', 'reversed', 'zfirst', 'topdown']) mutRes[m] = (await rayCast('exterior', 1, 'isoE', 0, m)).diff;
+  for (const m of Object.keys(mutRes)) ok(`control: the ray cast detects "${m}" (${mutRes[m]} samples differ)`, mutRes[m] > 0, mutRes[m]);
+  console.log(`MEASURED cost of the ray-cast reference: ${tRay.toFixed(1)} s for ${rn} combinations + ${((Date.now() - t0) / 1000 - tRay).toFixed(1)} s for the four controls`);
   // section faces: a cut and a removed quadrant have them, the closed exterior and the interior-only view do not
   const sec = Object.fromEntries(['exterior', 'quad', 'interior', 'cut1'].map((k) => [k, rows.find((r) => r.kind === k && r.pre === 'isoE' && r.dy === 0).section]));
   ok('section faces (their own colour): none in the Exterior and in Interior only, some in the Quadrant view and in the Horizontal cut', sec.exterior === 0 && sec.interior === 0 && sec.quad > 20 && sec.cut1 > 20, sec);
@@ -72,6 +134,19 @@ const crypto = require('crypto'), { open } = require('./common');
   await a.preset('classic'); await a.idle(); ok('Cam 7 falls back the same way', (await page.$$eval('#stage figure', (f) => f.filter((x) => !x.hidden).length)) === 4 && /not supported in the volume view/.test(await info()));
   await a.preset('isoE'); await a.idle(); ok('back at Cam 1 the volume is drawn again (one panel)', (await page.$$eval('#stage figure', (f) => f.filter((x) => !x.hidden).length)) === 1);
   await page.selectOption('#macroView', 'off'); await a.idle(); ok('Off: the existing heightmap exterior again (four panels, Box / A / B / C)', (await page.$$eval('#stage figure', (f) => f.filter((x) => !x.hidden).length)) === 4);
+  // incursion in the volume view: the volume has its own camera, so a click cannot be resolved against the heightmap shape: the buttons are greyed and a click only explains
+  await page.selectOption('#macroView', 'exterior'); await a.preset('isoE'); await a.idle();
+  const incBtns = await page.$$eval('#m-stake, #m-obj, #m-rm, #m-clear', (b) => b.map((x) => x.disabled + ':' + /set Macroform view to Off/.test(x.title)).join());
+  ok('volume view: the four Incursion buttons are greyed with "Requires: set Macroform view to Off"', incBtns === 'true:true,true:true,true:true,true:true', incBtns);
+  const clickCanvas = async () => { const bb = await page.$eval('#stage canvas', (c) => { const r = c.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }); await page.mouse.move(bb[0], bb[1]); await page.mouse.down(); await page.mouse.up(); };
+  await ev(() => { const e = window.__evo; e.inc.stake = null; e.setIncMode('stake'); }); await clickCanvas(); await a.idle();
+  const vs = await ev(() => { const e = window.__evo, m = document.getElementById('msg'); return { stake: e.inc.stake, msg: m.hidden ? '' : m.textContent }; });
+  ok('volume view: Place stake + a click on the canvas leaves inc.stake null and says where stakes are placed', vs.stake === null && /Stake and objectives are placed in the heightmap view \(Macroform: Off\)\./.test(vs.msg), vs);
+  await page.selectOption('#macroView', 'off'); await a.idle();
+  await ev(() => { const e = window.__evo; e.inc.stake = null; e.setIncMode('stake'); }); await clickCanvas(); await a.idle();
+  const hs2 = await ev(() => { const e = window.__evo; return { stake: e.inc.stake, mode: e.inc.mode }; });
+  ok('Macroform Off: the same click places a stake', hs2.stake !== null, hs2);
+  await ev(() => { const e = window.__evo; e.inc.stake = null; e.setIncMode(null); }); await a.idle();
   // the scenario button and the other sources
   await ev(() => window.__evo.scenario('snake_macro')); await a.idle();
   const sc = await ev(() => { const e = window.__evo; return [e.st.pack, e.st.macro, e.st.preset, e.st.mode, e.st.tech]; });
