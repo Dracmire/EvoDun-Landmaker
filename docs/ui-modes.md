@@ -1,6 +1,6 @@
 # UI pass: one mode per crystallizer
 
-Status: DESIGN DRAFT (2026-10-15). The direction is approved by the user; the detail below (which control goes where, the examples, the cameras) is a PROPOSAL to review. No code until the user approves it. `CLAUDE.md` Pending 9.
+Status: APPROVED (user, 2026-10-15), including the per-mode split of the controls (section 4). Next: PR 1 (section 10). `CLAUDE.md` Pending 9.
 
 ## 1. Decisions (user)
 
@@ -131,7 +131,8 @@ Not a new mode: a block "Extras" inside a mode that lists stages of OTHER crysta
 ## 10. Implementation (for Claude Code, after approval)
 
 - PR 1: the `MODES` table, the mode selector, show / hide per mode, examples (the old scenarios) per mode, cameras and techniques per mode, Compare only in 1 and 4, the banners, the baked-parameters box of mode 6, `docs/modes.md` generated, `viewer.mode` in the manifest.
-  Tests: a new `tools/ui/test_modes_ui.js` (per mode: the default example loads with its camera and technique; only its controls and the common area are visible; each MAIN control changes the picture or the info on that example; the cameras outside the mode are hidden; no page error). `tools/ui/test_controls_ui.js` WILL CHANGE (its greyed / orphan matrix becomes per mode): announced here, to be approved with this design. The pixel regression must stay at 0 differences for the same state (the regress scripts set the state through the page; hidden controls stay in the DOM).
+  Tests: a new `tools/ui/test_modes_ui.js` (per mode: the default example loads with its camera and technique; only its controls and the common area are visible; each MAIN control changes the picture or the info on that example; the cameras outside the mode are hidden; no page error). The pixel regression must stay at 0 differences for the same state.
+  COMPATIBILITY OF THE EXISTING TESTS (found while writing the prompt, 2026-10-15): most UI tests and every regress script set the state by clicking real controls (`page.check('#t-rooms')`, `page.selectOption('#roomsPreset' | '#src')`, ...), and `tools/verify.sh regress` runs the SAME scripts against origin/main and the new tree. A mode that hides those controls would break them. Solution: a test-only flag `window.EVO_NO_MODES` (set by `tools/ui/common.js` with `page.addInitScript` unless `open({ modes: true })`; the old tree ignores it) shows the whole panel as today, so every existing test and regress script runs unchanged; `test_modes_ui.js` opens with modes on. `tools/ui/test_controls_ui.js` then does not need to change. The mode selector sits at the top of the side panel (where the scenario block is), NOT in the top bar, so the canvas size does not change.
 - PR 2 (optional): one "Whole map" button for zones and rooms; remove the retired `#layout`; a fixed height for the info line (limitation 18; it changes the canvas size, so its regress differences are announced).
 - ACCEPTANCE (the user's criterion): from GitHub Pages, without reading code, the user chooses each mode, its example loads, each main control changes what is drawn, and nothing is greyed without a "Requires: ..." that says what to do.
 
@@ -140,4 +141,4 @@ Not a new mode: a block "Extras" inside a mode that lists stages of OTHER crysta
 ## 11. Open questions for the user
 
 Answered on 2026-10-15: Floors under "Archived" (U6); mode 2 at Cam 1 with Cam 6 working too (U7); DAC for every example after this pass, the table decides where each crystallizer is offered (U8).
-1. Review of the per-mode split of the controls (section 4) before the prompt for Claude Code is written.
+The per-mode split (section 4) was approved on 2026-10-15. No open question for PR 1.
