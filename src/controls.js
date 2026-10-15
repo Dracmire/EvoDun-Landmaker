@@ -219,5 +219,5 @@
     L.push('');
     return L.join('\n');
   }
-  E.controls = { GROUPS, TABLE, RETIRED, REQ: R, unmet, requiresText, tipOf, refresh, badges, layout, docs };
+  E.controls = { GROUPS, TABLE, RETIRED, REQ: R, unmet, requiresText, tipOf, holder, refresh, badges, layout, docs };
 })(typeof window !== 'undefined' ? (window.EVO = window.EVO || {}) : (globalThis.EVO = globalThis.EVO || {}));

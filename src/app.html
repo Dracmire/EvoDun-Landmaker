@@ -61,15 +61,30 @@ details.grp>summary{cursor:pointer;font-size:10.5px;text-transform:uppercase;let
  #stage[data-n="3"]{grid-template-columns:1fr;grid-auto-rows:62vh}
  #stage[data-n="4"]{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:62vh}
 }
+.mh,[hidden]{display:none!important} /* .mh = hidden by the mode; [hidden] must win over the display of .chips / .row / .sl (a hidden chips row was drawn) */
+.advtoggle{align-self:flex-start;font-size:11px;padding:2px 8px;margin:2px 0 4px;background:transparent;color:var(--mut)}
+#modeBox select{width:100%}
+#modePurpose{margin:6px 0 0}
+#modeBanner{margin:6px 0 0;padding:5px 8px;border:1px solid var(--acc);border-radius:6px;color:var(--acc);font-size:11.5px}
+#examples{margin-top:6px}
+#bakedBox{margin-top:8px;padding:6px 8px;border:1px solid var(--line);border-radius:6px}
+#bakedBox pre{margin:4px 0 0;white-space:pre-wrap;font:11px/1.4 ui-monospace,monospace;color:var(--mut)}
 </style>
 <div class="app">
  <aside>
   <h1>EvoDun Crystal Viewer<small>Materialization test · same data, several crystallizations</small></h1>
+  <div id="modeBox" hidden><h3>Mode</h3>
+   <select id="modeSel" title="One mode per crystallizer: choosing one loads its first example, its camera and its technique, and shows only its controls."></select>
+   <div class="hint" id="modePurpose"></div>
+   <div id="modeBanner" hidden></div>
+   <h3>Example</h3>
+   <div id="examples" class="scn"></div>
+  </div>
   <div id="scenarios"><h3>Scenarios</h3><div class="scn"></div></div>
-  <div><h3>Source</h3>
-   <div class="row"><select id="src"></select></div>
-   <div class="row" style="margin-top:6px"><input type="file" id="file" accept=".png,.json,image/png,application/json" multiple style="max-width:100%"></div>
-   <div class="hint">PNG images, 1 pixel = 1 tile, native size, read as raw samples. Select several at once (height, zones, edges…); a pack .json (evodun-pack/0.2) can go with them.</div>
+  <div id="source"><h3>Source</h3>
+   <div class="row" id="srcRow"><select id="src"></select></div>
+   <div class="row" id="fileRow" style="margin-top:6px"><input type="file" id="file" accept=".png,.json,image/png,application/json" multiple style="max-width:100%"></div>
+   <div class="hint" id="fileHint">PNG images, 1 pixel = 1 tile, native size, read as raw samples. Select several at once (height, zones, edges…); a pack .json (evodun-pack/0.2) can go with them.</div>
    <div id="roles" hidden>
     <h3>Channel roles</h3>
     <label class="tg"><input type="checkbox" id="flipy"><span>Flip Y (Unity writes Y up)</span></label>
@@ -84,7 +99,7 @@ details.grp>summary{cursor:pointer;font-size:10.5px;text-transform:uppercase;let
    <div class="hint" id="roomHint" hidden>Rooms (rooms on): click = only this room · Ctrl/Shift-click = add or remove</div>
    <div id="roomChips" class="chips"></div>
    <div class="row" id="roomBtns" hidden style="margin-top:4px"><button id="wholeRooms">Whole map</button></div>
-   <div class="hint" style="margin-top:6px">Crop in tiles (x1, y1 exclusive; blank = no limit)</div>
+   <div class="hint" id="cropHint" style="margin-top:6px">Crop in tiles (x1, y1 exclusive; blank = no limit)</div>
    <div class="crop"><input type="number" id="cx0" min="0" placeholder="x0"><input type="number" id="cy0" min="0" placeholder="y0"><input type="number" id="cx1" min="0" placeholder="x1"><input type="number" id="cy1" min="0" placeholder="y1"></div>
    <div class="hint" id="sliceInfo"></div>
   </div>
@@ -99,6 +114,7 @@ details.grp>summary{cursor:pointer;font-size:10.5px;text-transform:uppercase;let
   <div id="macro" hidden><h3>Macroform</h3>
    <div class="row"><select id="macroView" title="Macroform view"><option value="off">Off (heightmap exterior)</option><option value="exterior">Exterior (volume)</option><option value="quad">Quadrant removed</option><option value="interior">Interior only</option><option value="cut">Horizontal cut</option></select></div>
    <div id="macroChips" class="chips"></div>
+   <div id="bakedBox" hidden><b>Baked parameters</b> (read-only)<pre id="bakedParams"></pre><div class="hint">Changing them needs <code>tools/derive_snake_macroform.py</code>: the page cannot produce or tune the volume.</div></div>
    <div class="hint" id="macroHint">The volume is drawn with 1 tile of height = 1 tile of width (V = 2 tiles per elevation unit, provisional); Off draws the quantized terraces, so the two have different vertical scales. Cam 1-5 only.</div>
   </div>
   <div id="incursion"><h3>Incursion</h3>
