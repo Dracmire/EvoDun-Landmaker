@@ -30,7 +30,7 @@
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
   const NO_MODES = !!window.EVO_NO_MODES; // test-only flag (tools/ui/common.js): the whole panel as before the modes layer
-  const st = { modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const st = { modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -159,7 +159,6 @@
       b.addEventListener('click', () => { st.tech = id; st.mode = 'single'; invalidate(false); });
       tb.appendChild(b);
     }
-    $('#layout').addEventListener('change', (e) => { st.layout = e.target.value; invalidate(false); });
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
     $('#src').addEventListener('change', (e) => selectSource(e.target.value)); // a crop belongs to one map
     buildRoles();
@@ -294,7 +293,7 @@
   const hueOf = (c) => (c.hue !== undefined ? c.hue * 360 : (c.id * 137.5) % 360);
   function buildChips(pack) {
     const box = $('#zoneChips'), z = pack.fields && pack.fields.zone;
-    box.innerHTML = ''; $('#zoneHint').hidden = $('#zoneBtns').hidden = !z;
+    box.innerHTML = ''; $('#zoneHint').hidden = !z; syncWholeButtons(pack);
     if (!z) { sliceSel.zones.clear(); return; }
     const ids = z.info.classes.map((c) => c.id);
     for (const id of [...sliceSel.zones]) if (!ids.includes(id)) sliceSel.zones.delete(id);
@@ -311,9 +310,14 @@
     }
     syncChips();
   }
+  /* NEVER TWO "Whole map" buttons: with Rooms on (the rooms layer found rooms) the rooms button is the one ("Whole map" of the rooms also clears the zones: a superset of the zone one); with Rooms off, the zone button (only when the pack has a zone role) */
+  function syncWholeButtons(pack) {
+    const p = pack || (packs[st.pack] && packs[st.pack].pack), z = !!(p && p.fields && p.fields.zone);
+    $('#zoneBtns').hidden = !z || !!(S && S.rooms);
+  }
   function buildRoomChips() {
     const box = $('#roomChips'), on = !!(S && S.rooms);
-    $('#roomHint').hidden = $('#roomBtns').hidden = !on;
+    $('#roomHint').hidden = $('#roomBtns').hidden = !on; syncWholeButtons();
     if (!on) { box.innerHTML = ''; st.roomChipsKey = null; return; }
     if (st.roomChipsKey === S.rooms.room) { syncRoomChips(); return; }
     st.roomChipsKey = S.rooms.room; box.innerHTML = '';
@@ -511,8 +515,6 @@
     if (volView) O.incursion = null; // no stake, objectives or route in the volume view
     const techs = volView ? ['box'] : st.mode === 'compare' ? ALL_TECH : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
-    const layout = st.layout === 'auto' ? (st.preset.startsWith('iso') ? 'rows' : 'columns') : st.layout; // rows in isometric: the diamond is twice as wide as tall
-    stage.dataset.layout = layout; $('#layout').hidden = st.mode !== 'compare' || techs.length > 3; // four panels are always a 2x2 grid
     while (stage.children.length < techs.length) {
       const f = document.createElement('figure'); f.innerHTML = '<canvas></canvas><figcaption></figcaption>'; stage.appendChild(f);
     }
@@ -542,7 +544,7 @@
     });
     for (const t of techs) survOf(t);
     const firstMs = performance.now() - t0;
-    st.timing = { cold: !!st.cold, first: firstMs, all: needB ? null : firstMs, layout, techs: techs.slice() };
+    st.timing = { cold: !!st.cold, first: firstMs, all: needB ? null : firstMs, techs: techs.slice() };
     const finish = () => {
       if (token !== drawToken || !S) return;
       if (needB) { techs.forEach((t, i) => { if (late.includes(t)) paint(t, i); }); for (const t of late) survOf(t, true); st.timing.all = performance.now() - t0; }

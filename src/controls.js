@@ -148,8 +148,7 @@
     e('passes', '#t-passes', 'Diagnostics', ALL, ['passes'], 'Stair marks.'),
     e('edgeWarn', '#t-edgeWarn', 'Diagnostics', ALL, RM, 'Electric-blue outline of large regions that stay unconnected (edge problems); it only draws when the info line reports some.')
   ];
-  /* controls that exist in the DOM but are NOT in the active table */
-  const RETIRED = [{ id: 'layout', dom: '#layout', note: 'Layout selector: always hidden (compare mode is a fixed 2 x 2 grid of four panels). A candidate for removal.' }];
+  const RETIRED = []; /* controls that exist in the DOM but are not in the table: none (the Layout selector was removed in the UI pass, PR 2); the list stays for the tests that read it */
 
   const unmet = (en, ctx) => en.req.map((k) => R[k]).filter((r) => !r.ok(ctx)).map((r) => r.text);
   const requiresText = (list) => 'Requires: ' + list.join(' · ');
@@ -214,9 +213,7 @@
       for (const x of rows) L.push(`| ${x.id} | ${x.tech.length === 4 ? 'all' : x.tech.join(' ')} | ${x.req.length ? x.req.map((k) => R[k].text).join(' · ') : '-'} | ${x.keep && !x.help ? '(keeps its own tooltip: see the title in the viewer)' : x.help} |`);
       L.push('');
     }
-    L.push('## Not in the table', '');
-    for (const r of RETIRED) L.push(`- \`${r.id}\` (${r.dom}): ${r.note}`);
-    L.push('');
+    if (RETIRED.length) { L.push('## Not in the table', ''); for (const r of RETIRED) L.push(`- \`${r.id}\` (${r.dom}): ${r.note}`); L.push(''); }
     return L.join('\n');
   }
   E.controls = { GROUPS, TABLE, RETIRED, REQ: R, unmet, requiresText, tipOf, holder, refresh, badges, layout, docs };

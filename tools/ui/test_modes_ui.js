@@ -55,6 +55,10 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const ex0 = m.examples[0];
     ok(`${tag}: the default example (${ex0.label}) loads with its camera, technique and compare state`, s.m === m.id && s.sel === m.id && s.ex === ex0.id && s.pack === ex0.src && s.preset === m.camera && s.tech === m.tech && s.mode === (m.compareDefault ? 'compare' : 'single') && (m.id === 'rooms' ? s.rooms : true) && s.n === (m.compareDefault ? 4 : 1), JSON.stringify(s));
 
+    // the info line has a FIXED height (limitation 18): the same in every mode and state, so the canvases are painted at their final size (the bitmap equals the laid-out size)
+    const ih = await ev(() => ({ h: document.querySelector('#info').getBoundingClientRect().height, bad: [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden && (c.width !== c.clientWidth || c.height !== c.clientHeight)).length, scroll: document.querySelector('#info').scrollHeight }));
+    ok(`${tag}: the info line has the fixed height (80.2 px, 4 lines) and every visible canvas is painted at its laid-out size`, Math.abs(ih.h - 80.2) < 0.1 && ih.bad === 0, JSON.stringify(ih));
+
     // visible = the tables: first folded, then with every fold opened
     await collapseAll(); await a.idle();
     const adv0 = await ev(() => { const E = window.EVO, e = window.__evo, m = E.modes.byId(e.st.modeId), plan = E.modes.plan(m, { exampleId: e.st.exampleId, floorsView: e.st.floors }), C = E.controls, hid = [];

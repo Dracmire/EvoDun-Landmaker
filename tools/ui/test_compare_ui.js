@@ -21,7 +21,7 @@ const { open } = require('./common');
   ok('auto, Oblique: a 2 x 2 grid (two rows, two columns)', new Set(s.tops).size === 2 && new Set(s.lefts).size === 2, JSON.stringify([s.layout, s.tops, s.lefts]));
   await a.preset('isoE'); s = await state();
   ok('auto, Iso 45: also 2 x 2 (the layout does not depend on the camera any more)', new Set(s.tops).size === 2 && new Set(s.lefts).size === 2 && s.sizes.every((z) => Math.abs(z[0] - s.sizes[0][0]) <= 1 && Math.abs(z[1] - s.sizes[0][1]) <= 1), JSON.stringify([s.layout, s.sizes]));
-  ok('the layout selector is hidden in compare (4 panels) and in single technique mode', await (async () => { const h4 = await page.$eval('#layout', (e) => e.hidden); await page.click('#mode'); await a.idle(); const hidden = await page.$eval('#layout', (e) => e.hidden); await page.click('#mode'); await a.idle(); return h4 && hidden; })());
+  ok('there is no #layout element (the retired selector was removed), in compare (4 panels) and in single technique mode', await (async () => { const h4 = await page.$('#layout') === null; await page.click('#mode'); await a.idle(); const none = await page.$('#layout') === null; await page.click('#mode'); await a.idle(); return h4 && none; })());
 
   // 2. one camera for all panels
   for (const preset of ['oblique', 'isoE', 'isoW', 'low', 'top']) {

@@ -10,12 +10,11 @@ const { open } = require('./common');
   const off = {}, on = {};
   for (const t of ['box', 'A', 'B']) { await a.tech(t); await a.preset('isoE'); } // warm-up: the first draw of a technique may differ from the settled one
   for (const t of ['box', 'A', 'B']) { await a.tech(t); await a.preset('isoE'); off[t] = await hash(); }
+  const size = () => page.evaluate(() => { const c = [...document.querySelectorAll('#stage canvas')].find((x) => !x.closest('figure').hidden); return [c.width, c.height, c.clientWidth, c.clientHeight]; });
+  const sizeOff = await size();
   await page.check('#t-rooms'); await a.idle();
-  // the extra info line makes the bar one line taller and the canvas shorter: give the viewport the same height back so that the canvas has the same size and the pixels can be compared
-  const size = () => page.evaluate(() => { const c = document.querySelector('#stage canvas'); return [c.width, c.height]; });
-  const w0 = (await size())[0]; await page.setViewportSize({ width: 1500, height: 900 + 1 }); await a.idle();
-  for (let k = 0; k < 40 && (await size())[1] < 800; k++) { await page.setViewportSize({ width: 1500, height: 900 + 1 + k }); await a.idle(); }
-  ok('the canvas has its rooms-off size again (only the info bar grew)', (await size()).join() === `${w0},800`, (await size()).join());
+  const sizeOn = await size();
+  ok('the canvas has the same size with rooms off and on, and its bitmap equals its laid-out size (the info line has a fixed height)', sizeOff.join() === sizeOn.join() && sizeOn[0] === sizeOn[2] && sizeOn[1] === sizeOn[3], `off ${sizeOff.join('x')} on ${sizeOn.join('x')}`);
   for (const t of ['box', 'A', 'B']) { await a.tech(t); await a.preset('isoE'); on[t] = await hash(); }
   for (const t of ['box', 'A', 'B']) ok(`rooms on = rooms off, same pixels (${t})`, on[t] === off[t]);
   const txt = await info();

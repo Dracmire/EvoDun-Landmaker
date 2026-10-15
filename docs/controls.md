@@ -154,7 +154,3 @@ Techniques: Box, A, B, C = the panels the control changes; a badge [A] / [B] / [
 | regions | all | - | Colour each walkable region: what is connected to what. |
 | passes | all | a map with stairs (Stair / ramp width above 0 and a gate) | Stair marks. |
 | edgeWarn | all | turn on Rooms · a map where rooms are found: load the real map or lower Room radius | Electric-blue outline of large regions that stay unconnected (edge problems); it only draws when the info line reports some. |
-
-## Not in the table
-
-- `layout` (#layout): Layout selector: always hidden (compare mode is a fixed 2 x 2 grid of four panels). A candidate for removal.

@@ -33,9 +33,9 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
   ok('the technique badges [A] [B] [C] are on the single-technique controls only', await ev(() => { const b = [...document.querySelectorAll('.bdg')].map((x) => x.textContent + ':' + (x.closest('label').querySelector('input,select').id)); return b.includes('A:s-smooth') && b.includes('B:s-radius') && b.includes('C:curvesPreset') && b.includes('C:wallPass') && b.includes('C:s-wallExtrude') && b.length === 11; }));
   // ---- every control of the panel has an entry
   const orphans = await ev(() => { const C = window.EVO.controls, sel = C.TABLE.map((e) => e.dom).join(','), retired = C.RETIRED.map((r) => r.dom).join(',');
-    return [...document.querySelectorAll('aside input, aside select, aside button, #bar button, #bar select')].filter((e) => !e.matches(sel) && !e.matches(retired) && !e.classList.contains('chip') && !e.closest('#zoneChips, #roomChips, #floorChips, #roles')).map((e) => e.id || e.textContent); });
+    return [...document.querySelectorAll('aside input, aside select, aside button, #bar button, #bar select')].filter((e) => !e.matches(sel) && !(retired && e.matches(retired)) && !e.classList.contains('chip') && !e.closest('#zoneChips, #roomChips, #floorChips, #roles')).map((e) => e.id || e.textContent); });
   ok('every control of the panel has an entry in the table (or is the retired layout selector)', orphans.length === 0, orphans.join(','));
-  ok('the retired #layout selector is still in the DOM and hidden, not in the table', await ev(() => { const l = document.querySelector('#layout'); return !!l && l.hidden && !window.EVO.controls.TABLE.some((e) => e.dom.includes('#layout')); }));
+  ok('there is no #layout element (the retired selector was removed) and no table entry names it', await ev(() => !document.querySelector('#layout') && !window.EVO.controls.TABLE.some((e) => e.dom.includes('#layout'))));
   // ---- the original tooltips (Cam 1-7, Stage preset) are kept
   ok('the 8 original tooltips are kept', await ev(() => { const t = [...document.querySelectorAll('#presets button')].map((b) => b.title); return t.length === 7 && t.every((x) => /^Cam \d ·/.test(x)) && /^Stage preset: Cam 6/.test(document.querySelector('#stagePreset').title); }));
 
