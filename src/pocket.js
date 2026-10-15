@@ -1,6 +1,6 @@
 /* EvoDun crystal viewer - POCKET (pseudo-space) of a Diorama room: the user's crystallizer for Diorama rooms.
    IDEA (user's decision): the map does not change. The FRAGMENT of the Diorama (its real tiles) is the same in the world and in the pocket; only what surrounds it changes. The pocket is bigger
-   than the footprint and does not look outward (a closed scene, Hades style). Fixed camera for now: the composition is made for the Iso preset (yaw 45).
+   than the footprint and does not look outward (a closed scene, Hades style). The composition follows the ACTIVE camera: opts.yaw (degrees; the camera axis in map coordinates is u = (sin yaw, cos yaw), toward the camera) is set by the viewer from the camera's base yaw (P.pocketYaw in src/shape.js; Cam 1 45, Cam 2 -45, Cam 3-7 0); the default stays 45 (the Iso preset).
    - Input: a LIST of room ids (always one today; the list is there for double dioramas of two rooms, NOT implemented: only 2 pairs in the map are joined only by a cliff, none facing the camera).
    - Fragment: all the tiles of the room with their levels, sub-terraces and walkability as they are, in WORLD coordinates (the pocket overlaps the world at the same place: the change is seamless).
    - Size: R = 3 r, r = sqrt(tiles / pi). Centre of the disc = centroid of the fragment moved 2 r TOWARD the camera, so the fragment sits against the back edge. Outside the disc there is nothing (no world, no veil).

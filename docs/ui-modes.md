@@ -82,7 +82,7 @@ Controls per mode (ids of `src/controls.js`):
 |---|---|---|---|---|---|---|---|---|
 | 1 Terrain (terraces, ramps) | yes | yes | yes | yes | yes | yes (limitation 15) | yes | every heightmap |
 | 2 Cake rings, Ascension walls | yes | yes | yes | yes (measured 2026-10-15) | yes | yes (measured) | by design | only maps with rooms: today the real map (section 7) |
-| 2 Pocket | yes | yes | yes | by design (not measured) | Cam 1 (composed for it) | misaligned: the backdrop sits to one side (seen 2026-10-15; limitation 15 (4)) | misaligned (same) | real map Dioramas |
+| 2 Pocket | yes | yes | yes | by design (not measured) | yes: composed along the active camera's axis (all of Cam 1-7; 7b) | yes (7b) | yes (7b) | real map Dioramas |
 | 3 Art contract | yes | yes | yes | yes | yes | yes | by design | every heightmap; landmarks and trees only in Shrine-Pier x4 |
 | 4 Wall pass | no | no | no | yes | yes | yes | yes | every heightmap |
 | Wall dressing (shared) | yes | yes | yes | yes | yes | by design | by design | every heightmap |
@@ -113,12 +113,12 @@ Readings: on a 40x40 map the rooms are too few, and with rooms on the ramps come
 - R4 Reopen the rooms layer (frozen since PR #6 by the user's decision, Pending 4).
 Decision (U8): this comes after the UI pass. Until then DAC is offered only on examples that have rooms.
 
-### 7b. DAC at Cam 6 (U7; seen 2026-10-15, Pocket · Diorama 31 and the real map Balanced types, technique A)
+### 7b. DAC at Cam 6 (U7): DONE (UI pass, the Pocket composed along the active camera's axis). Seen 2026-10-15 before the fix, Pocket · Diorama 31 and the real map Balanced types, technique A
 
 - Works: Cake rings and Ascension walls on the whole map, at Cam 6 as at Cam 1 (no page error; section 7 figures).
 - Does not work: the POCKET. It is composed along the Cam 1 axis (backdrop behind, pond in front, as seen from Cam 1), so at Cam 6 (and Cam 7) the backdrop sits to one side of the fragment instead of behind it. Limitation 15 (4).
 - Also open under Cam 6 (limitation 15): Box tile order is the orthographic one, not an exact painter order under perspective (pick 91-98 %); marks and line widths do not shrink with distance.
-- Proposed fix (to design with the user, a PR of its own after PR 1): compose the Pocket along the ACTIVE camera's axis (its yaw: 0 for Cam 6 unless the pack declares `stageYaw`), rebuilt when the camera changes (preset click, not drag). Measure Box order under Cam 6 on the Pocket and the rings before deciding whether it needs work.
+- DONE: the Pocket is composed along the ACTIVE camera's axis. `P.pocketYaw` (degrees; a diagnostic-style parameter, not a control, not in the manifest; undefined = 45 = the old behaviour) is passed by `E.shape` to `E.pocket.windowOf` and `E.pocket.apply` (the same yaw, so the window contains the disc) and stored in `S.pocketYaw`; `src/ui.js` sets it from the camera's BASE yaw (`baseYaw()`: Cam 1 45, Cam 2 -45, Cam 3-5 and 7 0, Cam 6 0 or the pack's `stageYaw`) and `draw()` rebuilds a pocket whose `S.pocketYaw` differs from the base yaw now (one check that covers a preset click, a scenario, a mode or example change, a manifest camera and the Stage preset; Cam 3 <-> 4 <-> 5 <-> 6 <-> 7 do not rebuild, Cam 1 <-> 2 <-> the others do, about 1-2 s). The drag variation of yaw / pitch does NOT recompose it (same policy as the Floor backdrop: measured and printed, not asserted). `src/pocket.js` plan code unchanged (it was already parametrised by yaw: 18 of 18 Dioramas build, hard rule, fragment = world, exits reached at yaw 45 / -45 / 0 / 90; `tools/test_pocket.js`). Figures, measured on the 18 Dioramas of the real map, Balanced types (`tools/ui/test_pocket_cam_ui.js`, Box pick render): mean screen offset of the backdrop dx in fragment widths (0 = centred behind) Cam 1 +0.05, Cam 2 +0.08, Cam 3 +0.06, Cam 6 +0.05 (before, composed for 45: Cam 3 -0.33, Cam 6 -0.31, Cam 2 -0.48, Cam 1 +0.05); fragment visibility lost to the decoration (alone minus with pocket) 0.00-0.02 points at every camera (before: Cam 6 3.41, Cam 2 0.99). The mean over only the six archetype rooms (31 7 22 49 4 25) at Cam 2 is +0.18 because two of them have a backdrop of 27 and 3 tiles (a centroid of 3 tiles is noise), so the statistics use the 18 rooms. NOT fixed on purpose (out of scope, still open): Box tile order under perspective, marks and line widths, the low pitch of Cam 6 (25 deg) that makes a high-relief room hide itself, double dioramas.
 
 ## 8. Macroform and Floors: what they are (the user's objection, 2026-10-15)
 

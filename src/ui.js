@@ -488,15 +488,22 @@
     if (!raf) raf = requestAnimationFrame(() => setTimeout(draw, 0));
   }
 
+  /* the BASE yaw of the camera (degrees): the preset's own, without the drag variation. The pocket is composed along this axis (E.pocket, P.pocketYaw): Cam 1 45, Cam 2 -45, Cam 3-5 and 7 0, Cam 6 0 or the pack's stageYaw */
+  function baseYaw() {
+    const p = PRESETS.find((x) => x.id === st.preset); if (p.kind === 'oblique') return 0;
+    const pk = packs[st.pack] && packs[st.pack].pack; return p.kind === 'persp' && pk && pk.stageYaw ? pk.stageYaw : p.yaw;
+  }
   function view() {
     const p = PRESETS.find((x) => x.id === st.preset);
     if (p.kind === 'oblique') return { kind: 'oblique', yaw: 0, pitch: 0, zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc }; // Cam 7 has no angle: the drag variation does not apply
-    const pk = packs[st.pack] && packs[st.pack].pack, sy0 = p.kind === 'persp' && pk && pk.stageYaw ? pk.stageYaw : p.yaw; // a pack may declare stageYaw (degrees): the yaw of Cam 6 (no UI)
+    const sy0 = baseYaw(); // the camera's own yaw (a pack may declare stageYaw: the yaw of Cam 6, no UI)
     return { kind: p.kind, yaw: sy0 + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc, persH: st.persH };
   }
 
   function draw() {
     raf = 0;
+    if (S && S.pocket && S.pocketYaw !== baseYaw()) S = null; // a pocket is composed for ONE camera axis: any way of changing the camera (preset, scenario, mode, manifest, Stage preset) that changes the base yaw rebuilds it (a world shape does not depend on the yaw)
+    P.pocketYaw = baseYaw();
     const raw = packs[st.pack].pack, fl = E.hasFloors(raw); // a floors package (crystallizer 5): the shape is the one of the selected layer (the exterior in the stack and cutaway views)
     if (!S) {
       const pack = fl ? E.floorPack(raw, st.floors === 'single' ? st.layer : 0) : raw;
