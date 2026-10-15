@@ -51,7 +51,7 @@ const MUTATE = process.argv.includes('--mutate');
   await ev(() => { window.__prevS = window.__evo.S(); });
   const seq = [['isoE', 45, false], ['oblique', 0, true], ['stage', 0, false], ['low', 0, false], ['top', 0, false], ['classic', 0, false], ['isoE', 45, true], ['isoW', -45, true], ['oblique', 0, true], ['isoW', -45, true], ['isoW', -45, false]], bad = [];
   for (const [pre, yaw, rebuilt] of seq) { await a.preset(pre); const r = await ev(() => { const e = window.__evo, S = e.S(), re = S !== window.__prevS; window.__prevS = S; return { yaw: S.pocketYaw, re, pocket: !!S.pocket }; }); builds.push(`${pre}:${r.yaw}${r.re ? '*' : ''}`); if (r.yaw !== yaw || r.re !== rebuilt || !r.pocket) bad.push(`${pre} yaw ${r.yaw} (want ${yaw}) rebuilt ${r.re} (want ${rebuilt})`); }
-  ok('the shape yaw equals the camera base yaw after every preset click and a rebuild happens exactly when it changes (Cam 3-7 share yaw 0: no rebuild; Cam 1 <-> 2 <-> others: rebuild) ' + builds.join(' '), bad.length === 0 && !MUTATE ? true : bad.length === 0, bad.join('; '));
+  ok('the shape yaw equals the camera base yaw after every preset click and a rebuild happens exactly when it changes (Cam 3-7 share yaw 0: no rebuild; Cam 1 <-> 2 <-> others: rebuild) ' + builds.join(' '), bad.length === 0, bad.join('; '));
   // (e) Cam 1 -> 3 -> 1: identical canvas
   await a.preset('isoE'); const h1 = crypto.createHash('md5').update(await a.canvas()).digest('hex'); await a.preset('oblique'); await a.preset('isoE'); const h2 = crypto.createHash('md5').update(await a.canvas()).digest('hex');
   ok('Cam 1 -> Cam 3 -> Cam 1 gives the identical canvas (deterministic rebuild)', h1 === h2, h1 + ' ' + h2);
