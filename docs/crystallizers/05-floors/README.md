@@ -2,6 +2,8 @@
 
 ## 1. Status
 
+CLOSED as it stands (user, 2026-10-14; D8). No more work is planned on it.
+
 Default camera: Cam 1 (Iso 45), user decision 2026-10-13.
 
 MERGED (PR #19). Steps A, B, B2, C and E are in main: data, declared links, the Floors view (Single / Stack / Cutaway), the floor-2 railing and 'Stairs down' marker, cutaway paint order measured against a z-buffer (Cam 1 and Cam 3). Option 2 (camera-fixed backdrop, `option2-backdrop.md`): phases 0, 1, 1b (PR #23, #24) and 2a + 2b (PR #26: single gap, bay fix, stepped profile) are merged; 2c (tone + fog) and 2d (stripes) are NOT started. The backdrop is composed for Cam 1 only: its control is greyed at any other camera and it is not built there. Incursion marks of a floors package belong to the layer they were placed on. Nothing is exported to Unity.
@@ -21,6 +23,7 @@ Not the SDF exterior (deferred, it may become a later crystallizer): no volume r
 - D5 The head `H` is the high end of the spiral, (22, 16), in THIS pack only; the source pack keeps (29, 26) (the inverted end from the spreadsheet). `W`, `P`, `E` stay where they are (placed for the old head); the semantic-landmark stage will resolve it. The head is a semantic anchor, not built here.
 - D6 The link between floors is a DECLARED LINK (section 5): the pack declares it, a forced site carves its ramp; it is not detected. Reason: GDD 4.1 step 5 says floor connections are RESERVED (declared by the cave graph), the gate criterion is for natural terrain transitions. A straight radial ramp, not an arc or a spiral (later improvements).
 - D7 Number reference: an earlier estimate of the centre height (5.1) came from the cave-carved composite, not from the repository. The pure surface has 7.41 at (20.5, 20.5), a plateau of 7.0-7.5 up to r ~ 4 and the crest (9.1) at r 5-6; there is no basin, so the crater is dug. Section areas (z + 1, shell 1.5, shaft r 2.5): z = 3: 289, z = 4: 223, z = 5: 161 tiles.
+- D8 (user, 2026-10-14) CLOSED as it stands. What is not done stays not done and goes to `docs/concepts/05-decisions-to-revisit.md`: backdrop phases 2c (tone + fog) and 2d (stripes) and phases 3-6, the backdrop at cameras other than Cam 1, the floor-2 opening that reads as a railed pit, the "Pending for later" list of section 5d. The user's reason: the floors' shapes are baked by a Python script, so the package cannot be changed from the page ("a tool I cannot touch"). D1 still holds for THIS package (the shaft is its link between floors); the traversable serpent spiral that the user asked for is built by crystallizer 6 (Macroform), where the shaft is an addition, not a replacement.
 
 ## 4. Data (derivation rules)
 

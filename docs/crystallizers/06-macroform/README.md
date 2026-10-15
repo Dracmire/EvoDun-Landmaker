@@ -1,7 +1,9 @@
-# Crystallizer 6 - Macroform (volume of the Snake Mountain) - PROPOSAL (number provisional)
+# Crystallizer 6 - Macroform (volume of the Snake Mountain)
 
 ## 1. Status
-PR B (the viewer: `src/volume.js`, the Macroform view, `tools/ui/test_volume_ui.js`): IMPLEMENTED, waiting for review (section 11). PR A (derivation + data + tests, no `src/` change): IMPLEMENTED (`tools/derive_snake_macroform.py`, `data/snake_mountain_macroform.json`, `tools/test_macroform.js` + `.py`), waiting for review. PR B (the viewer) is section 11. Nothing is exported to Unity. Floors (crystallizer 5) code and data are untouched; techniques A, B and C are not extended to the volume.
+PHASE 1 CLOSED (user, 2026-10-14). PR A (#29: derivation + data + tests, no `src/` change: `tools/derive_snake_macroform.py`, `data/snake_mountain_macroform.json`, `tools/test_macroform.js` + `.py`) and PR B (#30: the viewer, `src/volume.js`, the Macroform view, `tools/ui/test_volume_ui.js`, section 11) are merged. The review added an independent voxel ray cast to the test (0 mismatches over 36 combinations; it catches missing faces, which the z-buffer over the same faces cannot) and greys the Incursion controls in the volume view (a click there cannot be resolved against the heightmap shape).
+PHASE 2: not designed, not started. The user (2026-10-14): it "looks good" but lacks serious things, such as the OTHER PASSES OF THE NUMERIC WORLD on the macroform. Candidates named so far (none decided): those numeric-world passes, the head as a semantic landmark, the waterfall from the mouth and the pond, more than one gate between exterior and interior (the original design had several), and changing the shape from the page (today it is baked by the Python script, so the user cannot reproduce or tune it).
+Nothing is exported to Unity. Floors (crystallizer 5) code and data are untouched; techniques A, B and C are not extended to the volume.
 
 ## 2. Why
 Floors stacks independent heightmaps, so it cannot hold a shell, a ceiling or an interior inside the SAME map. The user approved (2026-10-13) a different DATA MODEL with the SAME RENDER FAMILY: columns (x, y) that may hold SEVERAL solid intervals (z0, z1, material) instead of one height. Rendering stays 2.5D isometric: orthographic, painter's algorithm, flat colour + outlines, no WebGL, no mesh engine, no z-buffer in the product (a z-buffer is allowed in TESTS as a reference, as in `tools/ui/test_ramp_ui.js`).
@@ -12,6 +14,7 @@ Floors stacks independent heightmaps, so it cannot hold a shell, a ceiling or an
 - The shell is the exterior; interiors are where play happens. The mountain is not a solid block.
 - Dungeon content per floor, waterfall from the mouth, pond at the foot: OUT OF SCOPE.
 - Default camera for this crystallizer: Cam 1 (Iso 45).
+- (2026-10-14) Phase 1 closed as it stands; the rest is phase 2 (section 1).
 
 ## 4. Parameters (ALL PROVISIONAL: my choices, the user has not set them)
 | name | value | meaning |

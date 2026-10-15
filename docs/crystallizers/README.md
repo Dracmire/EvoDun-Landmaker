@@ -8,9 +8,12 @@ the short rules; the long history and the reasons live here.
 |---|---|---|---|
 | 1 | Terrain techniques: Box (reference), A (contour polygons), B (distance field) | Closed (base, PR #1-#4) | [01-terrain](01-terrain/README.md) |
 | 2 | Room types: Cake / Diorama (pocket) / Ascension (walls) | Closed (PR #7-#13; its data source, the rooms layer, PR #5-#6) | [02-room-types](02-room-types/README.md) |
-| 3 | Stage: framing and dressing as an art-piece contract, Sea of Stars reference | Design draft | [03-stage](03-stage/README.md) |
+| 3 | Stage: framing and dressing as an art-piece contract, Sea of Stars reference | Design draft; an MVP is in the viewer (Art contract, Stage preset, Cam 6). Needs a MAJOR design pass before any more work (user, 2026-10-14: a true HD-2D cannot be made here, and dressing another system as HD-2D is the incongruence behind the earlier failure) | [03-stage](03-stage/README.md) |
 | 4 | Tiles to Curves (Unexplored 2): technique C (planar Voronoi) + wall dressing | Closed (PR #17, #18) | [04-tiles-to-curves](04-tiles-to-curves/README.md) |
-| 5 | Floors: a multi-floor macroform (Snake Mountain, crater shaft, 2 interior floors) shown as single floor / exploded stack / cutaway | In progress (data, declared links and the Floors view built; in review) | [05-floors](05-floors/README.md) |
+| 5 | Floors: a multi-floor macroform (Snake Mountain, crater shaft, 2 interior floors) shown as single floor / exploded stack / cutaway | Closed as it stands (user, 2026-10-14; PR #19-#28). Its shapes are baked by a script: the page can only view them | [05-floors](05-floors/README.md) |
+| 6 | Macroform: Snake Mountain as a VOLUME (columns with several solid intervals): shell, interior, traversable serpent spiral through 3 floors, crater shaft | Phase 1 closed (user, 2026-10-14; PR #29, #30). Phase 2 not designed (the other numeric-world passes, among others) | [06-macroform](06-macroform/README.md) |
+
+**Next (user, 2026-10-14):** a UI pass BEFORE any crystallizer work. The panel mixes the controls of every crystallizer; they cannot be used together, and the user cannot build an example of each crystallizer from the page. Then the Stage (3) design pass. See `CLAUDE.md`, Pending 9 and 10.
 
 ## Core examples
 
