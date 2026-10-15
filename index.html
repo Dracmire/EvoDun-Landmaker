@@ -99,6 +99,11 @@ details.grp>summary{cursor:pointer;font-size:10.5px;text-transform:uppercase;let
    <label class="sl"><span>Backdrop height</span><output id="o-backdropHeight"></output><input type="range" id="s-backdropHeight" min="1" max="4" step="0.5"></label>
    <div class="hint" id="floorHint">Stack and cutaway: orthographic cameras only (Cam 1-5, 7); stake and objectives are placed in the single-floor views. The cutaway plane follows the camera yaw (the cut is recomputed when a drag is released).</div>
   </div>
+  <div id="macro" hidden><h3>Macroform</h3>
+   <div class="row"><select id="macroView" title="Macroform view"><option value="off">Off (heightmap exterior)</option><option value="exterior">Exterior (volume)</option><option value="quad">Quadrant removed</option><option value="interior">Interior only</option><option value="cut">Horizontal cut</option></select></div>
+   <div id="macroChips" class="chips"></div>
+   <div class="hint" id="macroHint">The volume is drawn with 1 tile of height = 1 tile of width (V = 2 tiles per elevation unit, provisional); Off draws the quantized terraces, so the two have different vertical scales. Cam 1-5 only.</div>
+  </div>
   <div id="incursion"><h3>Incursion</h3>
    <div class="row"><button id="m-stake">Place stake</button><button id="m-obj">Add objective</button><button id="m-rm">Remove</button><button id="m-clear">Clear</button></div>
    <div class="hint" id="incHint">Pick a mode, then click the map (Esc cancels). The route runs from each objective to the stake over the walkable tiles, ramps included.</div>
@@ -130,6 +135,7 @@ details.grp>summary{cursor:pointer;font-size:10.5px;text-transform:uppercase;let
 <script src="src/contract.js"></script>
 <script src="src/floors.js"></script>
 <script src="src/backdrop.js"></script>
+<script src="src/volume.js"></script>
 <script src="src/controls.js"></script>
 <script src="src/ui.js"></script>
 </body></html>

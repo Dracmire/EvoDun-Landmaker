@@ -96,6 +96,11 @@ details.grp>summary{cursor:pointer;font-size:10.5px;text-transform:uppercase;let
    <label class="sl"><span>Backdrop height</span><output id="o-backdropHeight"></output><input type="range" id="s-backdropHeight" min="1" max="4" step="0.5"></label>
    <div class="hint" id="floorHint">Stack and cutaway: orthographic cameras only (Cam 1-5, 7); stake and objectives are placed in the single-floor views. The cutaway plane follows the camera yaw (the cut is recomputed when a drag is released).</div>
   </div>
+  <div id="macro" hidden><h3>Macroform</h3>
+   <div class="row"><select id="macroView" title="Macroform view"><option value="off">Off (heightmap exterior)</option><option value="exterior">Exterior (volume)</option><option value="quad">Quadrant removed</option><option value="interior">Interior only</option><option value="cut">Horizontal cut</option></select></div>
+   <div id="macroChips" class="chips"></div>
+   <div class="hint" id="macroHint">The volume is drawn with 1 tile of height = 1 tile of width (V = 2 tiles per elevation unit, provisional); Off draws the quantized terraces, so the two have different vertical scales. Cam 1-5 only.</div>
+  </div>
   <div id="incursion"><h3>Incursion</h3>
    <div class="row"><button id="m-stake">Place stake</button><button id="m-obj">Add objective</button><button id="m-rm">Remove</button><button id="m-clear">Clear</button></div>
    <div class="hint" id="incHint">Pick a mode, then click the map (Esc cancels). The route runs from each objective to the stake over the walkable tiles, ramps included.</div>
@@ -4625,6 +4630,126 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   };
 })(window.EVO = window.EVO || {});
 
+/* EvoDun crystal viewer - crystallizer 6, MACROFORM: the VOLUME of a pack (`pack.volume`, `pack.macro`; docs/pack-format.md, docs/crystallizers/06-macroform/README.md).
+   The data model is a column (x, y) that holds SEVERAL solid intervals (z0, z1, material) instead of one height; the render family is the same as the Box technique: orthographic, painter's algorithm, flat colour + outlines,
+   no WebGL, no mesh engine, no z-buffer (a z-buffer is only used by the TESTS as a reference, tools/ui/test_volume_ui.js).
+   VERTICAL UNIT: the volume is stored in ELEVATION units; here z_tiles = z * vScale (a voxel is a cube, 1 tile wide and 1 tile high). The heightmap view of the same source quantizes `elevation` into terraces of `P.terH`
+   (a terrace is `terH` tiles high, not `vScale` tiles per elevation unit), so the two views do NOT share a vertical scale (README section 11).
+   PAINTER ORDER (exact for axis-aligned boxes under any orthographic camera, no sorting by projected depth): a box is nearer to the camera when its x is larger (if the camera is on the +x side), its y is larger (+y side) and its z is larger
+   (the camera is above), so the lexicographic order (x toward the camera, then y toward the camera, then z) is a linear extension of that product order, and two boxes that overlap on screen are never ordered the other way
+   (a ray from the camera moves monotonically in x, y and z). Per column the intervals go bottom up.
+   Faces: top, and the sides whose normal faces the camera (the same test as Box: `cam.nrm`), only where EXPOSED: a side is clipped against the intervals of the neighbour column, a top is hidden by an interval that starts on it.
+   SECTION faces (what a cut or a removed quadrant opens) take their own colour: a face that is exposed only because the full volume had solid there. Interior only has none (it removes the shell, it does not cut it). */
+(function (E) {
+  /* material -> [top, right-facing side, left-facing side]: PROVISIONAL (the spike palette); this table is the hook of the later stylization pass */
+  const PAL = { 1: [[132, 160, 104], [150, 138, 122], [118, 108, 96]], 2: [[74, 116, 92], [78, 104, 84], [58, 80, 64]], 3: [[216, 194, 148], [176, 156, 116], [146, 128, 92]], 4: [[238, 224, 188], [204, 190, 152], [172, 158, 124]], 5: [[204, 182, 134], [176, 156, 116], [146, 128, 92]] };
+  const CUT = [[112, 100, 90], [92, 82, 74]], CUT_TOP = [128, 116, 104], OUT = 'rgba(24,20,34,0.6)', EPS = 1e-6;
+  const KINDS = ['exterior', 'quad', 'interior', 'cut'];
+  const has = (pack) => !!(pack && pack.volume && pack.macro && pack.volume.columns);
+  const rgb = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;
+
+  /* the columns in TILES (z * vScale), cached on the pack */
+  function prep(pack) {
+    if (pack._vol) return pack._vol;
+    const V = pack.volume.vScale, W = pack.width, H = pack.height;
+    const cols = pack.volume.columns.map((iv) => iv.map(([a, b, m]) => [a * V, b * V, m]));
+    let top = 0; for (const iv of cols) if (iv.length) top = Math.max(top, iv[iv.length - 1][1]);
+    return (pack._vol = { W, H, V, cols, top, floors: pack.macro.floors.map((f) => f.zTiles) });
+  }
+  /* a stand-in shape for the camera (makeCam needs W, H and the height range): the fit frames the WHOLE volume in every view kind, so switching the view never rescales */
+  function camShape(vol) { return { W: vol.W, H: vol.H, ox: 0, oy: 0, levelH: [0, vol.top], maxFine: 1, baseH: 0, fitH: [0, vol.top + 1.5] }; }
+
+  /* the columns of a view kind: `vis` (what is drawn) and `ref` (what the section test compares against) */
+  function filtered(vol, pack, mv, view) {
+    const { W, H, cols } = vol, kind = mv.kind;
+    if (kind === 'exterior') return { vis: cols, ref: cols };
+    if (kind === 'interior') { const vis = cols.map((iv) => iv.filter((x) => x[2] >= 3)); return { vis, ref: vis }; } // floors, ramp and ground: the shell and the serpent body are removed, not cut
+    if (kind === 'cut') {
+      const f = Math.max(1, Math.min(vol.floors.length, mv.floor || 1)), cz = vol.floors[f - 1] + 2; // everything above floor + 2 tiles is removed
+      const vis = cols.map((iv) => iv.filter((x) => x[0] < cz - EPS).map((x) => (x[1] > cz + EPS ? [x[0], cz, x[2]] : x)));
+      return { vis, ref: cols, cutZ: cz };
+    }
+    // quadrant removed: the 90-degree wedge of the plan, centred on the direction of the camera (it follows the yaw), is taken out of the whole height
+    const yaw = view.yaw * Math.PI / 180, sy = Math.sin(yaw), cy = Math.cos(yaw), c = pack.macro.shaft.c, vis = cols.map((iv, i) => {
+      const dx = i % W + 0.5 - c[0], dy = Math.floor(i / W) + 0.5 - c[1], d = dx * sy + dy * cy, l = Math.abs(dx * cy - dy * sy);
+      return d > 1e-9 && d >= l - 1e-9 ? [] : iv;
+    });
+    return { vis, ref: cols };
+  }
+  /* the parts of [a, b] that no interval of `iv` covers */
+  function uncovered(a, b, iv) {
+    let segs = [[a, b]];
+    for (const [c0, c1] of iv) { const out = []; for (const [s0, s1] of segs) { if (c1 <= s0 + EPS || c0 >= s1 - EPS) out.push([s0, s1]); else { if (c0 > s0 + EPS) out.push([s0, c0]); if (c1 < s1 - EPS) out.push([c1, s1]); } } segs = out; }
+    return segs;
+  }
+  const covered = (a, b, iv) => { const un = uncovered(a, b, iv).sort((p, q) => p[0] - q[0]), parts = []; let cur = a; for (const [u0, u1] of un) { if (u0 > cur + EPS) parts.push([cur, u0]); cur = u1; } if (b > cur + EPS) parts.push([cur, b]); return parts; }; // the parts of [a, b] that `iv` does cover
+
+  /* all the faces of a view, in painter order. view: { yaw, pitch, ... } (only the yaw decides the order and the visible sides) */
+  function faces(pack, mv, view, o) {
+    o = o || {}; const vol = prep(pack), { W, H } = vol, { vis, ref, cutZ } = filtered(vol, pack, mv, view);
+    const yaw = view.yaw * Math.PI / 180, sy = Math.sin(yaw), cy = Math.cos(yaw);
+    const nrm = (nx, ny) => [cy * nx - sy * ny, sy * nx + cy * ny]; // the same as makeCam's cam.nrm: [screen x, toward the camera]
+    const SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dx, dy]) => nrm(dx, dy)[1] > 0.001);
+    const xs = [...Array(W).keys()], ys = [...Array(H).keys()]; if (sy < 0) xs.reverse(); if (cy < 0) ys.reverse();
+    const out = []; const st = { top: 0, side: 0, cutFaces: 0 };
+    const colOf = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? [] : vis[y * W + x]), refOf = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? [] : ref[y * W + x]);
+    for (const x of xs) for (const y of ys) {
+      const iv = vis[y * W + x];
+      for (let k = 0; k < iv.length; k++) {
+        const [z0, z1, m] = iv[k], pal = PAL[m];
+        for (const [dx, dy] of SIDES) { // the sides that face the camera, clipped against the neighbour column
+          const nx = x + dx, ny = y + dy, nv = colOf(nx, ny), nr = refOf(nx, ny), right = nrm(dx, dy)[0] > 0.001;
+          for (const [a, b] of uncovered(z0, z1, nv)) {
+            const segs = []; let cur = a; // [a, b, isCut]: the parts the full volume covered are the SECTION
+            for (const [c0, c1] of covered(a, b, nr)) { if (c0 > cur + EPS) segs.push([cur, c0, false]); segs.push([c0, c1, true]); cur = c1; }
+            if (b > cur + EPS) segs.push([cur, b, false]);
+            for (const [s0, s1, isCut] of segs) {
+              const px = dx !== 0 ? x + (dx > 0 ? 1 : 0) : null, py = dy !== 0 ? y + (dy > 0 ? 1 : 0) : null;
+              const pts = dx !== 0 ? [[px, y, s0], [px, y + 1, s0], [px, y + 1, s1], [px, y, s1]] : [[x, py, s0], [x + 1, py, s0], [x + 1, py, s1], [x, py, s1]];
+              out.push({ pts, col: isCut ? CUT[right ? 0 : 1] : pal[right ? 1 : 2], mat: m, top: false, cut: isCut, x, y, z0: s0, z1: s1 }); st.side++; if (isCut) st.cutFaces++;
+            }
+          }
+        }
+        // the top: hidden by an interval that starts on it; a section when the full volume continued above
+        const nxt = iv[k + 1]; if (nxt && nxt[0] <= z1 + EPS) continue;
+        const r = ref[y * W + x], isCut = r.some(([r0, r1]) => r0 <= z1 + EPS && r1 > z1 + EPS) && (mv.kind !== 'interior');
+        const edges = []; // outline: the sides of the top where the neighbour has no exposed top at the same height
+        for (const [i, [dx, dy]] of [[0, [0, -1]], [1, [1, 0]], [2, [0, 1]], [3, [-1, 0]]]) {
+          const nv = colOf(x + dx, y + dy), same = nv.some(([c0, c1], j) => Math.abs(c1 - z1) < EPS && !(nv[j + 1] && nv[j + 1][0] <= c1 + EPS));
+          if (!same) edges.push(i);
+        }
+        out.push({ pts: [[x, y, z1], [x + 1, y, z1], [x + 1, y + 1, z1], [x, y + 1, z1]], col: isCut && (m === 1 || m === 2) ? CUT_TOP : pal[0], mat: m, top: true, cut: isCut, edges, x, y, z0: z1, z1 }); st.top++; if (isCut) st.cutFaces++;
+      }
+    }
+    return { faces: out, stats: Object.assign(st, { cutZ }) };
+  }
+
+  const FIT_CACHE = new WeakMap();
+  /* draw the view into a canvas (the same background, size and dpr handling as E.render) */
+  function render(cv, pack, mv, view, o) {
+    o = o || {};
+    const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight, t0 = performance.now();
+    if (cv.width !== (w * dpr | 0) || cv.height !== (h * dpr | 0)) { cv.width = w * dpr; cv.height = h * dpr; }
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424'); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+    const vol = prep(pack), cam = E.makeCam(camShape(vol), { terH: 1 }, view, w, h), F = faces(pack, mv, view, o);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    for (const f of F.faces) {
+      ctx.beginPath(); f.pts.forEach(([x, y, z], i) => { const p = cam.p(x, y, z); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }); ctx.closePath();
+      ctx.fillStyle = rgb(f.col); ctx.fill(); ctx.strokeStyle = rgb(f.col); ctx.lineWidth = 0.8; ctx.stroke();
+      if (f.top && o.outlines !== false) for (const i of f.edges) { const a = cam.p(...f.pts[i]), b = cam.p(...f.pts[(i + 1) % 4]); ctx.strokeStyle = OUT; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); }
+    }
+    const marks = [];
+    if (o.markers !== false) { const hd = pack.macro.head, p0 = pack.macro.ramp.path[0]; marks.push({ x: hd.x + 0.5, y: hd.y + 0.5, z: p0[2] * vol.V + 0.1, label: 'H (snake head: marker only)', col: [220, 60, 40] }); }
+    for (const m of (E.volume.extraMarks || [])) marks.push(m);
+    for (const m of marks) { const p = cam.p(m.x, m.y, m.z); ctx.beginPath(); ctx.arc(p[0], p[1], 5, 0, 6.2832); ctx.fillStyle = rgb(m.col || [220, 60, 40]); ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = '#000'; ctx.font = '11px sans-serif'; ctx.fillText(m.label, p[0] + 8, p[1] - 6); }
+    return { polys: F.faces.length, walls: F.stats.side, verts: F.faces.length * 4, ms: performance.now() - t0, faces: F.faces.length, stats: F.stats, cam };
+  }
+  /* the fit scale (px per tile at zoom 1) of the whole volume, for the UI's shared camera */
+  const fitScale = (pack, view, w, h) => E.fitScale(camShape(prep(pack)), { terH: 1 }, view, w, h);
+  E.volume = { has, prep, faces, render, fitScale, camShape, KINDS, PAL, extraMarks: [], nearness: (view, x, y, z) => { const yaw = view.yaw * Math.PI / 180, p = view.pitch * Math.PI / 180, cx = x - 0, cyy = y - 0; return (Math.sin(yaw) * cx + Math.cos(yaw) * cyy) * Math.cos(p) + z * Math.sin(p); } };
+})(window.EVO = window.EVO || {});
+
 /* EvoDun crystal viewer - CONTROLS TABLE: the single source of truth for every control of the panel (id, group, techniques, requirements, help).
    - A requirement that is NOT met: the control is disabled (not interactable), greyed, and its tooltip lists ONLY what to activate ("Requires: turn on Rooms · ...").
      A control that holds a non-default value (a toggle that is ON...) keeps it, shows "inactive", and its effect returns with the requirement. Nothing is recomputed and no parameter changes.
@@ -4633,7 +4758,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
    - docs/controls.md is GENERATED from this table (tools/gen_controls_doc.js, run by tools/build.py); tools/test_controls.js checks that it is in sync.
    `dom` = CSS selector of the control element(s) that are disabled; the tooltip and the greyed look go on the label / row that holds them. `keep` = the control already has its own tooltip (cameras, Stage preset): not touched. */
 (function (E) {
-  const GROUPS = ['Scenarios', 'View bar', 'Source & slice', '1 Terrain', '2 Room types', '3 Stage', '4 Curves (C)', '5 Floors', 'Shared passes', 'Overlays', 'Incursion', 'Diagnostics'];
+  const GROUPS = ['Scenarios', 'View bar', 'Source & slice', '1 Terrain', '2 Room types', '3 Stage', '4 Curves (C)', '5 Floors', '6 Macroform', 'Shared passes', 'Overlays', 'Incursion', 'Diagnostics'];
   const T = (c, t) => c.techs.includes(t);
   /* requirements: ok(ctx) and the human text of what to do. A "found" / "present" requirement is treated as met while its prerequisite switch is off (the first text already says what to do). */
   const R = {
@@ -4668,6 +4793,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     singleFloor: { ok: (c) => !c.floors || c.floorsView === 'single', text: 'set Floors view to Single floor' },
     backdropOn: { ok: (c) => c.backdrop, text: 'turn on Floor backdrop' },
     cam1: { ok: (c) => c.preset === 'isoE', text: 'use Cam 1: the backdrop is composed for Cam 1 until its camera phase' },
+    macroform: { ok: (c) => c.macro, text: 'load a pack with a volume (Snake Mountain macroform)' },
+    heightmapView: { ok: (c) => !c.volOn, text: 'set Macroform view to Off' },
+    cam15: { ok: (c) => c.camKind === 'ortho', text: 'use Cam 1-5 (an orthographic camera, not Cam 6 or Cam 7)' },
     ortho: { ok: (c) => c.camKind !== 'persp', text: 'use an orthographic camera (not Cam 6)' }
   };
   const CAKE = ['rooms', 'roomsFound', 'cakeRoom'], ASC = ['rooms', 'roomsFound', 'ascRoom'], POCKET = ['rooms', 'roomsFound', 'dioRoom'], RM = ['rooms', 'roomsFound'];
@@ -4750,6 +4878,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     e('t-backdrop', '#t-backdrop', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1'], 'Floor backdrop (Option 2): a wall attached to the chosen floor (no gap by default) with a stepped profile that rises behind it, so the floor reads as inside a shell. Heights are the real exterior heights over the floor, placed by a mirror across the back edge; the height multiplier is stylization (on floor 2 the whole profile is). Decoration only: not walkable. The floor itself does not change. Cam 1 only (composed for the Cam 1 axis); the Exterior layer has none.'),
     e('backdropGap', '#s-backdropGap', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1', 'backdropOn'], 'Backdrop gap, 0-8 ground tiles (default 0): 0 = the wall rises from the floor edge; above 0 an apron at the height of the floor edge (not walkable) is inserted between the floor and the foot of the wall.'),
     e('backdropHeight', '#s-backdropHeight', '5 Floors', ALL, ['floors', 'singleFloor', 'cam1', 'backdropOn'], 'Backdrop height, 1-4: multiplies the whole rise of the wall above the floor edge (never the floor). The wall is a stepped profile (stylization: first riser one character = 2 tiles, then one terrace, 3 treads, tapering) with the real exterior height over the floor, mirrored across the back edge, as a lower bound.'),
+    // ---- 6 Macroform
+    e('macroView', '#macroView', '6 Macroform', ALL, ['macroform'], 'Macroform view of the volume (crystallizer 6): Off = the heightmap exterior of the same source (quantized terraces); Exterior, Quadrant removed (the quadrant facing the camera), Interior only (floors, ramp, shaft) and a Horizontal cut at floor 1 / 2 / 3 are drawn from the column intervals, one block per voxel run, Box-style. One view (no compare grid). Cam 1-5 only (Cam 6 and Cam 7 show the heightmap). The volume uses 1 tile of height = 1 tile of width, the heightmap uses terraces, so their vertical scales differ.', { options: { exterior: ['cam15'], quad: ['cam15'], interior: ['cam15'], cut: ['cam15'] } }),
     // ---- Shared passes
     e('outlines', '#t-outlines', 'Shared passes', ALL, [], 'Dark outlines on caps and walls.'),
     e('gradient', '#t-gradient', 'Shared passes', ALL, [], 'Shading gradient on cliffs.'),
@@ -4764,7 +4894,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     e('veil', '#t-veil', 'Overlays', ALL, ['slice'], 'Veil over the scenery outside the slice.'),
     e('border', '#t-border', 'Overlays', ALL, ['slice'], 'Slice border, coloured from the edge map: red barrier, cyan pass, yellow unmarked, white map edge.'),
     // ---- Incursion
-    e('incursion', '#m-stake, #m-obj, #m-rm, #m-clear', 'Incursion', ALL, ['singleFloor'], 'Place the stake, add or remove objectives; the route runs from each objective to the stake over the walkable tiles, ramps included.'),
+    e('incursion', '#m-stake, #m-obj, #m-rm, #m-clear', 'Incursion', ALL, ['singleFloor', 'heightmapView'], 'Place the stake, add or remove objectives; the route runs from each objective to the stake over the walkable tiles, ramps included.'),
     // ---- Diagnostics (folded)
     e('regions', '#t-regions', 'Diagnostics', ALL, [], 'Colour each walkable region: what is connected to what.'),
     e('passes', '#t-passes', 'Diagnostics', ALL, ['passes'], 'Stair marks.'),
@@ -4817,8 +4947,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       const els = [...root.querySelectorAll(en.dom)]; if (!els.length) continue;
       put(en.id === 'margin' ? 'Source & slice' : en.group, holder(els[0]));
     }
-    const fl = root.querySelector('#floors'), inc = root.querySelector('#incursion'), disp = toggles && toggles.parentNode;
+    const fl = root.querySelector('#floors'), mc = root.querySelector('#macro'), inc = root.querySelector('#incursion'), disp = toggles && toggles.parentNode;
     if (fl && disp) aside.insertBefore(fl, disp); // 5 Floors after the crystallizer blocks, before the shared passes and the overlays
+    if (mc && disp) aside.insertBefore(mc, disp); // 6 Macroform right after 5 Floors
     if (inc && box.Diagnostics) toggles.insertBefore(inc, box.Diagnostics); // Incursion before the folded Diagnostics
     for (const h of root.querySelectorAll('#sliders > h3')) h.remove(); // the old per-block headers (Shaping, Passes, ...)
     const dh = toggles && toggles.previousElementSibling; if (dh && dh.tagName === 'H3' && dh.textContent === 'Display') dh.remove();
@@ -4859,6 +4990,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     { id: 'stage', cam: 6, label: 'Cam 6', title: 'Cam 6 · Stage (perspective, FOV 30, pitch 25, yaw 0)', yaw: 0, pitch: 25, kind: 'persp' },
     { id: 'classic', cam: 7, label: 'Cam 7', title: 'Cam 7 · Classic 3/4 (oblique projection, ground scale 1, height scale 1)', yaw: 0, pitch: 0, kind: 'oblique' }
   ];
+  const MACRO_NAMES = { exterior: 'Exterior', quad: 'Quadrant removed', interior: 'Interior only', cut: 'Horizontal cut' };
   const SLIDERS = [
     ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 300, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Wall pass (technique C)', [['wallExtrude', 'Wall extrusion', 0.10, 0.40, 0.01], ['wallStrata', 'T3 · Strata per terrace', 2, 4, 1], ['wallColumn', 'T3 · Column spacing (tiles)', 0.8, 2.0, 0.1], ['t2Spacing', 'T2 · Lateral spacing (tiles)', 0.6, 1.5, 0.05], ['t2Rows', 'T2 · Height passes', 5, 10, 1], ['t2Group', 'T2 · Group width (tiles)', 0.6, 2.0, 0.1], ['t2Jitter', 'T2 · Jitter', 0, 0.6, 0.05]]],
@@ -4873,7 +5005,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
 
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
-  const st = { floors: 'single', layer: 0, pack: 'snake_surface', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const st = { floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -4903,14 +5035,15 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     { id: 'pocket31', label: 'Pocket · Diorama 31', src: 'real_map', rooms: true, preset: 'balanced', pocket: true, room: 31, cam: 'isoE' },
     { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage', src: 'shrine_pier_x4', stage: true, contract: true },
     { id: 'snake_curves', label: 'Snake surface · Curves C', src: 'snake_surface', tech: 'C', cam: 'oblique' },
-    { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors', cam: 'isoE' }
+    { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors', cam: 'isoE' },
+    { id: 'snake_macro', label: 'Snake · Macroform', src: 'snake_macroform', cam: 'isoE', tech: 'box', macro: 'exterior' }
   ];
   async function applyScenario(sc) {
     if (!(await selectSource(sc.src))) return;
     const tick = (id, v) => { const el = $('#' + id); if (el) el.checked = v; };
     // the base every scenario starts from (so the same click always gives the same state): the defaults of the parameters the scenarios touch
     setParam('terraces', 5); setParam('spread', 1); setParam('minPlateau', 5); P.spreadCentre = 'largest'; P.cake = false; P.ascWalls = false; O.contract = false; tick('t-cake', false); tick('t-ascWalls', false); tick('t-contract', false);
-    st.tech = 'A'; st.mode = 'compare'; st.preset = 'oblique'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.floors = 'single'; st.layer = 0;
+    st.tech = 'A'; st.mode = 'compare'; st.preset = 'oblique'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.floors = 'single'; st.layer = 0; st.macro = sc.macro || 'off'; st.macroFloor = 1;
     P.rooms = !!sc.rooms; tick('t-rooms', P.rooms); P.pocket = !!sc.pocket; tick('t-pocket', P.pocket);
     if (sc.preset) applyRoomsPreset(sc.preset);
     sliceSel.rooms.clear(); if (sc.room) { sliceSel.whole = false; sliceSel.rooms.add(sc.room); } else sliceSel.whole = true;
@@ -5014,6 +5147,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
     for (const k of ['backdropGap', 'backdropHeight']) { const inp = $('#s-' + k), out = $('#o-' + k); inp.value = P[k]; out.textContent = P[k]; inp.addEventListener('input', () => { out.textContent = inp.value; }); inp.addEventListener('change', () => { P[k] = +inp.value; out.textContent = P[k]; invalidate(true); }); } // the backdrop is part of the shape of the floor: recompute on release
     $('#t-backdrop').addEventListener('change', (e) => { P.backdrop = e.target.checked; invalidate(true); }); // the backdrop is part of the shape of the floor
+    $('#macroView').addEventListener('change', (e) => { st.macro = e.target.value; buildMacroChips(); invalidate(false); }); // the volume view of crystallizer 6: only the draw changes (the shape of the exterior stays)
     $('#floorsView').addEventListener('change', (e) => { st.floors = e.target.value; invalidate(true); }); // single floor / exploded stack / cutaway (the shape of the primary layer changes)
     window.addEventListener('resize', () => invalidate(false));
     $('#stage').addEventListener('wheel', (e) => { e.preventDefault(); st.zoom = Math.max(0.5, Math.min(4, st.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); invalidate(false); }, { passive: false });
@@ -5072,7 +5206,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     for (const [id, k] of [['m-stake', 'stake'], ['m-obj', 'obj'], ['m-rm', 'rm']]) { const b = document.getElementById(id); if (b) b.classList.toggle('on', m === k); }
     const stage = document.getElementById('stage'); if (stage) stage.classList.toggle('picking', !!m);
   }
+  const VOL_MSG = 'Stake and objectives are placed in the heightmap view (Macroform: Off).'; // the volume view has its own camera: a click cannot be resolved against the heightmap shape
   function clickMap(e) {
+    if (volActive()) { message(VOL_MSG); return; }
     if (E.hasFloors(packs[st.pack].pack) && st.floors !== 'single') { message('Stake and objectives are placed in the single-floor views.'); return; }
     const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
     for (let k = 0; k < figs.length; k++) {
@@ -5084,6 +5220,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
   /* Pocket view: a click in the world on a Diorama chooses that room (the same as its chip); in the pocket itself a click does nothing (another chip or Whole map goes back) */
   function clickRoom(e) {
+    if (volActive()) { message(VOL_MSG); return; }
     if (!S || !S.roomMap || S.pocket) return;
     const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
     for (let k = 0; k < figs.length; k++) {
@@ -5177,7 +5314,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
   function refreshMessage() { const p = packs[st.pack] && packs[st.pack].pack; message(p && p.warnings ? p.warnings.join(' ') : ''); }
   function onPackChanged() {
-    st.floors = 'single'; st.layer = 0; buildFloorChips();
+    st.floors = 'single'; st.layer = 0; st.macro = 'off'; st.macroFloor = 1; buildFloorChips(); buildMacroChips();
     buildChips(packs[st.pack].pack);
     inc.stake = null; inc.objectives = []; setIncMode(null);
     if (st.pack === 'image' && manifest) { inc.stake = manifest.stake ? Object.assign({}, manifest.stake) : null; inc.objectives = manifest.objectives.map((o) => Object.assign({}, o)); }
@@ -5338,12 +5475,14 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         if (fl && P.backdrop && E.backdrop && st.floors === 'single' && st.layer > 0 && st.preset === 'isoE') E.backdrop.apply(S, P, raw, st.layer); // Floor backdrop (crystallizer 5, Option 2, phase 1): a band of the mountain behind the floor
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
-      buildRoomChips(); buildFloorChips();
+      buildRoomChips(); buildFloorChips(); buildMacroChips();
       st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
     }
     const incursion = computeIncursion(); O.incursion = incursion;
     $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');
-    const techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
+    const volOn = !!(E.volume && E.volume.has(raw) && st.macro !== 'off'), volView = volOn && view().kind === 'ortho', mvk = { kind: st.macro, floor: st.macroFloor }; // crystallizer 6: the volume view is ONE panel, orthographic cameras only (Cam 6 / 7 show the heightmap)
+    if (volView) O.incursion = null; // no stake, objectives or route in the volume view
+    const techs = volView ? ['box'] : st.mode === 'compare' ? ALL_TECH : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
     const layout = st.layout === 'auto' ? (st.preset.startsWith('iso') ? 'rows' : 'columns') : st.layout; // rows in isometric: the diamond is twice as wide as tall
     stage.dataset.layout = layout; $('#layout').hidden = st.mode !== 'compare' || techs.length > 3; // four panels are always a 2x2 grid
@@ -5354,12 +5493,13 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     // one camera for every panel: the same scale (px per tile, fitted to the first panel) around the same point of the map
     const multi = fl && st.floors !== 'single' && view().kind !== 'persp'; // the stack and the cutaway are orthographic only: Cam 6 shows the selected floor
     const FLS = multi ? E.floors.layers(S, raw, P, view(), st.floors, !!st.dragging) : null; O.incursion = FLS ? null : O.incursion; st.floorsLayers = FLS;
-    const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
+    const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = volView ? E.volume.fitScale(raw, view(), f0.clientWidth, f0.clientHeight) : E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
     const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
     const lateKey = (t) => (t === 'B' ? 'Bready:' + P.radius + ':' + P.anchor : 'Cready:' + E.curves.key(P)), late = techs.filter((t) => (t === 'B' || t === 'C') && (!S.cache[lateKey(t)] || (FLS && FLS.dirty))), needB = late.length > 0; // B and C: the first draw is the slow one, painted after the other panels
     const paint = (t, i) => {
       const f = stage.children[i], cv = f.querySelector('canvas'), pend = f.querySelector('.pending');
       if (pend) pend.remove();
+      if (volView) { const r = E.volume.render(cv, raw, mvk, v, O); st.volStats = r.stats; f.querySelector('figcaption').innerHTML = `<b>Macroform · ${MACRO_NAMES[st.macro] || st.macro}${st.macro === 'cut' ? ' ' + st.macroFloor : ''}</b><span>${r.faces} faces (${r.stats.top} tops, ${r.stats.side} sides, ${r.stats.cutFaces} section) · ${r.ms.toFixed(0)} ms</span>`; return; }
       const r = FLS ? E.renderLayers(cv, FLS.list, P, t, v, O) : E.render(cv, S, P, t, v, O);
       f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ms.toFixed(0)} ms</span>`;
       if (t === 'B' || t === 'C') S.cache[lateKey(t)] = true;
@@ -5405,10 +5545,20 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
   function contractText() { // counts of the pieces drawn per kind (switch "Art contract")
     const ci = S.contractInfo; if (!O.contract || !ci) return '';
-    return (st.mode === 'compare' ? ALL_TECH : [st.tech]).filter((t) => ci[t]).map((t) => { const c = ci[t];
+    return shownTechs().filter((t) => ci[t]).map((t) => { const c = ci[t];
       return ` · <b>Art contract</b> (${t === 'box' ? 'Box' : t}): body low ${c.body.low} · mid ${c.body.mid} · high ${c.body.high} · masonry ${c.body.masonry} · edge ${c.body.edge}; wrapper drop ${c.wrapper.drop} · border ${c.wrapper.border} · shore ${c.wrapper.shore}; footprint ${c.footprint}; props trees ${c.trees} · landmarks ${c.landmarks}${c.faded ? ` (${c.faded} faded)` : ''}`; }).join('');
   }
   /* crystallizer 5: the Floors chips (Exterior / Floor 1 / Floor 2: single-floor view only) and the info line of a floors package */
+  /* crystallizer 6: the Macroform selector and its floor chips (the horizontal cut at floor 1 / 2 / 3) */
+  function buildMacroChips() {
+    const raw = packs[st.pack] && packs[st.pack].pack, on = !!(E.volume && E.volume.has(raw)), box = $('#macro'); box.hidden = !on; if (!on) return;
+    $('#macroView').value = st.macro;
+    const chips = $('#macroChips'); chips.hidden = st.macro !== 'cut'; chips.innerHTML = '';
+    raw.macro.floors.forEach((f) => {
+      const b = document.createElement('button'); b.className = 'chip' + (st.macroFloor === f.id ? ' on' : ''); b.textContent = 'Floor ' + f.id; b.dataset.id = f.id; b.dataset.macroFloor = f.id;
+      b.addEventListener('click', () => { st.macroFloor = f.id; buildMacroChips(); invalidate(false); }); chips.appendChild(b);
+    });
+  }
   function buildFloorChips() {
     const raw = packs[st.pack] && packs[st.pack].pack, on = E.hasFloors(raw), box = $('#floors'); box.hidden = !on; if (!on) return;
     $('#floorsView').value = st.floors;
@@ -5430,17 +5580,27 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     else if (bd) t += ` · <b>Backdrop</b>: ${bd.plain} plain + ${bd.band} band tiles (gap ${bd.gap}, band depth reached ${bd.maxDepth.toFixed(1)} of ${bd.depth} tiles, ${bd.dropped} lower than the plain left empty), ${bd.levelsAdded} levels added`;
     return t;
   }
+  /* the techniques the panels show (none of them in the volume view: its one panel is drawn by src/volume.js, so the per-technique counts of the heightmap are not reported) */
+  function volActive() { const raw = packs[st.pack] && packs[st.pack].pack; return !!(E.volume && E.volume.has(raw) && st.macro !== 'off' && view().kind === 'ortho'); }
+  function shownTechs() { return volActive() ? [] : (st.mode === 'compare' ? ALL_TECH : [st.tech]); }
+  function macroText() { // crystallizer 6: what the Macroform view draws and the vertical scale of the volume
+    const raw = packs[st.pack] && packs[st.pack].pack; if (!E.volume || !E.volume.has(raw) || st.macro === 'off') return '';
+    const V = raw.volume.vScale, ok = view().kind === 'ortho';
+    if (!ok) return ' · <b>Macroform</b>: Cam 6 and Cam 7 are not supported in the volume view: showing the heightmap exterior';
+    const q = st.volStats || { top: 0, side: 0, cutFaces: 0 };
+    return ` · <b>Macroform</b>: ${MACRO_NAMES[st.macro]}${st.macro === 'cut' ? ' at floor ' + st.macroFloor + ' (everything above floor + 2 tiles removed)' : ''} · ${q.top + q.side} faces (${q.cutFaces} section) · VERTICAL SCALE: the volume uses z = elevation x ${V} (1 tile of height = 1 tile of width, PROVISIONAL), the heightmap view (Off) uses ${P.terraces} terraces of ${P.terH} tile: the two are not the same height`;
+  }
   function wallText() { // the wall pass of C: mode, band, islands, faces and cost
-    const t = S && (st.mode === 'compare' ? ALL_TECH : [st.tech]).includes('C') && P.wallPass !== 'off' ? S.cache['Cw:' + E.curves.key(P) + '|' + E.wallc.key(P)] : null; if (!t) return '';
+    const t = S && shownTechs().includes('C') && P.wallPass !== 'off' ? S.cache['Cw:' + E.curves.key(P) + '|' + E.wallc.key(P)] : null; if (!t) return '';
     const q = t.stats; return ` · <b>Wall pass</b> (C ${q.mode.toUpperCase()}, extrusion ${P.wallExtrude}): ${q.edges} wall edges` + (q.mode === 't3' ? ` · ${q.band} band atoms · ${q.after.islands} islands (${q.before.islands} before the fusion, ${q.after.slivers} slivers, ${q.after.spans} over ${E.wallc.LMAX} tiles)` : ` · ${q.chains} chains · ${q.blocks} blocks`) + ` · ${q.faces} faces · ${q.ms} ms`;
   }
   function curvesText() { // technique C: preset, passes, seeds, contour edges and exempt cells of the last build
-    const t = S && (st.mode === 'compare' ? ALL_TECH : [st.tech]).includes('C') ? S.cache['Cs:' + E.curves.key(P)] : null; if (!t) return '';
+    const t = S && shownTechs().includes('C') ? S.cache['Cs:' + E.curves.key(P)] : null; if (!t) return '';
     return ` · <b>Curves C</b> (${P.curves}): ${t.info.passes} pass${t.info.passes > 1 ? 'es' : ''} · ${t.info.cells} seeds · ${t.info.edges} contour edges · ${t.info.exemptCells} exempt (ramps, walls, rings) · ${t.info.ms} ms`;
   }
   function dressText() { // counts of the wall dressing pieces drawn per technique (switch "Wall dressing")
     const di = S && S.dressInfo; if (!O.dress || !di) return '';
-    return (st.mode === 'compare' ? ALL_TECH : [st.tech]).filter((t) => di[t]).map((t) => { const c = di[t]; return ` · <b>Wall dressing</b> (${t === 'box' ? 'Box' : t}): ${c.walls} walls · strata ${c.strata} · lips ${c.lips} · foot ${c.foot} · rocks ${c.rocks}`; }).join('');
+    return shownTechs().filter((t) => di[t]).map((t) => { const c = di[t]; return ` · <b>Wall dressing</b> (${t === 'box' ? 'Box' : t}): ${c.walls} walls · strata ${c.strata} · lips ${c.lips} · foot ${c.foot} · rocks ${c.rocks}`; }).join('');
   }
   function ascText() { const a = S.ascWalls; return a && !a.rails ? ` · <b>Ascension walls</b>: ${a.info.faces} faces in ${a.info.runs} chains (${a.info.candidates} candidate faces, ${a.info.dropped} dropped: chains of fewer than 3)` : ''; }
   function pocketText() {
@@ -5467,7 +5627,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket,
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
-      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset };
+      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset, macro: !!(E.volume && E.volume.has(raw)), macroView: st.macro, volOn: volActive() };
   }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
@@ -5484,7 +5644,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText();
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText() + macroText();
     E.controls.refresh(document, controlsCtx()); // requirements of every control, from the live state
   }
 
@@ -5494,6 +5654,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     setPack('shrine_pier', 'Shrine-Pier (semantic landmarks)', window.EVO_PACKS.shrine_pier);
     setPack('shrine_pier_x4', 'Shrine-Pier x4 (decompressed, derived)', window.EVO_PACKS.shrine_pier_x4);
     setPack('snake_floors', 'Snake Mountain floors (shaft + 2 floors, derived)', window.EVO_PACKS.snake_mountain_floors);
+    setPack('snake_macroform', 'Snake Mountain macroform (volume: shell, serpent, shaft, floors, derived)', window.EVO_PACKS.snake_mountain_macroform);
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     setPack('real_map', 'Real map 256 (height only)', null); // decoded on the first selection (realMapPack)
     build(); E.controls.layout(document); E.controls.badges(document);

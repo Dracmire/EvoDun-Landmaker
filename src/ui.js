@@ -14,6 +14,7 @@
     { id: 'stage', cam: 6, label: 'Cam 6', title: 'Cam 6 · Stage (perspective, FOV 30, pitch 25, yaw 0)', yaw: 0, pitch: 25, kind: 'persp' },
     { id: 'classic', cam: 7, label: 'Cam 7', title: 'Cam 7 · Classic 3/4 (oblique projection, ground scale 1, height scale 1)', yaw: 0, pitch: 0, kind: 'oblique' }
   ];
+  const MACRO_NAMES = { exterior: 'Exterior', quad: 'Quadrant removed', interior: 'Interior only', cut: 'Horizontal cut' };
   const SLIDERS = [
     ['Shaping', [['terraces', 'Terraces', 2, 24, 1], ['subs', 'Sub-terraces / terrace', 1, 6, 1], ['terH', 'Terrace height', 0.4, 2.5, 0.05], ['spread', 'Height spread (1 = uniform)', 1, 3, 0.05], ['subH', 'Sub-terrace height', 0.05, 0.5, 0.01], ['minPlateau', 'Min plateau (tiles)', 1, 300, 1], ['minSub', 'Min sub-terrace patch', 1, 12, 1], ['pre', 'Pre-smooth', 0, 3, 1]]],
     ['Wall pass (technique C)', [['wallExtrude', 'Wall extrusion', 0.10, 0.40, 0.01], ['wallStrata', 'T3 · Strata per terrace', 2, 4, 1], ['wallColumn', 'T3 · Column spacing (tiles)', 0.8, 2.0, 0.1], ['t2Spacing', 'T2 · Lateral spacing (tiles)', 0.6, 1.5, 0.05], ['t2Rows', 'T2 · Height passes', 5, 10, 1], ['t2Group', 'T2 · Group width (tiles)', 0.6, 2.0, 0.1], ['t2Jitter', 'T2 · Jitter', 0, 0.6, 0.05]]],
@@ -28,7 +29,7 @@
 
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
-  const st = { floors: 'single', layer: 0, pack: 'snake_surface', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const st = { floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -58,14 +59,15 @@
     { id: 'pocket31', label: 'Pocket · Diorama 31', src: 'real_map', rooms: true, preset: 'balanced', pocket: true, room: 31, cam: 'isoE' },
     { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage', src: 'shrine_pier_x4', stage: true, contract: true },
     { id: 'snake_curves', label: 'Snake surface · Curves C', src: 'snake_surface', tech: 'C', cam: 'oblique' },
-    { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors', cam: 'isoE' }
+    { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors', cam: 'isoE' },
+    { id: 'snake_macro', label: 'Snake · Macroform', src: 'snake_macroform', cam: 'isoE', tech: 'box', macro: 'exterior' }
   ];
   async function applyScenario(sc) {
     if (!(await selectSource(sc.src))) return;
     const tick = (id, v) => { const el = $('#' + id); if (el) el.checked = v; };
     // the base every scenario starts from (so the same click always gives the same state): the defaults of the parameters the scenarios touch
     setParam('terraces', 5); setParam('spread', 1); setParam('minPlateau', 5); P.spreadCentre = 'largest'; P.cake = false; P.ascWalls = false; O.contract = false; tick('t-cake', false); tick('t-ascWalls', false); tick('t-contract', false);
-    st.tech = 'A'; st.mode = 'compare'; st.preset = 'oblique'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.floors = 'single'; st.layer = 0;
+    st.tech = 'A'; st.mode = 'compare'; st.preset = 'oblique'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.floors = 'single'; st.layer = 0; st.macro = sc.macro || 'off'; st.macroFloor = 1;
     P.rooms = !!sc.rooms; tick('t-rooms', P.rooms); P.pocket = !!sc.pocket; tick('t-pocket', P.pocket);
     if (sc.preset) applyRoomsPreset(sc.preset);
     sliceSel.rooms.clear(); if (sc.room) { sliceSel.whole = false; sliceSel.rooms.add(sc.room); } else sliceSel.whole = true;
@@ -169,6 +171,7 @@
     $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
     for (const k of ['backdropGap', 'backdropHeight']) { const inp = $('#s-' + k), out = $('#o-' + k); inp.value = P[k]; out.textContent = P[k]; inp.addEventListener('input', () => { out.textContent = inp.value; }); inp.addEventListener('change', () => { P[k] = +inp.value; out.textContent = P[k]; invalidate(true); }); } // the backdrop is part of the shape of the floor: recompute on release
     $('#t-backdrop').addEventListener('change', (e) => { P.backdrop = e.target.checked; invalidate(true); }); // the backdrop is part of the shape of the floor
+    $('#macroView').addEventListener('change', (e) => { st.macro = e.target.value; buildMacroChips(); invalidate(false); }); // the volume view of crystallizer 6: only the draw changes (the shape of the exterior stays)
     $('#floorsView').addEventListener('change', (e) => { st.floors = e.target.value; invalidate(true); }); // single floor / exploded stack / cutaway (the shape of the primary layer changes)
     window.addEventListener('resize', () => invalidate(false));
     $('#stage').addEventListener('wheel', (e) => { e.preventDefault(); st.zoom = Math.max(0.5, Math.min(4, st.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); invalidate(false); }, { passive: false });
@@ -227,7 +230,9 @@
     for (const [id, k] of [['m-stake', 'stake'], ['m-obj', 'obj'], ['m-rm', 'rm']]) { const b = document.getElementById(id); if (b) b.classList.toggle('on', m === k); }
     const stage = document.getElementById('stage'); if (stage) stage.classList.toggle('picking', !!m);
   }
+  const VOL_MSG = 'Stake and objectives are placed in the heightmap view (Macroform: Off).'; // the volume view has its own camera: a click cannot be resolved against the heightmap shape
   function clickMap(e) {
+    if (volActive()) { message(VOL_MSG); return; }
     if (E.hasFloors(packs[st.pack].pack) && st.floors !== 'single') { message('Stake and objectives are placed in the single-floor views.'); return; }
     const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
     for (let k = 0; k < figs.length; k++) {
@@ -239,6 +244,7 @@
   }
   /* Pocket view: a click in the world on a Diorama chooses that room (the same as its chip); in the pocket itself a click does nothing (another chip or Whole map goes back) */
   function clickRoom(e) {
+    if (volActive()) { message(VOL_MSG); return; }
     if (!S || !S.roomMap || S.pocket) return;
     const figs = [...$('#stage').children].filter((f) => !f.hidden), techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
     for (let k = 0; k < figs.length; k++) {
@@ -332,7 +338,7 @@
   }
   function refreshMessage() { const p = packs[st.pack] && packs[st.pack].pack; message(p && p.warnings ? p.warnings.join(' ') : ''); }
   function onPackChanged() {
-    st.floors = 'single'; st.layer = 0; buildFloorChips();
+    st.floors = 'single'; st.layer = 0; st.macro = 'off'; st.macroFloor = 1; buildFloorChips(); buildMacroChips();
     buildChips(packs[st.pack].pack);
     inc.stake = null; inc.objectives = []; setIncMode(null);
     if (st.pack === 'image' && manifest) { inc.stake = manifest.stake ? Object.assign({}, manifest.stake) : null; inc.objectives = manifest.objectives.map((o) => Object.assign({}, o)); }
@@ -493,12 +499,14 @@
         if (fl && P.backdrop && E.backdrop && st.floors === 'single' && st.layer > 0 && st.preset === 'isoE') E.backdrop.apply(S, P, raw, st.layer); // Floor backdrop (crystallizer 5, Option 2, phase 1): a band of the mountain behind the floor
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
-      buildRoomChips(); buildFloorChips();
+      buildRoomChips(); buildFloorChips(); buildMacroChips();
       st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
     }
     const incursion = computeIncursion(); O.incursion = incursion;
     $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');
-    const techs = st.mode === 'compare' ? ALL_TECH : [st.tech];
+    const volOn = !!(E.volume && E.volume.has(raw) && st.macro !== 'off'), volView = volOn && view().kind === 'ortho', mvk = { kind: st.macro, floor: st.macroFloor }; // crystallizer 6: the volume view is ONE panel, orthographic cameras only (Cam 6 / 7 show the heightmap)
+    if (volView) O.incursion = null; // no stake, objectives or route in the volume view
+    const techs = volView ? ['box'] : st.mode === 'compare' ? ALL_TECH : [st.tech];
     const stage = $('#stage'); stage.dataset.n = techs.length;
     const layout = st.layout === 'auto' ? (st.preset.startsWith('iso') ? 'rows' : 'columns') : st.layout; // rows in isometric: the diamond is twice as wide as tall
     stage.dataset.layout = layout; $('#layout').hidden = st.mode !== 'compare' || techs.length > 3; // four panels are always a 2x2 grid
@@ -509,12 +517,13 @@
     // one camera for every panel: the same scale (px per tile, fitted to the first panel) around the same point of the map
     const multi = fl && st.floors !== 'single' && view().kind !== 'persp'; // the stack and the cutaway are orthographic only: Cam 6 shows the selected floor
     const FLS = multi ? E.floors.layers(S, raw, P, view(), st.floors, !!st.dragging) : null; O.incursion = FLS ? null : O.incursion; st.floorsLayers = FLS;
-    const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
+    const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = volView ? E.volume.fitScale(raw, view(), f0.clientWidth, f0.clientHeight) : E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
     const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
     const lateKey = (t) => (t === 'B' ? 'Bready:' + P.radius + ':' + P.anchor : 'Cready:' + E.curves.key(P)), late = techs.filter((t) => (t === 'B' || t === 'C') && (!S.cache[lateKey(t)] || (FLS && FLS.dirty))), needB = late.length > 0; // B and C: the first draw is the slow one, painted after the other panels
     const paint = (t, i) => {
       const f = stage.children[i], cv = f.querySelector('canvas'), pend = f.querySelector('.pending');
       if (pend) pend.remove();
+      if (volView) { const r = E.volume.render(cv, raw, mvk, v, O); st.volStats = r.stats; f.querySelector('figcaption').innerHTML = `<b>Macroform · ${MACRO_NAMES[st.macro] || st.macro}${st.macro === 'cut' ? ' ' + st.macroFloor : ''}</b><span>${r.faces} faces (${r.stats.top} tops, ${r.stats.side} sides, ${r.stats.cutFaces} section) · ${r.ms.toFixed(0)} ms</span>`; return; }
       const r = FLS ? E.renderLayers(cv, FLS.list, P, t, v, O) : E.render(cv, S, P, t, v, O);
       f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ms.toFixed(0)} ms</span>`;
       if (t === 'B' || t === 'C') S.cache[lateKey(t)] = true;
@@ -560,10 +569,20 @@
   }
   function contractText() { // counts of the pieces drawn per kind (switch "Art contract")
     const ci = S.contractInfo; if (!O.contract || !ci) return '';
-    return (st.mode === 'compare' ? ALL_TECH : [st.tech]).filter((t) => ci[t]).map((t) => { const c = ci[t];
+    return shownTechs().filter((t) => ci[t]).map((t) => { const c = ci[t];
       return ` · <b>Art contract</b> (${t === 'box' ? 'Box' : t}): body low ${c.body.low} · mid ${c.body.mid} · high ${c.body.high} · masonry ${c.body.masonry} · edge ${c.body.edge}; wrapper drop ${c.wrapper.drop} · border ${c.wrapper.border} · shore ${c.wrapper.shore}; footprint ${c.footprint}; props trees ${c.trees} · landmarks ${c.landmarks}${c.faded ? ` (${c.faded} faded)` : ''}`; }).join('');
   }
   /* crystallizer 5: the Floors chips (Exterior / Floor 1 / Floor 2: single-floor view only) and the info line of a floors package */
+  /* crystallizer 6: the Macroform selector and its floor chips (the horizontal cut at floor 1 / 2 / 3) */
+  function buildMacroChips() {
+    const raw = packs[st.pack] && packs[st.pack].pack, on = !!(E.volume && E.volume.has(raw)), box = $('#macro'); box.hidden = !on; if (!on) return;
+    $('#macroView').value = st.macro;
+    const chips = $('#macroChips'); chips.hidden = st.macro !== 'cut'; chips.innerHTML = '';
+    raw.macro.floors.forEach((f) => {
+      const b = document.createElement('button'); b.className = 'chip' + (st.macroFloor === f.id ? ' on' : ''); b.textContent = 'Floor ' + f.id; b.dataset.id = f.id; b.dataset.macroFloor = f.id;
+      b.addEventListener('click', () => { st.macroFloor = f.id; buildMacroChips(); invalidate(false); }); chips.appendChild(b);
+    });
+  }
   function buildFloorChips() {
     const raw = packs[st.pack] && packs[st.pack].pack, on = E.hasFloors(raw), box = $('#floors'); box.hidden = !on; if (!on) return;
     $('#floorsView').value = st.floors;
@@ -585,17 +604,27 @@
     else if (bd) t += ` · <b>Backdrop</b>: ${bd.plain} plain + ${bd.band} band tiles (gap ${bd.gap}, band depth reached ${bd.maxDepth.toFixed(1)} of ${bd.depth} tiles, ${bd.dropped} lower than the plain left empty), ${bd.levelsAdded} levels added`;
     return t;
   }
+  /* the techniques the panels show (none of them in the volume view: its one panel is drawn by src/volume.js, so the per-technique counts of the heightmap are not reported) */
+  function volActive() { const raw = packs[st.pack] && packs[st.pack].pack; return !!(E.volume && E.volume.has(raw) && st.macro !== 'off' && view().kind === 'ortho'); }
+  function shownTechs() { return volActive() ? [] : (st.mode === 'compare' ? ALL_TECH : [st.tech]); }
+  function macroText() { // crystallizer 6: what the Macroform view draws and the vertical scale of the volume
+    const raw = packs[st.pack] && packs[st.pack].pack; if (!E.volume || !E.volume.has(raw) || st.macro === 'off') return '';
+    const V = raw.volume.vScale, ok = view().kind === 'ortho';
+    if (!ok) return ' · <b>Macroform</b>: Cam 6 and Cam 7 are not supported in the volume view: showing the heightmap exterior';
+    const q = st.volStats || { top: 0, side: 0, cutFaces: 0 };
+    return ` · <b>Macroform</b>: ${MACRO_NAMES[st.macro]}${st.macro === 'cut' ? ' at floor ' + st.macroFloor + ' (everything above floor + 2 tiles removed)' : ''} · ${q.top + q.side} faces (${q.cutFaces} section) · VERTICAL SCALE: the volume uses z = elevation x ${V} (1 tile of height = 1 tile of width, PROVISIONAL), the heightmap view (Off) uses ${P.terraces} terraces of ${P.terH} tile: the two are not the same height`;
+  }
   function wallText() { // the wall pass of C: mode, band, islands, faces and cost
-    const t = S && (st.mode === 'compare' ? ALL_TECH : [st.tech]).includes('C') && P.wallPass !== 'off' ? S.cache['Cw:' + E.curves.key(P) + '|' + E.wallc.key(P)] : null; if (!t) return '';
+    const t = S && shownTechs().includes('C') && P.wallPass !== 'off' ? S.cache['Cw:' + E.curves.key(P) + '|' + E.wallc.key(P)] : null; if (!t) return '';
     const q = t.stats; return ` · <b>Wall pass</b> (C ${q.mode.toUpperCase()}, extrusion ${P.wallExtrude}): ${q.edges} wall edges` + (q.mode === 't3' ? ` · ${q.band} band atoms · ${q.after.islands} islands (${q.before.islands} before the fusion, ${q.after.slivers} slivers, ${q.after.spans} over ${E.wallc.LMAX} tiles)` : ` · ${q.chains} chains · ${q.blocks} blocks`) + ` · ${q.faces} faces · ${q.ms} ms`;
   }
   function curvesText() { // technique C: preset, passes, seeds, contour edges and exempt cells of the last build
-    const t = S && (st.mode === 'compare' ? ALL_TECH : [st.tech]).includes('C') ? S.cache['Cs:' + E.curves.key(P)] : null; if (!t) return '';
+    const t = S && shownTechs().includes('C') ? S.cache['Cs:' + E.curves.key(P)] : null; if (!t) return '';
     return ` · <b>Curves C</b> (${P.curves}): ${t.info.passes} pass${t.info.passes > 1 ? 'es' : ''} · ${t.info.cells} seeds · ${t.info.edges} contour edges · ${t.info.exemptCells} exempt (ramps, walls, rings) · ${t.info.ms} ms`;
   }
   function dressText() { // counts of the wall dressing pieces drawn per technique (switch "Wall dressing")
     const di = S && S.dressInfo; if (!O.dress || !di) return '';
-    return (st.mode === 'compare' ? ALL_TECH : [st.tech]).filter((t) => di[t]).map((t) => { const c = di[t]; return ` · <b>Wall dressing</b> (${t === 'box' ? 'Box' : t}): ${c.walls} walls · strata ${c.strata} · lips ${c.lips} · foot ${c.foot} · rocks ${c.rocks}`; }).join('');
+    return shownTechs().filter((t) => di[t]).map((t) => { const c = di[t]; return ` · <b>Wall dressing</b> (${t === 'box' ? 'Box' : t}): ${c.walls} walls · strata ${c.strata} · lips ${c.lips} · foot ${c.foot} · rocks ${c.rocks}`; }).join('');
   }
   function ascText() { const a = S.ascWalls; return a && !a.rails ? ` · <b>Ascension walls</b>: ${a.info.faces} faces in ${a.info.runs} chains (${a.info.candidates} candidate faces, ${a.info.dropped} dropped: chains of fewer than 3)` : ''; }
   function pocketText() {
@@ -622,7 +651,7 @@
     return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket,
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
-      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset };
+      floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset, macro: !!(E.volume && E.volume.has(raw)), macroView: st.macro, volOn: volActive() };
   }
   function info(surv, techs) {
     document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.preset));
@@ -639,7 +668,7 @@
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText();
+    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText() + macroText();
     E.controls.refresh(document, controlsCtx()); // requirements of every control, from the live state
   }
 
@@ -649,6 +678,7 @@
     setPack('shrine_pier', 'Shrine-Pier (semantic landmarks)', window.EVO_PACKS.shrine_pier);
     setPack('shrine_pier_x4', 'Shrine-Pier x4 (decompressed, derived)', window.EVO_PACKS.shrine_pier_x4);
     setPack('snake_floors', 'Snake Mountain floors (shaft + 2 floors, derived)', window.EVO_PACKS.snake_mountain_floors);
+    setPack('snake_macroform', 'Snake Mountain macroform (volume: shell, serpent, shaft, floors, derived)', window.EVO_PACKS.snake_mountain_macroform);
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     setPack('real_map', 'Real map 256 (height only)', null); // decoded on the first selection (realMapPack)
     build(); E.controls.layout(document); E.controls.badges(document);
