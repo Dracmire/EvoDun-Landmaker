@@ -1,6 +1,8 @@
 # UI pass: one mode per crystallizer
 
-Status: APPROVED (user, 2026-10-15), including the per-mode split of the controls (section 4). Next: PR 1 (section 10). `CLAUDE.md` Pending 9.
+Status: APPROVED (user, 2026-10-15), including the per-mode split of the controls (section 4). PR 1 IMPLEMENTED (the modes layer, PR #31): `src/modes.js` (the table), `docs/modes.md` (generated), `tools/ui/test_modes_ui.js`. Next: PR 2 (section 10) and the PR after it (DAC at Cam 6, section 7b). `CLAUDE.md` Pending 9.
+
+PR 1 notes (what was built, where it differs from or adds to the text below): the mode selector, its purpose line, banner and examples are at the top of the side panel (the scenario block is hidden); a control outside the mode is hidden with the class `mh`; advanced controls (and the terrain controls of modes 2, 3, 4) are folded behind a toggle of their group ("Show advanced controls (n)"); the examples are the old scenarios; `viewer.mode` is in the manifest (`docs/pack-format.md`); the test-only flag `window.EVO_NO_MODES` (set by `tools/ui/common.js`) shows the whole panel as before; the global rule `[hidden]{display:none!important}` was added so that a hidden row (chips, rows) is really hidden; mode 5 hides Incursion in the Stack / Cutaway (it was greyed); a group whose controls are all folded keeps its heading and its fold toggle visible (the "1 Terrain" section of modes 2, 3, 4 shows "Show terrain controls (9)", which opens the nine terrain controls); with the modes layer on, the room chips (and zone chips) are in a box of about 5 rows with its own scroll (class `modes` on `<aside>`), so that the 88 room chips of mode 2 do not push the mode's own controls off the first screen ("Whole map" and the hint stay outside the box; the panel without modes is unchanged); the technique buttons offered are Box / A / B in mode 1, C in mode 4, B in mode 3, Box in mode 6 and all four in modes 2 and 5.
 
 ## 1. Decisions (user)
 

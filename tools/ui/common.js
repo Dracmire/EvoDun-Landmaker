@@ -17,6 +17,8 @@ exports.open = async (opts = {}) => {
   const errs = [];
   page.on('pageerror', (e) => errs.push('pageerror: ' + e.message));
   page.on('console', (m) => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
+  /* the modes layer (src/modes.js) hides the controls that do not belong to a mode; the existing tests set the state by clicking real controls, so by default the page shows the whole panel (window.EVO_NO_MODES, ignored by older trees). open({ modes: true }) turns the layer on. */
+  if (!opts.modes) await page.addInitScript(() => { window.EVO_NO_MODES = true; });
   await page.goto('file://' + path.join(ROOT, 'index.html'));
   await page.waitForFunction(() => window.__evo);
   const api = {

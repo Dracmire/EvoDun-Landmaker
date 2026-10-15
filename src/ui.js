@@ -29,7 +29,8 @@
 
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
-  const st = { floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const NO_MODES = !!window.EVO_NO_MODES; // test-only flag (tools/ui/common.js): the whole panel as before the modes layer
+  const st = { modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', layout: 'auto', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -62,16 +63,17 @@
     { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors', cam: 'isoE' },
     { id: 'snake_macro', label: 'Snake · Macroform', src: 'snake_macroform', cam: 'isoE', tech: 'box', macro: 'exterior' }
   ];
-  async function applyScenario(sc) {
-    if (!(await selectSource(sc.src))) return;
+  async function applyScenario(sc, mode) { // mode (optional, the modes layer): the example of a mode; without it this is the old scenario button, unchanged
+    if (sc.src && !(await selectSource(sc.src))) return;
     const tick = (id, v) => { const el = $('#' + id); if (el) el.checked = v; };
     // the base every scenario starts from (so the same click always gives the same state): the defaults of the parameters the scenarios touch
     setParam('terraces', 5); setParam('spread', 1); setParam('minPlateau', 5); P.spreadCentre = 'largest'; P.cake = false; P.ascWalls = false; O.contract = false; tick('t-cake', false); tick('t-ascWalls', false); tick('t-contract', false);
-    st.tech = 'A'; st.mode = 'compare'; st.preset = 'oblique'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.floors = 'single'; st.layer = 0; st.macro = sc.macro || 'off'; st.macroFloor = 1;
-    P.rooms = !!sc.rooms; tick('t-rooms', P.rooms); P.pocket = !!sc.pocket; tick('t-pocket', P.pocket);
+    st.tech = mode ? mode.tech : 'A'; st.mode = !mode || mode.compareDefault ? 'compare' : 'single'; st.preset = mode ? mode.camera : 'oblique'; st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; st.floors = 'single'; st.layer = 0; st.macro = sc.macro || 'off'; st.macroFloor = 1;
+    P.rooms = !!sc.rooms || !!(mode && mode.fixed.includes('t-rooms')); tick('t-rooms', P.rooms); P.pocket = !!sc.pocket; tick('t-pocket', P.pocket);
     if (sc.preset) applyRoomsPreset(sc.preset);
     sliceSel.rooms.clear(); if (sc.room) { sliceSel.whole = false; sliceSel.rooms.add(sc.room); } else sliceSel.whole = true;
     if (sc.stage) $('#stagePreset').click(); // the Stage preset sets Cam 6, B, single view, terraces 7, spread 1.5
+    if (sc.terraces) setParam('terraces', sc.terraces); // after the Stage preset (an example may keep fewer terraces: the rooms change with them)
     if (sc.contract) { O.contract = true; tick('t-contract', true); }
     if (sc.cam) st.preset = sc.cam;
     if (sc.tech) { st.tech = sc.tech; st.mode = 'single'; }
@@ -87,7 +89,7 @@
     sel.value = Object.keys(ROOMS_PRESETS).find((n) => Object.entries(ROOMS_PRESETS[n]).every(([k, v]) => P[k] === v)) || 'custom';
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
@@ -425,6 +427,7 @@
         if (man.slice.margin !== undefined) { P.margin = man.slice.margin; $('#s-margin').value = P.margin; $('#o-margin').textContent = P.margin; }
       }
       if (man) applyViewerBlock(man.viewer); // a manifest without the block means the defaults
+      if (man && man.viewer && man.viewer.mode) setModeSoft(man.viewer.mode); // the saved mode (optional): the images stay, the mode's view rules apply
       $('#flipy').checked = useFlip;
       $('#maxnode').value = man && man.maxnode ? man.maxnode : '';
       $('#roles').hidden = false; $('#rolesBtns').hidden = false;
@@ -458,7 +461,7 @@
       setPack('image', 'Images: ' + pack.name, pack);
       message([typeof note === 'string' ? note : '', ...pack.warnings].filter(Boolean).join(' '));
       $('#rolesInfo').innerHTML = describe(pack); $('#rolesInfo').hidden = false;
-      $('#src').value = 'image'; st.pack = 'image'; onPackChanged(); invalidate(true);
+      $('#src').value = 'image'; st.pack = 'image'; if (!NO_MODES && st.modeId && E.modes.byId(st.modeId).examples.some((x) => x.images)) st.exampleId = 'images'; enforceMode(); onPackChanged(); invalidate(true);
     } catch (e) { message(e.message); $('#rolesInfo').hidden = true; }
   }
 
@@ -670,6 +673,57 @@
     $('#sliceInfo').textContent = sinfo;
     $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText() + macroText();
     E.controls.refresh(document, controlsCtx()); // requirements of every control, from the live state
+    modeRefresh(); // the modes layer: what the current mode shows (after the requirements, so the greyed tooltips are already set)
+  }
+
+  /* ---- the MODES layer (src/modes.js, docs/ui-modes.md): one mode per crystallizer. It only shows / hides existing controls and sets existing parameters (the examples are the old scenarios). ---- */
+  const curMode = () => (NO_MODES || !st.modeId ? null : E.modes.byId(st.modeId));
+  function buildModeUi() {
+    const sel = $('#modeSel'), M = E.modes.MODES, opt = (m) => { const o = document.createElement('option'); o.value = m.id; o.textContent = `${m.number} ${m.name}`; return o; };
+    for (const m of M.filter((x) => x.group === 'main')) sel.appendChild(opt(m));
+    const og = document.createElement('optgroup'); og.label = 'Archived'; for (const m of M.filter((x) => x.group === 'archived')) og.appendChild(opt(m)); sel.appendChild(og);
+    sel.addEventListener('change', () => enterMode(sel.value));
+    $('#modeBox').hidden = false;
+    document.querySelector('aside').classList.add('modes'); // only with the modes layer: the long chips lists get a bounded box (the panel with EVO_NO_MODES stays as it was)
+    st.modeId = 'terrain'; st.exampleId = 'snake_surface'; sel.value = 'terrain'; buildExamples(); // the state at load is the default one (mode 1, Snake Mountain surface, Compare, Cam 3): nothing is re-applied
+    $('#macroView').dataset.offLabel = $('#macroView option[value="off"]').textContent;
+  }
+  function buildExamples() {
+    const m = curMode(), box = $('#examples'); box.innerHTML = ''; if (!m) return;
+    for (const ex of m.examples) { const b = document.createElement('button'); b.textContent = ex.label; b.dataset.id = ex.id; b.addEventListener('click', () => applyExample(ex)); box.appendChild(b); }
+    $('#modePurpose').textContent = m.purpose; const bn = $('#modeBanner'); bn.hidden = !m.banner; bn.textContent = m.banner || '';
+  }
+  /* the rules of the mode that the state must obey whatever loaded it (an example, a manifest, an images load) */
+  function enforceMode() {
+    const m = curMode(); if (!m) return;
+    if (m.fixed.includes('t-rooms') && !P.rooms) { P.rooms = true; const t = $('#t-rooms'); if (t) t.checked = true; }
+    if (!m.compare && st.mode !== 'single') st.mode = 'single';
+    if (!m.techs.includes(st.tech)) st.tech = m.tech;
+    if (!m.cameras.includes(st.preset)) st.preset = m.camera;
+  }
+  async function applyExample(ex, m) {
+    m = m || curMode(); if (!m) return;
+    st.exampleId = ex.id;
+    if (ex.images && !imgs.length) { enforceMode(); invalidate(false); return; } // "Your images" before any file: the loader appears; the state stays as it is
+    if (ex.images) { await applyScenario({ src: 'image', rooms: ex.rooms, tech: ex.tech }, m); enforceMode(); return; }
+    await applyScenario(ex, m); enforceMode();
+  }
+  async function enterMode(id) {
+    const m = E.modes.byId(id); if (!m || NO_MODES) return;
+    st.modeId = id; $('#modeSel').value = id; E.modes.resetFolds(document); buildExamples();
+    await applyExample(m.examples[0], m);
+  }
+  function setModeSoft(id) { // a manifest names its mode: the view rules apply, the loaded images and the camera of the manifest stay
+    const m = E.modes.byId(id); if (!m || NO_MODES) return;
+    st.modeId = id; $('#modeSel').value = id; E.modes.resetFolds(document); buildExamples(); st.exampleId = m.examples.some((x) => x.images) ? 'images' : m.examples[0].id; enforceMode();
+  }
+  function modeRefresh() {
+    const m = curMode(); if (!m) return;
+    E.modes.refresh(document, { modeId: m.id, exampleId: st.exampleId, floorsView: st.floors }, modeRefresh);
+    document.querySelectorAll('#examples button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.exampleId));
+    const off = $('#macroView option[value="off"]'); if (off) off.textContent = m.id === 'macroform' ? 'Heightmap (for comparison)' : $('#macroView').dataset.offLabel;
+    const raw = packs[st.pack] && packs[st.pack].pack, bb = $('#bakedBox'), pr = raw && raw.macro && raw.macro.params;
+    bb.hidden = !(m.id === 'macroform' && pr); if (!bb.hidden) $('#bakedParams').textContent = Object.entries(pr).map(([k, v]) => `${k} ${v}`).join(' · ') + (pr.provisional ? '\n(all provisional)' : '');
   }
 
   function init() {
@@ -682,8 +736,9 @@
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     setPack('real_map', 'Real map 256 (height only)', null); // decoded on the first selection (realMapPack)
     build(); E.controls.layout(document); E.controls.badges(document);
+    if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
-    window.__evo = { controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});
