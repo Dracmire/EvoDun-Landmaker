@@ -684,6 +684,7 @@
     const og = document.createElement('optgroup'); og.label = 'Archived'; for (const m of M.filter((x) => x.group === 'archived')) og.appendChild(opt(m)); sel.appendChild(og);
     sel.addEventListener('change', () => enterMode(sel.value));
     $('#modeBox').hidden = false;
+    document.querySelector('aside').classList.add('modes'); // only with the modes layer: the long chips lists get a bounded box (the panel with EVO_NO_MODES stays as it was)
     st.modeId = 'terrain'; st.exampleId = 'snake_surface'; sel.value = 'terrain'; buildExamples(); // the state at load is the default one (mode 1, Snake Mountain surface, Compare, Cam 3): nothing is re-applied
     $('#macroView').dataset.offLabel = $('#macroView option[value="off"]').textContent;
   }

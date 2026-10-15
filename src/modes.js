@@ -158,7 +158,7 @@
         t.textContent = (open ? 'Hide ' : 'Show ') + (terrainFold ? 'terrain controls' : 'advanced controls') + ` (${items.size})`; hide(t, false);
       } else if (t) hide(t, true);
       const kids = [...sec.children].filter((c) => !/^(H3|SUMMARY)$/.test(c.tagName) && !c.classList.contains('advtoggle'));
-      hide(sec, kids.length > 0 && kids.every((c) => c.classList.contains(MH)));
+      hide(sec, kids.length > 0 && kids.every((c) => c.classList.contains(MH)) && !(items && items.size)); // a section that has a fold toggle stays visible: its toggle is the way to reach the folded controls
     }
   }
 

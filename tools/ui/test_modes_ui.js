@@ -21,6 +21,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
   const sigModes = await sig(), b2 = await open({ w: 1500, h: 900 }); await b2.idle(); const sigPlain = await sigOf(b2.page);
   const sizes = [await ev(() => [...document.querySelectorAll('#stage canvas')].map((c) => c.clientWidth + 'x' + c.clientHeight).join()), await b2.page.evaluate(() => [...document.querySelectorAll('#stage canvas')].map((c) => c.clientWidth + 'x' + c.clientHeight).join())];
   ok('the default state is pixel-identical to the panel without modes (canvases and info line), and the canvases have the same size', sigModes === sigPlain && sizes[0] === sizes[1], sizes.join(' vs '));
+  ok('without modes the aside has no "modes" class (the chips boxes are not bounded: the old panel)', !(await b2.page.evaluate(() => document.querySelector('aside').classList.contains('modes'))) && (await b2.page.evaluate(() => getComputedStyle(document.querySelector('#roomChips')).maxHeight)) === 'none');
   await b2.browser.close();
 
   // ---- the selector: Archived holds mode 5, the rest are in the main list
@@ -34,12 +35,15 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     for (const en of C.TABLE) {
       if (['cams', 'tech', 'mode', 'reset'].includes(en.id)) continue;
       const els = [...document.querySelectorAll(en.dom)]; if (!els.length) { res.skipped.push(en.id); continue; }
-      const shown = els.some((el) => !el.closest('.mh')), want = !!plan[en.id];
-      res.seen++; if (shown !== want) res.bad.push(`${en.id}: shown ${shown}, plan ${plan[en.id] || 'hidden'}`);
+      // REAL visibility (the element is laid out: no hidden ancestor either); a control the plan shows but that the app itself keeps hidden (roles before a load, chips without zones...) is accepted only when it sits in a [hidden] container
+      const shown = els.some((el) => el.getClientRects().length > 0), want = !!plan[en.id], appHidden = els.every((el) => !!el.closest('[hidden]'));
+      res.seen++; if (shown !== want && !(want && appHidden)) res.bad.push(`${en.id}: shown ${shown}, plan ${plan[en.id] || 'hidden'}`);
     }
     return res;
   });
-  const expandAll = async () => { for (let i = 0; i < 12; i++) { const n = await ev(() => { const bs = [...document.querySelectorAll('.advtoggle:not(.mh)')].filter((b) => /^Show /.test(b.textContent)); bs.forEach((b) => b.click()); return bs.length; }); if (!n) break; } };
+  // a REAL click (Playwright waits for the toggle to be visible and fails when it is not) on every visible "Show ..." toggle
+  const visibleToggles = () => page.evaluateHandle(() => [...document.querySelectorAll('.advtoggle')].filter((b) => b.getClientRects().length > 0 && /^Show /.test(b.textContent)));
+  const expandAll = async () => { for (let i = 0; i < 12; i++) { const h = await visibleToggles(), props = await h.getProperties(), els = [...props.values()].map((x) => x.asElement()).filter(Boolean); if (!els.length) break; for (const el of els) await el.click({ timeout: 5000 }); } };
   const collapseAll = () => ev(() => window.EVO.modes.resetFolds(document) || window.__evo.draw());
 
   const results = {};
@@ -54,11 +58,36 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     // visible = the tables: first folded, then with every fold opened
     await collapseAll(); await a.idle();
     const adv0 = await ev(() => { const E = window.EVO, e = window.__evo, m = E.modes.byId(e.st.modeId), plan = E.modes.plan(m, { exampleId: e.st.exampleId, floorsView: e.st.floors }), C = E.controls, hid = [];
-      for (const en of C.TABLE) if (plan[en.id] === 'adv' || plan[en.id] === 'fold') { const els = [...document.querySelectorAll(en.dom)]; if (els.length && els.every((el) => !el.closest('.mh'))) hid.push(en.id); } return hid; });
+      for (const en of C.TABLE) if (plan[en.id] === 'adv' || plan[en.id] === 'fold') { const els = [...document.querySelectorAll(en.dom)]; if (els.length && els.some((el) => el.getClientRects().length > 0)) hid.push(en.id); } return hid; });
     ok(`${tag}: the advanced controls${m.terrain === 'folded' ? ' and the terrain controls' : ''} are folded at entry`, adv0.length === 0, adv0.join(','));
     const hasFold = m.advanced.length > 0 || m.terrain === 'folded';
-    const toggles = await ev(() => [...document.querySelectorAll('.advtoggle:not(.mh)')].map((b) => b.textContent));
+    const toggles = await ev(() => [...document.querySelectorAll('.advtoggle')].filter((b) => b.getClientRects().length > 0).map((b) => b.textContent)); // really visible, not just without the mh class
     ok(`${tag}: ${hasFold ? 'a toggle per folded group is offered' : 'no fold toggle (nothing is folded)'}`, hasFold ? toggles.length >= 1 : toggles.length === 0, toggles.join(' | '));
+    if (m.id === 'rooms') { // at entry (folds closed): the 88 room chips must not push the mode's own controls out of the first screen
+      const lay = await ev(() => { const asd = document.querySelector('aside'); asd.scrollTop = 0; const r = (q) => document.querySelector(q), c = r('#roomChips'), cs = getComputedStyle(c); return { cake: r('#t-cake').getBoundingClientRect().top, preset: r('#roomsPreset').getBoundingClientRect().top, chipsH: c.clientHeight, chipsScroll: c.scrollHeight, overflowY: cs.overflowY, whole: !c.contains(r('#wholeRooms')), hint: !c.contains(r('#roomHint')), modesClass: asd.classList.contains('modes') }; });
+      ok(`mode 2: at 1500x900 the Cake toggle is on the first screen without scrolling the panel (top ${Math.round(lay.cake)} < 900), and the Rooms preset too (${Math.round(lay.preset)})`, lay.cake < 900 && lay.preset < 900, JSON.stringify(lay));
+      ok('mode 2: the room chips are in a bounded scroll box (about 5 rows) with "Whole map" and the hint outside it', lay.overflowY === 'auto' && lay.chipsH <= 150 && lay.chipsScroll > lay.chipsH && lay.whole && lay.hint && lay.modesClass, JSON.stringify(lay));
+    }
+
+    if (m.terrain === 'folded') { // the terrain controls of modes 2-4 are reachable: the toggle is visible, a real click opens them, one of them works, a second click folds them again
+      const TT = '.grp[data-group="1 Terrain"] > .advtoggle', tv = () => ev((q) => { const b = document.querySelector(q); return !!b && b.getClientRects().length > 0; }, TT), sv = () => ev(() => { const b = document.querySelector('#s-terraces'); return !!b && b.getClientRects().length > 0; });
+      await ev(() => { document.querySelector('aside').scrollTop = 0; });
+      const vis0 = await tv(), t0txt = vis0 ? await page.textContent(TT) : '';
+      ok(`${tag}: the "Show terrain controls" toggle is visible (the "1 Terrain" section stays on screen)`, vis0 && /^Show terrain controls \(9\)$/.test(t0txt), t0txt || 'not visible');
+      if (vis0) {
+        ok(`${tag}: with the terrain folded, Terraces is not visible`, !(await sv()));
+        await page.click(TT); await page.waitForTimeout(150);
+        const en = await sv(), enabled = en ? await page.isEnabled('#s-terraces') : false;
+        ok(`${tag}: a real click on the toggle shows the 9 terrain controls (Terraces visible and enabled)`, en && enabled && (await ev(() => ['terraces', 'subs', 'terH', 'spread', 'stairW', 'stairStyle', 'rampDepth', 'smooth', 'radius'].filter((id) => !(document.querySelector('#s-' + id).getClientRects().length > 0)).length)) === 0, `visible ${en}, enabled ${enabled}`);
+        const b0 = await sig(), old = await ev(() => +document.querySelector('#s-terraces').value);
+        await ev((v) => { const el = document.querySelector('#s-terraces'); el.value = String(v); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, old === 4 ? 3 : 4); await a.idle(); await page.waitForTimeout(250);
+        const b1 = await sig();
+        ok(`${tag}: changing Terraces (${old} -> ${old === 4 ? 3 : 4}) from the opened terrain controls changes the canvas or the info line`, b1 !== b0);
+        await ev((v) => { const el = document.querySelector('#s-terraces'); el.value = String(v); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, old); await a.idle();
+        await page.click(TT); await page.waitForTimeout(150);
+        ok(`${tag}: a second click folds the terrain controls again (toggle still visible)`, !(await sv()) && (await tv()) && /^Show terrain controls/.test(await page.textContent(TT)));
+      }
+    }
     await expandAll();
     const vis = await domVisible();
     ok(`${tag}: with the folds open, the visible controls are exactly main + advanced + common (${vis.seen} entries checked)`, vis.bad.length === 0, vis.bad.join('; '));
