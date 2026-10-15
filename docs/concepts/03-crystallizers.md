@@ -37,8 +37,8 @@ Floors and Macroform are the ones confirmed. PROPOSAL, to confirm for the rest: 
 | 2 | Room types | Cake, Ascension, Diorama pocket | Real map with rooms |
 | 3 | Stage (HD-2D) | Body and wrapper, props, footprint shade; design draft, needs a major design pass (user, 2026-10-14) | Shrine-Pier x4 (semantic landmark) |
 | 4 | Tiles to Curves | Technique C and its wall pass (Unexplored 2 look) | Snake surface, real map |
-| 5 | Floors (closed 2026-10-14) | Exterior shell, interior floors, links, exploded stack and cutaway | Snake Mountain (semantic macroform) |
-| 6 | Macroform (phase 1 closed 2026-10-14) | The macroform as a volume: shell, interior, traversable serpent spiral through three floors, crater shaft; exterior, quadrant removed, interior only, horizontal cuts | Snake Mountain (semantic macroform) |
+| 5 | Floors (closed 2026-10-14, archived in the UI 2026-10-15) | Exterior shell, interior floors, links, exploded stack and cutaway | Snake Mountain (semantic macroform) |
+| 6 | Macroform (INCOMPLETE, 2026-10-15: one baked voxel example, not yet a crystallizer) | The macroform as a volume: shell, interior, traversable serpent spiral through three floors, crater shaft; exterior, quadrant removed, interior only, horizontal cuts | Snake Mountain (semantic macroform) |
 
 Details of each live in `docs/crystallizers/NN-.../README.md`.
 
@@ -47,6 +47,8 @@ Details of each live in `docs/crystallizers/NN-.../README.md`.
 The viewer is a mix of the features of every crystallizer in ONE panel. They cannot be used together; the only things that combine are support elements (some markers, the wall details). The user cannot use the methods of the different crystallizers from the page: Floors cannot be touched through the UI (one would have to work out how to activate its features and then tune them). "If you asked me to make an example of each crystallizer, I could not." The page is usable as it is, but the project needs order and an appropriate UI, and that comes BEFORE the Stage (3). Measured on the page (2026-10-14): 84 controls in one panel about 3,400 px tall (almost four screens at 900 px); the controls of Floors and Macroform only appear after choosing their source; the 21 controls of Room types are greyed until Rooms is on with a map big enough to have rooms; the shapes of Floors and Macroform are computed offline by Python scripts, so no control of the page changes them.
 
 The task deferred above (GROUP which tools combine with which crystallizer) becomes part of that UI pass.
+
+Rule (user, 2026-10-15): where a crystallizer is not a good match for an example, it is simply not offered there; the compatibility table of `docs/ui-modes.md` (section 6) decides. The room types (DAC) should apply to every crystallizer; measured, they draw with every technique, but the small examples have almost no rooms, so that is a later data question (`docs/ui-modes.md` section 7).
 
 ## Why techniques are compared, and what is deferred (user, 2026-10-13)
 

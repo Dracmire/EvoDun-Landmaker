@@ -1,6 +1,7 @@
 # Crystallizer 6 - Macroform (volume of the Snake Mountain)
 
 ## 1. Status
+INCOMPLETE (user, 2026-10-15), like the Stage (3): it shows the volume, but it is not yet a crystallizer. It can only show ONE example baked by `tools/derive_snake_macroform.py`; the page cannot produce a volume from the macroform's maps, nor tune it. What is built is a VOXEL crystallizer (columns of solid intervals at 0.25 tile, drawn as blocks); an SDF appears only inside the offline derivation (the shell is carved by the 3D distance to the outside air), and the "SDF exterior mesh" crystallizer was never built (`docs/ui-modes.md` section 8).
 PHASE 1 CLOSED (user, 2026-10-14). PR A (#29: derivation + data + tests, no `src/` change: `tools/derive_snake_macroform.py`, `data/snake_mountain_macroform.json`, `tools/test_macroform.js` + `.py`) and PR B (#30: the viewer, `src/volume.js`, the Macroform view, `tools/ui/test_volume_ui.js`, section 11) are merged. The review added an independent voxel ray cast to the test (0 mismatches over 36 combinations; it catches missing faces, which the z-buffer over the same faces cannot) and greys the Incursion controls in the volume view (a click there cannot be resolved against the heightmap shape).
 PHASE 2: not designed, not started. The user (2026-10-14): it "looks good" but lacks serious things, such as the OTHER PASSES OF THE NUMERIC WORLD on the macroform. Candidates named so far (none decided): those numeric-world passes, the head as a semantic landmark, the waterfall from the mouth and the pond, more than one gate between exterior and interior (the original design had several), and changing the shape from the page (today it is baked by the Python script, so the user cannot reproduce or tune it).
 Nothing is exported to Unity. Floors (crystallizer 5) code and data are untouched; techniques A, B and C are not extended to the volume.
@@ -15,6 +16,7 @@ Floors stacks independent heightmaps, so it cannot hold a shell, a ceiling or an
 - Dungeon content per floor, waterfall from the mouth, pond at the foot: OUT OF SCOPE.
 - Default camera for this crystallizer: Cam 1 (Iso 45).
 - (2026-10-14) Phase 1 closed as it stands; the rest is phase 2 (section 1).
+- (2026-10-15) Marked INCOMPLETE, like the Stage: it is not yet a crystallizer while it can only show one baked example (section 1).
 
 ## 4. Parameters (ALL PROVISIONAL: my choices, the user has not set them)
 | name | value | meaning |

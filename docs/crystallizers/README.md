@@ -11,9 +11,11 @@ the short rules; the long history and the reasons live here.
 | 3 | Stage: framing and dressing as an art-piece contract, Sea of Stars reference | Design draft; an MVP is in the viewer (Art contract, Stage preset, Cam 6). Needs a MAJOR design pass before any more work (user, 2026-10-14: a true HD-2D cannot be made here, and dressing another system as HD-2D is the incongruence behind the earlier failure) | [03-stage](03-stage/README.md) |
 | 4 | Tiles to Curves (Unexplored 2): technique C (planar Voronoi) + wall dressing | Closed (PR #17, #18) | [04-tiles-to-curves](04-tiles-to-curves/README.md) |
 | 5 | Floors: a multi-floor macroform (Snake Mountain, crater shaft, 2 interior floors) shown as single floor / exploded stack / cutaway | Closed as it stands (user, 2026-10-14; PR #19-#28). Its shapes are baked by a script: the page can only view them | [05-floors](05-floors/README.md) |
-| 6 | Macroform: Snake Mountain as a VOLUME (columns with several solid intervals): shell, interior, traversable serpent spiral through 3 floors, crater shaft | Phase 1 closed (user, 2026-10-14; PR #29, #30). Phase 2 not designed (the other numeric-world passes, among others) | [06-macroform](06-macroform/README.md) |
+| 6 | Macroform: Snake Mountain as a VOLUME (columns with several solid intervals): shell, interior, traversable serpent spiral through 3 floors, crater shaft | INCOMPLETE (user, 2026-10-15), like the Stage: it shows the volume, but only one example baked by a Python script, which cannot be produced or tuned from the page, so it is not yet a crystallizer. Phase 1 done (PR #29, #30); phase 2 not designed (the other numeric-world passes, among others) | [06-macroform](06-macroform/README.md) |
 
-**Next (user, 2026-10-14):** a UI pass BEFORE any crystallizer work. The panel mixes the controls of every crystallizer; they cannot be used together, and the user cannot build an example of each crystallizer from the page. Then the Stage (3) design pass. See `CLAUDE.md`, Pending 9 and 10.
+**Incomplete:** 3 (Stage) and 6 (Macroform). **Archived:** 5 (Floors), reachable in the viewer but out of the main list (2026-10-15).
+
+**Next (user, 2026-10-14):** a UI pass BEFORE any crystallizer work (design draft: `docs/ui-modes.md`). The panel mixes the controls of every crystallizer; they cannot be used together, and the user cannot build an example of each crystallizer from the page. Then the Stage (3) design pass. See `CLAUDE.md`, Pending 9 and 10.
 
 ## Core examples
 

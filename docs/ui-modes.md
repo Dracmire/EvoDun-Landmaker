@@ -9,6 +9,10 @@ Status: DESIGN DRAFT (2026-10-15). The direction is approved by the user; the de
 - U3 (2026-10-15) The Macroform (6) is view-only in this pass. The user's objection is recorded in section 8: as long as it can only show one baked volume, it is not yet a full crystallizer.
 - U4 (2026-10-15) Compare only in the modes that have alternative techniques (1 and 4).
 - U5 (2026-10-15) The room types (Diorama, Ascension, Cake: DAC) should apply to every crystallizer; it is the check the user is most interested in (section 7).
+- U6 (2026-10-15) Floors (5) goes under "Archived": reachable, out of the main list.
+- U7 (2026-10-15) Mode 2 (DAC) opens at Cam 1, and Cam 6 must also work in it: the crystallizers were first thought of as isometric + HD-2D (section 7b).
+- U8 (2026-10-15) DAC for every example comes LATER (after this pass). Where a crystallizer is not a good match for an example it is simply not offered there: the compatibility table (section 6) decides.
+- U9 (2026-10-15) The Macroform (6) is marked INCOMPLETE, like the Stage (3): it shows the volume but it is not yet a crystallizer (section 8).
 - Earlier (2026-10-14): Floors (5) is closed; the Macroform's phase 1 is closed; the Stage (3) waits for its own design pass.
 
 ## 2. The problem (measured on the page, 2026-10-14)
@@ -44,11 +48,11 @@ Rules: a control that does not belong to the current mode is HIDDEN (not greyed)
 | # | Mode | Examples (default first) | Camera (offered) | Technique / Compare |
 |---|---|---|---|---|
 | 1 | Terrain | Snake Mountain surface, Real map 256, Shrine-Pier, Shrine-Pier x4, Snake Mountain (caves subtracted), Value noise, Your images (PNG + roles) | Cam 3 (1-7) | Box / A / B; Compare |
-| 2 | Room types (DAC) | Real map · Balanced types, Real map · Default, Pocket · Diorama 31, Your images | Cam 1 (1-7); PROPOSAL: the Pocket is composed for Cam 1 | one of Box / A / B / C (DAC draws in all four, section 7); no Compare |
+| 2 | Room types (DAC) | Real map · Balanced types, Real map · Default, Pocket · Diorama 31, Your images (only examples with rooms, U8) | Cam 1 (1-7); Cam 6 must also work (U7, section 7b) | one of Box / A / B / C (DAC draws in all four, section 7); no Compare |
 | 3 | Stage | Shrine-Pier x4 · Stage, Diorama 31 · Stage | Cam 6 (6, 7, 1-5) | B (the Stage preset); no Compare. Banner: IN REDESIGN, frozen as it is |
 | 4 | Curves (C) | Snake Mountain surface, Real map · Default, Real map · Balanced types, Shrine-Pier x4 | Cam 3 (1-7) | C; Compare |
-| 5 | Floors | Snake Mountain floors | Cam 1 (1-5, 7) | the Floors view; no Compare. Banner: CLOSED, shapes baked by a script. PROPOSAL: listed under "Archived", not in the main list |
-| 6 | Macroform | Snake Mountain macroform | Cam 1 (1-5) | the volume (one panel); no Compare. Banner: phase 1, baked by a script |
+| 5 | Floors | Snake Mountain floors | Cam 1 (1-5, 7) | the Floors view; no Compare. Banner: CLOSED, shapes baked by a script. Under "Archived", not in the main list (U6) |
+| 6 | Macroform | Snake Mountain macroform | Cam 1 (1-5) | the volume (one panel); no Compare. Banner: INCOMPLETE (U9): one baked example, not yet a crystallizer |
 
 Compare: today's 2 x 2 grid (Box | A | B | C) in modes 1 and 4; no new layout work. (Alternative, not proposed: three panels Box | A | B in mode 1, which brings back the retired Rows / Columns layouts.)
 
@@ -76,7 +80,7 @@ Controls per mode (ids of `src/controls.js`):
 |---|---|---|---|---|---|---|---|---|
 | 1 Terrain (terraces, ramps) | yes | yes | yes | yes | yes | yes (limitation 15) | yes | every heightmap |
 | 2 Cake rings, Ascension walls | yes | yes | yes | yes (measured 2026-10-15) | yes | yes (measured) | by design | only maps with rooms: today the real map (section 7) |
-| 2 Pocket | yes | yes | yes | by design (not measured) | Cam 1 (composed for it) | misaligned (limitation 15 (4)) | misaligned | real map Dioramas |
+| 2 Pocket | yes | yes | yes | by design (not measured) | Cam 1 (composed for it) | misaligned: the backdrop sits to one side (seen 2026-10-15; limitation 15 (4)) | misaligned (same) | real map Dioramas |
 | 3 Art contract | yes | yes | yes | yes | yes | yes | by design | every heightmap; landmarks and trees only in Shrine-Pier x4 |
 | 4 Wall pass | no | no | no | yes | yes | yes | yes | every heightmap |
 | Wall dressing (shared) | yes | yes | yes | yes | yes | by design | by design | every heightmap |
@@ -105,12 +109,20 @@ Readings: on a 40x40 map the rooms are too few, and with rooms on the ramps come
 - R2 Room scale relative to the map. Measured above: radius 3 gives 3 rooms and no ramps on the Snake surface; not enough by itself.
 - R3 Bigger examples (decompressed like Shrine-Pier x4).
 - R4 Reopen the rooms layer (frozen since PR #6 by the user's decision, Pending 4).
+Decision (U8): this comes after the UI pass. Until then DAC is offered only on examples that have rooms.
+
+### 7b. DAC at Cam 6 (U7; seen 2026-10-15, Pocket · Diorama 31 and the real map Balanced types, technique A)
+
+- Works: Cake rings and Ascension walls on the whole map, at Cam 6 as at Cam 1 (no page error; section 7 figures).
+- Does not work: the POCKET. It is composed along the Cam 1 axis (backdrop behind, pond in front, as seen from Cam 1), so at Cam 6 (and Cam 7) the backdrop sits to one side of the fragment instead of behind it. Limitation 15 (4).
+- Also open under Cam 6 (limitation 15): Box tile order is the orthographic one, not an exact painter order under perspective (pick 91-98 %); marks and line widths do not shrink with distance.
+- Proposed fix (to design with the user, a PR of its own after PR 1): compose the Pocket along the ACTIVE camera's axis (its yaw: 0 for Cam 6 unless the pack declares `stageYaw`), rebuilt when the camera changes (preset click, not drag). Measure Box order under Cam 6 on the Pocket and the rings before deciding whether it needs work.
 
 ## 8. Macroform and Floors: what they are (the user's objection, 2026-10-15)
 
 - The Macroform's DATA is a voxel grid stored as runs: each column holds solid intervals (z0, z1, material) at a step of 0.25 tile. An SDF appears only inside the offline derivation: the shell is carved where the 3D distance to the outside air is greater than T_SHELL; that field is then cut into voxels. The viewer draws voxel blocks. So: SDF in the derivation, voxels in the data and the drawing. The "SDF exterior mesh" crystallizer (a smooth surface from the field) was deferred and is still not built.
 - Floors is stacked heightmaps; its floor footprints come from a rule (exterior >= z + 1 plus a shell of 1.5), not from a field. It never had a volume (its README, Goal).
-- The user's objection: as long as the volume can only be shown as one baked example, and cannot be produced or tuned from the page, the Macroform is not yet a full crystallizer. Conditions for its phase 2 (not designed): (a) the derivation in the page from the macroform's input maps and parameters (the Python uses a 3D distance transform, smoothing and the ramp; 40 x 40 x ~80 voxels is small); (b) optionally a smooth 2.5D look by drawing each horizontal band of the volume with technique B (B is already a signed-distance contour technique in 2D), which would be an "SDF look" without 3D rendering.
+- The user's objection: as long as the volume can only be shown as one baked example, and cannot be produced or tuned from the page, the Macroform is not yet a full crystallizer. Decision (U9): it is marked INCOMPLETE, like the Stage. Conditions for its phase 2 (not designed): (a) the derivation in the page from the macroform's input maps and parameters (the Python uses a 3D distance transform, smoothing and the ramp; 40 x 40 x ~80 voxels is small); (b) optionally a smooth 2.5D look by drawing each horizontal band of the volume with technique B (B is already a signed-distance contour technique in 2D), which would be an "SDF look" without 3D rendering.
 
 ## 9. The second step: Extras
 
@@ -123,8 +135,9 @@ Not a new mode: a block "Extras" inside a mode that lists stages of OTHER crysta
 - PR 2 (optional): one "Whole map" button for zones and rooms; remove the retired `#layout`; a fixed height for the info line (limitation 18; it changes the canvas size, so its regress differences are announced).
 - ACCEPTANCE (the user's criterion): from GitHub Pages, without reading code, the user chooses each mode, its example loads, each main control changes what is drawn, and nothing is greyed without a "Requires: ..." that says what to do.
 
+- PR after PR 1: DAC at Cam 6 (section 7b), with its own short design.
+
 ## 11. Open questions for the user
 
-1. Floors (5): under "Archived" (reachable, out of the main list) or in the main list with its "closed" banner?
-2. Mode 2: default camera Cam 1 (the Pocket is composed for it)?
-3. DAC for every example (section 7): which route (R1-R4), and does it come right after this UI pass or after the Stage?
+Answered on 2026-10-15: Floors under "Archived" (U6); mode 2 at Cam 1 with Cam 6 working too (U7); DAC for every example after this pass, the table decides where each crystallizer is offered (U8).
+1. Review of the per-mode split of the controls (section 4) before the prompt for Claude Code is written.
