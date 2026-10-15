@@ -19,6 +19,8 @@ exports.open = async (opts = {}) => {
   page.on('console', (m) => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
   /* the modes layer (src/modes.js) hides the controls that do not belong to a mode; the existing tests set the state by clicking real controls, so by default the page shows the whole panel (window.EVO_NO_MODES, ignored by older trees). open({ modes: true }) turns the layer on. */
   if (!opts.modes) await page.addInitScript(() => { window.EVO_NO_MODES = true; });
+  /* EVO_INFO_H (px): force the height rule of #info that the viewer now has natively (src/app.html: box-sizing border-box, height, overflow-y auto), so an OLDER tree (EVO_ROOT) can be compared pixel for pixel with this one: tools/verify.sh regress sets it for both runs. Appended to <html> before any page script, so the page's own CSS (which does not set these properties in an older tree) cascades after it. */
+  if (process.env.EVO_INFO_H) await page.addInitScript((h) => { const st = document.createElement('style'); st.textContent = `#info{box-sizing:border-box;height:${h}px;overflow-y:auto}`; document.documentElement.appendChild(st); }, process.env.EVO_INFO_H);
   await page.goto('file://' + path.join(ROOT, 'index.html'));
   await page.waitForFunction(() => window.__evo);
   const api = {

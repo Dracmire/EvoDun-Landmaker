@@ -2,7 +2,7 @@
 # Standard verification of the viewer. Parts (default: node ui regress zbuf):
 #   node     every tools/test_*.js
 #   ui       every tools/ui/test_*.js except the two z-buffer tests (they run in zbuf)
-#   regress  pixel regression against origin/main in a temporary worktree (EVO_ROOT): stairW 0 and 3 (rooms off), rooms on, one pass
+#   regress  pixel regression against origin/main in a temporary worktree (EVO_ROOT, with EVO_INFO_H forcing the fixed #info height in both runs; see part_regress): stairW 0 and 3 (rooms off), rooms on, one pass
 #            per new switch (cake, pocket, ascWalls, contract, dress) checked and unchecked again, and the camera bank Cam 1-5 (regress_cams.js); expectation: 0 images differ
 #   zbuf     painter order against a per-pixel z-buffer: tools/ui/test_ramp_ui.js and tools/ui/test_asc_ui.js
 #   shots    screenshots of the fixed set = the three core examples (real map rooms Default / Balanced types; Shrine-Pier; Snake Mountain surface; Box, A, B; Iso, Oblique) + --extra views
@@ -72,6 +72,9 @@ cmp_pass() { # label dirA dirB -> appends to the log, updates UNEXP / EXPD / TOT
 }
 part_regress() {
   local log="$D/regress.log" w r; : > "$log"; UNEXP=0; EXPD=0; TOTAL=0; RC=0
+  # The info line has a native FIXED height (limitation 18) that origin/main may not have yet: EVO_INFO_H forces the same rule (tools/ui/common.js) in BOTH runs, so the comparison stays pixel for pixel.
+  # Check (b) below proves that the forced rule equals the native one: the NEW tree without EVO_INFO_H against the OLD tree with it.
+  export EVO_INFO_H="${EVO_INFO_H:-80.2}"
   git fetch -q origin main >> "$log" 2>&1 || echo "WARNING: git fetch failed, comparing with the local origin/main" >> "$log"
   WT="$(mktemp -d)/main"; git worktree add -f --detach "$WT" origin/main >> "$log" 2>&1 || { S=FAIL; FIG="could not create the worktree of origin/main"; return; }
   r="$D/regress-img"; rm -rf "$r"; mkdir -p "$r"
@@ -100,6 +103,13 @@ part_regress() {
     cmp_pass "floors package, backdrop ON, Cam 1 -> Cam 3 -> Cam 1 round trip equals the first Cam 1 image" "$r/rt_bdon/first" "$r/rt_bdon/after"
     EVO_ROOT="$WT" node tools/ui/regress_cams.js "$r/old_cams" 2>&1 | tail -1; node tools/ui/regress_cams.js "$r/new_cams" 2>&1 | tail -1
     cmp_pass "camera bank Cam 1-5 (isoE isoW oblique low top), Box A B, three scenes" "$r/old_cams" "$r/new_cams"
+    # (b) forced rule == native rule: the new tree WITHOUT EVO_INFO_H against the old tree WITH it (stairW 3 oblique/iso Box A B C, rooms on, Cam 1-5)
+    env -u EVO_INFO_H node tools/ui/regress.js "$r/native_stairW3" --set stairW=3 2>&1 | tail -1
+    cmp_pass "(b) native info height vs forced: rooms off stairW=3" "$r/old_stairW3" "$r/native_stairW3"
+    env -u EVO_INFO_H node tools/ui/regress_rooms.js "$r/native_rooms" 2>&1 | tail -1
+    cmp_pass "(b) native info height vs forced: rooms on" "$r/old_rooms" "$r/native_rooms"
+    env -u EVO_INFO_H node tools/ui/regress_cams.js "$r/native_cams" 2>&1 | tail -1
+    cmp_pass "(b) native info height vs forced: camera bank Cam 1-5" "$r/old_cams" "$r/native_cams"
   } >> "$log" 2>&1
   git worktree remove --force "$WT" >/dev/null 2>&1; rm -rf "$(dirname "$WT")"; WT=""; git worktree prune
   [ $UNEXP -eq 0 ] && S=PASS || S=FAIL

@@ -64,6 +64,13 @@ const { open, mapFile, CACHE } = require('./common');
   ok('snake pack: whole map, no zone chips, crop cleared', r.spec === null && (await page.$$eval('#zoneChips .chip', (e) => e.length)) === 0);
   for (const [id, v] of [['cx0', 5], ['cy0', 5], ['cx1', 25], ['cy1', 25]]) await input(id, v); await a.idle(); r = await info();
   ok('snake pack: crop works without zones', r.tiles === 400 && r.slice);
+  // NEVER TWO "Whole map" buttons: images with a zone role loaded; Rooms off -> only the zone button, Rooms on (rooms found) -> only the rooms button (real visibility)
+  await a.load('maps'); await a.zone(6);
+  const whole = () => page.evaluate(() => ({ visible: [...document.querySelectorAll('#wholeMap, #wholeRooms')].filter((b) => b.getClientRects().length > 0).map((b) => b.id), rooms: !!window.__evo.S().rooms, zones: !!window.__evo.packs.image.pack.fields.zone }));
+  let w = await whole(); ok('zone role loaded, Rooms off: exactly one "Whole map" button, the zone one', w.zones && !w.rooms && w.visible.join() === 'wholeMap', JSON.stringify(w));
+  await page.check('#t-rooms'); await a.idle(); w = await whole(); ok('zone role loaded, Rooms on (rooms found): exactly one "Whole map" button, the rooms one', w.zones && w.rooms && w.visible.join() === 'wholeRooms', JSON.stringify(w));
+  await page.click('#wholeRooms'); await a.idle(); r = await info(); ok('the rooms button still clears the zones too (whole map, no slice)', r.spec === null && !r.slice);
+  await page.uncheck('#t-rooms'); await a.idle(); w = await whole(); ok('Rooms off again: only the zone button', w.visible.join() === 'wholeMap', JSON.stringify(w));
   ok('no console errors', a.errs.length === 0, JSON.stringify(a.errs));
   await a.browser.close();
 })();
