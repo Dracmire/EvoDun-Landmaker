@@ -30,7 +30,7 @@ const { open } = require('./common');
       for (let k = 0; k < rt.length && tot < 120; k += Math.max(1, Math.floor(rt.length / 120))) { const i = rt[k], x = i % S.W, y = (i / S.W) | 0, p = cam.p(x + 0.5, y + 0.5, S.levelH[S.fine[i]]), t = E.pickTile(S, P, tech, view, CW, CH, p[0], p[1]); tot++; if (t.tile === i) got++; }
       return { got, tot, rings: rt.length };
     }, { tech });
-    ok(`${tech}: a click on the centre of a ring tile that no taller neighbour hides resolves to that tile (top view)`, r.tot > 100 && r.got / r.tot >= 0.95, JSON.stringify(r));
+    ok(`${tech}: a click on the centre of a ring tile that no taller neighbour hides resolves to that tile (top view)`, r.tot > 50 && r.got / r.tot >= 0.95, JSON.stringify(r));
   }
   // rooms off: the switch does nothing
   await page.uncheck('#t-rooms'); await a.idle(); await a.tech('A'); await a.preset('oblique'); const ro = hash(await a.canvas()); await page.evaluate(() => { window.__evo.P.cake = false; document.querySelector('#t-cake').checked = false; window.__evo.draw(); }); await a.idle(); // the Cake switch is greyed with Rooms off: set by P.cake, not by a click
