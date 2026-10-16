@@ -4,6 +4,8 @@
    - A requirement that IS met: normal control, tooltip = the explanation (what it does, crystallizer, techniques). The explanation appears ONLY on active controls.
    - Requirements are evaluated from the live state (`ctx`, built by ui.js after every recompute / redraw): E.controls.refresh(ctx).
    - docs/controls.md is GENERATED from this table (tools/gen_controls_doc.js, run by tools/build.py); tools/test_controls.js checks that it is in sync.
+   - LOCKS are a separate concept from requirements: an optional `lock` {on(ctx), text} on an entry. A locked control is disabled and mirrors the value something else set (the rule of "Framing by room type"); its tooltip says who set it;
+     it gets NO `inactive` class and NO "inactive" tag, because its effect IS applied. An unmet requirement still wins over the lock.
    `dom` = CSS selector of the control element(s) that are disabled; the tooltip and the greyed look go on the label / row that holds them. `keep` = the control already has its own tooltip (cameras, Stage preset): not touched. */
 (function (E) {
   const GROUPS = ['Scenarios', 'View bar', 'Source & slice', '1 Terrain', '2 Room types', '3 Stage', '4 Curves (C)', '5 Floors', '6 Macroform', 'Shared passes', 'Overlays', 'Incursion', 'Diagnostics'];
@@ -48,6 +50,7 @@
   };
   const CAKE = ['rooms', 'roomsFound', 'cakeRoom'], ASC = ['rooms', 'roomsFound', 'ascRoom'], POCKET = ['rooms', 'roomsFound', 'dioRoom'], RM = ['rooms', 'roomsFound'];
   const ALL = ['box', 'A', 'B', 'C'];
+  const DAC_LOCK = { on: (c) => !!c.dacAuto, text: "Set by 'Framing by room type' (turn it off to choose by hand)", doc: "Framing by room type is on" };
   const e = (id, dom, group, tech, req, help, extra) => Object.assign({ id, dom, group, tech, req, help }, extra);
   const TABLE = [
     // ---- Scenarios (buttons that only SET existing parameters)
@@ -93,14 +96,15 @@
     e('rRadius', '#s-rRadius', '2 Room types', ALL, ['rooms'], 'Room size scale. Smaller values find rooms on small maps.'),
     e('roomsCross', '#s-roomsCross', '2 Room types', ALL, ['rooms'], 'Path cost of crossing a terrace gate when rooms are joined.'),
     e('roomsIsoLimit', '#s-roomsIsoLimit', '2 Room types', ALL, ['rooms'], 'Unconnected regions smaller than this (tiles) become decorative (not walkable).'),
-    e('t-cake', '#t-cake', '2 Room types', ALL, CAKE, 'Cake rings: concentric height rings per terrace link of each Cake room (a bowl or a pyramid). Same geometry in Box, A, B and C.'),
+    e('dacAuto', '#dacAuto', '2 Room types', ALL, ['rooms'], 'Framing by room type: one framing per room type, never mixed. With one room chosen only the framing of its type is on (Cake rings, Ascension walls or the Pocket of a Diorama); with several, the union; with Whole map, all three, each acting only on the rooms of its own type. The three switches follow the rule while this is on; turn it off to choose by hand.'),
+    e('t-cake', '#t-cake', '2 Room types', ALL, CAKE, 'Cake rings: concentric height rings per terrace link of each Cake room (a bowl or a pyramid). Same geometry in Box, A, B and C.', { lock: DAC_LOCK }),
     e('cakeLayers', '#s-cakeLayers', '2 Room types', ALL, [...CAKE, 'cakeOn'], 'Cake: number of rings.'),
     e('cakeStep', '#s-cakeStep', '2 Room types', ALL, [...CAKE, 'cakeOn'], 'Cake: height of one ring (x terrace height).'),
     e('cakePer', '#s-cakePer', '2 Room types', ALL, [...CAKE, 'cakeOn'], 'Cake: tiles per ring.'),
     e('cakeSeam', '#s-cakeSeam', '2 Room types', ALL, [...CAKE, 'cakeOn'], 'Cake: seam window of a bowl, in tiles.'),
-    e('t-ascWalls', '#t-ascWalls', '2 Room types', ALL, ASC, 'Ascension walls: thin walls on the blocking faces of Ascension rooms; low on the faces that face the camera.'),
+    e('t-ascWalls', '#t-ascWalls', '2 Room types', ALL, ASC, 'Ascension walls: thin walls on the blocking faces of Ascension rooms; low on the faces that face the camera.', { lock: DAC_LOCK }),
     e('ascHeight', '#s-ascHeight', '2 Room types', ALL, [...ASC, 'ascOn'], 'Ascension wall height (absolute).'),
-    e('t-pocket', '#t-pocket', '2 Room types', ALL, POCKET, 'Pocket view: a chosen Diorama room (chip, or a click in the world) is drawn as its pocket: the same room with generated surroundings.'),
+    e('t-pocket', '#t-pocket', '2 Room types', ALL, POCKET, 'Pocket view: a chosen Diorama room (chip, or a click in the world) is drawn as its pocket: the same room with generated surroundings.', { lock: DAC_LOCK }),
     e('pocketFraming', '#pocketFraming', '2 Room types', ALL, [...POCKET, 'pocketOn'], 'Pocket framing: Cerro (hill), Lago (lake), Cascada (falls), Isla (island), Caída (drop). Auto = by the room\'s shape. It changes nothing until a Diorama room is chosen.'),
     e('pocketHeight', '#s-pocketHeight', '2 Room types', ALL, [...POCKET, 'pocketOn'], 'Relief multiplier of the pocket\'s decoration only. It changes nothing until a Diorama room is chosen.'),
     e('roomBorders', '#t-roomBorders', '2 Room types', ALL, RM, 'Room borders: blocking faces (orange), open transitions and the ones on a tree path (green).'),
@@ -159,11 +163,11 @@
   function refresh(root, ctx) {
     for (const en of TABLE) {
       const els = [...root.querySelectorAll(en.dom)]; if (!els.length) continue;
-      const tip = tipOf(en, ctx), seen = new Set();
+      const tip0 = tipOf(en, ctx), locked = tip0.ok && !!en.lock && en.lock.on(ctx), tip = locked ? { ok: true, text: en.lock.text } : tip0, seen = new Set();
       for (const el of els) {
         const h = en.dom.includes(',') || els.length > 1 ? el : holder(el); // a group of buttons: each one; a single labelled control: its label
         if (el.dataset.def === undefined) el.dataset.def = el.type === 'checkbox' ? (el.checked ? '1' : '0') : String(el.value);
-        el.disabled = !tip.ok; el.setAttribute('aria-disabled', tip.ok ? 'false' : 'true');
+        el.disabled = !tip.ok || locked; el.setAttribute('aria-disabled', tip.ok && !locked ? 'false' : 'true');
         if (!seen.has(h)) {
           seen.add(h); h.classList.toggle('inactive', !tip.ok);
           if (!en.keep) { if (h.title !== tip.text) h.title = tip.text; if (h !== el && el.title) el.removeAttribute('title'); }
@@ -210,7 +214,7 @@
     for (const g of GROUPS) {
       const rows = TABLE.filter((x) => x.group === g); if (!rows.length) continue;
       L.push('## ' + g, '', '| id | techniques | requires | help |', '|---|---|---|---|');
-      for (const x of rows) L.push(`| ${x.id} | ${x.tech.length === 4 ? 'all' : x.tech.join(' ')} | ${x.req.length ? x.req.map((k) => R[k].text).join(' · ') : '-'} | ${x.keep && !x.help ? '(keeps its own tooltip: see the title in the viewer)' : x.help} |`);
+      for (const x of rows) L.push(`| ${x.id} | ${x.tech.length === 4 ? 'all' : x.tech.join(' ')} | ${x.req.length ? x.req.map((k) => R[k].text).join(' · ') : '-'}${x.lock ? ' (locked while: ' + x.lock.doc + ')' : ''} | ${x.keep && !x.help ? '(keeps its own tooltip: see the title in the viewer)' : x.help} |`);
       L.push('');
     }
     if (RETIRED.length) { L.push('## Not in the table', ''); for (const r of RETIRED) L.push(`- \`${r.id}\` (${r.dom}): ${r.note}`); L.push(''); }

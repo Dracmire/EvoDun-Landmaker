@@ -35,13 +35,13 @@ Room types (Diorama, Ascension, Cake) on a map with rooms: Cake rings, Ascension
 | field | value |
 |---|---|
 | id | `rooms` |
-| examples (first = default) | Real map · Balanced types (`real_map`); Real map · Default (`real_map`); Pocket · Diorama 31 (`real_map`); Your images (PNG + roles) |
+| examples (first = default) | Real map · Balanced types (`real_map`); Real map · Default (`real_map`); Cake · bowl (room 60) (`real_map`); Cake · bowl + pyramid (room 85) (`real_map`); Ascension · walls (room 88) (`real_map`); Pocket · Diorama 31 (`real_map`); Your images (PNG + roles) |
 | camera (default) | `isoE` |
 | cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic` |
 | technique (default) | `A` |
 | techniques offered | `box`, `A`, `B`, `C` |
 | compare | no |
-| main controls | `roomsPreset`, `t-cake`, `t-ascWalls`, `ascHeight`, `t-pocket`, `pocketFraming`, `pocketHeight`, `roomChips`, `typeTint` |
+| main controls | `roomsPreset`, `dacAuto`, `t-cake`, `t-ascWalls`, `ascHeight`, `t-pocket`, `pocketFraming`, `pocketHeight`, `roomChips`, `typeTint` |
 | advanced controls (folded) | `roomsMinCore`, `rRadius`, `roomsCross`, `roomsIsoLimit`, `cakeLayers`, `cakeStep`, `cakePer`, `cakeSeam`, `roomBorders`, `roomTint`, `nowalk`, `dioOutline` |
 | slice controls | - |
 | terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius` |
