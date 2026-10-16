@@ -108,7 +108,7 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
     const ringLv = []; S1.levelMeta.forEach((m, L) => { if (m.ring) ringLv.push(L); });
     ok(`${label}: no empty ring level (${ringLv.length} ring levels, each with tiles)`, ringLv.length === S1.cake.levelsAdded && ringLv.every((L) => S1.byLevel[L].length > 0), [ringLv.length, S1.cake.levelsAdded]);
     // per tile
-    let nRing = 0, bad = 0, thin = 0, band = 0, foot = 0, moved = 0, wrongSide = 0; const claim = S1.cake.claim, fw = S1.mapW, mapOf = (i) => (((i / S1.W) | 0) + S1.oy) * fw + (i % S1.W) + S1.ox;
+    let nRing = 0, bad = 0, thin = 0, band = 0, foot = 0, moved = 0, wrongSide = 0, upNotLow = 0; const claim = S1.cake.claim, fw = S1.mapW, mapOf = (i) => (((i / S1.W) | 0) + S1.oy) * fw + (i % S1.W) + S1.ox;
     const used = new Set(); for (const rec of S1.stairs) { for (const t of rec.bottom) used.add(t); for (const t of rec.top) used.add(t); for (const st of rec.steps) for (const t of st.tiles) used.add(t); }
     for (let i = 0; i < n; i++) {
       const hNew = S1.levelH[S1.fine[i]], hOld = S0.levelH[S0.fine[i]];
@@ -116,13 +116,14 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
       nRing++; const cl = claim.get(mapOf(i)); if (!cl) { bad++; continue; }
       const l = cl.link; if (S1.void && S1.void[i]) bad++;
       if (used.has(i)) foot++;
-      if (S1.roomMap[i] !== l.room) bad++;
-      if (S1.ter[i] !== (l.down ? l.high : l.low)) wrongSide++;
+      if (l.down ? S1.roomMap[i] !== l.room : S1.roomType[i] === T.DIORAMA) bad++; // Up v2 builds in the AIRSPACE (any non-void tile except a Diorama tile)
+      if (l.down ? S1.ter[i] !== l.high : S1.roomMap[i] === l.room && S1.ter[i] === l.high) wrongSide++; // Up: never on the core terrace of its own room (a room tile of a third terrace below may be raised: airspace)
+      if (!l.down && S1.roomMap[i] === l.room && S1.ter[i] !== l.low) upNotLow++;
       if (l.down ? !(hNew < hOld - 0.05 + 1e-9) : !(hNew > hOld + 0.05 - 1e-9)) thin++;           // a cut / build of at least the margin (0.05 terH): thickness > 0
       if (!(hNew > tb(l.low) && hNew < tb(l.high) + (K - 1) * sub)) band++;
     }
-    ok(`${label}: ${nRing} ring tiles, every one in a claimed ring of ITS room, none on void`, nRing === S1.cake.tiles && bad === 0, [nRing, S1.cake.tiles, bad]);
-    ok(`${label}: Down rings are cut into the HIGH terrace, Up rings built on the LOW one`, wrongSide === 0, wrongSide);
+    ok(`${label}: ${nRing} ring tiles, every one in a claimed ring (Down: of ITS room; Up: in the airspace, never a Diorama tile), none on void`, nRing === S1.cake.tiles && bad === 0, [nRing, S1.cake.tiles, bad]);
+    ok(`${label}: Down rings are cut into the HIGH terrace; Up rings are never on the core (high) terrace of their own room`, wrongSide === 0, wrongSide);
     ok(`${label}: every ring tile is really cut (Down) or built (Up) by at least the margin: no zero-thickness ring`, thin === 0, thin);
     ok(`${label}: every ring height is inside the band of its link`, band === 0, band);
     ok(`${label}: no ring on the footprint of a ramp`, foot === 0, foot);
@@ -151,7 +152,9 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
   console.log(`  info: 5 terraces: ${cake.cake.down} bowls + ${cake.cake.up} pyramids, ${cake.cake.flat} flat links, ${cake.cake.tiles} ring tiles of ${cake.landTiles} land tiles, ${cake.cake.levelsAdded} levels added (${base.maxFine + 1} -> ${cake.maxFine + 1}), ${cake.cake.conflicts} tiles claimed twice`);
   for (const t of [3, 4, 6]) { const a = run({ ...P0, terraces: t }), b = run({ ...P0, terraces: t, cake: true }); check(`${t} terraces`, a, b); }
   { const nb = run({ ...P0, cake: true, cakeCorridor: false }), m0 = measureRamps(nb), m1 = measureRamps(cake);
-    ok('mutation: without the corridor many feet are enclosed (the test can fail)', m0.footEnclosed > 20, JSON.stringify(m0));
+    const m0v1 = measureRamps(run({ ...P0, cake: true, cakeCorridor: false, cakeUpV1: true }));
+    ok('mutation (Up v1, the previous behaviour): without the corridor many feet are enclosed (the test can fail)', m0v1.footEnclosed > 20, JSON.stringify(m0v1)); // Up v2 builds far fewer ring tiles (seam window), so the same mutation encloses only 10 feet of 140 instead of 78
+    ok('mutation (Up v2): without the corridor feet are still enclosed (the test can fail; 10 of 140)', m0.footEnclosed > 0, JSON.stringify(m0));
     console.log(`  info: 5 terraces, ramps buried by the rings: feet enclosed ${m0.footEnclosed} -> ${m1.footEnclosed}, heads enclosed ${m0.headEnclosed} -> ${m1.headEnclosed}; ring tiles ${nb.cake.tiles} -> ${cake.cake.tiles} (${nb.cake.tiles - cake.cake.tiles} lost, ${cake.cake.corridor} corridor tiles reserved)`); }
   { // the user's table, measured in the viewer (types, ramps, rooms, main % of the land), reproduced by tools/room_types_table.js
     const T2 = require('./room_types_table.js'), want = [['31/0/1', 140, 32, 74], ['24/3/5', 83, 32, 69], ['28/3/1', 82, 32, 79], ['20/7/5', 44, 32, 75], ['62/7/19', 156, 88, 61], ['32/29/27', 54, 88, 70]];
@@ -168,5 +171,50 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
     ok('slice: the room type of every tile equals the whole-map type (classification does not depend on the slice)', diff === 0, diff); }
   { const off = E.shape(mk(), { ...P0, rooms: false, cake: true }, null), off2 = E.shape(mk(), { ...P0, rooms: false }, null);
     ok('rooms off (cake switch on): nothing changes, no types, no cake', off.cake === undefined && off.types === undefined && off.fine.every((v, i) => v === off2.fine[i]) && JSON.stringify(off.levelH) === JSON.stringify(off2.levelH)); }
+  { // ---- Cake v2 for Up links: the platform is the extreme of the cake; seam window; airspace except Diorama tiles; raise only; Down untouched (both presets) ----
+    const PBt = { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 };
+    for (const [label, Pp] of [['Default', P0], ['Balanced types', PBt]]) {
+      const S0 = run(Pp), RL = S0.rooms, ty = S0.types, K = Pp.subs, q = E.quantize(mk(), Pp), none = new Uint8Array(RL.W * RL.H), W = RL.W, H = RL.H, seam = T.paramsOf(Pp).seam;
+      const hb = (i) => E.hOf(RL.ter[i] * K + q.sub[i], Pp, q.center), linkOf = (c) => ty.rooms.get(c.link.room).linkList.find((l) => l.low === c.link.low && l.high === c.link.high);
+      const inv = (R) => { // counts of violations over the Up claims of one buildRings result
+        const o = { up: 0, ring0: 0, window: 0, seam: 0, notRaise: 0, dio: 0, outside: 0, onOtherCore: 0, down: 0 };
+        for (const [t, c] of R.claim) {
+          if (c.link.down) { o.down++; continue; } o.up++;
+          const l = linkOf(c), r = c.link.room, x = t % W, y = (t / W) | 0; let bad0 = false, badW = false;
+          for (let yy = Math.max(0, y - c.d); yy <= Math.min(H - 1, y + c.d); yy++) for (let xx = Math.max(0, x - c.d); xx <= Math.min(W - 1, x + c.d); xx++) {
+            const j = yy * W + xx; if (!(RL.room[j] === r && RL.ter[j] === l.core)) continue;
+            if (!(hb(j) > c.h + 1e-9)) { badW = true; if (Math.abs(xx - x) <= 1 && Math.abs(yy - y) <= 1) bad0 = true; }
+          }
+          if (bad0) o.ring0++; if (badW) o.window++;
+          if (!l.pos.some((p) => Math.abs((p % W) - x) <= seam && Math.abs(((p / W) | 0) - y) <= seam)) o.seam++;
+          if (!(c.h > c.old + 1e-9)) o.notRaise++;
+          if (ty.type[t] === T.DIORAMA) o.dio++;
+          if (RL.room[t] !== r) { o.outside++; const o2 = ty.rooms.get(RL.room[t]); if (o2 && o2.type === T.CAKE && o2.linkList.some((l2) => l2.core === RL.ter[t])) o.onOtherCore++; }
+        }
+        return o;
+      };
+      const Rv2 = T.buildRings(RL, ty, Pp, q, none), Rv1 = T.buildRings(RL, ty, { ...Pp, cakeUpV1: true }, q, none), a = inv(Rv2), b = inv(Rv1);
+      console.log(`  info: Cake v2 Up, ${label}: v1 -> v2: Up ring tiles ${b.up} -> ${a.up} (outside their room ${b.outside} -> ${a.outside}, on the core of another Cake room ${b.onOtherCore} -> ${a.onOtherCore}), ring-0 violations ${b.ring0} -> ${a.ring0} of ${b.up}/${a.up} claimed tiles, window violations ${b.window} -> ${a.window}, outside the seam window ${b.seam} -> ${a.seam}, not raised ${b.notRaise} -> ${a.notRaise}, Diorama tiles ${b.dio} -> ${a.dio} (blocked by the rule: ${Rv2.dioBlocked}, raise-only skips: ${Rv2.skipRaise}), Down tiles ${b.down} -> ${a.down}`);
+      ok(`${label}: Up v2 builds ring tiles (${a.up})`, a.up > 100, a.up);
+      ok(`${label}: the platform is the extreme: every Up ring tile is strictly lower than every core tile in its window of radius d (and than the adjacent ones)`, a.window === 0 && a.ring0 === 0, [a.window, a.ring0]);
+      ok(`${label}: every Up ring tile is inside the seam window of its link (radius ${seam} around the gate tiles)`, a.seam === 0, a.seam);
+      ok(`${label}: raise only: every Up claim has h > the old height`, a.notRaise === 0, a.notRaise);
+      ok(`${label}: no Diorama tile is claimed by an Up link (${Rv2.dioBlocked} tiles were blocked by the rule)`, a.dio === 0, a.dio);
+      ok(`${label}: mutation (Up v1): the platform-extreme and seam-window checks FAIL on the previous behaviour (${b.ring0} ring-0 tiles, ${b.window} window, ${b.seam} outside the seam)`, b.ring0 > 0 && b.window > 0 && b.seam > 0, JSON.stringify(b));
+      { // Down is untouched: Down claims of a run with the Up links disabled (a copy of types without them) = the Down claims of the normal run, except tiles an Up claim wins
+        const ty2 = { ...ty, rooms: new Map([...ty.rooms].map(([id, o]) => [id, { ...o, linkList: o.linkList.filter((l) => l.down) }])) }, Rd = T.buildRings(RL, ty2, Pp, q, none);
+        let diff = 0, lost = 0, extra = 0; const same = (c1, c2) => c1.link.room === c2.link.room && c1.link.low === c2.link.low && c1.k === c2.k && Math.abs(c1.h - c2.h) < 1e-9;
+        for (const [t, c] of Rd.claim) { const n = Rv2.claim.get(t); if (n && !n.link.down) extra++; else if (!n || !same(c, n)) diff++; }
+        for (const [t, c] of Rv2.claim) if (c.link.down) { const d = Rd.claim.get(t); if (!d || !same(c, d)) lost++; }
+        ok(`${label}: Down is untouched: the Down claims with the Up links disabled equal the normal run's (${extra} tiles are won by an Up claim)`, diff === 0 && lost === 0, [diff, lost, extra]);
+        // v1 vs v2 (Down rule unchanged): every v1 Down tile is kept with the same height or is now claimed by an Up link of ANOTHER room (the airspace of a neighbouring cake wins the conflict: smaller ring index); every tile Down gains was an Up claim in v1
+        let wonByUp = 0, miss = 0, hDiff = 0, added = 0, addedUp = 0, upSameRoom = 0; const dv1 = new Map([...Rv1.claim].filter(([, c]) => c.link.down)), dv2 = new Map([...Rv2.claim].filter(([, c]) => c.link.down));
+        for (const [t, c] of dv1) { const n = dv2.get(t); if (n) { if (Math.abs(n.h - c.h) > 1e-9) hDiff++; } else { const u = Rv2.claim.get(t); if (u && !u.link.down) { wonByUp++; if (u.link.room === c.link.room) upSameRoom++; } else miss++; } }
+        for (const [t] of dv2) if (!dv1.has(t)) { added++; const o = Rv1.claim.get(t); if (o && !o.link.down) addedUp++; }
+        console.log(`  info: ${label}: Down tiles v1 ${dv1.size} -> v2 ${dv2.size}: ${added} added (${addedUp} of them claimed by an Up link in v1), ${wonByUp} now won by an Up link (${upSameRoom} of the same room), ${miss} lost otherwise, ${hDiff} with another height`);
+        ok(`${label}: Down v1 -> v2: same heights on common tiles, ${added} tiles gained (all were Up claims in v1), ${wonByUp} lost only to an Up claim`, miss === 0 && hDiff === 0 && added === addedUp && upSameRoom === 0, [miss, hDiff, added, addedUp, wonByUp, upSameRoom]);
+      }
+    }
+  }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();

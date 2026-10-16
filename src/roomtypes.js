@@ -94,29 +94,34 @@
       return touched;
     };
     const byRoom = new Map(); for (let i = 0; i < n; i++) if (room[i] > 0 && !(isVoid && isVoid[i])) { let l = byRoom.get(room[i]); if (!l) byRoom.set(room[i], l = []); l.push(i); }
-    const claim = new Map(); // tile -> { link, k }
+    const claim = new Map(); // tile -> { link, k, h, old }
+    const v1 = P.cakeUpV1 === true, dioBlocked = new Set(); out.dioBlocked = 0; out.skipRaise = 0;
     for (const o of [...types.rooms.values()].sort((p, q2) => p.id - q2.id)) {
       if (o.type !== T.CAKE) continue; const tiles = byRoom.get(o.id) || [];
       for (const l of o.linkList) {
-        const r = o.id, lo = l.low, hi = l.high, core = l.core, inMask = (j) => room[j] === r && (ter[j] === lo || ter[j] === hi) && !(isVoid && isVoid[j]);
+        const r = o.id, lo = l.low, hi = l.high, core = l.core, air = !l.down && !v1; // air: Up v2 (seam window, airspace, local platform reference, raise only); Down and the v1 diagnostic keep the room-based rule
+        const isCore = (j) => room[j] === r && ter[j] === core;
+        const inMask = air // Up v2: the AIRSPACE of any non-void tile (the land mass of a cake room is more than its footprint), except a Diorama tile (a pocket: its footprint is not modified)
+          ? (j) => { if (isVoid && isVoid[j]) return false; if (types.type[j] === T.DIORAMA) { dioBlocked.add(j); return false; } return true; }
+          : (j) => room[j] === r && (ter[j] === lo || ter[j] === hi) && !(isVoid && isVoid[j]);
         const coreTiles = [], low = [], high = []; for (const t of tiles) { if (ter[t] === core) coreTiles.push(t); if (ter[t] === lo) low.push(t); else if (ter[t] === hi) high.push(t); }
         const info = { room: r, low: lo, high: hi, down: l.down, rings: 0, tiles: 0, gap: 0, step: 0, flat: false };
         out.links.push(info);
         if (!coreTiles.length) { info.flat = true; continue; }
         let coreTop = -Infinity, lowTop = -Infinity, highMin = Infinity; for (const t of coreTiles) coreTop = Math.max(coreTop, hb(t)); for (const t of low) lowTop = Math.max(lowTop, hb(t)); for (const t of high) highMin = Math.min(highMin, hb(t));
         const maxD = prm.layers * prm.per;
-        let allowed = null; // Down: the seam window
-        if (l.down) { bfs(l.pos, inMask, prm.seam); allowed = new Set(touched); for (const p of l.pos) allowed.add(p); }
+        let allowed = null; // the seam window (Dilate8 of the gate tiles of the link, radius cakeSeam): Down, and Up v2
+        if (l.down || air) { bfs(l.pos, inMask, prm.seam); allowed = new Set(touched); for (const p of l.pos) allowed.add(p); }
         bfs(coreTiles, inMask, maxD);
         const rings = Array.from({ length: prm.layers }, () => []);
         for (const t of touched) {
-          const d = dist[t]; if (d < 1 || ter[t] === core) continue; // exclude the core itself
-          if (reserved[t]) continue; if (l.down && !allowed.has(t)) continue;
+          const d = dist[t]; if (d < 1 || isCore(t)) continue; // exclude the core itself
+          if (reserved[t]) continue; if (allowed && !allowed.has(t)) continue;
           rings[Math.min(prm.layers - 1, Math.ceil(d / prm.per) - 1)].push(t);
         }
         // CloseSmallDiagonalGaps: two diagonal tiles of a ring without the tiles between them -> add those that are free candidates (never another ring, the core, the reserved ones)
         const taken = new Set(); for (const rg of rings) for (const t of rg) taken.add(t);
-        const cand = (j) => j >= 0 && inMask(j) && ter[j] !== core && !reserved[j] && !taken.has(j) && (!l.down || allowed.has(j)) && dist[j] >= 1 && Math.min(prm.layers - 1, Math.ceil(dist[j] / prm.per) - 1) >= 0;
+        const cand = (j) => j >= 0 && inMask(j) && !isCore(j) && !reserved[j] && !taken.has(j) && (!allowed || allowed.has(j)) && dist[j] >= 1 && Math.min(prm.layers - 1, Math.ceil(dist[j] / prm.per) - 1) >= 0;
         for (let k = 0; k < rings.length; k++) {
           const set = new Set(rings[k]), add = [];
           for (const t of rings[k]) { const x = t % W, y = (t / W) | 0; for (const [dx, dy] of [[1, 1], [-1, 1]]) { const ax = x + dx, ay = y + dy, bx = x - dx, by = y - dy; if (ax < 0 || ay < 0 || bx < 0 || by < 0 || ax >= W || ay >= H || bx >= W || by >= H) continue; if (!(set.has(ay * W + ax) && set.has(by * W + bx))) continue; for (const j of [y * W + x + dx, (y + dy) * W + x]) if (cand(j) && Math.min(prm.layers - 1, Math.ceil(dist[j] / prm.per) - 1) === k) add.push(j); } }
@@ -124,15 +129,27 @@
         }
         const kept = rings.filter((rg) => rg.length > 0), nR = kept.length; info.rings = nR;
         if (!nR) { info.flat = true; continue; }
-        const gap = l.down ? highMin - coreTop : coreTop - lowTop; info.gap = gap;
+        // Up v2: LOCAL PLATFORM REFERENCE. ref(t) = the lowest core tile inside the Chebyshev window of radius dist[t] around t (the BFS reached t from a core tile in dist[t] 8-neighbour steps, so one exists; coreTop is only a fallback): the ring is strictly below every core tile it can touch, so the platform is the highest point of the cake (the viewer core has sub-terrace relief, Unity platform tops are flat)
+        const refOf = new Map();
+        if (air) for (const rg of kept) for (const t of rg) {
+          const x = t % W, y = (t / W) | 0, d = dist[t]; let m = Infinity;
+          for (let yy = Math.max(0, y - d); yy <= Math.min(H - 1, y + d); yy++) for (let xx = Math.max(0, x - d); xx <= Math.min(W - 1, x + d); xx++) { const j = yy * W + xx; if (isCore(j)) m = Math.min(m, hb(j)); }
+          refOf.set(t, m === Infinity ? coreTop : m);
+        }
+        let refMin = Infinity; if (air) for (const v of refOf.values()) refMin = Math.min(refMin, v);
+        const gap = l.down ? highMin - coreTop : (air ? refMin : coreTop) - lowTop; info.gap = gap;
         if (!(gap - prm.margin * P.terH > 1e-9)) { info.flat = true; info.rings = 0; continue; }
         const step = Math.min(prm.step * P.terH, (gap - prm.margin * P.terH) / nR); info.step = step; info.coreTop = coreTop;
         kept.forEach((rg, k) => {
-          const h = l.down ? coreTop + (k + 1) * step : coreTop - (k + 1) * step;
-          for (const t of rg) { const c = claim.get(t); if (!c) claim.set(t, { link: info, k, h, old: hb(t) }); else { out.conflicts++; if (k < c.k) claim.set(t, { link: info, k, h, old: hb(t) }); } }
+          for (const t of rg) {
+            const h = l.down ? coreTop + (k + 1) * step : (air ? refOf.get(t) : coreTop) - (k + 1) * step, old = hb(t);
+            if (air && old >= h - 1e-9) { out.skipRaise++; continue; } // an Up ring only RAISES ground, never cuts it
+            const rec = { link: info, k, h, old, d: dist[t] }, c = claim.get(t); if (!c) claim.set(t, rec); else { out.conflicts++; if (k < c.k) claim.set(t, rec); }
+          }
         });
       }
     }
+    out.dioBlocked = dioBlocked.size;
     out.claim = claim; out.flat = out.links.filter((x) => x.flat).length; return out;
   }
   T.buildRings = buildRings;
