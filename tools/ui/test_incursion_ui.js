@@ -102,5 +102,14 @@ const { open } = require('./common');
       }
     }
   }
+  // placeMark refuses a "tile" that is not an integer index (undefined, NaN, a fraction, past the map): plain message, nothing stored (it used to store a mark with NaN coordinates)
+  await page.evaluate(() => { const e = window.__evo; e.inc.stake = null; e.inc.objectives = []; e.draw(); }); await a.idle();
+  for (const [label, bad] of [['undefined', null], ['NaN', 'NaN'], ['a fraction', 3.5], ['past the map', 1e9]]) {
+    for (const mode of ['stake', 'obj']) {
+      await page.evaluate(([b, mode]) => { const e = window.__evo, t = b === null ? undefined : b === 'NaN' ? NaN : b; e.setIncMode(mode); e.placeMark(t); e.setIncMode(null); }, [bad, mode]); await a.idle();
+      const st = await page.evaluate(() => ({ stake: window.__evo.inc.stake, n: window.__evo.inc.objectives.length }));
+      ok(`placeMark(${label}) in ${mode} mode: nothing is stored and the message is plain`, st.stake === null && st.n === 0 && /not a tile of the map/.test(await info()) && !/NaN|undefined/.test(await info()), JSON.stringify(st) + ' ' + await info());
+    }
+  }
   console.log('errors:', a.errs); await a.browser.close();
 })();

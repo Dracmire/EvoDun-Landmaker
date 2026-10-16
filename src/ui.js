@@ -266,6 +266,7 @@
   function placeMark(tile) {
     const note = (t) => { $('#incInfo').innerHTML = t; };
     if (tile < 0) return note('Nothing under the cursor.');
+    if (!Number.isInteger(tile) || tile >= S.n) return note('That is not a tile of the map: no stake or objective stored.'); // undefined / NaN / a fraction (a script or the console): nothing is stored, never a mark with NaN coordinates
     const x = S.ox + (tile % S.W), y = S.oy + ((tile / S.W) | 0);
     if (inc.mode === 'rm') {
       const near = (m) => Math.hypot(m.x - x, m.y - y) <= 1.5;
