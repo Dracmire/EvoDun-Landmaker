@@ -120,6 +120,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const needPrep = { 't-pocket': 'rooms', 't-backdrop': 'floors' };
     for (const id of m.main) {
       if (startDisabled[id]) { skipped.push(id); continue; }
+      if (m.id === 'rooms' && (id === 'pocketFraming' || id === 'pocketHeight')) await PREP.rooms(); // the Pocket sliders change nothing until a Diorama room is chosen (with Framing by room type on, Whole map has no pocket drawn): choose room 31 first, as for the Pocket switch
       const base0 = await sig();
       const act = await ev((id) => {
         const en = window.EVO.controls.TABLE.find((x) => x.id === id), els = [...document.querySelectorAll(en.dom)], el = els[0], undo = {};
@@ -136,6 +137,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       await ev((x) => { const { id, act } = x, en = window.EVO.controls.TABLE.find((q) => q.id === id), el = document.querySelector(en.dom), fire = (n, t) => n.dispatchEvent(new Event(t, { bubbles: true }));
         if (act.kind === 'range') { el.value = String(act.old); fire(el, 'input'); fire(el, 'change'); } else if (act.kind === 'check') el.click(); else if (act.kind === 'select') { el.value = act.old; fire(el, 'change'); } else if (act.kind === 'chip') document.querySelector(`#roomChips .chip[data-id="${act.value}"]`).click(); }, { id, act });
       await a.idle(); await page.waitForTimeout(150);
+      if (m.id === 'rooms' && (id === 'pocketFraming' || id === 'pocketHeight')) { await page.click('#wholeRooms'); await a.idle(); }
     }
     // controls that need a datum first (a Diorama room for the Pocket, a floor for the backdrop) are measured after choosing it
     for (const id of Object.keys(needPrep).filter((k) => m.main.includes(k) && !startDisabled[k])) {
@@ -261,7 +263,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
       const man = mk(viewer); await page.setInputFiles('#file', [PNG, man]); await page.waitForTimeout(2500); await a.idle(); fs.unlinkSync(man);
       f = await fr(); const vb = await ev(() => window.__evo.viewerBlock());
-      ok(`manifest ${label}: loads in mode 2 with the switch ${wantDac ? 'ON' : 'OFF'}, cake ${wantCake}, and saves the same dacAuto`, f.dac === wantDac && f.dacSt === wantDac && f.cake === wantCake && vb.dacAuto === wantDac && (wantDac ? locked(f) : free(f)) && mirrors(f), JSON.stringify({ dac: f.dac, cake: f.cake, asc: f.asc, pocket: f.pocket, vb: vb.dacAuto }));
+      ok(`manifest ${label}: loads in mode 2 with the switch ${wantDac ? 'ON' : 'OFF'}, cake ${wantCake}, and saves the same dacAuto`, f.dac === wantDac && f.dacSt === wantDac && f.cake === wantCake && vb.dacAuto === wantDac && (wantDac ? locked(f) : free(f)) && mirrors(f), JSON.stringify({ locked: locked(f), free: free(f), mirrors: mirrors(f), sw: f.sw, dac: f.dac, cake: f.cake, asc: f.asc, pocket: f.pocket, vb: vb.dacAuto }));
     }
   }
 
