@@ -108,7 +108,7 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
     const ringLv = []; S1.levelMeta.forEach((m, L) => { if (m.ring) ringLv.push(L); });
     ok(`${label}: no empty ring level (${ringLv.length} ring levels, each with tiles)`, ringLv.length === S1.cake.levelsAdded && ringLv.every((L) => S1.byLevel[L].length > 0), [ringLv.length, S1.cake.levelsAdded]);
     // per tile
-    let nRing = 0, bad = 0, thin = 0, band = 0, foot = 0, moved = 0, wrongSide = 0, upNotLow = 0; const claim = S1.cake.claim, fw = S1.mapW, mapOf = (i) => (((i / S1.W) | 0) + S1.oy) * fw + (i % S1.W) + S1.ox;
+    let nRing = 0, bad = 0, thin = 0, band = 0, foot = 0, moved = 0, wrongSide = 0; const claim = S1.cake.claim, fw = S1.mapW, mapOf = (i) => (((i / S1.W) | 0) + S1.oy) * fw + (i % S1.W) + S1.ox;
     const used = new Set(); for (const rec of S1.stairs) { for (const t of rec.bottom) used.add(t); for (const t of rec.top) used.add(t); for (const st of rec.steps) for (const t of st.tiles) used.add(t); }
     for (let i = 0; i < n; i++) {
       const hNew = S1.levelH[S1.fine[i]], hOld = S0.levelH[S0.fine[i]];
@@ -118,7 +118,6 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
       if (used.has(i)) foot++;
       if (l.down ? S1.roomMap[i] !== l.room : S1.roomType[i] === T.DIORAMA) bad++; // Up v2 builds in the AIRSPACE (any non-void tile except a Diorama tile)
       if (l.down ? S1.ter[i] !== l.high : S1.roomMap[i] === l.room && S1.ter[i] === l.high) wrongSide++; // Up: never on the core terrace of its own room (a room tile of a third terrace below may be raised: airspace)
-      if (!l.down && S1.roomMap[i] === l.room && S1.ter[i] !== l.low) upNotLow++;
       if (l.down ? !(hNew < hOld - 0.05 + 1e-9) : !(hNew > hOld + 0.05 - 1e-9)) thin++;           // a cut / build of at least the margin (0.05 terH): thickness > 0
       if (!(hNew > tb(l.low) && hNew < tb(l.high) + (K - 1) * sub)) band++;
     }
