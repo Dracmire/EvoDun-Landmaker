@@ -37,7 +37,7 @@
       for (let j = 0; j < n2; j++) { const i = src(j); if (i >= 0) for (let k = 0; k < per; k++) o[j * per + k] = a[i * per + k]; } return o; };
     S.U = grow(S.U, 0); S.ter = grow(S.ter, 0); S.sub = grow(S.sub, 0); S.fine = grow(S.fine, 0); S.void = grow(S.void || new Uint8Array(W * H), 1); S.fineMask = grow(S.fineMask || Int16Array.from(S.fine), -1);
     S.water = grow(S.water, 0); S.block = grow(S.block, 1); S.roomKind = grow(S.roomKind, 0, 4); S.roomBits = grow(S.roomBits, 0); S.roomMap = grow(S.roomMap, 0); S.carved = grow(S.carved, 0);
-    S.region = grow(S.region, -1); S.isolated = grow(S.isolated, 0); S.nowalk = grow(S.nowalk, 0); S.roomType = grow(S.roomType, 0);
+    S.region = grow(S.region, -1); S.isolated = grow(S.isolated, 0); S.nowalk = grow(S.nowalk, 0); S.roomType = grow(S.roomType, 0); S.ringTile = grow(S.ringTile, 0); // the Cake ring flags (set when Cake is on) follow the window too
     for (const k of ['snake', 'cave', 'waterfall']) if (S[k] && S[k].length === W * H) S[k] = grow(S[k], 0);
     S.dioBits = S.roomBitsDio = S.slice = S.border = S.borderKind = S.sliceLoops = null; S.sliceUse = null; S.conns = []; S.passes = []; S.gates = []; S.makeSite = null; S._walk = null; S.cache = {};
     const keep = []; for (const rec of S.stairs || []) {

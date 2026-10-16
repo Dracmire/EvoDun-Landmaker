@@ -213,6 +213,32 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
         console.log(`  info: ${label}: Down tiles v1 ${dv1.size} -> v2 ${dv2.size}: ${added} added (${addedUp} of them claimed by an Up link in v1), ${wonByUp} now won by an Up link (${upSameRoom} of the same room), ${miss} lost otherwise, ${hDiff} with another height`);
         ok(`${label}: Down v1 -> v2: same heights on common tiles, ${added} tiles gained (all were Up claims in v1), ${wonByUp} lost only to an Up claim`, miss === 0 && hDiff === 0 && added === addedUp && upSameRoom === 0, [miss, hDiff, added, addedUp, wonByUp, upSameRoom]);
       }
+      { // ---- CORE PROTECTION (follow-up of #35, user's decision 2026-10-16): an Up ring never takes a core tile of ANOTHER Cake room (stacked cakes of the same room are by design; a bowl floor is also protected from the Up rings of its own room) ----
+        const coreOf = (m) => { const o = ty.rooms.get(RL.room[m]); return o && o.type === T.CAKE ? o.linkList.filter((l2) => l2.core === RL.ter[m]) : []; };
+        const onCore = (R) => { const o = { other: 0, sameRoomUp: 0, sameRoomBowl: 0, down: 0 }; for (const [t, c] of R.claim) { const cs = coreOf(t); if (!cs.length) continue; if (c.link.down) { o.down++; continue; } if (RL.room[t] !== c.link.room) o.other++; else if (!cs.some((x) => x.low === c.link.low && x.high === c.link.high)) { if (cs.some((x) => x.down)) o.sameRoomBowl++; else o.sameRoomUp++; } } return o; };
+        const upCount = (R) => [...R.claim.values()].filter((c) => !c.link.down).length, Ropen = T.buildRings(RL, ty, { ...Pp, cakeCoreOpen: true }, q, none), cc = onCore(Rv2), co = onCore(Ropen);
+        console.log(`  info: ${label}: Up ring tiles on a core tile of ANOTHER Cake room ${co.other} -> ${cc.other} (cakeCoreOpen -> now); on the core of another link of the SAME room (stacked cakes, by design): ${co.sameRoomUp} -> ${cc.sameRoomUp}, on a bowl floor of the same room ${co.sameRoomBowl} -> ${cc.sameRoomBowl}; Down claims on any core tile (other rooms or other links of the same room): ${co.down} -> ${cc.down}; Up ring tiles ${upCount(Ropen)} -> ${upCount(Rv2)} (BFS entries refused by the rule, seam window included: ${Rv2.coreBlocked})`);
+        ok(`${label}: no Up ring tile lies on a core tile of another Cake room (and none on a bowl floor of its own room)`, cc.other === 0 && cc.sameRoomBowl === 0, JSON.stringify(cc));
+        ok(`${label}: Down claims never land on a core tile (other rooms or other links of the same room): 0`, cc.down === 0, cc.down);
+        if (label === 'Default') ok(`${label}: mutation (cakeCoreOpen): the same check FAILS on the previous behaviour (${co.other} on another room's core, ${co.sameRoomBowl} on a bowl floor of its own room)`, co.other > 0 && co.sameRoomBowl > 0, JSON.stringify(co));
+        else ok(`${label}: cakeCoreOpen changes nothing here (the old count is 0 too, so the check above is an equality)`, co.other === 0 && co.sameRoomBowl === 0 && Ropen.claim.size === Rv2.claim.size, JSON.stringify(co));
+        // the FINAL shape (heights as drawn): the platform of a cake is its extreme: ring-0 tiles are strictly lower than an adjacent core tile (Up) / higher (Down); a ramp surface is lower than its platform, so tiles next to a ramp are excluded
+        const finalCheck = (Sx) => {
+          const fw = Sx.mapW, mapOf = (i) => (((i / Sx.W) | 0) + Sx.oy) * fw + (i % Sx.W) + Sx.ox, Hh = (i) => Sx.levelH[Sx.fine[i]], o = { up: 0, down: 0, nUp: 0, nDown: 0, at: [] };
+          for (let i = 0; i < Sx.n; i++) {
+            if (!Sx.ringTile[i]) continue; const c = Sx.cake.claim.get(mapOf(i)); if (!c || c.k !== 0) continue; const l = c.link, lk = Sx.types.rooms.get(l.room).linkList.find((k2) => k2.low === l.low && k2.high === l.high), x = i % Sx.W, y = (i / Sx.W) | 0;
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+              const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= Sx.W || ny >= Sx.H) continue; const j = ny * Sx.W + nx; if (!(Sx.roomMap[j] === l.room && Sx.ter[j] === lk.core && !Sx.carved[j])) continue;
+              if (l.down) { o.nDown++; if (!(Hh(i) > Hh(j) + 1e-9)) { o.down++; o.at.push([x, y, l.room]); } } else { o.nUp++; if (!(Hh(i) < Hh(j) - 1e-9)) o.up++; }
+            }
+          }
+          return o;
+        };
+        const Sc = run({ ...Pp, cake: true }), So = run({ ...Pp, cake: true, cakeCoreOpen: true }), fc = finalCheck(Sc), fo = finalCheck(So);
+        console.log(`  info: ${label}: final shape, ring-0 tiles next to a core tile of their own link (Up ${fc.nUp}, Down ${fc.nDown}): violations Up ${fo.up} -> ${fc.up}, Down ${fo.down} -> ${fc.down}${fo.at.length ? ' (previous: ' + [...new Set(fo.at.map((a2) => a2.join(',')))].join(' ; ') + ' = x, y, room)' : ''}`);
+        ok(`${label}: FINAL shape: every Up ring-0 tile is strictly lower, every Down ring-0 tile strictly higher than an adjacent core tile of its link (${fc.nUp} + ${fc.nDown} pairs)`, fc.up === 0 && fc.down === 0, JSON.stringify(fc));
+        if (label === 'Default') ok(`${label}: mutation (cakeCoreOpen): the final-shape check FAILS for Down on the previous behaviour (${fo.down} violations)`, fo.down > 0, JSON.stringify(fo));
+      }
     }
   }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
