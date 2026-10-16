@@ -87,5 +87,20 @@ const { open } = require('./common');
   const json = JSON.parse(fs.readFileSync(await dl.path(), 'utf8'));
   ok('pack.json is evodun-pack/0.3 with the stake and the objectives in whole-map tiles', json.format === 'evodun-pack/0.3' && JSON.stringify(json.stake) === JSON.stringify(xy(pick.A[0])) && json.objectives.length === 1 && JSON.stringify(json.objectives[0]) === JSON.stringify(xy(pick.A[1])), JSON.stringify([json.stake, json.objectives]));
   await page.click('#m-clear'); ok('Clear removes everything', (await page.evaluate(() => window.__evo.inc.objectives.length + (window.__evo.inc.stake ? 1 : 0))) === 0);
+  // a mark that ARRIVES on a tile that is in no walkable region (a manifest, or terrain that became isolated / not walkable after a parameter change) is explained plainly, never as "Region R0 (undefined tiles)" or "RNaN"
+  for (const sc of ['real_balanced', 'real_default']) {
+    await page.evaluate((s) => window.__evo.scenario(s), sc); await a.idle();
+    const t = await page.evaluate(() => { const e = window.__evo, S = e.S(); let m = -1, iso = -1, nw = -1; for (let i = 0; i < S.n; i++) { if (S.block[i]) continue; if (m < 0 && S.region[i] === 0) m = i; if (iso < 0 && S.isolated && S.isolated[i]) iso = i; if (nw < 0 && S.nowalk && S.nowalk[i] && !(S.isolated && S.isolated[i])) nw = i; }
+      const xy = (k) => ({ x: S.ox + (k % S.W), y: S.oy + ((k / S.W) | 0) }); return { m: xy(m), iso: iso >= 0 ? xy(iso) : null, nw: nw >= 0 ? xy(nw) : null, nonFinite: { x: NaN, y: NaN } }; });
+    const bad = /R0|NaN|undefined/;
+    for (const [kind, tile] of [['isolated', t.iso], ['forbidden margin', t.nw], ['non-finite coordinates', t.nonFinite]]) {
+      if (!tile) { console.log(`  info: ${sc}: no ${kind} tile in this scenario`); continue; }
+      for (const side of ['objective', 'stake']) {
+        await page.evaluate(([m, k, side]) => { const e = window.__evo; if (side === 'objective') { e.inc.stake = m; e.inc.objectives = [k]; } else { e.inc.stake = k; e.inc.objectives = [m]; } e.draw(); }, [t.m, tile, side]); await a.idle();
+        const txt = await info();
+        ok(`${sc}: a ${side} on a ${kind} tile: plain message, no R0 / NaN / undefined, and no "closest approach"`, !bad.test(txt) && !/closest approach/.test(txt) && /no route|outside the slice/.test(txt), txt);
+      }
+    }
+  }
   console.log('errors:', a.errs); await a.browser.close();
 })();

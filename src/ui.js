@@ -198,8 +198,11 @@
   /* ---- incursion: stake, objectives, routes ---- */
   const incIdx = (m) => { // a mark (tile of the whole map) as a tile of the built window, or -1 when it is outside the window or the slice
     const x = m.x - S.ox, y = m.y - S.oy; if (x < 0 || y < 0 || x >= S.W || y >= S.H) return -1;
-    const i = y * S.W + x; return S.block[i] ? -1 : i;
+    const i = y * S.W + x; return !Number.isInteger(i) || S.block[i] ? -1 : i; // a mark from a manifest with a non-integer / NaN coordinate is outside, never a tile index
   };
+  // a tile that belongs to a walkable region: isolated terrain and the forbidden margins of the rooms layer have region -1 (a mark can arrive on one from a manifest or after a parameter change; placeMark refuses a click there)
+  const inRegion = (i) => !!S.region && Number.isInteger(S.region[i]) && S.region[i] >= 0;
+  const noRegionWhy = (i) => (S.isolated && S.isolated[i] ? `isolated terrain (a walkable region under ${S.walkInfo ? S.walkInfo.limit : 'the limit of'} tiles)` : 'a tile that is not part of any walkable region (a margin of a wall, a cliff or a steep slope)');
   const regionName = (r) => `R${r + 1}`;
   /* a floors package (crystallizer 5): a mark belongs to the LAYER it was placed on (0 = the exterior, k = floor k); other packs keep marks without a layer (same pixels, same manifest) */
   const incFloors = () => !!(packs[st.pack] && E.hasFloors(packs[st.pack].pack)), curLayer = () => (st.floors === 'single' ? st.layer : 0);
@@ -211,6 +214,7 @@
     const gone = (name, m) => (fl ? `${name}: on ${layerName(m.layer || 0)}, not shown here.` : null);
     const stakeHere = inc.stake && onLayer(inc.stake), stake = stakeHere ? incIdx(inc.stake) : -1;
     if (inc.stake && !stakeHere) out.lines.push(gone('Stake', inc.stake));
+    if (stakeHere && stake >= 0 && !inRegion(stake)) out.lines.push(`Stake: on ${noRegionWhy(stake)} now: no route can reach it.`);
     if (stakeHere) { if (stake >= 0) out.stake = stake; else out.lines.push(fl ? 'Stake: on a tile that is not walkable in this layer (kept in the pack, not shown).' : 'Stake: outside the slice (kept in the pack, not shown).'); }
     inc.objectives.forEach((o, k) => {
       const name = o.label || `Objective ${k + 1}`;
@@ -218,7 +222,9 @@
       const i = incIdx(o);
       if (i < 0) { out.lines.push(fl ? `${name}: on a tile that is not walkable in this layer (kept in the pack, not shown).` : `${name}: outside the slice (kept in the pack, not shown).`); return; }
       const ob = { i, route: null }; out.objectives.push(ob);
+      if (!inRegion(i)) { out.lines.push(`${name}: on ${noRegionWhy(i)} now: no route.`); return; }
       if (stake < 0) { out.lines.push(`${name} at (${o.x}, ${o.y}): no stake ${fl && inc.stake ? 'on this layer' : 'yet'}.`); return; }
+      if (!inRegion(stake)) { out.lines.push(`${name}: no route (the stake is not on a walkable region, see above).`); return; }
       ob.route = E.route(S, P, i, stake);
       if (ob.route) { out.lines.push(`${name}: route of ${ob.route.length} tiles to the stake.`); return; }
       const g = E.regionGap(S, i, stake), xy = (t) => `(${S.ox + (t % S.W)}, ${S.oy + ((t / S.W) | 0)})`;
