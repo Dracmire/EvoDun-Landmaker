@@ -12,13 +12,24 @@ const arg = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.a
   await page.click('#mode'); await a.idle();
   await page.setInputFiles('#file', [IMG]); await page.waitForTimeout(1500); await a.idle();
   await page.check('#t-rooms'); await a.idle(); await page.check('#t-cake'); await a.idle();
-  const sp = arg('--spots');
+  const sp = arg('--spots'), saved = sp ? JSON.parse(fs.readFileSync(sp, 'utf8')) : {}, found = {};
   for (const cfg of ['default', 'balanced']) { // Default first (the preset at load), then Balanced types
     if (cfg === 'balanced') { await page.selectOption('#roomsPreset', 'balanced'); await a.idle(); }
     for (const t of ['box', 'A', 'B', 'C']) { await a.tech(t); for (const p of ['isoE', 'oblique']) { await a.preset(p); await shot(`${cfg}_${t}_${p}`); } }
+    if (cfg === 'default') { // the Up ring tiles that sit on a core tile of ANOTHER Cake room (the airspace of Up v2), split by the direction of the cake that owns that core: the densest 10 x 10 cell of each kind
+      const core = saved.core || await page.evaluate(() => {
+        const S = window.__evo.S(), RL = S.rooms, fw = S.mapW, T = window.EVO.roomTypes, cells = { up: new Map(), down: new Map() };
+        for (const [m, c] of S.cake.claim) { if (c.link.down || RL.room[m] === c.link.room || RL.room[m] <= 0) continue; const o2 = S.types.rooms.get(RL.room[m]); if (!o2 || o2.type !== T.CAKE) continue;
+          const ds = o2.linkList.filter((l2) => l2.core === RL.ter[m]); if (!ds.length) continue; const k = ds.some((l2) => !l2.down) ? 'up' : 'down', x = (m % fw) - S.ox, y = ((m / fw) | 0) - S.oy, ck = Math.floor(x / 10) + ',' + Math.floor(y / 10); let a = cells[k].get(ck); if (!a) cells[k].set(ck, a = []); a.push([x, y]); }
+        const out = {}; for (const k of ['up', 'down']) { let best = null; for (const a of cells[k].values()) if (!best || a.length > best.length) best = a; if (best) out[k] = { n: best.length, x: best.reduce((p, q) => p + q[0], 0) / best.length + 0.5, y: best.reduce((p, q) => p + q[1], 0) / best.length + 0.5 }; } return out; });
+      found.core = core;
+      for (const key of ['up', 'down']) { const s = core[key]; if (!s) continue;
+        const info = await page.evaluate(({ x, y }) => { const e = window.__evo, S = e.S(), i = Math.min(S.n - 1, Math.max(0, Math.floor(y) * S.W + Math.floor(x))); return { h: S.levelH[S.fine[i]], fit: e.st.fitSc }; }, s);
+        for (const t of ['box', 'B']) { await a.tech(t); await a.preset('isoE'); await a.focus(s.x, s.y, info.h, 16 / info.fit); await shot(`corespot_${key}_${t}_isoE`); } }
+    }
     if (cfg !== 'balanced') continue;
     let spots;
-    if (sp) spots = JSON.parse(fs.readFileSync(sp, 'utf8'));
+    if (saved.up || saved.down) spots = saved;
     else {
       spots = await page.evaluate(() => {
         const e = window.__evo, S = e.S(), fw = S.mapW, RL = S.rooms, win = (m) => [(m % fw) - S.ox, ((m / fw) | 0) - S.oy], best = { up: null, down: null };
@@ -31,7 +42,7 @@ const arg = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.a
         }
         return best;
       });
-      fs.writeFileSync(path.join(out, 'spots.json'), JSON.stringify(spots));
+      found.up = spots.up; found.down = spots.down;
     }
     for (const key of ['up', 'down']) {
       const s = spots[key]; if (!s) continue;
@@ -39,5 +50,6 @@ const arg = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.a
       for (const [t, cams] of [['box', key === 'up' ? ['isoE', 'low'] : ['isoE']], ['B', key === 'up' ? ['isoE', 'low'] : ['isoE']]]) { await a.tech(t); for (const c of cams) { await a.preset(c); await a.focus(s.x, s.y, info.h, (c === 'low' ? 30 : 16) / info.fit); await shot(`closeup_${key}_${t}_${c}`); } } // Cam 4 (Low) at about 30 px per tile: the platform against its rings seen from the side
     }
   }
+  fs.writeFileSync(path.join(out, 'spots.json'), JSON.stringify(Object.assign({}, saved, found)));
   console.log('errors:', a.errs); await a.browser.close();
 })();

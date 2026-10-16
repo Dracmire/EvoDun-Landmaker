@@ -17,11 +17,18 @@ const arg = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.a
   if (process.argv.includes('--asc')) { await page.check('#t-ascWalls'); await a.idle(); }
   for (const cfg of cfgs) {
     if (cfg === 'balanced') { await page.selectOption('#roomsPreset', 'balanced'); await a.idle(); }
-    const heights = await page.evaluate(() => { const S = window.__evo.S(); return { n: S.n, W: S.W, ox: S.ox, oy: S.oy, h: Array.from(S.fine, (L) => S.levelH[L]) }; });
+    // heights per tile + claimed = the window tiles of every ring (Up and Down), for cake_up_reach.py
+    const heights = await page.evaluate(() => { const S = window.__evo.S(); const fw = S.mapW; return { n: S.n, W: S.W, ox: S.ox, oy: S.oy, h: Array.from(S.fine, (L) => S.levelH[L]), claimed: S.cake ? [...S.cake.claim.keys()].map((m) => ((((m / fw) | 0) - S.oy) * S.W + (m % fw) - S.ox)) : [] }; });
     fs.writeFileSync(path.join(out, `${cfg}_heights.json`), JSON.stringify(heights));
     const oldH = old ? JSON.parse(fs.readFileSync(path.join(old, `${cfg}_heights.json`), 'utf8')) : null;
     for (const t of techs) { await a.tech(t); for (const p of presets) {
       await a.preset(p); fs.writeFileSync(path.join(out, `${cfg}_${t}_${p}.png`), await a.canvas());
+      if (process.argv.includes('--pick')) { // the Box pick buffer of this view as an image: tile + 1 in the RGB bytes of every pixel that resolves to a tile (wall, ramp or cap code), 0 elsewhere (used by cake_up_reach.py)
+        const pk = await page.evaluate(() => { const E = window.EVO, e = window.__evo, S = e.S(), cv = document.querySelector('#stage canvas'), w = cv.clientWidth, h = cv.clientHeight, b = E.pickBuffer(S, e.P, e.view(), w, h), o = document.createElement('canvas'); o.width = w; o.height = h;
+          const g = o.getContext('2d'), im = g.createImageData(w, h); for (let i = 0; i < w * h; i++) { const r = b.data[4 * i], gg = b.data[4 * i + 1], bb = b.data[4 * i + 2], al = b.data[4 * i + 3], code = (r << 16) | (gg << 8) | bb, k = code >> 20, v = code & 0xfffff, t = al === 255 && (k === 2 || k === 3 || k === 4) && v < S.n ? v + 1 : 0; im.data[4 * i] = (t >> 16) & 255; im.data[4 * i + 1] = (t >> 8) & 255; im.data[4 * i + 2] = t & 255; im.data[4 * i + 3] = 255; }
+          g.putImageData(im, 0, 0); return o.toDataURL('image/png'); });
+        fs.writeFileSync(path.join(out, `${cfg}_${t}_${p}_pick.png`), Buffer.from(pk.split(',')[1], 'base64'));
+      }
       if (oldH) {
         const mask = await page.evaluate(({ oldH, rad }) => {
           const E = window.EVO, e = window.__evo, S = e.S(), P = e.P, cv = document.querySelector('#stage canvas'), CW = cv.clientWidth, CH = cv.clientHeight, cam = E.makeCam(S, P, e.view(), CW, CH);
