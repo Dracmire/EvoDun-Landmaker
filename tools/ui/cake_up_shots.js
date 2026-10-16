@@ -27,6 +27,11 @@ const arg = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.a
         const info = await page.evaluate(({ x, y }) => { const e = window.__evo, S = e.S(), i = Math.min(S.n - 1, Math.max(0, Math.floor(y) * S.W + Math.floor(x))); return { h: S.levelH[S.fine[i]], fit: e.st.fitSc }; }, s);
         for (const t of ['box', 'B']) { await a.tech(t); await a.preset('isoE'); await a.focus(s.x, s.y, info.h, 16 / info.fit); await shot(`corespot_${key}_${t}_isoE`); } }
     }
+    if (cfg === 'default') { // the two Down ring-0 tiles that ended BELOW a bowl-floor tile raised by an Up ring of another cake (Up v2 without the core protection): room 19 (130, 144), room 30 (173, 154); window tiles of the whole-map shape
+      for (const [x, y] of [[130, 144], [173, 154]]) {
+        const info = await page.evaluate(({ x, y }) => { const e = window.__evo, S = e.S(), i = Math.min(S.n - 1, Math.max(0, Math.floor(y) * S.W + Math.floor(x))); return { h: S.levelH[S.fine[i]], fit: e.st.fitSc }; }, { x, y });
+        for (const t of ['box', 'B']) { await a.tech(t); await a.preset('isoE'); await a.focus(x + 0.5, y + 0.5, info.h, 16 / info.fit); await shot(`violation_${x}_${y}_${t}_isoE`); } }
+    }
     if (cfg !== 'balanced') continue;
     let spots;
     if (saved.up || saved.down) spots = saved;
