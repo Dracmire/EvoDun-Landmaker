@@ -240,6 +240,8 @@
 
   /* pack: the whole map; spec: see E.sliceOf (omit for the whole map as one slice). Terraces use the global
      elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
+  /* the camera axis the pocket is composed for (degrees; P.pocketYaw, a diagnostic-style parameter: not a control, not in the manifest). Undefined = the default of src/pocket.js (45, the Iso preset). The key is added ONLY when it is set: Object.assign({}, defaults, { yaw: undefined }) would give NaN. */
+  const pocketOpts = (P) => (P.pocketYaw === undefined ? {} : { yaw: P.pocketYaw });
   E.shape = function (full, P, spec) {
     let RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: the global tree gives the gates, sub-terraces are only visual
     let roomsNone = null; // rooms on but the layer found no room (e.g. a 40x40 map with the Default radius): the layer is not applied, the shape is the one with rooms off
@@ -250,7 +252,7 @@
       const o = E.roomTypes.classify(RL, P).rooms.get(spec.rooms[0]);
       if (o && o.type === E.roomTypes.DIORAMA) {
         pocketIds = [o.id]; seedIds = [o.id]; spec = null;
-        pocketWin = E.pocket.windowOf(RL, o); // the world shape is reframed to the window of the disc (it may extend past the map: void) before the pocket is made
+        pocketWin = E.pocket.windowOf(RL, o, pocketOpts(P)); // the SAME yaw as the pocket itself (the window must contain the disc) // the world shape is reframed to the window of the disc (it may extend past the map: void) before the pocket is made
       }
     }
     const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
@@ -358,7 +360,7 @@
         S.dioBits = db; S.roomBitsDio = bd;
       }
     }
-    if (pocketIds) { if (pocketWin) E.pocket.reframe(S, pocketWin); E.pocket.apply(S, P, RL, pocketIds, { ids: seedIds }); } // the pocket of a Diorama: the fragment stays, the surroundings change
+    if (pocketIds) { if (pocketWin) E.pocket.reframe(S, pocketWin); E.pocket.apply(S, P, RL, pocketIds, Object.assign({ ids: seedIds }, pocketOpts(P))); S.pocketYaw = P.pocketYaw === undefined ? E.pocket.defaults.yaw : P.pocketYaw; S.pocketInfo.yaw = S.pocketYaw; } // the pocket of a Diorama: the fragment stays, the surroundings change
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
     S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };

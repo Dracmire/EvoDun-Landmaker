@@ -145,13 +145,13 @@ Known limits:
 - Imbalance of the plain V16.4 rule (D12) and the figures with rule D-D (D10).
 - The "not walkable" tone looks jagged over the Cake rings (limitation 13, same cause as terrain limitation 1, PARKED).
 - Cold cost with Cake rings: B grows with the number of levels (15 -> 41 on the 5-terrace Default row); figures in section 7.
-- Pocket: fixed Iso camera (composition made for yaw 45, the fragment sits in the back third); double dioramas of two rooms NOT implemented (only 2 pairs of the map are joined only by a cliff and none faces the camera); per-room variations (wall yes / no) are designed, not implemented.
+- Pocket: composed along the ACTIVE camera's axis (UI pass; `P.pocketYaw`, all seven cameras; rebuilt on a preset change, not on a drag); double dioramas of two rooms NOT implemented (only 2 pairs of the map are joined only by a cliff and none faces the camera); per-room variations (wall yes / no) are designed, not implemented.
 - Snake Mountain surface with rooms on: no rooms, layer not applied (D19).
 
 Open questions / pending for later (CLAUDE.md "Pending" 4 and 5):
 - Double dioramas of two rooms (the list of ids is ready).
 - Per-room variations (wall yes / no).
-- Pocket with cameras other than Iso.
+- (Done in the UI pass) Pocket with cameras other than Iso: composed along the active camera's axis.
 - The hierarchical A* with flow stays as an ALTERNATIVE pending the user's decision (not implemented).
 - A LATER step (user's decision): fewer ramps or ramps only in X rooms to even the types out; AFTER it: HD-2D layered terraces, SDF exterior mesh for Snake Mountain, RuleTile skin / modular kits.
 - Possible improvement (user's call): loops for the terrace gates only (room transitions already give alternative routes on flat ground).
@@ -159,10 +159,10 @@ Open questions / pending for later (CLAUDE.md "Pending" 4 and 5):
 
 ## 10. Camera contract
 
-- **Made for**: **Cam 1 Iso 45** (`isoE`). The Pocket was composed for it (disc centred 1 r toward the camera, backdrop bands by distance along the camera axis, Iso yaw 45; [`docs/room-types.md`](../../room-types.md)) and the Cake figures, the Ascension-wall cut and the
+- **Made for**: **Cam 1 Iso 45** (`isoE`) first; the POCKET now follows the active camera (UI pass: disc centred 1 r toward the camera, backdrop bands by distance along the camera axis, the axis being the camera's base yaw: Cam 1 45, Cam 2 -45, Cam 3-7 0; [`docs/room-types.md`](../../room-types.md)); the Cake figures, the Ascension-wall cut and the
   wall z-buffer figures of this README were measured at Oblique 50 and Iso 45 (CLAUDE.md, [`docs/room-types.md`](../../room-types.md)). Cam 3 Oblique 50 (`oblique`, the default) is the other camera these were checked at (the wall order test uses Oblique 50 and four Iso 45 directions).
 - **Does not work: the low camera with the Pocket.** The real Diorama pocket seen from a low camera does not work, it was designed for Iso ([`../03-stage/README.md`](../03-stage/README.md) section 8, mock 5, and Q6 there).
-- **Not looked at**: Cam 2 Iso -45 (the mirror of Cam 1) and Cam 5 Top 80 with the Pocket, Cake and the walls.
-- **Cam 6 Stage and Cam 7 Classic 3/4** (added with the camera bank, PR of crystallizer 3 groundwork): looked at with Diorama 31 (Balanced types, Pocket on): under Cam 6 the pocket reads as a disc seen head-on with the pond in front, but its backdrop bands (built along the Iso axis) do not line up with the
-  view axis, so the "stage" is flat; under Cam 7 it is a nearly top-down disc with the heights shifted up and the front and back bands cannot be told apart. The Ascension walls under both cameras: the Zelda cut is recomputed per camera (per-position facing under Cam 6) and the wall order was measured against the
+- **Pocket at Cam 1, 2, 3, 6** (UI pass, `tools/ui/test_pocket_cam_ui.js`, 18 Dioramas of the Balanced types): backdrop dx +0.05 / +0.08 / +0.06 / +0.05 fragment widths, fragment visibility lost to the decoration 0.00-0.02 points; Cam 2 was looked at in screenshots (rooms 31, 7, 22, 49). **Not looked at**: Cam 4, 5 and 7 with the Pocket (they share the yaw-0 composition with Cam 3 and Cam 6), and Cam 5 Top 80 with the Cake and the walls.
+- **Cam 6 Stage and Cam 7 Classic 3/4** (added with the camera bank, PR of crystallizer 3 groundwork): looked at with Diorama 31 (Balanced types, Pocket on): under Cam 6 the pocket USED to read as a disc seen head-on with the pond in front but with its backdrop bands (built along the Iso axis) not lined up with the
+  view axis (so the "stage" was flat); since the UI pass the pocket is composed along the Cam 6 axis (the backdrop sits behind and centred; the large flat decoration of the disc in front still reads as a flat stage at the low pitch of 25 deg); under Cam 7 it is a nearly top-down disc with the heights shifted up and the front and back bands cannot be told apart. The Ascension walls under both cameras: the Zelda cut is recomputed per camera (per-position facing under Cam 6) and the wall order was measured against the
   z-buffer (Cam 6: Box mean 0.08 % / worst 0.19 %, A and B 0.46 % / 1.60 %; Cam 7: Box 0.32 % / 0.57 %, A and B 0.35 % / 1.82 %; real map, Balanced types, 10 chains, 30 px per tile; CLAUDE.md limitation 15). Cake rings and the full Pocket composition under Cam 6 / Cam 7 are NOT measured.

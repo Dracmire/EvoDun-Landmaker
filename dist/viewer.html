@@ -835,6 +835,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
 
   /* pack: the whole map; spec: see E.sliceOf (omit for the whole map as one slice). Terraces use the global
      elevation range of the whole map (pack.elevRange when present), so they do not depend on the window. */
+  /* the camera axis the pocket is composed for (degrees; P.pocketYaw, a diagnostic-style parameter: not a control, not in the manifest). Undefined = the default of src/pocket.js (45, the Iso preset). The key is added ONLY when it is set: Object.assign({}, defaults, { yaw: undefined }) would give NaN. */
+  const pocketOpts = (P) => (P.pocketYaw === undefined ? {} : { yaw: P.pocketYaw });
   E.shape = function (full, P, spec) {
     let RL = P.rooms && E.rooms ? E.rooms.layer(full, P) : null; // rooms on: the global tree gives the gates, sub-terraces are only visual
     let roomsNone = null; // rooms on but the layer found no room (e.g. a 40x40 map with the Default radius): the layer is not applied, the shape is the one with rooms off
@@ -845,7 +847,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       const o = E.roomTypes.classify(RL, P).rooms.get(spec.rooms[0]);
       if (o && o.type === E.roomTypes.DIORAMA) {
         pocketIds = [o.id]; seedIds = [o.id]; spec = null;
-        pocketWin = E.pocket.windowOf(RL, o); // the world shape is reframed to the window of the disc (it may extend past the map: void) before the pocket is made
+        pocketWin = E.pocket.windowOf(RL, o, pocketOpts(P)); // the SAME yaw as the pocket itself (the window must contain the disc) // the world shape is reframed to the window of the disc (it may extend past the map: void) before the pocket is made
       }
     }
     const sl = E.sliceOf(full, spec), pack = sl ? cropPack(full, sl) : full;
@@ -953,7 +955,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         S.dioBits = db; S.roomBitsDio = bd;
       }
     }
-    if (pocketIds) { if (pocketWin) E.pocket.reframe(S, pocketWin); E.pocket.apply(S, P, RL, pocketIds, { ids: seedIds }); } // the pocket of a Diorama: the fragment stays, the surroundings change
+    if (pocketIds) { if (pocketWin) E.pocket.reframe(S, pocketWin); E.pocket.apply(S, P, RL, pocketIds, Object.assign({ ids: seedIds }, pocketOpts(P))); S.pocketYaw = P.pocketYaw === undefined ? E.pocket.defaults.yaw : P.pocketYaw; S.pocketInfo.yaw = S.pocketYaw; } // the pocket of a Diorama: the fragment stays, the surroundings change
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
     for (let i = 0; i < n; i++) if ((!S.slice || S.slice[i]) && !(vd && vd[i])) { terSeen.add(S.ter[i]); fineSeen.add(S.fine[i]); }
     S.levelCount = { terraces: terSeen.size, levels: fineSeen.size };
@@ -2223,7 +2225,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
 
 /* EvoDun crystal viewer - POCKET (pseudo-space) of a Diorama room: the user's crystallizer for Diorama rooms.
    IDEA (user's decision): the map does not change. The FRAGMENT of the Diorama (its real tiles) is the same in the world and in the pocket; only what surrounds it changes. The pocket is bigger
-   than the footprint and does not look outward (a closed scene, Hades style). Fixed camera for now: the composition is made for the Iso preset (yaw 45).
+   than the footprint and does not look outward (a closed scene, Hades style). The composition follows the ACTIVE camera: opts.yaw (degrees; the camera axis in map coordinates is u = (sin yaw, cos yaw), toward the camera) is set by the viewer from the camera's base yaw (P.pocketYaw in src/shape.js; Cam 1 45, Cam 2 -45, Cam 3-7 0); the default stays 45 (the Iso preset).
    - Input: a LIST of room ids (always one today; the list is there for double dioramas of two rooms, NOT implemented: only 2 pairs in the map are joined only by a cliff, none facing the camera).
    - Fragment: all the tiles of the room with their levels, sub-terraces and walkability as they are, in WORLD coordinates (the pocket overlaps the world at the same place: the change is seamless).
    - Size: R = 3 r, r = sqrt(tiles / pi). Centre of the disc = centroid of the fragment moved 2 r TOWARD the camera, so the fragment sits against the back edge. Outside the disc there is nothing (no world, no veil).
@@ -5668,15 +5670,22 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     if (!raf) raf = requestAnimationFrame(() => setTimeout(draw, 0));
   }
 
+  /* the BASE yaw of the camera (degrees): the preset's own, without the drag variation. The pocket is composed along this axis (E.pocket, P.pocketYaw): Cam 1 45, Cam 2 -45, Cam 3-5 and 7 0, Cam 6 0 or the pack's stageYaw */
+  function baseYaw() {
+    const p = PRESETS.find((x) => x.id === st.preset); if (p.kind === 'oblique') return 0;
+    const pk = packs[st.pack] && packs[st.pack].pack; return p.kind === 'persp' && pk && pk.stageYaw ? pk.stageYaw : p.yaw;
+  }
   function view() {
     const p = PRESETS.find((x) => x.id === st.preset);
     if (p.kind === 'oblique') return { kind: 'oblique', yaw: 0, pitch: 0, zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc }; // Cam 7 has no angle: the drag variation does not apply
-    const pk = packs[st.pack] && packs[st.pack].pack, sy0 = p.kind === 'persp' && pk && pk.stageYaw ? pk.stageYaw : p.yaw; // a pack may declare stageYaw (degrees): the yaw of Cam 6 (no UI)
+    const sy0 = baseYaw(); // the camera's own yaw (a pack may declare stageYaw: the yaw of Cam 6, no UI)
     return { kind: p.kind, yaw: sy0 + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc, persH: st.persH };
   }
 
   function draw() {
     raf = 0;
+    if (S && S.pocket && S.pocketYaw !== baseYaw()) S = null; // a pocket is composed for ONE camera axis: any way of changing the camera (preset, scenario, mode, manifest, Stage preset) that changes the base yaw rebuilds it (a world shape does not depend on the yaw)
+    P.pocketYaw = baseYaw();
     const raw = packs[st.pack].pack, fl = E.hasFloors(raw); // a floors package (crystallizer 5): the shape is the one of the selected layer (the exterior in the stack and cutaway views)
     if (!S) {
       const pack = fl ? E.floorPack(raw, st.floors === 'single' ? st.layer : 0) : raw;

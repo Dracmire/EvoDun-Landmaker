@@ -136,5 +136,31 @@ const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log
   ok('a room that is not a Diorama has no pocket (the switch does nothing)', none.pocket === undefined);
   const off = E.shape(mk(), PB, { rooms: [31], margin: 6 }), off2 = E.shape(mk(), { ...PB, pocket: false }, { rooms: [31], margin: 6 });
   ok('pocket off: identical shape (levels, tiles) and no pocket data', off.pocket === undefined && off.pocketInfo === undefined && JSON.stringify(off.levelH) === JSON.stringify(off2.levelH) && Buffer.compare(Buffer.from(off.fine.buffer), Buffer.from(off2.fine.buffer)) === 0);
+  { // ---- the pocket is composed along the ACTIVE camera's axis (P.pocketYaw; the UI sets it from the camera's base yaw; undefined = 45 = the Iso preset, the old behaviour) ----
+    const same = (A, B) => Buffer.compare(Buffer.from(A.pocketPlan.role.buffer), Buffer.from(B.pocketPlan.role.buffer)) === 0 && Buffer.compare(Buffer.from(A.pocketPlan.height.buffer), Buffer.from(B.pocketPlan.height.buffer)) === 0 && Buffer.compare(Buffer.from(A.pocketPlan.cell.buffer), Buffer.from(B.pocketPlan.cell.buffer)) === 0 && A.ox === B.ox && A.oy === B.oy && A.W === B.W && A.H === B.H && JSON.stringify(A.levelH) === JSON.stringify(B.levelH);
+    for (const id of [31, 7]) {
+      const A = E.shape(mk(), { ...PB, pocket: true }, { rooms: [id], margin: 6 }), B = E.shape(mk(), { ...PB, pocket: true, pocketYaw: 45 }, { rooms: [id], margin: 6 });
+      ok(`room ${id}: pocketYaw undefined and 45 give IDENTICAL roles, heights, cells, levels and window (Cam 1 is unchanged by construction)`, same(A, B) && A.pocketYaw === 45 && B.pocketYaw === 45);
+    }
+    // the disc centre = the centroid + r * (sin yaw, cos yaw) for other yaws (the plan on the hand-made fragment, as above)
+    { const W = 90, H = 90, frag = new Uint8Array(W * H); for (let y = 40; y < 50; y++) for (let x = 34; x < 46; x++) frag[y * W + x] = 1; const r = Math.sqrt(120 / Math.PI);
+      for (const yaw of [0, -45, 90]) { const pl = K.plan(W, H, frag, () => 3, [], { ids: [7], jump: 1, sub: 0.22, yaw }), d = pl.disc, yr = yaw * Math.PI / 180;
+        ok(`plan: the disc centre = the centroid moved 1 r toward the camera at yaw ${yaw}`, Math.abs(d.cx - (40 + r * Math.sin(yr))) < 1e-9 && Math.abs(d.cy - (45 + r * Math.cos(yr))) < 1e-9 && Math.abs(d.u[0] - Math.sin(yr)) < 1e-9 && Math.abs(d.u[1] - Math.cos(yr)) < 1e-9, JSON.stringify(d)); } }
+    // the 18 Dioramas x yaw 45, -45, 0 through P.pocketYaw: builds, hard rule along the plan's u, the fragment is the world's, exits reached, the disc inside the window
+    for (const yaw of [45, -45, 0]) {
+      let nOk = 0, hard = 0, hardChecks = 0, fragBad = 0, exitsBad = 0, trunc = 0, noPocket = 0;
+      for (const o of dio) {
+        const S = E.shape(mk(), { ...PB, pocket: true, pocketYaw: yaw }, { rooms: [o.id], margin: 6 }); if (!S.pocket || S.pocketYaw !== yaw || S.pocketInfo.yaw !== yaw) { noPocket++; continue; } nOk++;
+        const I = S.pocketInfo, d = S.pocketPlan.disc, W = S.W, H = S.H, frag = Uint8Array.from(S.slice, (v) => (v ? 1 : 0)), yr = yaw * Math.PI / 180;
+        if (Math.abs(d.u[0] - Math.sin(yr)) > 1e-9 || Math.abs(d.u[1] - Math.cos(yr)) > 1e-9) fragBad++;
+        for (let i = 0; i < S.n; i++) { if (S.pocketRole[i] !== 2 && S.pocketRole[i] !== 4) continue; hardChecks++; let x = (i % W) + 0.5, y = ((i / W) | 0) + 0.5, hit = -1; for (let st = 0; st < 4 * d.R && hit < 0; st++) { x -= d.u[0] * 0.5; y -= d.u[1] * 0.5; const ix = Math.floor(x), iy = Math.floor(y); if (ix < 0 || iy < 0 || ix >= W || iy >= H) break; if (frag[iy * W + ix]) hit = iy * W + ix; } if (hit >= 0 && S.levelH[S.fine[i]] > S.levelH[S.fine[hit]] + 1e-6) hard++; }
+        // the fragment is the world's, tile by tile (levels and terraces; the window is shifted by S.ox / S.oy)
+        const fw = base.mapW; for (let i = 0; i < S.n; i++) { if (!S.slice[i]) continue; const x = (i % W) + S.ox, y = ((i / W) | 0) + S.oy; if (x < 0 || y < 0 || x >= fw || y >= base.mapH) { fragBad++; continue; } const j = y * fw + x; if (Math.abs(S.levelH[S.fine[i]] - base.levelH[base.fine[j]]) > 1e-9 || S.ter[i] !== base.ter[j]) fragBad++; }
+        if (I.exitsBlocked !== 0 || I.exitsReached !== I.exitRuns) exitsBad++; if (I.truncated) trunc++;
+      }
+      ok(`yaw ${yaw}: the 18 Dioramas build with the pocket, the yaw is stored (S.pocketYaw, S.pocketInfo.yaw) and the disc axis is (sin yaw, cos yaw) (${nOk} of 18)`, nOk === 18 && noPocket === 0);
+      ok(`yaw ${yaw}: HARD RULE along the plan's u (${hardChecks} checks), the fragment is the world's tile by tile, the exits are reached, the disc fits the window`, hard === 0 && fragBad === 0 && exitsBad === 0 && trunc === 0, `hard ${hard}, fragment/axis ${fragBad}, exits ${exitsBad}, truncated ${trunc}`);
+    }
+  }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();
