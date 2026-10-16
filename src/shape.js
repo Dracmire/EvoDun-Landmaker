@@ -896,7 +896,10 @@
   /* Why there is no route between a and b: their regions (id, tiles), the closest approach between the two regions through any
      unblocked tile (tiles between them, the two end tiles) and the gates that touch both regions but got no stair. */
   E.regionGap = function (S, a, b) {
-    const ra = S.region[a], rb = S.region[b], W = S.W, H = S.H;
+    const ok = (r) => Number.isInteger(r) && r >= 0, ra0 = S.region[a], rb0 = S.region[b], W = S.W, H = S.H;
+    // a tile that is not in a walkable region (isolated terrain, a forbidden margin: region -1; or an index outside the window: undefined) has no region to explain: flag it, no BFS (the caller says it plainly)
+    if (!ok(ra0) || !ok(rb0)) return { ra: ok(ra0) ? ra0 : -1, rb: ok(rb0) ? rb0 : -1, sizeA: ok(ra0) ? S.regionSizes[ra0] : 0, sizeB: ok(rb0) ? S.regionSizes[rb0] : 0, dist: -1, from: -1, to: -1, droppedGates: 0, invalid: true };
+    const ra = ra0, rb = rb0;
     const res = { ra, rb, sizeA: S.regionSizes[ra], sizeB: S.regionSizes[rb], dist: -1, from: -1, to: -1, droppedGates: 0 };
     const dist = new Int32Array(S.n).fill(-1), from = new Int32Array(S.n).fill(-1), q = [];
     for (let i = 0; i < S.n; i++) if (S.region[i] === ra) { dist[i] = 0; from[i] = i; q.push(i); }

@@ -71,5 +71,15 @@ for (const [label, P, spec] of [['whole map', BASE, null], ['ramps, width 1', Ob
   const S2 = E.shape(relief, BASE), nGates = S2.gates.length;
   ok('regionGap: with stairs on, gates that touch two regions but have no stair are counted as dropped', (() => { let ok2 = true; for (let n = 0; n < 40; n++) { const a2 = (rnd() * S2.n) | 0, b2 = (rnd() * S2.n) | 0; if (S2.block[a2] || S2.block[b2] || S2.region[a2] === S2.region[b2]) continue; const r = E.regionGap(S2, a2, b2); if (!(r.droppedGates >= 0 && r.dist >= 0)) ok2 = false; } return ok2; })(), nGates);
 }
+// a tile that is in no walkable region (region -1: water / void, isolated terrain, a forbidden margin) or an index outside the window (region undefined): flagged, no BFS, no NaN / undefined field (the viewer used to print "Region R0 (undefined tiles)" / "RNaN")
+{
+  const P = Object.assign({}, BASE, { stairW: 0 }), S = E.shape(relief, P); let a = -1, neg = -1; for (let i = 0; i < S.n && (a < 0 || neg < 0); i++) { if (S.block[i]) continue; if (a < 0) a = i; else if (neg < 0 && S.region[i] === S.region[a]) neg = i; }
+  if (neg >= 0) S.region[neg] = -1; // the state of isolated terrain / a forbidden margin of the rooms layer (this map has no rooms: the tile is taken out of its region by hand)
+  const clean = (g) => Object.values(g).every((v) => typeof v === 'number' || typeof v === 'boolean') && Object.values(g).every((v) => v === v);
+  const gn = neg >= 0 ? E.regionGap(S, a, neg) : null, gs = neg >= 0 ? E.regionGap(S, neg, a) : null, gu = E.regionGap(S, a, S.n + 7);
+  ok(`regionGap: a tile of region -1 gives the invalid flag, no BFS, no NaN / undefined, on either side`, neg >= 0 && gn.invalid === true && gs.invalid === true && gn.dist === -1 && gn.from === -1 && gn.to === -1 && clean(gn) && clean(gs), JSON.stringify([gn, gs]));
+  ok('regionGap: an index outside the window (region undefined) gives the invalid flag and no NaN / undefined', gu.invalid === true && clean(gu) && gu.ra >= 0 && gu.rb === -1, JSON.stringify(gu));
+  ok('regionGap: two walkable tiles are not flagged', E.regionGap(S, a, a).invalid === undefined);
+}
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
