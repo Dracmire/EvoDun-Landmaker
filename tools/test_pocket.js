@@ -162,5 +162,14 @@ const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log
       ok(`yaw ${yaw}: HARD RULE along the plan's u (${hardChecks} checks), the fragment is the world's tile by tile, the exits are reached, the disc fits the window`, hard === 0 && fragBad === 0 && exitsBad === 0 && trunc === 0, `hard ${hard}, fragment/axis ${fragBad}, exits ${exitsBad}, truncated ${trunc}`);
     }
   }
+  { // Cake on: S.ringTile follows the reframed window (it used to keep indexing the pre-reframe window): one flag per cake claim that falls inside the window
+    for (const id of [31, 7]) {
+      const Sc = E.shape(mk(), { ...PB, cake: true, pocket: true }, { rooms: [id], margin: 6 }); let inside = 0, flagged = 0, onRingLevel = 0, flaggedOnRingLevel = 0;
+      for (const m of Sc.cake.claim.keys()) { const x = (m % Sc.mapW) - Sc.ox, y = ((m / Sc.mapW) | 0) - Sc.oy; if (x >= 0 && y >= 0 && x < Sc.W && y < Sc.H) inside++; }
+      for (let i = 0; i < Sc.n; i++) { if (Sc.ringTile[i]) flagged++; if (Sc.levelMeta[Sc.fine[i]].ring && Sc.pocketRole[i] === 1) onRingLevel++; if (Sc.ringTile[i] && Sc.pocketRole[i] === 1) flaggedOnRingLevel++; }
+      console.log(`  info: room ${id} + Cake: ${flagged} ring tiles flagged in ${Sc.n} window tiles, ${inside} cake claims inside the window; fragment tiles flagged ${flaggedOnRingLevel}, fragment tiles on a ring level ${onRingLevel}`);
+      ok(`room ${id} + Cake: S.ringTile has one entry per window tile and one flag per cake claim inside the window (${flagged} = ${inside}); the fragment carries none`, Sc.ringTile.length === Sc.n && flagged === inside && flaggedOnRingLevel === 0 && onRingLevel === 0, [Sc.ringTile.length, Sc.n, flagged, inside, flaggedOnRingLevel, onRingLevel]);
+    }
+  }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();

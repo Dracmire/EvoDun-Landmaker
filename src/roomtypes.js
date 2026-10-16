@@ -96,14 +96,19 @@
     };
     const byRoom = new Map(); for (let i = 0; i < n; i++) if (room[i] > 0 && !(isVoid && isVoid[i])) { let l = byRoom.get(room[i]); if (!l) byRoom.set(room[i], l = []); l.push(i); }
     const claim = new Map(); // tile -> { link, k, h, old }
-    const v1 = P.cakeUpV1 === true, dioBlocked = new Set(); out.dioBlocked = 0; out.skipRaise = 0;
+    const v1 = P.cakeUpV1 === true, coreOpen = P.cakeCoreOpen === true, dioBlocked = new Set(), coreBlocked = new Set(); out.dioBlocked = 0; out.skipRaise = 0; out.coreBlocked = 0;
+    // CORE PROTECTION (user's decision 2026-10-16; P.cakeCoreOpen = the previous behaviour): the core tiles of every Cake room (any link, any direction) are solid for the Up rings of ANOTHER room: a platform is the extreme of its own cake (Up = the highest point, Down = the lowest, a bowl floor)
+    // and a ring of another cake must not raise it. The cores of the other links of the SAME room are not protected, except a bowl floor (the core of a Down link): stacked cakes (the platform terrace of the lower link is the low terrace of the upper link) are by design.
+    // A bowl floor (the core of a Down link) is protected from the Up rings of the SAME room as well (protDown): a bowl's floor must stay its lowest point (measured: room 30 of the Default real map, an Up ring of its link (1, 2) raised the floor of its link (0, 1) from 0.44 to 1.49).
+    const prot = new Uint8Array(n), protDown = new Uint8Array(n);
+    for (const o of types.rooms.values()) { if (o.type !== T.CAKE) continue; const cores = new Set(o.linkList.map((k) => k.core)), dcores = new Set(o.linkList.filter((k) => k.down).map((k) => k.core)); for (const t of byRoom.get(o.id) || []) { if (cores.has(ter[t])) prot[t] = 1; if (dcores.has(ter[t])) protDown[t] = 1; } }
     for (const o of [...types.rooms.values()].sort((p, q2) => p.id - q2.id)) {
       if (o.type !== T.CAKE) continue; const tiles = byRoom.get(o.id) || [];
       for (const l of o.linkList) {
         const r = o.id, lo = l.low, hi = l.high, core = l.core, air = !l.down && !v1; // air: Up v2 (seam window, airspace, local platform reference, raise only); Down and the v1 diagnostic keep the room-based rule
         const isCore = (j) => room[j] === r && ter[j] === core;
         const inMask = air // Up v2: the AIRSPACE of any non-void tile (the land mass of a cake room is more than its footprint), except a Diorama tile (a pocket: its footprint is not modified)
-          ? (j) => { if (isVoid && isVoid[j]) return false; if (types.type[j] === T.DIORAMA) { dioBlocked.add(j); return false; } return true; }
+          ? (j) => { if (isVoid && isVoid[j]) return false; if (types.type[j] === T.DIORAMA) { dioBlocked.add(j); return false; } if (!coreOpen && prot[j] && !isCore(j) && (room[j] !== r || protDown[j])) { coreBlocked.add(j); return false; } return true; }
           : (j) => room[j] === r && (ter[j] === lo || ter[j] === hi) && !(isVoid && isVoid[j]);
         const coreTiles = [], low = [], high = []; for (const t of tiles) { if (ter[t] === core) coreTiles.push(t); if (ter[t] === lo) low.push(t); else if (ter[t] === hi) high.push(t); }
         const info = { room: r, low: lo, high: hi, down: l.down, rings: 0, tiles: 0, gap: 0, step: 0, flat: false };
@@ -150,7 +155,7 @@
         });
       }
     }
-    out.dioBlocked = dioBlocked.size;
+    out.dioBlocked = dioBlocked.size; out.coreBlocked = coreBlocked.size;
     out.claim = claim; out.flat = out.links.filter((x) => x.flat).length; return out;
   }
   T.buildRings = buildRings;
