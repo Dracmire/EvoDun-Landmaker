@@ -25,6 +25,8 @@ So that a saved pack reproduces the same picture when it is loaded again. Writte
 
 `mode` (optional, UI pass PR 1) is the viewer mode (`docs/modes.md`, `docs/ui-modes.md`): `terrain`, `rooms`, `stage`, `curves`, `floors` or `macroform`. "Save pack.json" writes it (the mode the viewer was in); on load the viewer switches to that mode and keeps the loaded images and the manifest's camera and switches (the mode only changes which controls are shown and which cameras, techniques and Compare are offered; `rooms` also turns Rooms on). Absent = the current mode stays; any other value is rejected.
 
+`dacAuto` (optional boolean, DAC mode 2 "Framing by room type", `docs/ui-modes.md` U10): written whenever the viewer is in mode `rooms`. `true` = the rule sets Cake rings / Ascension walls / the Pocket from the type of the chosen rooms; `false` = the three switches are free. Absent = `false` (a manifest saved before the rule keeps the switches it stored).
+
 `curves` (optional, 9th field) is the preset of technique C (Tiles to Curves): "ordered" (the default), "balanced" or "natural"; "Save pack.json" writes it only when it is not the default, so a pack saved before technique C is unchanged. A pack may also declare `stageYaw` (see the Stage camera). The wall pass of C adds optional `wallPass` ("t3" default, "t2", "off") and the numbers `wallExtrude` (0.10-0.40, 0.25), `wallStrata` (2-4, 3), `wallColumn` (0.8-2, 1.2), `t2Spacing` (0.6-1.5, 0.9), `t2Rows` (5-10, 6), `t2Group` (0.6-2, 1.0), `t2Jitter` (0-0.6, 0.4); written only when they are not the default.
 
 ### Floors package (crystallizer 5, optional keys of a built-in pack; old packs are unaffected)

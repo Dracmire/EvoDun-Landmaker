@@ -39,11 +39,15 @@
       examples: [
         { id: 'real_balanced', label: 'Real map · Balanced types', src: 'real_map', rooms: true, preset: 'balanced' },
         { id: 'real_default', label: 'Real map · Default', src: 'real_map', rooms: true, preset: 'default' },
-        { id: 'pocket31', label: 'Pocket · Diorama 31', src: 'real_map', rooms: true, preset: 'balanced', pocket: true, room: 31 },
+        /* one example per room type (`type` = the type the example is about: it is what the rule of "Framing by room type" uses on the first application, when the classification of the new source is not built yet; tools/ui/test_modes_ui.js checks it against the real classification) */
+        { id: 'cake60', label: 'Cake · bowl (room 60)', src: 'real_map', rooms: true, preset: 'balanced', room: 60, type: 'cake' },
+        { id: 'cake85', label: 'Cake · bowl + pyramid (room 85)', src: 'real_map', rooms: true, preset: 'balanced', room: 85, type: 'cake' },
+        { id: 'asc88', label: 'Ascension · walls (room 88)', src: 'real_map', rooms: true, preset: 'balanced', room: 88, type: 'ascension' },
+        { id: 'pocket31', label: 'Pocket · Diorama 31', src: 'real_map', rooms: true, preset: 'balanced', pocket: true, room: 31, type: 'diorama' },
         { id: 'images', label: 'Your images (PNG + roles)', images: true, rooms: true }
       ],
       camera: 'isoE', cameras: CAMS, tech: 'A', techs: ['box', 'A', 'B', 'C'], compare: false, compareDefault: false,
-      main: ['roomsPreset', 't-cake', 't-ascWalls', 'ascHeight', 't-pocket', 'pocketFraming', 'pocketHeight', 'roomChips', 'typeTint'],
+      main: ['roomsPreset', 'dacAuto', 't-cake', 't-ascWalls', 'ascHeight', 't-pocket', 'pocketFraming', 'pocketHeight', 'roomChips', 'typeTint'],
       advanced: ['roomsMinCore', 'rRadius', 'roomsCross', 'roomsIsoLimit', 'cakeLayers', 'cakeStep', 'cakePer', 'cakeSeam', 'roomBorders', 'roomTint', 'nowalk', 'dioOutline'],
       slice: [], fixed: ['t-rooms'], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }

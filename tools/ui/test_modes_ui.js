@@ -97,7 +97,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     ok(`${tag}: with the folds open, the visible controls are exactly main + advanced + common (${vis.seen} entries checked)`, vis.bad.length === 0, vis.bad.join('; '));
 
     // every visible disabled control says what it requires
-    const dis = await ev(() => { const C = window.EVO.controls, out = []; for (const en of C.TABLE) for (const el of document.querySelectorAll(en.dom)) { if (el.closest('.mh') || el.closest('[hidden]') || !el.disabled || en.keep) continue; const h = C.holder(el); const t = (h.title || el.title || ''); if (!/^Requires: /.test(t) && !(en.dom.includes(',') && /^Requires: /.test(el.title))) out.push(en.id + ':' + (el.id || el.textContent.trim().slice(0, 20))); } return out; });
+    const dis = await ev(() => { const C = window.EVO.controls, out = []; for (const en of C.TABLE) for (const el of document.querySelectorAll(en.dom)) { if (el.closest('.mh') || el.closest('[hidden]') || !el.disabled || en.keep) continue; const h = C.holder(el); const t = (h.title || el.title || ''); if (en.lock && en.lock.on(window.__evo.controlsCtx()) && t === en.lock.text) continue; /* a LOCKED control (src/controls.js: set by the rule of "Framing by room type") says who set it, not what it requires */ if (!/^Requires: /.test(t) && !(en.dom.includes(',') && /^Requires: /.test(el.title))) out.push(en.id + ':' + (el.id || el.textContent.trim().slice(0, 20))); } return out; });
     ok(`${tag}: every visible disabled control has a "Requires: ..." tooltip`, dis.length === 0, dis.join(','));
 
     // the bar: cameras and techniques outside the mode are hidden, Compare only in modes 1 and 4
@@ -179,6 +179,91 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
   const lm = await ev(() => { const e = window.__evo; return { m: e.st.modeId, sel: document.querySelector('#modeSel').value, preset: e.st.preset, rooms: !!e.P.rooms, ex: e.st.exampleId }; });
   ok('a manifest with viewer.mode "rooms" switches the viewer to that mode on load (images and the manifest camera stay)', lm.m === 'rooms' && lm.sel === 'rooms' && lm.preset === 'isoE' && lm.rooms && lm.ex === 'images', JSON.stringify(lm));
   fs.unlinkSync(man);
+
+  // ---- FRAMING BY ROOM TYPE (mode 2, docs/ui-modes.md U10): one framing per room type, never mixed. The state is measured on the real shape (ring tiles, wall faces, pocket), not on the switches only.
+  {
+    const fr = () => ev(() => {
+      const e = window.__evo, S = e.S(), C = window.EVO.controls, q = (id) => { const el = document.querySelector(id), h = C.holder(el); return { checked: el.checked, disabled: el.disabled, inactiveCls: h.classList.contains('inactive'), tag: !!h.querySelector('.inact'), title: h.title }; };
+      const T = window.EVO.roomTypes, nm = (t) => (t === T.CAKE ? 'cake' : t === T.ASCENSION ? 'ascension' : 'diorama'), chosen = [...e.sliceSel.rooms];
+      const want = chosen.length ? new Set(chosen.map((id) => nm(S.types.rooms.get(id).type))) : new Set(['cake', 'ascension', 'diorama']);
+      return { cake: !!e.P.cake, asc: !!e.P.ascWalls, pocket: !!e.P.pocket, rings: S && S.cake ? S.cake.tiles : 0, faces: S && S.ascWalls ? S.ascWalls.info.faces : 0, pk: !!(S && S.pocketInfo), chosen, dac: document.querySelector('#dacAuto').checked, dacSt: e.st.dacAuto,
+        sw: { cake: q('#t-cake'), asc: q('#t-ascWalls'), pocket: q('#t-pocket') }, want: { cake: want.has('cake'), asc: want.has('ascension'), pocket: want.has('diorama') }, types: chosen.map((id) => nm(S.types.rooms.get(id).type)).join('+'), err: document.querySelector('#msg').hidden ? '' : document.querySelector('#msg').textContent };
+    });
+    const mirrors = (f) => f.sw.cake.checked === f.cake && f.sw.asc.checked === f.asc && f.sw.pocket.checked === f.pocket;
+    const locked = (f) => ['cake', 'asc', 'pocket'].every((k) => f.sw[k].disabled && !f.sw[k].inactiveCls && !f.sw[k].tag && /^Set by 'Framing by room type'/.test(f.sw[k].title));
+    const free = (f) => ['cake', 'asc', 'pocket'].every((k) => !f.sw[k].disabled && !f.sw[k].inactiveCls && !f.sw[k].tag);
+    const rule = (f) => f.cake === f.want.cake && f.asc === f.want.asc && f.pocket === f.want.pocket;
+    const click = async (sel) => { await page.click(sel); await a.idle(); };
+    const exs = [['cake60', 'cake', 60], ['cake85', 'cake', 85], ['asc88', 'ascension', 88], ['pocket31', 'diorama', 31]];
+    await ev(() => window.__evo.setMode('rooms')); await a.idle();
+    const m2 = MODES.find((m) => m.id === 'rooms');
+    ok('mode 2 offers 7 examples in this order (first = the default): real_balanced, real_default, cake60, cake85, asc88, pocket31, images', m2.examples.map((e) => e.id).join() === 'real_balanced,real_default,cake60,cake85,asc88,pocket31,images', m2.examples.map((e) => e.id).join());
+    ok('mode 2 lists the "Framing by room type" switch first among its framing controls', m2.main.indexOf('dacAuto') >= 0 && m2.main.indexOf('dacAuto') < m2.main.indexOf('t-cake'));
+    let f = await fr();
+    ok('mode 2 opens with the switch ON (default example: whole map, all three framings on their own rooms)', f.dac && f.dacSt && f.cake && f.asc && f.pocket && f.chosen.length === 0, JSON.stringify([f.cake, f.asc, f.pocket]));
+    ok('switch ON: the three checkboxes are disabled, show the rule\'s state, carry no "inactive" tag nor class, tooltip says who set them', locked(f) && mirrors(f), JSON.stringify(f.sw));
+
+    for (const [id, type, room] of exs) {
+      await click(`#examples button[data-id="${id}"]`); f = await fr();
+      const real = await ev((r) => { const S = window.__evo.S(), T = window.EVO.roomTypes, t = S.types.rooms.get(r).type; return t === T.CAKE ? 'cake' : t === T.ASCENSION ? 'ascension' : 'diorama'; }, room);
+      const declared = await ev((id) => window.EVO.modes.byId('rooms').examples.find((e) => e.id === id).type, id);
+      ok(`${id}: the declared type (${declared}) is the real type of room ${room} (${real})`, declared === real && real === type);
+      // the invariant: ONLY the framing of the room's type exists on screen
+      const only = { cake: f.rings > 0 && f.faces === 0 && !f.pk && f.cake && !f.asc && !f.pocket, ascension: f.faces > 0 && f.rings === 0 && !f.pk && !f.cake && f.asc && !f.pocket, diorama: f.pk && f.rings === 0 && f.faces === 0 && !f.cake && !f.asc && f.pocket }[type];
+      ok(`${id}: only the ${type} framing is on the real shape (rings ${f.rings}, wall faces ${f.faces}, pocket ${f.pk}), the other two are off and so are the scenery's`, only, JSON.stringify({ rings: f.rings, faces: f.faces, pk: f.pk }));
+      ok(`${id}: the three switches mirror the rule and are locked (no "inactive")`, mirrors(f) && locked(f) && rule(f));
+      console.log(`    ${id}: room ${room} ${real} · ring tiles ${f.rings} · wall faces ${f.faces} · pocket ${f.pk}`);
+    }
+
+    // chips: the rule follows the chosen rooms
+    await click('#examples button[data-id="cake60"]');
+    const seq = [['#roomChips .chip[data-id="88"]', 'asc'], ['#roomChips .chip[data-id="31"]', 'pocket'], ['#roomChips .chip[data-id="60"]', 'cake']];
+    for (const [sel, k] of seq) {
+      await click(sel); f = await fr();
+      ok(`chip ${sel.match(/\d+/)[0]} (${f.types}): only the ${k} framing, switches mirrored and locked`, rule(f) && f.cake === (k === 'cake') && f.asc === (k === 'asc') && f.pocket === (k === 'pocket') && mirrors(f) && locked(f) && f.err === '', JSON.stringify([f.cake, f.asc, f.pocket]));
+    }
+    await page.click('#roomChips .chip[data-id="88"]', { modifiers: ['Control'] }); await a.idle(); f = await fr();
+    ok('ctrl-click 88 on 60 (Cake + Ascension): the union, rings and walls, no pocket', f.cake && f.asc && !f.pocket && f.rings > 0 && f.faces > 0 && !f.pk && mirrors(f) && locked(f), JSON.stringify([f.rings, f.faces, f.pk]));
+    await click('#wholeRooms'); f = await fr();
+    ok('Whole map: all three on, each acting on the rooms of its own type', f.cake && f.asc && f.pocket && f.rings > 0 && f.faces > 0 && mirrors(f) && locked(f), JSON.stringify([f.rings, f.faces, f.pk]));
+
+    // the switch OFF: free, keeps the last state, manual mixing allowed; ON again re-applies
+    await click('#examples button[data-id="cake60"]'); await click('#dacAuto'); f = await fr();
+    ok('switch OFF: the three checkboxes are enabled (no lock, no "inactive") and keep the last state (Cake only)', !f.dac && !f.dacSt && free(f) && f.cake && !f.asc && !f.pocket && mirrors(f), JSON.stringify(f.sw));
+    await click('#t-ascWalls'); f = await fr();
+    ok('OFF: turning Ascension walls on does not touch the others (Cake + Ascension, mixing allowed by hand)', f.cake && f.asc && !f.pocket && f.rings > 0 && f.faces > 0, JSON.stringify([f.cake, f.asc, f.pocket]));
+    await click('#dacAuto'); f = await fr();
+    ok('switch ON again: the rule is re-applied (room 60 is Cake: rings only)', f.dac && f.cake && !f.asc && !f.pocket && f.rings > 0 && f.faces === 0 && locked(f) && mirrors(f));
+
+    // a preset change with a room chosen: no stale flags, no error, the rule re-applied with the new classification
+    await click('#examples button[data-id="asc88"]');
+    await page.selectOption('#roomsPreset', 'default'); await a.idle(); f = await fr();
+    ok('Balanced -> Default with room 88 chosen: no stale ids, the switches follow the rule and mirror (the Pocket one needs a Diorama room: none in Default, so it is requirement-disabled, not locked), no error', f.chosen.every((r) => r > 0) && rule(f) && mirrors(f) && f.err === '' && f.sw.cake.disabled && f.sw.asc.disabled, JSON.stringify({ chosen: f.chosen, sw: [f.cake, f.asc, f.pocket], want: f.want, err: f.err, pk: f.sw.pocket.title }));
+    await page.selectOption('#roomsPreset', 'balanced'); await a.idle(); f = await fr();
+    ok('Default -> Balanced: the rule still holds, mirrored and locked', rule(f) && mirrors(f) && locked(f) && f.err === '', JSON.stringify({ chosen: f.chosen, sw: [f.cake, f.asc, f.pocket], want: f.want, err: f.err, locked: locked(f) }));
+
+    await click('#examples button[data-id="pocket31"]'); await page.selectOption('#roomsPreset', 'default'); await a.idle(); f = await fr();
+    ok(`Diorama 31 chosen, Balanced -> Default: room 31 is ${f.types || 'gone'} there; the switches follow the new type (no stale Pocket), mirrored, no error`, rule(f) && mirrors(f) && f.err === '' && (f.chosen.length === 0 || f.chosen[0] === 31), JSON.stringify({ chosen: f.chosen, sw: [f.cake, f.asc, f.pocket], want: f.want, err: f.err }));
+    await page.selectOption('#roomsPreset', 'balanced'); await a.idle(); f = await fr();
+    ok('Default -> Balanced again: the rule holds', rule(f) && mirrors(f) && f.err === '');
+
+    // the manifest: dacAuto round trip, and a manifest without it loads with the switch OFF
+    await click('#examples button[data-id="cake60"]');
+    const vb1 = await ev(() => window.__evo.viewerBlock());
+    ok('the viewer block written on save carries mode "rooms" and dacAuto true (cake true)', vb1.mode === 'rooms' && vb1.dacAuto === true && vb1.cake === true, JSON.stringify(vb1));
+    await click('#dacAuto'); const vb2 = await ev(() => window.__evo.viewerBlock());
+    ok('with the switch OFF the viewer block writes dacAuto false', vb2.dacAuto === false, JSON.stringify(vb2)); await click('#dacAuto');
+    await ev(() => window.__evo.setMode('terrain')); await a.idle();
+    const vb3 = await ev(() => window.__evo.viewerBlock());
+    ok('outside mode 2 the viewer block does not write dacAuto', vb3.dacAuto === undefined, JSON.stringify(vb3));
+    const mk = (viewer) => { const p = path.join(os.tmpdir(), 'dac_manifest_' + Math.random().toString(36).slice(2) + '.json'); fs.writeFileSync(p, JSON.stringify({ format: 'evodun-pack/0.3', name: 'dac test', roles: { elevation: { image: 'skeleton_heightmap_256.png', channel: 'V' } }, viewer })); return p; };
+    for (const [label, viewer, wantDac, wantCake] of [['dacAuto true', { mode: 'rooms', rooms: true, preset: 'balanced', terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120, camera: 'isoE', dacAuto: true, cake: true }, true, true], ['dacAuto false', { mode: 'rooms', rooms: true, preset: 'balanced', terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120, camera: 'isoE', dacAuto: false, cake: true }, false, true], ['no dacAuto (saved before the rule)', { mode: 'rooms', rooms: true, preset: 'balanced', terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120, camera: 'isoE', cake: true }, false, true]]) {
+      await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
+      const man = mk(viewer); await page.setInputFiles('#file', [PNG, man]); await page.waitForTimeout(2500); await a.idle(); fs.unlinkSync(man);
+      f = await fr(); const vb = await ev(() => window.__evo.viewerBlock());
+      ok(`manifest ${label}: loads in mode 2 with the switch ${wantDac ? 'ON' : 'OFF'}, cake ${wantCake}, and saves the same dacAuto`, f.dac === wantDac && f.dacSt === wantDac && f.cake === wantCake && vb.dacAuto === wantDac && (wantDac ? locked(f) : free(f)) && mirrors(f), JSON.stringify({ dac: f.dac, cake: f.cake, asc: f.asc, pocket: f.pocket, vb: vb.dacAuto }));
+    }
+  }
 
   console.log('errors:', a.errs); ok('no page errors', a.errs.length === 0); await a.browser.close();
 })();

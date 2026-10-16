@@ -30,7 +30,7 @@
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
   const NO_MODES = !!window.EVO_NO_MODES; // test-only flag (tools/ui/common.js): the whole panel as before the modes layer
-  const st = { modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const st = { dacAuto: true, modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -63,6 +63,20 @@
     { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors', cam: 'isoE' },
     { id: 'snake_macro', label: 'Snake · Macroform', src: 'snake_macroform', cam: 'isoE', tech: 'box', macro: 'exterior' }
   ];
+  /* FRAMING BY ROOM TYPE (mode 2, docs/ui-modes.md U10): one framing per room type, never mixed. It only SETS the three existing switches (P.cake, P.ascWalls, P.pocket) from the type of the chosen rooms; no renderer, shape or P default changes.
+     One room: only its type's framing; several rooms: the union; none (Whole map): all three, each acting only on the rooms of its own type. Types come from the cached whole-map classification (S.types);
+     `declared` = the type an example names, used on the first application when the new source / preset has no classification yet (draw() re-runs the rule once with the real types). Returns true when a switch changed. */
+  const dacOn = () => !NO_MODES && st.modeId === 'rooms' && !!st.dacAuto;
+  function applyDacRule(declared) {
+    if (!dacOn()) return false;
+    const RT = E.roomTypes, nameOf = (t) => (t === RT.CAKE ? 'cake' : t === RT.ASCENSION ? 'ascension' : t === RT.DIORAMA ? 'diorama' : null), want = new Set();
+    if (!sliceSel.rooms.size) { want.add('cake'); want.add('ascension'); want.add('diorama'); }
+    else for (const id of sliceSel.rooms) { const o = S && S.types && S.types.rooms.get(id), n = declared && sliceSel.rooms.size === 1 ? declared : o ? nameOf(o.type) : null; if (n) want.add(n); }
+    const next = { cake: want.has('cake'), ascWalls: want.has('ascension'), pocket: want.has('diorama') }, ids = { cake: 't-cake', ascWalls: 't-ascWalls', pocket: 't-pocket' };
+    let changed = false;
+    for (const k of Object.keys(next)) { if (!!P[k] !== next[k]) changed = true; P[k] = next[k]; const el = $('#' + ids[k]); if (el) el.checked = next[k]; }
+    return changed;
+  }
   async function applyScenario(sc, mode) { // mode (optional, the modes layer): the example of a mode; without it this is the old scenario button, unchanged
     if (sc.src && !(await selectSource(sc.src))) return;
     const tick = (id, v) => { const el = $('#' + id); if (el) el.checked = v; };
@@ -77,6 +91,7 @@
     if (sc.contract) { O.contract = true; tick('t-contract', true); }
     if (sc.cam) st.preset = sc.cam;
     if (sc.tech) { st.tech = sc.tech; st.mode = 'single'; }
+    if (mode && mode.id === 'rooms') { st.dacAuto = true; const da = $('#dacAuto'); if (da) da.checked = true; applyDacRule(sc.type); } // an example of mode 2 starts with the rule on (the declared type: the new source has no classification yet)
     syncChips(); syncRoomChips(); refreshMessage(); invalidate(true);
   }
   function message(text) { const m = $('#msg'); m.textContent = text || ''; m.hidden = !text; }
@@ -89,11 +104,12 @@
     sel.value = Object.keys(ROOMS_PRESETS).find((n) => Object.entries(ROOMS_PRESETS[n]).every(([k, v]) => P[k] === v)) || 'custom';
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') b.dacAuto = !!st.dacAuto; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
     for (const k of ['terraces', 'roomsMinCore', 'rRadius', 'minPlateau']) setParam(k, w[k]);
+    st.dacAuto = w.dacAuto === true; const dac = $('#dacAuto'); if (dac) dac.checked = st.dacAuto; // absent = off (a manifest saved before the rule keeps the switches it stored)
     syncRoomsPreset();
     st.preset = PRESETS.some((x) => x.id === w.camera) ? w.camera : 'oblique'; st.yawOff = st.pitchOff = 0; // absent = the default camera
     P.curves = E.curves.PRESETS[w.curves] ? w.curves : 'ordered'; const cs = $('#curvesPreset'); if (cs) cs.value = P.curves; // absent = Ordered
@@ -107,6 +123,9 @@
       if (title === 'Rooms') { // the switch: off, the viewer is the one without rooms (gates by terrace)
         const l = document.createElement('label'); l.className = 'tg'; l.innerHTML = '<input type="checkbox" id="t-rooms"><span>Rooms (watershed rooms, cores, tree)</span>';
         const i = l.querySelector('input'); i.checked = P.rooms; i.addEventListener('change', () => { P.rooms = i.checked; refreshMessage(); invalidate(true); }); sl.appendChild(l);
+        const ld = document.createElement('label'); ld.className = 'tg'; ld.innerHTML = '<input type="checkbox" id="dacAuto"><span>Framing by room type</span>';
+        const id_ = ld.querySelector('input'); id_.checked = st.dacAuto; if (NO_MODES) ld.hidden = true; // the panel without modes has no such switch
+        id_.addEventListener('change', () => { st.dacAuto = id_.checked; if (st.dacAuto) applyDacRule(); refreshMessage(); invalidate(st.dacAuto); }); sl.appendChild(ld);
         const lc = document.createElement('label'); lc.className = 'tg'; lc.innerHTML = '<input type="checkbox" id="t-cake"><span>Cake rings (room type Cake; needs Rooms)</span>';
         const ic = lc.querySelector('input'); ic.checked = P.cake; ic.addEventListener('change', () => { P.cake = ic.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lc);
         const lw = document.createElement('label'); lw.className = 'tg'; lw.innerHTML = '<input type="checkbox" id="t-ascWalls"><span>Ascension walls (thin walls on the blocking faces of Ascension rooms; needs Rooms)</span>';
@@ -162,7 +181,7 @@
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
     $('#src').addEventListener('change', (e) => selectSource(e.target.value)); // a crop belongs to one map
     buildRoles();
-    $('#wholeRooms').addEventListener('click', () => { sliceSel.rooms.clear(); sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); syncRoomChips(); refreshMessage(); invalidate(true); });
+    $('#wholeRooms').addEventListener('click', () => { sliceSel.rooms.clear(); sliceSel.whole = true; sliceSel.zones.clear(); applyDacRule(); syncChips(); syncRoomChips(); refreshMessage(); invalidate(true); });
     $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
     for (const id of cropIds) $('#' + id).addEventListener('change', () => { refreshMessage(); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadFiles(e.target.files));
@@ -259,7 +278,7 @@
       if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
       const hit = E.pickTile(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top);
       const id = hit.tile >= 0 ? S.roomMap[hit.tile] : 0, o = id > 0 && S.types ? S.types.rooms.get(id) : null;
-      if (o && o.type === E.roomTypes.DIORAMA) { sliceSel.whole = false; sliceSel.rooms.clear(); sliceSel.rooms.add(id); syncRoomChips(); refreshMessage(); invalidate(true); }
+      if (o && o.type === E.roomTypes.DIORAMA) { sliceSel.whole = false; sliceSel.rooms.clear(); sliceSel.rooms.add(id); applyDacRule(); syncRoomChips(); refreshMessage(); invalidate(true); }
       return;
     }
   }
@@ -328,14 +347,16 @@
     if (!on) { box.innerHTML = ''; st.roomChipsKey = null; return; }
     if (st.roomChipsKey === S.rooms.room) { syncRoomChips(); return; }
     st.roomChipsKey = S.rooms.room; box.innerHTML = '';
-    const ids = new Set(S.rooms.rooms.map((r) => r.id)); for (const id of [...sliceSel.rooms]) if (!ids.has(id)) sliceSel.rooms.delete(id);
+    const ids = new Set(S.rooms.rooms.map((r) => r.id)), had = sliceSel.rooms.size; for (const id of [...sliceSel.rooms]) if (!ids.has(id)) sliceSel.rooms.delete(id);
+    st.roomsGone = had > 0 && !sliceSel.rooms.size && !NO_MODES && st.modeId === 'rooms'; // mode 2: every chosen room is gone in the new map (preset / parameters changed): back to Whole map, rebuilt once by draw() (the slice built from the old ids was empty)
+    if (st.roomsGone) sliceSel.whole = true;
     for (const r of S.rooms.rooms) {
       const b = document.createElement('button'); b.className = 'chip'; b.dataset.id = r.id;
       b.innerHTML = `<i style="background:hsl(${E.rooms.hue(r.id).toFixed(0)},55%,50%)"></i>${r.id} <small>${S.rooms.roomSizes[r.id]}</small>`;
       b.addEventListener('click', (e) => {
         sliceSel.whole = false;
         if (e.ctrlKey || e.shiftKey || e.metaKey) { sliceSel.rooms.has(r.id) ? sliceSel.rooms.delete(r.id) : sliceSel.rooms.add(r.id); } else { sliceSel.rooms.clear(); sliceSel.rooms.add(r.id); }
-        syncRoomChips(); refreshMessage(); invalidate(true);
+        applyDacRule(); syncRoomChips(); refreshMessage(); invalidate(true);
       });
       box.appendChild(b);
     }
@@ -521,6 +542,8 @@
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
       buildRoomChips(); buildFloorChips(); buildMacroChips();
+      if (st.roomsGone) { st.roomsGone = false; applyDacRule(); refreshMessage(); invalidate(true); return; }
+      if (S.types && applyDacRule()) { invalidate(true); return; } // the classification of a new source / preset / parameters is known only now: if the rule gives other switches than the ones set before it, one more build (the usual case: nothing changes)
       st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
     }
     const incursion = computeIncursion(); O.incursion = incursion;
@@ -662,12 +685,13 @@
     const c = t.counts, k = S.cake;
     let x = `<br><b>Room types</b> (V16.4 rule, neighbours instead of lobby platforms): ${c.cake} Cake (${c.bowl} bowls, ${c.pyramid} pyramids) · ${c.diorama} Diorama · ${c.ascension} Ascension of ${t.rooms.size} rooms` + (c.dioDemoted ? ` (rule "Diorama never touches Diorama": ${c.dioDemoted} Dioramas of ${c.diorama + c.dioDemoted} became Ascension, ${c.dioDemotedTiles} tiles)` : '');
     if (P.cake && k) x += ` · Cake rings ON: ${k.down} bowl + ${k.up} pyramid links built, ${k.flat} links without rings, ${k.tiles} ring tiles, ${k.levelsAdded} levels added` + (k.conflicts ? `, ${k.conflicts} tiles claimed twice` : '');
+    if (!NO_MODES && st.modeId === 'rooms') x += ` · <b>Framing by room type</b>: ` + (st.dacAuto ? `on (${[P.cake && 'Cake rings', P.ascWalls && 'Ascension walls', P.pocket && 'Pocket'].filter(Boolean).join(', ') || 'none'}; ${sliceSel.rooms.size ? sliceSel.rooms.size + ' room' + (sliceSel.rooms.size > 1 ? 's' : '') + ' chosen' : 'whole map: each framing acts on the rooms of its own type'})` : 'off (the three switches are set by hand)');
     return x;
   }
   /* the live state the control requirements are evaluated from (src/controls.js): after every recompute / redraw */
   function controlsCtx() {
     const raw = packs[st.pack] && packs[st.pack].pack, T = S && S.types ? S.types.counts : null, F = (S && S.fields) || {}, any = (a) => !!(a && a.some((v) => v));
-    return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket,
+    return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket, dacAuto: dacOn(),
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
       floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset, macro: !!(E.volume && E.volume.has(raw)), macroView: st.macro, volOn: volActive() };

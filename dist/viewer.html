@@ -493,7 +493,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   };
 
   /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
-  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode']; // the optional `viewer` block of the manifest
+  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto']; // the optional `viewer` block of the manifest
   E.VIEWER_MODES = ['terrain', 'rooms', 'stage', 'curves', 'floors', 'macroform']; // the ids of src/modes.js (tools/test_modes.js checks that they agree)
   E.parseManifest = function (json) {
     if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
@@ -522,7 +522,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       for (const [k, lo, hi] of [['wallExtrude', 0.1, 0.4], ['wallStrata', 2, 4], ['wallColumn', 0.8, 2], ['t2Spacing', 0.6, 1.5], ['t2Rows', 5, 10], ['t2Group', 0.6, 2], ['t2Jitter', 0, 0.6]]) if (v[k] !== undefined && !(typeof v[k] === 'number' && v[k] >= lo && v[k] <= hi)) throw new Error(`Manifest: viewer.${k} must be a number from ${lo} to ${hi}.`);
       if (v.mode !== undefined && !E.VIEWER_MODES.includes(v.mode)) throw new Error('Manifest: viewer.mode must be one of ' + E.VIEWER_MODES.join(', ') + '.');
       if (v.curves !== undefined && !['ordered', 'balanced', 'natural'].includes(v.curves)) throw new Error('Manifest: viewer.curves must be "ordered", "balanced" or "natural".');
-      for (const k of ['rooms', 'cake']) if (v[k] !== undefined && typeof v[k] !== 'boolean') throw new Error(`Manifest: viewer.${k} must be true or false.`);
+      for (const k of ['rooms', 'cake', 'dacAuto']) if (v[k] !== undefined && typeof v[k] !== 'boolean') throw new Error(`Manifest: viewer.${k} must be true or false.`);
       num('terraces', 2, 24); num('roomsMinCore', 5, 250); num('rRadius', 3, 30); num('minPlateau', 1, 300);
       viewer = {}; for (const k of E.VIEWER_KEYS) if (v[k] !== undefined) viewer[k] = v[k];
     }
@@ -4814,6 +4814,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
    - A requirement that IS met: normal control, tooltip = the explanation (what it does, crystallizer, techniques). The explanation appears ONLY on active controls.
    - Requirements are evaluated from the live state (`ctx`, built by ui.js after every recompute / redraw): E.controls.refresh(ctx).
    - docs/controls.md is GENERATED from this table (tools/gen_controls_doc.js, run by tools/build.py); tools/test_controls.js checks that it is in sync.
+   - LOCKS are a separate concept from requirements: an optional `lock` {on(ctx), text} on an entry. A locked control is disabled and mirrors the value something else set (the rule of "Framing by room type"); its tooltip says who set it;
+     it gets NO `inactive` class and NO "inactive" tag, because its effect IS applied. An unmet requirement still wins over the lock.
    `dom` = CSS selector of the control element(s) that are disabled; the tooltip and the greyed look go on the label / row that holds them. `keep` = the control already has its own tooltip (cameras, Stage preset): not touched. */
 (function (E) {
   const GROUPS = ['Scenarios', 'View bar', 'Source & slice', '1 Terrain', '2 Room types', '3 Stage', '4 Curves (C)', '5 Floors', '6 Macroform', 'Shared passes', 'Overlays', 'Incursion', 'Diagnostics'];
@@ -4858,6 +4860,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   };
   const CAKE = ['rooms', 'roomsFound', 'cakeRoom'], ASC = ['rooms', 'roomsFound', 'ascRoom'], POCKET = ['rooms', 'roomsFound', 'dioRoom'], RM = ['rooms', 'roomsFound'];
   const ALL = ['box', 'A', 'B', 'C'];
+  const DAC_LOCK = { on: (c) => !!c.dacAuto, text: "Set by 'Framing by room type' (turn it off to choose by hand)", doc: "Framing by room type is on" };
   const e = (id, dom, group, tech, req, help, extra) => Object.assign({ id, dom, group, tech, req, help }, extra);
   const TABLE = [
     // ---- Scenarios (buttons that only SET existing parameters)
@@ -4903,14 +4906,15 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     e('rRadius', '#s-rRadius', '2 Room types', ALL, ['rooms'], 'Room size scale. Smaller values find rooms on small maps.'),
     e('roomsCross', '#s-roomsCross', '2 Room types', ALL, ['rooms'], 'Path cost of crossing a terrace gate when rooms are joined.'),
     e('roomsIsoLimit', '#s-roomsIsoLimit', '2 Room types', ALL, ['rooms'], 'Unconnected regions smaller than this (tiles) become decorative (not walkable).'),
-    e('t-cake', '#t-cake', '2 Room types', ALL, CAKE, 'Cake rings: concentric height rings per terrace link of each Cake room (a bowl or a pyramid). Same geometry in Box, A, B and C.'),
+    e('dacAuto', '#dacAuto', '2 Room types', ALL, ['rooms'], 'Framing by room type: one framing per room type, never mixed. With one room chosen only the framing of its type is on (Cake rings, Ascension walls or the Pocket of a Diorama); with several, the union; with Whole map, all three, each acting only on the rooms of its own type. The three switches follow the rule while this is on; turn it off to choose by hand.'),
+    e('t-cake', '#t-cake', '2 Room types', ALL, CAKE, 'Cake rings: concentric height rings per terrace link of each Cake room (a bowl or a pyramid). Same geometry in Box, A, B and C.', { lock: DAC_LOCK }),
     e('cakeLayers', '#s-cakeLayers', '2 Room types', ALL, [...CAKE, 'cakeOn'], 'Cake: number of rings.'),
     e('cakeStep', '#s-cakeStep', '2 Room types', ALL, [...CAKE, 'cakeOn'], 'Cake: height of one ring (x terrace height).'),
     e('cakePer', '#s-cakePer', '2 Room types', ALL, [...CAKE, 'cakeOn'], 'Cake: tiles per ring.'),
     e('cakeSeam', '#s-cakeSeam', '2 Room types', ALL, [...CAKE, 'cakeOn'], 'Cake: seam window of a bowl, in tiles.'),
-    e('t-ascWalls', '#t-ascWalls', '2 Room types', ALL, ASC, 'Ascension walls: thin walls on the blocking faces of Ascension rooms; low on the faces that face the camera.'),
+    e('t-ascWalls', '#t-ascWalls', '2 Room types', ALL, ASC, 'Ascension walls: thin walls on the blocking faces of Ascension rooms; low on the faces that face the camera.', { lock: DAC_LOCK }),
     e('ascHeight', '#s-ascHeight', '2 Room types', ALL, [...ASC, 'ascOn'], 'Ascension wall height (absolute).'),
-    e('t-pocket', '#t-pocket', '2 Room types', ALL, POCKET, 'Pocket view: a chosen Diorama room (chip, or a click in the world) is drawn as its pocket: the same room with generated surroundings.'),
+    e('t-pocket', '#t-pocket', '2 Room types', ALL, POCKET, 'Pocket view: a chosen Diorama room (chip, or a click in the world) is drawn as its pocket: the same room with generated surroundings.', { lock: DAC_LOCK }),
     e('pocketFraming', '#pocketFraming', '2 Room types', ALL, [...POCKET, 'pocketOn'], 'Pocket framing: Cerro (hill), Lago (lake), Cascada (falls), Isla (island), Caída (drop). Auto = by the room\'s shape. It changes nothing until a Diorama room is chosen.'),
     e('pocketHeight', '#s-pocketHeight', '2 Room types', ALL, [...POCKET, 'pocketOn'], 'Relief multiplier of the pocket\'s decoration only. It changes nothing until a Diorama room is chosen.'),
     e('roomBorders', '#t-roomBorders', '2 Room types', ALL, RM, 'Room borders: blocking faces (orange), open transitions and the ones on a tree path (green).'),
@@ -4969,11 +4973,11 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   function refresh(root, ctx) {
     for (const en of TABLE) {
       const els = [...root.querySelectorAll(en.dom)]; if (!els.length) continue;
-      const tip = tipOf(en, ctx), seen = new Set();
+      const tip0 = tipOf(en, ctx), locked = tip0.ok && !!en.lock && en.lock.on(ctx), tip = locked ? { ok: true, text: en.lock.text } : tip0, seen = new Set();
       for (const el of els) {
         const h = en.dom.includes(',') || els.length > 1 ? el : holder(el); // a group of buttons: each one; a single labelled control: its label
         if (el.dataset.def === undefined) el.dataset.def = el.type === 'checkbox' ? (el.checked ? '1' : '0') : String(el.value);
-        el.disabled = !tip.ok; el.setAttribute('aria-disabled', tip.ok ? 'false' : 'true');
+        el.disabled = !tip.ok || locked; el.setAttribute('aria-disabled', tip.ok && !locked ? 'false' : 'true');
         if (!seen.has(h)) {
           seen.add(h); h.classList.toggle('inactive', !tip.ok);
           if (!en.keep) { if (h.title !== tip.text) h.title = tip.text; if (h !== el && el.title) el.removeAttribute('title'); }
@@ -5020,7 +5024,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     for (const g of GROUPS) {
       const rows = TABLE.filter((x) => x.group === g); if (!rows.length) continue;
       L.push('## ' + g, '', '| id | techniques | requires | help |', '|---|---|---|---|');
-      for (const x of rows) L.push(`| ${x.id} | ${x.tech.length === 4 ? 'all' : x.tech.join(' ')} | ${x.req.length ? x.req.map((k) => R[k].text).join(' · ') : '-'} | ${x.keep && !x.help ? '(keeps its own tooltip: see the title in the viewer)' : x.help} |`);
+      for (const x of rows) L.push(`| ${x.id} | ${x.tech.length === 4 ? 'all' : x.tech.join(' ')} | ${x.req.length ? x.req.map((k) => R[k].text).join(' · ') : '-'}${x.lock ? ' (locked while: ' + x.lock.doc + ')' : ''} | ${x.keep && !x.help ? '(keeps its own tooltip: see the title in the viewer)' : x.help} |`);
       L.push('');
     }
     if (RETIRED.length) { L.push('## Not in the table', ''); for (const r of RETIRED) L.push(`- \`${r.id}\` (${r.dom}): ${r.note}`); L.push(''); }
@@ -5070,11 +5074,15 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       examples: [
         { id: 'real_balanced', label: 'Real map · Balanced types', src: 'real_map', rooms: true, preset: 'balanced' },
         { id: 'real_default', label: 'Real map · Default', src: 'real_map', rooms: true, preset: 'default' },
-        { id: 'pocket31', label: 'Pocket · Diorama 31', src: 'real_map', rooms: true, preset: 'balanced', pocket: true, room: 31 },
+        /* one example per room type (`type` = the type the example is about: it is what the rule of "Framing by room type" uses on the first application, when the classification of the new source is not built yet; tools/ui/test_modes_ui.js checks it against the real classification) */
+        { id: 'cake60', label: 'Cake · bowl (room 60)', src: 'real_map', rooms: true, preset: 'balanced', room: 60, type: 'cake' },
+        { id: 'cake85', label: 'Cake · bowl + pyramid (room 85)', src: 'real_map', rooms: true, preset: 'balanced', room: 85, type: 'cake' },
+        { id: 'asc88', label: 'Ascension · walls (room 88)', src: 'real_map', rooms: true, preset: 'balanced', room: 88, type: 'ascension' },
+        { id: 'pocket31', label: 'Pocket · Diorama 31', src: 'real_map', rooms: true, preset: 'balanced', pocket: true, room: 31, type: 'diorama' },
         { id: 'images', label: 'Your images (PNG + roles)', images: true, rooms: true }
       ],
       camera: 'isoE', cameras: CAMS, tech: 'A', techs: ['box', 'A', 'B', 'C'], compare: false, compareDefault: false,
-      main: ['roomsPreset', 't-cake', 't-ascWalls', 'ascHeight', 't-pocket', 'pocketFraming', 'pocketHeight', 'roomChips', 'typeTint'],
+      main: ['roomsPreset', 'dacAuto', 't-cake', 't-ascWalls', 'ascHeight', 't-pocket', 'pocketFraming', 'pocketHeight', 'roomChips', 'typeTint'],
       advanced: ['roomsMinCore', 'rRadius', 'roomsCross', 'roomsIsoLimit', 'cakeLayers', 'cakeStep', 'cakePer', 'cakeSeam', 'roomBorders', 'roomTint', 'nowalk', 'dioOutline'],
       slice: [], fixed: ['t-rooms'], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
@@ -5250,7 +5258,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
   const NO_MODES = !!window.EVO_NO_MODES; // test-only flag (tools/ui/common.js): the whole panel as before the modes layer
-  const st = { modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const st = { dacAuto: true, modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -5283,6 +5291,20 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     { id: 'snake_floors', label: 'Snake · Floors', src: 'snake_floors', cam: 'isoE' },
     { id: 'snake_macro', label: 'Snake · Macroform', src: 'snake_macroform', cam: 'isoE', tech: 'box', macro: 'exterior' }
   ];
+  /* FRAMING BY ROOM TYPE (mode 2, docs/ui-modes.md U10): one framing per room type, never mixed. It only SETS the three existing switches (P.cake, P.ascWalls, P.pocket) from the type of the chosen rooms; no renderer, shape or P default changes.
+     One room: only its type's framing; several rooms: the union; none (Whole map): all three, each acting only on the rooms of its own type. Types come from the cached whole-map classification (S.types);
+     `declared` = the type an example names, used on the first application when the new source / preset has no classification yet (draw() re-runs the rule once with the real types). Returns true when a switch changed. */
+  const dacOn = () => !NO_MODES && st.modeId === 'rooms' && !!st.dacAuto;
+  function applyDacRule(declared) {
+    if (!dacOn()) return false;
+    const RT = E.roomTypes, nameOf = (t) => (t === RT.CAKE ? 'cake' : t === RT.ASCENSION ? 'ascension' : t === RT.DIORAMA ? 'diorama' : null), want = new Set();
+    if (!sliceSel.rooms.size) { want.add('cake'); want.add('ascension'); want.add('diorama'); }
+    else for (const id of sliceSel.rooms) { const o = S && S.types && S.types.rooms.get(id), n = declared && sliceSel.rooms.size === 1 ? declared : o ? nameOf(o.type) : null; if (n) want.add(n); }
+    const next = { cake: want.has('cake'), ascWalls: want.has('ascension'), pocket: want.has('diorama') }, ids = { cake: 't-cake', ascWalls: 't-ascWalls', pocket: 't-pocket' };
+    let changed = false;
+    for (const k of Object.keys(next)) { if (!!P[k] !== next[k]) changed = true; P[k] = next[k]; const el = $('#' + ids[k]); if (el) el.checked = next[k]; }
+    return changed;
+  }
   async function applyScenario(sc, mode) { // mode (optional, the modes layer): the example of a mode; without it this is the old scenario button, unchanged
     if (sc.src && !(await selectSource(sc.src))) return;
     const tick = (id, v) => { const el = $('#' + id); if (el) el.checked = v; };
@@ -5297,6 +5319,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     if (sc.contract) { O.contract = true; tick('t-contract', true); }
     if (sc.cam) st.preset = sc.cam;
     if (sc.tech) { st.tech = sc.tech; st.mode = 'single'; }
+    if (mode && mode.id === 'rooms') { st.dacAuto = true; const da = $('#dacAuto'); if (da) da.checked = true; applyDacRule(sc.type); } // an example of mode 2 starts with the rule on (the declared type: the new source has no classification yet)
     syncChips(); syncRoomChips(); refreshMessage(); invalidate(true);
   }
   function message(text) { const m = $('#msg'); m.textContent = text || ''; m.hidden = !text; }
@@ -5309,11 +5332,12 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     sel.value = Object.keys(ROOMS_PRESETS).find((n) => Object.entries(ROOMS_PRESETS[n]).every(([k, v]) => P[k] === v)) || 'custom';
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') b.dacAuto = !!st.dacAuto; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
     for (const k of ['terraces', 'roomsMinCore', 'rRadius', 'minPlateau']) setParam(k, w[k]);
+    st.dacAuto = w.dacAuto === true; const dac = $('#dacAuto'); if (dac) dac.checked = st.dacAuto; // absent = off (a manifest saved before the rule keeps the switches it stored)
     syncRoomsPreset();
     st.preset = PRESETS.some((x) => x.id === w.camera) ? w.camera : 'oblique'; st.yawOff = st.pitchOff = 0; // absent = the default camera
     P.curves = E.curves.PRESETS[w.curves] ? w.curves : 'ordered'; const cs = $('#curvesPreset'); if (cs) cs.value = P.curves; // absent = Ordered
@@ -5327,6 +5351,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       if (title === 'Rooms') { // the switch: off, the viewer is the one without rooms (gates by terrace)
         const l = document.createElement('label'); l.className = 'tg'; l.innerHTML = '<input type="checkbox" id="t-rooms"><span>Rooms (watershed rooms, cores, tree)</span>';
         const i = l.querySelector('input'); i.checked = P.rooms; i.addEventListener('change', () => { P.rooms = i.checked; refreshMessage(); invalidate(true); }); sl.appendChild(l);
+        const ld = document.createElement('label'); ld.className = 'tg'; ld.innerHTML = '<input type="checkbox" id="dacAuto"><span>Framing by room type</span>';
+        const id_ = ld.querySelector('input'); id_.checked = st.dacAuto; if (NO_MODES) ld.hidden = true; // the panel without modes has no such switch
+        id_.addEventListener('change', () => { st.dacAuto = id_.checked; if (st.dacAuto) applyDacRule(); refreshMessage(); invalidate(st.dacAuto); }); sl.appendChild(ld);
         const lc = document.createElement('label'); lc.className = 'tg'; lc.innerHTML = '<input type="checkbox" id="t-cake"><span>Cake rings (room type Cake; needs Rooms)</span>';
         const ic = lc.querySelector('input'); ic.checked = P.cake; ic.addEventListener('change', () => { P.cake = ic.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lc);
         const lw = document.createElement('label'); lw.className = 'tg'; lw.innerHTML = '<input type="checkbox" id="t-ascWalls"><span>Ascension walls (thin walls on the blocking faces of Ascension rooms; needs Rooms)</span>';
@@ -5382,7 +5409,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     $('#mode').addEventListener('click', () => { st.mode = st.mode === 'single' ? 'compare' : 'single'; invalidate(false); });
     $('#src').addEventListener('change', (e) => selectSource(e.target.value)); // a crop belongs to one map
     buildRoles();
-    $('#wholeRooms').addEventListener('click', () => { sliceSel.rooms.clear(); sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); syncRoomChips(); refreshMessage(); invalidate(true); });
+    $('#wholeRooms').addEventListener('click', () => { sliceSel.rooms.clear(); sliceSel.whole = true; sliceSel.zones.clear(); applyDacRule(); syncChips(); syncRoomChips(); refreshMessage(); invalidate(true); });
     $('#wholeMap').addEventListener('click', () => { sliceSel.whole = true; sliceSel.zones.clear(); syncChips(); refreshMessage(); invalidate(true); });
     for (const id of cropIds) $('#' + id).addEventListener('change', () => { refreshMessage(); invalidate(true); });
     $('#file').addEventListener('change', (e) => loadFiles(e.target.files));
@@ -5479,7 +5506,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
       const hit = E.pickTile(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top);
       const id = hit.tile >= 0 ? S.roomMap[hit.tile] : 0, o = id > 0 && S.types ? S.types.rooms.get(id) : null;
-      if (o && o.type === E.roomTypes.DIORAMA) { sliceSel.whole = false; sliceSel.rooms.clear(); sliceSel.rooms.add(id); syncRoomChips(); refreshMessage(); invalidate(true); }
+      if (o && o.type === E.roomTypes.DIORAMA) { sliceSel.whole = false; sliceSel.rooms.clear(); sliceSel.rooms.add(id); applyDacRule(); syncRoomChips(); refreshMessage(); invalidate(true); }
       return;
     }
   }
@@ -5548,14 +5575,16 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     if (!on) { box.innerHTML = ''; st.roomChipsKey = null; return; }
     if (st.roomChipsKey === S.rooms.room) { syncRoomChips(); return; }
     st.roomChipsKey = S.rooms.room; box.innerHTML = '';
-    const ids = new Set(S.rooms.rooms.map((r) => r.id)); for (const id of [...sliceSel.rooms]) if (!ids.has(id)) sliceSel.rooms.delete(id);
+    const ids = new Set(S.rooms.rooms.map((r) => r.id)), had = sliceSel.rooms.size; for (const id of [...sliceSel.rooms]) if (!ids.has(id)) sliceSel.rooms.delete(id);
+    st.roomsGone = had > 0 && !sliceSel.rooms.size && !NO_MODES && st.modeId === 'rooms'; // mode 2: every chosen room is gone in the new map (preset / parameters changed): back to Whole map, rebuilt once by draw() (the slice built from the old ids was empty)
+    if (st.roomsGone) sliceSel.whole = true;
     for (const r of S.rooms.rooms) {
       const b = document.createElement('button'); b.className = 'chip'; b.dataset.id = r.id;
       b.innerHTML = `<i style="background:hsl(${E.rooms.hue(r.id).toFixed(0)},55%,50%)"></i>${r.id} <small>${S.rooms.roomSizes[r.id]}</small>`;
       b.addEventListener('click', (e) => {
         sliceSel.whole = false;
         if (e.ctrlKey || e.shiftKey || e.metaKey) { sliceSel.rooms.has(r.id) ? sliceSel.rooms.delete(r.id) : sliceSel.rooms.add(r.id); } else { sliceSel.rooms.clear(); sliceSel.rooms.add(r.id); }
-        syncRoomChips(); refreshMessage(); invalidate(true);
+        applyDacRule(); syncRoomChips(); refreshMessage(); invalidate(true);
       });
       box.appendChild(b);
     }
@@ -5741,6 +5770,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
       } catch (e) { message(e.message); S = E.shape(pack, P, null); }
       buildRoomChips(); buildFloorChips(); buildMacroChips();
+      if (st.roomsGone) { st.roomsGone = false; applyDacRule(); refreshMessage(); invalidate(true); return; }
+      if (S.types && applyDacRule()) { invalidate(true); return; } // the classification of a new source / preset / parameters is known only now: if the rule gives other switches than the ones set before it, one more build (the usual case: nothing changes)
       st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
     }
     const incursion = computeIncursion(); O.incursion = incursion;
@@ -5882,12 +5913,13 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const c = t.counts, k = S.cake;
     let x = `<br><b>Room types</b> (V16.4 rule, neighbours instead of lobby platforms): ${c.cake} Cake (${c.bowl} bowls, ${c.pyramid} pyramids) · ${c.diorama} Diorama · ${c.ascension} Ascension of ${t.rooms.size} rooms` + (c.dioDemoted ? ` (rule "Diorama never touches Diorama": ${c.dioDemoted} Dioramas of ${c.diorama + c.dioDemoted} became Ascension, ${c.dioDemotedTiles} tiles)` : '');
     if (P.cake && k) x += ` · Cake rings ON: ${k.down} bowl + ${k.up} pyramid links built, ${k.flat} links without rings, ${k.tiles} ring tiles, ${k.levelsAdded} levels added` + (k.conflicts ? `, ${k.conflicts} tiles claimed twice` : '');
+    if (!NO_MODES && st.modeId === 'rooms') x += ` · <b>Framing by room type</b>: ` + (st.dacAuto ? `on (${[P.cake && 'Cake rings', P.ascWalls && 'Ascension walls', P.pocket && 'Pocket'].filter(Boolean).join(', ') || 'none'}; ${sliceSel.rooms.size ? sliceSel.rooms.size + ' room' + (sliceSel.rooms.size > 1 ? 's' : '') + ' chosen' : 'whole map: each framing acts on the rooms of its own type'})` : 'off (the three switches are set by hand)');
     return x;
   }
   /* the live state the control requirements are evaluated from (src/controls.js): after every recompute / redraw */
   function controlsCtx() {
     const raw = packs[st.pack] && packs[st.pack].pack, T = S && S.types ? S.types.counts : null, F = (S && S.fields) || {}, any = (a) => !!(a && a.some((v) => v));
-    return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket,
+    return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket, dacAuto: dacOn(),
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
       floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset, macro: !!(E.volume && E.volume.has(raw)), macroView: st.macro, volOn: volActive() };
