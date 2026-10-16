@@ -13,12 +13,14 @@ const arg = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.a
   await page.click('#mode'); await a.idle();
   await page.setInputFiles('#file', [IMG]); await page.waitForTimeout(1500); await a.idle();
   await page.check('#t-rooms'); await a.idle(); if (!process.argv.includes('--nocake')) { await page.check('#t-cake'); await a.idle(); } // --nocake: the Cake-OFF baseline (a control: how much of the picture outside the changed columns moves when ring levels enter the ranking)
-  for (const cfg of ['default', 'balanced']) {
+  const cfgs = (arg('--cfg') || 'default,balanced').split(','), techs = (arg('--techs') || 'box,A,B,C').split(','), presets = (arg('--cams') || 'oblique,isoE').split(','); // --asc: Ascension walls on too (the camera-bank scene of tools/verify.sh regress: --cfg balanced --asc --techs box,A,B --cams isoE,isoW,oblique,low,top)
+  if (process.argv.includes('--asc')) { await page.check('#t-ascWalls'); await a.idle(); }
+  for (const cfg of cfgs) {
     if (cfg === 'balanced') { await page.selectOption('#roomsPreset', 'balanced'); await a.idle(); }
     const heights = await page.evaluate(() => { const S = window.__evo.S(); return { n: S.n, W: S.W, ox: S.ox, oy: S.oy, h: Array.from(S.fine, (L) => S.levelH[L]) }; });
     fs.writeFileSync(path.join(out, `${cfg}_heights.json`), JSON.stringify(heights));
     const oldH = old ? JSON.parse(fs.readFileSync(path.join(old, `${cfg}_heights.json`), 'utf8')) : null;
-    for (const t of ['box', 'A', 'B', 'C']) { await a.tech(t); for (const p of ['oblique', 'isoE']) {
+    for (const t of techs) { await a.tech(t); for (const p of presets) {
       await a.preset(p); fs.writeFileSync(path.join(out, `${cfg}_${t}_${p}.png`), await a.canvas());
       if (oldH) {
         const mask = await page.evaluate(({ oldH, rad }) => {
