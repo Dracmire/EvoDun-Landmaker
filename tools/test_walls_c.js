@@ -60,6 +60,28 @@ const load = (f) => JSON.parse(fs.readFileSync(path.join(__dirname, '../data', f
     const mapA = new Map(a.inst.map((r) => [key(r, Sw), r])); let n2 = 0, diff = 0;
     for (const r of b.inst) { const wx = (r.a.x + Sz.ox), wy = (r.a.y + Sz.oy); if (wx - Sz.ox < 5 || wy - Sz.oy < 5 || Sz.ox + Sz.W - wx < 5 || Sz.oy + Sz.H - wy < 5) continue; const o = mapA.get(key(r, Sz)); n2++; if (!o || o.s !== r.s || o.hi !== r.hi) diff++; }
     ok(`the same atoms and strata in the interior of a slice as on the whole map (${n2} atoms compared)`, n2 > 100 && diff <= Math.max(2, n2 * 0.005), diff); }
+  // POCKET ROADS (D23): the wall pass leaves the Pocket road tiles (S.pocketRole 3) out, by the OWNER tile of the C cells (E.cellTileAt), radius 0; Box / A / B and non-Pocket C are untouched
+  { const PB = { terraces: 3, subs: 3, terH: 1, subH: 0.22, minPlateau: 120, minSub: 3, pre: 1, climb: 2, gateThr: 0.05, gateMin: 3, passGap: 8, stairW: 3, stairStyle: 1, rampDepth: 2, spread: 1, smooth: 2, radius: 0.9, tread: 2, roomsMinCore: 100, roomsCross: 10, roomsIsoLimit: 100, rRadius: 5, rooms: true, margin: 24, pocket: true, pocketYaw: 45, curves: 'ordered' };
+    const Sp = E.shape(mk(), PB, { rooms: [31], margin: 6 }); let roads = 0; for (let i = 0; i < Sp.n; i++) if (Sp.pocketRole[i] === 3) roads++;
+    ok('Pocket 31 (Balanced types, Cam 1 axis): 223 road tiles', Sp.pocket === true && roads === 223, roads);
+    const FIG = { t3: { before: [402, 1562, 953], after: [179, 904, 560] }, t2: { before: [402, 3588, 1061], after: [179, 1598, 483] } }; // [edges, faces, tops]: before = main (no road exemption), after = this PR
+    for (const m of ['t3', 't2']) {
+      const Pm = Object.assign({}, PB, { wallPass: m }), w = E.wallc.get(Sp, Pm), e = w.W.e, g = w.W.st.grid, roadAt = (x, y) => { const t = E.cellTileAt(Sp, Pm, x, y); return t >= 0 && Sp.pocketRole[t] === 3; };
+      let edgesOn = 0; for (const i of w.W.list) if (Sp.pocketRole[g.own[e.ci[i]]] === 3 || (e.co[i] >= 0 && Sp.pocketRole[g.own[e.co[i]]] === 3)) edgesOn++;
+      let facesOn = 0, topsOn = 0, atomsOn = 0;
+      for (const v of w.byHi.values()) { for (const f of v.faces) if (roadAt((f.ax + f.bx) / 2, (f.ay + f.by) / 2)) facesOn++; for (const t of v.tops) if (roadAt(t.cx, t.cy)) topsOn++; }
+      if (w.inst) for (const r of w.inst) for (const p of r.pieces) { const n = p.poly.x.length; let on = false; for (let k = 0; k < n; k++) if (roadAt((p.poly.x[k] + p.poly.x[(k + 1) % n]) / 2, (p.poly.y[k] + p.poly.y[(k + 1) % n]) / 2)) on = true; if (on) atomsOn++; }
+      ok(`${m.toUpperCase()}: no wall edge, face, top or atom piece on a road tile (owner-tile rule): ${edgesOn} edges, ${facesOn} faces, ${topsOn} tops, ${atomsOn} atoms`, edgesOn + facesOn + topsOn + atomsOn === 0, [edgesOn, facesOn, topsOn, atomsOn]);
+      ok(`${m.toUpperCase()}: wall edges / faces / tops ${FIG[m].before.join(' / ')} -> ${FIG[m].after.join(' / ')} (${w.stats.roadEdges} edges left out)`, [w.stats.edges, w.stats.faces, w.stats.tops].join() === FIG[m].after.join() && w.stats.roadEdges === 223, [w.stats.edges, w.stats.faces, w.stats.tops, w.stats.roadEdges]);
+    }
+    // the exemption does not touch the displacement set (the roads stay curved in C): exemptTiles is the same before and after the wall pass, and most road tiles are not in it
+    const S3 = E.shape(mk(), PB, { rooms: [31], margin: 6 }), ex0 = Array.from(E.curves.exemptTiles(S3, PB)); E.wallc.get(S3, Object.assign({}, PB, { wallPass: 't3' }));
+    let exRoad = 0; for (let i = 0; i < S3.n; i++) if (S3.pocketRole[i] === 3 && ex0[i]) exRoad++;
+    ok(`E.curves.exemptTiles is unchanged by the wall pass and holds only ${exRoad} of the ${roads} road tiles (ramp footprints): the roads keep the Voronoi displacement`, JSON.stringify(Array.from(E.curves.exemptTiles(S3, PB))) === JSON.stringify(ex0) && exRoad < roads, exRoad);
+    ok('the wall-pass cache key is the same with and without a Pocket', E.wallc.key(PB) === E.wallc.key(Object.assign({}, PB, { pocket: false })));
+    // no Pocket: no mask, no extra stat key, and the output equals main's byte for byte (sha1 of stats without ms + faces / tops, measured on main bfdd87d)
+    const sha = (w) => { const o = {}; for (const [k, v] of w.byHi) o[k] = v; const st = Object.assign({}, w.stats); delete st.ms; return require('crypto').createHash('sha1').update(JSON.stringify([st, o])).digest('hex').slice(0, 12); };
+    for (const [m, h] of [['t3', '0586ad8c4d63'], ['t2', 'eba088f37298']]) { const w = E.wallc.get(S, Object.assign({}, PX, { wallPass: m })); ok(`no Pocket (Shrine-Pier x4, 7 terraces, ${m.toUpperCase()}): no road mask, no roadEdges key, output byte-identical to main (${h})`, w.W.road === null && w.stats.roadEdges === undefined && sha(w) === h, [w.W.road, sha(w)]); } }
   // the figures of the fusion on the maps (measured, not enforced)
   console.log('\nFUSION FIGURES (T3, Natural, extrude 0.25; islands before -> after the rules, slivers (s < K and area < 0.30), thin (area / border < 0.10; reported for walls of 1.5 terH or more, the metric on H = 1 walls is dominated by the narrow band), tiny full-height islands (s = K and area < FULLMIN = 0.15), islands over LMAX = 3.6 tiles, mean / max span in tiles, rounds, ms):');
   const rows = [['real map 5 terraces', mk, P0], ['real map 7 terraces spread 1.5 middle', mk, Object.assign({}, P0, STAGE)], ['real map 12 terraces', mk, Object.assign({}, P0, { terraces: 12 })], ['Snake surface 5 terraces', snake, P0], ['Snake surface 7 terraces', snake, Object.assign({}, P0, STAGE)], ['Shrine-Pier x4 7 terraces', x4, Object.assign({}, P0, STAGE)]];

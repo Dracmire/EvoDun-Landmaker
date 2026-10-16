@@ -1,7 +1,7 @@
 /* WALL PASS of technique C (crystallizer 4, phase 2; C-only geometry: it needs sub-tile resolution, Box / A / B do not get it; the wall DRESSING stays the shared pass of the four techniques).
    A cliff band of blocks built OUTWARD on the lower ground in front of every wall (D17: the upper floor and its lip stay intact). Visual only: walking, regions, gates and ramps do not change.
    P.wallPass: 't3' (default, the Unexplored 2 look: atoms + strata + fusion), 't2' (alternative: Voronoi blocks moved by groups through N height passes, NO fusion), 'off' (the C of phase 1, identical pixels).
-   WALLS: every Voronoi edge of C with a jump (levelH[hi] - levelH[lo]) of 0.5 terH or more (the threshold of the dressing), except edges next to an exempt cell (ramp / stair footprints + 1 ring, Ascension wall faces, Cake rings) and next to void:
+   WALLS: every Voronoi edge of C with a jump (levelH[hi] - levelH[lo]) of 0.5 terH or more (the threshold of the dressing), except edges next to an exempt cell (ramp / stair footprints + 1 ring, Ascension wall faces, Cake rings, and the owner tiles of the Pocket roads: D23) and next to void:
    the band is interrupted there. H = the jump in tiles. "The nearest higher ground IS the terrace a" holds by construction: a low point is tied to the nearest wall edge of ITS OWN level (an intermediate ledge has its own edges).
    TECHNIQUE 3 (layout space first, then the extrusion scale):
      atoms     a jittered grid of 0.5 tile (jitter +-0.3 of the cell, hashed by WHOLE-MAP coordinates), cells = Voronoi of those seeds, clipped to the LOW-SIDE C cell of level lo (convex x convex, no library): the pieces of an
@@ -27,24 +27,35 @@
   const KEYS = ['wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter'];
   const wkey = (P) => par(P, 'wallPass') + ':' + KEYS.map((k) => par(P, k)).join(':');
   const BAND = 0.35, REACH = 0.45, MIN_JUMP = 0.5, ATOM = 0.5, ATOM_JIT = 0.3, LMAX = 3.6, FULLMIN = 0.15, FINE = 1 / 16;
+  const ROAD_RADIUS = 0; // Pocket roads (S.pocketRole 3) are left out of the wall pass: radius in tiles around the road tiles (0 = the road tiles only; 1 = + one ring, measured, not chosen)
+  /* the Pocket road tiles as a mask over the window (null when the shape has no Pocket). Local to the wall pass: E.curves.exemptTiles also stops the Voronoi displacement, and the roads would turn rectilinear */
+  function roadMask(S) {
+    if (!(S.pocket && S.pocketRole)) return null;
+    const W = S.W, H = S.H, r = ROAD_RADIUS, m = new Uint8Array(W * H); let any = false;
+    for (let i = 0; i < m.length; i++) if (S.pocketRole[i] === 3) { any = true; const x = i % W, y = (i / W) | 0; for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H) m[yy * W + xx] = 1; } }
+    return any ? m : null;
+  }
   const hash = (a, b, c, d) => E.curves.hash(a, b, c, d);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const area2 = (x, y) => { let a = 0; for (let k = 0, n = x.length; k < n; k++) { const j = (k + 1) % n; a += x[k] * y[j] - x[j] * y[k]; } return a; }; // twice the signed area
 
   /* ---- the wall edges of C and a grid to find the nearest one ---- */
   function wallEdges(S, P, st) {
-    const e = st.edges, g = st.grid, th = P.terH || 1, list = [], byLo = new Map();
-    let hmax = 0;
+    const e = st.edges, g = st.grid, th = P.terH || 1, list = [], byLo = new Map(), road = roadMask(S);
+    let hmax = 0, roadEdges = 0;
     for (let i = 0; i < e.x0.length; i++) {
       const lo = e.lo[i], hi = e.hi[i]; if (lo < 0) continue;
       const H = S.levelH[hi] - S.levelH[lo]; if (H < MIN_JUMP * th - 1e-9) continue;
       const ci = e.ci[i], co = e.co[i]; if (g.ex[ci] || (co >= 0 && g.ex[co])) continue; // the band is interrupted next to the exempt cells
+      if (road && (road[g.own[ci]] || (co >= 0 && road[g.own[co]]))) { roadEdges++; continue; } // Pocket road: the owner tile of either cell (the cell -> tile map of C), the flank keeps the plain slab wall
       list.push(i); hmax = Math.max(hmax, H);
       let m = byLo.get(lo); if (!m) byLo.set(lo, m = new Map());
       const x0 = Math.floor(Math.min(e.x0[i], e.x1[i])), x1 = Math.floor(Math.max(e.x0[i], e.x1[i])), y0 = Math.floor(Math.min(e.y0[i], e.y1[i])), y1 = Math.floor(Math.max(e.y0[i], e.y1[i]));
       for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) { const k = x * 8192 + y; let a = m.get(k); if (!a) m.set(k, a = []); a.push(i); }
     }
-    return { st, e, list, byLo, hmax, S };
+    // a point on a road tile: the OWNER tile of the C cell that holds it (E.cellTileAt), the same cell -> tile map as the edge test above
+    const roadAt = road ? (x, y) => { const t = E.cellTileAt(S, P, x, y); return t >= 0 && road[t] === 1; } : () => false;
+    return { st, e, list, byLo, hmax, S, road, roadEdges, roadAt };
   }
   /* nearest wall edge of level lo (and of upper level hi when hi >= 0) within rmax: { i, d, qx, qy } or null */
   function nearest(W, lo, hi, x, y, rmax) {
@@ -115,14 +126,14 @@
       }
       return out;
     };
-    const exT = st.exemptTiles, tileEx = (x, y) => { const tx = Math.floor(x), ty = Math.floor(y); return tx >= 0 && ty >= 0 && tx < S.W && ty < S.H && !!exT[ty * S.W + tx]; }; // the band is interrupted over the exempt tiles (footprints + ring, Ascension faces, Cake rings)
+    const exT = st.exemptTiles, rdT = W.road, tileEx = (x, y) => { const tx = Math.floor(x), ty = Math.floor(y); return tx >= 0 && ty >= 0 && tx < S.W && ty < S.H && (!!exT[ty * S.W + tx] || (rdT !== null && !!rdT[ty * S.W + tx])); }; // the band is interrupted over the exempt tiles (footprints + ring, Ascension faces, Cake rings)
     const rmaxFor = BAND * W.hmax + 0.3, inst = [], imap = new Map();
     for (const [key, [a, lo]] of cand) {
       const pcs = piecesOf(a, lo); if (!pcs.length) continue;
       let tot = 0, big = pcs[0]; for (const p of pcs) { tot += p.area; if (p.area > big.area) big = p; }
       let cx = 0, cy = 0; for (let k = 0; k < big.poly.x.length; k++) { cx += big.poly.x[k]; cy += big.poly.y[k]; } cx /= big.poly.x.length; cy /= big.poly.y.length;
       const n0 = nearest(W, lo, -1, cx, cy, rmaxFor); if (!n0) continue;
-      if (pcs.some((p) => p.poly.x.some((vx, k) => tileEx((vx + p.poly.x[(k + 1) % p.poly.x.length]) / 2, (p.poly.y[k] + p.poly.y[(k + 1) % p.poly.y.length]) / 2)) || tileEx(cx, cy))) continue; // a piece touching an exempt tile: no atom there
+      if (pcs.some((p) => p.poly.x.some((vx, k) => tileEx((vx + p.poly.x[(k + 1) % p.poly.x.length]) / 2, (p.poly.y[k] + p.poly.y[(k + 1) % p.poly.y.length]) / 2) || W.roadAt((vx + p.poly.x[(k + 1) % p.poly.x.length]) / 2, (p.poly.y[k] + p.poly.y[(k + 1) % p.poly.y.length]) / 2)) || tileEx(cx, cy) || W.roadAt(cx, cy))) continue; // a piece touching an exempt tile or a Pocket road (tile under the point, or the owner tile of its C cell): no atom there
       const hi = st.edges.hi[n0.i], H = S.levelH[hi] - S.levelH[lo]; if (n0.d >= BAND * H) continue;
       let sum = 0, ok = true;
       for (const p of pcs) {
@@ -265,6 +276,7 @@
             // footprint along the chain from c.t0 to c.t1: the vertices inside plus the two ends
             const ss = [c.t0]; for (let q = 1; q < L.length - 1; q++) if (L[q] > c.t0 + 1e-6 && L[q] < c.t1 - 1e-6) ss.push(L[q]); ss.push(c.t1);
             const base = ss.map((s) => at(s)), front = base.map((b) => [b.x + b.n[0] * d, b.y + b.n[1] * d]);
+            if (W.road && (front.some((f, q) => W.roadAt(f[0], f[1]) || (q > 0 && W.roadAt((f[0] + front[q - 1][0]) / 2, (f[1] + front[q - 1][1]) / 2))) || W.roadAt((base[0].x + front[front.length - 1][0]) / 2, (base[0].y + front[front.length - 1][1]) / 2))) continue; // a block whose front lies on a Pocket road (owner tile): none
             for (let q = 0; q < base.length - 1; q++) {
               const a = front[q], b = front[q + 1], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); if (l < 1e-9) continue;
               dst.faces.push({ ax: a[0], ay: a[1], bx: b[0], by: b[1], zlo: z0, zhi: z1, nx: dy / l, ny: -dx / l, na: base[q].n, nb: base[q + 1].n, lo, hi, tot: H / th, top: topRow, wx: wox + Math.floor((a[0] + b[0]) / 2), wy: woy + Math.floor((a[1] + b[1]) / 2), dep: d, grp: gj0, row: k, chain: ch, maxD });
@@ -290,7 +302,7 @@
     const key = 'Cw:' + E.curves.key(P) + '|' + wkey(P); if (S.cache[key]) return S.cache[key];
     const t0 = Date.now(), st = E.curves.struct(S, P), W = wallEdges(S, P, st), res = par(P, 'wallPass') === 't2' ? buildT2(S, P, W) : buildT3(S, P, W);
     let nf = 0, nt = 0; for (const v of res.byHi.values()) { nf += v.faces.length; nt += v.tops.length; }
-    res.stats = Object.assign({ mode: par(P, 'wallPass'), edges: W.list.length, faces: nf, tops: nt, ms: Date.now() - t0 }, res.stats); res.W = W;
+    res.stats = Object.assign({ mode: par(P, 'wallPass'), edges: W.list.length, faces: nf, tops: nt, ms: Date.now() - t0 }, W.road ? { roadEdges: W.roadEdges } : {}, res.stats); res.W = W;
     return (S.cache[key] = res);
   }
 
