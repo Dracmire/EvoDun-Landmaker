@@ -6,12 +6,13 @@
    - Cake (BuildCakesForCurrentRoom 1719, BuildCakeDownRingsSimple 1670, BuildCakeUpRings 1602): ONE cake per terrace link (low, high) of the room. Direction: one link -> more pieces of the room on the high
      terrace = Down, more on the low = Up, tie = Down; several links -> Down only when low is the minimum terrace of the room, else Up. Pieces = 4-connected pieces of the room per terrace (no platforms here).
      Core = ALL the room's tiles of the core terrace (low if Down, high if Up). Rings OUTSIDE the core: ring k = Dilate8(core, (k+1)d) \ Dilate8(core, k d), cakeLayers 3, dilationPerLayer 1, clipped to the room's tiles
-     of the two terraces. Down: cut to the seam window (Dilate8 of the gate tiles of the link, radius 5). Up: around the whole high core. Heights: uniform step (cakeStepHeight = 0.3 terH); Down rises from the core top
-     (+0.3, +0.6, +0.9), Up descends (-0.3, -0.6, -0.9).
+     of the two terraces (Down; Up v2: see below). Both directions are cut to the seam window (Dilate8 of the gate tiles of the link, radius 5). Heights: uniform step (cakeStepHeight = 0.3 terH); Down rises from the core top
+     (+0.3, +0.6, +0.9), Up descends from the LOCAL platform height (-0.3, -0.6, -0.9 at most).
    - ADAPTATION TO THE VIEWER (user's decision): in Unity the rings fill the gap between the platforms of two terraces; here the terraces touch. Down: the rings are CUT into tiles of the high terrace of the same room.
-     Up: they are BUILT on tiles of the low terrace of the same room. Never outside the room, never on void. The footprint of a ramp is reserved. Empty rings are dropped and the rest renumbered.
+     Up (CAKE v2 FOR UP LINKS, 2026-10-15; P.cakeUpV1 = the previous rule): rings are BUILT in the AIRSPACE of any non-void tile except a Diorama tile (the land mass of a cake room is more than its footprint), only raising ground, and
+     each ring tile takes its height from ref(t) = the lowest core tile in the Chebyshev window of radius d around it, so the platform is the highest point of the cake. Never on void. The footprint of a ramp is reserved. Empty rings are dropped and the rest renumbered.
      step = min(step, (gap - margin) / n) so the last ring stays below the neighbouring terrace (Down) / above the low terrace (Up). Rings replace the sub-terraces on the tiles they take.
-   - Up has no "high side" filter (the rings already sit on low tiles of the room, within ring distance of the high core). Stitching of diagonal gaps only adds free ring candidates.
+   - Unity's BuildCakeUpRings keeps the ring tiles closer to the low terrace than to the high one; the seam window is the viewer's way to the same result. Stitching of diagonal gaps only adds free ring candidates.
    - A tile claimed by two links keeps the ring with the smaller index (tie: the lower link).
    Ported to Unity later: classify() and the ring construction (BFS over tile sets); the level assignment replaces BuildPlatformMesh heights. */
 (function (E) {

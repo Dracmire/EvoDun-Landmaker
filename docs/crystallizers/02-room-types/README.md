@@ -56,13 +56,14 @@ Closure:
 - **D18** (PR #13, merged 2026-10-09) Snake Mountain of the fixed test set is its pure SURFACE pack (`data/snake_mountain_surface.json`, default source). The real Snake Mountain is multi-level (snake body, interior caves as an SDF) and cannot be expressed as a heightmap; it is the test case of the future SDF / volume crystallizer.
 - **D19** (PR #13, merged 2026-10-09) Rooms on with ZERO rooms (40x40 with the Default radius): the layer is NOT applied, the viewer draws as with rooms off and the info says so; the verifier reports "not applicable".
 - **D20** (PR #13, merged 2026-10-09) Crystallizer 2 is CLOSED in this phase; pending items in section 9.
+- **D21** (2026-10-15, user's decision) CAKE v2 FOR UP LINKS (the previous Up rule stays as the diagnostic `P.cakeUpV1`; Down unchanged). Up rings: seam window (as Down), built in the AIRSPACE of any non-void tile except Diorama tiles, raise only, height from the LOCAL platform reference (the lowest core tile in the Chebyshev window of radius d), so the platform is the highest point of the cake. Why, rules, figures and the Unity parameters: [`docs/room-types.md`](../../room-types.md) (Cake v2 for Up links, Unity parameters). Real map (v1 -> v2): Balanced types Up ring tiles 1914 -> 317, ring-0 violations 470 -> 0, levels added 12 -> 9; Default 12979 -> 3420, 4014 -> 0, 26 -> 25; the Up step becomes 0.170 terH (Unity 0.3) because the sub-terrace relief of the core eats the gap (accepted).
 
 ## 5. Design
 
 Short summary; the full rules are in [`docs/room-types.md`](../../room-types.md) (Cake, balancing table, D-D, Pocket, archetypes, Ascension walls) and [`docs/rooms.md`](../../rooms.md) (the chain, its checks and its viewer integration).
 - **Input**: rooms, terrace per tile, used terrace gates (the tree's), room transitions; all of the WHOLE map (classification does not depend on the slice).
 - **Type** (`E.roomTypes.classify`, `src/roomtypes.js`): CAKE = >= 2 terraces in the room, cakeLayers > 0 and a terrace edge (the LOW tile of a used gate pair whose two tiles are in the room); DIORAMA = not cake and >= 3 neighbouring rooms by transitions (the lobby-platform count of the Unity code is lost); ASCENSION = the rest; then rule D-D.
-- **Cake**: see D8, D9 and the Heights rule: Down core top + (k+1) step, Up core top - (k+1) step, step = min(0.3 terH, (gap - 0.05 terH) / n); rings replace the sub-terraces on their tiles; a tile claimed by two links keeps the smaller ring index; walking, stake and route do not change. Switch "Cake rings" with sliders (rings 1-6 = 3, ring step 0.1-0.6 = 0.3, tiles per ring 1-3 = 1, seam window 2-12 = 5).
+- **Cake**: see D8, D9 and the Heights rule: Down core top + (k+1) step, Up local platform height - (k+1) step (D21), step = min(0.3 terH, (gap - 0.05 terH) / n); rings replace the sub-terraces on their tiles; a tile claimed by two links keeps the smaller ring index; walking, stake and route do not change. Switch "Cake rings" with sliders (rings 1-6 = 3, ring step 0.1-0.6 = 0.3, tiles per ring 1-3 = 1, seam window 2-12 = 5).
 - **Pocket** (`src/pocket.js`): disc R = 3 r centred 1 r toward the camera (minimum radius 14), ~30-48 seeds (one per 80 tiles), cell offset by band, heights quantized, decoration levels of its own and capped brightness, exits and pond as in D14. The world shape is reframed to the window of the disc (`E.pocket.windowOf`, `E.pocket.reframe`). Display toggle "Diorama footprint outline".
 - **Archetypes** (`E.pocket.chooseArchetype`): Cerro, Lago, Cascada, Isla, Caída; water is a level with its own colour; Isla and Caída have a ring of void and a deep `S.baseH`; the camera frames the fragment + 2 r.
 - **Ascension walls** (`E.roomTypes.ascWalls`, `drawAscWall` in `src/render.js`): see D17; Box draws a wall after the later of the two tiles of its face; A and B cut the wall into bands at the heights of the levels it crosses and draw each band in the pass of the level at the top of its band, after the cap, sorted by depth.
@@ -86,11 +87,11 @@ Every figure below carries its configuration. Real map = `data/samples/skeleton_
 
 | Terraces | Cake / Diorama / Ascension | links (bowl + pyramid) | ring tiles | levels |
 |---|---|---|---|---|
-| 5 | 31 / 0 / 1 (the user's figures) | 30 + 40 | 14409 of 44582 land (15205 before the corridor) | 15 -> 41 |
-| 3 | 27 / 5 / 0 (expected values) | 26 + 14 | 6573 | 8 -> 23 |
-| 2 | 26 / 4 / 2 (expected values) | 19 + 7 | 4057 | 5 -> 14 |
+| 5 | 31 / 0 / 1 (the user's figures) | 30 + 40 | 4893 of 44582 land (Cake v2 for Up, D21; 14409 with the previous Up rule, 15205 before the corridor) | 15 -> 40 (15 -> 41) |
+| 3 | 27 / 5 / 0 (expected values) | 26 + 14 | 2972 (6573) | 9 -> 19 (9 -> 24; the earlier table said 8 -> 23) |
+| 2 | 26 / 4 / 2 (expected values) | 19 + 7 | 1584 (4057) | 6 -> 12 (6 -> 15; the earlier table said 5 -> 14) |
 
-Corridor (real map, 5 terraces, `node tools/diag_cake_ramps.js`, CLAUDE.md): ramps with the foot enclosed by ring tiles 78 -> 0, heads enclosed 2 -> 0, 796 of 15205 ring tiles lost (1007 corridor tiles reserved).
+Corridor (real map, 5 terraces, `node tools/diag_cake_ramps.js`, CLAUDE.md): ramps with the foot enclosed by ring tiles 78 -> 0, heads enclosed 2 -> 0, 796 of 15205 ring tiles lost (1007 corridor tiles reserved); with Cake v2 for Up: feet enclosed 10 -> 0, heads 2 -> 0, 772 of 5665 lost.
 
 **Balancing the types** (real map, rooms on, Cake off, `node tools/room_types_table.js`; Cake / Diorama / Ascension by the plain V16.4 rule; ramps; main region and walkable as % of the land; edge problems):
 
