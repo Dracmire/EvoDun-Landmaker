@@ -293,6 +293,26 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const pos = await ev(() => { window.EVO.modes.resetFolds(document); document.querySelector('aside').scrollTop = 0; const r = (q) => Math.round(document.querySelector(q).getBoundingClientRect().top); return { cake: r('#t-cake'), show: r('#dacShow'), roomChips: r('#roomChips') }; });
     console.log(`    MEASURED (1500x900, folds closed): Cake toggle top ${pos.cake} px, Show framing top ${pos.show} px (${pos.show > 900 ? (pos.show - 900) + ' px below the fold: needs scrolling the panel' : 'on the first screen'})`);
 
+    // 1b. the selector ISOLATES the view (handler only): tint and room borders off for a single type, outline on for diorama; All = tint + outline on, borders as they are; nothing is re-forced by a redraw
+    {
+      const flags = () => ev(() => { const e = window.__evo, q = (id) => document.querySelector(id).checked; return { tint: !!e.O.typeTint, borders: !!e.O.roomBorders, out: !!e.O.dioOutline, boxes: [q('#t-typeTint'), q('#t-roomBorders'), q('#t-dioOutline')].join() }; });
+      const sameBoxes = (f) => f.boxes === [f.tint, f.borders, f.out].join();
+      const toggle = async (id) => { await ev((id) => document.querySelector(id).click(), id); await a.idle(); };
+      await click('#examples button[data-id="real_balanced"]'); await toggle('#t-roomBorders'); let f = await flags();
+      ok('start of the isolation tests: the default example (tint on, outline on) with the room borders switched on by hand', f.tint && f.out && f.borders && sameBoxes(f), JSON.stringify(f));
+      for (const v of ['cake', 'ascension']) { await page.selectOption('#dacShow', v); await a.idle(); f = await flags(); ok(`Show framing ${v}: type tint OFF and room borders OFF (checkboxes agree), the outline is left as it was`, !f.tint && !f.borders && f.out && sameBoxes(f), JSON.stringify(f)); await toggle('#t-roomBorders'); }
+      await toggle('#t-dioOutline'); f = await flags(); ok('the outline switched off by hand', !f.out && sameBoxes(f));
+      await page.selectOption('#dacShow', 'diorama'); await a.idle(); f = await flags();
+      ok('Show framing diorama: tint OFF, room borders OFF and the footprint outline ON', !f.tint && !f.borders && f.out && sameBoxes(f), JSON.stringify(f));
+      await toggle('#t-dioOutline'); await toggle('#t-typeTint'); await ev(() => window.__evo.draw()); await a.idle(); f = await flags();
+      ok('manual choices persist through a redraw: outline off and tint on by hand are NOT re-forced (the rule never touches the Display toggles)', !f.out && f.tint && sameBoxes(f), JSON.stringify(f));
+      await click('#roomChips .chip[data-id="31"]'); await click('#wholeRooms'); f = await flags();
+      ok('a chip click and Whole map do not re-force them either', !f.out && f.tint, JSON.stringify(f));
+      await toggle('#t-roomBorders'); await page.selectOption('#dacShow', 'all'); await a.idle(); f = await flags();
+      ok('Show framing All: tint ON and outline ON, the room borders (on by hand) are left as they are', f.tint && f.out && f.borders && sameBoxes(f), JSON.stringify(f));
+      await toggle('#t-roomBorders');
+    }
+
     // 2. the three marks of the default example
     await click('#examples button[data-id="real_balanced"]');
     const d = await ev(() => { const e = window.__evo, S = e.S(), E = window.EVO, T = E.roomTypes, nm = (t) => (t === T.CAKE ? 'Cake' : t === T.DIORAMA ? 'Dio' : 'Asc'), sizes = S.regionSizes, main = sizes.indexOf(Math.max(...sizes)), tile = (q) => (q.y - S.oy) * S.W + (q.x - S.ox);
@@ -353,10 +373,17 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     ok('with "cake" chosen the viewer block writes dacShow "cake"', vb.dacShow === 'cake', JSON.stringify(vb));
     const mkMan = (viewer) => { const p = path.join(os.tmpdir(), 'dac2_manifest_' + Math.random().toString(36).slice(2) + '.json'); fs.writeFileSync(p, JSON.stringify({ format: 'evodun-pack/0.3', name: 'dac2 test', roles: { elevation: { image: 'skeleton_heightmap_256.png', channel: 'V' } }, viewer })); return p; };
     const base = { mode: 'rooms', rooms: true, preset: 'balanced', terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120, camera: 'isoE', dacAuto: true };
-    for (const [label, viewer, wantShow] of [['dacShow cake', Object.assign({}, base, { dacShow: 'cake' }), 'cake'], ['no dacShow', base, 'all']]) {
+    const dflags = () => ev(() => { const e = window.__evo; return { tint: !!e.O.typeTint, borders: !!e.O.roomBorders, out: !!e.O.dioOutline }; });
+    for (const [label, viewer, wantShow] of [['dacShow cake', Object.assign({}, base, { dacShow: 'cake' }), 'cake'], ['dacShow diorama', Object.assign({}, base, { dacShow: 'diorama' }), 'diorama'], ['no dacShow', base, 'all']]) {
+      const before = await dflags();
       await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
       const man = mkMan(viewer); await page.setInputFiles('#file', [PNG, man]); await page.waitForTimeout(2500); await a.idle(); fs.unlinkSync(man);
       await page.waitForFunction(() => { const S = window.__evo.S(); return S && S.rooms && document.querySelector('#busy').hidden; }, null, { timeout: 180000 }); await a.idle();
+      m = await meas(); const vb2 = await ev(() => window.__evo.viewerBlock()); const after = await dflags();
+      if (wantShow === 'cake') ok('manifest dacShow cake: loads ISOLATED (type tint and room borders off, as the selector does)', !after.tint && !after.borders, JSON.stringify(after));
+      if (wantShow === 'diorama') { const s1 = await sig(); await ev(() => document.querySelector('#t-dioOutline').click()); await a.idle(); const s2 = await sig(); await ev(() => document.querySelector('#t-dioOutline').click()); await a.idle();
+        ok('manifest dacShow diorama: loads with the footprint outline ON and the picture is not the plain map (switching the outline off changes it), tint and room borders off', after.out && !after.tint && !after.borders && s1 !== s2, JSON.stringify(after)); }
+      if (wantShow === 'all') ok('manifest without dacShow: the Display toggles (tint, room borders, outline) are untouched by the load', JSON.stringify(after) === JSON.stringify(before), JSON.stringify({ before, after }));
       m = await meas(); const vb2 = await ev(() => window.__evo.viewerBlock());
       ok(`manifest ${label}: loads with Show framing "${wantShow}" (selector, state and real shape agree) and saves the same value`, m.sel === wantShow && (wantShow === 'cake' ? want.cake(m) : m.rings > 0 && m.faces > 0) && (wantShow === 'all' ? vb2.dacShow === undefined : vb2.dacShow === wantShow), JSON.stringify(m));
     }
