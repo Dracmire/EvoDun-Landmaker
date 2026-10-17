@@ -198,6 +198,12 @@ const zoneImg = (extra) => rgba(W, H, (x, y) => {
     ok('manifest viewer block: a partial block keeps only its fields', JSON.stringify(E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { terraces: 3 } }).viewer) === JSON.stringify({ terraces: 3 }));
     let bad = 0; for (const v of [{ terraces: 1 }, { terraces: 25 }, { roomsMinCore: 4 }, { roomsMinCore: 251 }, { rRadius: 2 }, { rRadius: 31 }, { minPlateau: 0 }, { minPlateau: 301 }, { terraces: 3.5 }, { rooms: 'yes' }, { cake: 1 }, { preset: 'other' }]) { try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: v }); } catch (e) { bad++; } }
     ok('manifest viewer block: out-of-range or wrong-type values are rejected', bad === 12, bad);
+    { // dacShow (DAC mode 2 "Show framing", docs/ui-modes.md U11): a closed list, round trip, a clear error
+      const rt3 = E.parseManifest(JSON.parse(JSON.stringify(E.buildManifest({ name: 'v', roles: {}, viewer: { mode: 'rooms', dacAuto: true, dacShow: 'diorama' } }))));
+      ok('manifest viewer block: dacShow survives a round trip', rt3.viewer.dacShow === 'diorama' && rt3.viewer.dacAuto === true, JSON.stringify(rt3.viewer));
+      let msg = ''; try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { dacShow: 'water' } }); } catch (e) { msg = e.message; }
+      ok('manifest viewer block: an invalid dacShow is rejected with a clear error', /viewer\.dacShow must be/.test(msg), msg);
+    }
   }
 }
 console.log(`${pass} passed, ${fail} failed`);
