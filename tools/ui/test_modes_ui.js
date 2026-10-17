@@ -384,7 +384,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       if (wantShow === 'diorama') { const s1 = await sig(); await ev(() => document.querySelector('#t-dioOutline').click()); await a.idle(); const s2 = await sig(); await ev(() => document.querySelector('#t-dioOutline').click()); await a.idle();
         ok('manifest dacShow diorama: loads with the footprint outline ON and the picture is not the plain map (switching the outline off changes it), tint and room borders off', after.out && !after.tint && !after.borders && s1 !== s2, JSON.stringify(after)); }
       if (wantShow === 'all') ok('manifest without dacShow: the Display toggles (tint, room borders, outline) are untouched by the load', JSON.stringify(after) === JSON.stringify(before), JSON.stringify({ before, after }));
-      ok(`manifest ${label}: loads with Show framing "${wantShow}" (selector, state and real shape agree) and saves the same value`, m.sel === wantShow && (wantShow === 'cake' ? want.cake(m) : m.rings > 0 && m.faces > 0) && (wantShow === 'all' ? vb2.dacShow === undefined : vb2.dacShow === wantShow), JSON.stringify(m));
+      ok(`manifest ${label}: loads with Show framing "${wantShow}" (selector, state and real shape agree) and saves the same value`, m.sel === wantShow && (wantShow === 'all' ? m.rings > 0 && m.faces > 0 : want[wantShow](m)) && (wantShow === 'all' ? vb2.dacShow === undefined : vb2.dacShow === wantShow), JSON.stringify(m));
     }
   }
 
