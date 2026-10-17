@@ -276,6 +276,9 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const ex = await ev(() => window.EVO.modes.byId('rooms').examples[0]);
     ok('the default example of mode 2 is "Real map · Balanced (3 types, connected)" with the tint, the outline, a stake and two objectives', ex.id === 'real_balanced' && /3 types, connected/.test(ex.label) && ex.tint && ex.outline && ex.stake && ex.objectives.length === 2, ex.label);
 
+    const first = await ev(() => { const e = window.__evo; return { tint: !!e.O.typeTint, borders: !!e.O.roomBorders, out: !!e.O.dioOutline }; });
+    ok('first open of mode 2: the Display state is tint ON, room borders ON, footprint outline ON (recorded: the reference of the re-click tests)', first.tint && first.borders && first.out, JSON.stringify(first));
+
     // 1. the selector, on the real shape, whole map
     let m = await meas();
     ok('Show framing: All (default, whole map): rings, wall faces and the pocket flag are on', m.sel === 'all' && !m.dis && m.rings > 0 && m.faces > 0 && m.pk, JSON.stringify(m));
@@ -293,17 +296,16 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const pos = await ev(() => { window.EVO.modes.resetFolds(document); document.querySelector('aside').scrollTop = 0; const r = (q) => Math.round(document.querySelector(q).getBoundingClientRect().top); return { cake: r('#t-cake'), show: r('#dacShow'), roomChips: r('#roomChips') }; });
     console.log(`    MEASURED (1500x900, folds closed): Cake toggle top ${pos.cake} px, Show framing top ${pos.show} px (${pos.show > 900 ? (pos.show - 900) + ' px below the fold: needs scrolling the panel' : 'on the first screen'})`);
 
-    // 1b. the selector ISOLATES the view (handler only): tint and room borders off for a single type, outline on for diorama; All = tint + outline on, borders as they are; nothing is re-forced by a redraw
+    // 1b. the selector ISOLATES the view FULLY (handler only): tint, room borders and outline off for cake / ascension, outline on for diorama; All = tint + outline on, borders as they are; nothing is re-forced by a redraw
     {
       const flags = () => ev(() => { const e = window.__evo, q = (id) => document.querySelector(id).checked; return { tint: !!e.O.typeTint, borders: !!e.O.roomBorders, out: !!e.O.dioOutline, boxes: [q('#t-typeTint'), q('#t-roomBorders'), q('#t-dioOutline')].join() }; });
       const sameBoxes = (f) => f.boxes === [f.tint, f.borders, f.out].join();
       const toggle = async (id) => { await ev((id) => document.querySelector(id).click(), id); await a.idle(); };
-      await click('#examples button[data-id="real_balanced"]'); await toggle('#t-roomBorders'); let f = await flags();
-      ok('start of the isolation tests: the default example (tint on, outline on) with the room borders switched on by hand', f.tint && f.out && f.borders && sameBoxes(f), JSON.stringify(f));
-      for (const v of ['cake', 'ascension']) { await page.selectOption('#dacShow', v); await a.idle(); f = await flags(); ok(`Show framing ${v}: type tint OFF and room borders OFF (checkboxes agree), the outline is left as it was`, !f.tint && !f.borders && f.out && sameBoxes(f), JSON.stringify(f)); await toggle('#t-roomBorders'); }
-      await toggle('#t-dioOutline'); f = await flags(); ok('the outline switched off by hand', !f.out && sameBoxes(f));
+      await click('#examples button[data-id="real_balanced"]'); let f = await flags();
+      ok('start of the isolation tests: the default example gives tint ON, outline ON and room borders ON (the example resets the borders too)', f.tint && f.out && f.borders && sameBoxes(f), JSON.stringify(f));
+      for (const v of ['cake', 'ascension']) { await page.selectOption('#dacShow', v); await a.idle(); f = await flags(); ok(`Show framing ${v}: type tint OFF, room borders OFF and outline OFF exactly (checkboxes agree)`, !f.tint && !f.borders && !f.out && sameBoxes(f), JSON.stringify(f)); await toggle('#t-roomBorders'); }
       await page.selectOption('#dacShow', 'diorama'); await a.idle(); f = await flags();
-      ok('Show framing diorama: tint OFF, room borders OFF and the footprint outline ON', !f.tint && !f.borders && f.out && sameBoxes(f), JSON.stringify(f));
+      ok('Show framing diorama: tint OFF, room borders OFF and the footprint outline ON exactly', !f.tint && !f.borders && f.out && sameBoxes(f), JSON.stringify(f));
       await toggle('#t-dioOutline'); await toggle('#t-typeTint'); await ev(() => window.__evo.draw()); await a.idle(); f = await flags();
       ok('manual choices persist through a redraw: outline off and tint on by hand are NOT re-forced (the rule never touches the Display toggles)', !f.out && f.tint && sameBoxes(f), JSON.stringify(f));
       await click('#roomChips .chip[data-id="31"]'); await click('#wholeRooms'); f = await flags();
@@ -311,6 +313,15 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       await toggle('#t-roomBorders'); await page.selectOption('#dacShow', 'all'); await a.idle(); f = await flags();
       ok('Show framing All: tint ON and outline ON, the room borders (on by hand) are left as they are', f.tint && f.out && f.borders && sameBoxes(f), JSON.stringify(f));
       await toggle('#t-roomBorders');
+      // the examples are reproducible: from every isolated state, re-clicking the default example gives the state of the first open; cake60 gives its own
+      for (const v of ['cake', 'ascension', 'diorama']) {
+        await page.selectOption('#dacShow', v); await a.idle(); await click('#examples button[data-id="real_balanced"]'); f = await flags();
+        ok(`re-clicking the default example from the isolated "${v}" view gives the state of the first open (tint ${first.tint}, borders ${first.borders}, outline ${first.out}) and the selector back on All`, f.tint === first.tint && f.borders === first.borders && f.out === first.out && sameBoxes(f) && (await ev(() => document.querySelector('#dacShow').value)) === 'all', JSON.stringify(f));
+      }
+      await page.selectOption('#dacShow', 'cake'); await a.idle(); await click('#examples button[data-id="cake60"]'); f = await flags();
+      ok('re-clicking cake60 from the isolated "cake" view gives tint OFF, outline OFF and room borders ON', !f.tint && !f.out && f.borders && sameBoxes(f), JSON.stringify(f));
+      await click('#examples button[data-id="real_balanced"]'); f = await flags();
+      ok('...and the default example again gives the first-open state', f.tint === first.tint && f.borders === first.borders && f.out === first.out, JSON.stringify(f));
     }
 
     // 2. the three marks of the default example
@@ -373,24 +384,25 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     ok('with "cake" chosen the viewer block writes dacShow "cake"', vb.dacShow === 'cake', JSON.stringify(vb));
     const mkMan = (viewer) => { const p = path.join(os.tmpdir(), 'dac2_manifest_' + Math.random().toString(36).slice(2) + '.json'); fs.writeFileSync(p, JSON.stringify({ format: 'evodun-pack/0.3', name: 'dac2 test', roles: { elevation: { image: 'skeleton_heightmap_256.png', channel: 'V' } }, viewer })); return p; };
     const base = { mode: 'rooms', rooms: true, preset: 'balanced', terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120, camera: 'isoE', dacAuto: true };
-    const setDisp = () => ev(() => { const e = window.__evo, want = { typeTint: true, roomBorders: true, dioOutline: false }, id = { typeTint: '#t-typeTint', roomBorders: '#t-roomBorders', dioOutline: '#t-dioOutline' }; for (const k of Object.keys(want)) if (!!e.O[k] !== want[k]) document.querySelector(id[k]).click(); });
+    const setDisp = (out) => ev((out) => { const e = window.__evo, want = { typeTint: true, roomBorders: true, dioOutline: out }, id = { typeTint: '#t-typeTint', roomBorders: '#t-roomBorders', dioOutline: '#t-dioOutline' }; for (const k of Object.keys(want)) if (!!e.O[k] !== want[k]) document.querySelector(id[k]).click(); }, out);
     const dflags = () => ev(() => { const e = window.__evo; return { tint: !!e.O.typeTint, borders: !!e.O.roomBorders, out: !!e.O.dioOutline }; });
     for (const [label, viewer, wantShow] of [['dacShow cake', Object.assign({}, base, { dacShow: 'cake' }), 'cake'], ['dacShow ascension', Object.assign({}, base, { dacShow: 'ascension' }), 'ascension'], ['dacShow diorama', Object.assign({}, base, { dacShow: 'diorama' }), 'diorama'], ['no dacShow', base, 'all']]) {
-      await setDisp(); // a Display state that is NOT the isolated one (tint on, room borders on, outline off), so a load that does not isolate is caught; the toggles live in a folded group: DOM clicks
+      const isoOut = wantShow === 'cake' || wantShow === 'ascension'; // the outline is the one toggle whose isolated value differs: OFF for cake / ascension, ON for diorama
+      await setDisp(isoOut); // a Display state that is NOT the isolated one (tint on, room borders on, outline ON for cake / ascension, OFF for diorama and the untouched case), so a load that does not isolate is caught; the toggles live in a folded group: DOM clicks
       const before = await dflags();
       await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
       const man = mkMan(viewer); await page.setInputFiles('#file', [PNG, man]); await page.waitForTimeout(2500); await a.idle(); fs.unlinkSync(man);
       await page.waitForFunction(() => { const S = window.__evo.S(); return S && S.rooms && document.querySelector('#busy').hidden; }, null, { timeout: 180000 }); await a.idle();
       m = await meas(); const vb2 = await ev(() => window.__evo.viewerBlock()); const after = await dflags();
-      ok(`manifest ${label}: the Display toggles were NOT isolated before the load (tint, room borders on, outline off): the check below can tell`, before.tint && before.borders && !before.out, JSON.stringify(before));
-      if (wantShow === 'cake' || wantShow === 'ascension') ok(`manifest dacShow ${wantShow}: loads ISOLATED (type tint and room borders off, as the selector does; the outline stays off)`, !after.tint && !after.borders && !after.out, JSON.stringify(after));
+      ok(`manifest ${label}: the Display toggles were NOT isolated before the load (tint on, room borders on, outline ${isoOut ? 'ON' : 'OFF'}): the check below can tell`, before.tint && before.borders && before.out === isoOut, JSON.stringify(before));
+      if (wantShow === 'cake' || wantShow === 'ascension') ok(`manifest dacShow ${wantShow}: loads FULLY ISOLATED (type tint, room borders and outline all off, as the selector does; the outline was ON before the load)`, !after.tint && !after.borders && !after.out, JSON.stringify(after));
       if (wantShow === 'diorama') { const s1 = await sig(); await ev(() => document.querySelector('#t-dioOutline').click()); await a.idle(); const s2 = await sig(); await ev(() => document.querySelector('#t-dioOutline').click()); await a.idle();
         ok('manifest dacShow diorama: loads with the footprint outline ON and the picture is not the plain map (switching the outline off changes it), tint and room borders off', after.out && !after.tint && !after.borders && s1 !== s2, JSON.stringify(after)); }
       if (wantShow === 'all') ok('manifest without dacShow: the Display toggles (tint, room borders, outline) are untouched by the load', JSON.stringify(after) === JSON.stringify(before), JSON.stringify({ before, after }));
       ok(`manifest ${label}: loads with Show framing "${wantShow}" (selector, state and real shape agree) and saves the same value`, m.sel === wantShow && (wantShow === 'all' ? m.rings > 0 && m.faces > 0 : want[wantShow](m)) && (wantShow === 'all' ? vb2.dacShow === undefined : vb2.dacShow === wantShow), JSON.stringify(m));
     }
     { // edge: dacShow saved with the rule OFF -> the selector has no effect, so the load does not isolate the Display toggles either
-      await setDisp(); const before = await dflags(); await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
+      await setDisp(false); const before = await dflags(); await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
       const man = mkMan(Object.assign({}, base, { dacAuto: false, dacShow: 'cake' })); await page.setInputFiles('#file', [PNG, man]); await page.waitForTimeout(2500); await a.idle(); fs.unlinkSync(man);
       await page.waitForFunction(() => { const S = window.__evo.S(); return S && S.rooms && document.querySelector('#busy').hidden; }, null, { timeout: 180000 }); await a.idle();
       const after = await dflags(), off = await ev(() => !window.__evo.st.dacAuto);

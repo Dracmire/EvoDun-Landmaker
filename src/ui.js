@@ -79,12 +79,11 @@
     return changed;
   }
   /* "Show framing" ISOLATES the view (U11), in the selector's own handler only (the other callers of the rule never touch the Display toggles, and nothing re-forces them on a later redraw: the user can toggle any of them back by hand):
-     a single type -> the type tint and the room borders off (diorama keeps / turns on the footprint outline: a Pocket is drawn only for a chosen room, so without it that view shows nothing); All -> the look of the default example (tint and outline on). */
+     a single type -> the type tint, the room borders and the footprint outline all off, except diorama, which turns the outline ON (a Pocket is drawn only for a chosen room, so without it that view shows nothing); All -> the look of the default example (tint and outline on, room borders as they are). FULL isolation: with the outline on in every view, Cake and Diorama were almost indistinguishable at whole-map scale and the outline state depended on history. */
   function dacIsolate(show) {
     const set = (k, id, v) => { O[k] = v; const el = $('#' + id); if (el) el.checked = v; };
     if (show === 'all') { set('typeTint', 't-typeTint', true); set('dioOutline', 't-dioOutline', true); return; }
-    set('typeTint', 't-typeTint', false); set('roomBorders', 't-roomBorders', false);
-    if (show === 'diorama') set('dioOutline', 't-dioOutline', true);
+    set('typeTint', 't-typeTint', false); set('roomBorders', 't-roomBorders', false); set('dioOutline', 't-dioOutline', show === 'diorama');
   }
   async function applyScenario(sc, mode) { // mode (optional, the modes layer): the example of a mode; without it this is the old scenario button, unchanged
     if (sc.src && !(await selectSource(sc.src))) return;
@@ -102,7 +101,7 @@
     if (sc.tech) { st.tech = sc.tech; st.mode = 'single'; }
     if (mode && sc.src !== 'image') { inc.stake = null; inc.objectives = []; setIncMode(null); } // marks belong to the example that placed them: they do not leak into the next example or mode (they would on the same source, onPackChanged does not run); loaded images keep the marks of their manifest
     if (mode && mode.id === 'rooms') { // an example of mode 2 starts with the rule on (the declared type: the new source has no classification yet), the selector on All, and its own tint / outline / marks
-      O.typeTint = !!sc.tint; O.dioOutline = !!sc.outline; tick('t-typeTint', O.typeTint); tick('t-dioOutline', O.dioOutline);
+      O.typeTint = !!sc.tint; O.dioOutline = !!sc.outline; O.roomBorders = true; tick('t-typeTint', O.typeTint); tick('t-dioOutline', O.dioOutline); tick('t-roomBorders', true); // the mode's base Display state (room borders are on by default in the code: O.roomBorders = true), so re-clicking an example always gives the same look
       if (sc.stake) inc.stake = { x: sc.stake.x, y: sc.stake.y }; if (sc.objectives) inc.objectives = sc.objectives.map((o) => Object.assign({}, o));
       st.dacShow = 'all'; const ds = $('#dacShow'); if (ds) ds.value = 'all';
       st.dacAuto = true; const da = $('#dacAuto'); if (da) da.checked = true; applyDacRule(sc.type);
