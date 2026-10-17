@@ -30,7 +30,7 @@
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
   const NO_MODES = !!window.EVO_NO_MODES; // test-only flag (tools/ui/common.js): the whole panel as before the modes layer
-  const st = { dacAuto: true, modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const st = { dacAuto: true, dacShow: 'all', modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -70,11 +70,13 @@
   function applyDacRule(declared) {
     if (!dacOn()) return false;
     const RT = E.roomTypes, nameOf = (t) => (t === RT.CAKE ? 'cake' : t === RT.ASCENSION ? 'ascension' : t === RT.DIORAMA ? 'diorama' : null), want = new Set();
-    if (!sliceSel.rooms.size) { want.add('cake'); want.add('ascension'); want.add('diorama'); }
+    const whole = !sliceSel.rooms.size, show = whole ? st.dacShow : 'all'; // "Show framing" (U11): only the whole-map branch; with rooms chosen the room types decide
+    if (whole) { if (show === 'all' || show === 'cake') want.add('cake'); if (show === 'all' || show === 'ascension') want.add('ascension'); if (show === 'all' || show === 'diorama') want.add('diorama'); }
     else for (const id of sliceSel.rooms) { const o = S && S.types && S.types.rooms.get(id), n = declared && sliceSel.rooms.size === 1 ? declared : o ? nameOf(o.type) : null; if (n) want.add(n); }
     const next = { cake: want.has('cake'), ascWalls: want.has('ascension'), pocket: want.has('diorama') }, ids = { cake: 't-cake', ascWalls: 't-ascWalls', pocket: 't-pocket' };
     let changed = false;
     for (const k of Object.keys(next)) { if (!!P[k] !== next[k]) changed = true; P[k] = next[k]; const el = $('#' + ids[k]); if (el) el.checked = next[k]; }
+    if (whole && show === 'diorama') { O.dioOutline = true; const od = $('#t-dioOutline'); if (od) od.checked = true; } // a Diorama view shows nothing without the footprint outline: the Pocket is drawn only for a chosen room (the user can turn the outline off again)
     return changed;
   }
   async function applyScenario(sc, mode) { // mode (optional, the modes layer): the example of a mode; without it this is the old scenario button, unchanged
@@ -91,7 +93,13 @@
     if (sc.contract) { O.contract = true; tick('t-contract', true); }
     if (sc.cam) st.preset = sc.cam;
     if (sc.tech) { st.tech = sc.tech; st.mode = 'single'; }
-    if (mode && mode.id === 'rooms') { st.dacAuto = true; const da = $('#dacAuto'); if (da) da.checked = true; applyDacRule(sc.type); } // an example of mode 2 starts with the rule on (the declared type: the new source has no classification yet)
+    if (mode && sc.src !== 'image') { inc.stake = null; inc.objectives = []; setIncMode(null); } // marks belong to the example that placed them: they do not leak into the next example or mode (they would on the same source, onPackChanged does not run); loaded images keep the marks of their manifest
+    if (mode && mode.id === 'rooms') { // an example of mode 2 starts with the rule on (the declared type: the new source has no classification yet), the selector on All, and its own tint / outline / marks
+      O.typeTint = !!sc.tint; O.dioOutline = !!sc.outline; tick('t-typeTint', O.typeTint); tick('t-dioOutline', O.dioOutline);
+      if (sc.stake) inc.stake = { x: sc.stake.x, y: sc.stake.y }; if (sc.objectives) inc.objectives = sc.objectives.map((o) => Object.assign({}, o));
+      st.dacShow = 'all'; const ds = $('#dacShow'); if (ds) ds.value = 'all';
+      st.dacAuto = true; const da = $('#dacAuto'); if (da) da.checked = true; applyDacRule(sc.type);
+    }
     syncChips(); syncRoomChips(); refreshMessage(); invalidate(true);
   }
   function message(text) { const m = $('#msg'); m.textContent = text || ''; m.hidden = !text; }
@@ -104,11 +112,12 @@
     sel.value = Object.keys(ROOMS_PRESETS).find((n) => Object.entries(ROOMS_PRESETS[n]).every(([k, v]) => P[k] === v)) || 'custom';
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') b.dacAuto = !!st.dacAuto; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; } if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
     for (const k of ['terraces', 'roomsMinCore', 'rRadius', 'minPlateau']) setParam(k, w[k]);
+    st.dacShow = ['cake', 'ascension', 'diorama'].includes(w.dacShow) ? w.dacShow : 'all'; const dsh = $('#dacShow'); if (dsh) dsh.value = st.dacShow; // absent = All
     st.dacAuto = w.dacAuto === true; const dac = $('#dacAuto'); if (dac) dac.checked = st.dacAuto; // absent = off (a manifest saved before the rule keeps the switches it stored)
     syncRoomsPreset();
     st.preset = PRESETS.some((x) => x.id === w.camera) ? w.camera : 'oblique'; st.yawOff = st.pitchOff = 0; // absent = the default camera
@@ -126,6 +135,9 @@
         const ld = document.createElement('label'); ld.className = 'tg'; ld.innerHTML = '<input type="checkbox" id="dacAuto"><span>Framing by room type</span>';
         const id_ = ld.querySelector('input'); id_.checked = st.dacAuto; if (NO_MODES) ld.hidden = true; // the panel without modes has no such switch
         id_.addEventListener('change', () => { st.dacAuto = id_.checked; if (st.dacAuto) applyDacRule(); refreshMessage(); invalidate(st.dacAuto); }); sl.appendChild(ld);
+        const lsh = document.createElement('label'); lsh.className = 'sl'; lsh.innerHTML = '<span>Show framing (whole map)</span><select id="dacShow"><option value="all">All</option><option value="cake">Cake</option><option value="ascension">Ascension</option><option value="diorama">Diorama</option></select>';
+        if (NO_MODES) lsh.hidden = true; // the panel without modes has no such selector
+        lsh.querySelector('select').addEventListener('change', (e) => { st.dacShow = e.target.value; applyDacRule(); refreshMessage(); invalidate(true); }); sl.appendChild(lsh);
         const lc = document.createElement('label'); lc.className = 'tg'; lc.innerHTML = '<input type="checkbox" id="t-cake"><span>Cake rings (room type Cake; needs Rooms)</span>';
         const ic = lc.querySelector('input'); ic.checked = P.cake; ic.addEventListener('change', () => { P.cake = ic.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lc);
         const lw = document.createElement('label'); lw.className = 'tg'; lw.innerHTML = '<input type="checkbox" id="t-ascWalls"><span>Ascension walls (thin walls on the blocking faces of Ascension rooms; needs Rooms)</span>';
@@ -227,8 +239,18 @@
   const incFloors = () => !!(packs[st.pack] && E.hasFloors(packs[st.pack].pack)), curLayer = () => (st.floors === 'single' ? st.layer : 0);
   const onLayer = (m) => !incFloors() || (m.layer || 0) === curLayer();
   const layerName = (k) => (k ? `Floor ${k}` : 'the Exterior');
+  /* The route as a SEQUENCE OF ROOMS (mode 2 only, appended after the usual incursion text; docs/ui-modes.md U11): walk the route stake first (E.route gives objective -> stake), skip the tiles with no room (roomMap 0), THEN collapse
+     consecutive equal ids (a room visited twice, not consecutively, is listed twice). Every room is listed; only above ROUTE_CAP rooms the MIDDLE is elided, so the first (the stake's) and the last (the objective's) stay visible. */
+  const ROUTE_CAP = 30, ROUTE_KEEP = 10;
+  const roomsView = () => !NO_MODES && st.modeId === 'rooms' && !!(S && S.roomMap && S.types);
+  function routeRoomIds(route) { const seq = []; for (let k = route.length - 1; k >= 0; k--) { const id = S.roomMap[route[k]]; if (!id) continue; if (seq.length && seq[seq.length - 1] === id) continue; seq.push(id); } return seq; }
+  function fmtRoomSeq(ids) {
+    const T = E.roomTypes, lab = (id) => { const o = S.types.rooms.get(id); return (o ? (o.type === T.CAKE ? 'Cake' : o.type === T.DIORAMA ? 'Dio' : 'Asc') : 'Room') + ' ' + id; };
+    return (ids.length > ROUTE_CAP ? [...ids.slice(0, ROUTE_KEEP).map(lab), `... (+${ids.length - 2 * ROUTE_KEEP})`, ...ids.slice(-ROUTE_KEEP).map(lab)] : ids.map(lab)).join(' > ');
+  }
+  const routeRoomsLine = (n, route) => { const ids = routeRoomIds(route); return `Route ${n} (${route.length} tiles, ${ids.length} room${ids.length === 1 ? '' : 's'}), stake first: ${fmtRoomSeq(ids)}`; };
   function computeIncursion() {
-    const out = { stake: null, objectives: [], lines: [] }, fl = incFloors();
+    const out = { stake: null, objectives: [], lines: [], roomLines: [] }, fl = incFloors();
     if (!S) return out;
     const gone = (name, m) => (fl ? `${name}: on ${layerName(m.layer || 0)}, not shown here.` : null);
     const stakeHere = inc.stake && onLayer(inc.stake), stake = stakeHere ? incIdx(inc.stake) : -1;
@@ -245,7 +267,7 @@
       if (stake < 0) { out.lines.push(`${name} at (${o.x}, ${o.y}): no stake ${fl && inc.stake ? 'on this layer' : 'yet'}.`); return; }
       if (!inRegion(stake)) { out.lines.push(`${name}: no route (the stake is not on a walkable region, see above).`); return; }
       ob.route = E.route(S, P, i, stake);
-      if (ob.route) { out.lines.push(`${name}: route of ${ob.route.length} tiles to the stake.`); return; }
+      if (ob.route) { out.lines.push(`${name}: route of ${ob.route.length} tiles to the stake.`); if (roomsView()) out.roomLines.push(routeRoomsLine(k + 1, ob.route)); return; }
       const g = E.regionGap(S, i, stake), xy = (t) => `(${S.ox + (t % S.W)}, ${S.oy + ((t / S.W) | 0)})`;
       out.lines.push(`${name}: <b>no route</b>. Region ${regionName(g.ra)} (${g.sizeA} tiles) is not connected to the stake region ${regionName(g.rb)} (${g.sizeB} tiles)` + (g.dist >= 0 ? `; closest approach ${g.dist} tile${g.dist === 1 ? '' : 's'} between ${xy(g.from)} and ${xy(g.to)}` : '') + (g.droppedGates ? `; ${g.droppedGates} gate${g.droppedGates === 1 ? '' : 's'} touch${g.droppedGates === 1 ? 'es' : ''} both without a ramp.` : '; no gate touches both.'));
     });
@@ -547,7 +569,7 @@
       st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
     }
     const incursion = computeIncursion(); O.incursion = incursion;
-    $('#incInfo').innerHTML = incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.');
+    $('#incInfo').innerHTML = (incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.')) + (incursion.roomLines.length ? (incursion.lines.length ? '<br>' : '') + incursion.roomLines.join('<br>') : '');
     const volOn = !!(E.volume && E.volume.has(raw) && st.macro !== 'off'), volView = volOn && view().kind === 'ortho', mvk = { kind: st.macro, floor: st.macroFloor }; // crystallizer 6: the volume view is ONE panel, orthographic cameras only (Cam 6 / 7 show the heightmap)
     if (volView) O.incursion = null; // no stake, objectives or route in the volume view
     const techs = volView ? ['box'] : st.mode === 'compare' ? ALL_TECH : [st.tech];
@@ -691,7 +713,7 @@
   /* the live state the control requirements are evaluated from (src/controls.js): after every recompute / redraw */
   function controlsCtx() {
     const raw = packs[st.pack] && packs[st.pack].pack, T = S && S.types ? S.types.counts : null, F = (S && S.fields) || {}, any = (a) => !!(a && a.some((v) => v));
-    return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket, dacAuto: dacOn(),
+    return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket, dacAuto: dacOn(), dacWhole: dacOn() && !sliceSel.rooms.size,
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
       floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset, macro: !!(E.volume && E.volume.has(raw)), macroView: st.macro, volOn: volActive() };
@@ -778,7 +800,7 @@
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
-    window.__evo = { enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});
