@@ -373,18 +373,28 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     ok('with "cake" chosen the viewer block writes dacShow "cake"', vb.dacShow === 'cake', JSON.stringify(vb));
     const mkMan = (viewer) => { const p = path.join(os.tmpdir(), 'dac2_manifest_' + Math.random().toString(36).slice(2) + '.json'); fs.writeFileSync(p, JSON.stringify({ format: 'evodun-pack/0.3', name: 'dac2 test', roles: { elevation: { image: 'skeleton_heightmap_256.png', channel: 'V' } }, viewer })); return p; };
     const base = { mode: 'rooms', rooms: true, preset: 'balanced', terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120, camera: 'isoE', dacAuto: true };
+    const setDisp = () => ev(() => { const e = window.__evo, want = { typeTint: true, roomBorders: true, dioOutline: false }, id = { typeTint: '#t-typeTint', roomBorders: '#t-roomBorders', dioOutline: '#t-dioOutline' }; for (const k of Object.keys(want)) if (!!e.O[k] !== want[k]) document.querySelector(id[k]).click(); });
     const dflags = () => ev(() => { const e = window.__evo; return { tint: !!e.O.typeTint, borders: !!e.O.roomBorders, out: !!e.O.dioOutline }; });
-    for (const [label, viewer, wantShow] of [['dacShow cake', Object.assign({}, base, { dacShow: 'cake' }), 'cake'], ['dacShow diorama', Object.assign({}, base, { dacShow: 'diorama' }), 'diorama'], ['no dacShow', base, 'all']]) {
+    for (const [label, viewer, wantShow] of [['dacShow cake', Object.assign({}, base, { dacShow: 'cake' }), 'cake'], ['dacShow ascension', Object.assign({}, base, { dacShow: 'ascension' }), 'ascension'], ['dacShow diorama', Object.assign({}, base, { dacShow: 'diorama' }), 'diorama'], ['no dacShow', base, 'all']]) {
+      await setDisp(); // a Display state that is NOT the isolated one (tint on, room borders on, outline off), so a load that does not isolate is caught; the toggles live in a folded group: DOM clicks
       const before = await dflags();
       await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
       const man = mkMan(viewer); await page.setInputFiles('#file', [PNG, man]); await page.waitForTimeout(2500); await a.idle(); fs.unlinkSync(man);
       await page.waitForFunction(() => { const S = window.__evo.S(); return S && S.rooms && document.querySelector('#busy').hidden; }, null, { timeout: 180000 }); await a.idle();
       m = await meas(); const vb2 = await ev(() => window.__evo.viewerBlock()); const after = await dflags();
-      if (wantShow === 'cake') ok('manifest dacShow cake: loads ISOLATED (type tint and room borders off, as the selector does)', !after.tint && !after.borders, JSON.stringify(after));
+      ok(`manifest ${label}: the Display toggles were NOT isolated before the load (tint, room borders on, outline off): the check below can tell`, before.tint && before.borders && !before.out, JSON.stringify(before));
+      if (wantShow === 'cake' || wantShow === 'ascension') ok(`manifest dacShow ${wantShow}: loads ISOLATED (type tint and room borders off, as the selector does; the outline stays off)`, !after.tint && !after.borders && !after.out, JSON.stringify(after));
       if (wantShow === 'diorama') { const s1 = await sig(); await ev(() => document.querySelector('#t-dioOutline').click()); await a.idle(); const s2 = await sig(); await ev(() => document.querySelector('#t-dioOutline').click()); await a.idle();
         ok('manifest dacShow diorama: loads with the footprint outline ON and the picture is not the plain map (switching the outline off changes it), tint and room borders off', after.out && !after.tint && !after.borders && s1 !== s2, JSON.stringify(after)); }
       if (wantShow === 'all') ok('manifest without dacShow: the Display toggles (tint, room borders, outline) are untouched by the load', JSON.stringify(after) === JSON.stringify(before), JSON.stringify({ before, after }));
       ok(`manifest ${label}: loads with Show framing "${wantShow}" (selector, state and real shape agree) and saves the same value`, m.sel === wantShow && (wantShow === 'all' ? m.rings > 0 && m.faces > 0 : want[wantShow](m)) && (wantShow === 'all' ? vb2.dacShow === undefined : vb2.dacShow === wantShow), JSON.stringify(m));
+    }
+    { // edge: dacShow saved with the rule OFF -> the selector has no effect, so the load does not isolate the Display toggles either
+      await setDisp(); const before = await dflags(); await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
+      const man = mkMan(Object.assign({}, base, { dacAuto: false, dacShow: 'cake' })); await page.setInputFiles('#file', [PNG, man]); await page.waitForTimeout(2500); await a.idle(); fs.unlinkSync(man);
+      await page.waitForFunction(() => { const S = window.__evo.S(); return S && S.rooms && document.querySelector('#busy').hidden; }, null, { timeout: 180000 }); await a.idle();
+      const after = await dflags(), off = await ev(() => !window.__evo.st.dacAuto);
+      ok('manifest dacShow cake with dacAuto false: the rule is off and the Display toggles are untouched (the isolation follows the selector, which has no effect then)', off && JSON.stringify(after) === JSON.stringify(before), JSON.stringify({ before, after, off }));
     }
   }
 
