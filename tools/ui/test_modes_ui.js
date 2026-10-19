@@ -458,8 +458,8 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const y1 = await ypx(); await toggle('#t-gateMarks'); const s2 = await csig(); const y2 = await ypx(); await toggle('#t-gateMarks'); const s3 = await csig();
     ok(`gate markers: the bright gate LINES are in the picture (${y1} pixels of the gate colour with the toggle on, ${y2} with it off)`, y1 - y2 > 150, JSON.stringify({ on: y1, off: y2 }));
     ok('gate markers: switching the toggle off changes the picture and back on restores it exactly', s1 !== s2 && s1 === s3);
-    await toggle('#t-roomBorders'); const y3 = await ypx(); await toggle('#t-roomBorders'); // with the room borders off only the gate faces carry lines: ALL the gate faces (also the open ones nobody uses), so the lines do not depend on the border overlay
-    ok(`gate markers: with the room borders OFF the gate lines are still drawn (${y3} pixels of the gate colour), and there are at least as many as the ones that coincide with a used border`, y3 > 150 && y3 >= y1 - 5, JSON.stringify({ y3, y1 }));
+    await toggle('#t-roomBorders'); await toggle('#t-dioOutline'); const y3 = await ypx(); await toggle('#t-dioOutline'); await toggle('#t-roomBorders'); // (the room borders AND the Diorama outline off: both make the renderer read the border bits) with the room borders off only the gate faces carry lines: ALL the gate faces (also the open ones nobody uses), so the lines do not depend on the border overlay
+    ok(`gate markers: with the room borders and the Diorama outline OFF the gate lines are still drawn (${y3} pixels of the gate colour), and there are at least as many as the ones that coincide with a used border`, y3 > 150 && y3 >= y1 - 5, JSON.stringify({ y3, y1 }));
     await page.selectOption('#dacView', 'whole'); await a.idle(); const s4 = await csig(); await toggle('#t-gateMarks'); const s5 = await csig(); await toggle('#t-gateMarks');
     ok('gate markers: outside the chain view the toggle changes nothing (no gate faces: today\'s pixels)', s4 === s5); await page.selectOption('#dacView', 'chain'); await a.idle();
 
