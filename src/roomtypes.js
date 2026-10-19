@@ -215,6 +215,82 @@
     S.ringTile = new Uint8Array(n); for (const [i] of claimed) S.ringTile[i] = 1;
     if (S.void) { S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < n; i++) if (S.void[i]) S.fineMask[i] = -1; }
   };
+  /* NON-WALKABLE AS ANCHORS (DAC v2, D26; `P.anchors`, off by default; `P.anchorH` terraces, default 0.5): the tiles that are not walkable in the rooms layer (S.nowalk: isolated terrain and the forbidden margins of walls, cliffs and Steep) are raised by a fixed
+     amount and drawn grey (`meta.anchor`), as a reminder of the structural anchors, instead of the flat "not walkable" tone. VISUAL ONLY (walking, regions and routes are computed before). In the Chain view only the tiles of the chain rooms are raised (the
+     rest is the flat grey ground). Ring tiles and ramp tiles are never raised. Each distinct level under an anchor gets ONE new level `anchorH * terH` above it (the shared level insertion, like the Cake rings and the Pocket). Sets S.anchorInfo. */
+  T.insertLevels = function (S, moves) { // moves: Map tile -> { h, meta }; new levels are never merged with an existing one (a height that equals one is nudged up by 0.003)
+    const n = S.n, eps = 1e-6, old = S.levelH, key = (m) => JSON.stringify(m), uniq = new Map(); // (height, meta) -> level
+    for (const [, m] of moves) { let h = m.h; if (old.some((x) => Math.abs(x - h) < 1e-4)) h += 0.003; const k = Math.round(h / eps) + '|' + key(m.meta); if (!uniq.has(k)) uniq.set(k, { h, meta: m.meta }); m.k = k; }
+    const list = [...uniq.entries()].sort((a, b) => a[1].h - b[1].h), newH = [], newMeta = [], remap = new Array(old.length), idx = new Map(); let hi = 0;
+    for (let L = 0; L <= S.maxFine; L++) {
+      while (hi < list.length && list[hi][1].h < old[L]) { idx.set(list[hi][0], newH.length); newH.push(list[hi][1].h); newMeta.push(list[hi][1].meta); hi++; }
+      remap[L] = newH.length; newH.push(old[L]); newMeta.push(S.levelMeta[L]);
+    }
+    while (hi < list.length) { idx.set(list[hi][0], newH.length); newH.push(list[hi][1].h); newMeta.push(list[hi][1].meta); hi++; }
+    for (let i = 0; i < n; i++) S.fine[i] = remap[S.fine[i]];
+    for (const [i, m] of moves) S.fine[i] = idx.get(m.k);
+    for (const rec of S.stairs || []) if (rec.level !== undefined) rec.level = remap[rec.level];
+    S.levelH = newH; S.levelMeta = newMeta; S.maxFine = newH.length - 1;
+    const vd = S.void; S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []); for (let i = 0; i < n; i++) if (!vd || !vd[i]) S.byLevel[S.fine[i]].push(i);
+    if (vd) { S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < n; i++) if (vd[i]) S.fineMask[i] = -1; }
+    return uniq.size;
+  };
+  T.anchors = function (S, P) {
+    const n = S.n, up = (P.anchorH === undefined ? 0.5 : P.anchorH) * P.terH, moves = new Map(), vd = S.void, chain = S.chainGrey; let skippedRing = 0;
+    for (let i = 0; i < n; i++) {
+      if (!S.nowalk[i] || (vd && vd[i]) || (chain && chain[i]) || (S.carved && S.carved[i])) continue;
+      if (S.ringTile && S.ringTile[i]) { skippedRing++; continue; }
+      moves.set(i, { h: S.levelH[S.fine[i]] + up, meta: { ter: S.levelMeta[S.fine[i]].ter, sub: 0, bridge: false, anchor: true } });
+    }
+    const added = moves.size ? T.insertLevels(S, moves) : 0;
+    S.anchorInfo = { tiles: moves.size, levelsAdded: added, skippedRing, up };
+    return S.anchorInfo;
+  };
+  /* CHAIN VIEW (DAC v2, docs/crystallizers/02-room-types/README.md D23; `P.chainIds` = the ids of the rooms the route(s) from the stake to the objective(s) cross; absent = nothing here runs, the shape is the one of before):
+     a VISUAL pass after the Cake rings and the Ascension walls (so the rings exist when it runs). Every land tile outside the chain rooms is moved to a level of its own, just under the lowest level (`meta.grey`: a neutral grey, no type tint), i.e. flattened;
+     the void stays void. The ring tiles (S.ringTile) of the Cake links of the CHAIN rooms are never flattened, even where they fall outside the chain (Cake v2 builds Up rings in the airspace of other rooms). Walking, the regions, the route and the room
+     types do not change: the caller builds the walking graph BEFORE this runs (the ramps outside the chain are dropped from S.stairs, which the graph reads). Ascension wall faces with no chain room on either side are dropped.
+     GATE faces: the open borders (a valid transition, used or not) between two rooms that are consecutive in a chain sequence (`seqs`, arrays of room ids stake first) -> S.gateBits (bit b of a tile = its face b, N E S W), drawn by the Display toggle `gateMarks`. */
+  T.chainFlatten = function (S, P, RL, ids, seqs) {
+    const n = S.n, W = S.W, H = S.H, fw = S.mapW, chain = new Set(ids), map = S.roomMap, vd = S.void;
+    const mapOf = (i) => ((((i / W) | 0) + S.oy) * fw + (i % W) + S.ox), ring = S.ringTile, claim = S.cake && S.cake.claim;
+    const info = { rooms: ids.length, tiles: 0, kept: 0, chainRingTiles: 0, ringOutside: 0, ringOffChainLinks: 0, stairsDropped: 0, wallsDropped: 0, gateFaces: 0 };
+    const grey = new Uint8Array(n);
+    for (let i = 0; i < n; i++) {
+      if (vd && vd[i]) continue;
+      const ringOfChain = !!(ring && ring[i] && claim && (() => { const c = claim.get(mapOf(i)); return c && chain.has(c.link.room); })());
+      if (ringOfChain) { info.chainRingTiles++; if (!chain.has(map[i])) info.ringOutside++; }
+      if (chain.has(map[i]) || ringOfChain) { info.kept++; continue; }
+      if (ring && ring[i]) info.ringOffChainLinks++;
+      grey[i] = 1; info.tiles++;
+    }
+    if (info.tiles) { // the grey level: just under the lowest one, so the flattened ground is the lowest ground
+      S.levelH.unshift(S.levelH[0] - 0.002); S.levelMeta.unshift({ ter: 0, sub: 0, bridge: false, grey: true });
+      for (let i = 0; i < n; i++) S.fine[i] = grey[i] ? 0 : S.fine[i] + 1;
+      for (const rec of S.stairs || []) if (rec.level !== undefined) rec.level++;
+      S.maxFine = S.levelH.length - 1;
+      S.byLevel = Array.from({ length: S.maxFine + 1 }, () => []); for (let i = 0; i < n; i++) if (!vd || !vd[i]) S.byLevel[S.fine[i]].push(i);
+      if (vd) { S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < n; i++) if (vd[i]) S.fineMask[i] = -1; }
+      if (S.roomType) for (let i = 0; i < n; i++) if (grey[i]) S.roomType[i] = 0; // no type tint on the grey ground
+      if (S.nowalk) for (let i = 0; i < n; i++) if (grey[i]) S.nowalk[i] = 0;
+      if (S.roomBits) { S.roomBits = Uint8Array.from(S.roomBits); if (S.roomBitsDio) S.roomBitsDio = Uint8Array.from(S.roomBitsDio); if (S.dioBits) S.dioBits = Uint8Array.from(S.dioBits); S.roomKind = Uint8Array.from(S.roomKind); // no room border lines on the grey ground (the faces of a chain tile toward it stay)
+        for (let i = 0; i < n; i++) if (grey[i]) { S.roomBits[i] = 0; if (S.roomBitsDio) S.roomBitsDio[i] = 0; if (S.dioBits) S.dioBits[i] = 0; for (let b = 0; b < 4; b++) S.roomKind[i * 4 + b] = 0; } }
+    }
+    S.chainGrey = grey;
+    if (S.stairs) { const before = S.stairs.length; S.stairs = S.stairs.filter((r) => ![...r.bottom, ...r.top, ...r.steps.flatMap((x) => x.tiles)].some((t) => grey[t])); info.stairsDropped = before - S.stairs.length; }
+    if (S.ascWalls && S.ascWalls.faces) { const keep = S.ascWalls.faces.filter((f) => chain.has(map[f.i]) || chain.has(map[f.j])); info.wallsDropped = S.ascWalls.faces.length - keep.length; S.ascWalls = Object.assign({}, S.ascWalls, { faces: keep }); }
+    const pairs = new Set(); for (const sq of seqs || []) for (let k = 0; k + 1 < sq.length; k++) { const a = Math.min(sq[k], sq[k + 1]), b = Math.max(sq[k], sq[k + 1]); if (a !== b) pairs.add(a * 100000 + b); }
+    const gate = new Uint8Array(n), OFF = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+    for (let i = 0; i < n; i++) {
+      const r = map[i]; if (r <= 0 || (vd && vd[i])) continue; const x = i % W, y = (i / W) | 0;
+      for (let b = 0; b < 4; b++) {
+        const nx = x + OFF[b][0], ny = y + OFF[b][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx, r2 = map[j]; if (r2 <= 0 || r2 === r || (vd && vd[j])) continue;
+        if (S.roomKind[i * 4 + b] === 1 || !pairs.has(Math.min(r, r2) * 100000 + Math.max(r, r2))) continue; // blocking borders are walls, not gates; only consecutive chain rooms
+        gate[i] |= 1 << b; if (i < j) info.gateFaces++;
+      }
+    }
+    S.gateBits = gate; S.chain = info; return info;
+  };
   /* ASCENSION WALLS (user's decision, Zelda: A Link Between Worlds; `P.ascWalls`, off by default): a thin wall on every room-border face WITHOUT a transition (a face that blocks: S.roomKind 1) that has an Ascension room on at least one side.
      Never on an open transition (the doors stay open), never on a face of a ramp tile (S.carved), never toward void; only runs of 3 faces or more (consecutive faces on the same line). One face = one wall, tile-exact. The base is the
      higher of the two tiles; the height is ABSOLUTE (wallH 0.7; the low piece for the cut, lowH 0.15) and does not scale with the terrace height or with Pocket height. Returns { faces: [{ i, j, dir (0 = E face of i, 1 = S face), x, y,

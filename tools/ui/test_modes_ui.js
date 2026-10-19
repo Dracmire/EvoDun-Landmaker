@@ -410,5 +410,78 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     }
   }
 
+  // ---- DAC v2 (docs/crystallizers/02-room-types/README.md D23-D26): CHAIN VIEW, gate markers, non-walkable anchors, terH up to 10
+  {
+    const click = async (sel) => { await page.click(sel); await a.idle(); };
+    const csig = () => ev(() => [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).map((c) => c.toDataURL('image/png')).join('|')); // the canvases only (the info line carries timings)
+    const toggle = async (id) => { await ev((id) => document.querySelector(id).click(), id); await a.idle(); };
+    const snap = () => ev(() => { const e = window.__evo, S = e.S(), E = window.EVO, T = E.roomTypes, nm = (id) => { const o = S.types.rooms.get(id); return o ? (o.type === T.CAKE ? 'Cake' : o.type === T.DIORAMA ? 'Dio' : 'Asc') + ' ' + id : '?' + id; };
+      const tile = (q) => (q.y - S.oy) * S.W + (q.x - S.ox), st0 = e.inc.stake ? tile(e.inc.stake) : -1;
+      const routes = e.inc.objectives.map((q) => { const r = st0 >= 0 ? E.route(S, e.P, tile(q), st0) : null; return r ? r.length : -1; });
+      const lh = (i) => S.levelH[S.fine[i]], grey = (i) => !!(S.levelMeta[S.fine[i]] && S.levelMeta[S.fine[i]].grey), anch = (i) => !!(S.levelMeta[S.fine[i]] && S.levelMeta[S.fine[i]].anchor);
+      let greyN = 0, chainGrey = 0, offNotGrey = 0, ringKeptWrong = 0, anchN = 0; const chain = new Set(e.P.chainIds || []), claim = S.cake && S.cake.claim, fw = S.mapW;
+      for (let i = 0; i < S.n; i++) { if (S.void && S.void[i]) continue; if (anch(i)) anchN++; if (!S.chainGrey) continue;
+        const ring = S.ringTile && S.ringTile[i] && claim && (() => { const c = claim.get(((((i / S.W) | 0) + S.oy) * fw + (i % S.W) + S.ox)); return c && chain.has(c.link.room); })();
+        if (grey(i)) { greyN++; if (chain.has(S.roomMap[i])) chainGrey++; if (ring) ringKeptWrong++; } else if (!chain.has(S.roomMap[i]) && !ring && !anch(i)) offNotGrey++; }
+      return { chain: S.chain || null, ids: e.P.chainIds ? e.P.chainIds.length : 0, seqs: (e.P.chainSeqs || []).map((q) => q.map(nm)), routes, region: Array.from(S.region).join(','), levels: S.levelH.length, greyN, chainGrey, offNotGrey, ringKeptWrong, anchN, anchInfo: S.anchorInfo || null, gateBits: S.gateBits ? Array.from(S.gateBits).filter(Boolean).length : 0, view: e.st.dacView, info: document.querySelector('#info').innerText }; });
+    await ev(() => window.__evo.setMode('rooms')); await a.idle();
+    const out = {};
+    for (const id of ['real_balanced', 'real_chain5']) {
+      await click(`#examples button[data-id="${id}"]`); const c = await snap(); out[id] = c;
+      const types = new Set(c.seqs.flat().map((x) => x.split(' ')[0]));
+      ok(`${id}: the Chain view is the default (selector Chain), the chain has ${c.ids} rooms and a route to both objectives`, c.view === 'chain' && c.chain && c.ids > 3 && c.routes.length === 2 && c.routes.every((r) => r > 0), JSON.stringify({ ids: c.ids, routes: c.routes }));
+      ok(`${id}: the chain contains at least one Cake, one Ascension and one Diorama (AOK-1)`, types.has('Cake') && types.has('Asc') && types.has('Dio'), [...types].join());
+      console.log(`    ${id} CHAIN (stake first): ${c.seqs.map((q) => q.join(' > ')).join('  ||  ')}`);
+      ok(`${id}: every off-chain land tile is flattened to the grey level, no chain-room tile is, and no ring tile of a chain Cake link is flattened`, c.greyN === c.chain.tiles && c.chainGrey === 0 && c.offNotGrey === 0 && c.ringKeptWrong === 0, JSON.stringify({ greyN: c.greyN, tiles: c.chain.tiles, chainGrey: c.chainGrey, offNotGrey: c.offNotGrey, ringKeptWrong: c.ringKeptWrong }));
+      console.log(`    ${id}: ring tiles of the chain Cake links ${c.chain.chainRingTiles}, of them OUTSIDE the chain rooms ${c.chain.ringOutside} (kept); ring tiles of off-chain links flattened ${c.chain.ringOffChainLinks}; flattened tiles ${c.chain.tiles}; ramps dropped ${c.chain.stairsDropped}; gate faces ${c.chain.gateFaces}`);
+      // the chain view is visual only: the same regions and routes as the whole map
+      await page.selectOption('#dacView', 'whole'); await a.idle(); const w = await snap();
+      ok(`${id}: Whole map: no chain, no grey level (levels ${w.levels} vs ${c.levels} with the chain), the regions and the route lengths are IDENTICAL to the chain view (visual only)`, !w.chain && w.greyN === 0 && w.region === c.region && JSON.stringify(w.routes) === JSON.stringify(c.routes) && c.levels === w.levels + 1, JSON.stringify({ wl: w.levels, cl: c.levels, wr: w.routes, cr: c.routes }));
+      await page.selectOption('#dacView', 'chain'); await a.idle();
+    }
+    // no stake: Chain falls back to the whole map with a notice in the info
+    await click('#examples button[data-id="real_balanced"]'); await click('#m-clear'); let c0 = await snap();
+    ok('Chain without a stake / objectives: the whole map is shown and the info says so', !c0.chain && /needs a stake and an objective/.test(c0.info), c0.info.slice(-160));
+    // a room chosen: the view applies to the whole map only
+    await click('#examples button[data-id="real_balanced"]'); await click('#roomChips .chip[data-id="60"]'); c0 = await snap();
+    ok('a room chosen with the Chain selector on: no chain (the room is shown as in #38)', !c0.chain && c0.greyN === 0 && /a room is chosen/.test(c0.info));
+    await click('#wholeRooms');
+
+    // GATE MARKERS: lines on the open borders between consecutive chain rooms; the toggle changes the picture; the stubs of cut Ascension walls are darker
+    await click('#examples button[data-id="real_balanced"]'); let g = await snap(); const s1 = await csig();
+    ok('gate markers: the gate faces exist (S.gateBits) and the toggle is on by default in the chain view', g.gateBits > 0 && (await ev(() => window.__evo.O.gateMarks)) === true, String(g.gateBits));
+    await toggle('#t-gateMarks'); const s2 = await csig(); await toggle('#t-gateMarks'); const s3 = await csig();
+    ok('gate markers: switching the toggle off changes the picture and back on restores it exactly', s1 !== s2 && s1 === s3);
+    await page.selectOption('#dacView', 'whole'); await a.idle(); const s4 = await csig(); await toggle('#t-gateMarks'); const s5 = await csig(); await toggle('#t-gateMarks');
+    ok('gate markers: outside the chain view the toggle changes nothing (no gate faces: today\'s pixels)', s4 === s5); await page.selectOption('#dacView', 'chain'); await a.idle();
+
+    // NON-WALKABLE AS ANCHORS
+    const before = await snap(); await toggle('#t-anchors'); const an = await snap();
+    ok('anchors: the checkbox raises the non-walkable tiles of the chain rooms (tiles, new levels), the regions and the routes are unchanged', an.anchInfo && an.anchInfo.tiles > 0 && an.anchN === an.anchInfo.tiles && an.region === before.region && JSON.stringify(an.routes) === JSON.stringify(before.routes), JSON.stringify(an.anchInfo));
+    const rz = await ev(() => { const e = window.__evo, S = e.S(); let bad = 0, n = 0, inGrey = 0; for (let i = 0; i < S.n; i++) { const m = S.levelMeta[S.fine[i]]; if (m && m.anchor) { n++; if (S.chainGrey && S.chainGrey[i]) inGrey++; if (!(S.nowalk[i] === 1 || S.nowalk[i] === 0)) bad++; } } return { n, inGrey, up: S.anchorInfo.up, terH: e.P.terH }; });
+    ok('anchors: none of the raised tiles is on the flat grey ground (in the Chain view only the chain rooms are raised) and the raise is anchorH x terH', rz.inGrey === 0 && Math.abs(rz.up - 0.5 * rz.terH) < 1e-9, JSON.stringify(rz));
+    console.log(`    anchors (default example, chain view): ${an.anchInfo.tiles} tiles raised, ${an.anchInfo.levelsAdded} levels added (levels ${before.levels} -> ${an.levels})`);
+    await ev(() => { const el = document.querySelector('#s-anchorH'); el.value = '1.5'; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }); await a.idle(); const an2 = await snap();
+    ok('anchors: the slider changes the raise (1.5 terraces)', an2.anchInfo && Math.abs(an2.anchInfo.up - 1.5 * 1.0) < 1e-9, JSON.stringify(an2.anchInfo));
+    await ev(() => { const el = document.querySelector('#s-anchorH'); el.value = '0.5'; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }); await a.idle();
+    await toggle('#t-anchors'); const off = await snap();
+    ok('anchors off: the shape is back to the one before (levels, regions, no anchor info)', !off.anchInfo && off.levels === before.levels && off.region === before.region);
+
+    // TERRACE HEIGHT up to 10
+    const mx = await ev(() => document.querySelector('#s-terH').max);
+    ok('terrace height: the slider goes up to 10 (was 2.5), default 1', mx === '10' && (await ev(() => window.__evo.P.terH)) === 1, mx);
+    for (const v of [3, 10]) { await ev((v) => { const el = document.querySelector('#s-terH'); el.value = String(v); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, v); await a.idle();
+      const r = await ev(() => { const S = window.__evo.S(); return { terH: window.__evo.P.terH, ramps: S.stairInfo.placed, walk: S.regionSizes.length }; });
+      ok(`terrace height ${v}: the shape builds, ramps are carved (${r.ramps}) and the chain is still there`, r.terH === v && r.ramps > 0 && (await snap()).chain !== null, JSON.stringify(r)); }
+    await ev(() => { const el = document.querySelector('#s-terH'); el.value = '1'; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }); await a.idle();
+
+    // manifest: dacView and anchors
+    let vb = await ev(() => window.__evo.viewerBlock());
+    ok('the viewer block writes dacView "chain" in mode 2 and no anchors when they are off', vb.dacView === 'chain' && vb.anchors === undefined && vb.anchorH === undefined, JSON.stringify(vb));
+    await page.selectOption('#dacView', 'whole'); await a.idle(); await toggle('#t-anchors'); vb = await ev(() => window.__evo.viewerBlock());
+    ok('with Whole map and anchors on the viewer block writes dacView "whole", anchors true', vb.dacView === 'whole' && vb.anchors === true, JSON.stringify(vb));
+    await toggle('#t-anchors');
+  }
+
   console.log('errors:', a.errs); ok('no page errors', a.errs.length === 0); await a.browser.close();
 })();
