@@ -415,15 +415,19 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const click = async (sel) => { await page.click(sel); await a.idle(); };
     const csig = () => ev(() => [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).map((c) => c.toDataURL('image/png')).join('|')); // the canvases only (the info line carries timings)
     const toggle = async (id) => { await ev((id) => document.querySelector(id).click(), id); await a.idle(); };
-    const snap = () => ev(() => { const e = window.__evo, S = e.S(), E = window.EVO, T = E.roomTypes, nm = (id) => { const o = S.types.rooms.get(id); return o ? (o.type === T.CAKE ? 'Cake' : o.type === T.DIORAMA ? 'Dio' : 'Asc') + ' ' + id : '?' + id; };
+    const ypx = () => ev(() => { const cv = [...document.querySelectorAll('#stage canvas')].find((c) => !c.closest('figure').hidden), g = cv.getContext('2d'), d = g.getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] >= 250 && d[i + 1] >= 232 && d[i + 1] <= 248 && d[i + 2] >= 40 && d[i + 2] <= 95) n++; return n; }); // the gate line colour (255, 240, 60)
+    const snap = (far) => ev((far) => { const e = window.__evo, S = e.S(), E = window.EVO, T = E.roomTypes, nm = (id) => { const o = S.types.rooms.get(id); return o ? (o.type === T.CAKE ? 'Cake' : o.type === T.DIORAMA ? 'Dio' : 'Asc') + ' ' + id : '?' + id; };
       const tile = (q) => (q.y - S.oy) * S.W + (q.x - S.ox), st0 = e.inc.stake ? tile(e.inc.stake) : -1;
       const routes = e.inc.objectives.map((q) => { const r = st0 >= 0 ? E.route(S, e.P, tile(q), st0) : null; return r ? r.length : -1; });
+      // a route that needs ramps OUTSIDE the chain: the stake to an off-chain tile of the main region (picked in the chain view, the same tile in the whole view): the walking graph must not lose the ramps the chain pass drops from S.stairs
+      let farTile = far === undefined ? -1 : far; if (far === undefined && S.chainGrey && st0 >= 0) { const mr = S.region[st0]; for (let i = S.n - 1; i >= 0; i--) if (S.chainGrey[i] && S.region[i] === mr) { farTile = i; break; } }
+      const fr = farTile >= 0 && st0 >= 0 ? E.route(S, e.P, farTile, st0) : null, farRoute = fr ? fr.length : -1;
       const lh = (i) => S.levelH[S.fine[i]], grey = (i) => !!(S.levelMeta[S.fine[i]] && S.levelMeta[S.fine[i]].grey), anch = (i) => !!(S.levelMeta[S.fine[i]] && S.levelMeta[S.fine[i]].anchor);
       let greyN = 0, chainGrey = 0, offNotGrey = 0, ringKeptWrong = 0, anchN = 0; const chain = new Set(e.P.chainIds || []), claim = S.cake && S.cake.claim, fw = S.mapW;
       for (let i = 0; i < S.n; i++) { if (S.void && S.void[i]) continue; if (anch(i)) anchN++; if (!S.chainGrey) continue;
         const ring = S.ringTile && S.ringTile[i] && claim && (() => { const c = claim.get(((((i / S.W) | 0) + S.oy) * fw + (i % S.W) + S.ox)); return c && chain.has(c.link.room); })();
         if (grey(i)) { greyN++; if (chain.has(S.roomMap[i])) chainGrey++; if (ring) ringKeptWrong++; } else if (!chain.has(S.roomMap[i]) && !ring && !anch(i)) offNotGrey++; }
-      return { chain: S.chain || null, ids: e.P.chainIds ? e.P.chainIds.length : 0, seqs: (e.P.chainSeqs || []).map((q) => q.map(nm)), routes, region: Array.from(S.region).join(','), levels: S.levelH.length, greyN, chainGrey, offNotGrey, ringKeptWrong, anchN, anchInfo: S.anchorInfo || null, gateBits: S.gateBits ? Array.from(S.gateBits).filter(Boolean).length : 0, view: e.st.dacView, info: document.querySelector('#info').innerText }; });
+      return { chain: S.chain || null, ids: e.P.chainIds ? e.P.chainIds.length : 0, seqs: (e.P.chainSeqs || []).map((q) => q.map(nm)), routes, region: Array.from(S.region).join(','), levels: S.levelH.length, greyN, chainGrey, offNotGrey, ringKeptWrong, anchN, farTile, farRoute, anchInfo: S.anchorInfo || null, gateBits: S.gateBits ? Array.from(S.gateBits).filter(Boolean).length : 0, view: e.st.dacView, info: document.querySelector('#info').innerText }; }, far);
     await ev(() => window.__evo.setMode('rooms')); await a.idle();
     const out = {};
     for (const id of ['real_balanced', 'real_chain5']) {
@@ -435,8 +439,9 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       ok(`${id}: every off-chain land tile is flattened to the grey level, no chain-room tile is, and no ring tile of a chain Cake link is flattened`, c.greyN === c.chain.tiles && c.chainGrey === 0 && c.offNotGrey === 0 && c.ringKeptWrong === 0, JSON.stringify({ greyN: c.greyN, tiles: c.chain.tiles, chainGrey: c.chainGrey, offNotGrey: c.offNotGrey, ringKeptWrong: c.ringKeptWrong }));
       console.log(`    ${id}: ring tiles of the chain Cake links ${c.chain.chainRingTiles}, of them OUTSIDE the chain rooms ${c.chain.ringOutside} (kept); ring tiles of off-chain links flattened ${c.chain.ringOffChainLinks}; flattened tiles ${c.chain.tiles}; ramps dropped ${c.chain.stairsDropped}; gate faces ${c.chain.gateFaces}`);
       // the chain view is visual only: the same regions and routes as the whole map
-      await page.selectOption('#dacView', 'whole'); await a.idle(); const w = await snap();
+      await page.selectOption('#dacView', 'whole'); await a.idle(); const w = await snap(c.farTile);
       ok(`${id}: Whole map: no chain, no grey level (levels ${w.levels} vs ${c.levels} with the chain), the regions and the route lengths are IDENTICAL to the chain view (visual only)`, !w.chain && w.greyN === 0 && w.region === c.region && JSON.stringify(w.routes) === JSON.stringify(c.routes) && c.levels === w.levels + 1, JSON.stringify({ wl: w.levels, cl: c.levels, wr: w.routes, cr: c.routes }));
+      ok(`${id}: a route from the stake to an off-chain tile of the main region (it needs ramps the chain pass drops from S.stairs) has the same length in the chain view and in the whole map (${c.farRoute})`, c.farTile >= 0 && c.farRoute > 0 && w.farRoute === c.farRoute, JSON.stringify({ far: c.farTile, chain: c.farRoute, whole: w.farRoute }));
       await page.selectOption('#dacView', 'chain'); await a.idle();
     }
     // no stake: Chain falls back to the whole map with a notice in the info
@@ -450,7 +455,8 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     // GATE MARKERS: lines on the open borders between consecutive chain rooms; the toggle changes the picture; the stubs of cut Ascension walls are darker
     await click('#examples button[data-id="real_balanced"]'); let g = await snap(); const s1 = await csig();
     ok('gate markers: the gate faces exist (S.gateBits) and the toggle is on by default in the chain view', g.gateBits > 0 && (await ev(() => window.__evo.O.gateMarks)) === true, String(g.gateBits));
-    await toggle('#t-gateMarks'); const s2 = await csig(); await toggle('#t-gateMarks'); const s3 = await csig();
+    const y1 = await ypx(); await toggle('#t-gateMarks'); const s2 = await csig(); const y2 = await ypx(); await toggle('#t-gateMarks'); const s3 = await csig();
+    ok(`gate markers: the bright gate LINES are in the picture (${y1} pixels of the gate colour with the toggle on, ${y2} with it off)`, y1 - y2 > 150, JSON.stringify({ on: y1, off: y2 }));
     ok('gate markers: switching the toggle off changes the picture and back on restores it exactly', s1 !== s2 && s1 === s3);
     await page.selectOption('#dacView', 'whole'); await a.idle(); const s4 = await csig(); await toggle('#t-gateMarks'); const s5 = await csig(); await toggle('#t-gateMarks');
     ok('gate markers: outside the chain view the toggle changes nothing (no gate faces: today\'s pixels)', s4 === s5); await page.selectOption('#dacView', 'chain'); await a.idle();
