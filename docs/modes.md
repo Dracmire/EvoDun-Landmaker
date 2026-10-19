@@ -35,7 +35,7 @@ Room types (Diorama, Ascension, Cake) on a map with rooms: Cake rings, Ascension
 | field | value |
 |---|---|
 | id | `rooms` |
-| examples (first = default) | Real map · Balanced (3 types, connected) (`real_map`); Real map · Default (`real_map`); Real map · Chain (5 terraces) (`real_map`); Cake · bowl (room 60) (`real_map`); Cake · bowl + pyramid (room 85) (`real_map`); Ascension · walls (room 88) (`real_map`); Pocket · Diorama 31 (`real_map`); Your images (PNG + roles) |
+| examples (first = default) | Real map · Balanced (3 types, connected) (`real_map`); Real map · Default (`real_map`); Chain (5 terraces) (`real_map`); Cake · bowl (room 60) (`real_map`); Cake · bowl + pyramid (room 85) (`real_map`); Ascension · walls (room 88) (`real_map`); Pocket · Diorama 31 (`real_map`); Your images (PNG + roles) |
 | camera (default) | `isoE` |
 | cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic` |
 | technique (default) | `A` |

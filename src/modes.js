@@ -43,7 +43,7 @@
         { id: 'real_default', label: 'Real map · Default', src: 'real_map', rooms: true, preset: 'default' },
         /* THE CHAIN AT 5 TERRACES (DAC v2, D23): the parameters of the mocks (Balanced types values with 5 terraces: core 100, radius 5, minPlateau 120); the marks are, as in the default example, the walkable main-region tile nearest the centroid of the largest
            room of each type at THESE parameters: stake = Cake 82 (5941 tiles), objective 1 = Ascension 27 (443), objective 2 = Diorama 6 (1149); tools/ui/test_modes_ui.js checks the type under each mark */
-        { id: 'real_chain5', label: 'Real map · Chain (5 terraces)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, tint: true, outline: true, stake: { x: 200, y: 62 }, objectives: [{ x: 87, y: 136, label: 'Ascension 27' }, { x: 25, y: 128, label: 'Diorama 6' }] },
+        { id: 'real_chain5', label: 'Chain (5 terraces)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, tint: true, outline: true, stake: { x: 200, y: 62 }, objectives: [{ x: 87, y: 136, label: 'Ascension 27' }, { x: 25, y: 128, label: 'Diorama 6' }] },
         /* one example per room type (`type` = the type the example is about: it is what the rule of "Framing by room type" uses on the first application, when the classification of the new source is not built yet; tools/ui/test_modes_ui.js checks it against the real classification) */
         { id: 'cake60', label: 'Cake · bowl (room 60)', src: 'real_map', rooms: true, preset: 'balanced', room: 60, type: 'cake' },
         { id: 'cake85', label: 'Cake · bowl + pyramid (room 85)', src: 'real_map', rooms: true, preset: 'balanced', room: 85, type: 'cake' },

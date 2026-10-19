@@ -199,7 +199,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const exs = [['cake60', 'cake', 60], ['cake85', 'cake', 85], ['asc88', 'ascension', 88], ['pocket31', 'diorama', 31]];
     await ev(() => window.__evo.setMode('rooms')); await a.idle();
     const m2 = MODES.find((m) => m.id === 'rooms');
-    ok('mode 2 offers 7 examples in this order (first = the default): real_balanced, real_default, cake60, cake85, asc88, pocket31, images', m2.examples.map((e) => e.id).join() === 'real_balanced,real_default,cake60,cake85,asc88,pocket31,images', m2.examples.map((e) => e.id).join());
+    ok('mode 2 offers 8 examples in this order (first = the default): real_balanced, real_default, real_chain5, cake60, cake85, asc88, pocket31, images (the list was 7 before DAC v2: real_chain5 added after real_default, announced and approved)', m2.examples.map((e) => e.id).join() === 'real_balanced,real_default,real_chain5,cake60,cake85,asc88,pocket31,images', m2.examples.map((e) => e.id).join());
     ok('mode 2 lists the "Framing by room type" switch first among its framing controls', m2.main.indexOf('dacAuto') >= 0 && m2.main.indexOf('dacAuto') < m2.main.indexOf('t-cake'));
     let f = await fr();
     ok('mode 2 opens with the switch ON (default example: whole map, all three framings on their own rooms)', f.dac && f.dacSt && f.cake && f.asc && f.pocket && f.chosen.length === 0, JSON.stringify([f.cake, f.asc, f.pocket]));
