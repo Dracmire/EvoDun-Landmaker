@@ -84,10 +84,14 @@ const load = (f) => JSON.parse(fs.readFileSync(path.join(__dirname, '../data', f
     for (const [m, h] of [['t3', '0586ad8c4d63'], ['t2', 'eba088f37298']]) { const w = E.wallc.get(S, Object.assign({}, PX, { wallPass: m })); ok(`no Pocket (Shrine-Pier x4, 7 terraces, ${m.toUpperCase()}): no road mask, no roadEdges key, output byte-identical to main (${h})`, w.W.road === null && w.stats.roadEdges === undefined && sha(w) === h, [w.W.road, sha(w)]); } }
   // D24: the WORK BUDGET of the pass (E.wallc.BUDGET, P.wallBudget test-only): Off skips the whole build; below the budget the output is the unchanged one; above it the pass is skipped for that build and S.wallSkipped says so
   {
-    const Pb = Object.assign({}, PX, { wallPass: 't3' }), Sb = E.shape(x4(), Pb, null), wref = E.wallc.get(Sb, Pb), shaB = (w) => { const o = {}; for (const [k, v] of w.byHi) o[k] = v; const st = Object.assign({}, w.stats); delete st.ms; return require('crypto').createHash('sha1').update(JSON.stringify([st, o])).digest('hex'); };
+    const Pb = Object.assign({}, PX, { wallPass: 't3' }), Pinf = Object.assign({}, Pb, { wallBudget: Infinity }), Sb = E.shape(x4(), Pinf, null), wref = E.wallc.get(Sb, Pinf), shaB = (w) => { const o = {}; for (const [k, v] of w.byHi) o[k] = v; const st = Object.assign({}, w.stats); delete st.ms; return require('crypto').createHash('sha1').update(JSON.stringify([st, o])).digest('hex'); };
     ok('the default budget is finite and above the work of the shapes of the fixed set (x4 stage, real map 5 terraces)', Number.isFinite(E.wallc.BUDGET) && wref.work < E.wallc.BUDGET, [wref.work, E.wallc.BUDGET]);
     const Sc = E.shape(x4(), Object.assign({}, Pb, { wallBudget: wref.work + 1 }), null), wcl = E.wallc.get(Sc, Object.assign({}, Pb, { wallBudget: wref.work + 1 }));
     ok('below the budget the pass is the unchanged one (same faces, tops and stats) and S.wallSkipped is empty', wcl && shaB(wcl) === shaB(wref) && !Sc.wallSkipped);
+    for (const [name, Pp] of [['real map 5 terraces (fixed set, Default)', P0], ['real map 3 terraces', Object.assign({}, P0, { terraces: 3 })], ['real map 7 terraces, spread 1.5 (the Stage preset)', Object.assign({}, P0, STAGE)], ['real map 12 terraces (the heaviest state measured by tools/ui/measure_wall.js)', Object.assign({}, P0, { terraces: 12 })]]) {
+      const Pq = Object.assign({}, Pp, { wallPass: 't3' }), Sq = E.shape(mk(), Pq, null), wq = E.wallc.get(Sq, Pq);
+      ok(`under the DEFAULT budget the pass runs on the ${name} (not skipped, work ${wq && Math.round(wq.work)} <= ${E.wallc.BUDGET})`, wq !== null && !Sq.wallSkipped, Sq.wallSkipped);
+    }
     const Pk = Object.assign({}, Pb, { wallBudget: wref.work - 1 }), Sd = E.shape(x4(), Pk, null), wsk = E.wallc.get(Sd, Pk);
     ok('above the budget the pass is skipped for that build (null) and S.wallSkipped holds the work and the budget', wsk === null && Sd.wallSkipped && Sd.wallSkipped.work > Sd.wallSkipped.budget && Sd.wallSkipped.budget === wref.work - 1, Sd.wallSkipped);
     ok('the skipped state is cached (a second call is the same answer)', E.wallc.get(Sd, Pk) === null && Sd.wallSkipped && Sd.wallSkipped.work === wref.work);
