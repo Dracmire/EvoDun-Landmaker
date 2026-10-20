@@ -145,7 +145,7 @@
         let refMin = Infinity; if (air) for (const v of refOf.values()) refMin = Math.min(refMin, v);
         const gap = l.down ? highMin - coreTop : (air ? refMin : coreTop) - lowTop; info.gap = gap;
         if (!(gap - prm.margin * P.terH > 1e-9)) { info.flat = true; info.rings = 0; continue; }
-        const step = Math.min(prm.step * P.terH, (gap - prm.margin * P.terH) / nR); info.step = step; info.coreTop = coreTop;
+        const step = Math.min(prm.step * P.terH, (gap - prm.margin * P.terH) / nR); info.step = step; info.coreTop = coreTop; info.lowTop = lowTop; { let sx = 0, sy = 0; for (const t of coreTiles) { sx += t % W; sy += (t / W) | 0; } info.cc = [sx / coreTiles.length + 0.5, sy / coreTiles.length + 0.5]; }
         kept.forEach((rg, k) => {
           for (const t of rg) {
             const h = l.down ? coreTop + (k + 1) * step : (air ? refOf.get(t) : coreTop) - (k + 1) * step, old = hb(t);
@@ -154,6 +154,12 @@
           }
         });
       }
+    }
+    // CAMERA CUT (D29, P.cakeCut quadrant | half; off = nothing): the rings stay per link, but the sector of the link that faces the camera axis (P.pocketYaw) is removed so the platform is seen: Down -> the tile drops to the core floor, Up -> the claim is dropped (an Up ring only raised ground, so the tile keeps its original, lower height)
+    out.cut = 0;
+    if (P.cakeCut === 'quadrant' || P.cakeCut === 'half') {
+      const yaw = (P.pocketYaw || 0) * Math.PI / 180, ux = Math.sin(yaw), uy = Math.cos(yaw), thr = P.cakeCut === 'half' ? 0 : Math.SQRT1_2;
+      for (const [t, c] of [...claim]) { const l = c.link; if (!l.cc) continue; const dx = (t % W) + 0.5 - l.cc[0], dy = ((t / W) | 0) + 0.5 - l.cc[1], len = Math.hypot(dx, dy) || 1; if ((dx * ux + dy * uy) / len < thr - 1e-9) continue; out.cut++; if (l.down) c.h = l.coreTop; else claim.delete(t); }
     }
     out.dioBlocked = dioBlocked.size; out.coreBlocked = coreBlocked.size;
     out.claim = claim; out.flat = out.links.filter((x) => x.flat).length; return out;
@@ -246,6 +252,70 @@
     S.anchorInfo = { tiles: moves.size, levelsAdded: added, skippedRing, up };
     return S.anchorInfo;
   };
+  /* ROOM-LEVEL CHAIN (DAC v2 PR B, D27; `P.chainExtra` N, default 3). The chain is a path in the ROOM graph, not the union of the tile routes (PR A). Nodes = rooms; edges = room pairs joined by an OPEN room transition (a valid transition, used or not: the walking
+     rule of src/rooms.js) or by a carved ramp between two rooms (a used terrace gate); `doors` keeps the tiles of every connection. Goals = the room of the stake, then the objectives in placement order (the last one is the final goal; intermediate landmarks and
+     arenas will come later). BLOCK THE SHORTEST ONCE: the shortest room path from the start to the FINAL goal only (BFS, fewest rooms; intermediate goals ignored) is blocked edge by edge, except the edges that are a BRIDGE of the room graph (never block them: the map
+     must not split in two). Then, per leg (goal -> next goal), the LONGEST simple room path without the blocked edges and without any room already in the chain, with at most (shortest rooms of that leg + N) rooms (a bounded DFS pruned by the distance to the goal; the
+     bound and an expansion budget cut the exponential search: `cut` says so); a leg with no path after blocking is unblocked and reported. Legs are chained by backtracking over their candidate paths (longest first), so a long leg cannot make the next one impossible.
+     Visual only: the tile route and the walking do not change. Returns { rooms (the core chain, stake first), blocked: [[a, b]], bridges, cut, unblockedLegs, legs, shortest } or { fail }. */
+  const rkey = (a, b) => Math.min(a, b) * 100000 + Math.max(a, b);
+  T.roomGraph = function (S) {
+    const W = S.W, H = S.H, n = S.n, map = S.roomMap, kind = S.roomKind, vd = S.void, adj = new Map(), doors = new Map();
+    const add = (ra, rb, ia, ib, ramp) => { const k = rkey(ra, rb); let d = doors.get(k); if (!d) doors.set(k, d = []); d.push({ ra, rb, ia, ib, ramp }); (adj.get(ra) || adj.set(ra, new Set()).get(ra)).add(rb); (adj.get(rb) || adj.set(rb, new Set()).get(rb)).add(ra); };
+    for (let i = 0; i < n; i++) {
+      const r = map[i]; if (r <= 0 || (vd && vd[i])) continue; const x = i % W, y = (i / W) | 0;
+      for (const [b, dx, dy] of [[1, 1, 0], [2, 0, 1]]) { const nx = x + dx, ny = y + dy; if (nx >= W || ny >= H) continue; const j = ny * W + nx, r2 = map[j]; if (r2 <= 0 || r2 === r || (vd && vd[j])) continue; const k = kind[i * 4 + b]; if (k === 0 || k === 2) add(r, r2, i, j, false); }
+    }
+    for (const st of S.stairs || []) { const ra = map[st.bottom[0]], rb = map[st.top[0]]; if (ra > 0 && rb > 0 && ra !== rb) add(ra, rb, st.bottom[0], st.top[0], true); }
+    return { adj, doors };
+  };
+  T.roomChain = function (S, P, goalRooms) {
+    const g = T.roomGraph(S), adj = g.adj, N = P.chainExtra === undefined ? 3 : P.chainExtra, goals = [goalRooms[0]];
+    for (let k = 1; k < goalRooms.length; k++) if (goalRooms[k] !== goals[goals.length - 1]) goals.push(goalRooms[k]);
+    for (const r of goals) if (!adj.has(r)) return { fail: `room ${r} has no passable connection to another room` };
+    if (goals.length < 2) return { rooms: [goals[0]], blocked: [], bridges: 0, cut: false, unblockedLegs: [], legs: [], shortest: 1, graph: g, goals };
+    const nb = (u) => [...(adj.get(u) || [])].sort((p, q) => p - q);
+    const bfs = (s, t, blocked, forbid) => { const prev = new Map([[s, -1]]), q = [s]; for (let h = 0; h < q.length; h++) { const u = q[h]; if (u === t) break; for (const v of nb(u)) { if (prev.has(v) || (forbid && forbid.has(v) && v !== t) || (blocked && blocked.has(rkey(u, v)))) continue; prev.set(v, u); q.push(v); } }
+      if (!prev.has(t)) return null; const path = []; for (let k = t; k !== -1; k = prev.get(k)) path.push(k); return path.reverse(); };
+    const final = goals[goals.length - 1], p0 = bfs(goals[0], final, null, null); if (!p0) return { fail: 'the start and the final goal are not connected by passable room transitions' };
+    const blocked = new Set(), blockedList = []; let bridges = 0;
+    for (let k = 0; k + 1 < p0.length; k++) { const a = p0[k], b = p0[k + 1], one = new Set([rkey(a, b)]); if (!bfs(a, b, one, null)) { bridges++; continue; } blocked.add(rkey(a, b)); blockedList.push([a, b]); }
+    let cut = false; const unblockedLegs = [], BUDGET = 400000, legInfo = [];
+    const dists = (t, blk, forbid) => { const d = new Map([[t, 0]]), q = [t]; for (let h = 0; h < q.length; h++) { const u = q[h]; for (const v of nb(u)) { if (d.has(v) || (forbid && forbid.has(v)) || (blk && blk.has(rkey(u, v)))) continue; d.set(v, d.get(u) + 1); q.push(v); } } return d; };
+    const legPaths = (from, to, used, li) => {
+      let blk = blocked, d = dists(to, blk, used); if (!d.has(from)) { blk = null; d = dists(to, null, used); if (!d.has(from)) return []; if (!unblockedLegs.includes(li)) unblockedLegs.push(li); }
+      const limit = d.get(from) + 1 + N, out = [], path = [from], seen = new Set([from]); let exp = 0;
+      const dfs = (u) => { if (u === to) { out.push(path.slice()); return; } if (++exp > BUDGET || out.length > 4000) { cut = true; return; }
+        for (const v of nb(u)) { if (seen.has(v) || (used.has(v) && v !== to) || (blk && blk.has(rkey(u, v))) || !d.has(v)) continue; if (path.length + 1 + d.get(v) > limit) continue; seen.add(v); path.push(v); dfs(v); path.pop(); seen.delete(v); if (cut && out.length > 4000) return; } };
+      dfs(from); out.sort((p, q) => q.length - p.length || (p.join() < q.join() ? -1 : 1)); legInfo[li] = { shortest: d.get(from) + 1, limit, candidates: out.length }; return out.slice(0, 60);
+    };
+    const solve = (li, used) => { if (li + 1 >= goals.length) return []; const from = goals[li], to = goals[li + 1], u2 = new Set(used); u2.delete(from);
+      for (const pth of legPaths(from, to, u2, li)) { const nu = new Set(used); for (const r of pth) nu.add(r); const rest = solve(li + 1, nu); if (rest) return [pth, ...rest]; } return null; };
+    const legs = solve(0, new Set([goals[0]])); if (!legs) return { fail: 'no chain of simple room paths joins the goals (the legs need the same rooms)' };
+    const rooms = [goals[0]]; for (const l of legs) for (let k = 1; k < l.length; k++) rooms.push(l[k]);
+    return { rooms, blocked: blockedList, bridges, cut, unblockedLegs, legs, legInfo, shortest: p0.length, graph: g, goals };
+  };
+  /* ROOM TYPE ALONG THE ROUTE (D28): the user's older rule (skeletonMeshmakerGenV4 Step5), by ROLE in the chain. Cake if the terrace of the entry differs from the one of the exit along the chain (Up if it climbs, Down if it descends; the entry of the first room
+     is the tile of the stake, the exit of the last one the tile of the goal; between two rooms the door is an open face, the lowest terrace if there are several, ramps only if there is no open face); Diorama if it is not Cake, has >= 2 terraces and no used terrace
+     edge inside (no link); Ascension for the rest. Both rules then turn the second Diorama of two in a row into Ascension (chain view only). `rule` 'v164' keeps the classification of E.roomTypes.classify. Returns { map: Map id -> { type, up? }, counts, v164, route }. */
+  T.chainTypes = function (S, P, chain, rule, stakeTile, goalTile) {
+    const ty = S.types, graph = chain.graph, rooms = chain.rooms, doorTer = (ra, rb) => { const ds = graph.doors.get(rkey(ra, rb)) || []; let best = null;
+      for (const d of ds) { const ia = d.ra === ra ? d.ia : d.ib, ib = d.ra === ra ? d.ib : d.ia, c = { ta: S.ter[ia], tb: S.ter[ib], ramp: d.ramp }; if (!best || (best.ramp && !c.ramp) || (best.ramp === c.ramp && c.ta < best.ta)) best = c; } return best || { ta: 0, tb: 0 }; };
+    const relabel = (types) => { for (let k = 1; k < types.length; k++) if (types[k] === T.DIORAMA && types[k - 1] === T.DIORAMA) types[k] = T.ASCENSION; return types; };
+    const v164 = rooms.map((id) => { const o = ty.rooms.get(id); return o ? o.type : T.ASCENSION; });
+    const route = rooms.map((id, k) => { const o = ty.rooms.get(id); const entry = k === 0 ? S.ter[stakeTile] : doorTer(rooms[k - 1], id).tb, exit = k === rooms.length - 1 ? S.ter[goalTile] : doorTer(id, rooms[k + 1]).ta;
+      if (entry !== exit) return { type: T.CAKE, up: exit > entry }; if (o && o.terraces.size >= 2 && !(o.linkList && o.linkList.length)) return { type: T.DIORAMA }; return { type: T.ASCENSION }; });
+    const cnt = (arr) => { const c = { Cake: 0, Asc: 0, Dio: 0 }; for (const t of arr) c[t === T.CAKE ? 'Cake' : t === T.DIORAMA ? 'Dio' : 'Asc']++; return c; };
+    const a = relabel(v164.slice()), b = relabel(route.map((x) => x.type)), use = rule === 'route' ? b : a, map = new Map();
+    rooms.forEach((id, k) => { const o = ty.rooms.get(id); if (!o || o.type !== use[k]) map.set(id, { type: use[k], up: rule === 'route' && route[k].up }); else if (rule === 'route') map.set(id, { type: use[k], up: route[k].up }); });
+    return { map, counts: cnt(use), v164: cnt(a), route: cnt(b), v164Raw: cnt(v164), routeRaw: cnt(route.map((x) => x.type)), types: use, relabeled: rooms.filter((id, k) => (rule === 'route' ? route[k].type : v164[k]) === T.DIORAMA && use[k] === T.ASCENSION).length };
+  };
+  /* a copy of the classification where the chain rooms take the types of the rule in force (the rings of Cake, the Ascension walls, the tint and the Diorama outline of the chain view read it; E.roomTypes.classify itself is unchanged) */
+  T.overrideTypes = function (ty, map, RL) {
+    const rooms = new Map(); for (const [id, o] of ty.rooms) rooms.set(id, map.has(id) ? Object.assign({}, o, { type: map.get(id).type, linkList: o.linkList || [] }) : o);
+    const type = Uint8Array.from(ty.type); for (let i = 0; i < RL.room.length; i++) { const r = RL.room[i]; if (r > 0 && map.has(r)) type[i] = map.get(r).type; }
+    return Object.assign({}, ty, { rooms, type });
+  };
   /* CHAIN VIEW (DAC v2, docs/crystallizers/02-room-types/README.md D23; `P.chainIds` = the ids of the rooms the route(s) from the stake to the objective(s) cross; absent = nothing here runs, the shape is the one of before):
      a VISUAL pass after the Cake rings and the Ascension walls (so the rings exist when it runs). Every land tile outside the chain rooms is moved to a level of its own, just under the lowest level (`meta.grey`: a neutral grey, no type tint), i.e. flattened;
      the void stays void. The ring tiles (S.ringTile) of the Cake links of the CHAIN rooms are never flattened, even where they fall outside the chain (Cake v2 builds Up rings in the airspace of other rooms). Walking, the regions, the route and the room
@@ -289,7 +359,11 @@
         gate[i] |= 1 << b; if (i < j) info.gateFaces++;
       }
     }
-    S.gateBits = gate; S.chain = info; return info;
+    const bl = new Set((P.chainBlocked || []).map(([a, b]) => rkey(a, b))), blk = new Uint8Array(n); info.blockedFaces = 0;
+    if (bl.size) for (let i = 0; i < n; i++) { const r = map[i]; if (r <= 0 || (vd && vd[i])) continue; const x = i % W, y = (i / W) | 0;
+      for (let b = 0; b < 4; b++) { const nx = x + OFF[b][0], ny = y + OFF[b][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx, r2 = map[j]; if (r2 <= 0 || r2 === r || (vd && vd[j])) continue;
+        if (!bl.has(rkey(r, r2)) || !(chain.has(r) || chain.has(r2)) || S.roomKind[i * 4 + b] === 1 || (S.roomKind[i * 4 + b] === 0 && grey[i])) continue; blk[i] |= 1 << b; if (i < j) info.blockedFaces++; } }
+    S.blockBits = blk; S.gateBits = gate; S.chain = info; return info;
   };
   /* ASCENSION WALLS (user's decision, Zelda: A Link Between Worlds; `P.ascWalls`, off by default): a thin wall on every room-border face WITHOUT a transition (a face that blocks: S.roomKind 1) that has an Ascension room on at least one side.
      Never on an open transition (the doors stay open), never on a face of a ramp tile (S.carved), never toward void; only runs of 3 faces or more (consecutive faces on the same line). One face = one wall, tile-exact. The base is the
