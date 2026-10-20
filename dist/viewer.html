@@ -5689,8 +5689,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const gs = [roomAt(inc.stake), ...inc.objectives.map(roomAt)]; return gs.length < 2 || gs.some((r) => !(r > 0)) ? null : gs;
   }
   function chainSig() { // what the chain depends on: the goal rooms, N, the type rule, the rooms layer and the ramp parameters (the room graph is read from the WHOLE shape: a rebuilt chain shape is flattened and cannot be read again)
-    const gs = chainGoals(); if (!gs || !S.rooms) return ''; let id = rlIds.get(S.rooms); if (!id) rlIds.set(S.rooms, id = ++rlSeq);
-    return [gs.join('>'), P.chainExtra, st.roomRule, id, P.terraces, P.stairW, P.rampDepth, P.stairStyle].join('|');
+    const gs = chainGoals(); if (!gs || !S.rooms) return ''; 
+    return [gs.join('>'), P.chainExtra, st.roomRule, st.pack, P.roomsMinCore, P.rRadius, P.minPlateau, P.roomsCross, P.terraces, P.stairW, P.rampDepth, P.stairStyle].join('|');
   }
   const ROUTE_CAP = 30, ROUTE_KEEP = 10;
   const roomsView = () => !NO_MODES && st.modeId === 'rooms' && !!(S && S.roomMap && S.types);
