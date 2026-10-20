@@ -291,9 +291,9 @@
     for (let k = 0; k + 1 < p0.length; k++) { const a = p0[k], b = p0[k + 1], one = new Set([rkey(a, b)]); if (!bfs(a, b, one)) { bridges++; continue; } blocked.add(rkey(a, b)); blockedList.push([a, b]); }
     const dists = (t, blk) => { const d = new Map([[t, 0]]), q = [t]; for (let h = 0; h < q.length; h++) { const u = q[h]; for (const v of nb(u)) { if (d.has(v) || (blk && blk.has(rkey(u, v)))) continue; d.set(v, d.get(u) + 1); q.push(v); } } return d; };
     let blk = blocked, unblocked = false, d = dists(to, blk); if (!d.has(from)) { blk = null; unblocked = true; d = dists(to, null); }
-    const limit = d.get(from) + 1 + N, BUDGET = 400000; let cut = false, exp = 0; const out = [], path = [from], seenN = new Set([from]), seenR = new Set([roomOf(from)]);
+    const repeat = P.chainRoomRepeat === true, limit = d.get(from) + 1 + N, BUDGET = 400000; // `P.chainRoomRepeat` (diagnostic only, not in the UI or the manifest): a room may host two pieces of the chain let cut = false, exp = 0; const out = [], path = [from], seenN = new Set([from]), seenR = new Set([roomOf(from)]);
     const dfs = (u) => { if (u === to) { out.push(path.slice()); return; } if (++exp > BUDGET || out.length > 4000) { cut = true; return; }
-      for (const v of nb(u)) { if (seenN.has(v) || seenR.has(roomOf(v)) || (blk && blk.has(rkey(u, v))) || !d.has(v) || path.length + 1 + d.get(v) > limit) continue; seenN.add(v); seenR.add(roomOf(v)); path.push(v); dfs(v); path.pop(); seenN.delete(v); seenR.delete(roomOf(v)); if (cut && out.length > 4000) return; } };
+      for (const v of nb(u)) { if (seenN.has(v) || (!repeat && seenR.has(roomOf(v))) || (blk && blk.has(rkey(u, v))) || !d.has(v) || path.length + 1 + d.get(v) > limit) continue; seenN.add(v); seenR.add(roomOf(v)); path.push(v); dfs(v); path.pop(); seenN.delete(v); seenR.delete(roomOf(v)); if (cut && out.length > 4000) return; } };
     dfs(from); if (!out.length) return { fail: 'no simple chain of rooms joins the stake and the final goal (every path repeats a room)' };
     out.sort((p, q) => q.length - p.length || (p.join() < q.join() ? -1 : 1)); const pieces = out[0];
     return { pieces, rooms: pieces.map(roomOf), blocked: blockedList, bridges, cut, unblocked, shortest: p0.length, candidates: out.length, graph: g, mode: g.mode };
