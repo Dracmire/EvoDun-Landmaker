@@ -29,6 +29,8 @@ So that a saved pack reproduces the same picture when it is loaded again. Writte
 
 `dacShow` (optional, DAC mode 2 "Show framing", `docs/ui-modes.md` U11): `all`, `cake`, `ascension` or `diorama`; which framing the whole map shows while `dacAuto` is on. Written only when it is not `all`; absent = `all`; any other value is rejected.
 
+`dacView` (optional, DAC mode 2 "DAC view", `docs/ui-modes.md` U12): `chain` or `whole`; written whenever the viewer is in mode `rooms`. Absent on load = `whole` (a manifest saved before the Chain view); any other value is rejected. `anchors` (optional boolean, off) and `anchorH` (optional number 0.25-2, default 0.5): "Non-walkable as anchors" (D26); written only when on / not the default.
+
 `curves` (optional, 9th field) is the preset of technique C (Tiles to Curves): "ordered" (the default), "balanced" or "natural"; "Save pack.json" writes it only when it is not the default, so a pack saved before technique C is unchanged. A pack may also declare `stageYaw` (see the Stage camera). The wall pass of C adds optional `wallPass` ("t3" default, "t2", "off") and the numbers `wallExtrude` (0.10-0.40, 0.25), `wallStrata` (2-4, 3), `wallColumn` (0.8-2, 1.2), `t2Spacing` (0.6-1.5, 0.9), `t2Rows` (5-10, 6), `t2Group` (0.6-2, 1.0), `t2Jitter` (0-0.6, 0.4); written only when they are not the default.
 
 ### Floors package (crystallizer 5, optional keys of a built-in pack; old packs are unaffected)

@@ -19,6 +19,8 @@
     if (DBG) return [128, 128, 128];
     const K = P.subs, m = S.levelMeta[L];
     if (m.water) return [52, 142, 222]; // pocket water: a level of its own with its own colour
+    if (m.anchor) return [140, 142, 150]; // anchors (D26): a non-walkable tile raised, a lighter neutral grey than the flat ground
+    if (m.grey) return [118, 120, 126]; // chain view (D23): the ground outside the chain rooms, flattened, a neutral grey (no type tint)
     const at = (ter, mi) => { // colour of terrace `ter`, sub-terrace `mi`
       const c = ramp(P.terraces > 1 ? ter / (P.terraces - 1) : 0);
       const lift = 1 + (mi - (K - 1) / 2) * 0.05;
@@ -227,7 +229,8 @@
   function drawAscWall(ctx, cam, S, o, w, st, band) {
     if (PICK && !o.pickWalls) return;
     const low = ascLow(o, cam, w), T = E.roomTypes, hb = band ? band.lo : w.hb, ht = band ? band.hi : w.hb + (low ? T.ASC_LOW : S.ascWalls.height), [x0, x1, y0, y1] = T.ascBox(w);
-    const veiled = !!(o.veil && S.slice && !S.pocket && !S.slice[w.i] && !S.slice[w.j]), side = DBG ? [255, 0, 0] : veiled ? veilMix(STONE) : STONE, top = DBG ? [255, 0, 0] : veiled ? veilMix(STONE_TOP) : STONE_TOP;
+    const veiled = !!(o.veil && S.slice && !S.pocket && !S.slice[w.i] && !S.slice[w.j]); let side = DBG ? [255, 0, 0] : veiled ? veilMix(STONE) : STONE, top = DBG ? [255, 0, 0] : veiled ? veilMix(STONE_TOP) : STONE_TOP;
+    if (!PICK && !DBG && low && o.gateMarks && S.gateBits) { side = side.map((v) => v * 0.55); top = top.map((v) => v * 0.55); } // chain view with the gate markers: the low (cut) stubs are darker than the full walls, so a gate and a cut wall cannot be confused (D25)
     if (PICK) PKC = pcode(0, 0);
     for (const [ax, ay, bx, by, nx, ny] of [[x0, y0, x1, y0, 0, -1], [x1, y0, x1, y1, 1, 0], [x1, y1, x0, y1, 0, 1], [x0, y1, x0, y0, -1, 0]]) { // the sides that face the camera, then the top
       const [rnx, rny] = cam.nrm(nx, ny, (ax + bx) / 2, (ay + by) / 2); if (rny <= 0.001) continue;
@@ -276,16 +279,19 @@
     ctx.restore();
   }
   /* Room borders: a line on every face between two rooms that blocks (orange); an open transition is a gap; the ones the tree uses are green. */
-  const ROOM_COLORS = { 4: 'rgba(255,226,40,0.99)', 1: 'rgba(255,150,40,0.98)', 2: 'rgba(70,232,130,0.98)', 3: 'rgba(40,110,255,0.98)' }; // 3 = the warning outline of an edge-problem region (electric blue, dashed: white is the slice border at the map edge, cyan the passes, pink the route)
-  function roomFaces(list, S, cam, i, b, hh, o) { if (S.pocket && !S.slice[i]) return; let k = S.roomKind[i * 4 + b]; if (o.dioOutline && S.dioBits && (S.dioBits[i] >> b & 1)) k = 4; else if (!k || (k === 3 ? !o.edgeWarn : !o.roomBorders)) return; const x = i % S.W, y = (i / S.W) | 0, f = FACE[b]; list.push([cam.p(x + f[0], y + f[1], hh), cam.p(x + f[2], y + f[3], hh), k]); }
+  const ROOM_COLORS = { 5: 'rgba(255,240,60,1)', 4: 'rgba(255,226,40,0.99)', 1: 'rgba(255,150,40,0.98)', 2: 'rgba(70,232,130,0.98)', 3: 'rgba(40,110,255,0.98)' }; // 3 = the warning outline of an edge-problem region (electric blue, dashed: white is the slice border at the map edge, cyan the passes, pink the route)
+  function roomFaces(list, S, cam, i, b, hh, o) { if (S.pocket && !S.slice[i]) return; let k = S.roomKind[i * 4 + b]; if (o.gateMarks && S.gateBits && (S.gateBits[i] >> b & 1)) k = 5; else if (o.dioOutline && S.dioBits && (S.dioBits[i] >> b & 1)) k = 4; else if (!k || (k === 3 ? !o.edgeWarn : !o.roomBorders)) return; const x = i % S.W, y = (i / S.W) | 0, f = FACE[b]; list.push([cam.p(x + f[0], y + f[1], hh), cam.p(x + f[2], y + f[3], hh), k]); }
+  /* the faces of tile i that carry a line: the room borders (Display toggles) plus the gate markers of the chain view (S.gateBits, Display toggle gateMarks) */
+  const faceBits = (S, o, i, RB) => (((o.roomBorders || o.edgeWarn || o.dioOutline) && RB) ? RB[i] : 0) | ((o.gateMarks && S.gateBits) ? S.gateBits[i] : 0);
   function strokeRoomFaces(ctx, list) {
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     const path = new Path2D(); for (const [p, q] of list) { path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]); }
     ctx.strokeStyle = BORDER_CASE; ctx.lineWidth = 3.4; ctx.stroke(path);
-    for (const kind of [1, 2, 3, 4]) {
+    for (const kind of [1, 2, 3, 4, 5]) {
       const pp = new Path2D(); let any = false;
       for (const [p, q, k] of list) if (k === kind) { pp.moveTo(p[0], p[1]); pp.lineTo(q[0], q[1]); any = true; }
-      if (any) { ctx.strokeStyle = ROOM_COLORS[kind]; ctx.lineWidth = kind === 4 ? 2.6 : 1.8; if (kind === 3) { ctx.lineCap = 'butt'; ctx.setLineDash([3, 2.5]); } ctx.stroke(pp); ctx.setLineDash([]); ctx.lineCap = 'round'; }
+      if (any && kind === 5) { ctx.strokeStyle = BORDER_CASE; ctx.lineWidth = 5.6; ctx.stroke(pp); } // gate markers (D25): a dark casing under a bright, wide line
+      if (any) { ctx.strokeStyle = ROOM_COLORS[kind]; ctx.lineWidth = kind === 5 ? 3.8 : kind === 4 ? 2.6 : 1.8; if (kind === 3) { ctx.lineCap = 'butt'; ctx.setLineDash([3, 2.5]); } ctx.stroke(pp); ctx.setLineDash([]); ctx.lineCap = 'round'; }
     }
     ctx.restore();
   }
@@ -593,10 +599,11 @@
         }
       }
       const RB = o.dioOutline && S.roomBitsDio ? S.roomBitsDio : S.roomBits;
-      if ((o.roomBorders || o.edgeWarn || o.dioOutline) && RB && !PICK && RB[i]) { // each face is drawn once, after the later (painter order) of its two tiles
+      const rbm = PICK ? 0 : faceBits(S, o, i, RB);
+      if (rbm) { // each face is drawn once, after the later (painter order) of its two tiles
         const bp = [];
         for (let b = 0; b < 4; b++) {
-          if (!(RB[i] >> b & 1)) continue;
+          if (!(rbm >> b & 1)) continue;
           const j = (y + dirs[b][1]) * W + x + dirs[b][0]; if (rank[j] > rank[i]) continue;
           roomFaces(bp, S, cam, i, b, Math.max(hh, S.levelH[S.fine[j]]), o);
         }
@@ -738,11 +745,11 @@
         if (bp.length) strokeBorder(ctx, bp);
       }
       const RB = o.dioOutline && S.roomBitsDio ? S.roomBitsDio : S.roomBits;
-      if ((o.roomBorders || o.edgeWarn || o.dioOutline) && RB && !PICK) { // a face belongs to the higher of its two tiles (the lower index when they are level)
+      if (((o.roomBorders || o.edgeWarn || o.dioOutline) && RB || (o.gateMarks && S.gateBits)) && !PICK) { // a face belongs to the higher of its two tiles (the lower index when they are level)
         const bp = [], dd = [[0, -1], [1, 0], [0, 1], [-1, 0]];
         for (const i of S.byLevel[L]) {
-          if (!RB[i]) continue; const x = i % S.W, y = (i / S.W) | 0;
-          for (let b = 0; b < 4; b++) { if (!(RB[i] >> b & 1)) continue; const j = (y + dd[b][1]) * S.W + x + dd[b][0]; if (S.fine[j] > L || (S.fine[j] === L && j < i)) continue; roomFaces(bp, S, cam, i, b, ht, o); }
+          const rbm = faceBits(S, o, i, RB); if (!rbm) continue; const x = i % S.W, y = (i / S.W) | 0;
+          for (let b = 0; b < 4; b++) { if (!(rbm >> b & 1)) continue; const j = (y + dd[b][1]) * S.W + x + dd[b][0]; if (S.fine[j] > L || (S.fine[j] === L && j < i)) continue; roomFaces(bp, S, cam, i, b, ht, o); }
         }
         if (bp.length) strokeRoomFaces(ctx, bp);
       }

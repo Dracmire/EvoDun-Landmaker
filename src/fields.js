@@ -231,7 +231,7 @@
   };
 
   /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
-  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow']; // the optional `viewer` block of the manifest
+  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH']; // the optional `viewer` block of the manifest
   E.VIEWER_MODES = ['terrain', 'rooms', 'stage', 'curves', 'floors', 'macroform']; // the ids of src/modes.js (tools/test_modes.js checks that they agree)
   E.parseManifest = function (json) {
     if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
@@ -260,8 +260,10 @@
       for (const [k, lo, hi] of [['wallExtrude', 0.1, 0.4], ['wallStrata', 2, 4], ['wallColumn', 0.8, 2], ['t2Spacing', 0.6, 1.5], ['t2Rows', 5, 10], ['t2Group', 0.6, 2], ['t2Jitter', 0, 0.6]]) if (v[k] !== undefined && !(typeof v[k] === 'number' && v[k] >= lo && v[k] <= hi)) throw new Error(`Manifest: viewer.${k} must be a number from ${lo} to ${hi}.`);
       if (v.mode !== undefined && !E.VIEWER_MODES.includes(v.mode)) throw new Error('Manifest: viewer.mode must be one of ' + E.VIEWER_MODES.join(', ') + '.');
       if (v.dacShow !== undefined && !['all', 'cake', 'ascension', 'diorama'].includes(v.dacShow)) throw new Error('Manifest: viewer.dacShow must be "all", "cake", "ascension" or "diorama".');
+      if (v.dacView !== undefined && !['chain', 'whole'].includes(v.dacView)) throw new Error('Manifest: viewer.dacView must be "chain" or "whole".');
+      if (v.anchorH !== undefined && !(typeof v.anchorH === 'number' && v.anchorH >= 0.25 && v.anchorH <= 2)) throw new Error('Manifest: viewer.anchorH must be a number from 0.25 to 2.');
       if (v.curves !== undefined && !['ordered', 'balanced', 'natural'].includes(v.curves)) throw new Error('Manifest: viewer.curves must be "ordered", "balanced" or "natural".');
-      for (const k of ['rooms', 'cake', 'dacAuto']) if (v[k] !== undefined && typeof v[k] !== 'boolean') throw new Error(`Manifest: viewer.${k} must be true or false.`);
+      for (const k of ['rooms', 'cake', 'dacAuto', 'anchors']) if (v[k] !== undefined && typeof v[k] !== 'boolean') throw new Error(`Manifest: viewer.${k} must be true or false.`);
       num('terraces', 2, 24); num('roomsMinCore', 5, 250); num('rRadius', 3, 30); num('minPlateau', 1, 300);
       viewer = {}; for (const k of E.VIEWER_KEYS) if (v[k] !== undefined) viewer[k] = v[k];
     }

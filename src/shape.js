@@ -359,6 +359,8 @@
           for (let b = 0; b < 4; b++) { const nx = x + OFF2[b][0], ny = y + OFF2[b][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H || S.roomMap[ny * W + nx] !== r) { db[i] |= 1 << b; bd[i] |= 1 << b; } } }
         S.dioBits = db; S.roomBitsDio = bd;
       }
+      if (P.chainIds && P.chainIds.length && S.roomMap && !pocketIds) { walkGraph(S, P); E.roomTypes.chainFlatten(S, P, RL, P.chainIds, P.chainSeqs); } // CHAIN VIEW (D23): visual only; the walking graph is built first because the pass drops the ramps outside the chain from S.stairs
+      if (P.anchors && S.nowalk && !pocketIds) E.roomTypes.anchors(S, P); // NON-WALKABLE AS ANCHORS (D26): visual only, after the chain flattening (only the chain rooms are raised in the Chain view)
     }
     if (pocketIds) { if (pocketWin) E.pocket.reframe(S, pocketWin); E.pocket.apply(S, P, RL, pocketIds, Object.assign({ ids: seedIds }, pocketOpts(P))); S.pocketYaw = P.pocketYaw === undefined ? E.pocket.defaults.yaw : P.pocketYaw; S.pocketInfo.yaw = S.pocketYaw; } // the pocket of a Diorama: the fragment stays, the surroundings change
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
