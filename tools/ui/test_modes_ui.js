@@ -513,7 +513,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const en2 = await dis('#curvesPreset'), en3 = await dis('#wallPass');
     ok('mode 1, C alone: the C controls are enabled', !en2.d && !en3.d, JSON.stringify([en2, en3]));
     // the freeze state: real map, Compare, Terraces 15, Height spread 2.2 -> the budget skips the wall pass; Off costs nothing; times bounded
-    await page.click('#examples button[data-id="real_map"]'); await a.idle(); await page.click('#mode'); await a.idle();
+    await page.click('#examples button[data-id="real_map"]'); await a.idle(); if ((await ev(() => window.__evo.st.mode)) !== 'compare') { await page.click('#mode'); await a.idle(); }
     await a.slider('terraces', 15); await a.idle();
     const t0 = Date.now(); await a.slider('spread', 2.2); await a.idle(); const ms = Date.now() - t0;
     const fz = await ev(() => { const e = window.__evo; return { skipped: !!e.S().wallSkipped, work: e.S().wallSkipped && Math.round(e.S().wallSkipped.work), budget: e.S().wallSkipped && e.S().wallSkipped.budget, info: document.querySelector('#info').textContent, mode: e.st.mode, n: [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).length }; });
