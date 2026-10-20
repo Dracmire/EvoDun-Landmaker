@@ -16,10 +16,10 @@ Terraces, ramps and the techniques Box, A, B and C on any heightmap: the same da
 | camera (default) | `oblique` |
 | cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic` |
 | technique (default) | `A` |
-| techniques offered | `box`, `A`, `B` |
+| techniques offered | `box`, `A`, `B`, `C` |
 | compare | yes (on at entry) |
-| main controls | `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius` |
-| advanced controls (folded) | `subH`, `minPlateau`, `minSub`, `pre`, `climb`, `gateThr`, `gateMin`, `passGap`, `tread` |
+| main controls | `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |
+| advanced controls (folded) | `subH`, `minPlateau`, `minSub`, `pre`, `climb`, `gateThr`, `gateMin`, `passGap`, `tread`, `wallStrata`, `wallColumn`, `t2Spacing`, `t2Rows`, `t2Group`, `t2Jitter` |
 | slice controls | `zoneChips`, `crop`, `margin` |
 | terrain controls | main (above) |
 | fixed by the mode (hidden) | - |
@@ -44,7 +44,7 @@ Room types (Diorama, Ascension, Cake) on a map with rooms: Cake rings, Ascension
 | main controls | `roomsPreset`, `dacAuto`, `t-cake`, `t-ascWalls`, `ascHeight`, `t-pocket`, `pocketFraming`, `pocketHeight`, `dacShow`, `dacView`, `gateMarks`, `anchors`, `anchorH`, `roomChips`, `typeTint` |
 | advanced controls (folded) | `roomsMinCore`, `rRadius`, `roomsCross`, `roomsIsoLimit`, `cakeLayers`, `cakeStep`, `cakePer`, `cakeSeam`, `roomBorders`, `roomTint`, `nowalk`, `dioOutline` |
 | slice controls | - |
-| terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius` |
+| terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |
 | fixed by the mode (hidden) | `t-rooms` |
 | shared passes | `outlines`, `gradient`, `rampLines`, `dress` |
 | overlays | `features`, `markers`, `zones`, `edges`, `masks`, `veil`, `border` |
@@ -69,7 +69,7 @@ Banner: **IN REDESIGN: frozen as it is; the Stage waits for its own design pass.
 | main controls | `contract` |
 | advanced controls (folded) | - |
 | slice controls | - |
-| terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius` |
+| terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |
 | fixed by the mode (hidden) | - |
 | shared passes | `outlines`, `gradient`, `rampLines`, `dress` |
 | overlays | `features`, `markers`, `zones`, `edges`, `masks`, `veil`, `border` |
@@ -92,7 +92,7 @@ Tiles to curves (technique C, Unexplored 2 style): displaced Voronoi contours an
 | main controls | `curvesPreset`, `wallPass`, `wallExtrude` |
 | advanced controls (folded) | `wallStrata`, `wallColumn`, `t2Spacing`, `t2Rows`, `t2Group`, `t2Jitter` |
 | slice controls | - |
-| terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius` |
+| terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |
 | fixed by the mode (hidden) | - |
 | shared passes | `outlines`, `gradient`, `rampLines`, `dress` |
 | overlays | `features`, `markers`, `zones`, `edges`, `masks`, `veil`, `border` |

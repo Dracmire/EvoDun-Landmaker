@@ -29,8 +29,8 @@
         { id: 'noise', label: 'Value noise', src: 'noise' },
         { id: 'images', label: 'Your images (PNG + roles)', images: true }
       ],
-      camera: 'oblique', cameras: CAMS, tech: 'A', techs: ['box', 'A', 'B'], compare: true, compareDefault: true,
-      main: TERRAIN_MAIN, advanced: ['subH', 'minPlateau', 'minSub', 'pre', 'climb', 'gateThr', 'gateMin', 'passGap', 'tread'], slice: ['zoneChips', 'crop', 'margin'], fixed: [], terrain: 'main',
+      camera: 'oblique', cameras: CAMS, tech: 'A', techs: ['box', 'A', 'B', 'C'], compare: true, compareDefault: true,
+      main: [...TERRAIN_MAIN, 'curvesPreset', 'wallPass', 'wallExtrude'], advanced: ['subH', 'minPlateau', 'minSub', 'pre', 'climb', 'gateThr', 'gateMin', 'passGap', 'tread', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter'], slice: ['zoneChips', 'crop', 'margin'], fixed: [], terrain: 'main',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {

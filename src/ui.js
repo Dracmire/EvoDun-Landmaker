@@ -708,7 +708,7 @@
     return ` · <b>Macroform</b>: ${MACRO_NAMES[st.macro]}${st.macro === 'cut' ? ' at floor ' + st.macroFloor + ' (everything above floor + 2 tiles removed)' : ''} · ${q.top + q.side} faces (${q.cutFaces} section) · VERTICAL SCALE: the volume uses z = elevation x ${V} (1 tile of height = 1 tile of width, PROVISIONAL), the heightmap view (Off) uses ${P.terraces} terraces of ${P.terH} tile: the two are not the same height`;
   }
   function wallText() { // the wall pass of C: mode, band, islands, faces and cost
-    const t = S && shownTechs().includes('C') && P.wallPass !== 'off' ? S.cache['Cw:' + E.curves.key(P) + '|' + E.wallc.key(P)] : null; if (!t) return '';
+    const t = S && shownTechs().includes('C') && P.wallPass !== 'off' ? S.cache[E.wallc.ckey(P)] : null; if (!t || t.skipped) return t && t.skipped ? ` · Wall pass of C skipped: cliffs too tall (work ${Math.round(t.work)} > budget ${Math.round(t.budget)} terrace-units of wall; lower Terraces or Height spread, or set Wall pass to Off)` : '';
     const q = t.stats; return ` · <b>Wall pass</b> (C ${q.mode.toUpperCase()}, extrusion ${P.wallExtrude}): ${q.edges} wall edges` + (q.mode === 't3' ? ` · ${q.band} band atoms · ${q.after.islands} islands (${q.before.islands} before the fusion, ${q.after.slivers} slivers, ${q.after.spans} over ${E.wallc.LMAX} tiles)` : ` · ${q.chains} chains · ${q.blocks} blocks`) + ` · ${q.faces} faces · ${q.ms} ms`;
   }
   function curvesText() { // technique C: preset, passes, seeds, contour edges and exempt cells of the last build

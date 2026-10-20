@@ -297,14 +297,22 @@
   }
 
   /* the wall pass of a shape: { byHi: Map(level -> { faces, tops }), stats } or null when it is off (or the technique has no edges). Cached on S with every wall parameter in the key. */
+  const ckey = (P) => 'Cw:' + E.curves.key(P) + '|' + wkey(P) + (P.wallBudget === undefined ? '' : '|b' + P.wallBudget); // the cache key (the test-only budget is part of it)
   function get(S, P) {
-    if (par(P, 'wallPass') === 'off') return null;
-    const key = 'Cw:' + E.curves.key(P) + '|' + wkey(P); if (S.cache[key]) return S.cache[key];
-    const t0 = Date.now(), st = E.curves.struct(S, P), W = wallEdges(S, P, st), res = par(P, 'wallPass') === 't2' ? buildT2(S, P, W) : buildT3(S, P, W);
+    if (par(P, 'wallPass') === 'off') return null; // Off skips the whole build (edges, atoms, blocks): zero cost
+    const key = ckey(P); if (S.cache[key] !== undefined) { S.wallSkipped = S.cache[key] && S.cache[key].skipped ? S.cache[key] : null; return S.cache[key] && S.cache[key].skipped ? null : S.cache[key]; }
+    const t0 = Date.now(), st = E.curves.struct(S, P), W = wallEdges(S, P, st), work = workOf(S, P, W), budget = P.wallBudget === undefined ? BUDGET : P.wallBudget;
+    if (work > budget) { const sk = { skipped: true, work, budget, edges: W.list.length, hmax: W.hmax / (P.terH || 1) }; S.cache[key] = sk; S.wallSkipped = sk; return null; } // D24: above the work budget the pass is skipped for this build (the info line says so)
+    S.wallSkipped = null;
+    const res = par(P, 'wallPass') === 't2' ? buildT2(S, P, W) : buildT3(S, P, W);
     let nf = 0, nt = 0; for (const v of res.byHi.values()) { nf += v.faces.length; nt += v.tops.length; }
-    res.stats = Object.assign({ mode: par(P, 'wallPass'), edges: W.list.length, faces: nf, tops: nt, ms: Date.now() - t0 }, W.road ? { roadEdges: W.roadEdges } : {}, res.stats); res.W = W;
+    res.stats = Object.assign({ mode: par(P, 'wallPass'), edges: W.list.length, faces: nf, tops: nt, ms: Date.now() - t0, work }, W.road ? { roadEdges: W.roadEdges } : {}, res.stats); res.W = W;
     return (S.cache[key] = res);
   }
-
-  E.wallc = { DEF, KEYS, key: wkey, get, par, BAND, REACH, LMAX, FULLMIN, MIN_JUMP, nearest };
+  /* WORK (D24): the total height of the wall edges in terrace units (sum of H / terH over the edges that get blocks). The time of T3 / T2 grows with it (taller cliffs = more strata, columns and blocks per edge). */
+  function workOf(S, P, W) { const th = P.terH || 1; let w = 0; for (const i of W.list) w += (S.levelH[W.e.hi[i]] - S.levelH[W.e.lo[i]]) / th; return w; }
+  const BUDGET = Infinity; // set from the measurements (docs/crystallizers/04-tiles-to-curves/README.md D24)
+  /* measurement only: the cold cost of the pass for the shape in hand, ignoring the budget */
+  function measure(S, P) { const b = P.wallBudget; P.wallBudget = Infinity; const key = ckey(P); delete S.cache[key]; const t0 = Date.now(), r = get(S, P), ms = Date.now() - t0; P.wallBudget = b; delete S.cache[key]; return { ms, work: r ? r.stats.work : 0, edges: r ? r.stats.edges : 0 }; }
+  E.wallc = { ckey, measure, workOf, DEF, KEYS, key: wkey, get, par, BAND, REACH, LMAX, FULLMIN, MIN_JUMP, nearest };
 })(window.EVO = window.EVO || {});
