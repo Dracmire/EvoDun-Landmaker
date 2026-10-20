@@ -306,13 +306,13 @@
     S.wallSkipped = null;
     const res = par(P, 'wallPass') === 't2' ? buildT2(S, P, W) : buildT3(S, P, W);
     let nf = 0, nt = 0; for (const v of res.byHi.values()) { nf += v.faces.length; nt += v.tops.length; }
-    res.stats = Object.assign({ mode: par(P, 'wallPass'), edges: W.list.length, faces: nf, tops: nt, ms: Date.now() - t0, work }, W.road ? { roadEdges: W.roadEdges } : {}, res.stats); res.W = W;
+    res.stats = Object.assign({ mode: par(P, 'wallPass'), edges: W.list.length, faces: nf, tops: nt, ms: Date.now() - t0 }, W.road ? { roadEdges: W.roadEdges } : {}, res.stats); res.W = W; res.work = work;
     return (S.cache[key] = res);
   }
   /* WORK (D24): the total height of the wall edges in terrace units (sum of H / terH over the edges that get blocks). The time of T3 / T2 grows with it (taller cliffs = more strata, columns and blocks per edge). */
   function workOf(S, P, W) { const th = P.terH || 1; let w = 0; for (const i of W.list) w += (S.levelH[W.e.hi[i]] - S.levelH[W.e.lo[i]]) / th; return w; }
-  const BUDGET = Infinity; // set from the measurements (docs/crystallizers/04-tiles-to-curves/README.md D24)
+  const BUDGET = 36000; // T3 cost is about 0.12-0.2 ms per unit (real map: 5.4 s at 38.6 k, 13.8 s at 69.9 k, 4.1 s at 35.2 k): states of about 5 s or more are skipped (docs/crystallizers/04-tiles-to-curves/README.md D24)
   /* measurement only: the cold cost of the pass for the shape in hand, ignoring the budget */
-  function measure(S, P) { const b = P.wallBudget; P.wallBudget = Infinity; const key = ckey(P); delete S.cache[key]; const t0 = Date.now(), r = get(S, P), ms = Date.now() - t0; P.wallBudget = b; delete S.cache[key]; return { ms, work: r ? r.stats.work : 0, edges: r ? r.stats.edges : 0 }; }
-  E.wallc = { ckey, measure, workOf, DEF, KEYS, key: wkey, get, par, BAND, REACH, LMAX, FULLMIN, MIN_JUMP, nearest };
+  function measure(S, P) { const b = P.wallBudget; P.wallBudget = Infinity; const key = ckey(P); delete S.cache[key]; const t0 = Date.now(), r = get(S, P), ms = Date.now() - t0; P.wallBudget = b; delete S.cache[key]; return { ms, work: r ? r.work : 0, edges: r ? r.stats.edges : 0 }; }
+  E.wallc = { BUDGET, ckey, measure, workOf, DEF, KEYS, key: wkey, get, par, BAND, REACH, LMAX, FULLMIN, MIN_JUMP, nearest };
 })(window.EVO = window.EVO || {});

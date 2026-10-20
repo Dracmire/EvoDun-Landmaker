@@ -82,6 +82,23 @@ const load = (f) => JSON.parse(fs.readFileSync(path.join(__dirname, '../data', f
     // no Pocket: no mask, no extra stat key, and the output equals main's byte for byte (sha1 of stats without ms + faces / tops, measured on main bfdd87d)
     const sha = (w) => { const o = {}; for (const [k, v] of w.byHi) o[k] = v; const st = Object.assign({}, w.stats); delete st.ms; return require('crypto').createHash('sha1').update(JSON.stringify([st, o])).digest('hex').slice(0, 12); };
     for (const [m, h] of [['t3', '0586ad8c4d63'], ['t2', 'eba088f37298']]) { const w = E.wallc.get(S, Object.assign({}, PX, { wallPass: m })); ok(`no Pocket (Shrine-Pier x4, 7 terraces, ${m.toUpperCase()}): no road mask, no roadEdges key, output byte-identical to main (${h})`, w.W.road === null && w.stats.roadEdges === undefined && sha(w) === h, [w.W.road, sha(w)]); } }
+  // D24: the WORK BUDGET of the pass (E.wallc.BUDGET, P.wallBudget test-only): Off skips the whole build; below the budget the output is the unchanged one; above it the pass is skipped for that build and S.wallSkipped says so
+  {
+    const Pb = Object.assign({}, PX, { wallPass: 't3' }), Sb = E.shape(x4(), Pb, null), wref = E.wallc.get(Sb, Pb), shaB = (w) => { const o = {}; for (const [k, v] of w.byHi) o[k] = v; const st = Object.assign({}, w.stats); delete st.ms; return require('crypto').createHash('sha1').update(JSON.stringify([st, o])).digest('hex'); };
+    ok('the default budget is finite and above the work of the shapes of the fixed set (x4 stage, real map 5 terraces)', Number.isFinite(E.wallc.BUDGET) && wref.work < E.wallc.BUDGET, [wref.work, E.wallc.BUDGET]);
+    const Sc = E.shape(x4(), Object.assign({}, Pb, { wallBudget: wref.work + 1 }), null), wcl = E.wallc.get(Sc, Object.assign({}, Pb, { wallBudget: wref.work + 1 }));
+    ok('below the budget the pass is the unchanged one (same faces, tops and stats) and S.wallSkipped is empty', wcl && shaB(wcl) === shaB(wref) && !Sc.wallSkipped);
+    const Pk = Object.assign({}, Pb, { wallBudget: wref.work - 1 }), Sd = E.shape(x4(), Pk, null), wsk = E.wallc.get(Sd, Pk);
+    ok('above the budget the pass is skipped for that build (null) and S.wallSkipped holds the work and the budget', wsk === null && Sd.wallSkipped && Sd.wallSkipped.work > Sd.wallSkipped.budget && Sd.wallSkipped.budget === wref.work - 1, Sd.wallSkipped);
+    ok('the skipped state is cached (a second call is the same answer)', E.wallc.get(Sd, Pk) === null && Sd.wallSkipped && Sd.wallSkipped.work === wref.work);
+    const PkT2 = Object.assign({}, Pk, { wallPass: 't2' }), SdT2 = E.shape(x4(), PkT2, null);
+    ok('T2 is skipped above the budget too (same work measure)', E.wallc.get(SdT2, PkT2) === null && SdT2.wallSkipped);
+    const t0 = Date.now(), PkO = Object.assign({}, Pb, { wallPass: 'off', wallBudget: 0 }); const SdO = E.shape(x4(), PkO, null), t1 = Date.now(); const wo = E.wallc.get(SdO, PkO);
+    ok('Off skips the whole build at zero cost (null, no wall edges computed, no skip record) even with a budget of 0', wo === null && !SdO.wallSkipped && !Object.keys(SdO.cache).some((k) => k.startsWith('Cw:')), Object.keys(SdO.cache));
+    // the freeze state of the UI (real map, terraces 15, spread 2.2): the default budget skips the pass in well under a second after the shape
+    const Pf = Object.assign({}, P0, { terraces: 15, spread: 2.2, wallPass: 't3' }), Sf = E.shape(mk(), Pf, null), tf = Date.now(), wf = E.wallc.get(Sf, Pf), msF = Date.now() - tf;
+    ok(`the freeze state (real map, 15 terraces, spread 2.2, T3): skipped by the default budget in ${msF} ms (work ${Sf.wallSkipped && Math.round(Sf.wallSkipped.work)} > ${E.wallc.BUDGET})`, wf === null && Sf.wallSkipped && msF < 3000, [msF, Sf.wallSkipped]);
+  }
   // the figures of the fusion on the maps (measured, not enforced)
   console.log('\nFUSION FIGURES (T3, Natural, extrude 0.25; islands before -> after the rules, slivers (s < K and area < 0.30), thin (area / border < 0.10; reported for walls of 1.5 terH or more, the metric on H = 1 walls is dominated by the narrow band), tiny full-height islands (s = K and area < FULLMIN = 0.15), islands over LMAX = 3.6 tiles, mean / max span in tiles, rounds, ms):');
   const rows = [['real map 5 terraces', mk, P0], ['real map 7 terraces spread 1.5 middle', mk, Object.assign({}, P0, STAGE)], ['real map 12 terraces', mk, Object.assign({}, P0, { terraces: 12 })], ['Snake surface 5 terraces', snake, P0], ['Snake surface 7 terraces', snake, Object.assign({}, P0, STAGE)], ['Shrine-Pier x4 7 terraces', x4, Object.assign({}, P0, STAGE)]];
