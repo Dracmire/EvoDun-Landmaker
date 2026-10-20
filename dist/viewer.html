@@ -3497,7 +3497,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   /* the wall pass of a shape: { byHi: Map(level -> { faces, tops }), stats } or null when it is off (or the technique has no edges). Cached on S with every wall parameter in the key. */
   const ckey = (P) => 'Cw:' + E.curves.key(P) + '|' + wkey(P) + (P.wallBudget === undefined ? '' : '|b' + P.wallBudget); // the cache key (the test-only budget is part of it)
   function get(S, P) {
-    if (par(P, 'wallPass') === 'off') return null; // Off skips the whole build (edges, atoms, blocks): zero cost
+    if (par(P, 'wallPass') === 'off') { S.wallSkipped = null; return null; } // Off skips the whole build (edges, atoms, blocks): zero cost
     const key = ckey(P); if (S.cache[key] !== undefined) { S.wallSkipped = S.cache[key] && S.cache[key].skipped ? S.cache[key] : null; return S.cache[key] && S.cache[key].skipped ? null : S.cache[key]; }
     const t0 = Date.now(), st = E.curves.struct(S, P), W = wallEdges(S, P, st), work = workOf(S, P, W), budget = P.wallBudget === undefined ? BUDGET : P.wallBudget;
     if (work > budget) { const sk = { skipped: true, work, budget, edges: W.list.length, hmax: W.hmax / (P.terH || 1) }; S.cache[key] = sk; S.wallSkipped = sk; return null; } // D24: above the work budget the pass is skipped for this build (the info line says so)
