@@ -279,19 +279,19 @@
     ctx.restore();
   }
   /* Room borders: a line on every face between two rooms that blocks (orange); an open transition is a gap; the ones the tree uses are green. */
-  const ROOM_COLORS = { 5: 'rgba(255,240,60,1)', 4: 'rgba(255,226,40,0.99)', 1: 'rgba(255,150,40,0.98)', 2: 'rgba(70,232,130,0.98)', 3: 'rgba(40,110,255,0.98)' }; // 3 = the warning outline of an edge-problem region (electric blue, dashed: white is the slice border at the map edge, cyan the passes, pink the route)
-  function roomFaces(list, S, cam, i, b, hh, o) { if (S.pocket && !S.slice[i]) return; let k = S.roomKind[i * 4 + b]; if (o.gateMarks && S.gateBits && (S.gateBits[i] >> b & 1)) k = 5; else if (o.dioOutline && S.dioBits && (S.dioBits[i] >> b & 1)) k = 4; else if (!k || (k === 3 ? !o.edgeWarn : !o.roomBorders)) return; const x = i % S.W, y = (i / S.W) | 0, f = FACE[b]; list.push([cam.p(x + f[0], y + f[1], hh), cam.p(x + f[2], y + f[3], hh), k]); }
+  const ROOM_COLORS = { 5: 'rgba(70,235,255,1)', 6: 'rgba(255,45,45,1)', 4: 'rgba(255,226,40,0.99)', 1: 'rgba(255,150,40,0.98)', 2: 'rgba(70,232,130,0.98)', 3: 'rgba(40,110,255,0.98)' }; // 3 = the warning outline of an edge-problem region (electric blue, dashed: white is the slice border at the map edge, cyan the passes, pink the route)
+  function roomFaces(list, S, cam, i, b, hh, o) { if (S.pocket && !S.slice[i]) return; let k = S.roomKind[i * 4 + b]; if (o.gateMarks && S.blockBits && (S.blockBits[i] >> b & 1)) k = 6; else if (o.gateMarks && S.gateBits && (S.gateBits[i] >> b & 1)) k = 5; else if (o.dioOutline && S.dioBits && (S.dioBits[i] >> b & 1)) k = 4; else if (!k || (k === 3 ? !o.edgeWarn : !o.roomBorders)) return; const x = i % S.W, y = (i / S.W) | 0, f = FACE[b]; list.push([cam.p(x + f[0], y + f[1], hh), cam.p(x + f[2], y + f[3], hh), k]); }
   /* the faces of tile i that carry a line: the room borders (Display toggles) plus the gate markers of the chain view (S.gateBits, Display toggle gateMarks) */
-  const faceBits = (S, o, i, RB) => (((o.roomBorders || o.edgeWarn || o.dioOutline) && RB) ? RB[i] : 0) | ((o.gateMarks && S.gateBits) ? S.gateBits[i] : 0);
+  const faceBits = (S, o, i, RB) => (((o.roomBorders || o.edgeWarn || o.dioOutline) && RB) ? RB[i] : 0) | ((o.gateMarks && S.gateBits) ? S.gateBits[i] : 0) | ((o.gateMarks && S.blockBits) ? S.blockBits[i] : 0);
   function strokeRoomFaces(ctx, list) {
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     const path = new Path2D(); for (const [p, q] of list) { path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]); }
     ctx.strokeStyle = BORDER_CASE; ctx.lineWidth = 3.4; ctx.stroke(path);
-    for (const kind of [1, 2, 3, 4, 5]) {
+    for (const kind of [1, 2, 3, 4, 5, 6]) {
       const pp = new Path2D(); let any = false;
       for (const [p, q, k] of list) if (k === kind) { pp.moveTo(p[0], p[1]); pp.lineTo(q[0], q[1]); any = true; }
-      if (any && kind === 5) { ctx.strokeStyle = BORDER_CASE; ctx.lineWidth = 5.6; ctx.stroke(pp); } // gate markers (D25): a dark casing under a bright, wide line
-      if (any) { ctx.strokeStyle = ROOM_COLORS[kind]; ctx.lineWidth = kind === 5 ? 3.8 : kind === 4 ? 2.6 : 1.8; if (kind === 3) { ctx.lineCap = 'butt'; ctx.setLineDash([3, 2.5]); } ctx.stroke(pp); ctx.setLineDash([]); ctx.lineCap = 'round'; }
+      if (any && (kind === 5 || kind === 6)) { ctx.strokeStyle = BORDER_CASE; ctx.lineWidth = 5.6; ctx.stroke(pp); } // gate markers (D25): a dark casing under a bright, wide line
+      if (any) { ctx.strokeStyle = ROOM_COLORS[kind]; ctx.lineWidth = kind >= 5 ? 3.8 : kind === 4 ? 2.6 : 1.8; if (kind === 3) { ctx.lineCap = 'butt'; ctx.setLineDash([3, 2.5]); } ctx.stroke(pp); ctx.setLineDash([]); ctx.lineCap = 'round'; }
     }
     ctx.restore();
   }
@@ -745,7 +745,7 @@
         if (bp.length) strokeBorder(ctx, bp);
       }
       const RB = o.dioOutline && S.roomBitsDio ? S.roomBitsDio : S.roomBits;
-      if (((o.roomBorders || o.edgeWarn || o.dioOutline) && RB || (o.gateMarks && S.gateBits)) && !PICK) { // a face belongs to the higher of its two tiles (the lower index when they are level)
+      if (((o.roomBorders || o.edgeWarn || o.dioOutline) && RB || (o.gateMarks && (S.gateBits || S.blockBits))) && !PICK) { // a face belongs to the higher of its two tiles (the lower index when they are level)
         const bp = [], dd = [[0, -1], [1, 0], [0, 1], [-1, 0]];
         for (const i of S.byLevel[L]) {
           const rbm = faceBits(S, o, i, RB); if (!rbm) continue; const x = i % S.W, y = (i / S.W) | 0;

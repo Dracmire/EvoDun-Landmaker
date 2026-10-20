@@ -231,7 +231,7 @@
   };
 
   /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
-  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH']; // the optional `viewer` block of the manifest
+  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH', 'chainExtra', 'roomRule', 'cakeCut']; // the optional `viewer` block of the manifest
   E.VIEWER_MODES = ['terrain', 'rooms', 'stage', 'curves', 'floors', 'macroform']; // the ids of src/modes.js (tools/test_modes.js checks that they agree)
   E.parseManifest = function (json) {
     if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
@@ -262,6 +262,9 @@
       if (v.dacShow !== undefined && !['all', 'cake', 'ascension', 'diorama'].includes(v.dacShow)) throw new Error('Manifest: viewer.dacShow must be "all", "cake", "ascension" or "diorama".');
       if (v.dacView !== undefined && !['chain', 'whole'].includes(v.dacView)) throw new Error('Manifest: viewer.dacView must be "chain" or "whole".');
       if (v.anchorH !== undefined && !(typeof v.anchorH === 'number' && v.anchorH >= 0.25 && v.anchorH <= 2)) throw new Error('Manifest: viewer.anchorH must be a number from 0.25 to 2.');
+      if (v.roomRule !== undefined && !['v164', 'route'].includes(v.roomRule)) throw new Error('Manifest: viewer.roomRule must be "v164" or "route".');
+      if (v.cakeCut !== undefined && !['off', 'quadrant', 'half'].includes(v.cakeCut)) throw new Error('Manifest: viewer.cakeCut must be "off", "quadrant" or "half".');
+      if (v.chainExtra !== undefined && !(Number.isInteger(v.chainExtra) && v.chainExtra >= 0 && v.chainExtra <= 8)) throw new Error('Manifest: viewer.chainExtra must be an integer from 0 to 8.');
       if (v.curves !== undefined && !['ordered', 'balanced', 'natural'].includes(v.curves)) throw new Error('Manifest: viewer.curves must be "ordered", "balanced" or "natural".');
       for (const k of ['rooms', 'cake', 'dacAuto', 'anchors']) if (v[k] !== undefined && typeof v[k] !== 'boolean') throw new Error(`Manifest: viewer.${k} must be true or false.`);
       num('terraces', 2, 24); num('roomsMinCore', 5, 250); num('rRadius', 3, 30); num('minPlateau', 1, 300);
