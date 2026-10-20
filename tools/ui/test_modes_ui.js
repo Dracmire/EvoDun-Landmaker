@@ -491,5 +491,45 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     await toggle('#t-anchors');
   }
 
+  // ---- UI fix (U14): technique C in mode 1 (Terrain) + the wall-pass work budget (D24)
+  {
+    await ev(() => window.__evo.setMode('terrain')); await a.idle();
+    const vis = (sel) => ev((sel) => { const el = document.querySelector(sel); return !!el && !el.closest('.mh') && !el.closest('[hidden]') && el.offsetParent !== null; }, sel);
+    const dis = (sel) => ev((sel) => { const el = document.querySelector(sel); return el ? { d: !!el.disabled, t: el.title || (el.closest('label') || {}).title || '' } : null; }, sel);
+    const bar = await ev(() => [...document.querySelectorAll('#techs button')].filter((b) => !b.closest('.mh') && !b.hidden && b.offsetParent !== null).map((b) => b.dataset.id));
+    ok('mode 1: the bar offers Box, A, B and C (the Compare grid has four panels)', bar.join() === 'box,A,B,C', bar.join());
+    const st0 = await ev(() => ({ tech: window.__evo.st.tech, mode: window.__evo.st.mode }));
+    ok('mode 1: the default technique stays A and Compare stays on at entry', st0.tech === 'A' && st0.mode === 'compare', JSON.stringify(st0));
+    for (const id of ['#curvesPreset', '#wallPass', '#s-wallExtrude']) ok(`mode 1: C's main control ${id} is visible`, await vis(id));
+    for (const id of ['#s-wallStrata', '#s-wallColumn', '#s-t2Spacing']) ok(`mode 1: C's advanced control ${id} is folded (not visible)`, !(await vis(id)));
+    // Compare shows C: the controls are enabled; one click on A (single): greyed with "Requires: ... technique C"; one click on C: enabled and ONE canvas
+    const en1 = await dis('#curvesPreset'); ok('mode 1 Compare: Curves preset is enabled (C is on screen)', en1 && !en1.d, JSON.stringify(en1));
+    await page.click('#techs button[data-id="A"]'); await a.idle();
+    const g = await dis('#curvesPreset'), gw = await dis('#wallPass');
+    ok('mode 1, A alone: the C controls are greyed with "Requires: ... technique C"', g.d && /Requires:.*C/.test(g.t) && gw.d && /Requires:.*C/.test(gw.t), JSON.stringify([g, gw]));
+    await page.click('#techs button[data-id="C"]'); await a.idle();
+    const one = await ev(() => ({ n: [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).length, tech: window.__evo.st.tech, mode: window.__evo.st.mode, lbl: [...document.querySelectorAll('#stage figure:not([hidden]) figcaption, #stage figure:not([hidden]) .lab')].map((x) => x.textContent).join('|') }));
+    ok('mode 1: clicking C draws C alone (one panel, single view)', one.n === 1 && one.tech === 'C' && one.mode === 'single', JSON.stringify(one));
+    const en2 = await dis('#curvesPreset'), en3 = await dis('#wallPass');
+    ok('mode 1, C alone: the C controls are enabled', !en2.d && !en3.d, JSON.stringify([en2, en3]));
+    // the freeze state: real map, Compare, Terraces 15, Height spread 2.2 -> the budget skips the wall pass; Off costs nothing; times bounded
+    await page.click('#examples button[data-id="real_map"]'); await a.idle(); if ((await ev(() => window.__evo.st.mode)) !== 'compare') { await page.click('#mode'); await a.idle(); }
+    await a.slider('terraces', 15); await a.idle();
+    const t0 = Date.now(); await a.slider('spread', 2.2); await a.idle(); const ms = Date.now() - t0;
+    const fz = await ev(() => { const e = window.__evo; return { skipped: !!e.S().wallSkipped, work: e.S().wallSkipped && Math.round(e.S().wallSkipped.work), budget: e.S().wallSkipped && e.S().wallSkipped.budget, info: document.querySelector('#info').textContent, mode: e.st.mode, n: [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).length }; });
+    ok(`freeze state (Compare, real map, 15 terraces, spread 2.2): the wall pass is skipped (S.wallSkipped, work ${fz.work} > ${fz.budget}); Compare is ready in ${ms} ms (MEASURED, no bound: about 16 s of it is B with 44 levels, a pre-existing cost, limitation 21)`, fz.skipped && fz.mode === 'compare' && fz.n === 4, JSON.stringify({ ms, skipped: fz.skipped, work: fz.work, mode: fz.mode, n: fz.n }));
+    ok('freeze state: the info line says the wall pass of C was skipped and why', /Wall pass of C skipped: cliffs too tall/.test(fz.info), fz.info.slice(-260));
+    // C alone (no B): the state this PR controls; time bound 10 s
+    const t1 = Date.now(); await page.click('#techs button[data-id="C"]'); await a.idle(); const msC = Date.now() - t1;
+    const cs = await ev(() => ({ skipped: !!window.__evo.S().wallSkipped, info: document.querySelector('#info').textContent, n: [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).length }));
+    ok(`freeze state, C alone: ready in ${msC} ms (bound 10000 ms), wall pass skipped (S.wallSkipped) and the info line says so`, msC < 10000 && cs.n === 1 && cs.skipped && /Wall pass of C skipped/.test(cs.info), JSON.stringify({ msC, n: cs.n, skipped: cs.skipped }));
+    await page.selectOption('#wallPass', 'off'); const t2 = Date.now(); await a.idle(); const msOff = Date.now() - t2;
+    const off = await ev(() => ({ skipped: !!window.__evo.S().wallSkipped, info: document.querySelector('#info').textContent }));
+    ok(`freeze state, C alone with Wall pass Off: nothing is skipped or reported (Off skips the whole build), ready in ${msOff} ms (bound 10000 ms)`, !off.skipped && !/Wall pass of C skipped/.test(off.info) && msOff < 10000, JSON.stringify({ msOff, skipped: off.skipped }));
+    await page.selectOption('#wallPass', 't3'); await a.slider('terraces', 5); await a.idle(); await a.slider('spread', 1); await a.idle();
+    const back = await ev(() => ({ skipped: !!window.__evo.S().wallSkipped, info: document.querySelector('#info').textContent }));
+    ok('back under the budget (5 terraces, spread 1, T3): the wall pass is built again and the skip note is gone', !back.skipped && !/Wall pass of C skipped/.test(back.info) && /Wall pass/.test(back.info), back.info.slice(-200));
+  }
+
   console.log('errors:', a.errs); ok('no page errors', a.errs.length === 0); await a.browser.close();
 })();

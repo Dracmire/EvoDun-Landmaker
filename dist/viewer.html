@@ -3495,16 +3495,24 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
 
   /* the wall pass of a shape: { byHi: Map(level -> { faces, tops }), stats } or null when it is off (or the technique has no edges). Cached on S with every wall parameter in the key. */
+  const ckey = (P) => 'Cw:' + E.curves.key(P) + '|' + wkey(P) + (P.wallBudget === undefined ? '' : '|b' + P.wallBudget); // the cache key (the test-only budget is part of it)
   function get(S, P) {
-    if (par(P, 'wallPass') === 'off') return null;
-    const key = 'Cw:' + E.curves.key(P) + '|' + wkey(P); if (S.cache[key]) return S.cache[key];
-    const t0 = Date.now(), st = E.curves.struct(S, P), W = wallEdges(S, P, st), res = par(P, 'wallPass') === 't2' ? buildT2(S, P, W) : buildT3(S, P, W);
+    if (par(P, 'wallPass') === 'off') { S.wallSkipped = null; return null; } // Off skips the whole build (edges, atoms, blocks): zero cost
+    const key = ckey(P); if (S.cache[key] !== undefined) { S.wallSkipped = S.cache[key] && S.cache[key].skipped ? S.cache[key] : null; return S.cache[key] && S.cache[key].skipped ? null : S.cache[key]; }
+    const t0 = Date.now(), st = E.curves.struct(S, P), W = wallEdges(S, P, st), work = workOf(S, P, W), budget = P.wallBudget === undefined ? BUDGET : P.wallBudget;
+    if (work > budget) { const sk = { skipped: true, work, budget, edges: W.list.length, hmax: W.hmax / (P.terH || 1) }; S.cache[key] = sk; S.wallSkipped = sk; return null; } // D24: above the work budget the pass is skipped for this build (the info line says so)
+    S.wallSkipped = null;
+    const res = par(P, 'wallPass') === 't2' ? buildT2(S, P, W) : buildT3(S, P, W);
     let nf = 0, nt = 0; for (const v of res.byHi.values()) { nf += v.faces.length; nt += v.tops.length; }
-    res.stats = Object.assign({ mode: par(P, 'wallPass'), edges: W.list.length, faces: nf, tops: nt, ms: Date.now() - t0 }, W.road ? { roadEdges: W.roadEdges } : {}, res.stats); res.W = W;
+    res.stats = Object.assign({ mode: par(P, 'wallPass'), edges: W.list.length, faces: nf, tops: nt, ms: Date.now() - t0 }, W.road ? { roadEdges: W.roadEdges } : {}, res.stats); res.W = W; res.work = work;
     return (S.cache[key] = res);
   }
-
-  E.wallc = { DEF, KEYS, key: wkey, get, par, BAND, REACH, LMAX, FULLMIN, MIN_JUMP, nearest };
+  /* WORK (D24): the total height of the wall edges in terrace units (sum of H / terH over the edges that get blocks). The time of T3 / T2 grows with it (taller cliffs = more strata, columns and blocks per edge). */
+  function workOf(S, P, W) { const th = P.terH || 1; let w = 0; for (const i of W.list) w += (S.levelH[W.e.hi[i]] - S.levelH[W.e.lo[i]]) / th; return w; }
+  const BUDGET = 36000; // T3 cost is about 0.12-0.2 ms per unit (real map: 5.4 s at 38.6 k, 13.8 s at 69.9 k, 4.1 s at 35.2 k): states of about 5 s or more are skipped (docs/crystallizers/04-tiles-to-curves/README.md D24)
+  /* measurement only: the cold cost of the pass for the shape in hand, ignoring the budget */
+  function measure(S, P) { const b = P.wallBudget; P.wallBudget = Infinity; const key = ckey(P); delete S.cache[key]; const t0 = Date.now(), r = get(S, P), ms = Date.now() - t0; P.wallBudget = b; delete S.cache[key]; return { ms, work: r ? r.work : 0, edges: r ? r.stats.edges : 0 }; }
+  E.wallc = { BUDGET, ckey, measure, workOf, DEF, KEYS, key: wkey, get, par, BAND, REACH, LMAX, FULLMIN, MIN_JUMP, nearest };
 })(window.EVO = window.EVO || {});
 
 /* Orthographic painter renderer shared by all techniques (same style pass for every technique). */
@@ -5160,8 +5168,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         { id: 'noise', label: 'Value noise', src: 'noise' },
         { id: 'images', label: 'Your images (PNG + roles)', images: true }
       ],
-      camera: 'oblique', cameras: CAMS, tech: 'A', techs: ['box', 'A', 'B'], compare: true, compareDefault: true,
-      main: TERRAIN_MAIN, advanced: ['subH', 'minPlateau', 'minSub', 'pre', 'climb', 'gateThr', 'gateMin', 'passGap', 'tread'], slice: ['zoneChips', 'crop', 'margin'], fixed: [], terrain: 'main',
+      camera: 'oblique', cameras: CAMS, tech: 'A', techs: ['box', 'A', 'B', 'C'], compare: true, compareDefault: true,
+      main: [...TERRAIN_MAIN, 'curvesPreset', 'wallPass', 'wallExtrude'], advanced: ['subH', 'minPlateau', 'minSub', 'pre', 'climb', 'gateThr', 'gateMin', 'passGap', 'tread', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter'], slice: ['zoneChips', 'crop', 'margin'], fixed: [], terrain: 'main',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {
@@ -6037,7 +6045,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     return ` · <b>Macroform</b>: ${MACRO_NAMES[st.macro]}${st.macro === 'cut' ? ' at floor ' + st.macroFloor + ' (everything above floor + 2 tiles removed)' : ''} · ${q.top + q.side} faces (${q.cutFaces} section) · VERTICAL SCALE: the volume uses z = elevation x ${V} (1 tile of height = 1 tile of width, PROVISIONAL), the heightmap view (Off) uses ${P.terraces} terraces of ${P.terH} tile: the two are not the same height`;
   }
   function wallText() { // the wall pass of C: mode, band, islands, faces and cost
-    const t = S && shownTechs().includes('C') && P.wallPass !== 'off' ? S.cache['Cw:' + E.curves.key(P) + '|' + E.wallc.key(P)] : null; if (!t) return '';
+    const t = S && shownTechs().includes('C') && P.wallPass !== 'off' ? S.cache[E.wallc.ckey(P)] : null; if (!t || t.skipped) return t && t.skipped ? ` · Wall pass of C skipped: cliffs too tall (work ${Math.round(t.work)} > budget ${Math.round(t.budget)} terrace-units of wall; lower Terraces or Height spread, or set Wall pass to Off)` : '';
     const q = t.stats; return ` · <b>Wall pass</b> (C ${q.mode.toUpperCase()}, extrusion ${P.wallExtrude}): ${q.edges} wall edges` + (q.mode === 't3' ? ` · ${q.band} band atoms · ${q.after.islands} islands (${q.before.islands} before the fusion, ${q.after.slivers} slivers, ${q.after.spans} over ${E.wallc.LMAX} tiles)` : ` · ${q.chains} chains · ${q.blocks} blocks`) + ` · ${q.faces} faces · ${q.ms} ms`;
   }
   function curvesText() { // technique C: preset, passes, seeds, contour edges and exempt cells of the last build
