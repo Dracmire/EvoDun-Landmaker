@@ -884,6 +884,7 @@
     };
     return (S._walk = neighbors);
   }
+  E.walkGraph = walkGraph; // the neighbours function of the walking graph (the room pieces of the DAC chain read it)
   /* Shortest route (fewest tiles) from tile a to tile b over the walking graph, or null. Tiles are window indices. */
   E.route = function (S, P, a, b) {
     if (a === b) return [a];

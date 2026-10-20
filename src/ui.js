@@ -267,13 +267,13 @@
   /* CHAIN VIEW (D23): on in mode 2 with the selector on Chain, the whole map (no room chosen) and the rooms layer on */
   const dacChainOn = () => !NO_MODES && st.modeId === 'rooms' && st.dacView === 'chain' && !!P.rooms && !sliceSel.rooms.size;
   const rlIds = new WeakMap(); let rlSeq = 0;
-  function chainGoals() { // the rooms of the stake and of the objectives in placement order (the last one is the final goal), or null
-    if (!S || !S.roomMap || !inc.stake) return null; const roomAt = (m) => { const x = m.x - S.ox, y = m.y - S.oy; return x < 0 || y < 0 || x >= S.W || y >= S.H ? 0 : S.roomMap[y * S.W + x]; };
-    const gs = [roomAt(inc.stake), ...inc.objectives.map(roomAt)]; return gs.length < 2 || gs.some((r) => !(r > 0)) ? null : gs;
+  function chainGoals() { // the stake tile and the FINAL goal tile (the last objective placed) as window indices: the other objectives are not intermediate goals (user, 2026-10-20); null without both on room terrain
+    if (!S || !S.roomMap || !inc.stake || !inc.objectives.length) return null; const at = (m) => { const x = m.x - S.ox, y = m.y - S.oy; return x < 0 || y < 0 || x >= S.W || y >= S.H ? -1 : y * S.W + x; };
+    const a = at(inc.stake), g = at(inc.objectives[inc.objectives.length - 1]); return a < 0 || g < 0 || !(S.roomMap[a] > 0) || !(S.roomMap[g] > 0) ? null : { stake: a, goal: g };
   }
-  function chainSig() { // what the chain depends on: the goal rooms, N, the type rule, the rooms layer and the ramp parameters (the room graph is read from the WHOLE shape: a rebuilt chain shape is flattened and cannot be read again)
-    const gs = chainGoals(); if (!gs || !S.rooms) return ''; 
-    return [gs.join('>'), P.chainExtra, st.roomRule, st.pack, P.roomsMinCore, P.rRadius, P.minPlateau, P.roomsCross, P.terraces, P.stairW, P.rampDepth, P.stairStyle].join('|');
+  function chainSig() { // what the chain depends on: the stake and the final goal, N, the type rule, the rooms layer and the ramp parameters (the graph is read from the WHOLE shape: a rebuilt chain shape is flattened and cannot be read again)
+    const gs = chainGoals(); if (!gs || !S.rooms) return '';
+    return [gs.stake, gs.goal, P.chainExtra, P.chainNodes || '', st.roomRule, st.pack, P.roomsMinCore, P.rRadius, P.minPlateau, P.roomsCross, P.terraces, P.stairW, P.rampDepth, P.stairStyle].join('|');
   }
   const ROUTE_CAP = 30, ROUTE_KEEP = 10;
   const roomsView = () => !NO_MODES && st.modeId === 'rooms' && !!(S && S.roomMap && S.types);
@@ -609,11 +609,11 @@
         if (P.chainIds || S.chain) { P.chainIds = null; P.chainSeqs = null; P.chainTypes = null; P.chainBlocked = null; P.chainInfo = null; P.chainKey = ''; P.chainFail = ''; invalidate(true); return; } // the shape in hand is flattened: back to the whole one first
         P.chainKey = sig; P.chainFail = '';
         if (sig) {
-          const res = E.roomTypes.roomChain(S, P, chainGoals());
+          const gl = chainGoals(), res = E.roomTypes.roomChain(S, P, gl.stake, gl.goal, P.chainNodes === 'room' ? 'room' : undefined);
           if (res.fail) P.chainFail = res.fail;
           else {
-            const tile = (m) => (m.y - S.oy) * S.W + (m.x - S.ox), tp = E.roomTypes.chainTypes(S, P, res, st.roomRule, tile(inc.stake), tile(inc.objectives[inc.objectives.length - 1]));
-            P.chainIds = [...res.rooms].sort((a, b) => a - b); P.chainSeqs = [res.rooms]; P.chainBlocked = res.blocked; P.chainTypes = tp.map; P.chainInfo = { rooms: res.rooms, blocked: res.blocked.length, bridges: res.bridges, cut: res.cut, unblocked: res.unblockedLegs.length, shortest: res.shortest, legs: res.legs.map((l) => l.length), counts: tp.counts, v164: tp.v164, route: tp.route, relabeled: tp.relabeled, rule: st.roomRule };
+            const tp = E.roomTypes.chainTypes(S, P, res, st.roomRule, gl.stake, gl.goal), wk = E.roomTypes.chainWalk(S, P, res, gl.stake, gl.goal);
+            P.chainIds = [...new Set(res.rooms)].sort((a, b) => a - b); P.chainSeqs = [res.pieces]; P.chainBlocked = res.blocked; P.chainTypes = tp.map; P.chainInfo = { rooms: res.rooms, pieces: res.pieces.length, blocked: res.blocked.length, bridges: res.bridges, cut: res.cut, unblocked: res.unblocked, shortest: res.shortest, counts: tp.counts, v164: tp.v164, route: tp.route, relabeled: tp.relabeled, rule: st.roomRule, walkOk: wk.ok, walkLen: wk.length };
             invalidate(true); return;
           }
         }
@@ -763,7 +763,7 @@
   }
   function chainText() {
     const c = S.chain, ci = P.chainInfo, f = (o) => `${o.Cake} Cake / ${o.Asc} Asc / ${o.Dio} Dio`, land = c.kept + c.tiles, T = E.roomTypes;
-    return `Chain of ${ci.rooms.length} rooms (${f(ci.counts)}; rule ${ci.rule === 'route' ? 'Along the route' : 'V16.4'}: V16.4 gives ${f(ci.v164)}, Along the route ${f(ci.route)}${ci.relabeled ? `; ${ci.relabeled} second Diorama shown as Ascension` : ''}), legs ${ci.legs.join(' + ')} rooms (shortest to the final goal ${ci.shortest}), N ${P.chainExtra}${ci.cut ? ', the search bound cut it' : ''}, ${ci.blocked} edges blocked (${ci.bridges} bridges skipped${ci.unblocked ? `, ${ci.unblocked} legs unblocked` : ''}; the tile route may still cross a blocked edge), ${(100 * c.kept / land).toFixed(1)} % of the land kept, ${c.tiles} tiles flattened, ${c.gateFaces} gate faces, ${c.blockedFaces || 0} blocked faces` + (c.chainRingTiles ? `, ${c.chainRingTiles} ring tiles of the chain Cakes (${c.ringOutside} outside the chain rooms, kept)` : '') + (c.stairsDropped ? `, ${c.stairsDropped} ramps outside the chain not drawn` : '');
+    return `Chain of ${ci.rooms.length} rooms (${f(ci.counts)}; rule ${ci.rule === 'route' ? 'Along the route' : 'V16.4'}: V16.4 gives ${f(ci.v164)}, Along the route ${f(ci.route)}${ci.relabeled ? `; ${ci.relabeled} second Diorama shown as Ascension` : ''}), stake to the final goal only (shortest ${ci.shortest} pieces, chain ${ci.pieces} pieces), N ${P.chainExtra}${ci.cut ? ', the search bound cut it' : ''}, ${ci.blocked} edges blocked (${ci.bridges} bridges skipped${ci.unblocked ? ', unblocked: no path without them' : ''}; chain walkable with its own tiles and no blocked edge: ${ci.walkOk ? 'yes, ' + ci.walkLen + ' tiles' : 'NO'}; the tile route of the info may still cross a blocked edge), ${(100 * c.kept / land).toFixed(1)} % of the land kept, ${c.tiles} tiles flattened, ${c.gateFaces} gate faces, ${c.blockedFaces || 0} blocked faces` + (c.chainRingTiles ? `, ${c.chainRingTiles} ring tiles of the chain Cakes (${c.ringOutside} outside the chain rooms, kept)` : '') + (c.stairsDropped ? `, ${c.stairsDropped} ramps outside the chain not drawn` : '');
   }
   /* the live state the control requirements are evaluated from (src/controls.js): after every recompute / redraw */
   function controlsCtx() {
