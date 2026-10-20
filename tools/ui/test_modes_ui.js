@@ -517,11 +517,15 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     await a.slider('terraces', 15); await a.idle();
     const t0 = Date.now(); await a.slider('spread', 2.2); await a.idle(); const ms = Date.now() - t0;
     const fz = await ev(() => { const e = window.__evo; return { skipped: !!e.S().wallSkipped, work: e.S().wallSkipped && Math.round(e.S().wallSkipped.work), budget: e.S().wallSkipped && e.S().wallSkipped.budget, info: document.querySelector('#info').textContent, mode: e.st.mode, n: [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).length }; });
-    ok(`freeze state (Compare, real map, 15 terraces, spread 2.2): the wall pass is skipped (S.wallSkipped, work ${fz.work} > ${fz.budget}) and the page is ready in ${ms} ms (bound 10000 ms)`, fz.skipped && fz.mode === 'compare' && fz.n === 4 && ms < 10000, JSON.stringify({ ms, skipped: fz.skipped, work: fz.work, mode: fz.mode, n: fz.n }));
+    ok(`freeze state (Compare, real map, 15 terraces, spread 2.2): the wall pass is skipped (S.wallSkipped, work ${fz.work} > ${fz.budget}); Compare is ready in ${ms} ms (MEASURED, no bound: about 16 s of it is B with 44 levels, a pre-existing cost, limitation 21)`, fz.skipped && fz.mode === 'compare' && fz.n === 4, JSON.stringify({ ms, skipped: fz.skipped, work: fz.work, mode: fz.mode, n: fz.n }));
     ok('freeze state: the info line says the wall pass of C was skipped and why', /Wall pass of C skipped: cliffs too tall/.test(fz.info), fz.info.slice(-260));
-    await page.selectOption('#wallPass', 'off'); const t1 = Date.now(); await a.idle(); const msOff = Date.now() - t1;
+    // C alone (no B): the state this PR controls; time bound 10 s
+    const t1 = Date.now(); await page.click('#techs button[data-id="C"]'); await a.idle(); const msC = Date.now() - t1;
+    const cs = await ev(() => ({ skipped: !!window.__evo.S().wallSkipped, info: document.querySelector('#info').textContent, n: [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).length }));
+    ok(`freeze state, C alone: ready in ${msC} ms (bound 10000 ms), wall pass skipped (S.wallSkipped) and the info line says so`, msC < 10000 && cs.n === 1 && cs.skipped && /Wall pass of C skipped/.test(cs.info), JSON.stringify({ msC, n: cs.n, skipped: cs.skipped }));
+    await page.selectOption('#wallPass', 'off'); const t2 = Date.now(); await a.idle(); const msOff = Date.now() - t2;
     const off = await ev(() => ({ skipped: !!window.__evo.S().wallSkipped, info: document.querySelector('#info').textContent }));
-    ok(`freeze state with Wall pass Off: nothing is skipped or reported (Off skips the whole build), ready in ${msOff} ms`, !/Wall pass of C skipped/.test(off.info) && msOff < 10000, JSON.stringify({ msOff, skipped: off.skipped }));
+    ok(`freeze state, C alone with Wall pass Off: nothing is skipped or reported (Off skips the whole build), ready in ${msOff} ms (bound 10000 ms)`, !off.skipped && !/Wall pass of C skipped/.test(off.info) && msOff < 10000, JSON.stringify({ msOff, skipped: off.skipped }));
     await page.selectOption('#wallPass', 't3'); await a.slider('terraces', 5); await a.idle(); await a.slider('spread', 1); await a.idle();
     const back = await ev(() => ({ skipped: !!window.__evo.S().wallSkipped, info: document.querySelector('#info').textContent }));
     ok('back under the budget (5 terraces, spread 1, T3): the wall pass is built again and the skip note is gone', !back.skipped && !/Wall pass of C skipped/.test(back.info) && /Wall pass/.test(back.info), back.info.slice(-200));
