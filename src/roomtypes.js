@@ -291,12 +291,18 @@
     for (let k = 0; k + 1 < p0.length; k++) { const a = p0[k], b = p0[k + 1], one = new Set([rkey(a, b)]); if (!bfs(a, b, one)) { bridges++; continue; } blocked.add(rkey(a, b)); blockedList.push([a, b]); }
     const dists = (t, blk) => { const d = new Map([[t, 0]]), q = [t]; for (let h = 0; h < q.length; h++) { const u = q[h]; for (const v of nb(u)) { if (d.has(v) || (blk && blk.has(rkey(u, v)))) continue; d.set(v, d.get(u) + 1); q.push(v); } } return d; };
     let blk = blocked, unblocked = false, d = dists(to, blk); if (!d.has(from)) { blk = null; unblocked = true; d = dists(to, null); }
-    const repeat = P.chainRoomRepeat === true, /* P.chainRoomRepeat: diagnostic only (not in the UI or the manifest): a room may host two pieces of the chain */ limit = d.get(from) + 1 + N, BUDGET = 400000; let cut = false, exp = 0; const out = [], path = [from], seenN = new Set([from]), seenR = new Set([roomOf(from)]);
-    const dfs = (u) => { if (u === to) { out.push(path.slice()); return; } if (++exp > BUDGET || out.length > 4000) { cut = true; return; }
-      for (const v of nb(u)) { if (seenN.has(v) || (!repeat && seenR.has(roomOf(v))) || (blk && blk.has(rkey(u, v))) || !d.has(v) || path.length + 1 + d.get(v) > limit) continue; seenN.add(v); seenR.add(roomOf(v)); path.push(v); dfs(v); path.pop(); seenN.delete(v); seenR.delete(roomOf(v)); if (cut && out.length > 4000) return; } };
-    dfs(from); if (!out.length) return { fail: 'no simple chain of rooms joins the stake and the final goal (every path repeats a room)' };
+    const BUDGET = 400000; let cut = false, out = [], repeated = false;
+    // FIRST the chain without repeating a room (the user's rule); only if there is none, a room may host two pieces of the chain (user's decision 2026-10-20: the info says "room X appears twice, two pieces"; the repeated room has ONE type, the one of its first visit, in both pieces)
+    for (const repeat of [false, true]) {
+      const limit = d.get(from) + 1 + N; let exp = 0; out = []; const path = [from], seenN = new Set([from]), seenR = new Set([roomOf(from)]);
+      const dfs = (u) => { if (u === to) { out.push(path.slice()); return; } if (++exp > BUDGET || out.length > 4000) { cut = true; return; }
+        for (const v of nb(u)) { if (seenN.has(v) || (!repeat && seenR.has(roomOf(v))) || (blk && blk.has(rkey(u, v))) || !d.has(v) || path.length + 1 + d.get(v) > limit) continue; const had = seenR.has(roomOf(v)); seenN.add(v); seenR.add(roomOf(v)); path.push(v); dfs(v); path.pop(); seenN.delete(v); if (!had) seenR.delete(roomOf(v)); if (cut && out.length > 4000) return; } };
+      dfs(from); if (out.length) { repeated = repeat; break; }
+    }
+    if (!out.length) return { fail: 'no chain of rooms joins the stake and the final goal within the extra-rooms bound' };
     out.sort((p, q) => q.length - p.length || (p.join() < q.join() ? -1 : 1)); const pieces = out[0];
-    return { pieces, rooms: pieces.map(roomOf), blocked: blockedList, bridges, cut, unblocked, shortest: p0.length, candidates: out.length, graph: g, mode: g.mode };
+    const cnt = new Map(); for (const x of pieces) cnt.set(roomOf(x), (cnt.get(roomOf(x)) || 0) + 1); const twice = [...cnt].filter(([, c]) => c > 1).map(([r]) => r);
+    return { pieces, rooms: pieces.map(roomOf), blocked: blockedList, bridges, cut, unblocked, shortest: p0.length, candidates: out.length, repeated: twice, graph: g, mode: g.mode };
   };
   /* WALKABLE CHECK (user, 2026-10-20): the chain must be walkable using only the tiles of the rooms of the chain and without crossing a blocked edge: a BFS from the stake over the walking graph restricted to those tiles. { ok, length } (length in tiles, -1 if not). */
   T.chainWalk = function (S, P, chain, stakeTile, goalTile) {
@@ -326,9 +332,10 @@
     const route = rooms.map((id, k) => { const o = ty.rooms.get(id); const entry = k === 0 ? S.ter[stakeTile] : doorTer(nodes[k - 1], nodes[k]).tb, exit = k === rooms.length - 1 ? S.ter[goalTile] : doorTer(nodes[k], nodes[k + 1]).ta;
       if (entry !== exit) return { type: T.CAKE, up: exit > entry }; if (o && o.terraces.size >= 2 && !(o.linkList && o.linkList.length)) return { type: T.DIORAMA }; return { type: T.ASCENSION }; });
     const cnt = (arr) => { const c = { Cake: 0, Asc: 0, Dio: 0 }; for (const t of arr) c[t === T.CAKE ? 'Cake' : t === T.DIORAMA ? 'Dio' : 'Asc']++; return c; };
-    const a = relabel(v164.slice()), b = relabel(route.map((x) => x.type)), use = rule === 'route' ? b : a, map = new Map();
-    rooms.forEach((id, k) => { const o = ty.rooms.get(id); if (!o || o.type !== use[k]) map.set(id, { type: use[k], up: rule === 'route' && route[k].up }); else if (rule === 'route') map.set(id, { type: use[k], up: route[k].up }); });
-    return { map, counts: cnt(use), v164: cnt(a), route: cnt(b), v164Raw: cnt(v164), routeRaw: cnt(route.map((x) => x.type)), types: use, relabeled: rooms.filter((id, k) => (rule === 'route' ? route[k].type : v164[k]) === T.DIORAMA && use[k] === T.ASCENSION).length };
+    const first = rooms.map((id, k) => rooms.indexOf(id)), a = relabel(v164.slice()), b = relabel(route.map((x) => x.type)); for (const arr of [a, b]) for (let k = 0; k < arr.length; k++) if (first[k] !== k) arr[k] = arr[first[k]]; // a room that appears twice has ONE type, the one of its first visit
+    const use = rule === 'route' ? b : a, map = new Map(), ters = new Set([S.ter[stakeTile], S.ter[goalTile]]); for (let k = 0; k + 1 < nodes.length; k++) { const dt = doorTer(nodes[k], nodes[k + 1]); ters.add(dt.ta); ters.add(dt.tb); }
+    rooms.forEach((id, k) => { if (first[k] !== k) return; const o = ty.rooms.get(id); if (!o || o.type !== use[k]) map.set(id, { type: use[k], up: rule === 'route' && route[k].up }); else if (rule === 'route') map.set(id, { type: use[k], up: route[k].up }); });
+    return { map, counts: cnt(use), v164: cnt(a), route: cnt(b), v164Raw: cnt(v164), routeRaw: cnt(route.map((x) => x.type)), types: use, terraces: [...ters].sort((x, y) => x - y), relabeled: rooms.filter((id, k) => (rule === 'route' ? route[k].type : v164[k]) === T.DIORAMA && use[k] === T.ASCENSION).length };
   };
   /* a copy of the classification where the chain rooms take the types of the rule in force (the rings of Cake, the Ascension walls, the tint and the Diorama outline of the chain view read it; E.roomTypes.classify itself is unchanged) */
   T.overrideTypes = function (ty, map, RL) {
