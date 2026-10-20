@@ -515,11 +515,11 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       await a.slider('chainExtra', 5); await page.selectOption('#roomRule', 'route'); await page.selectOption('#cakeCut', 'half'); await a.idle();
       const vb1 = await ev(() => window.__evo.viewerBlock());
       ok('manifest: with N 5, Along the route and the Half cut the viewer block writes chainExtra 5, roomRule "route", cakeCut "half"', vb1.chainExtra === 5 && vb1.roomRule === 'route' && vb1.cakeCut === 'half', JSON.stringify(vb1));
-      await ev(() => window.__evo.applyViewerBlock({})); const d0 = await ev(() => ({ n: window.__evo.P.chainExtra, r: window.__evo.st.roomRule, c: window.__evo.P.cakeCut }));
+      await ev((vb) => window.__evo.applyViewerBlock(vb), vb0); const d0 = await ev(() => ({ n: window.__evo.P.chainExtra, r: window.__evo.st.roomRule, c: window.__evo.P.cakeCut }));
       ok('manifest: a block without the keys loads the defaults', d0.n === 3 && d0.r === 'v164' && d0.c === 'off', JSON.stringify(d0));
       await ev((vb) => window.__evo.applyViewerBlock(vb), vb1); const d1 = await ev(() => ({ n: window.__evo.P.chainExtra, r: window.__evo.st.roomRule, c: window.__evo.P.cakeCut }));
       ok('manifest: the written block applies N 5, Along the route and the Half cut on load (round trip)', d1.n === 5 && d1.r === 'route' && d1.c === 'half', JSON.stringify(d1));
-      await ev(() => window.__evo.applyViewerBlock({})); await page.selectOption('#roomRule', 'v164'); await page.selectOption('#cakeCut', 'off'); await a.slider('chainExtra', 3); await a.idle();
+      await ev((vb) => window.__evo.applyViewerBlock(vb), vb0); await a.idle();
     }
 
     // manifest: dacView and anchors
