@@ -343,6 +343,21 @@
     const type = Uint8Array.from(ty.type); for (let i = 0; i < RL.room.length; i++) { const r = RL.room[i]; if (r > 0 && map.has(r)) type[i] = map.get(r).type; }
     return Object.assign({}, ty, { rooms, type });
   };
+  /* the GATE faces of a chain: bit b of tile i = its face b (N E S W) is an open border (not a blocking one) between two consecutive pieces of a chain sequence (`seqs`: arrays of piece ids, stake first). Returns a Uint8Array with `.count` (faces counted once). */
+  T.chainGateBits = function (S, P, seqs) {
+    const n = S.n, W = S.W, H = S.H, map = S.roomMap, vd = S.void, pcs = T.pieces(S, P), nodeOf = P.chainNodes === 'room' ? (i) => map[i] : (i) => pcs.id[i], OFF = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+    const pairs = new Set(); for (const sq of seqs || []) for (let k = 0; k + 1 < sq.length; k++) { const a = Math.min(sq[k], sq[k + 1]), b = Math.max(sq[k], sq[k + 1]); if (a !== b) pairs.add(a * 100000 + b); }
+    const gate = new Uint8Array(n); gate.count = 0;
+    for (let i = 0; i < n; i++) {
+      const r = map[i]; if (r <= 0 || (vd && vd[i])) continue; const x = i % W, y = (i / W) | 0;
+      for (let b = 0; b < 4; b++) {
+        const nx = x + OFF[b][0], ny = y + OFF[b][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx, r2 = map[j]; if (r2 <= 0 || r2 === r || (vd && vd[j])) continue; const na = nodeOf(i), nbb = nodeOf(j); if (!(na > 0) || !(nbb > 0)) continue;
+        if (S.roomKind[i * 4 + b] === 1 || !pairs.has(Math.min(na, nbb) * 100000 + Math.max(na, nbb))) continue; // blocking borders are walls, not gates; only consecutive chain rooms
+        gate[i] |= 1 << b; if (i < j) gate.count++;
+      }
+    }
+    return gate;
+  };
   /* CHAIN VIEW (DAC v2, docs/crystallizers/02-room-types/README.md D23; `P.chainIds` = the ids of the rooms the route(s) from the stake to the objective(s) cross; absent = nothing here runs, the shape is the one of before):
      a VISUAL pass after the Cake rings and the Ascension walls (so the rings exist when it runs). Every land tile outside the chain rooms is moved to a level of its own, just under the lowest level (`meta.grey`: a neutral grey, no type tint), i.e. flattened;
      the void stays void. The ring tiles (S.ringTile) of the Cake links of the CHAIN rooms are never flattened, even where they fall outside the chain (Cake v2 builds Up rings in the airspace of other rooms). Walking, the regions, the route and the room
@@ -376,17 +391,8 @@
     S.chainGrey = grey;
     if (S.stairs) { const before = S.stairs.length; S.stairs = S.stairs.filter((r) => ![...r.bottom, ...r.top, ...r.steps.flatMap((x) => x.tiles)].some((t) => grey[t])); info.stairsDropped = before - S.stairs.length; }
     if (S.ascWalls && S.ascWalls.faces) { const keep = S.ascWalls.faces.filter((f) => chain.has(map[f.i]) || chain.has(map[f.j])); info.wallsDropped = S.ascWalls.faces.length - keep.length; S.ascWalls = Object.assign({}, S.ascWalls, { faces: keep }); }
-    const pcs = T.pieces(S, P), nodeOf = P.chainNodes === 'room' ? (i) => map[i] : (i) => pcs.id[i]; // the chain is a sequence of PIECES (nodes of T.roomGraph); gates and blocked faces are the faces between those pieces
-    const pairs = new Set(); for (const sq of seqs || []) for (let k = 0; k + 1 < sq.length; k++) { const a = Math.min(sq[k], sq[k + 1]), b = Math.max(sq[k], sq[k + 1]); if (a !== b) pairs.add(a * 100000 + b); }
-    const gate = new Uint8Array(n), OFF = [[0, -1], [1, 0], [0, 1], [-1, 0]];
-    for (let i = 0; i < n; i++) {
-      const r = map[i]; if (r <= 0 || (vd && vd[i])) continue; const x = i % W, y = (i / W) | 0;
-      for (let b = 0; b < 4; b++) {
-        const nx = x + OFF[b][0], ny = y + OFF[b][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx, r2 = map[j]; if (r2 <= 0 || r2 === r || (vd && vd[j])) continue; const na = nodeOf(i), nbb = nodeOf(j); if (!(na > 0) || !(nbb > 0)) continue;
-        if (S.roomKind[i * 4 + b] === 1 || !pairs.has(Math.min(na, nbb) * 100000 + Math.max(na, nbb))) continue; // blocking borders are walls, not gates; only consecutive chain rooms
-        gate[i] |= 1 << b; if (i < j) info.gateFaces++;
-      }
-    }
+    const pcs = T.pieces(S, P), nodeOf = P.chainNodes === 'room' ? (i) => map[i] : (i) => pcs.id[i], OFF = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // the chain is a sequence of PIECES (nodes of T.roomGraph); gates and blocked faces are the faces between those pieces
+    const gate = T.chainGateBits(S, P, seqs); info.gateFaces = gate.count;
     const bl = new Set((P.chainBlocked || []).map(([a, b]) => rkey(a, b))), blk = new Uint8Array(n); info.blockedFaces = 0;
     if (bl.size) for (let i = 0; i < n; i++) { const r = map[i]; if (r <= 0 || (vd && vd[i])) continue; const x = i % W, y = (i / W) | 0;
       for (let b = 0; b < 4; b++) { const nx = x + OFF[b][0], ny = y + OFF[b][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx, r2 = map[j]; if (r2 <= 0 || r2 === r || (vd && vd[j])) continue;
@@ -397,16 +403,41 @@
      Never on an open transition (the doors stay open), never on a face of a ramp tile (S.carved), never toward void; only runs of 3 faces or more (consecutive faces on the same line). One face = one wall, tile-exact. The base is the
      higher of the two tiles; the height is ABSOLUTE (wallH 0.7; the low piece for the cut, lowH 0.15) and does not scale with the terrace height or with Pocket height. Returns { faces: [{ i, j, dir (0 = E face of i, 1 = S face), x, y,
      ai, aj (that side is an Ascension room), hb, run }], runs, info } (window tiles). The CUT toward the camera is computed at render time (E.ascWallLow). */
-  T.ASC_H = 1.5; T.ASC_LOW = 0.15; T.ASC_T = 0.35; T.ASC_MIN_RUN = 3;
+  T.ASC_H = 1.5; T.ASC_LOW = 0.15; T.ASC_T = 0.35; T.ASC_MIN_RUN = 3; T.ASC_GATE_MAX = 5;
   T.ascWalls = function (S, P, RL, ty) {
-    const W = S.W, H = S.H, n = S.n, kind = S.roomKind, map = S.roomMap, cand = [], isAsc = (r) => { const o = ty.rooms.get(r); return !!o && o.type === T.ASCENSION; };
+    const W = S.W, H = S.H, n = S.n, kind = S.roomKind, map = S.roomMap, cand = [], openF = [], isAsc = (r) => { const o = ty.rooms.get(r); return !!o && o.type === T.ASCENSION; }, gateN = Math.max(0, Math.min(T.ASC_GATE_MAX, P.ascGate | 0)); // gateN > 0 (`P.ascGate`, D28): the open transition faces of Ascension rooms are collected too
     for (let i = 0; i < n; i++) {
       if (S.void && S.void[i]) continue; const ri = map[i]; if (ri <= 0) continue; const x = i % W, y = (i / W) | 0;
       for (const [b, dx, dy] of [[1, 1, 0], [2, 0, 1]]) {
-        const nx = x + dx, ny = y + dy; if (nx >= W || ny >= H) continue; const j = ny * W + nx; if (S.void && S.void[j]) continue; const rj = map[j]; if (rj <= 0 || rj === ri || kind[i * 4 + b] !== 1) continue;
+        const nx = x + dx, ny = y + dy; if (nx >= W || ny >= H) continue; const j = ny * W + nx; if (S.void && S.void[j]) continue; const rj = map[j]; if (rj <= 0 || rj === ri) continue; const kd = kind[i * 4 + b];
+        if (kd !== 1 && !(gateN > 0 && (kd === 0 || kd === 2))) continue;
         const ai = isAsc(ri), aj = isAsc(rj); if (!ai && !aj) continue; if (S.carved && (S.carved[i] || S.carved[j])) continue;
-        cand.push({ i, j, dir: b === 1 ? 0 : 1, x, y, ai, aj, hb: Math.max(S.levelH[S.fine[i]], S.levelH[S.fine[j]]) });
+        const f = { i, j, dir: b === 1 ? 0 : 1, x, y, ai, aj, rid: ai ? ri : rj, hb: Math.max(S.levelH[S.fine[i]], S.levelH[S.fine[j]]) };
+        if (kd === 1) cand.push(f); else openF.push(Object.assign(f, { kd, ri, rj }));
       }
+    }
+    // GATE WIDTH (D28, `P.ascGate` N = 1..5; 0 = nothing here runs): the open transition faces of an Ascension room are grouped (same room pair, joined by a shared corner); in each group only a GATE of N faces stays open around every CROSSING and the other faces become blocking faces (walls).
+    // CROSSINGS = the union of (a) the used transition faces (S.roomKind 2: the spanning-tree paths), (b) every face crossed by a drawn tile route (P.ascRouteFaces: map-coordinate keys of the routes of the objectives to the stake, set by the UI from the finished shape) and (c) in the chain view the gate faces of the chain (T.chainGateBits);
+    // a group with no crossing keeps the N faces around the face nearest its centroid. Faces of ramp tiles stay excluded (a ramp is a door that always stays open). Walking, the tree and the routes do not change. info.gateOk: no crossing face is a wall.
+    let gateInfo = null;
+    if (gateN > 0) {
+      const fw = S.mapW, mi = (t) => (((t / W) | 0) + S.oy) * fw + (t % W) + S.ox, fkey = (f) => { const a = mi(f.i), b = mi(f.j); return Math.min(a, b) + '_' + Math.max(a, b); };
+      const rf = P.ascRouteFaces || null, gbits = P.chainIds && P.chainSeqs ? T.chainGateBits(S, P, P.chainSeqs) : null;
+      const isX = (f) => f.kd === 2 || (rf && rf.has(fkey(f))) || (gbits && ((gbits[f.i] >> (f.dir === 0 ? 1 : 2)) & 1));
+      const vo = (f) => (f.dir === 0 ? [[f.x + 1, f.y], [f.x + 1, f.y + 1]] : [[f.x, f.y + 1], [f.x + 1, f.y + 1]]);
+      const par = openF.map((_, k) => k), find = (q) => { while (par[q] !== q) { par[q] = par[par[q]]; q = par[q]; } return q; }, at = new Map();
+      openF.forEach((f, k) => { const rk = Math.min(f.ri, f.rj) + '_' + Math.max(f.ri, f.rj); for (const [vx, vy] of vo(f)) { const key = rk + '|' + vx + ',' + vy, o = at.get(key); if (o === undefined) at.set(key, k); else par[find(k)] = find(o); } });
+      const groups = new Map(); openF.forEach((f, k) => { const r = find(k); let g = groups.get(r); if (!g) groups.set(r, g = []); g.push(k); });
+      let nX = 0, nOpen = 0, nAdded = 0, nNoX = 0; const added = [];
+      for (const g of groups.values()) {
+        const adjV = new Map(); for (const k of g) for (const [vx, vy] of vo(openF[k])) { const key = vx + ',' + vy; (adjV.get(key) || adjV.set(key, []).get(key)).push(k); }
+        const keep = new Set(), win = (k0) => { const seen = new Set([k0]), q = [k0], got = []; for (let h = 0; h < q.length && got.length < gateN; h++) { got.push(q[h]); const nbs = new Set(); for (const [vx, vy] of vo(openF[q[h]])) for (const o of adjV.get(vx + ',' + vy)) if (!seen.has(o)) nbs.add(o); for (const o of [...nbs].sort((p2, q2) => p2 - q2)) { seen.add(o); q.push(o); } } for (const k of got) keep.add(k); };
+        const xs = g.filter((k) => isX(openF[k])); nX += xs.length;
+        if (xs.length) for (const k of xs) { keep.add(k); win(k); }
+        else { nNoX++; let cx = 0, cy = 0; for (const k of g) { cx += openF[k].x; cy += openF[k].y; } cx /= g.length; cy /= g.length; let best = g[0], bd = 1e9; for (const k of g) { const d = Math.hypot(openF[k].x - cx, openF[k].y - cy); if (d < bd - 1e-9) { bd = d; best = k; } } win(best); }
+        for (const k of g) if (keep.has(k)) nOpen++; else { const f = openF[k]; cand.push({ i: f.i, j: f.j, dir: f.dir, x: f.x, y: f.y, ai: f.ai, aj: f.aj, rid: f.rid, hb: f.hb, gate: true }); added.push(k); nAdded++; }
+      }
+      gateInfo = { groups: groups.size, crossings: nX, groupsWithoutCrossing: nNoX, open: nOpen, added: nAdded, gateOk: added.every((k) => !isX(openF[k])), routeFaces: rf ? rf.size : 0 };
     }
     // CHAINS: faces connected by a shared corner (vertex) along the border, following the turns (a diagonal border is a staircase of faces in two directions); a chain of fewer than 3 faces is dropped
     const vOf = (f) => (f.dir === 0 ? [[f.x + 1, f.y], [f.x + 1, f.y + 1]] : [[f.x, f.y + 1], [f.x + 1, f.y + 1]]), par = cand.map((_, k) => k), find = (a) => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; }, at = new Map();
@@ -415,7 +446,8 @@
     const faces = [], ids = new Map(), runs = [], deg = new Map();
     cand.forEach((f, k) => { const r = find(k); if (size.get(r) < T.ASC_MIN_RUN) return; if (!ids.has(r)) { ids.set(r, runs.length); runs.push({ id: runs.length, n: 0 }); } f.run = ids.get(r); runs[f.run].n++; faces.push(f); for (const [vx, vy] of vOf(f)) { const key = vx + ',' + vy; deg.set(key, (deg.get(key) || 0) + 1); } });
     for (const f of faces) { const [v0, v1] = vOf(f); f.e0 = deg.get(v0[0] + ',' + v0[1]) > 1; f.e1 = deg.get(v1[0] + ',' + v1[1]) > 1; } // an end is extended by half the thickness where another wall meets it (the corner is filled)
-    return { faces, runs, height: P.ascHeight === undefined ? T.ASC_H : P.ascHeight, info: { candidates: cand.length, faces: faces.length, runs: runs.length, dropped: cand.length - faces.length } };
+    const height = P.ascHeight === undefined ? T.ASC_H : P.ascHeight, lowH = Math.min(P.ascCut === undefined ? T.ASC_LOW : P.ascCut, height); // `lowH` (D28, `P.ascCut`): the height of the low walls of the cut toward the camera (default 0.15 = ASC_LOW)
+    return { faces, runs, height, lowH, gate: gateN, info: Object.assign({ candidates: cand.length, faces: faces.length, runs: runs.length, dropped: cand.length - faces.length }, gateInfo ? { gateInfo } : {}) };
   };
   /* the footprint of the wall of a face: [x0, x1, y0, y1] (thickness ASC_T centred on the edge, the ends extended where another face meets it) */
   T.ascBox = function (w) {

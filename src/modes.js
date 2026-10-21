@@ -53,7 +53,7 @@
       ],
       camera: 'isoE', cameras: CAMS, tech: 'A', techs: ['box', 'A', 'B', 'C'], compare: false, compareDefault: false,
       main: ['roomsPreset', 'dacAuto', 't-cake', 't-ascWalls', 'ascHeight', 't-pocket', 'pocketFraming', 'pocketHeight', 'dacShow', 'dacView', 'chainExtra', 'roomRule', 'cakeCut', 'gateMarks', 'anchors', 'anchorH', 'roomChips', 'typeTint'],
-      advanced: ['roomsMinCore', 'rRadius', 'roomsCross', 'roomsIsoLimit', 'cakeLayers', 'cakeStep', 'cakePer', 'cakeSeam', 'roomBorders', 'roomTint', 'nowalk', 'dioOutline'],
+      advanced: ['ascCut', 'ascGate', 'roomsMinCore', 'rRadius', 'roomsCross', 'roomsIsoLimit', 'cakeLayers', 'cakeStep', 'cakePer', 'cakeSeam', 'roomBorders', 'roomTint', 'nowalk', 'dioOutline'],
       slice: [], fixed: ['t-rooms'], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },

@@ -222,13 +222,13 @@
   /* In A / B a wall is cut into BANDS at the heights of the levels it crosses (like the ramps) and each band is drawn in the pass of the level at the top of its band, so a higher slab behind it cannot paint over it;
      the top cap goes with the last band. Returns [{ pass, lo, hi, top }]. */
   function ascBands(S, w, low) {
-    const T = E.roomTypes, hb = w.hb, ht = hb + (low ? T.ASC_LOW : S.ascWalls.height), bands = []; let lo = hb, L = Math.max(S.fine[w.i], S.fine[w.j]) + 1;
+    const T = E.roomTypes, hb = w.hb, ht = hb + (low ? (S.ascWalls.lowH === undefined ? T.ASC_LOW : S.ascWalls.lowH) : S.ascWalls.height), bands = []; let lo = hb, L = Math.max(S.fine[w.i], S.fine[w.j]) + 1;
     while (L <= S.maxFine && S.levelH[L] < ht - 1e-6) { const hi = S.levelH[L]; if (hi > lo + 1e-6) { bands.push({ pass: L, lo, hi, top: false }); lo = hi; } L++; }
     bands.push({ pass: Math.min(L, S.maxFine), lo, hi: ht, top: true }); return bands;
   }
   function drawAscWall(ctx, cam, S, o, w, st, band) {
     if (PICK && !o.pickWalls) return;
-    const low = ascLow(o, cam, w), T = E.roomTypes, hb = band ? band.lo : w.hb, ht = band ? band.hi : w.hb + (low ? T.ASC_LOW : S.ascWalls.height), [x0, x1, y0, y1] = T.ascBox(w);
+    const low = ascLow(o, cam, w), T = E.roomTypes, hb = band ? band.lo : w.hb, ht = band ? band.hi : w.hb + (low ? (S.ascWalls.lowH === undefined ? T.ASC_LOW : S.ascWalls.lowH) : S.ascWalls.height), [x0, x1, y0, y1] = T.ascBox(w);
     const veiled = !!(o.veil && S.slice && !S.pocket && !S.slice[w.i] && !S.slice[w.j]); let side = DBG ? [255, 0, 0] : veiled ? veilMix(STONE) : STONE, top = DBG ? [255, 0, 0] : veiled ? veilMix(STONE_TOP) : STONE_TOP;
     if (!PICK && !DBG && low && o.gateMarks && S.gateBits) { side = side.map((v) => v * 0.55); top = top.map((v) => v * 0.55); } // chain view with the gate markers: the low (cut) stubs are darker than the full walls, so a gate and a cut wall cannot be confused (D25)
     if (PICK) PKC = pcode(0, 0);
