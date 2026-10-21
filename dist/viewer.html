@@ -3887,6 +3887,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     if (PICK && !o.pickWalls) return;
     const low = ascLow(o, cam, w), T = E.roomTypes, hb = band ? band.lo : w.hb, ht = band ? band.hi : w.hb + (low ? (S.ascWalls.lowH === undefined ? T.ASC_LOW : S.ascWalls.lowH) : S.ascWalls.height), [x0, x1, y0, y1] = T.ascBox(w);
     const veiled = !!(o.veil && S.slice && !S.pocket && !S.slice[w.i] && !S.slice[w.j]); let side = DBG ? [255, 0, 0] : veiled ? veilMix(STONE) : STONE, top = DBG ? [255, 0, 0] : veiled ? veilMix(STONE_TOP) : STONE_TOP;
+    if (!PICK && !DBG && o.typeTint && S.ascWalls.gate > 0) { const mixT = (c, k) => [0, 1, 2].map((q) => (c[q] * 0.65 + [70, 130, 255][q] * 0.35) * k); side = mixT(side, 0.8); top = mixT(top, 0.88); } // D28: with the gate width on (ascGate > 0) and the type tint on, a wall takes a darker shade of the Ascension tint, so it can be attributed to its room (the default look is unchanged)
     if (!PICK && !DBG && low && o.gateMarks && S.gateBits) { side = side.map((v) => v * 0.55); top = top.map((v) => v * 0.55); } // chain view with the gate markers: the low (cut) stubs are darker than the full walls, so a gate and a cut wall cannot be confused (D25)
     if (PICK) PKC = pcode(0, 0);
     for (const [ax, ay, bx, by, nx, ny] of [[x0, y0, x1, y0, 0, -1], [x1, y0, x1, y1, 1, 0], [x1, y1, x0, y1, 0, 1], [x0, y1, x0, y0, -1, 0]]) { // the sides that face the camera, then the top
