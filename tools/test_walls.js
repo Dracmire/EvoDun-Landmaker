@@ -44,5 +44,26 @@ const PB = { terraces: 3, subs: 3, terH: 1, subH: 0.22, minPlateau: 120, minSub:
   const asc = [...ty.rooms.values()].filter((o) => o.type === T.ASCENSION).length, ascFaceN = A.faces.length, lens = A.runs.map((r) => r.n).sort((a, b) => a - b);
   console.log(`  figures (Balanced types, whole map): ${ty.counts.ascension} Ascension rooms; candidate faces (blocking, with an Ascension side, not ramp, not void) ${A.info.candidates}; walls ${A.info.faces} faces in ${A.info.runs} chains (${A.info.dropped} faces dropped: chains of fewer than 3); chain length median ${lens[lens.length >> 1]}, max ${lens[lens.length - 1]}`);
   { const hs = E.shape(mk(), { ...PB, ascWalls: true, ascHeight: 2.5 }, null); ok('the height is a parameter (ascHeight) and does not change which faces get a wall', hs.ascWalls.height === 2.5 && hs.ascWalls.faces.length === A.faces.length); }
+  // ---- D28 (DAC v2 PR B2): the gate width (ascGate) and the cut height (ascCut)
+  {
+    const ids = (w) => w.faces.map((f) => f.i + '_' + f.j + '_' + f.dir).join(','), base = on.ascWalls, key = (w) => w.faces.map((f) => `${f.i},${f.j},${f.dir},${f.hb}`).join(';');
+    const g0 = E.shape(mk(), { ...PB, ascWalls: true, ascGate: 0, ascCut: 0.15 }, null).ascWalls;
+    ok('ascGate 0 and ascCut 0.15 (the defaults) reproduce today: the same faces, runs and heights, no gate info, lowH 0.15', key(g0) === key(base) && g0.runs.length === base.runs.length && !g0.info.gateInfo && g0.lowH === 0.15 && g0.gate === 0);
+    const gs = [1, 3, 5].map((k) => E.shape(mk(), { ...PB, ascWalls: true, ascGate: k }, null)); const ns = gs.map((S) => S.ascWalls.faces.length);
+    ok(`ascGate 1 / 3 / 5: faces ${ns.join(' / ')} (today ${base.faces.length}): more walls than today, fewer as the gate widens`, ns[0] > ns[1] && ns[1] > ns[2] && ns[2] > base.faces.length, ns.join());
+    for (const [k, S] of [1, 3, 5].map((k, q) => [k, gs[q]])) { const w = S.ascWalls, gi = w.info.gateInfo, W2 = S.W;
+      ok(`ascGate ${k}: info.gateOk (no crossing face is a wall), ${gi.crossings} crossings, ${gi.open} faces kept open, ${gi.added} faces walled in ${gi.groups} groups`, gi.gateOk === true && gi.crossings > 0 && gi.added > 0, JSON.stringify(gi));
+      let usedWall = 0, rampWall = 0; const wallSet = new Set(w.faces.map((f) => f.i + '_' + f.j)); for (let i = 0; i < S.n; i++) for (const [b, dx, dy] of [[1, 1, 0], [2, 0, 1]]) { const x = i % W2, y = (i / W2) | 0; if (x + dx >= W2 || y + dy >= S.H) continue; const j = (y + dy) * W2 + x + dx; if (S.roomKind[i * 4 + b] === 2 && wallSet.has(i + '_' + j)) usedWall++; }
+      for (const f of w.faces) if (S.carved && (S.carved[f.i] || S.carved[f.j])) rampWall++;
+      ok(`ascGate ${k}: no used transition face (roomKind 2) and no ramp tile gets a wall`, usedWall === 0 && rampWall === 0, [usedWall, rampWall]);
+      const added = w.faces.filter((f) => f.gate).length; ok(`ascGate ${k}: the walls added by the gate are marked and all of them lie on open transition faces`, added > 0 && w.faces.filter((f) => f.gate).every((f) => { const b = f.dir === 0 ? 1 : 2; return [0, 2].includes(S.roomKind[f.i * 4 + b]); }), added); }
+    // a route face (a face crossed by a drawn route, passed through P like P.chainIds) is never walled: take a kind-0 face that the gate would wall and pass it
+    const g1 = gs[0], w1 = g1.ascWalls, add1 = w1.faces.find((f) => f.gate), fw = g1.mapW, mk2 = (t) => (((t / g1.W) | 0) + g1.oy) * fw + (t % g1.W) + g1.ox, rk = Math.min(mk2(add1.i), mk2(add1.j)) + '_' + Math.max(mk2(add1.i), mk2(add1.j));
+    const gr = E.shape(mk(), { ...PB, ascWalls: true, ascGate: 1, ascRouteFaces: new Set([rk]) }, null).ascWalls;
+    ok('a route face passed in P.ascRouteFaces is kept open (not a wall) and counted as a crossing', !gr.faces.some((f) => f.i === add1.i && f.j === add1.j) && gr.info.gateInfo.routeFaces === 1 && gr.info.gateInfo.gateOk, JSON.stringify(gr.info.gateInfo));
+    // the cut height
+    const c5 = E.shape(mk(), { ...PB, ascWalls: true, ascCut: 0.5 }, null).ascWalls, cf = E.shape(mk(), { ...PB, ascWalls: true, ascCut: 3 }, null).ascWalls;
+    ok('ascCut sets the low height (0.5), clamped to the wall height (1.5) at full; the faces and their heights of base are unchanged', c5.lowH === 0.5 && cf.lowH === 1.5 && key(c5) === key(base) && c5.height === 1.5, [c5.lowH, cf.lowH]);
+  }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();
