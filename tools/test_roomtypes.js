@@ -241,5 +241,39 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
       }
     }
   }
+  // ---- DAC v2 PR B: the CHAIN of room PIECES (src/roomtypes.js: pieces, roomGraph, roomChain, chainTypes, chainWalk, chainCrossings)
+  {
+    const PBc = { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 }, Sb = run(PBc), at = (S, x, y) => (y - S.oy) * S.W + (x - S.ox), stake = at(Sb, 200, 62), goal = at(Sb, 47, 75);
+    const pc = T.pieces(Sb, PBc), nb = E.walkGraph(Sb, PBc);
+    let bad1 = 0, bad2 = 0, bad3 = 0, tiles = 0; for (let i = 0; i < Sb.n; i++) { const walk = Sb.roomMap[i] > 0 && !(Sb.void && Sb.void[i]) && Sb.region[i] >= 0; if (walk !== (pc.id[i] > 0)) bad1++; if (pc.id[i] > 0) { tiles++; if (pc.room[pc.id[i]] !== Sb.roomMap[i]) bad2++; for (const j of nb(i).slice()) if (pc.id[j] === pc.id[i] ? false : (Sb.roomMap[j] === Sb.roomMap[i] && pc.id[j] > 0)) bad3++; } }
+    ok(`pieces: every walkable room tile (${tiles}) is in exactly one piece, and only those`, bad1 === 0, bad1);
+    ok('pieces: a piece lies inside one room', bad2 === 0, bad2);
+    ok('pieces: two tiles joined by a walking step inside the same room are in the same piece (a room is split only where it has no internal way)', bad3 === 0, bad3);
+    ok('pieces: some room is split in more than one piece (the reason the room-level chain was not walkable)', pc.count > new Set(pc.room.slice(1)).size, [pc.count, new Set(pc.room.slice(1)).size]);
+    const ch = T.roomChain(Sb, PBc, stake, goal), g = ch.graph, rk = (x, y) => Math.min(x, y) * 100000 + Math.max(x, y);
+    ok('Balanced types, N 3: the chain is 21 pieces in 21 rooms, 8 blocked edges, 3 bridges skipped, the bound did not cut (the viewer figures)', ch.pieces.length === 21 && new Set(ch.rooms).size === 21 && ch.blocked.length === 8 && ch.bridges === 3 && !ch.cut && ch.repeated.length === 0, JSON.stringify({ n: ch.pieces.length, b: ch.blocked.length, br: ch.bridges, cut: ch.cut, rep: ch.repeated }));
+    ok('the chain starts at the stake piece and ends at the goal piece, and consecutive pieces are joined by an edge of the graph', ch.pieces[0] === pc.id[stake] && ch.pieces[ch.pieces.length - 1] === pc.id[goal] && ch.pieces.every((x, k) => k === 0 || g.adj.get(ch.pieces[k - 1]).has(x)));
+    ok('no blocked edge is on the chain', ch.blocked.every(([a, b]) => !ch.pieces.some((x, k) => k > 0 && rk(x, ch.pieces[k - 1]) === rk(a, b))));
+    const conn = (a, b, ban) => { const seen = new Set([a]), q = [a]; for (let h = 0; h < q.length; h++) for (const v of g.adj.get(q[h]) || []) { if (seen.has(v) || rk(q[h], v) === ban) continue; seen.add(v); q.push(v); } return seen.has(b); };
+    ok('no blocked edge is a bridge (removing it keeps its ends connected), and every edge of the shortest path is either blocked or a skipped bridge', ch.blocked.every(([a, b]) => conn(a, b, rk(a, b))) && ch.blocked.length + ch.bridges === ch.shortest - 1, JSON.stringify([ch.blocked.length, ch.bridges, ch.shortest]));
+    const wk = T.chainWalk(Sb, PBc, ch, stake, goal);
+    ok(`the chain is walkable with the tiles of its own rooms and without crossing a blocked edge (${wk.length} tiles)`, wk.ok && wk.length > 0, JSON.stringify(wk));
+    const lens = [0, 1, 2, 3].map((n) => T.roomChain(Sb, { ...PBc, chainExtra: n }, stake, goal).pieces.length);
+    ok(`the chain grows with N: ${lens.join(' <= ')} (the bound is the shortest path that avoids the blocked edges, 18 pieces, plus N; the unblocked shortest is 12)`, lens.every((l, k) => (k === 0 || l >= lens[k - 1]) && l === 18 + k), lens.join());
+    const roomCh = T.roomChain(Sb, PBc, stake, goal, 'room');
+    ok('MUTATION CHECK (nodes = rooms, the first PR B probe): the same stake and goal give a chain that is NOT walkable inside its rooms, so the walkable check can fail', !T.chainWalk(Sb, PBc, roomCh, stake, goal).ok, roomCh.pieces.length);
+    const OLD = [82, 74, 68, 59, 53, 58, 66, 65, 55, 54, 36, 64, 57, 38, 23, 12, 11, 9, 10, 17, 20, 18, 19, 7], badOld = T.chainCrossings(Sb, PBc, OLD, stake, goal);
+    ok(`the room-level chain of the first probe (24 rooms) has ${badOld.length} rooms that cannot be crossed (entry and exit in different pieces): ${badOld.join(', ')}`, badOld.join() === '55,54,64,38,23,9,10,20,7' && T.chainCrossings(Sb, PBc, ch.rooms, stake, goal).length === 0, badOld.join());
+    // the types
+    for (const rule of ['v164', 'route']) { const tp = T.chainTypes(Sb, PBc, ch, rule, stake, goal);
+      ok(`rule ${rule}: no two Dioramas in a row in the chain (the second becomes Ascension)`, tp.types.every((t, k) => !(k > 0 && t === T.DIORAMA && tp.types[k - 1] === T.DIORAMA)), tp.types.join()); }
+    const t164 = T.chainTypes(Sb, PBc, ch, 'v164', stake, goal), trt = T.chainTypes(Sb, PBc, ch, 'route', stake, goal);
+    ok('V16.4 gives a Cake, an Ascension and a Diorama in the chain (AOK-1); Along the route only reports counts (7 / 8 / 6 and 0 / 17 / 4)', t164.counts.Cake > 0 && t164.counts.Asc > 0 && t164.counts.Dio > 0 && JSON.stringify(t164.counts) === '{"Cake":7,"Asc":8,"Dio":6}' && JSON.stringify(trt.route) === '{"Cake":0,"Asc":17,"Dio":4}', JSON.stringify([t164.counts, trt.route]));
+    ok('Along the route (Balanced types): the whole chain stays on ONE terrace (stake, goal and every door tile), so no room is Cake by route (the info says so)', trt.terraces.length === 1 && trt.route.Cake === 0, trt.terraces.join());
+    // 5 terraces: no chain without repeating a room; a room may then host two pieces
+    const P5 = { ...PBc, terraces: 5 }, S5 = run(P5), s5 = at(S5, 200, 62), g5 = at(S5, 25, 128), c5 = T.roomChain(S5, P5, s5, g5);
+    ok('5 terraces: there is no chain without repeating a room, so the repeat rule applies: room 6 appears twice, two pieces (14 pieces in 13 rooms)', c5.repeated.join() === '6' && c5.pieces.length === 14 && new Set(c5.rooms).size === 13 && T.chainWalk(S5, P5, c5, s5, g5).ok, JSON.stringify({ rep: c5.repeated, n: c5.pieces.length }));
+    for (const rule of ['v164', 'route']) { const tp = T.chainTypes(S5, P5, c5, rule, s5, g5), first = new Map(); let same = true; c5.rooms.forEach((r, k) => { if (!first.has(r)) first.set(r, tp.types[k]); else if (tp.types[k] !== first.get(r)) same = false; }); ok(`5 terraces, rule ${rule}: the repeated room has one type (its first visit) in both pieces`, same); }
+  }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();

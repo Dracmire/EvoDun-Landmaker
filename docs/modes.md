@@ -41,7 +41,7 @@ Room types (Diorama, Ascension, Cake) on a map with rooms: Cake rings, Ascension
 | technique (default) | `A` |
 | techniques offered | `box`, `A`, `B`, `C` |
 | compare | no |
-| main controls | `roomsPreset`, `dacAuto`, `t-cake`, `t-ascWalls`, `ascHeight`, `t-pocket`, `pocketFraming`, `pocketHeight`, `dacShow`, `dacView`, `gateMarks`, `anchors`, `anchorH`, `roomChips`, `typeTint` |
+| main controls | `roomsPreset`, `dacAuto`, `t-cake`, `t-ascWalls`, `ascHeight`, `t-pocket`, `pocketFraming`, `pocketHeight`, `dacShow`, `dacView`, `chainExtra`, `roomRule`, `cakeCut`, `gateMarks`, `anchors`, `anchorH`, `roomChips`, `typeTint` |
 | advanced controls (folded) | `roomsMinCore`, `rRadius`, `roomsCross`, `roomsIsoLimit`, `cakeLayers`, `cakeStep`, `cakePer`, `cakeSeam`, `roomBorders`, `roomTint`, `nowalk`, `dioOutline` |
 | slice controls | - |
 | terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |

@@ -415,7 +415,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const click = async (sel) => { await page.click(sel); await a.idle(); };
     const csig = () => ev(() => [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).map((c) => c.toDataURL('image/png')).join('|')); // the canvases only (the info line carries timings)
     const toggle = async (id) => { await ev((id) => document.querySelector(id).click(), id); await a.idle(); };
-    const ypx = () => ev(() => { const cv = [...document.querySelectorAll('#stage canvas')].find((c) => !c.closest('figure').hidden), g = cv.getContext('2d'), d = g.getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] >= 250 && d[i + 1] >= 232 && d[i + 1] <= 248 && d[i + 2] >= 40 && d[i + 2] <= 95) n++; return n; }); // the gate line colour (255, 240, 60)
+    const ypx = () => ev(() => { const cv = [...document.querySelectorAll('#stage canvas')].find((c) => !c.closest('figure').hidden), g = cv.getContext('2d'), d = g.getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] >= 55 && d[i] <= 90 && d[i + 1] >= 225 && d[i + 1] <= 245 && d[i + 2] >= 245) n++; return n; }); // the gate line colour (70, 235, 255) (was yellow 255, 240, 60 in PR A: the colour change was asked for in PR B, an announced consequence for this check, no threshold touched)
     const snap = (far) => ev((far) => { const e = window.__evo, S = e.S(), E = window.EVO, T = E.roomTypes, nm = (id) => { const o = S.types.rooms.get(id); return o ? (o.type === T.CAKE ? 'Cake' : o.type === T.DIORAMA ? 'Dio' : 'Asc') + ' ' + id : '?' + id; };
       const tile = (q) => (q.y - S.oy) * S.W + (q.x - S.ox), st0 = e.inc.stake ? tile(e.inc.stake) : -1;
       const routes = e.inc.objectives.map((q) => { const r = st0 >= 0 ? E.route(S, e.P, tile(q), st0) : null; return r ? r.length : -1; });
@@ -427,7 +427,8 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       for (let i = 0; i < S.n; i++) { if (S.void && S.void[i]) continue; if (anch(i)) anchN++; if (!S.chainGrey) continue;
         const ring = S.ringTile && S.ringTile[i] && claim && (() => { const c = claim.get(((((i / S.W) | 0) + S.oy) * fw + (i % S.W) + S.ox)); return c && chain.has(c.link.room); })();
         if (grey(i)) { greyN++; if (chain.has(S.roomMap[i])) chainGrey++; if (ring) ringKeptWrong++; } else if (!chain.has(S.roomMap[i]) && !ring && !anch(i)) offNotGrey++; }
-      return { chain: S.chain || null, ids: e.P.chainIds ? e.P.chainIds.length : 0, seqs: (e.P.chainSeqs || []).map((q) => q.map(nm)), routes, region: Array.from(S.region).join(','), levels: S.levelH.length, greyN, chainGrey, offNotGrey, ringKeptWrong, anchN, farTile, farRoute, anchInfo: S.anchorInfo || null, gateBits: S.gateBits ? Array.from(S.gateBits).filter(Boolean).length : 0, view: e.st.dacView, info: document.querySelector('#info').innerText }; }, far);
+      const rmAt = (q) => S.roomMap[tile(q)], dioRow = (() => { if (!e.P.chainInfo) return 0; const ty = e.P.chainInfo.rooms.map((r) => { const m = e.P.chainTypes && e.P.chainTypes.get(r), o = S.types.rooms.get(r); return m ? m.type : o && o.type; }); let n = 0; for (let k = 1; k < ty.length; k++) if (ty[k] === T.DIORAMA && ty[k - 1] === T.DIORAMA && ty[k] === ty[k - 1] && e.P.chainInfo.rooms[k] !== e.P.chainInfo.rooms[k - 1]) n++; return n; })();
+      return { stakeRoom: e.inc.stake ? rmAt(e.inc.stake) : 0, finalRoom: e.inc.objectives.length ? rmAt(e.inc.objectives[e.inc.objectives.length - 1]) : 0, dioRow, chain: S.chain || null, ids: e.P.chainIds ? e.P.chainIds.length : 0, seqs: e.P.chainInfo ? [e.P.chainInfo.rooms.map(nm)] : [], ci: e.P.chainInfo ? { rooms: e.P.chainInfo.rooms, pieces: e.P.chainInfo.pieces, blocked: e.P.chainInfo.blocked, bridges: e.P.chainInfo.bridges, shortest: e.P.chainInfo.shortest, walkOk: e.P.chainInfo.walkOk, repeated: e.P.chainInfo.repeated, v164: e.P.chainInfo.v164, route: e.P.chainInfo.route, terraces: e.P.chainInfo.terraces } : null, blockedPairs: (e.P.chainBlocked || []).map((x) => x.slice()), shortInfo: S.chain ? S.chain.blockedFaces : 0, routes, region: Array.from(S.region).join(','), levels: S.levelH.length, greyN, chainGrey, offNotGrey, ringKeptWrong, anchN, farTile, farRoute, anchInfo: S.anchorInfo || null, gateBits: S.gateBits ? Array.from(S.gateBits).filter(Boolean).length : 0, view: e.st.dacView, info: document.querySelector('#info').innerText }; }, far);
     await ev(() => window.__evo.setMode('rooms')); await a.idle();
     const out = {};
     for (const id of ['real_balanced', 'real_chain5']) {
@@ -435,7 +436,14 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       const types = new Set(c.seqs.flat().map((x) => x.split(' ')[0]));
       ok(`${id}: the Chain view is the default (selector Chain), the chain has ${c.ids} rooms and a route to both objectives`, c.view === 'chain' && c.chain && c.ids > 3 && c.routes.length === 2 && c.routes.every((r) => r > 0), JSON.stringify({ ids: c.ids, routes: c.routes }));
       ok(`${id}: the chain contains at least one Cake, one Ascension and one Diorama (AOK-1)`, types.has('Cake') && types.has('Asc') && types.has('Dio'), [...types].join());
-      console.log(`    ${id} CHAIN (stake first): ${c.seqs.map((q) => q.join(' > ')).join('  ||  ')}`);
+      console.log(`    ${id} CHAIN (stake first): ${c.seqs.map((q) => q.join(' > ')).join('  ||  ')}; ${c.ci.pieces} pieces, ${c.ci.blocked} blocked, ${c.ci.bridges} bridges skipped, walkable ${c.ci.walkOk}`);
+      const rep = c.ci.repeated || [], uniq = new Set(c.ci.rooms).size === c.ci.rooms.length;
+      ok(`${id}: the chain repeats no room unless there is no chain without it, and then the info says "room X appears twice, two pieces"`, (uniq && rep.length === 0) || (rep.length > 0 && rep.every((r) => new RegExp(`room ${r} appears twice, two pieces`).test(c.info)) && c.ci.rooms.length - new Set(c.ci.rooms).size === rep.length), JSON.stringify({ rep, info: c.info.slice(-200) }));
+      ok(`${id}: the chain is walkable with the tiles of its own rooms and without crossing a blocked edge (the check of the chain)`, c.ci.walkOk === true && /walkable with its own tiles and no blocked edge: yes/.test(c.info));
+      ok(`${id}: from the stake to the FINAL goal only: the chain ends in the room of the last objective and the other objective is not a goal`, c.ci.rooms[c.ci.rooms.length - 1] === c.finalRoom && c.ci.rooms[0] === c.stakeRoom, JSON.stringify([c.stakeRoom, c.finalRoom, c.ci.rooms[0], c.ci.rooms[c.ci.rooms.length - 1]]));
+      ok(`${id}: no two Dioramas in a row in the chain (the second shows as Ascension), in the rule in force`, c.dioRow === 0, String(c.dioRow));
+      ok(`${id}: ${c.ci.blocked} edges are blocked and drawn as closed (red) faces (${c.shortInfo} faces); every edge of the shortest path is blocked or a skipped bridge`, c.ci.blocked + c.ci.bridges === c.ci.shortest - 1 && (c.ci.blocked === 0 || c.shortInfo > 0), JSON.stringify([c.ci.blocked, c.ci.bridges, c.ci.shortest, c.shortInfo]));
+
       ok(`${id}: every off-chain land tile is flattened to the grey level, no chain-room tile is, and no ring tile of a chain Cake link is flattened`, c.greyN === c.chain.tiles && c.chainGrey === 0 && c.offNotGrey === 0 && c.ringKeptWrong === 0, JSON.stringify({ greyN: c.greyN, tiles: c.chain.tiles, chainGrey: c.chainGrey, offNotGrey: c.offNotGrey, ringKeptWrong: c.ringKeptWrong }));
       console.log(`    ${id}: ring tiles of the chain Cake links ${c.chain.chainRingTiles}, of them OUTSIDE the chain rooms ${c.chain.ringOutside} (kept); ring tiles of off-chain links flattened ${c.chain.ringOffChainLinks}; flattened tiles ${c.chain.tiles}; ramps dropped ${c.chain.stairsDropped}; gate faces ${c.chain.gateFaces}`);
       // the chain view is visual only: the same regions and routes as the whole map
@@ -482,6 +490,37 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       const r = await ev(() => { const S = window.__evo.S(); return { terH: window.__evo.P.terH, ramps: S.stairInfo.placed, walk: S.regionSizes.length }; });
       ok(`terrace height ${v}: the shape builds, ramps are carved (${r.ramps}) and the chain is still there`, r.terH === v && r.ramps > 0 && (await snap()).chain !== null, JSON.stringify(r)); }
     await ev(() => { const el = document.querySelector('#s-terH'); el.value = '1'; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }); await a.idle();
+
+    // ---- DAC v2 PR B: blocked edges, room type rule, Cake camera cut, manifest
+    {
+      await click('#examples button[data-id="real_balanced"]'); const bl = await snap(); const sB = await csig();
+      const rpx = () => ev(() => { const cv = [...document.querySelectorAll('#stage canvas')].find((c) => !c.closest('figure').hidden), g = cv.getContext('2d'), d = g.getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] >= 245 && d[i + 1] >= 35 && d[i + 1] <= 60 && d[i + 2] >= 35 && d[i + 2] <= 60) n++; return n; }); // the blocked-edge colour (255, 45, 45)
+      const r1 = await rpx(); await toggle('#t-gateMarks'); const r2 = await rpx(); await toggle('#t-gateMarks');
+      ok(`blocked edges: ${bl.ci.blocked} edges are drawn as red closed faces with the gate-marker toggle (${r1} red pixels on, ${r2} off)`, r1 - r2 > 30, JSON.stringify({ on: r1, off: r2 }));
+      await page.selectOption('#dacView', 'whole'); await a.idle();
+      const br = await ev((pairs) => { const e = window.__evo, S = e.S(), T = window.EVO.roomTypes, g = T.roomGraph(S, e.P), rk = (x, y) => Math.min(x, y) * 100000 + Math.max(x, y); const conn = (a, b, ban) => { const seen = new Set([a]), q = [a]; for (let h = 0; h < q.length; h++) for (const v of g.adj.get(q[h]) || []) { if (seen.has(v) || rk(q[h], v) === ban) continue; seen.add(v); q.push(v); } return seen.has(b); }; return pairs.map(([a, b]) => conn(a, b, rk(a, b))); }, bl.blockedPairs);
+      ok(`blocked edges: none of the ${bl.blockedPairs.length} is a bridge (read in the whole shape: removing it keeps its ends connected)`, br.length === bl.blockedPairs.length && br.length > 0 && br.every(Boolean), JSON.stringify(br));
+      await page.selectOption('#dacView', 'chain'); await a.idle();
+      // the rule Along the route: the info says why there is no Cake by route
+      await page.selectOption('#roomRule', 'route'); await a.idle(); const rt = await snap();
+      ok(`room type rule Along the route (Balanced types): ${JSON.stringify(rt.ci.route)}; the info says "the route stayed on terrace T the whole way: no Cake by route"`, rt.ci.route.Cake === 0 && /the route stayed on terrace \d+ the whole way: no Cake by route/.test(rt.info), rt.info.slice(-260));
+      ok('room type rule V16.4 (the default) and Along the route report the same chain and both counts', JSON.stringify(rt.ci.rooms) === JSON.stringify(bl.ci.rooms) && JSON.stringify(rt.ci.v164) === JSON.stringify(bl.ci.v164), JSON.stringify([rt.ci.v164, bl.ci.v164]));
+      await page.selectOption('#roomRule', 'v164'); await a.idle();
+      // the Cake camera cut: Off = today (identical pixels), Quadrant and Half change the picture, and they differ from each other
+      const sOff = await csig(); await page.selectOption('#cakeCut', 'quadrant'); await a.idle(); const sQ = await csig(); await page.selectOption('#cakeCut', 'half'); await a.idle(); const sH = await csig(); await page.selectOption('#cakeCut', 'off'); await a.idle(); const sO2 = await csig();
+      ok('Cake camera cut: Off restores the exact picture, Quadrant and Half change it and differ from each other', sOff === sB && sO2 === sOff && sQ !== sOff && sH !== sOff && sQ !== sH);
+      // manifest round trip: written only when not the default, applied on load, absent = the defaults
+      const vb0 = await ev(() => window.__evo.viewerBlock());
+      ok('manifest: chainExtra, roomRule and cakeCut are not written while at their defaults (3, V16.4, off)', vb0.chainExtra === undefined && vb0.roomRule === undefined && vb0.cakeCut === undefined, JSON.stringify(vb0));
+      await a.slider('chainExtra', 5); await page.selectOption('#roomRule', 'route'); await page.selectOption('#cakeCut', 'half'); await a.idle();
+      const vb1 = await ev(() => window.__evo.viewerBlock());
+      ok('manifest: with N 5, Along the route and the Half cut the viewer block writes chainExtra 5, roomRule "route", cakeCut "half"', vb1.chainExtra === 5 && vb1.roomRule === 'route' && vb1.cakeCut === 'half', JSON.stringify(vb1));
+      await ev((vb) => window.__evo.applyViewerBlock(vb), vb0); const d0 = await ev(() => ({ n: window.__evo.P.chainExtra, r: window.__evo.st.roomRule, c: window.__evo.P.cakeCut }));
+      ok('manifest: a block without the keys loads the defaults', d0.n === 3 && d0.r === 'v164' && d0.c === 'off', JSON.stringify(d0));
+      await ev((vb) => window.__evo.applyViewerBlock(vb), vb1); const d1 = await ev(() => ({ n: window.__evo.P.chainExtra, r: window.__evo.st.roomRule, c: window.__evo.P.cakeCut }));
+      ok('manifest: the written block applies N 5, Along the route and the Half cut on load (round trip)', d1.n === 5 && d1.r === 'route' && d1.c === 'half', JSON.stringify(d1));
+      await ev((vb) => window.__evo.applyViewerBlock(vb), vb0); await a.idle();
+    }
 
     // manifest: dacView and anchors
     let vb = await ev(() => window.__evo.viewerBlock());

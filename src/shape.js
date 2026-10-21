@@ -349,7 +349,7 @@
       build(); S.retryBroke += S.conns.reduce((a, c, i) => a + (okBefore[i] && c.status !== 'ok' ? 1 : 0), 0); S.unmerged += add.filter(Boolean).length; S.isoRampsDropped += useless.length;
     }
     if (RL && E.roomTypes) { // room types (classification always, tint and info) and the Cake geometry (P.cake): after the stairs, before the levels are counted
-      const ty = E.roomTypes.classify(RL, P); S.types = ty; S.roomType = new Uint8Array(n);
+      const ty0 = E.roomTypes.classify(RL, P); S.types = ty0; const ty = (P.chainTypes && P.chainIds && P.chainIds.length && !pocketIds) ? E.roomTypes.overrideTypes(ty0, P.chainTypes, RL) : ty0; S.roomType = new Uint8Array(n);
       for (let i = 0; i < n; i++) if (!(vd && vd[i])) S.roomType[i] = ty.type[(((i / W) | 0) + S.oy) * S.mapW + (i % W) + S.ox] || 0;
       if (P.cake) E.roomTypes.cake(S, P, RL, q, ty);
       if (P.ascWalls && S.roomMap && S.roomKind && !pocketIds) S.ascWalls = E.roomTypes.ascWalls(S, P, RL, ty);
@@ -884,6 +884,7 @@
     };
     return (S._walk = neighbors);
   }
+  E.walkGraph = walkGraph; // the neighbours function of the walking graph (the room pieces of the DAC chain read it)
   /* Shortest route (fewest tiles) from tile a to tile b over the walking graph, or null. Tiles are window indices. */
   E.route = function (S, P, a, b) {
     if (a === b) return [a];

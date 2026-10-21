@@ -1,7 +1,7 @@
 /* UI wiring */
 (function (E) {
   const $ = (s) => document.querySelector(s);
-  const P = { anchors: false, anchorH: 0.5, terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', wallPass: 't3', wallExtrude: 0.25, wallStrata: 3, wallColumn: 1.2, t2Spacing: 0.9, t2Rows: 6, t2Group: 1.0, t2Jitter: 0.4, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, backdrop: false, backdropGap: 0, backdropHeight: 2, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
+  const P = { chainExtra: 3, cakeCut: 'off', anchors: false, anchorH: 0.5, terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', wallPass: 't3', wallExtrude: 0.25, wallStrata: 3, wallColumn: 1.2, t2Spacing: 0.9, t2Rows: 6, t2Group: 1.0, t2Jitter: 0.4, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, backdrop: false, backdropGap: 0, backdropHeight: 2, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
   const O = { gateMarks: true, outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, dress: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
      persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
@@ -20,7 +20,7 @@
     ['Wall pass (technique C)', [['wallExtrude', 'Wall extrusion', 0.10, 0.40, 0.01], ['wallStrata', 'T3 · Strata per terrace', 2, 4, 1], ['wallColumn', 'T3 · Column spacing (tiles)', 0.8, 2.0, 0.1], ['t2Spacing', 'T2 · Lateral spacing (tiles)', 0.6, 1.5, 0.05], ['t2Rows', 'T2 · Height passes', 5, 10, 1], ['t2Group', 'T2 · Group width (tiles)', 0.6, 2.0, 0.1], ['t2Jitter', 'T2 · Jitter', 0, 0.6, 0.05]]],
     ['Technique A / B', [['smooth', 'A · Chaikin passes', 0, 4, 1], ['radius', 'B · Field blur (tiles)', 0, 2.5, 0.1]]],
     ['Passes', [['climb', 'Climb limit, sub-terraces (provisional)', 1, 5, 1], ['gateThr', 'Gate slope threshold', 0, 0.3, 0.005], ['gateMin', 'Min gate size, tiles', 1, 20, 1], ['passGap', 'Stair spacing (long gates)', 3, 20, 1], ['stairStyle', 'Style: 0 steps · 1 ramp', 0, 1, 1], ['rampDepth', 'Ramp depth, tiles (fixed)', 1, 4, 1], ['tread', 'Tread rise, sub-terraces (steps only)', 1, 5, 1], ['stairW', 'Stair / ramp width, tiles (0 = none; steps use up to 3)', 0, 5, 1]]],
-    ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['anchorH', 'Anchor height, terraces (non-walkable raised)', 0.25, 2, 0.05], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 6, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1], ['pocketHeight', 'Pocket height (decoration relief x)', 1, 4, 0.1], ['ascHeight', 'Ascension wall height (absolute)', 0.5, 3, 0.1]]],
+    ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['anchorH', 'Anchor height, terraces (non-walkable raised)', 0.25, 2, 0.05], ['chainExtra', 'Chain: extra rooms per leg (N)', 0, 8, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 10, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1], ['pocketHeight', 'Pocket height (decoration relief x)', 1, 4, 0.1], ['ascHeight', 'Ascension wall height (absolute)', 0.5, 3, 0.1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
   const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['gateMarks', 'Gate markers (chain view)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI'], ['contract', 'Art contract (Stage placeholders: body, wrapper, footprint, props)'], ['dress', 'Wall dressing (strata, lip, foot, base rocks; Box, A, B, C)']];
@@ -30,7 +30,7 @@
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
   const NO_MODES = !!window.EVO_NO_MODES; // test-only flag (tools/ui/common.js): the whole panel as before the modes layer
-  const st = { dacAuto: true, dacShow: 'all', dacView: 'chain', modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const st = { dacAuto: true, dacShow: 'all', dacView: 'chain', roomRule: 'v164', modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -87,7 +87,7 @@
   }
   async function applyScenario(sc, mode) { // mode (optional, the modes layer): the example of a mode; without it this is the old scenario button, unchanged
     if (sc.src && !(await selectSource(sc.src))) return;
-    P.chainIds = null; P.chainSeqs = null; P.chainKey = ''; // the chain view belongs to the state of mode 2 (D23): an example starts without one, draw() derives it from the routes
+    P.chainIds = null; P.chainSeqs = null; P.chainKey = ''; P.chainTypes = null; P.chainBlocked = null; P.chainFail = ''; P.chainInfo = null; // the chain view belongs to the state of mode 2 (D23): an example starts without one, draw() derives it from the routes
     const tick = (id, v) => { const el = $('#' + id); if (el) el.checked = v; };
     // the base every scenario starts from (so the same click always gives the same state): the defaults of the parameters the scenarios touch
     setParam('terraces', 5); setParam('spread', 1); setParam('minPlateau', 5); P.spreadCentre = 'largest'; P.cake = false; P.ascWalls = false; O.contract = false; tick('t-cake', false); tick('t-ascWalls', false); tick('t-contract', false);
@@ -105,7 +105,7 @@
       O.typeTint = !!sc.tint; O.dioOutline = !!sc.outline; O.roomBorders = true; tick('t-typeTint', O.typeTint); tick('t-dioOutline', O.dioOutline); tick('t-roomBorders', true); // the mode's base Display state (room borders are on by default in the code: O.roomBorders = true), so re-clicking an example always gives the same look
       if (sc.stake) inc.stake = { x: sc.stake.x, y: sc.stake.y }; if (sc.objectives) inc.objectives = sc.objectives.map((o) => Object.assign({}, o));
       st.dacShow = 'all'; const ds = $('#dacShow'); if (ds) ds.value = 'all';
-      st.dacView = sc.view || 'chain'; const dv = $('#dacView'); if (dv) dv.value = st.dacView; // the default of mode 2 is the Chain view (D23)
+      st.dacView = sc.view || 'chain'; const dv = $('#dacView'); if (dv) dv.value = st.dacView; st.roomRule = 'v164'; const rr = $('#roomRule'); if (rr) rr.value = 'v164'; setParam('chainExtra', 3); P.cakeCut = 'off'; const cc = $('#cakeCut'); if (cc) cc.value = 'off'; // the default of mode 2 is the Chain view (D23)
       st.dacAuto = true; const da = $('#dacAuto'); if (da) da.checked = true; applyDacRule(sc.type);
     }
     syncChips(); syncRoomChips(); refreshMessage(); invalidate(true);
@@ -120,11 +120,12 @@
     sel.value = Object.keys(ROOMS_PRESETS).find((n) => Object.entries(ROOMS_PRESETS[n]).every(([k, v]) => P[k] === v)) || 'custom';
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; b.dacView = st.dacView; if (P.anchors) b.anchors = true; if (P.anchorH !== 0.5) b.anchorH = P.anchorH; } if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; b.dacView = st.dacView; if (P.chainExtra !== 3) b.chainExtra = P.chainExtra; if (st.roomRule !== 'v164') b.roomRule = st.roomRule; if (P.cakeCut !== 'off') b.cakeCut = P.cakeCut; if (P.anchors) b.anchors = true; if (P.anchorH !== 0.5) b.anchorH = P.anchorH; } if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
     for (const k of ['terraces', 'roomsMinCore', 'rRadius', 'minPlateau']) setParam(k, w[k]);
+    setParam('chainExtra', w.chainExtra !== undefined ? w.chainExtra : 3); st.roomRule = w.roomRule === 'route' ? 'route' : 'v164'; const rru = $('#roomRule'); if (rru) rru.value = st.roomRule; P.cakeCut = ['quadrant', 'half'].includes(w.cakeCut) ? w.cakeCut : 'off'; const ccu = $('#cakeCut'); if (ccu) ccu.value = P.cakeCut; // absent = 3, V16.4, Off
     P.anchors = w.anchors === true; const tan = $('#t-anchors'); if (tan) tan.checked = P.anchors; setParam('anchorH', w.anchorH !== undefined ? w.anchorH : 0.5); // absent = off, 0.5
     st.dacView = w.dacView === 'chain' ? 'chain' : 'whole'; const dvw = $('#dacView'); if (dvw) dvw.value = st.dacView; // absent = the whole map (a manifest saved before the Chain view)
     st.dacShow = ['cake', 'ascension', 'diorama'].includes(w.dacShow) ? w.dacShow : 'all'; const dsh = $('#dacShow'); if (dsh) dsh.value = st.dacShow; // absent = All
@@ -152,6 +153,10 @@
         const lvw = document.createElement('label'); lvw.className = 'sl'; lvw.innerHTML = '<span>DAC view</span><select id="dacView"><option value="chain">Chain</option><option value="whole">Whole map</option></select>';
         if (NO_MODES) lvw.hidden = true; // the panel without modes has no such selector
         lvw.querySelector('select').value = st.dacView; lvw.querySelector('select').addEventListener('change', (e) => { st.dacView = e.target.value; refreshMessage(); invalidate(true); }); sl.appendChild(lvw);
+        const lrr = document.createElement('label'); lrr.className = 'sl'; lrr.innerHTML = '<span>Room type rule (chain)</span><select id="roomRule"><option value="v164">V16.4</option><option value="route">Along the route</option></select>';
+        if (NO_MODES) lrr.hidden = true; lrr.querySelector('select').value = st.roomRule; lrr.querySelector('select').addEventListener('change', (e) => { st.roomRule = e.target.value; refreshMessage(); invalidate(true); }); sl.appendChild(lrr);
+        const lcc = document.createElement('label'); lcc.className = 'sl'; lcc.innerHTML = '<span>Cake camera cut</span><select id="cakeCut"><option value="off">Off</option><option value="quadrant">Quadrant</option><option value="half">Half</option></select>';
+        if (NO_MODES) lcc.hidden = true; lcc.querySelector('select').value = P.cakeCut; lcc.querySelector('select').addEventListener('change', (e) => { P.cakeCut = e.target.value; refreshMessage(); invalidate(true); }); sl.appendChild(lcc);
         const lan = document.createElement('label'); lan.className = 'tg'; lan.innerHTML = '<input type="checkbox" id="t-anchors"><span>Non-walkable as anchors (raised, grey; needs Rooms)</span>';
         if (NO_MODES) lan.hidden = true; // mode 2 only (the panel without modes has no such checkbox)
         const ian = lan.querySelector('input'); ian.checked = !!P.anchors; ian.addEventListener('change', () => { P.anchors = ian.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lan);
@@ -179,7 +184,7 @@
       for (const [k, label, mn, mx, step] of list) {
         const row = document.createElement('label'); row.className = 'sl';
         row.innerHTML = `<span>${label}</span><output id="o-${k}"></output><input type="range" id="s-${k}" min="${mn}" max="${mx}" step="${step}">`;
-        if (NO_MODES && k === 'anchorH') row.hidden = true; // mode 2 only
+        if (NO_MODES && (k === 'anchorH' || k === 'chainExtra')) row.hidden = true; // mode 2 only
         sl.appendChild(row);
         const inp = row.querySelector('input'), out = row.querySelector('output');
         inp.value = P[k]; out.textContent = P[k];
@@ -261,10 +266,14 @@
      consecutive equal ids (a room visited twice, not consecutively, is listed twice). Every room is listed; only above ROUTE_CAP rooms the MIDDLE is elided, so the first (the stake's) and the last (the objective's) stay visible. */
   /* CHAIN VIEW (D23): on in mode 2 with the selector on Chain, the whole map (no room chosen) and the rooms layer on */
   const dacChainOn = () => !NO_MODES && st.modeId === 'rooms' && st.dacView === 'chain' && !!P.rooms && !sliceSel.rooms.size;
-  function chainFromRoutes(inc) { // the room sequences (stake first) of every objective that has a route, and the set of their rooms
-    if (!S || !S.roomMap) return null; const seqs = [], ids = new Set();
-    for (const ob of inc.objectives) if (ob.route) { const sq = routeRoomIds(ob.route); if (sq.length) { seqs.push(sq); for (const r of sq) ids.add(r); } }
-    return ids.size ? { ids: [...ids].sort((a, b) => a - b), seqs } : null;
+  const rlIds = new WeakMap(); let rlSeq = 0;
+  function chainGoals() { // the stake tile and the FINAL goal tile (the last objective placed) as window indices: the other objectives are not intermediate goals (user, 2026-10-20); null without both on room terrain
+    if (!S || !S.roomMap || !inc.stake || !inc.objectives.length) return null; const at = (m) => { const x = m.x - S.ox, y = m.y - S.oy; return x < 0 || y < 0 || x >= S.W || y >= S.H ? -1 : y * S.W + x; };
+    const a = at(inc.stake), g = at(inc.objectives[inc.objectives.length - 1]); return a < 0 || g < 0 || !(S.roomMap[a] > 0) || !(S.roomMap[g] > 0) ? null : { stake: a, goal: g };
+  }
+  function chainSig() { // what the chain depends on: the stake and the final goal, N, the type rule, the rooms layer and the ramp parameters (the graph is read from the WHOLE shape: a rebuilt chain shape is flattened and cannot be read again)
+    const gs = chainGoals(); if (!gs || !S.rooms) return '';
+    return [gs.stake, gs.goal, P.chainExtra, P.chainNodes || '', st.roomRule, st.pack, P.roomsMinCore, P.rRadius, P.minPlateau, P.roomsCross, P.terraces, P.stairW, P.rampDepth, P.stairStyle].join('|');
   }
   const ROUTE_CAP = 30, ROUTE_KEEP = 10;
   const roomsView = () => !NO_MODES && st.modeId === 'rooms' && !!(S && S.roomMap && S.types);
@@ -595,8 +604,20 @@
     }
     const incursion = computeIncursion(); O.incursion = incursion;
     if (!NO_MODES) { // CHAIN VIEW (D23): the rooms the routes cross, derived from the routes of the shape just built; a change rebuilds the shape ONCE (the routes of the rebuilt shape are the same: the walking graph is built before the flattening)
-      const ch = st.modeId === 'rooms' && dacChainOn() ? chainFromRoutes(incursion) : null, key = ch ? ch.ids.join(',') : '';
-      if (key !== (P.chainKey || '')) { P.chainKey = key; P.chainIds = ch ? ch.ids : null; P.chainSeqs = ch ? ch.seqs : null; invalidate(true); return; }
+      const sig = st.modeId === 'rooms' && dacChainOn() ? chainSig() : '';
+      if (sig !== (P.chainKey || '')) {
+        if (P.chainIds || S.chain) { P.chainIds = null; P.chainSeqs = null; P.chainTypes = null; P.chainBlocked = null; P.chainInfo = null; P.chainKey = ''; P.chainFail = ''; invalidate(true); return; } // the shape in hand is flattened: back to the whole one first
+        P.chainKey = sig; P.chainFail = '';
+        if (sig) {
+          const gl = chainGoals(), res = E.roomTypes.roomChain(S, P, gl.stake, gl.goal, P.chainNodes === 'room' ? 'room' : undefined);
+          if (res.fail) P.chainFail = res.fail;
+          else {
+            const tp = E.roomTypes.chainTypes(S, P, res, st.roomRule, gl.stake, gl.goal), wk = E.roomTypes.chainWalk(S, P, res, gl.stake, gl.goal);
+            P.chainIds = [...new Set(res.rooms)].sort((a, b) => a - b); P.chainSeqs = [res.pieces]; P.chainBlocked = res.blocked; P.chainTypes = tp.map; P.chainInfo = { rooms: res.rooms, pieces: res.pieces.length, blocked: res.blocked.length, bridges: res.bridges, cut: res.cut, unblocked: res.unblocked, shortest: res.shortest, counts: tp.counts, v164: tp.v164, route: tp.route, relabeled: tp.relabeled, rule: st.roomRule, walkOk: wk.ok, walkLen: wk.length, repeated: res.repeated, terraces: tp.terraces };
+            invalidate(true); return;
+          }
+        }
+      }
     }
     $('#incInfo').innerHTML = (incursion.lines.join('<br>') || (inc.mode ? '' : 'No stake or objectives.')) + (incursion.roomLines.length ? (incursion.lines.length ? '<br>' : '') + incursion.roomLines.join('<br>') : '');
     const volOn = !!(E.volume && E.volume.has(raw) && st.macro !== 'off'), volView = volOn && view().kind === 'ortho', mvk = { kind: st.macro, floor: st.macroFloor }; // crystallizer 6: the volume view is ONE panel, orthographic cameras only (Cam 6 / 7 show the heightmap)
@@ -737,17 +758,17 @@
     let x = `<br><b>Room types</b> (V16.4 rule, neighbours instead of lobby platforms): ${c.cake} Cake (${c.bowl} bowls, ${c.pyramid} pyramids) · ${c.diorama} Diorama · ${c.ascension} Ascension of ${t.rooms.size} rooms` + (c.dioDemoted ? ` (rule "Diorama never touches Diorama": ${c.dioDemoted} Dioramas of ${c.diorama + c.dioDemoted} became Ascension, ${c.dioDemotedTiles} tiles)` : '');
     if (P.cake && k) x += ` · Cake rings ON: ${k.down} bowl + ${k.up} pyramid links built, ${k.flat} links without rings, ${k.tiles} ring tiles, ${k.levelsAdded} levels added` + (k.conflicts ? `, ${k.conflicts} tiles claimed twice` : '');
     if (!NO_MODES && st.modeId === 'rooms') x += ` · <b>Framing by room type</b>: ` + (st.dacAuto ? `on (${[P.cake && 'Cake rings', P.ascWalls && 'Ascension walls', P.pocket && 'Pocket'].filter(Boolean).join(', ') || 'none'}; ${sliceSel.rooms.size ? sliceSel.rooms.size + ' room' + (sliceSel.rooms.size > 1 ? 's' : '') + ' chosen' : 'whole map: each framing acts on the rooms of its own type'})` : 'off (the three switches are set by hand)');
-    if (!NO_MODES && st.modeId === 'rooms') x += ' · <b>DAC view</b>: ' + (st.dacView !== 'chain' ? 'Whole map' : sliceSel.rooms.size ? 'Chain (a room is chosen: the Chain view applies to the whole map, showing the room)' : S.chain ? chainText() : 'Chain (needs a stake and an objective with a route: showing the whole map)');
+    if (!NO_MODES && st.modeId === 'rooms') x += ' · <b>DAC view</b>: ' + (st.dacView !== 'chain' ? 'Whole map' : sliceSel.rooms.size ? 'Chain (a room is chosen: the Chain view applies to the whole map, showing the room)' : S.chain && P.chainInfo ? chainText() : P.chainFail ? 'Chain (' + P.chainFail + ': showing the whole map)' : 'Chain (needs a stake and an objective in rooms: showing the whole map)');
     return x;
   }
   function chainText() {
-    const c = S.chain, T = E.roomTypes, cnt = { Cake: 0, Dio: 0, Asc: 0 }; for (const r of P.chainIds) { const o = S.types.rooms.get(r); if (o) cnt[o.type === T.CAKE ? 'Cake' : o.type === T.DIORAMA ? 'Dio' : 'Asc']++; }
-    return `Chain of ${c.rooms} rooms (${cnt.Cake} Cake, ${cnt.Asc} Ascension, ${cnt.Dio} Diorama), ${c.tiles} tiles flattened to the grey ground, ${c.gateFaces} gate faces` + (c.chainRingTiles ? `, ${c.chainRingTiles} ring tiles of the chain Cakes (${c.ringOutside} outside the chain rooms, kept)` : '') + (c.stairsDropped ? `, ${c.stairsDropped} ramps outside the chain not drawn` : '');
+    const c = S.chain, ci = P.chainInfo, f = (o) => `${o.Cake} Cake / ${o.Asc} Asc / ${o.Dio} Dio`, land = c.kept + c.tiles, T = E.roomTypes;
+    return `Chain of ${ci.rooms.length} rooms (${f(ci.counts)}; rule ${ci.rule === 'route' ? 'Along the route' : 'V16.4'}: V16.4 gives ${f(ci.v164)}, Along the route ${f(ci.route)}${ci.relabeled ? `; ${ci.relabeled} second Diorama shown as Ascension` : ''}), stake to the final goal only (shortest ${ci.shortest} pieces, chain ${ci.pieces} pieces), N ${P.chainExtra}${ci.cut ? ', the search bound cut it' : ''}${ci.repeated && ci.repeated.length ? '; no chain without repeating a room: ' + ci.repeated.map((r) => `room ${r} appears twice, two pieces (one type: the one of its first visit)`).join(', ') : ''}${ci.rule === 'route' && ci.route.Cake === 0 ? (ci.terraces.length === 1 ? `; the route stayed on terrace ${ci.terraces[0]} the whole way: no Cake by route` : '; the route changes terrace only on the ramps between rooms, never inside a room: no Cake by route') : ''}, ${ci.blocked} edges blocked (${ci.bridges} bridges skipped${ci.unblocked ? ', unblocked: no path without them' : ''}; chain walkable with its own tiles and no blocked edge: ${ci.walkOk ? 'yes, ' + ci.walkLen + ' tiles' : 'NO'}; the tile route of the info may still cross a blocked edge), ${(100 * c.kept / land).toFixed(1)} % of the land kept, ${c.tiles} tiles flattened, ${c.gateFaces} gate faces, ${c.blockedFaces || 0} blocked faces` + (c.chainRingTiles ? `, ${c.chainRingTiles} ring tiles of the chain Cakes (${c.ringOutside} outside the chain rooms, kept)` : '') + (c.stairsDropped ? `, ${c.stairsDropped} ramps outside the chain not drawn` : '');
   }
   /* the live state the control requirements are evaluated from (src/controls.js): after every recompute / redraw */
   function controlsCtx() {
     const raw = packs[st.pack] && packs[st.pack].pack, T = S && S.types ? S.types.counts : null, F = (S && S.fields) || {}, any = (a) => !!(a && a.some((v) => v));
-    return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket, dacAuto: dacOn(), dacWhole: dacOn() && !sliceSel.rooms.size, dacView: st.dacView, chainOn: !!(S && S.chain), anchors: !!P.anchors,
+    return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket, dacAuto: dacOn(), dacWhole: dacOn() && !sliceSel.rooms.size, dacView: st.dacView, chainOn: !!(S && S.chain), chainView: dacChainOn(), anchors: !!P.anchors,
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
       floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset, macro: !!(E.volume && E.volume.has(raw)), macroView: st.macro, volOn: volActive() };
@@ -834,7 +855,7 @@
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
-    window.__evo = { fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});
