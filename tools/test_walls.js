@@ -48,7 +48,7 @@ const PB = { terraces: 3, subs: 3, terH: 1, subH: 0.22, minPlateau: 120, minSub:
   {
     const ids = (w) => w.faces.map((f) => f.i + '_' + f.j + '_' + f.dir).join(','), base = on.ascWalls, key = (w) => w.faces.map((f) => `${f.i},${f.j},${f.dir},${f.hb}`).join(';');
     const g0 = E.shape(mk(), { ...PB, ascWalls: true, ascGate: 0, ascCut: 0.15 }, null).ascWalls;
-    ok('ascGate 0 and ascCut 0.15 (the defaults) reproduce today: the same faces, runs and heights, no gate info, lowH 0.15', key(g0) === key(base) && g0.runs.length === base.runs.length && !g0.info.gateInfo && g0.lowH === 0.15 && g0.gate === 0);
+    ok('ascGate 0 and ascCut 0.15 (the defaults) reproduce today: the same faces, runs and heights, no gate info, lowH 0.15', key(g0) === key(base) && g0.runs.length === base.runs.length && !g0.info.gateInfo && g0.lowH === 0.15 && g0.gate === 0 && base.lowH === 0.15 && base.gate === 0); // (base: P.ascCut and P.ascGate absent = the defaults)
     const gs = [1, 3, 5].map((k) => E.shape(mk(), { ...PB, ascWalls: true, ascGate: k }, null)); const ns = gs.map((S) => S.ascWalls.faces.length);
     ok(`ascGate 1 / 3 / 5: faces ${ns.join(' / ')} (today ${base.faces.length}): more walls than today, fewer as the gate widens`, ns[0] > ns[1] && ns[1] > ns[2] && ns[2] > base.faces.length, ns.join());
     for (const [k, S] of [1, 3, 5].map((k, q) => [k, gs[q]])) { const w = S.ascWalls, gi = w.info.gateInfo, W2 = S.W;
