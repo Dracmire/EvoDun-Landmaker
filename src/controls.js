@@ -107,6 +107,8 @@
     e('cakeSeam', '#s-cakeSeam', '2 Room types', ALL, [...CAKE, 'cakeOn'], 'Cake: seam window of a bowl, in tiles.'),
     e('t-ascWalls', '#t-ascWalls', '2 Room types', ALL, ASC, 'Ascension walls: thin walls on the blocking faces of Ascension rooms; low on the faces that face the camera.', { lock: DAC_LOCK }),
     e('ascHeight', '#s-ascHeight', '2 Room types', ALL, [...ASC, 'ascOn'], 'Ascension wall height (absolute).'),
+    e('ascCut', '#s-ascCut', '2 Room types', ALL, [...ASC, 'ascOn'], 'Wall cut height: the height of the LOW walls on the faces that face the camera (the Zelda cut). 0.15 = the usual cut; the full wall height = no cut. Visual only.'),
+    e('ascGate', '#s-ascGate', '2 Room types', ALL, [...ASC, 'ascOn'], 'Gate width, tiles: 0 = every room transition of an Ascension room stays open. 1-5 = only a gate of that width stays open around each crossing (used transitions, the drawn routes, the chain gates); the rest of the border becomes wall, so the room reads as an enclosure. Visual only: walking, routes and the tree do not change.'),
     e('t-pocket', '#t-pocket', '2 Room types', ALL, POCKET, 'Pocket view: a chosen Diorama room (chip, or a click in the world) is drawn as its pocket: the same room with generated surroundings.', { lock: DAC_LOCK }),
     e('pocketFraming', '#pocketFraming', '2 Room types', ALL, [...POCKET, 'pocketOn'], 'Pocket framing: Cerro (hill), Lago (lake), Cascada (falls), Isla (island), Caída (drop). Auto = by the room\'s shape. It changes nothing until a Diorama room is chosen.'),
     e('pocketHeight', '#s-pocketHeight', '2 Room types', ALL, [...POCKET, 'pocketOn'], 'Relief multiplier of the pocket\'s decoration only. It changes nothing until a Diorama room is chosen.'),

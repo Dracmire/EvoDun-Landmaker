@@ -570,5 +570,40 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     ok('back under the budget (5 terraces, spread 1, T3): the wall pass is built again and the skip note is gone', !back.skipped && !/Wall pass of C skipped/.test(back.info) && /Wall pass/.test(back.info), back.info.slice(-200));
   }
 
+  // ---- DAC v2 PR B2 (D28): the Ascension gate width (ascGate) and the cut height (ascCut)
+  {
+    const csig2 = () => ev(() => [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).map((c) => c.toDataURL('image/png')).join('|'));
+    const wallsInfo = () => ev(() => { const e = window.__evo, S = e.S(), E = window.EVO, W = S.W, w = S.ascWalls; if (!w) return null; const ws = new Set(w.faces.map((f) => f.i + '_' + f.j)), tile = (q) => (q.y - S.oy) * W + (q.x - S.ox), st = tile(e.inc.stake);
+      let routeOnWall = 0, routeCross = 0, gateOnWall = 0, gateFaces = 0; const OFFS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+      for (const o of e.inc.objectives) { const r = E.route(S, e.P, tile(o), st); if (!r) continue; for (let k = 0; k + 1 < r.length; k++) { const u = r[k], v = r[k + 1]; if (Math.abs((u % W) - (v % W)) + Math.abs(((u / W) | 0) - ((v / W) | 0)) !== 1) continue; if (S.roomMap[u] === S.roomMap[v]) continue; routeCross++; if (ws.has(Math.min(u, v) + '_' + Math.max(u, v))) routeOnWall++; } }
+      if (S.gateBits) for (let i = 0; i < S.n; i++) { const gb = S.gateBits[i]; if (!gb) continue; const x = i % W, y = (i / W) | 0; for (let b = 0; b < 4; b++) if (gb >> b & 1) { const j = (y + OFFS[b][1]) * W + x + OFFS[b][0]; gateFaces++; if (ws.has(Math.min(i, j) + '_' + Math.max(i, j))) gateOnWall++; } }
+      return { faces: w.faces.length, runs: w.runs.length, gi: w.info.gateInfo || null, lowH: w.lowH, routeCross, routeOnWall, gateFaces, gateOnWall, ascGate: e.P.ascGate }; });
+    const slide = async (id, v) => { await ev(({ id, v }) => { const el = document.querySelector('#s-' + id); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, { id, v }); await a.idle(); };
+    await ev(() => window.__evo.setMode('rooms')); await a.idle();
+    for (const id of ['real_balanced', 'real_chain5']) {
+      await page.click(`#examples button[data-id="${id}"]`); await a.idle();
+      const s0 = await csig2(), w0 = await wallsInfo();
+      ok(`${id}: the gate and cut sliders exist in mode 2 and their defaults are 0 and 0.15`, w0 && w0.ascGate === 0 && w0.lowH === 0.15 && !w0.gi, JSON.stringify(w0));
+      for (const N of [1, 3, 5]) { await slide('ascGate', N); const w = await wallsInfo(), sN = await csig2();
+        ok(`${id}, ascGate ${N}: ${w.faces} wall faces in ${w.runs} chains (today ${w0.faces} / ${w0.runs}), info.gateOk, ${w.routeCross} route crossings of a room border: 0 of them on a wall face`, w.gi && w.gi.gateOk === true && w.routeCross > 0 && w.routeOnWall === 0 && w.faces >= w0.faces && sN !== s0, JSON.stringify({ faces: w.faces, gi: w.gi, routeCross: w.routeCross, routeOnWall: w.routeOnWall }));
+        ok(`${id}, ascGate ${N}: the chain gate faces (the cyan ones, ${w.gateFaces}) carry no wall`, w.gateOnWall === 0, JSON.stringify([w.gateFaces, w.gateOnWall]));
+      }
+      await slide('ascGate', 0); const s1 = await csig2();
+      ok(`${id}: ascGate back to 0 restores the exact picture (the default is today)`, s1 === s0);
+      await slide('ascCut', 0.5); const sc5 = await csig2(), wc = await wallsInfo(); await slide('ascCut', 3); const scF = await csig2(); await slide('ascCut', 0.15); const sc0 = await csig2();
+      ok(`${id}: ascCut changes the picture (0.5 and full differ from 0.15 and from each other, lowH ${wc.lowH}), and 0.15 restores the exact picture`, sc5 !== s0 && scF !== s0 && sc5 !== scF && sc0 === s0 && wc.lowH === 0.5);
+    }
+    // manifest: written only when not the default; applied on load
+    const vb0 = await ev(() => window.__evo.viewerBlock());
+    ok('manifest: ascCut and ascGate are not written at their defaults (0.15, 0)', vb0.ascCut === undefined && vb0.ascGate === undefined, JSON.stringify(vb0));
+    await slide('ascCut', 0.5); await slide('ascGate', 3); const vb1 = await ev(() => window.__evo.viewerBlock());
+    ok('manifest: ascCut 0.5 and ascGate 3 are written', vb1.ascCut === 0.5 && vb1.ascGate === 3, JSON.stringify(vb1));
+    await ev((vb) => window.__evo.applyViewerBlock(vb), vb0); const d0 = await ev(() => [window.__evo.P.ascCut, window.__evo.P.ascGate]);
+    ok('manifest: a block without the keys loads the defaults', d0[0] === 0.15 && d0[1] === 0, JSON.stringify(d0));
+    await ev((vb) => window.__evo.applyViewerBlock(vb), vb1); const d1 = await ev(() => [window.__evo.P.ascCut, window.__evo.P.ascGate]);
+    ok('manifest: the written block applies ascCut 0.5 and ascGate 3 (round trip)', d1[0] === 0.5 && d1[1] === 3, JSON.stringify(d1));
+    await ev((vb) => window.__evo.applyViewerBlock(vb), vb0); await a.idle();
+  }
+
   console.log('errors:', a.errs); ok('no page errors', a.errs.length === 0); await a.browser.close();
 })();
