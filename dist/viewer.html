@@ -2547,9 +2547,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       it.landing = [...land2];
       const free_ = (j) => j >= 0 && !CR.has(map[j]) && !occ.has(j);
       // M2: the smallest shift (first found: ties by direction order)
-      let sh = null; for (let d = 2; d <= 160 && !sh; d += 2) for (let a = 0; a < 16 && !sh; a++) { const dx = Math.round(d * Math.cos(a * Math.PI / 8)), dy = Math.round(d * Math.sin(a * Math.PI / 8)); let ok = true; const dst = new Array(area);
-        for (let k = 0; k < area; k++) { const [x, y] = xy(tiles[k]), j = idx(x + dx, y + dy); if (j < 0 || land2.has(j) || (CR.has(map[j]) && !inT[j]) || occ.has(j)) { ok = false; break; } dst[k] = j; }
-        if (ok) sh = { dx, dy, dst, d: Math.hypot(dx, dy) }; }
+      let sh = null; for (let d = 2; d <= 160 && !sh; d += 2) for (let a = 0; a < 16 && !sh; a++) { const dx = Math.round(d * Math.cos(a * Math.PI / 8)), dy = Math.round(d * Math.sin(a * Math.PI / 8)); let ok = true, out = 0; const dst = [], src = []; // >= 90 % of the tiles inside the window (the rest is clipped), none on another chain room, the landing or an earlier pocket
+        for (let k = 0; k < area; k++) { const [x, y] = xy(tiles[k]), j = idx(x + dx, y + dy); if (j < 0) { out++; continue; } if (land2.has(j) || (CR.has(map[j]) && !inT[j]) || occ.has(j)) { ok = false; break; } dst.push(j); src.push(tiles[k]); }
+        if (ok && out <= 0.1 * area && it.goals.every((g) => goals[g] < 0 || !inT[goals[g]] || src.includes(goals[g]))) sh = { dx, dy, dst, src, d: Math.hypot(dx, dy) }; }
       it.shiftM2 = sh ? +sh.d.toFixed(1) : null;
       const bridgeOf = (dstSet, dstArr, srcArr) => { // the straight bridge: the nearest pair (a walkable landing tile, a walkable footprint tile), a 4-connected line, cut at the first footprint tile
         let bd = 1e18, bl = -1, bf = -1; const lt = [...land2].filter(walk0), srcOf = new Map(dstArr.map((j, k) => [j, srcArr[k]])); const ft = dstArr.filter((j) => walk0(srcOf.get(j))); if (!lt.length || !ft.length) return null;
@@ -2565,7 +2565,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       const near = (srcArr, want, avoid) => { const q = [...srcArr], dist = new Map(srcArr.map((i) => [i, 0])), got = []; for (let h = 0; h < q.length && got.length < want; h++) { const [x, y] = xy(q[h]); for (const [dx, dy] of N8) { const j = idx(x + dx, y + dy); if (dist.has(j) || !free_(j) || avoid.has(j)) continue; dist.set(j, dist.get(q[h]) + 1); q.push(j); got.push(j); if (got.length >= want) break; } } return { tiles: got, dist }; };
       let geo = null;
       if (sh) {
-        if (mode === 'm2') { const dstSet = new Set(sh.dst); geo = { dst: sh.dst, shift: [sh.dx, sh.dy], bridge: bridgeOf(dstSet, sh.dst, tiles) }; if (geo.bridge) { const avoid = new Set([...dstSet, ...geo.bridge.inner, ...geo.bridge.lat]); const pk = near(sh.dst, 3 * area, avoid); geo.pocket = pk.tiles; } }
+        if (mode === 'm2') { const dstSet = new Set(sh.dst); geo = { dst: sh.dst, src: sh.src, shift: [sh.dx, sh.dy], bridge: bridgeOf(dstSet, sh.dst, sh.src) }; if (geo.bridge) { const avoid = new Set([...dstSet, ...geo.bridge.inner, ...geo.bridge.lat]); const pk = near(sh.dst, 3 * area, avoid); geo.pocket = pk.tiles; } }
         else { const rest = tiles.filter((i) => !land2.has(i)), pk = near(rest, 3 * area, new Set()), Rs = new Set([...rest, ...pk.tiles]), cR = centroid([...Rs]), cT = centroid(tiles), dx = Math.round(cR[0] - cT[0]), dy = Math.round(cR[1] - cT[1]); const dst = [], src = []; tiles.forEach((i) => { const [x, y] = xy(i), j = idx(x + dx, y + dy); if (j >= 0 && Rs.has(j)) { dst.push(j); src.push(i); } });
           geo = { dst, src, shift: [dx, dy], kept: +(100 * dst.length / area).toFixed(1) }; const dstSet = new Set(dst);
           geo.bridge = dst.length ? bridgeOf(dstSet, dst, src) : null;
@@ -2590,6 +2590,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
      Sets S.dioRole (1 footprint, 2 pocket, 3 landing, 4 bridge), S.dioInfo. */
   T.dioApply = function (S, P, dp) {
     const n = S.n, W = S.W; if (!dp || dp.n !== n) return null; const items = dp.items.filter((q) => q.eligible); S.dioInfo = { mode: dp.mode, cap: dp.cap, eligible: dp.eligible.slice(), demoted: dp.why.slice(), levelsAdded: 0, footprint: 0, pocket: 0, bridge: 0, landing: 0 }; if (!items.length) return S.dioInfo;
+    for (const k of ['void', 'block', 'region', 'ter', 'sub']) if (S[k]) S[k] = S[k].slice(); // these arrays can be shared with the cached layers of the shape: copy before writing (Off after the option must draw as before)
     const lv = S.levelH, terH = P.terH, greyL = S.levelMeta.findIndex((m) => m && m.grey), greyH = greyL >= 0 ? lv[greyL] : lv[0], vd = S.void;
     const role = new Uint8Array(n), height = new Float64Array(n), keep = new Uint8Array(n), dioRole = new Uint8Array(n), srcOf = new Map(), own = new Set(), ext = new Map(), move = new Map(), oldFp = new Set(), landSet = new Set();
     const link = (a, b) => { const la = ext.get(a) || ext.set(a, []).get(a), lb = ext.get(b) || ext.set(b, []).get(b); if (!la.includes(b)) la.push(b); if (!lb.includes(a)) lb.push(a); }, base = E.walkGraph(S, P), baseList = (i) => base(i).slice();
