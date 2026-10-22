@@ -278,7 +278,7 @@
   };
   /* THE CHAIN (user's decisions 2026-10-19 / 20): from the stake to the FINAL goal only (the last objective placed; the other objectives are not intermediate goals: landmarks and arenas will become forced intermediate goals later). The shortest node path is found; its edges are BLOCKED except bridges (an edge whose removal disconnects its ends);
      then the LONGEST simple node path without blocked edges and without repeating a room (or a piece) whose length is at most shortest + N (`P.chainExtra`, default 3, bounded DFS: `cut` says if the bound was hit). If the blocked graph has no path the edges are unblocked and the info says so. Returns { pieces, rooms, blocked: [[a, b]], bridges, cut, unblocked, shortest, graph, mode }. */
-  T.roomChain = function (S, P, stakeTile, goalTile, mode) {
+  T.roomChainSimple = function (S, P, stakeTile, goalTile, mode) {
     const g = T.roomGraph(S, P, mode), adj = g.adj, pc = g.pc, N = P.chainExtra === undefined ? 3 : P.chainExtra, node = g.mode === 'room' ? (i) => S.roomMap[i] : (i) => pc.id[i], roomOf = g.mode === 'room' ? (x) => x : (x) => pc.room[x];
     const from = node(stakeTile), to = node(goalTile);
     if (!(from > 0) || !(to > 0)) return { fail: 'the stake or the final goal is not on walkable room terrain' };
@@ -304,13 +304,50 @@
     const cnt = new Map(); for (const x of pieces) cnt.set(roomOf(x), (cnt.get(roomOf(x)) || 0) + 1); const twice = [...cnt].filter(([, c]) => c > 1).map(([r]) => r);
     return { pieces, rooms: pieces.map(roomOf), blocked: blockedList, bridges, cut, unblocked, shortest: p0.length, candidates: out.length, repeated: twice, graph: g, mode: g.mode };
   };
+  /* CHAIN THROUGH SUB-OBJECTIVES (DAC v2 PR B3, D29; user's rule 2026-10-21, it CORRECTS "no room repeated anywhere in the whole chain" of PR B, which only holds with no sub-objective): the goals in order are the stake, the SUB-OBJECTIVES (the objectives before the last, in placement order; later landmarks and
+     arenas become sub-objectives the same way) and the FINAL goal. K = the number of valid sub-objectives; a MAXIMUM NUMBER OF USES per piece over the whole chain U = K + 1 (K = 0: U = 1, no piece repeats: `roomChainSimple`, the PR B code, unchanged); the step maximum is (K + 1) x B with B = the ACTUAL steps of the K = 0 chain of the same example (a chain of 14 rooms = 13 steps becomes 26 with one sub-objective).
+     A sub-objective off room terrain, or in the same piece as the previous goal, is skipped (`skipped`, the info says so). The blocking is the PR B one (shortest stake -> FINAL goal, once, bridges skipped; a goal unreachable once blocked unblocks the edges and the info says so). The walk is the LONGEST within the bounds (ties: the smallest ids in DFS order), bounded DFS (`cut` says if the budget was hit) with a distance lower bound through the remaining goals.
+     JUSTIFIED REPEAT (user's decision, the reason for a repeat, not a stated rule: the cap U is the rule): a piece may be entered again only if a goal was reached since its previous visit, so every repeat has a sub-objective behind it and there is no pointless back-and-forth (A-B-A-B) inside one stretch. Returns the PR B fields plus { k, steps, maxSteps, baseSteps, visits, uses, skipped, goalTiles }. */
+  T.roomChain = function (S, P, stakeTile, goalTile, mode, subTiles) {
+    const base = T.roomChainSimple(S, P, stakeTile, goalTile, mode); if (base.fail || mode === 'room' || !subTiles || !subTiles.length) return base;
+    const g = base.graph, pc = g.pc, adj = g.adj, node = (i) => (i >= 0 ? pc.id[i] : 0), from = node(stakeTile), to = node(goalTile), skipped = [], goals = [from], goalTiles = [stakeTile];
+    subTiles.forEach((t, q) => { const v = node(t); if (!(v > 0)) { skipped.push({ index: q + 1, why: 'not on room terrain' }); return; } if (v === goals[goals.length - 1]) { skipped.push({ index: q + 1, why: 'in the same piece as the previous goal' }); return; } goals.push(v); goalTiles.push(t); });
+    if (goals.length === 1) return Object.assign({}, base, { k: 0, skipped, goalTiles: [stakeTile, goalTile] });
+    goals.push(to); goalTiles.push(goalTile); const K = goals.length - 2, U = K + 1, B = base.pieces.length - 1, MAX = (K + 1) * B;
+    const bl = new Set(base.blocked.map(([a, b]) => rkey(a, b))); let blk = bl, unblocked = base.unblocked;
+    const nbOf = (b2) => (u) => [...(adj.get(u) || [])].filter((v) => !(b2 && b2.has(rkey(u, v)))).sort((p, q) => p - q);
+    const distFrom = (nb, s) => { const d = new Map([[s, 0]]), q = [s]; for (let h = 0; h < q.length; h++) for (const v of nb(q[h])) if (!d.has(v)) { d.set(v, d.get(q[h]) + 1); q.push(v); } return d; };
+    let nb = nbOf(blk), dist = goals.map((x) => distFrom(nb, x));
+    if (goals.some((x) => !dist[0].has(x))) { blk = null; unblocked = true; nb = nbOf(null); dist = goals.map((x) => distFrom(nb, x)); }
+    const justified = P.chainJustified !== false, last = goals.length - 1, BUDGET = 400000; let exp = 0, cut = false, best = null; const uses = new Map([[from, 1]]), walk = [from], stretch = new Set([from]);
+    const dfs = (u, gi) => {
+      if (++exp > BUDGET) { cut = true; return; }
+      if (gi === last && u === to && (!best || walk.length > best.length)) best = walk.slice();
+      for (const v of nb(u)) {
+        const c = uses.get(v) || 0; if (c >= U || (justified && stretch.has(v))) continue; // the cap U per piece; a repeat only after a goal was reached (the stretch set is cleared at every goal; `P.chainJustified === false` = diagnostic only, not in the UI or the manifest: the cap alone, to test it)
+        const ngi = gi < last && v === goals[gi + 1] ? gi + 1 : gi; let lb = walk.length, cur = v, ok = true;
+        for (let q = ngi + 1; q <= last && ok; q++) { const dd = dist[q].get(cur); if (dd === undefined) ok = false; else { lb += dd; cur = goals[q]; } }
+        if (!ok || lb > MAX) continue;
+        const reset = ngi !== gi, saved = reset ? [...stretch] : null; walk.push(v); uses.set(v, c + 1); if (reset) { stretch.clear(); } stretch.add(v);
+        dfs(v, ngi);
+        walk.pop(); uses.set(v, c); stretch.delete(v); if (reset) for (const x of saved) stretch.add(x);
+      }
+    };
+    dfs(from, 0);
+    if (!best) return { fail: 'no chain of rooms through the sub-objectives within the step maximum' };
+    const roomOf = (x) => pc.room[x], cnt = new Map(); for (const x of best) cnt.set(x, (cnt.get(x) || 0) + 1); const rc = new Map(); for (const x of best) rc.set(roomOf(x), (rc.get(roomOf(x)) || 0) + 1);
+    return Object.assign({}, base, { pieces: best, rooms: best.map(roomOf), cut, unblocked, repeated: [...rc].filter(([, c]) => c > 1).map(([r2]) => r2), k: K, steps: best.length - 1, maxSteps: MAX, baseSteps: B, visits: best.length, distinct: cnt.size, piecesTwice: [...cnt].filter(([, c]) => c > 1).length, maxUses: Math.max(...cnt.values()), uses: U, skipped, goalTiles, candidates: 1 });
+  };
   /* WALKABLE CHECK (user, 2026-10-20): the chain must be walkable using only the tiles of the rooms of the chain and without crossing a blocked edge: a BFS from the stake over the walking graph restricted to those tiles. { ok, length } (length in tiles, -1 if not). */
   T.chainWalk = function (S, P, chain, stakeTile, goalTile) {
     const nb = E.walkGraph(S, P), pc = T.pieces(S, P), rooms = new Set(chain.rooms), bl = new Set(chain.blocked.map(([a, b]) => rkey(a, b))), node = chain.mode === 'room' ? (i) => S.roomMap[i] : (i) => pc.id[i];
-    if (!rooms.has(S.roomMap[stakeTile]) || !rooms.has(S.roomMap[goalTile])) return { ok: false, length: -1 };
-    const dist = new Int32Array(S.n).fill(-1), q = [stakeTile]; dist[stakeTile] = 1;
-    for (let h = 0; h < q.length; h++) { const i = q[h]; if (i === goalTile) break; for (const j of nb(i).slice()) { if (dist[j] >= 0 || !rooms.has(S.roomMap[j])) continue; const a = node(i), b = node(j); if (a !== b && bl.has(rkey(a, b))) continue; dist[j] = dist[i] + 1; q.push(j); } }
-    return { ok: dist[goalTile] >= 0, length: dist[goalTile] };
+    const tiles = chain.goalTiles && chain.goalTiles.length > 2 ? chain.goalTiles : [stakeTile, goalTile]; // through the sub-objectives (D29): the whole walk, stretch by stretch, from each goal to the next
+    for (const t of tiles) if (!rooms.has(S.roomMap[t])) return { ok: false, length: -1 };
+    let total = 0;
+    for (let k = 0; k + 1 < tiles.length; k++) { const a0 = tiles[k], b0 = tiles[k + 1], dist = new Int32Array(S.n).fill(-1), q = [a0]; dist[a0] = 1;
+      for (let h = 0; h < q.length; h++) { const i = q[h]; if (i === b0) break; for (const j of nb(i).slice()) { if (dist[j] >= 0 || !rooms.has(S.roomMap[j])) continue; const a = node(i), b = node(j); if (a !== b && bl.has(rkey(a, b))) continue; dist[j] = dist[i] + 1; q.push(j); } }
+      if (dist[b0] < 0) return { ok: false, length: -1 }; total += dist[b0] - (k > 0 ? 1 : 0); }
+    return { ok: true, length: total };
   };
   /* CROSSINGS (diagnostic, the user's check of the room-level chain): for a sequence of ROOM ids (stake first) the rooms where the route cannot get through: the pieces reachable on entry have no door into the next room, i.e. the entry and the exit are different pieces of the room
      (not walkable inside it). Returns the list of room ids (the last one is listed when the goal piece is not reached). */
@@ -332,10 +369,12 @@
     const route = rooms.map((id, k) => { const o = ty.rooms.get(id); const entry = k === 0 ? S.ter[stakeTile] : doorTer(nodes[k - 1], nodes[k]).tb, exit = k === rooms.length - 1 ? S.ter[goalTile] : doorTer(nodes[k], nodes[k + 1]).ta;
       if (entry !== exit) return { type: T.CAKE, up: exit > entry }; if (o && o.terraces.size >= 2 && !(o.linkList && o.linkList.length)) return { type: T.DIORAMA }; return { type: T.ASCENSION }; });
     const cnt = (arr) => { const c = { Cake: 0, Asc: 0, Dio: 0 }; for (const t of arr) c[t === T.CAKE ? 'Cake' : t === T.DIORAMA ? 'Dio' : 'Asc']++; return c; };
-    const first = rooms.map((id, k) => rooms.indexOf(id)), a = relabel(v164.slice()), b = relabel(route.map((x) => x.type)); for (const arr of [a, b]) for (let k = 0; k < arr.length; k++) if (first[k] !== k) arr[k] = arr[first[k]]; // a room that appears twice has ONE type, the one of its first visit
+    // a room that appears several times has ONE type, the one of its FIRST visit; no two Dioramas in a row on the whole sequence: a room that follows a Diorama at any visit becomes Ascension (in all its visits), to a fixpoint (with no repeated room it is the single pass of PR B)
+    const first = rooms.map((id, k) => rooms.indexOf(id)), typed = (arr) => { const m = new Map(); rooms.forEach((id, k) => { if (!m.has(id)) m.set(id, arr[k]); }); for (let ch = true, it = 0; ch && it < 50; it++) { ch = false; for (let k = 1; k < rooms.length; k++) { const r = rooms[k], q = rooms[k - 1]; if (r !== q && m.get(r) === T.DIORAMA && m.get(q) === T.DIORAMA) { m.set(r, T.ASCENSION); ch = true; } } } return rooms.map((id) => m.get(id)); };
+    const a = typed(v164), b = typed(route.map((x) => x.type));
     const use = rule === 'route' ? b : a, map = new Map(), ters = new Set([S.ter[stakeTile], S.ter[goalTile]]); for (let k = 0; k + 1 < nodes.length; k++) { const dt = doorTer(nodes[k], nodes[k + 1]); ters.add(dt.ta); ters.add(dt.tb); }
     rooms.forEach((id, k) => { if (first[k] !== k) return; const o = ty.rooms.get(id); if (!o || o.type !== use[k]) map.set(id, { type: use[k], up: rule === 'route' && route[k].up }); else if (rule === 'route') map.set(id, { type: use[k], up: route[k].up }); });
-    return { map, counts: cnt(use), v164: cnt(a), route: cnt(b), v164Raw: cnt(v164), routeRaw: cnt(route.map((x) => x.type)), types: use, terraces: [...ters].sort((x, y) => x - y), relabeled: rooms.filter((id, k) => (rule === 'route' ? route[k].type : v164[k]) === T.DIORAMA && use[k] === T.ASCENSION).length };
+    return { map, counts: cnt(use), v164: cnt(a), route: cnt(b), v164Raw: cnt(v164), routeRaw: cnt(route.map((x) => x.type)), types: use, routeVisit: route.map((x) => x.type), terraces: [...ters].sort((x, y) => x - y), relabeled: rooms.filter((id, k) => (rule === 'route' ? route[k].type : v164[k]) === T.DIORAMA && use[k] === T.ASCENSION).length };
   };
   /* a copy of the classification where the chain rooms take the types of the rule in force (the rings of Cake, the Ascension walls, the tint and the Diorama outline of the chain view read it; E.roomTypes.classify itself is unchanged) */
   T.overrideTypes = function (ty, map, RL) {

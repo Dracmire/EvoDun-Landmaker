@@ -275,5 +275,41 @@ const ringsOf = (RL, P, reserved, sub) => { const ty = T.classify(RL, P), R = T.
     ok('5 terraces: there is no chain without repeating a room, so the repeat rule applies: room 6 appears twice, two pieces (14 pieces in 13 rooms)', c5.repeated.join() === '6' && c5.pieces.length === 14 && new Set(c5.rooms).size === 13 && T.chainWalk(S5, P5, c5, s5, g5).ok, JSON.stringify({ rep: c5.repeated, n: c5.pieces.length }));
     for (const rule of ['v164', 'route']) { const tp = T.chainTypes(S5, P5, c5, rule, s5, g5), first = new Map(); let same = true; c5.rooms.forEach((r, k) => { if (!first.has(r)) first.set(r, tp.types[k]); else if (tp.types[k] !== first.get(r)) same = false; }); ok(`5 terraces, rule ${rule}: the repeated room has one type (its first visit) in both pieces`, same); }
   }
+  // ---- DAC v2 PR B3 (D29): the chain THROUGH the sub-objectives: a maximum number of uses per piece U = K + 1, steps <= (K + 1) x B, a repeat only after a goal
+  {
+    const PBc = { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 }, Sb = run(PBc), at = (S, x, y) => (y - S.oy) * S.W + (x - S.ox), stake = at(Sb, 200, 62), goal = at(Sb, 47, 75), sub = at(Sb, 122, 201);
+    const k0 = T.roomChain(Sb, PBc, stake, goal), k0e = T.roomChain(Sb, PBc, stake, goal, undefined, []);
+    ok('K = 0 (no sub-objective, or an empty list) is the PR B chain unchanged: the same pieces, blocked edges and bridges', JSON.stringify(k0e.pieces) === JSON.stringify(k0.pieces) && JSON.stringify(k0e.blocked) === JSON.stringify(k0.blocked) && k0e.bridges === k0.bridges && k0.pieces.length === 21 && k0.k === undefined);
+    const pcB = T.pieces(Sb, PBc), subPiece = pcB.id[sub], B = k0.pieces.length - 1;
+    const k1 = T.roomChain(Sb, PBc, stake, goal, undefined, [sub]);
+    ok(`K = 1 with a dead-end sub-objective (room 57, an arm of the graph): a chain exists and passes the sub-objective piece (${k1.pieces ? k1.pieces.length : 0} visits)`, !k1.fail && k1.pieces.includes(subPiece) && k1.k === 1, k1.fail);
+    ok('K = 1: no piece is used more than 2 times (U = K + 1), steps <= 2 x B (B = the actual 20 steps of the K = 0 chain), the walk starts at the stake piece and ends at the final goal piece', k1.maxUses <= 2 && k1.steps <= 2 * B && k1.baseSteps === B && k1.maxSteps === 2 * B && k1.pieces[0] === pcB.id[stake] && k1.pieces[k1.pieces.length - 1] === pcB.id[goal], JSON.stringify({ maxUses: k1.maxUses, steps: k1.steps, B: k1.baseSteps }));
+    ok('K = 1 figures (the viewer\'s): 40 steps (the maximum), 41 visits, 32 distinct pieces, 9 pieces twice, 30 rooms, the bound did not cut', k1.steps === 40 && k1.visits === 41 && k1.distinct === 32 && k1.piecesTwice === 9 && new Set(k1.rooms).size === 30 && !k1.cut, JSON.stringify({ steps: k1.steps, visits: k1.visits, distinct: k1.distinct, twice: k1.piecesTwice, cut: k1.cut }));
+    const rk2 = (x, y) => Math.min(x, y) * 100000 + Math.max(x, y), bset = new Set(k0.blocked.map(([x, y]) => rk2(x, y)));
+    ok('the blocked edges are those of the stake -> FINAL goal path only (the K = 0 ones) and the walk crosses none of them', JSON.stringify(k1.blocked) === JSON.stringify(k0.blocked) && k1.pieces.every((x, k) => k === 0 || !bset.has(rk2(x, k1.pieces[k - 1]))));
+    // justified repeat: no piece twice inside one stretch (the stretches are cut where a goal is reached for the first time)
+    const iSub = k1.pieces.indexOf(subPiece), st1 = k1.pieces.slice(0, iSub + 1), st2 = k1.pieces.slice(iSub);
+    ok('justified repeat: a piece is entered again only after a goal was reached: no piece twice inside the stretch stake -> sub-objective, nor inside sub-objective -> final goal', new Set(st1).size === st1.length && new Set(st2).size === st2.length, [st1.length, st2.length]);
+    ok('the whole walk is walkable with the chain\'s own tiles and no blocked edge (every stretch, tiles counted)', T.chainWalk(Sb, PBc, k1, stake, goal).ok && T.chainWalk(Sb, PBc, k1, stake, goal).length > 0, JSON.stringify(T.chainWalk(Sb, PBc, k1, stake, goal)));
+    // the cap alone (diagnostic: the justified-repeat rule off) is the rule U = K + 1 and the step maximum
+    const kc = T.roomChain(Sb, { ...PBc, chainJustified: false }, stake, goal, undefined, [sub]);
+    ok(`the cap alone (diagnostic, justified repeat off): no piece more than ${kc.uses} times (K + 1), steps <= ${kc.maxSteps} (the maximum is reached: ${kc.steps})`, !kc.fail && kc.maxUses <= kc.uses && kc.steps <= kc.maxSteps && kc.uses === 2, JSON.stringify({ maxUses: kc.maxUses, steps: kc.steps }));
+    // K = 2: a second sub-objective (a tile of a piece of the K = 1 walk) allows 3 uses and 3 x B
+    const k2sub = [...pcB.id.keys()].find((i) => pcB.id[i] === k1.pieces[6] && pcB.id[i] !== subPiece && pcB.id[i] !== pcB.id[stake] && pcB.id[i] !== pcB.id[goal]);
+    const k2 = T.roomChain(Sb, PBc, stake, goal, undefined, [sub, k2sub]), k2c = T.roomChain(Sb, { ...PBc, chainJustified: false }, stake, goal, undefined, [sub, k2sub]);
+    ok(`K = 2 (two sub-objectives): 3 uses and 3 x B steps are allowed: justified walk ${k2.steps} steps <= ${k2.maxSteps}, max uses ${k2.maxUses} <= 3; the cap alone reaches ${k2c.maxUses} uses`, !k2.fail && k2.k === 2 && k2.uses === 3 && k2.maxSteps === 3 * B && k2.steps <= 3 * B && k2.maxUses <= 3 && k2c.maxUses === 3, JSON.stringify({ k: k2.k, steps: k2.steps, uses: k2.maxUses, capOnly: k2c.maxUses }));
+    // skipped sub-objectives
+    const off = T.roomChain(Sb, PBc, stake, goal, undefined, [-1]), same = T.roomChain(Sb, PBc, stake, goal, undefined, [stake]);
+    ok('a sub-objective off room terrain, or in the same piece as the previous goal, is skipped with its reason and the chain is the K = 0 one', JSON.stringify(off.pieces) === JSON.stringify(k0.pieces) && off.skipped.length === 1 && /not on room terrain/.test(off.skipped[0].why) && same.skipped.length === 1 && /same piece/.test(same.skipped[0].why) && JSON.stringify(same.pieces) === JSON.stringify(k0.pieces), JSON.stringify([off.skipped, same.skipped]));
+    // types across the repeated uses
+    for (const rule of ['v164', 'route']) { const tp = T.chainTypes(Sb, PBc, k1, rule, stake, goal), first = new Map(); let one = true, dio = 0; k1.rooms.forEach((r, k) => { if (!first.has(r)) first.set(r, tp.types[k]); else if (tp.types[k] !== first.get(r)) one = false; if (k > 0 && k1.rooms[k] !== k1.rooms[k - 1] && tp.types[k] === T.DIORAMA && tp.types[k - 1] === T.DIORAMA) dio++; });
+      ok(`K = 1, rule ${rule}: a room used several times has ONE type in all its visits, and there are no two Dioramas in a row across the repeated uses (${dio})`, one && dio === 0); }
+    // the type of a repeated room is the one of its FIRST visit (synthetic: its role differs between the visits)
+    { const fake = { ter: [0, 0, 0, 1], types: { rooms: new Map([[1, { type: T.ASCENSION, terraces: new Set([0]), linkList: [] }], [2, { type: T.ASCENSION, terraces: new Set([0]), linkList: [] }]]) } };
+      const rkk = (x, y) => Math.min(x, y) * 100000 + Math.max(x, y), doors = new Map([[rkk(10, 20), [{ ra: 10, rb: 20, ia: 0, ib: 0, ramp: false }]], [rkk(20, 10), []]]);
+      doors.set(rkk(10, 20), [{ ra: 10, rb: 20, ia: 1, ib: 2, ramp: false }]); // piece 10 (room 1) -> piece 20 (room 2): leaves by tile 1, enters at tile 2 (all terrace 0); the goal tile 3 is on terrace 1, so the LAST visit of room 1 would be a Cake
+      const chain = { graph: { doors }, pieces: [10, 20, 10], rooms: [1, 2, 1] }, tp = T.chainTypes(fake, {}, chain, 'route', 0, 3);
+      ok('Along the route: a room visited twice with different roles takes the type of its FIRST visit in both (first visit Ascension, last visit would be Cake)', tp.routeVisit[0] === T.ASCENSION && tp.routeVisit[2] === T.CAKE && tp.types[0] === T.ASCENSION && tp.types[2] === T.ASCENSION, JSON.stringify([tp.routeVisit, tp.types])); }
+  }
   console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();
