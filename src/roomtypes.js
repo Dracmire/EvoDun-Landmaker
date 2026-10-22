@@ -319,12 +319,12 @@
     const distFrom = (nb, s) => { const d = new Map([[s, 0]]), q = [s]; for (let h = 0; h < q.length; h++) for (const v of nb(q[h])) if (!d.has(v)) { d.set(v, d.get(q[h]) + 1); q.push(v); } return d; };
     let nb = nbOf(blk), dist = goals.map((x) => distFrom(nb, x));
     if (goals.some((x) => !dist[0].has(x))) { blk = null; unblocked = true; nb = nbOf(null); dist = goals.map((x) => distFrom(nb, x)); }
-    const last = goals.length - 1, BUDGET = 400000; let exp = 0, cut = false, best = null; const uses = new Map([[from, 1]]), walk = [from], stretch = new Set([from]);
+    const justified = P.chainJustified !== false, last = goals.length - 1, BUDGET = 400000; let exp = 0, cut = false, best = null; const uses = new Map([[from, 1]]), walk = [from], stretch = new Set([from]);
     const dfs = (u, gi) => {
       if (++exp > BUDGET) { cut = true; return; }
       if (gi === last && u === to && (!best || walk.length > best.length)) best = walk.slice();
       for (const v of nb(u)) {
-        const c = uses.get(v) || 0; if (c >= U || stretch.has(v)) continue; // the cap U per piece; a repeat only after a goal was reached (the stretch set is cleared at every goal)
+        const c = uses.get(v) || 0; if (c >= U || (justified && stretch.has(v))) continue; // the cap U per piece; a repeat only after a goal was reached (the stretch set is cleared at every goal; `P.chainJustified === false` = diagnostic only, not in the UI or the manifest: the cap alone, to test it)
         const ngi = gi < last && v === goals[gi + 1] ? gi + 1 : gi; let lb = walk.length, cur = v, ok = true;
         for (let q = ngi + 1; q <= last && ok; q++) { const dd = dist[q].get(cur); if (dd === undefined) ok = false; else { lb += dd; cur = goals[q]; } }
         if (!ok || lb > MAX) continue;
@@ -374,7 +374,7 @@
     const a = typed(v164), b = typed(route.map((x) => x.type));
     const use = rule === 'route' ? b : a, map = new Map(), ters = new Set([S.ter[stakeTile], S.ter[goalTile]]); for (let k = 0; k + 1 < nodes.length; k++) { const dt = doorTer(nodes[k], nodes[k + 1]); ters.add(dt.ta); ters.add(dt.tb); }
     rooms.forEach((id, k) => { if (first[k] !== k) return; const o = ty.rooms.get(id); if (!o || o.type !== use[k]) map.set(id, { type: use[k], up: rule === 'route' && route[k].up }); else if (rule === 'route') map.set(id, { type: use[k], up: route[k].up }); });
-    return { map, counts: cnt(use), v164: cnt(a), route: cnt(b), v164Raw: cnt(v164), routeRaw: cnt(route.map((x) => x.type)), types: use, terraces: [...ters].sort((x, y) => x - y), relabeled: rooms.filter((id, k) => (rule === 'route' ? route[k].type : v164[k]) === T.DIORAMA && use[k] === T.ASCENSION).length };
+    return { map, counts: cnt(use), v164: cnt(a), route: cnt(b), v164Raw: cnt(v164), routeRaw: cnt(route.map((x) => x.type)), types: use, routeVisit: route.map((x) => x.type), terraces: [...ters].sort((x, y) => x - y), relabeled: rooms.filter((id, k) => (rule === 'route' ? route[k].type : v164[k]) === T.DIORAMA && use[k] === T.ASCENSION).length };
   };
   /* a copy of the classification where the chain rooms take the types of the rule in force (the rings of Cake, the Ascension walls, the tint and the Diorama outline of the chain view read it; E.roomTypes.classify itself is unchanged) */
   T.overrideTypes = function (ty, map, RL) {
