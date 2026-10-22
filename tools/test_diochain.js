@@ -40,6 +40,16 @@ const EX = { balanced: { P: { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5,
     ok('round trip: Off -> M2 -> Off returns the identical shape (levels, void, block, region, terraces, tints)', same(A, B), keys.filter((k) => A[k] && !A[k].every((v, i) => v === B[k][i])));
     ok('round trip: Off -> M2 -> M1 -> Off returns the identical shape', same(A, C), keys.filter((k) => A[k] && !A[k].every((v, i) => v === C[k][i])));
   }
+  { // ASCENSION WALLS follow the type shown (user, PR #45 review): no wall face inside the moved footprint, the bridge, the pocket or the flattened old footprint
+    for (const key of ['balanced-K1-m2', 'balanced-K1-m1']) {
+      const o = get(key), PPw = { ...o.PP, ascWalls: true }, Sw = E.shape(mk(), PPw, null), Sx = E.shape(mk(), { ...PPw, dioChain: 'off' }, null), items = o.dp.items.filter((q) => q.eligible), W = Sw.W;
+      const bad = new Set(), land = new Set(); for (const it of items) { for (const t of it.dst) bad.add(t); for (const t of it.pocket) bad.add(t); for (const t of it.bridge.inner) bad.add(t); for (const t of it.bridge.lat) bad.add(t); for (const t of it.landing) land.add(t); }
+      for (const it of items) for (const t of it.src) if (!land.has(t)) bad.add(t);
+      const inside = Sw.ascWalls.faces.filter((f) => bad.has(f.i) || bad.has(f.j)).length, insideOff = Sx.ascWalls.faces.filter((f) => bad.has(f.i) || bad.has(f.j)).length;
+      ok(`${key}: no Ascension wall face inside the footprint, the bridge, the pocket or the flattened old footprint (${Sw.dioInfo.wallsDropped} dropped; ${insideOff} stood there with the option Off)`, inside === 0 && insideOff > 0 && Sw.dioInfo.wallsDropped === Sx.ascWalls.faces.length - Sw.ascWalls.faces.length, [inside, insideOff, Sw.dioInfo.wallsDropped]);
+      ok(`${key}: the walls that stay are the Off ones (a subset of the faces of the shape with the option Off)`, Sw.ascWalls.faces.every((f) => Sx.ascWalls.faces.some((g) => g.i === f.i && g.j === f.j)));
+    }
+  }
   // ---- eligibility (cap 30, user's decision 2026-10-23)
   const el = (key) => get(key).dp.eligible.slice().sort((a, b) => a - b).join();
   ok('Balanced types K = 1 (M2 and M1): the eligible Dioramas are rooms 7, 64 and 66; the others are drawn as Ascension', el('balanced-K1-m2') === '7,64,66' && el('balanced-K1-m1') === '7,64,66', [el('balanced-K1-m2'), el('balanced-K1-m1')]);

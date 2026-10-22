@@ -2621,6 +2621,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const greyNow = S.levelMeta.findIndex((m) => m && m.grey), fp = new Set(); let nFp = 0, nPk = 0, nBr = 0;
     for (let i = 0; i < n; i++) { if (role[i] >= 2 && vd && vd[i]) vd[i] = 0; if (dioRole[i] === 1) { fp.add(i); nFp++; } else if (dioRole[i] === 2) nPk++; else if (dioRole[i] === 4) nBr++; }
     for (const t of oldFp) if (!fp.has(t) && !landSet.has(t) && greyNow >= 0) { S.fine[t] = greyNow; if (S.roomType) S.roomType[t] = 0; if (S.nowalk) S.nowalk[t] = 0; if (S.roomBits) S.roomBits[t] = 0; if (S.dioBits) S.dioBits[t] = 0; if (S.roomBitsDio) S.roomBitsDio[t] = 0; }
+    if (S.ascWalls && S.ascWalls.faces) { // the Ascension walls were built on the room borders at the OLD tiles: no wall inside the footprint, the bridge, the pocket or the flattened old footprint (the walls follow the type shown)
+      const dead = (t) => dioRole[t] === 1 || dioRole[t] === 2 || dioRole[t] === 4 || (oldFp.has(t) && !landSet.has(t)), keepF = S.ascWalls.faces.filter((f) => !dead(f.i) && !dead(f.j));
+      S.dioInfo.wallsDropped = S.ascWalls.faces.length - keepF.length; S.ascWalls = Object.assign({}, S.ascWalls, { faces: keepF }); }
     S.stairs = (S.stairs || []).filter((r) => { const ts = r.bottom.concat(r.top, ...r.steps.map((x) => x.tiles)); return !ts.some((t) => oldFp.has(t) && !landSet.has(t)); }); // a ramp inside a moved footprint is not drawn (a Diorama has no internal ramp; the ramps at its doors lie in the landing)
     for (let i = 0; i < n; i++) { if (role[i] < 2) continue; const s = srcOf.get(i); if (s !== undefined) { S.ter[i] = S.ter[s]; S.sub[i] = S.sub[s]; if (S.roomType) S.roomType[i] = 2; if (S.nowalk) S.nowalk[i] = 0; } if (dioRole[i] === 2) { S.block[i] = 1; if (S.region) S.region[i] = -1; if (S.roomType) S.roomType[i] = 0; if (S.nowalk) S.nowalk[i] = 0; } else { S.block[i] = 0; } }
     for (const it of items) { const reg = S.region ? S.region[it.bridge.from] : 0; for (const j of own) if (dioRole[j] === 1 || dioRole[j] === 4) if (S.region) S.region[j] = reg; if (S.roomBits) for (const j of it.dst) S.roomBits[j] = 0;
@@ -4158,7 +4161,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       const z = F.zone.ids[i];
       if (F.zone.amb[i]) out.push(AMBIGUOUS); else if (z > 0) out.push(zoneTint(S, z));
     }
-    if (S.dioRole && S.dioRole[i] === 3) out.push('rgba(255,205,60,0.5)'); else if (S.dioRole && S.dioRole[i] === 4) out.push('rgba(240,240,240,0.4)'); // Diorama in the chain view (D30): the transit landing and the bridge
+    if (!PICK && S.dioRole && S.dioRole[i] === 3) out.push('rgba(255,205,60,0.5)'); else if (!PICK && S.dioRole && S.dioRole[i] === 4) out.push('rgba(240,240,240,0.4)'); // Diorama in the chain view (D30): the transit landing and the bridge
     if (o.nowalk && S.nowalk && S.nowalk[i]) out.push('rgba(48,40,84,0.36)'); // not walkable (rooms on): isolated terrain and the margins of walls, cliffs and steep slopes
     if (o.typeTint && S.roomType && S.roomType[i]) out.push(S.roomType[i] === 1 ? 'rgba(255,150,30,0.42)' : S.roomType[i] === 2 ? 'rgba(60,200,110,0.42)' : 'rgba(70,130,255,0.42)');
     if (o.roomTint && S.roomMap && S.roomMap[i] > 0) out.push(`hsla(${E.rooms.hue(S.roomMap[i]).toFixed(0)},55%,50%,0.45)`);
