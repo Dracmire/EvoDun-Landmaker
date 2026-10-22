@@ -338,6 +338,7 @@
       const z = F.zone.ids[i];
       if (F.zone.amb[i]) out.push(AMBIGUOUS); else if (z > 0) out.push(zoneTint(S, z));
     }
+    if (S.dioRole && S.dioRole[i] === 3) out.push('rgba(255,205,60,0.5)'); else if (S.dioRole && S.dioRole[i] === 4) out.push('rgba(240,240,240,0.4)'); // Diorama in the chain view (D30): the transit landing and the bridge
     if (o.nowalk && S.nowalk && S.nowalk[i]) out.push('rgba(48,40,84,0.36)'); // not walkable (rooms on): isolated terrain and the margins of walls, cliffs and steep slopes
     if (o.typeTint && S.roomType && S.roomType[i]) out.push(S.roomType[i] === 1 ? 'rgba(255,150,30,0.42)' : S.roomType[i] === 2 ? 'rgba(60,200,110,0.42)' : 'rgba(70,130,255,0.42)');
     if (o.roomTint && S.roomMap && S.roomMap[i] > 0) out.push(`hsla(${E.rooms.hue(S.roomMap[i]).toFixed(0)},55%,50%,0.45)`);
