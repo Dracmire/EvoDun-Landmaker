@@ -360,7 +360,8 @@
         S.dioBits = db; S.roomBitsDio = bd;
       }
       if (P.chainIds && P.chainIds.length && S.roomMap && !pocketIds) { walkGraph(S, P); E.roomTypes.chainFlatten(S, P, RL, P.chainIds, P.chainSeqs); } // CHAIN VIEW (D23): visual only; the walking graph is built first because the pass drops the ramps outside the chain from S.stairs
-      if (P.anchors && S.nowalk && !pocketIds) E.roomTypes.anchors(S, P); // NON-WALKABLE AS ANCHORS (D26): visual only, after the chain flattening (only the chain rooms are raised in the Chain view)
+      if (P.anchors && S.nowalk && !pocketIds) E.roomTypes.anchors(S, P);
+      if (P.dioChain && P.dioChain !== 'off' && P.dioPlan && P.chainIds && P.chainIds.length && S.roomMap && !pocketIds) E.roomTypes.dioApply(S, P, P.dioPlan); // DIORAMA IN THE CHAIN VIEW (D30): the plan was made on the whole shape (ui.js), the footprint moves now // NON-WALKABLE AS ANCHORS (D26): visual only, after the chain flattening (only the chain rooms are raised in the Chain view)
     }
     if (pocketIds) { if (pocketWin) E.pocket.reframe(S, pocketWin); E.pocket.apply(S, P, RL, pocketIds, Object.assign({ ids: seedIds }, pocketOpts(P))); S.pocketYaw = P.pocketYaw === undefined ? E.pocket.defaults.yaw : P.pocketYaw; S.pocketInfo.yaw = S.pocketYaw; } // the pocket of a Diorama: the fragment stays, the surroundings change
     const terSeen = new Set(), fineSeen = new Set(); // distinct levels inside the slice (the whole window if there is none)
