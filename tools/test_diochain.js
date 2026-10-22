@@ -46,6 +46,8 @@ const EX = { balanced: { P: { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5,
   { const o = get('chain5-K1-m2'), dp = T.dioPlan(o.S0, { ...o.PP, dioCap: 300 }, { chainIds: o.PP.chainIds, pieces: o.ch.pieces, goals: o.goals, typeOf: (r) => (o.tp.map.has(r) ? o.tp.map.get(r).type : (o.S0.types.rooms.get(r) || {}).type) });
     const q6 = dp.items.find((q) => q.room === 6);
     ok('Chain 5 K = 1, room 6 with the cap lifted: its straight bridge at the minimum shift (38 tiles) still crosses 10 chain-room tiles, so it stays demoted: the cap would be 30 whatever the 40 rule says', q6 && q6.shiftM2 > 30 && q6.shiftM2 <= 40 && q6.bridgeCross.chain > 0 && !q6.eligible, q6 && JSON.stringify([q6.shiftM2, q6.bridgeCross, q6.why])); }
+  { const o = get('balanced-K1-m2'), dp = T.dioPlan(o.S0, { ...o.PP, dioCap: 10 }, { chainIds: o.PP.chainIds, pieces: o.ch.pieces, goals: o.goals, typeOf: (r) => (o.tp.map.has(r) ? o.tp.map.get(r).type : (o.S0.types.rooms.get(r) || {}).type) });
+    ok('the cap is a parameter: with 10 tiles only room 7 (shift 8) stays; rooms 64 and 66 (shift 13.9) are beyond the cap and demoted', dp.eligible.join() === '7' && dp.items.filter((q) => q.room === 64 || q.room === 66).every((q) => !q.eligible && /cap/.test(q.why)), JSON.stringify([dp.eligible, dp.why.filter((q) => q.room === 64 || q.room === 66)])); }
   // ---- the geometry of the eligible Dioramas, per key
   for (const key of ['balanced-K1-m2', 'balanced-K1-m1', 'balanced-K0-m2']) {
     const o = get(key), S1 = o.S1, S2 = base[key], S0 = o.S0, dp = o.dp, W = S1.W, mode = dp.mode, items = dp.items.filter((q) => q.eligible), chainRooms = new Set(o.PP.chainIds);
