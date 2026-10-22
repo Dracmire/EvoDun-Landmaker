@@ -576,6 +576,7 @@
      Sets S.dioRole (1 footprint, 2 pocket, 3 landing, 4 bridge), S.dioInfo. */
   T.dioApply = function (S, P, dp) {
     const n = S.n, W = S.W; if (!dp || dp.n !== n) return null; const items = dp.items.filter((q) => q.eligible); S.dioInfo = { mode: dp.mode, cap: dp.cap, eligible: dp.eligible.slice(), demoted: dp.why.slice(), levelsAdded: 0, footprint: 0, pocket: 0, bridge: 0, landing: 0 }; if (!items.length) return S.dioInfo;
+    for (const k of ['void', 'block', 'region', 'ter', 'sub']) if (S[k]) S[k] = S[k].slice(); // these arrays can be shared with the cached layers of the shape: copy before writing (Off after the option must draw as before)
     const lv = S.levelH, terH = P.terH, greyL = S.levelMeta.findIndex((m) => m && m.grey), greyH = greyL >= 0 ? lv[greyL] : lv[0], vd = S.void;
     const role = new Uint8Array(n), height = new Float64Array(n), keep = new Uint8Array(n), dioRole = new Uint8Array(n), srcOf = new Map(), own = new Set(), ext = new Map(), move = new Map(), oldFp = new Set(), landSet = new Set();
     const link = (a, b) => { const la = ext.get(a) || ext.set(a, []).get(a), lb = ext.get(b) || ext.set(b, []).get(b); if (!la.includes(b)) la.push(b); if (!lb.includes(a)) lb.push(a); }, base = E.walkGraph(S, P), baseList = (i) => base(i).slice();

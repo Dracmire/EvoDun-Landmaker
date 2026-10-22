@@ -32,6 +32,14 @@ const EX = { balanced: { P: { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5,
   for (const key of Object.keys(out)) ok(`${key}: with the option Off the plan is ignored (no S.dioRole, no S.dioInfo)`, !base[key].dioRole && !base[key].dioInfo && !base[key].dioMove);
   { const o = get('balanced-K1-m2'), S0b = E.shape(mk(), { ...o.PP, dioChain: undefined, dioPlan: undefined }, null), S2 = base['balanced-K1-m2'];
     ok('Off = a shape built without any Diorama key: same levels, same level of every tile', S0b.levelH.length === S2.levelH.length && S0b.fine.every((v, i) => v === S2.fine[i]) && S0b.levelH.every((v, i) => v === S2.levelH[i])); }
+  { // ROUND TRIP (user's rule: Off -> M2 -> Off and Off -> M2 -> M1 -> Off return the identical shape: nothing is left behind in arrays shared with the cached layers)
+    const o = get('balanced-K1-m2'), pack = mk(), mkS = (mode) => E.shape(pack, { ...o.PP, dioChain: mode, chainTypes: o.PP.chainTypes, dioPlan: mode === 'off' ? o.PP.dioPlan : (mode === 'm1' ? get('balanced-K1-m1').dp : o.dp) }, null);
+    const keys = ['fine', 'fineMask', 'void', 'block', 'region', 'ter', 'sub', 'nowalk', 'roomType', 'carved', 'isolated', 'chainGrey'], same = (X, Y) => X.levelH.length === Y.levelH.length && X.levelH.every((v, i) => v === Y.levelH[i]) && keys.every((k) => !X[k] || X[k].length === Y[k].length && X[k].every((v, i) => v === Y[k][i]));
+    const A = mkS('off'), A2 = mkS('off'); mkS('m2'); const B = mkS('off'); mkS('m2'); mkS('m1'); const C = mkS('off');
+    ok('round trip: Off -> Off gives the same shape (the baseline is deterministic)', same(A, A2));
+    ok('round trip: Off -> M2 -> Off returns the identical shape (levels, void, block, region, terraces, tints)', same(A, B), keys.filter((k) => A[k] && !A[k].every((v, i) => v === B[k][i])));
+    ok('round trip: Off -> M2 -> M1 -> Off returns the identical shape', same(A, C), keys.filter((k) => A[k] && !A[k].every((v, i) => v === C[k][i])));
+  }
   // ---- eligibility (cap 30, user's decision 2026-10-23)
   const el = (key) => get(key).dp.eligible.slice().sort((a, b) => a - b).join();
   ok('Balanced types K = 1 (M2 and M1): the eligible Dioramas are rooms 7, 64 and 66; the others are drawn as Ascension', el('balanced-K1-m2') === '7,64,66' && el('balanced-K1-m1') === '7,64,66', [el('balanced-K1-m2'), el('balanced-K1-m1')]);
