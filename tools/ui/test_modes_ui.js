@@ -601,7 +601,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     }
     // manifest: written only when not the default; applied on load
     const vb0 = await ev(() => window.__evo.viewerBlock());
-    ok('manifest: ascCut and ascGate are not written at their defaults (0.15, 0)', vb0.ascCut === undefined && vb0.ascGate === undefined, JSON.stringify(vb0));
+    ok('manifest: ascCut and ascGate are written explicitly in mode 2, also at the old values 0.15 / 0 (ANNOUNCED D31: were written only when not the default; the mode-2 defaults are now 0.5 / 3)', vb0.ascCut === 0.15 && vb0.ascGate === 0, JSON.stringify(vb0));
     await slide('ascCut', 0.5); await slide('ascGate', 3); const vb1 = await ev(() => window.__evo.viewerBlock());
     ok('manifest: ascCut 0.5 and ascGate 3 are written', vb1.ascCut === 0.5 && vb1.ascGate === 3, JSON.stringify(vb1));
     await ev((vb) => window.__evo.applyViewerBlock(vb), vb0); const d0 = await ev(() => [window.__evo.P.ascCut, window.__evo.P.ascGate]);
