@@ -14,12 +14,13 @@ const EX = { balanced: { P: { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5,
     const P = { ...ex.P, pocketYaw: 45 }, S0 = E.shape(mk(), P, null), at = (xy) => (xy[1] - S0.oy) * S0.W + (xy[0] - S0.ox), st = at(ex.stake), fin = at(ex.fin), subs = k ? ex.subs.map(at) : [];
     const ch = T.roomChain(S0, P, st, fin, undefined, subs), tp = T.chainTypes(S0, P, ch, 'v164', st, fin), goals = ch.goalTiles && ch.goalTiles.length ? ch.goalTiles : [st, fin];
     const typeOf = (r) => (tp.map.has(r) ? tp.map.get(r).type : (S0.types.rooms.get(r) || {}).type), ids = [...new Set(ch.rooms)].sort((a, b) => a - b);
-    for (const mode of ['m2', 'm1']) {
-      const PP = { ...P, dioChain: mode, chainIds: ids, chainSeqs: [ch.pieces], chainBlocked: ch.blocked, chainExtra: 3 };
+    // D31: M1 with the gap lowered to 1 (test-only P.dioGap) is the D30 selection (rooms 7, 64 and 66 in M1): it keeps the per-Diorama M1 checks of D30 running on the three rooms; with the real gap (4) only room 66 stays in M1
+    for (const [mode, gapKey, extra] of [['m2', '', {}], ['m1', '', {}], ...(name === 'balanced' && k === 1 ? [['m1', 'gap1', { dioGap: 1 }]] : [])]) {
+      const PP = { ...P, ...extra, dioChain: mode, chainIds: ids, chainSeqs: [ch.pieces], chainBlocked: ch.blocked, chainExtra: 3 };
       const dp = T.dioPlan(S0, PP, { chainIds: ids, pieces: ch.pieces, goals, typeOf }), tmap = new Map(tp.map); for (const r of dp.demoted) tmap.set(r, { type: T.ASCENSION, up: false });
       PP.chainTypes = tmap; PP.dioPlan = dp;
       const t0 = Date.now(), S1 = E.shape(mk(), PP, null), ms = Date.now() - t0;
-      out[`${name}-K${k}-${mode}`] = { dp, S1, S0, ch, goals, ms, PP, tp };
+      out[`${name}-K${k}-${mode}${gapKey}`] = { dp, S1, S0, ch, goals, ms, PP, tp };
       console.log(name, 'K' + k, mode, 'eligible', dp.eligible.join(','), 'demoted', dp.why.map((d) => d.room + ':' + d.why).join(' | '), 'info', JSON.stringify(S1.dioInfo), ms + ' ms');
     }
   }
@@ -67,15 +68,17 @@ const EX = { balanced: { P: { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5,
   { const o = get('balanced-K1-m2'), dp = T.dioPlan(o.S0, { ...o.PP, dioCap: 13 }, { chainIds: o.PP.chainIds, pieces: o.ch.pieces, goals: o.goals, typeOf: (r) => (o.tp.map.has(r) ? o.tp.map.get(r).type : (o.S0.types.rooms.get(r) || {}).type) });
     ok('the cap is a parameter: with 13 tiles only room 7 (shift 12.1 with the D31 gap) stays; rooms 66 (13.9) and 64 (16.2) are beyond the cap and demoted (ANNOUNCED: the shifts of D30 were 8 / 13.9 / 13.9)', dp.eligible.join() === '7' && dp.items.filter((q) => q.room === 64 || q.room === 66).every((q) => !q.eligible && /cap/.test(q.why)), JSON.stringify([dp.eligible, dp.why.filter((q) => q.room === 64 || q.room === 66)])); }
   // ---- the geometry of the eligible Dioramas, per key
-  for (const key of ['balanced-K1-m2', 'balanced-K1-m1', 'balanced-K0-m2']) {
+  for (const key of ['balanced-K1-m2', 'balanced-K1-m1', 'balanced-K1-m1gap1', 'balanced-K0-m2']) {
     const o = get(key), S1 = o.S1, S2 = base[key], S0 = o.S0, dp = o.dp, W = S1.W, mode = dp.mode, items = dp.items.filter((q) => q.eligible), chainRooms = new Set(o.PP.chainIds);
     ok(`${key}: ${items.length} Dioramas moved, levels added, applied`, items.length > 0 && S1.dioInfo && S1.dioInfo.footprint > 0 && S1.dioInfo.levelsAdded > 0, JSON.stringify(S1.dioInfo));
     for (const it of items) {
       const tag = `${key} room ${it.room}`, dx = it.dst[0] % W - it.src[0] % W, dy = ((it.dst[0] / W) | 0) - ((it.src[0] / W) | 0);
       if (mode === 'm2') ok(`${tag}: M2 the footprint keeps its shape (every tile translated by the same shift; ${it.dst.length} of ${it.tiles} tiles, the rest clipped by the window, at most 10 %)`, it.dst.every((j, k) => j % W - it.src[k] % W === dx && ((j / W) | 0) - ((it.src[k] / W) | 0) === dy) && it.dst.length >= 0.9 * it.tiles);
       else ok(`${tag}: M1 the footprint is translated to the centre of its region and clipped to it (kept ${it.kept} %)`, it.dst.every((j, k) => j % W - it.src[k] % W === dx && ((j / W) | 0) - ((it.src[k] / W) | 0) === dy) && it.kept >= 60 && it.kept <= 100, it.kept);
-      const dz = it.prof.dz; // D31 (ANNOUNCED): the offset comes from the pocket type (replaces the +-2 terraces of D30); the footprint keeps its internal relative heights
-      ok(`${tag}: the footprint keeps its internal relative heights (source + ${dz.toFixed(2)}, the offset of its ${it.type} profile)`, it.dst.every((j, k) => Math.abs(hOf(S1, j) - (hOf(S2, it.src[k]) + dz)) < 0.02), it.dst.slice(0, 3).map((j, k) => [hOf(S1, j), hOf(S2, it.src[k]) + dz]));
+      // D31 (ANNOUNCED, review of PR #46): the offset is the ABSOLUTE constant of the type (terH units over the landing level), no longer the profile's own dz and no longer +-2 terraces
+      const OFF = { island: 0, cima: 1.5, arena: -1.2, quebrada: 1.0 }[it.type], med = (a) => { const q = a.slice().sort((x, y) => x - y); return q[(q.length - 1) >> 1]; }, d0 = hOf(S1, it.dst[0]) - hOf(S2, it.src[0]);
+      ok(`${tag}: the footprint keeps its internal relative heights (every tile at source + one constant)`, OFF !== undefined && it.dst.every((j, k) => Math.abs(hOf(S1, j) - hOf(S2, it.src[k]) - d0) < 0.02), it.dst.slice(0, 3).map((j, k) => [hOf(S1, j), hOf(S2, it.src[k]) + d0]));
+      ok(`${tag}: the footprint (median) sits ${OFF} terH over the landing level (${it.type}: island 0, cima +1.5, arena -1.2, quebrada +1.0), measured on the shape`, Math.abs(med(it.dst.map((j) => hOf(S1, j))) - med(it.landing.map((t) => hOf(S1, t))) - OFF * terH) < 0.02, [med(it.dst.map((j) => hOf(S1, j))), med(it.landing.map((t) => hOf(S1, t))), OFF * terH]);
       ok(`${tag}: the landing keeps its heights (the same level as without the option)`, it.landing.every((t) => hOf(S1, t) === hOf(S2, t)), it.landing.filter((t) => hOf(S1, t) !== hOf(S2, t)).length);
       ok(`${tag}: the landing is colour-coded as transit (dioRole 3) and the bridge as 4`, it.landing.every((t) => S1.dioRole[t] === 3 || S1.dioRole[t] === 1) && it.bridge.inner.every((t) => S1.dioRole[t] === 4));
       ok(`${tag}: the bridge lies on free ground (no tile of a chain room, but the old footprint) and the pocket on free ground only (plus the own old footprint minus the landing, D31)`, [...it.bridge.inner, ...it.bridge.lat].every((t) => !chainRooms.has(S0.roomMap[t]) || S0.roomMap[t] === it.room) && it.pocket.every((t) => !chainRooms.has(S0.roomMap[t]) || S0.roomMap[t] === it.room)); // D31 (ANNOUNCED): the own old footprint minus the landing is ground and may be pocket in M2 too (it was M1 only in D30)
