@@ -33,6 +33,20 @@ const build = (pack, c, mode) => { const PP = { ...c.P, dioChain: mode, chainIds
   // the OLD drawn route (E.route) went through the grey ground in Balanced: the instrument finds it (the user's 39 / 65 tiles)
   { const c = out['balanced-K1'], b = c.b_off, S = b.S, gs = c.goals, r1 = E.route(S, b.PP, gs[1], gs[0]), r2 = E.route(S, b.PP, gs[2], gs[0]);
     ok('Balanced K = 1, the old shortest route crossed the flattened ground (39 and 65 tiles on route 1 and 2) and skipped pieces: this is the defect the chain route removes', r1.filter((t) => S.chainGrey[t]).length === 39 && r2.filter((t) => S.chainGrey[t]).length === 65, [r1.filter((t) => S.chainGrey[t]).length, r2.filter((t) => S.chainGrey[t]).length]); }
+  // ---- RANK (touches the extreme terrace) and FREE SIDE on synthetic terraces
+  { const mkS = (W, H, fill) => { const n = W * H, S = { W, H, n, N: 5, roomMap: new Int32Array(n), ter: new Int32Array(n), void: null }; fill(S); return S; };
+    const rows = (S, room, t, x0, x1) => { for (let y = 0; y < S.H; y++) for (let x = x0; x <= x1; x++) { S.roomMap[y * S.W + x] = room; S.ter[y * S.W + x] = t; } };
+    const S1 = mkS(12, 12, (S) => { rows(S, 1, 0, 0, 3); rows(S, 2, 4, 4, 7); rows(S, 3, 2, 8, 9); rows(S, 4, 1, 10, 10); S.ter[5 * 12 + 11] = 0; S.roomMap[5 * 12 + 11] = 4; S.ter[1 * 12 + 11] = 4; S.roomMap[1 * 12 + 11] = 4; S.ter[2 * 12 + 11] = 4; S.roomMap[2 * 12 + 11] = 4; });
+    ok('rank: a room that touches the LOWEST terrace of the map is Low, the HIGHEST High, a room touching neither Middle', T.dioRank(S1, {}, 1) === 'low' && T.dioRank(S1, {}, 2) === 'high' && T.dioRank(S1, {}, 3) === 'mid');
+    ok('rank: a room that touches both extremes takes the extreme with more of its tiles (2 high tiles against 1 low tile -> High)', T.dioRank(S1, {}, 4) === 'high');
+    ok('rank: the test-only hook forces the rank and nothing else', T.dioRank(S1, { dioForceRank: 'low' }, 2) === 'low' && T.dioRank(S1, {}, 2) === 'high');
+    ok('type: Low -> Island, Mid -> Arena, High -> Quebrada when the free side holds >= 60 % of non-chain tiles, else Cima', T.dioType('low') === 'island' && T.dioType('mid') === 'arena' && T.dioType('high', { share: 0.6 }) === 'quebrada' && T.dioType('high', { share: 0.59 }) === 'cima');
+    const S2 = mkS(40, 40, (S) => { for (let y = 0; y < 40; y++) for (let x = 0; x < 40; x++) { S.roomMap[y * 40 + x] = x < 20 ? 7 : 0; S.ter[y * 40 + x] = 1; } });
+    const fs0 = T.dioFreeSide(S2, new Set([7]), 20, 20, new Set(), 12);
+    ok('free side: the direction with most tiles that are NOT chain rooms (the chain room is to the west, the free ground to the east)', fs0.sector === 0 && fs0.share === 1 && Math.abs(fs0.dir[0] - 1) < 1e-9, JSON.stringify([fs0.sector, fs0.share]));
+    const fs1 = T.dioFreeSide(S2, new Set([7]), 5, 20, new Set(), 12); ok('free side: a footprint deep inside the chain rooms has no free sector (share 0 -> Cima for a High room)', fs1.share === 0 && T.dioType('high', fs1) === 'cima', fs1.share);
+  }
+  if (process.env.DIO_REPORT) for (const [k, c] of Object.entries(out)) for (const it of c.b_m2.dp.items) console.log(k, 'room', it.room, it.eligible ? 'ELIGIBLE' : 'no', 'perim', it.perim, 'rank', it.rank || '-', 'type', it.type || '-', 'free share', it.free ? Math.round(it.free.share * 100) + ' % at ' + it.free.sector * 45 + ' deg, min sector ' + Math.round(Math.min(...it.free.shares) * 100) + ' %' : '-', it.eligible ? '' : '| ' + it.why);
   global.__out = out; if (process.argv[2] === 'probe') process.exit(0);
   console.log(pass + ' PASS, ' + fail + ' FAIL'); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

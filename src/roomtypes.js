@@ -558,6 +558,7 @@
           if (geo.bridge) { const avoid = new Set([...dstSet, ...geo.bridge.inner, ...geo.bridge.lat]); geo.pocket = [...Rs].filter((j) => !avoid.has(j) && !land2.has(j)); } }
       }
       if (geo && geo.bridge) geo.pdist = ringsOf(geo.dst, geo.pocket);
+      if (geo && geo.dst && geo.dst.length) { const fc = [geo.dst.reduce((a, j) => a + (j % W), 0) / geo.dst.length, geo.dst.reduce((a, j) => a + ((j / W) | 0), 0) / geo.dst.length]; it.rank = T.dioRank(S, P, r); it.free = T.dioFreeSide(S, CR, fc[0], fc[1], new Set(geo.dst)); it.type = T.dioType(it.rank, it.free); }
       it.shift = geo ? +Math.hypot(geo.shift[0], geo.shift[1]).toFixed(1) : null; it.kept = geo && geo.kept !== undefined ? geo.kept : 100; const br = geo && geo.bridge; it.bridgeLen = br ? br.length : null; it.bridgeCross = br ? { chain: br.xChain, pocket: br.xOcc, void: br.xVoid } : null;
       if (perim < 50) it.why = `free perimeter ${perim.toFixed(0)} % < 50 %`;
       else if (!sh) it.why = 'no free place for the footprint';
@@ -644,4 +645,22 @@
     const goalIdx = goals.map((g, j) => { const k = j === 0 ? 0 : goalAt.indexOf(j); const tile = gs[j]; for (let i = 0; i < path.length; i++) if (lay[i] === k && path[i] === tile) return i; return -1; });
     return (S._chainRoute = { path, goalIdx, layers: lay, goals: gs, pieces: new Set(path.map((t) => pc.id[t]).filter((p) => p > 0 && seq.includes(p))).size, chainPieces: new Set(seq).size });
   };
+
+  /* RANK AND TYPE OF A MOVED DIORAMA (DAC v2 PR C2, D31; user's rule 2026-10-23): the RANK of a room over the terraces of the map (0 .. S.N - 1): it TOUCHES the lowest terrace -> 'low', the highest -> 'high', neither -> 'mid'; touching both: the extreme with more of the room's tiles. The rank decides the pocket TYPE:
+     low -> ISLAND, mid -> ARENA, high -> QUEBRADA or CIMA by the FREE SIDE: the 45-degree sector (of 8, radius 18 around the footprint, the footprint itself not counted) with the highest share of tiles that are NOT chain rooms (void counts as free: the D30 pocket-space definition); a share >= T.DIO_FREE (0.6) -> QUEBRADA, else CIMA.
+     (MIRADOR, the fifth type, is deferred.) `P.dioForceRank` ('low' | 'mid' | 'high') is a TEST-ONLY hook (not in the pack, not in the UI). */
+  T.DIO_FREE = 0.6;
+  T.dioRank = function (S, P, room) {
+    if (P && P.dioForceRank) return P.dioForceRank; const N = S.N; if (!(N > 1)) return 'mid'; let lo = 0, hi = 0;
+    for (let i = 0; i < S.n; i++) if (S.roomMap[i] === room && !(S.void && S.void[i])) { if (S.ter[i] === 0) lo++; else if (S.ter[i] === N - 1) hi++; }
+    return lo && !hi ? 'low' : hi && !lo ? 'high' : lo && hi ? (lo > hi ? 'low' : 'high') : 'mid';
+  };
+  T.dioFreeSide = function (S, chainSet, cx, cy, skip, R) {
+    const W = S.W, H = S.H, rad = R || 18, tot = new Array(8).fill(0), fr = new Array(8).fill(0);
+    for (let y = Math.max(0, Math.round(cy) - rad); y < Math.min(H, Math.round(cy) + rad); y++) for (let x = Math.max(0, Math.round(cx) - rad); x < Math.min(W, Math.round(cx) + rad); x++) { const i = y * W + x; if (skip && skip.has(i)) continue;
+      const k = ((Math.round(Math.atan2(y - cy, x - cx) / (Math.PI / 4)) % 8) + 8) % 8; tot[k]++; if ((S.void && S.void[i]) || !(S.roomMap[i] > 0 && chainSet.has(S.roomMap[i]))) fr[k]++; }
+    const shares = tot.map((t, k) => (t ? fr[k] / t : 0)); let b = 0; for (let k = 1; k < 8; k++) if (shares[k] > shares[b]) b = k;
+    return { sector: b, share: shares[b], shares, dir: [Math.cos(b * Math.PI / 4), Math.sin(b * Math.PI / 4)] };
+  };
+  T.dioType = function (rank, free) { return rank === 'low' ? 'island' : rank === 'mid' ? 'arena' : free && free.share >= T.DIO_FREE ? 'quebrada' : 'cima'; };
 })(window.EVO = window.EVO || {});
