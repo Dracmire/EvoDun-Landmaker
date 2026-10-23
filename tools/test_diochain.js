@@ -52,7 +52,7 @@ const EX = { balanced: { P: { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5,
   }
   // ---- eligibility (cap 30, user's decision 2026-10-23)
   const el = (key) => get(key).dp.eligible.slice().sort((a, b) => a - b).join();
-  ok('Balanced types K = 1 (M2 and M1): the eligible Dioramas are rooms 7, 64 and 66; the others are drawn as Ascension', el('balanced-K1-m2') === '7,64,66' && el('balanced-K1-m1') === '7,64,66', [el('balanced-K1-m2'), el('balanced-K1-m1')]);
+  ok('Balanced types K = 1: M2 keeps rooms 7, 64 and 66 (D31: the gap of 3 empty tiles pushes 64 and 7 farther, no M1 fallback needed); the M1 selection (no M2 fallback) keeps only room 66, the others cannot keep the gap and are drawn as Ascension (ANNOUNCED change of D31)', el('balanced-K1-m2') === '7,64,66' && el('balanced-K1-m1') === '66', [el('balanced-K1-m2'), el('balanced-K1-m1')]);
   ok('Balanced types K = 0: rooms 7, 20 and 66', el('balanced-K0-m2') === '7,20,66', el('balanced-K0-m2'));
   ok('Chain 5 terraces (K = 1 and K = 0): no Diorama qualifies (rooms 48 and 6 are beyond the cap and their straight bridge crosses the chain; room 10 has 25 % free perimeter)', el('chain5-K1-m2') === '' && el('chain5-K0-m2') === '' && el('chain5-K1-m1') === '', [el('chain5-K1-m2'), el('chain5-K0-m2')]);
   for (const key of ['balanced-K1-m2', 'balanced-K1-m1', 'chain5-K1-m2', 'chain5-K0-m2']) {
@@ -64,8 +64,8 @@ const EX = { balanced: { P: { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5,
   { const o = get('chain5-K1-m2'), dp = T.dioPlan(o.S0, { ...o.PP, dioCap: 300 }, { chainIds: o.PP.chainIds, pieces: o.ch.pieces, goals: o.goals, typeOf: (r) => (o.tp.map.has(r) ? o.tp.map.get(r).type : (o.S0.types.rooms.get(r) || {}).type) });
     const q6 = dp.items.find((q) => q.room === 6);
     ok('Chain 5 K = 1, room 6 with the cap lifted: its straight bridge at the minimum shift (38 tiles) still crosses 10 chain-room tiles, so it stays demoted: the cap would be 30 whatever the 40 rule says', q6 && q6.shiftM2 > 30 && q6.shiftM2 <= 40 && q6.bridgeCross.chain > 0 && !q6.eligible, q6 && JSON.stringify([q6.shiftM2, q6.bridgeCross, q6.why])); }
-  { const o = get('balanced-K1-m2'), dp = T.dioPlan(o.S0, { ...o.PP, dioCap: 10 }, { chainIds: o.PP.chainIds, pieces: o.ch.pieces, goals: o.goals, typeOf: (r) => (o.tp.map.has(r) ? o.tp.map.get(r).type : (o.S0.types.rooms.get(r) || {}).type) });
-    ok('the cap is a parameter: with 10 tiles only room 7 (shift 8) stays; rooms 64 and 66 (shift 13.9) are beyond the cap and demoted', dp.eligible.join() === '7' && dp.items.filter((q) => q.room === 64 || q.room === 66).every((q) => !q.eligible && /cap/.test(q.why)), JSON.stringify([dp.eligible, dp.why.filter((q) => q.room === 64 || q.room === 66)])); }
+  { const o = get('balanced-K1-m2'), dp = T.dioPlan(o.S0, { ...o.PP, dioCap: 13 }, { chainIds: o.PP.chainIds, pieces: o.ch.pieces, goals: o.goals, typeOf: (r) => (o.tp.map.has(r) ? o.tp.map.get(r).type : (o.S0.types.rooms.get(r) || {}).type) });
+    ok('the cap is a parameter: with 13 tiles only room 7 (shift 12.1 with the D31 gap) stays; rooms 66 (13.9) and 64 (16.2) are beyond the cap and demoted (ANNOUNCED: the shifts of D30 were 8 / 13.9 / 13.9)', dp.eligible.join() === '7' && dp.items.filter((q) => q.room === 64 || q.room === 66).every((q) => !q.eligible && /cap/.test(q.why)), JSON.stringify([dp.eligible, dp.why.filter((q) => q.room === 64 || q.room === 66)])); }
   // ---- the geometry of the eligible Dioramas, per key
   for (const key of ['balanced-K1-m2', 'balanced-K1-m1', 'balanced-K0-m2']) {
     const o = get(key), S1 = o.S1, S2 = base[key], S0 = o.S0, dp = o.dp, W = S1.W, mode = dp.mode, items = dp.items.filter((q) => q.eligible), chainRooms = new Set(o.PP.chainIds);

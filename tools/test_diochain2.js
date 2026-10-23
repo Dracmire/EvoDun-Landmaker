@@ -47,6 +47,20 @@ const build = (pack, c, mode) => { const PP = { ...c.P, dioChain: mode, chainIds
     const fs1 = T.dioFreeSide(S2, new Set([7]), 5, 20, new Set(), 12); ok('free side: a footprint deep inside the chain rooms has no free sector (share 0 -> Cima for a High room)', fs1.share === 0 && T.dioType('high', fs1) === 'cima', fs1.share);
   }
   if (process.env.DIO_REPORT) for (const [k, c] of Object.entries(out)) for (const it of c.b_m2.dp.items) console.log(k, 'room', it.room, it.eligible ? 'ELIGIBLE' : 'no', 'perim', it.perim, 'rank', it.rank || '-', 'type', it.type || '-', 'free share', it.free ? Math.round(it.free.share * 100) + ' % at ' + it.free.sector * 45 + ' deg, min sector ' + Math.round(Math.min(...it.free.shares) * 100) + ' %' : '-', it.eligible ? '' : '| ' + it.why);
+  // ---- D31 part 2: the GAP, the bridge, M1 != M2, the fallback, the outline at the moved footprint
+  const cheb = (W, A, B) => { let m = 1e9; for (const a of A) for (const b of B) { const d = Math.max(Math.abs(a % W - b % W), Math.abs(((a / W) | 0) - ((b / W) | 0))); if (d < m) m = d; } return m; };
+  for (const key of ['balanced-K1', 'balanced-K0']) { const c = out[key], b = c.b_m2, W = b.S.W, items = b.dp.items.filter((q) => q.eligible);
+    ok(`${key}: every moved Diorama keeps a gap of >= ${T.DIO_GAP} (centre distance, 3 empty tiles) between the footprint and the landing, measured independently`, items.length > 0 && items.every((it) => cheb(W, it.dst, it.landing) >= T.DIO_GAP && it.gapC >= T.DIO_GAP && it.gapE >= T.DIO_GAP - 1e-9), items.map((it) => [it.room, cheb(W, it.dst, it.landing), it.gapE]));
+    ok(`${key}: every bridge is >= ${T.DIO_GAP} long and walkable (no chain room crossed)`, items.every((it) => it.bridgeLen >= T.DIO_GAP && it.bridge.inner.length >= T.DIO_GAP - 1 && it.bridgeCross.chain === 0), items.map((it) => [it.room, it.bridgeLen]));
+    ok(`${key}: the D30 bridges of 1-2 tiles are gone (rooms 64 and 7 / 20 had 2 and 2)`, items.every((it) => it.bridgeLen >= 4));
+    const S = b.S, W2 = S.W; ok(`${key}: the Diorama outline (S.dioBits) is at the MOVED footprint only: no outline bit at the old position (footprint source tiles, landing included), outline on the perimeter of the new footprint`, items.every((it) => it.src.every((t) => !it.dst.includes(t) ? S.dioBits[t] === 0 : true) && it.landing.every((t) => S.dioBits[t] === 0) && it.dst.some((t) => S.dioBits[t] !== 0)));
+  }
+  { const c = out['balanced-K1'], o2 = build(pack, c, 'm2').dp, o1 = build(pack, c, 'm1').dp, a2 = o2.items.find((q) => q.room === 66), a1 = o1.items.find((q) => q.room === 66);
+    ok('M1 and M2 give DIFFERENT footprints for room 66 (shift 13.9 against 18) and different pockets (1602 against 1570 tiles)', a2.eligible && a1.eligible && a1.via === 'm1' && a2.via === 'm2' && a2.shift !== a1.shift && a2.dst.join() !== a1.dst.join() && a2.pocket.length !== a1.pocket.length, [a2.shift, a1.shift, a2.pocket.length, a1.pocket.length]); }
+  { const c = out['balanced-K1'], PPf = { ...c.b_m2.PP, dioGap: 1, dioCap: 12 }, dp = T.dioPlan(c.S0, PPf, { chainIds: c.ids, pieces: c.ch.pieces, goals: c.goals, typeOf: c.typeOf }), q64 = dp.items.find((q) => q.room === 64);
+    ok('fallback: with the cap at 12 and the gap at 1 the M2 position of room 64 (shift 13.9) is beyond the cap, so the Diorama falls back to M1 (shift 11.2, kept 97.9 %) and the plan says via m1', q64.eligible && q64.via === 'm1' && q64.m2why && /cap/.test(q64.m2why), JSON.stringify([q64.via, q64.shift, q64.kept, q64.m2why]));
+    const dp2 = T.dioPlan(c.S0, { ...c.b_m2.PP, dioGap: 4, dioCap: 12 }, { chainIds: c.ids, pieces: c.ch.pieces, goals: c.goals, typeOf: c.typeOf }), q2 = dp2.items.find((q) => q.room === 64);
+    ok('fallback: with the gap at 4 M1 cannot keep it (gap 1), so room 64 is drawn as Ascension and the reason names the gap or the cap', !q2.eligible && /gap|cap/.test(q2.why), q2.why); }
   global.__out = out; if (process.argv[2] === 'probe') process.exit(0);
   console.log(pass + ' PASS, ' + fail + ' FAIL'); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
