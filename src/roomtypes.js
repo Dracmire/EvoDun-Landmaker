@@ -620,4 +620,28 @@
     S.dioRole = dioRole; S.dioMove = move; Object.assign(S.dioInfo, { levelsAdded: added, footprint: nFp, pocket: nPk, bridge: nBr, landing: landSet.size });
     return S.dioInfo;
   };
+
+  /* THE DRAWN ROUTE IS THE CHAIN (DAC v2 PR C2, D31; the chain view only): the route of the objective j is the prefix of ONE tile path that follows the chain piece by piece, door to door, ONLY on tiles of the chain pieces (never on the flattened ground) and, where a Diorama moved, on its landing and, when a goal lies inside it, on the bridge and the footprint.
+     A layered BFS over (visit k, tile, goal flag): layer k = the tiles of piece k of `P.chainSeqs[0]` (the old footprint minus the landing is flattened, so it is not walkable here), edges = the final walking graph `S._walk`, a move to layer k + 1 only across a door edge, every goal (stake, sub-objectives, final goal; `P.chainGoals`, moved with the footprint by `S.dioMove`) forced at its visit in order.
+     Returns { path (stake first), goalIdx (index of each goal in the path), layers, pieces (distinct pieces on the path) } or { fail, failAt, why }; the tree, classify and the walking graph are only READ. */
+  T.chainRoute = function (S, P) {
+    const seq = P.chainSeqs && P.chainSeqs[0], goals = P.chainGoals; if (!seq || !goals || goals.length < 2) return null;
+    if (S._chainRoute !== undefined) return S._chainRoute;
+    const n = S.n, K = seq.length, pc = T.pieces(S, P), nb = E.walkGraph(S, P), dp = S.dioInfo && P.dioPlan && P.dioChain && P.dioChain !== 'off' ? P.dioPlan : null, moved = dp ? dp.items.filter((q) => q.eligible) : [];
+    const mv = (t) => (S.dioMove && S.dioMove.has(t) ? S.dioMove.get(t) : t), gs = goals.map(mv), flat = new Set(), landOf = new Map(), extraOf = new Map();
+    for (const it of moved) { for (const t of it.src) flat.add(t); landOf.set(it.room, new Set(it.landing)); extraOf.set(it.room, [...it.dst, ...it.bridge.inner, ...it.bridge.lat]); }
+    const gp = goals.map((t) => pc.id[t]), goalAt = new Array(K).fill(-1); goalAt[0] = 0; { let gi = 0; for (let k = 1; k < K; k++) if (gi + 1 < gp.length && seq[k] === gp[gi + 1]) { gi++; goalAt[k] = gi; } }
+    const byPiece = new Map(); for (let i = 0; i < n; i++) { const p = pc.id[i]; if (p > 0) { let a = byPiece.get(p); if (!a) byPiece.set(p, a = []); a.push(i); } }
+    const layerSets = seq.map((p, k) => { const room = pc.room[p], land = landOf.get(room), set = new Set(); for (const i of byPiece.get(p) || []) { if (land && flat.has(i) && !land.has(i)) continue; set.add(i); } if (land && goalAt[k] >= 0 && gs[goalAt[k]] !== goals[goalAt[k]]) for (const t of extraOf.get(room)) set.add(t); return set; });
+    const need = (k) => goalAt[k] > 0, goalTile = (k) => (goalAt[k] >= 0 ? gs[goalAt[k]] : -1), f0 = (k, t) => (need(k) ? (t === goalTile(k) ? 1 : 0) : 1), key = (k, t, f) => (k * n + t) * 2 + f;
+    const start = gs[0]; if (!layerSets[0].has(start)) return (S._chainRoute = { fail: true, failAt: 0, why: 'the stake tile is not on its piece' });
+    const par = new Map([[key(0, start, 1), -1]]), q = [[0, start, 1]], last = K - 1, fin = gs[gs.length - 1]; let maxK = 0, endKey = -1;
+    for (let h = 0; h < q.length; h++) { const [k, t, f] = q[h]; if (k > maxK) maxK = k; if (k === last && t === fin && f === 1) { endKey = key(k, t, f); break; }
+      for (const v of nb(t).slice()) { if (layerSets[k].has(v)) { const f2 = need(k) && v === goalTile(k) ? 1 : f, kk = key(k, v, f2); if (!par.has(kk)) { par.set(kk, key(k, t, f)); q.push([k, v, f2]); } }
+        if (k + 1 < K && f === 1 && layerSets[k + 1].has(v)) { const f2 = f0(k + 1, v), kk = key(k + 1, v, f2); if (!par.has(kk)) { par.set(kk, key(k, t, f)); q.push([k + 1, v, f2]); } } } }
+    if (endKey < 0) return (S._chainRoute = { fail: true, failAt: Math.min(maxK + 1, K - 1), why: `no way through visit ${maxK + 1} (piece ${seq[maxK]}) with its own tiles` + (need(maxK) && maxK < K ? ' (door to the next piece or its goal tile)' : '') });
+    const path = [], lay = []; for (let kk = endKey; kk !== -1; kk = par.get(kk)) { const f = kk % 2, rest = (kk - f) / 2, t = rest % n, k = (rest - t) / n; path.push(t); lay.push(k); } path.reverse(); lay.reverse();
+    const goalIdx = goals.map((g, j) => { const k = j === 0 ? 0 : goalAt.indexOf(j); const tile = gs[j]; for (let i = 0; i < path.length; i++) if (lay[i] === k && path[i] === tile) return i; return -1; });
+    return (S._chainRoute = { path, goalIdx, layers: lay, goals: gs, pieces: new Set(path.map((t) => pc.id[t]).filter((p) => p > 0 && seq.includes(p))).size, chainPieces: new Set(seq).size });
+  };
 })(window.EVO = window.EVO || {});
