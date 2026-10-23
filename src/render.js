@@ -19,6 +19,7 @@
     if (DBG) return [128, 128, 128];
     const K = P.subs, m = S.levelMeta[L];
     if (m.water) return [52, 142, 222]; // pocket water: a level of its own with its own colour
+    if (m.pk !== undefined) { const t = m.pk, A = t < 0.5 ? [[52, 78, 96], [186, 150, 104]] : [[186, 150, 104], [176, 92, 68]], u = t < 0.5 ? t * 2 : (t - 0.5) * 2; return [0, 1, 2].map((q) => A[0][q] + (A[1][q] - A[0][q]) * u); } // Diorama pocket (D31): a palette by height, slate -> sand -> terracotta
     if (m.anchor) return [140, 142, 150]; // anchors (D26): a non-walkable tile raised, a lighter neutral grey than the flat ground
     if (m.grey) return [118, 120, 126]; // chain view (D23): the ground outside the chain rooms, flattened, a neutral grey (no type tint)
     const at = (ter, mi) => { // colour of terrace `ter`, sub-terrace `mi`
