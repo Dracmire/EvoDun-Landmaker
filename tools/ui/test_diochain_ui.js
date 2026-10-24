@@ -8,9 +8,10 @@ const { open } = require('./common');
   await ev(() => window.__evo.setMode('rooms')); await a.idle();
   for (const id of ['real_balanced', 'real_chain5']) {
     await page.click(`#examples button[data-id="${id}"]`); await a.idle();
-    ok(`${id}: the selector "Diorama in chain view" exists, enabled in the chain view, default Off`, (await ev(() => { const s = document.querySelector('#dioChain'); return !!s && !s.disabled && s.value === 'off' && window.__evo.P.dioChain === 'off'; })));
+    ok(`${id}: the selector "Diorama in chain view" exists and is enabled in the chain view; D31 (ANNOUNCED): its default in mode 2 is M2 (every check below starts from an explicit Off)`, (await ev(() => { const s = document.querySelector('#dioChain'); return !!s && !s.disabled && s.value === 'm2' && window.__evo.P.dioChain === 'm2'; })));
+    await page.selectOption('#dioChain', 'off'); await a.idle();
     const h0 = await hash(), vb0 = await ev(() => window.__evo.viewerBlock());
-    ok(`${id}: Off writes no dioChain in the manifest and the shape has no Diorama role`, vb0.dioChain === undefined && (await ev(() => !window.__evo.S().dioRole)));
+    ok(`${id}: Off is written explicitly (D31: "off") and the shape has no Diorama role`, vb0.dioChain === 'off' && (await ev(() => !window.__evo.S().dioRole)));
     await page.selectOption('#dioChain', 'm2'); await a.idle();
     const m2 = await ev(() => { const S = window.__evo.S(), d = S.dioInfo; return { eligible: d ? d.eligible : null, fp: d ? d.footprint : 0, added: d ? d.levelsAdded : 0, vb: window.__evo.viewerBlock().dioChain, info: document.querySelector('#info').textContent.match(/Diorama in chain view.{0,260}/) }; });
     const h2 = await hash();
@@ -37,7 +38,7 @@ const { open } = require('./common');
     ok(`${id}: M2 is written to the manifest (viewer.dioChain "m2") and read back`, m2.vb === 'm2' && await (async () => { const vb = await ev(() => window.__evo.viewerBlock()); await ev(() => { const s = document.querySelector('#dioChain'); s.value = 'off'; s.dispatchEvent(new Event('change')); }); await a.idle(); await ev((b) => window.__evo.applyViewerBlock(b), vb); await a.idle(); return (await ev(() => window.__evo.P.dioChain)) === 'm2' && (await ev(() => document.querySelector('#dioChain').value)) === 'm2'; })());
     await page.selectOption('#dioChain', 'm1'); await a.idle();
     const m1 = await ev(() => { const d = window.__evo.S().dioInfo; return { eligible: d ? d.eligible : null, fp: d ? d.footprint : 0 }; });
-    ok(`${id}: M1 gives the same eligible set as M2 at the cap (${m1.eligible && m1.eligible.join()})`, JSON.stringify((m1.eligible || []).slice().sort((x, y) => x - y)) === JSON.stringify((m2.eligible || []).slice().sort((x, y) => x - y)));
+    ok(`${id}: M1 keeps only the Dioramas that can hold the gap of 3 empty tiles without moving far (D31, ANNOUNCED: room 66 in Balanced, none in Chain 5; M2 keeps 7, 64 and 66) (${m1.eligible && m1.eligible.join()})`, JSON.stringify((m1.eligible || []).slice().sort((x, y) => x - y)) === (id === 'real_balanced' ? '[66]' : '[]'));
     await page.selectOption('#dioChain', 'off'); await a.idle();
     ok(`${id}: back to Off = the same pixels as before`, (await hash()) === h0);
   }

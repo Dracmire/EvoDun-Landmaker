@@ -341,14 +341,17 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     // 2b. the route as a sequence of rooms: an INDEPENDENT recomputation (the test\'s own rule: stake first, drop room 0, then collapse equal neighbours)
     const rl = await ev(() => { const e = window.__evo, S = e.S(), E = window.EVO, tile = (q) => (q.y - S.oy) * S.W + (q.x - S.ox), st0 = tile(e.inc.stake);
       const lines = [...document.querySelector('#incInfo').innerHTML.split('<br>')].filter((l) => /^Route \d/.test(l)).map((l) => l.replace(/&gt;/g, '>'));
-      const exp = e.inc.objectives.map((q) => { const r = E.route(S, e.P, tile(q), st0), ids = r.slice().reverse().map((t) => S.roomMap[t]).filter((id) => id !== 0), seq = ids.filter((id, k) => k === 0 || id !== ids[k - 1]); return { len: r.length, seq, stakeRoom: S.roomMap[st0], objRoom: S.roomMap[tile(q)] }; });
+      const cr = S.chain && e.P.chainGoals ? E.roomTypes.chainRoute(S, e.P) : null, exp = e.inc.objectives.map((q) => { const tq = tile(q), tm = S.dioMove && S.dioMove.has(tq) ? S.dioMove.get(tq) : tq, j = cr && !cr.fail ? cr.goals.indexOf(tm) : -1, r = j > 0 ? cr.path.slice(0, cr.goalIdx[j] + 1).reverse() : E.route(S, e.P, tile(q), st0), /* D31 (ANNOUNCED): in the chain view the drawn route IS the chain, so the independent room-sequence recomputation reads that route's tiles */ ids = r.slice().reverse().map((t) => S.roomMap[t]).filter((id) => id !== 0), seq = ids.filter((id, k) => k === 0 || id !== ids[k - 1]); return { len: r.length, seq, stakeRoom: S.roomMap[st0], objRoom: S.roomMap[tile(q)] }; });
       const usual = document.querySelector('#incInfo').innerHTML.split('<br>').filter((l) => !/^Route \d/.test(l));
-      return { lines, exp, usual }; });
+      const drawn = e.O.incursion.objectives.map((o) => e.routeRoomIds(o.route)); // the DRAWN route's full room sequence (the text below elides above 30 rooms)
+      return { lines, exp, usual, drawn }; });
     ok('route lines: one per objective, after the usual incursion text', rl.lines.length === 2 && rl.usual.length === 2 && rl.usual.every((l) => /route of \d+ tiles to the stake/.test(l)), JSON.stringify(rl.usual));
     for (let k = 0; k < 2; k++) {
-      const line = rl.lines[k], e = rl.exp[k], listed = line.split('stake first: ')[1].split(' > '), ids = listed.map((t) => +t.match(/(\d+)$/)[1]), K = +line.match(/, (\d+) rooms?\)/)[1], n = +line.match(/\((\d+) tiles/)[1];
-      ok(`route line ${k + 1}: the listed rooms equal the independent recomputation (${e.seq.length} rooms), K and the tile count agree, first = the stake's room, last = the objective's room`, ids.join() === e.seq.join() && K === e.seq.length && n === e.len && ids[0] === e.stakeRoom && ids[ids.length - 1] === e.objRoom, line.slice(0, 160));
+      const line = rl.lines[k], e = rl.exp[k], listed = line.split('stake first: ')[1].split(' > '), ids = listed.filter((t) => !/^\.\.\./.test(t)).map((t) => +t.match(/(\d+)$/)[1]), shown = e.seq.length > 30 ? [...e.seq.slice(0, 10), ...e.seq.slice(-10)] : e.seq, K = +line.match(/, (\d+) rooms?\)/)[1], n = +line.match(/\((\d+) tiles/)[1];
+      ok(`route line ${k + 1}: the listed rooms equal the independent recomputation (${e.seq.length} rooms), K and the tile count agree, first = the stake's room, last = the objective's room`, ids.join() === shown.join() && K === e.seq.length && n === e.len && ids[0] === e.stakeRoom && ids[ids.length - 1] === e.objRoom, line.slice(0, 160));
     }
+    // ANNOUNCED (review of PR #46): the FULL sequence, not only the head and the tail the text shows: every room of the drawn route (41 for the second objective of Balanced types) equals the independent recomputation
+    for (let k = 0; k < 2; k++) ok(`route ${k + 1}: the FULL room sequence of the drawn route (${rl.exp[k].seq.length} rooms) equals the independent recomputation, room by room`, rl.drawn[k] && rl.drawn[k].length === rl.exp[k].seq.length && rl.drawn[k].join() === rl.exp[k].seq.join(), JSON.stringify([rl.drawn[k] && rl.drawn[k].join(), rl.exp[k].seq.join()]).slice(0, 300));
     // the safety cap: above 30 rooms the MIDDLE is elided, the first and the last stay
     const cap = await ev(() => { const S = window.__evo.S(), ids = [...S.types.rooms.keys()], f = window.__evo.fmtRoomSeq; const lab = (s) => s.split(' > '); const a30 = lab(f(ids.slice(0, 30))), a31 = lab(f(ids.slice(0, 31))), a40 = lab(f(ids.slice(0, 40))); const num = (t) => +String(t).match(/(\d+)$/)[1];
       return { a30: a30.length, a30first: num(a30[0]), a30last: num(a30[a30.length - 1]), a31: a31.length, a40: a40, f40: ids[0], l40: ids[39], f31: ids[0], l31: ids[30] }; });
@@ -416,6 +419,8 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const csig = () => ev(() => [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).map((c) => c.toDataURL('image/png')).join('|')); // the canvases only (the info line carries timings)
     const toggle = async (id) => { await ev((id) => document.querySelector(id).click(), id); await a.idle(); };
     const ypx = () => ev(() => { const cv = [...document.querySelectorAll('#stage canvas')].find((c) => !c.closest('figure').hidden), g = cv.getContext('2d'), d = g.getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] >= 55 && d[i] <= 90 && d[i + 1] >= 225 && d[i + 1] <= 245 && d[i + 2] >= 245) n++; return n; }); // the gate line colour (70, 235, 255) (was yellow 255, 240, 60 in PR A: the colour change was asked for in PR B, an announced consequence for this check, no threshold touched)
+    // D31 (ANNOUNCED): the mode-2 default is now the Diorama in the chain view = M2, which moves footprints and changes the walking graph; the checks below are about the flattening, the anchors and the 'visual only' rule of the chain view, so they run with it Off (the same state as before C2)
+    const exL = async (id) => { await click(`#examples button[data-id="${id}"]`); await ev(() => { const s = document.querySelector('#dioChain'); s.value = 'off'; s.dispatchEvent(new Event('change', { bubbles: true })); }); await a.idle(); };
     const snap = (far) => ev((far) => { const e = window.__evo, S = e.S(), E = window.EVO, T = E.roomTypes, nm = (id) => { const o = S.types.rooms.get(id); return o ? (o.type === T.CAKE ? 'Cake' : o.type === T.DIORAMA ? 'Dio' : 'Asc') + ' ' + id : '?' + id; };
       const tile = (q) => (q.y - S.oy) * S.W + (q.x - S.ox), st0 = e.inc.stake ? tile(e.inc.stake) : -1;
       const routes = e.inc.objectives.map((q) => { const r = st0 >= 0 ? E.route(S, e.P, tile(q), st0) : null; return r ? r.length : -1; });
@@ -432,7 +437,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     await ev(() => window.__evo.setMode('rooms')); await a.idle();
     const out = {};
     for (const id of ['real_balanced', 'real_chain5']) {
-      await click(`#examples button[data-id="${id}"]`); const c = await snap(); out[id] = c;
+      await exL(id); const c = await snap(); out[id] = c;
       const types = new Set(c.seqs.flat().map((x) => x.split(' ')[0]));
       ok(`${id}: the Chain view is the default (selector Chain), the chain has ${c.ids} rooms and a route to both objectives`, c.view === 'chain' && c.chain && c.ids > 3 && c.routes.length === 2 && c.routes.every((r) => r > 0), JSON.stringify({ ids: c.ids, routes: c.routes }));
       ok(`${id}: the chain contains at least one Cake, one Ascension and one Diorama (AOK-1)`, types.has('Cake') && types.has('Asc') && types.has('Dio'), [...types].join());
@@ -453,15 +458,15 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       await page.selectOption('#dacView', 'chain'); await a.idle();
     }
     // no stake: Chain falls back to the whole map with a notice in the info
-    await click('#examples button[data-id="real_balanced"]'); await click('#m-clear'); let c0 = await snap();
+    await exL('real_balanced'); await click('#m-clear'); let c0 = await snap();
     ok('Chain without a stake / objectives: the whole map is shown and the info says so', !c0.chain && /needs a stake and an objective/.test(c0.info), c0.info.slice(-160));
     // a room chosen: the view applies to the whole map only
-    await click('#examples button[data-id="real_balanced"]'); await click('#roomChips .chip[data-id="60"]'); c0 = await snap();
+    await exL('real_balanced'); await click('#roomChips .chip[data-id="60"]'); c0 = await snap();
     ok('a room chosen with the Chain selector on: no chain (the room is shown as in #38)', !c0.chain && c0.greyN === 0 && /a room is chosen/.test(c0.info));
     await click('#wholeRooms');
 
     // GATE MARKERS: lines on the open borders between consecutive chain rooms; the toggle changes the picture; the stubs of cut Ascension walls are darker
-    await click('#examples button[data-id="real_balanced"]'); let g = await snap(); const s1 = await csig();
+    await exL('real_balanced'); let g = await snap(); const s1 = await csig();
     ok('gate markers: the gate faces exist (S.gateBits) and the toggle is on by default in the chain view', g.gateBits > 0 && (await ev(() => window.__evo.O.gateMarks)) === true, String(g.gateBits));
     const y1 = await ypx(); await toggle('#t-gateMarks'); const s2 = await csig(); const y2 = await ypx(); await toggle('#t-gateMarks'); const s3 = await csig();
     ok(`gate markers: the bright gate LINES are in the picture (${y1} pixels of the gate colour with the toggle on, ${y2} with it off)`, y1 - y2 > 150, JSON.stringify({ on: y1, off: y2 }));
@@ -493,7 +498,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
 
     // ---- DAC v2 PR B: blocked edges, room type rule, Cake camera cut, manifest
     {
-      await click('#examples button[data-id="real_balanced"]'); const bl = await snap(); const sB = await csig();
+      await exL('real_balanced'); const bl = await snap(); const sB = await csig();
       const rpx = () => ev(() => { const cv = [...document.querySelectorAll('#stage canvas')].find((c) => !c.closest('figure').hidden), g = cv.getContext('2d'), d = g.getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] >= 245 && d[i + 1] >= 35 && d[i + 1] <= 60 && d[i + 2] >= 35 && d[i + 2] <= 60) n++; return n; }); // the blocked-edge colour (255, 45, 45)
       const r1 = await rpx(); await toggle('#t-gateMarks'); const r2 = await rpx(); await toggle('#t-gateMarks');
       ok(`blocked edges: ${bl.ci.blocked} edges are drawn as red closed faces with the gate-marker toggle (${r1} red pixels on, ${r2} off)`, r1 - r2 > 30, JSON.stringify({ on: r1, off: r2 }));
@@ -575,15 +580,19 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const csig2 = () => ev(() => [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).map((c) => c.toDataURL('image/png')).join('|'));
     const wallsInfo = () => ev(() => { const e = window.__evo, S = e.S(), E = window.EVO, W = S.W, w = S.ascWalls; if (!w) return null; const ws = new Set(w.faces.map((f) => f.i + '_' + f.j)), tile = (q) => (q.y - S.oy) * W + (q.x - S.ox), st = tile(e.inc.stake);
       let routeOnWall = 0, routeCross = 0, gateOnWall = 0, gateFaces = 0; const OFFS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
-      for (const o of e.inc.objectives) { const r = E.route(S, e.P, tile(o), st); if (!r) continue; for (let k = 0; k + 1 < r.length; k++) { const u = r[k], v = r[k + 1]; if (Math.abs((u % W) - (v % W)) + Math.abs(((u / W) | 0) - ((v / W) | 0)) !== 1) continue; if (S.roomMap[u] === S.roomMap[v]) continue; routeCross++; if (ws.has(Math.min(u, v) + '_' + Math.max(u, v))) routeOnWall++; } }
+      const cr = S.chain && e.P.chainGoals ? E.roomTypes.chainRoute(S, e.P) : null; /* D31 (ANNOUNCED): the drawn route of the chain view is the chain route */ for (const o of e.inc.objectives) { const to = tile(o), tmo = S.dioMove && S.dioMove.has(to) ? S.dioMove.get(to) : to, j = cr && !cr.fail ? cr.goals.indexOf(tmo) : -1, r = j > 0 ? cr.path.slice(0, cr.goalIdx[j] + 1) : E.route(S, e.P, to, st); if (!r) continue; for (let k = 0; k + 1 < r.length; k++) { const u = r[k], v = r[k + 1]; if (Math.abs((u % W) - (v % W)) + Math.abs(((u / W) | 0) - ((v / W) | 0)) !== 1) continue; if (S.roomMap[u] === S.roomMap[v]) continue; routeCross++; if (ws.has(Math.min(u, v) + '_' + Math.max(u, v))) routeOnWall++; } }
       if (S.gateBits) for (let i = 0; i < S.n; i++) { const gb = S.gateBits[i]; if (!gb) continue; const x = i % W, y = (i / W) | 0; for (let b = 0; b < 4; b++) if (gb >> b & 1) { const j = (y + OFFS[b][1]) * W + x + OFFS[b][0]; gateFaces++; if (ws.has(Math.min(i, j) + '_' + Math.max(i, j))) gateOnWall++; } }
       return { faces: w.faces.length, runs: w.runs.length, gi: w.info.gateInfo || null, lowH: w.lowH, routeCross, routeOnWall, gateFaces, gateOnWall, ascGate: e.P.ascGate }; });
     const slide = async (id, v) => { await ev(({ id, v }) => { const el = document.querySelector('#s-' + id); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, { id, v }); await a.idle(); };
     await ev(() => window.__evo.setMode('rooms')); await a.idle();
     for (const id of ['real_balanced', 'real_chain5']) {
       await page.click(`#examples button[data-id="${id}"]`); await a.idle();
+      const wD = await wallsInfo();
+      ok(`${id}: the gate and cut sliders exist in mode 2 and their defaults are 3 and 0.5 (ANNOUNCED: were 0 and 0.15)`, wD && wD.ascGate === 3 && wD.lowH === 0.5 && wD.gi && wD.gi.gateOk === true, JSON.stringify(wD));
+      // the rest of the block compares the gate width and the cut against "today" (gate 0, cut 0.15) with the Diorama Off, as before C2
+      await ev(() => { const s = document.querySelector('#dioChain'); s.value = 'off'; s.dispatchEvent(new Event('change', { bubbles: true })); }); await a.idle(); await slide('ascGate', 0); await slide('ascCut', 0.15);
       const s0 = await csig2(), w0 = await wallsInfo();
-      ok(`${id}: the gate and cut sliders exist in mode 2 and their defaults are 0 and 0.15`, w0 && w0.ascGate === 0 && w0.lowH === 0.15 && !w0.gi, JSON.stringify(w0));
+      ok(`${id}: the legacy values (gate 0, cut 0.15) are the exact old ones`, w0 && w0.ascGate === 0 && w0.lowH === 0.15 && !w0.gi, JSON.stringify(w0));
       for (const N of [1, 3, 5]) { await slide('ascGate', N); const w = await wallsInfo(), sN = await csig2();
         ok(`${id}, ascGate ${N}: ${w.faces} wall faces in ${w.runs} chains (today ${w0.faces} / ${w0.runs}), info.gateOk, ${w.routeCross} route crossings of a room border: 0 of them on a wall face`, w.gi && w.gi.gateOk === true && w.routeCross > 0 && w.routeOnWall === 0 && w.faces >= w0.faces && sN !== s0, JSON.stringify({ faces: w.faces, gi: w.gi, routeCross: w.routeCross, routeOnWall: w.routeOnWall }));
         ok(`${id}, ascGate ${N}: the chain gate faces (the cyan ones, ${w.gateFaces}) carry no wall`, w.gateOnWall === 0, JSON.stringify([w.gateFaces, w.gateOnWall]));
@@ -595,7 +604,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     }
     // manifest: written only when not the default; applied on load
     const vb0 = await ev(() => window.__evo.viewerBlock());
-    ok('manifest: ascCut and ascGate are not written at their defaults (0.15, 0)', vb0.ascCut === undefined && vb0.ascGate === undefined, JSON.stringify(vb0));
+    ok('manifest: ascCut and ascGate are written explicitly in mode 2, also at the old values 0.15 / 0 (ANNOUNCED D31: were written only when not the default; the mode-2 defaults are now 0.5 / 3)', vb0.ascCut === 0.15 && vb0.ascGate === 0, JSON.stringify(vb0));
     await slide('ascCut', 0.5); await slide('ascGate', 3); const vb1 = await ev(() => window.__evo.viewerBlock());
     ok('manifest: ascCut 0.5 and ascGate 3 are written', vb1.ascCut === 0.5 && vb1.ascGate === 3, JSON.stringify(vb1));
     await ev((vb) => window.__evo.applyViewerBlock(vb), vb0); const d0 = await ev(() => [window.__evo.P.ascCut, window.__evo.P.ascGate]);

@@ -502,12 +502,13 @@
      in the chain view (labels only: `classify` is unchanged). LANDING (user's variant (b): the goals inside a Diorama move with the footprint): the lane of the route through the old footprint between its doors (a single door = a stub), dilated by 2 and clipped to the room; it keeps its heights and is colour-coded as transit.
      M2: translate the footprint by the SMALLEST shift (16 directions, step 2) whose tiles lie on no other chain room, no landing and no earlier pocket and fall inside the window; pocket = the 3 x area free tiles nearest the footprint. M1: region R = (old footprint minus landing) + the 3 x area free tiles nearest to it; the footprint is translated to the centroid of R and clipped to R; pocket = R minus footprint.
      Height (Auto): +2 terraces if the room's median terrace is >= the median of its chain neighbours, else -2 (terH units). Pocket: Low = water at min(footprint min - 0.5 terH, ground - 0.5 terH); High = stepped flanks from the footprint top down to the ground, the flank toward the camera capped at 1/3 of that height. Returns a plan of window indices (valid for a rebuild of the same window). */
-  T.DIO_CAP = 30;
+  T.DIO_CAP = 30; T.DIO_GAP = 4; // D31: the gap between the footprint and the landing, as a centre (Chebyshev) distance (4 = 3 empty tiles)
   const rasterLine = (x0, y0, x1, y1) => { const out = [[x0, y0]], dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1; let x = x0, y = y0, ix = 0, iy = 0; // a 4-connected line (one tile step at a time)
     while (ix < dx || iy < dy) { if (iy >= dy || (ix < dx && (0.5 + ix) / dx < (0.5 + iy) / dy)) { x += sx; ix++; } else { y += sy; iy++; } out.push([x, y]); } return out; };
   const walk0S = (S, i) => !S.block[i] && S.region && S.region[i] >= 0;
   T.dioPlan = function (S, P, ctx) {
-    const n = S.n, W = S.W, H = S.H, map = S.roomMap, vd = S.void, CR = new Set(ctx.chainIds), pc = T.pieces(S, P), nbf = E.walkGraph(S, P), pieces = ctx.pieces, goals = ctx.goals, mode = P.dioChain === 'm1' ? 'm1' : 'm2', cap = P.dioCap === undefined ? T.DIO_CAP : P.dioCap, typeOf = ctx.typeOf;
+    const PTH = P.dioPerim != null ? P.dioPerim : 50; // free-perimeter threshold (%): the 50 % rule; the override is for the eligibility report only, not in the UI or the manifest
+    const n = S.n, W = S.W, H = S.H, map = S.roomMap, vd = S.void, CR = new Set(ctx.chainIds), pc = T.pieces(S, P), nbf = E.walkGraph(S, P), pieces = ctx.pieces, goals = ctx.goals, mode = P.dioChain === 'm1' ? 'm1' : 'm2', cap = P.dioCap === undefined ? T.DIO_CAP : P.dioCap, typeOf = (r) => (P.dioForceRooms && P.dioForceRooms.includes(r) ? T.DIORAMA : ctx.typeOf(r)); // `P.dioForceRooms`: TEST-ONLY (not in the pack or the UI): treat these rooms as Dioramas and skip the free-perimeter rule
     const xy = (i) => [i % W, (i / W) | 0], idx = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? -1 : y * W + x), land = (i) => !(vd && vd[i]), walk0 = (i) => !S.block[i] && S.region && S.region[i] >= 0, N4o = [[0, -1], [1, 0], [0, 1], [-1, 0]];
     const gp = goals.map((t) => (t >= 0 ? pc.id[t] : 0)), reach = pieces.map(() => []); { let gi = 0; for (let k = 1; k < pieces.length; k++) if (gi + 1 < gp.length && pieces[k] === gp[gi + 1]) { gi++; reach[k].push(gi); } }
     const bfsPath = (starts, goalSet, p) => { const prev = new Map(), q = []; for (const s of starts) { prev.set(s, -1); q.push(s); } let hit = -1; for (let h = 0; h < q.length && hit < 0; h++) { const u = q[h]; if (goalSet.has(u)) { hit = u; break; } for (const v of nbf(u).slice()) if (!prev.has(v) && pc.id[v] === p) { prev.set(v, u); q.push(v); } } if (hit < 0) return null; const path = []; for (let k = hit; k !== -1; k = prev.get(k)) path.push(k); return path; };
@@ -518,7 +519,7 @@
         const A = first ? adjTo(p, pieces[k + 1]) : adjTo(p, pieces[k - 1]), B = last || first ? A : adjTo(p, pieces[k + 1]), path = bfsPath([...A], B, p); if (!path) { bad = true; return; } for (const t of path) res.add(t); });
       return { tiles: res, bad }; };
     const median = (a) => { const s = a.slice().sort((x, y) => x - y); return s.length ? s[(s.length - 1) >> 1] : 0; };
-    const roomsSeq = pieces.map((p) => pc.room[p]), order = [...new Set(roomsSeq)], items = [], demoted = [], occ = new Set();
+    const roomsSeq = pieces.map((p) => pc.room[p]), order = [...new Set(roomsSeq)], items = [], demoted = [], occ = new Set(), hov = new Map();
     const tmed = new Map(); for (const r of order) { const ts = []; for (let i = 0; i < n; i++) if (map[i] === r && land(i)) ts.push(S.ter[i]); tmed.set(r, median(ts)); }
     const centroid = (arr) => { let sx = 0, sy = 0; for (const i of arr) { const [x, y] = xy(i); sx += x; sy += y; } return [sx / arr.length, sy / arr.length]; };
     for (const r of order) {
@@ -531,14 +532,22 @@
       const L = laneOf(r); let landing = L.tiles; if (L.bad || !landing.size) { it.why = 'no door lane (the room is the whole chain or has no walkable door)'; items.push(it); demoted.push({ room: r, why: it.why }); continue; }
       const land2 = dil(landing, 2, (j) => inT[j]); for (const st of S.stairs || []) { const ts = st.bottom.concat(st.top, ...st.steps.map((x) => x.tiles)); if (ts.some((t) => land2.has(t))) for (const t of ts) if (inT[t]) land2.add(t); } // a ramp that touches the landing stays whole
       it.landing = [...land2];
-      const free_ = (j) => j >= 0 && !CR.has(map[j]) && !occ.has(j);
-      // M2: the smallest shift (first found: ties by direction order)
-      let sh = null; for (let d = 2; d <= 160 && !sh; d += 2) for (let a = 0; a < 16 && !sh; a++) { const dx = Math.round(d * Math.cos(a * Math.PI / 8)), dy = Math.round(d * Math.sin(a * Math.PI / 8)); let ok = true, out = 0; const dst = [], src = []; // >= 90 % of the tiles inside the window (the rest is clipped), none on another chain room, the landing or an earlier pocket
+      const free_ = (j) => j >= 0 && (!CR.has(map[j]) || (map[j] === r && !land2.has(j))) && !occ.has(j); // free ground for the bridge sides and the pocket: no chain room, but the OWN old footprint (minus the landing) is flattened to ground and is free too
+      // GAP (D31, user's rule): 3 EMPTY tiles between the footprint and the landing = a centre (Chebyshev) distance >= T.DIO_GAP (4); `dL` = the Chebyshev distance field from the landing (8-neighbour BFS, up to 64)
+      const GAP = P.dioGap !== undefined ? P.dioGap : T.DIO_GAP, dL = new Int16Array(n).fill(-1); { const q = [...land2]; for (const t of q) dL[t] = 0; for (let h = 0; h < q.length; h++) { const t = q[h], [x, y] = xy(t); if (dL[t] >= 64) continue; for (const [dx, dy] of N8) { const j = idx(x + dx, y + dy); if (j >= 0 && dL[j] < 0) { dL[j] = dL[t] + 1; q.push(j); } } } }
+      const gapOf = (dArr) => { let c = 99; for (const j of dArr) if (dL[j] >= 0 && dL[j] < c) c = dL[j]; return c; };
+      const gapEuclid = (dArr) => { let e = 1e9; const L = [...land2].map((l) => [l % W, (l / W) | 0]); for (const j of dArr) { const x = j % W, y = (j / W) | 0; if (dL[j] > 12) continue; for (const [lx, ly] of L) { const d = Math.hypot(lx - x, ly - y); if (d < e) e = d; } } return +e.toFixed(2); };
+      // M2: the VALID shifts (16 directions, step 2, within the cap) in order of distance; the footprint keeps the gap (ties by direction order). The smallest one is taken, or, with the visibility criterion, the smallest whose footprint is >= 95 % visible from the FIXED reference camera (Cam 1)
+      const useVis = P.dioVis !== undefined ? P.dioVis : T.DIO_VIS, cands = []; let sh = null;
+      for (let d = 2; d <= 160 && (cands.length === 0 || (useVis && d <= cap && cands.length < 24)); d += 2) for (let a = 0; a < 16; a++) { const dx = Math.round(d * Math.cos(a * Math.PI / 8)), dy = Math.round(d * Math.sin(a * Math.PI / 8)); let ok = true, out = 0; const dst = [], src = []; // >= 90 % of the tiles inside the window (the rest is clipped), none on another chain room, the landing or an earlier pocket
         for (let k = 0; k < area; k++) { const [x, y] = xy(tiles[k]), j = idx(x + dx, y + dy); if (j < 0) { out++; continue; } if (land2.has(j) || (CR.has(map[j]) && !inT[j]) || occ.has(j)) { ok = false; break; } dst.push(j); src.push(tiles[k]); }
-        if (ok && out <= 0.1 * area && it.goals.every((g) => goals[g] < 0 || !inT[goals[g]] || src.includes(goals[g]))) sh = { dx, dy, dst, src, d: Math.hypot(dx, dy) }; }
+        if (ok && out <= 0.1 * area && it.goals.every((g) => goals[g] < 0 || !inT[goals[g]] || src.includes(goals[g])) && gapOf(dst) >= GAP) { cands.push({ dx, dy, dst, src, d: Math.hypot(dx, dy) }); if (!useVis) break; } }
+      sh = cands.length ? cands[0] : null;
       it.shiftM2 = sh ? +sh.d.toFixed(1) : null;
+      const wantPiece = (() => { const g = it.goals.find((q) => goals[q] >= 0 && inT[goals[q]]); if (g !== undefined) return pc.id[goals[g]]; const cnt = new Map(); for (const t of land2) if (pc.id[t] > 0) cnt.set(pc.id[t], (cnt.get(pc.id[t]) || 0) + 1); let bp = 0, bc = -1; for (const [p, c] of cnt) if (c > bc) { bc = c; bp = p; } return bp; })(); // the piece the bridge serves: the piece of the goal inside the Diorama, else the piece with most landing tiles
       const bridgeOf = (dstSet, dstArr, srcArr) => { // the straight bridge: the nearest pair (a walkable landing tile, a walkable footprint tile), a 4-connected line, cut at the first footprint tile
-        let bd = 1e18, bl = -1, bf = -1; const lt = [...land2].filter(walk0), srcOf = new Map(dstArr.map((j, k) => [j, srcArr[k]])); const ft = dstArr.filter((j) => walk0(srcOf.get(j))); if (!lt.length || !ft.length) return null;
+        let bd = 1e18, bl = -1, bf = -1; const lt = [...land2].filter((t) => walk0(t) && pc.id[t] === wantPiece), srcOf = new Map(dstArr.map((j, k) => [j, srcArr[k]])); const ft = dstArr.filter((j) => walk0(srcOf.get(j)) && pc.id[srcOf.get(j)] === wantPiece); // both ends on the piece the route uses (see wantPiece), so the footprint is reached door to door
+        if (!lt.length || !ft.length) return null; if (!lt.length || !ft.length) return null;
         for (const a2 of lt) { const [ax, ay] = xy(a2); for (const b2 of ft) { const [bx, by] = xy(b2); const dd = (ax - bx) * (ax - bx) + (ay - by) * (ay - by); if (dd < bd) { bd = dd; bl = a2; bf = b2; } } }
         const [ax, ay] = xy(bl), [bx, by] = xy(bf), line = rasterLine(ax, ay, bx, by), inner = []; let end = bf;
         for (let q = 1; q < line.length; q++) { const j = idx(line[q][0], line[q][1]); if (dstSet.has(j)) { end = j; break; } inner.push(j); }
@@ -547,25 +556,34 @@
         const lat = new Set(), cs = new Set(inner); for (let q = 0; q < inner.length; q++) { const [x, y] = xy(inner[q]), nxt = q + 1 < inner.length ? xy(inner[q + 1]) : xy(end), prv = q ? xy(inner[q - 1]) : [ax, ay], tx = nxt[0] - prv[0], ty = nxt[1] - prv[1]; const px = Math.abs(ty) >= Math.abs(tx) ? 1 : 0, py = px ? 0 : 1;
           for (const s of [-1, 1]) { const j = idx(x + s * px, y + s * py); if (j >= 0 && free_(j) && !dstSet.has(j) && !cs.has(j) && !land2.has(j)) lat.add(j); } }
         return { from: bl, to: end, inner, lat: [...lat], xChain, xOcc, xVoid, length: +Math.hypot(xy(end)[0] - ax, xy(end)[1] - ay).toFixed(1) }; };
-      const ringsOf = (from, set) => { const ps = new Set(set), dist = new Map(from.map((i) => [i, 0])), q = [...from]; for (let h = 0; h < q.length; h++) { const [x, y] = xy(q[h]); for (const [dx, dy] of N8) { const j = idx(x + dx, y + dy); if (j < 0 || dist.has(j) || !ps.has(j)) continue; dist.set(j, dist.get(q[h]) + 1); q.push(j); } } return set.map((j) => dist.has(j) ? dist.get(j) : 1); };
+      const ringsOf = (from, set) => { const dist = new Int16Array(n).fill(-1), q = [...from]; for (const t of q) dist[t] = 0; for (let h = 0; h < q.length; h++) { const t = q[h]; if (dist[t] >= 64) continue; const [x, y] = xy(t); for (const [dx, dy] of N8) { const j = idx(x + dx, y + dy); if (j >= 0 && dist[j] < 0) { dist[j] = dist[t] + 1; q.push(j); } } } return set.map((j) => (dist[j] > 0 ? dist[j] : 1)); }; // the Chebyshev distance of a pocket tile to the footprint (over the whole window)
       const near = (srcArr, want, avoid) => { const q = [...srcArr], dist = new Map(srcArr.map((i) => [i, 0])), got = []; for (let h = 0; h < q.length && got.length < want; h++) { const [x, y] = xy(q[h]); for (const [dx, dy] of N8) { const j = idx(x + dx, y + dy); if (dist.has(j) || !free_(j) || avoid.has(j)) continue; dist.set(j, dist.get(q[h]) + 1); q.push(j); got.push(j); if (got.length >= want) break; } } return { tiles: got, dist }; };
-      let geo = null;
-      if (sh) {
-        if (mode === 'm2') { const dstSet = new Set(sh.dst); geo = { dst: sh.dst, src: sh.src, shift: [sh.dx, sh.dy], bridge: bridgeOf(dstSet, sh.dst, sh.src) }; if (geo.bridge) { const avoid = new Set([...dstSet, ...geo.bridge.inner, ...geo.bridge.lat]); const pk = near(sh.dst, 3 * area, avoid); geo.pocket = pk.tiles; } }
-        else { const rest = tiles.filter((i) => !land2.has(i)), pk = near(rest, 3 * area, new Set()), Rs = new Set([...rest, ...pk.tiles]), cR = centroid([...Rs]), cT = centroid(tiles), dx = Math.round(cR[0] - cT[0]), dy = Math.round(cR[1] - cT[1]); const dst = [], src = []; tiles.forEach((i) => { const [x, y] = xy(i), j = idx(x + dx, y + dy); if (j >= 0 && Rs.has(j)) { dst.push(j); src.push(i); } });
-          geo = { dst, src, shift: [dx, dy], kept: +(100 * dst.length / area).toFixed(1) }; const dstSet = new Set(dst);
-          geo.bridge = dst.length ? bridgeOf(dstSet, dst, src) : null;
-          if (geo.bridge) { const avoid = new Set([...dstSet, ...geo.bridge.inner, ...geo.bridge.lat]); geo.pocket = [...Rs].filter((j) => !avoid.has(j) && !land2.has(j)); } }
-      }
-      if (geo && geo.bridge) geo.pdist = ringsOf(geo.dst, geo.pocket);
-      it.shift = geo ? +Math.hypot(geo.shift[0], geo.shift[1]).toFixed(1) : null; it.kept = geo && geo.kept !== undefined ? geo.kept : 100; const br = geo && geo.bridge; it.bridgeLen = br ? br.length : null; it.bridgeCross = br ? { chain: br.xChain, pocket: br.xOcc, void: br.xVoid } : null;
-      if (perim < 50) it.why = `free perimeter ${perim.toFixed(0)} % < 50 %`;
-      else if (!sh) it.why = 'no free place for the footprint';
-      else if (sh.d > cap + 1e-9) it.why = `minimum shift ${sh.d.toFixed(1)} tiles > cap ${cap}`;
-      else if (!geo || !br) it.why = 'no walkable bridge ends';
-      else if (br.xChain || br.xOcc) it.why = `the straight bridge crosses ${br.xChain ? br.xChain + ' chain-room tiles' : br.xOcc + ' tiles of an earlier pocket'}`;
+      const buildM2 = (c) => { c = c || sh; if (!c) return null; const dstSet = new Set(c.dst), geo = { dst: c.dst, src: c.src, shift: [c.dx, c.dy], bridge: bridgeOf(dstSet, c.dst, c.src), via: 'm2' }; if (geo.bridge) { const avoid = new Set([...dstSet, ...geo.bridge.inner, ...geo.bridge.lat]); geo.pocket = near(c.dst, 3 * area, avoid).tiles; } return addMargin(geo); };
+      const buildM1 = () => { const rest = tiles.filter((i) => !land2.has(i)), pk = near(rest, 3 * area, new Set()), Rs = new Set([...rest, ...pk.tiles]), cR = centroid([...Rs]), cT = centroid(tiles), dx = Math.round(cR[0] - cT[0]), dy = Math.round(cR[1] - cT[1]); const dst = [], src = []; tiles.forEach((i) => { const [x, y] = xy(i), j = idx(x + dx, y + dy); if (j >= 0 && Rs.has(j)) { dst.push(j); src.push(i); } });
+        const geo = { dst, src, shift: [dx, dy], kept: +(100 * dst.length / area).toFixed(1), via: 'm1' }; if (!dst.length || !it.goals.every((g) => goals[g] < 0 || !inT[goals[g]] || src.includes(goals[g]))) return geo; const dstSet = new Set(dst); geo.bridge = bridgeOf(dstSet, dst, src); if (geo.bridge) { const avoid = new Set([...dstSet, ...geo.bridge.inner, ...geo.bridge.lat]); geo.pocket = [...Rs].filter((j) => !avoid.has(j) && !land2.has(j)); } return addMargin(geo); };
+      const addMargin = (geo) => { // the pocket FRAMES the connecting paths (D31): free tiles within 2 of the bridge are always part of the pocket (priority corridor), whatever the 3 x area cut
+        if (!geo || !geo.bridge || !geo.pocket) return geo; const have = new Set(geo.pocket), skip = new Set([...geo.dst, ...geo.bridge.inner, ...geo.bridge.lat, ...land2]); for (const b of [...geo.bridge.inner, ...geo.bridge.lat, geo.bridge.from, geo.bridge.to]) { const [bx, by] = xy(b); for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const j = idx(bx + dx, by + dy); if (j >= 0 && !have.has(j) && !skip.has(j) && free_(j)) { have.add(j); geo.pocket.push(j); } } } return geo; };
+      const whyNot = (geo) => { // the reason a geometry is not eligible ('' = eligible)
+        if (perim < PTH && !(P.dioForceRooms && P.dioForceRooms.includes(r))) return `free perimeter ${perim.toFixed(0)} % < ${PTH} %`; if (!geo || !geo.dst || !geo.dst.length) return geo === null ? 'no free place for the footprint' : 'the footprint is clipped away';
+        const sd = Math.hypot(geo.shift[0], geo.shift[1]); if (sd > cap + 1e-9) return `${geo.via === 'm1' ? 'shift' : 'minimum shift'} ${sd.toFixed(1)} tiles > cap ${cap}`; const g = gapOf(geo.dst); if (g < GAP) return `gap ${g} < ${GAP} (a centre distance of ${GAP} = 3 empty tiles)`;
+        const br = geo.bridge; if (!br) return 'no walkable bridge ends'; if (br.xChain || br.xOcc) return `the straight bridge crosses ${br.xChain ? br.xChain + ' chain-room tiles' : br.xOcc + ' tiles of an earlier pocket'}`; if (br.length < GAP) return `bridge ${br.length} < ${GAP}`; return ''; };
+      // the visibility criterion: among the valid candidates (eligible geometry) the smallest shift whose real footprint (raised / lowered by its type, with its pocket and bridge) is >= 95 % visible from the reference camera; else the most visible one
+      const visOf = (geo) => { const w = new Map(); const itx = { room: r, landing: it.landing, src: geo.src, dst: geo.dst, bridge: { from: geo.bridge.from, to: geo.bridge.to, inner: geo.bridge.inner, lat: geo.bridge.lat }, pocket: geo.pocket, pdist: ringsOf(geo.dst, geo.pocket) }; const fc = [geo.dst.reduce((a, j) => a + (j % W), 0) / geo.dst.length, geo.dst.reduce((a, j) => a + ((j / W) | 0), 0) / geo.dst.length];
+        itx.rank = T.dioRank(S, P, r); itx.free = T.dioFreeSide(S, CR, fc[0], fc[1], new Set(geo.dst)); itx.type = T.dioType(itx.rank, itx.free, P.dioFree); const pf = T.dioProfile(S, P, itx); itx.dst.forEach((j, k) => w.set(j, pf.fpH[k])); for (const [j, h] of pf.bridgeH) w.set(j, h); itx.pocket.forEach((j, k) => w.set(j, pf.heights[k]));
+        const ownOld = new Set(tiles.filter((t) => !land2.has(t))); const heightOf = (t) => (hov.has(t) ? hov.get(t) : w.has(t) ? w.get(t) : S.void && S.void[t] ? -Infinity : ownOld.has(t) || !CR.has(map[t]) ? pf.greyH : S.levelH[S.fine[t]]);
+        return { vis: T.dioLOS(W, H, heightOf, itx.dst, itx.dst.map((j, k) => pf.fpH[k])), pf }; };
+      if (useVis && mode === 'm2' && cands.length) { let best = null; for (const c of cands.slice(0, 24)) { if (c.d > cap + 1e-9) break; const g = buildM2(c); if (whyNot(g)) continue; const v = visOf(g); c.vis = v.vis; if (!best || v.vis > best.vis + 1e-9) best = c; if (v.vis >= T.DIO_VIS_MIN) { best = c; break; } } if (best) sh = best; }
+      let geo, why;
+      if (mode === 'm2') { geo = buildM2(); why = whyNot(geo); if (why && (perim >= PTH || (P.dioForceRooms && P.dioForceRooms.includes(r)))) { const g1 = buildM1(), w1 = whyNot(g1); it.m2why = why; if (!w1) { geo = g1; why = ''; } } } // M2 -> fallback M1 for this Diorama -> else Ascension
+      else { geo = buildM1(); why = whyNot(geo); }
+      if (geo && geo.bridge) geo.pdist = ringsOf(geo.dst, geo.pocket || []);
+      if (geo && geo.dst && geo.dst.length) { const fc = [geo.dst.reduce((a, j) => a + (j % W), 0) / geo.dst.length, geo.dst.reduce((a, j) => a + ((j / W) | 0), 0) / geo.dst.length]; it.rank = T.dioRank(S, P, r); it.free = T.dioFreeSide(S, CR, fc[0], fc[1], new Set(geo.dst)); it.type = T.dioType(it.rank, it.free, P.dioFree); it.gapC = gapOf(geo.dst); it.gapE = gapEuclid(geo.dst); }
+      it.via = geo ? geo.via : null; it.shift = geo ? +Math.hypot(geo.shift[0], geo.shift[1]).toFixed(1) : null; it.kept = geo && geo.kept !== undefined ? geo.kept : 100; const br = geo && geo.bridge; it.bridgeLen = br ? br.length : null; it.bridgeCross = br ? { chain: br.xChain, pocket: br.xOcc, void: br.xVoid } : null; it.why = why;
       if (it.why) { items.push(it); demoted.push({ room: r, why: it.why }); continue; }
-      it.eligible = true; it.src = geo.src || tiles.slice(); it.dst = geo.dst; it.bridge = { from: br.from, to: br.to, inner: br.inner, lat: br.lat }; it.pocket = geo.pocket; it.pdist = geo.pdist; it.pocketWanted = 3 * area;
+      it.src = geo.src || tiles.slice(); it.dst = geo.dst; it.bridge = { from: br.from, to: br.to, inner: br.inner, lat: br.lat }; it.pocket = geo.pocket; it.pdist = geo.pdist; it.pocketWanted = 3 * area;
+      it.prof = T.dioProfile(S, P, it); it.framing = T.dioFraming(S, it, CR);
+      if (!it.prof.ok) { it.why = it.prof.why; items.push(it); demoted.push({ room: r, why: it.why }); continue; } // the pocket profile does not fit (slope cap): drawn as Ascension
+      it.eligible = true; it.dst.forEach((j, k) => hov.set(j, it.prof.fpH[k])); for (const [j, h] of it.prof.bridgeH) hov.set(j, h); it.pocket.forEach((j, k) => hov.set(j, it.prof.heights[k]));
       for (const j of geo.dst) occ.add(j); for (const j of geo.pocket) occ.add(j); for (const j of br.inner) occ.add(j); for (const j of br.lat) occ.add(j);
       items.push(it);
     }
@@ -580,33 +598,31 @@
     const lv = S.levelH, terH = P.terH, greyL = S.levelMeta.findIndex((m) => m && m.grey), greyH = greyL >= 0 ? lv[greyL] : lv[0], vd = S.void;
     const role = new Uint8Array(n), height = new Float64Array(n), keep = new Uint8Array(n), dioRole = new Uint8Array(n), srcOf = new Map(), own = new Set(), ext = new Map(), move = new Map(), oldFp = new Set(), landSet = new Set();
     const link = (a, b) => { const la = ext.get(a) || ext.set(a, []).get(a), lb = ext.get(b) || ext.set(b, []).get(b); if (!la.includes(b)) la.push(b); if (!lb.includes(a)) lb.push(a); }, base = E.walkGraph(S, P), baseList = (i) => base(i).slice();
-    const yaw = (P.pocketYaw || 0) * Math.PI / 180, ux = Math.sin(yaw), uy = Math.cos(yaw);
     for (const it of items) {
-      const dz = (it.high ? 2 : -2) * terH; let top = -1e9, mn = 1e9;
-      it.dst.forEach((j, k) => { const h = lv[S.fine[it.src[k]]] + dz; role[j] = 3; height[j] = h; keep[j] = 1; dioRole[j] = 1; srcOf.set(j, it.src[k]); own.add(j); top = Math.max(top, h); mn = Math.min(mn, h); });
+      const prof = it.prof;
+      it.dst.forEach((j, k) => { role[j] = 3; height[j] = prof.fpH[k]; keep[j] = 1; dioRole[j] = 1; srcOf.set(j, it.src[k]); own.add(j); });
       for (const t of it.src) oldFp.add(t); for (const t of it.landing) { landSet.add(t); dioRole[t] = 3; }
       // walking inside the footprint = the walking of the source tiles
       const inv = new Map(it.src.map((s, k) => [s, it.dst[k]]));
       for (const [s, j] of inv) { if (!walk0S(S, s)) continue; for (const q of baseList(s)) { const j2 = inv.get(q); if (j2 !== undefined && j2 > j) link(j, j2); } }
       // the bridge: from the landing tile through the centre line to the footprint tile, heights linear between both ends
-      const b = it.bridge, hL = lv[S.fine[b.from]], hF = height[b.to], m = b.inner.length, path = [b.from, ...b.inner, b.to];
-      b.inner.forEach((j, q) => { const h = hL + (hF - hL) * (q + 1) / (m + 1); role[j] = 3; height[j] = h; keep[j] = 1; dioRole[j] = 4; own.add(j); });
-      for (const j of b.lat) { const [x, y] = [j % W, (j / W) | 0]; let bq = 0, bd = 1e9; b.inner.forEach((c, q) => { const d = Math.abs((c % W) - x) + Math.abs(((c / W) | 0) - y); if (d < bd) { bd = d; bq = q; } }); const h = hL + (hF - hL) * (bq + 1) / (m + 1); role[j] = 3; height[j] = h; keep[j] = 1; dioRole[j] = 4; own.add(j); }
+      const b = it.bridge, path = [b.from, ...b.inner, b.to];
+      for (const [j, h] of prof.bridgeH) { role[j] = 3; height[j] = h; keep[j] = 1; dioRole[j] = 4; own.add(j); }
       for (let q = 0; q + 1 < path.length; q++) link(path[q], path[q + 1]);
       { const brSet = new Set([...b.inner, ...b.lat]), ends = new Set([b.from, b.to]); for (const j of brSet) { const x = j % W, y = (j / W) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= S.H) continue; const k = ny * W + nx; if (brSet.has(k) || ends.has(k)) link(j, k); } } }
-      // the pocket
-      const ring = it.pdist, D = Math.max(1, ...ring), cx = it.dst.reduce((a, j) => a + (j % W), 0) / it.dst.length, cy = it.dst.reduce((a, j) => a + ((j / W) | 0), 0) / it.dst.length;
-      if (!it.high) { const wl = Math.min(mn - 0.5 * terH, greyH - 0.5 * terH); it.pocket.forEach((j) => { role[j] = 4; height[j] = wl; keep[j] = 1; dioRole[j] = 2; }); it.water = wl; }
-      else { const span = Math.max(0, top - greyH); it.pocket.forEach((j, k) => { const d = ring[k], toward = (((j % W) - cx) * ux + (((j / W) | 0) - cy) * uy) > 0; let h = greyH + span * (1 - d / (D + 1)); if (toward) h = Math.min(h, greyH + span / 3); role[j] = 2; height[j] = Math.max(h, greyH + 0.05); dioRole[j] = 2; }); }
+      // the pocket: the profile of its type (heights relative to the footprint and the landing)
+      it.pocket.forEach((j, k) => { role[j] = prof.roles[k]; height[j] = prof.heights[k]; keep[j] = 1; dioRole[j] = 2; });
       for (const g of it.goals) { const s = dp.goals[g]; if (s >= 0 && inv.has(s)) move.set(s, inv.get(s)); }
     }
     const decoHeight = Float64Array.from(height), added = E.pocket.addLevels(S, P, { role, height, decoHeight, keep }).added;
     // the levels of the footprint and the bridge follow the palette of the terrace they sit at (not the desaturated decoration)
     { const base0 = []; S.levelMeta.forEach((m, L) => { if (m && !m.deco && !m.water && !m.grey && !m.bridge && !m.dio) base0.push(L); });
       const done = new Set(); for (let i = 0; i < n; i++) if (role[i] === 3) { const L = S.fine[i]; if (done.has(L)) continue; done.add(L); let bl = base0[0], bd = 1e9; for (const q of base0) { const d = Math.abs(S.levelH[q] - S.levelH[L]); if (d < bd) { bd = d; bl = q; } } const m0 = S.levelMeta[bl]; S.levelMeta[L] = { ter: m0.ter, sub: m0.sub, bridge: false, dio: true }; } }
+    for (const it of items) { let pmn = 1e9, pmx = -1e9; it.pocket.forEach((j, k) => { if (it.prof.roles[k] === 2) { pmn = Math.min(pmn, it.prof.heights[k]); pmx = Math.max(pmx, it.prof.heights[k]); } }); it.pocket.forEach((j, k) => { if (it.prof.roles[k] === 2) S.levelMeta[S.fine[j]] = { ter: 0, sub: 0, bridge: false, deco: true, pk: (it.prof.heights[k] - pmn) / ((pmx - pmn) || 1) }; }); } // the pocket palette: a gradient by height, distinct from the flattened grey and from the terrace palette (render.js `meta.pk`)
     const greyNow = S.levelMeta.findIndex((m) => m && m.grey), fp = new Set(); let nFp = 0, nPk = 0, nBr = 0;
     for (let i = 0; i < n; i++) { if (role[i] >= 2 && vd && vd[i]) vd[i] = 0; if (dioRole[i] === 1) { fp.add(i); nFp++; } else if (dioRole[i] === 2) nPk++; else if (dioRole[i] === 4) nBr++; }
-    for (const t of oldFp) if (!fp.has(t) && !landSet.has(t) && greyNow >= 0) { S.fine[t] = greyNow; if (S.roomType) S.roomType[t] = 0; if (S.nowalk) S.nowalk[t] = 0; if (S.roomBits) S.roomBits[t] = 0; if (S.dioBits) S.dioBits[t] = 0; if (S.roomBitsDio) S.roomBitsDio[t] = 0; }
+    for (const t of landSet) if (!fp.has(t)) { if (S.dioBits) S.dioBits[t] = 0; if (S.roomBitsDio && S.roomBits) S.roomBitsDio[t] = S.roomBits[t]; } // D31: the Diorama outline is at the MOVED footprint only, not at the landing of the old place
+    for (const t of oldFp) if (!fp.has(t) && !landSet.has(t)) { if (!dioRole[t] && greyNow >= 0) S.fine[t] = greyNow; if (S.roomType) S.roomType[t] = 0; if (S.nowalk) S.nowalk[t] = 0; if (S.roomBits) S.roomBits[t] = 0; if (S.dioBits) S.dioBits[t] = 0; if (S.roomBitsDio) S.roomBitsDio[t] = 0; } // the old footprint minus the landing is ground (grey) or pocket / bridge: no tint, no border, no outline
     if (S.ascWalls && S.ascWalls.faces) { // the Ascension walls were built on the room borders at the OLD tiles: no wall inside the footprint, the bridge, the pocket or the flattened old footprint (the walls follow the type shown)
       const dead = (t) => dioRole[t] === 1 || dioRole[t] === 2 || dioRole[t] === 4 || (oldFp.has(t) && !landSet.has(t)), keepF = S.ascWalls.faces.filter((f) => !dead(f.i) && !dead(f.j));
       S.dioInfo.wallsDropped = S.ascWalls.faces.length - keepF.length; S.ascWalls = Object.assign({}, S.ascWalls, { faces: keepF }); }
@@ -619,5 +635,104 @@
     S._walk = (i) => { if (own.has(i)) return ext.get(i) || []; const b = base(i); let out = b; for (const j of b) if (own.has(j)) { out = b.filter((q) => !own.has(q)); break; } const e = ext.get(i); return e ? out.concat(e) : out; };
     S.dioRole = dioRole; S.dioMove = move; Object.assign(S.dioInfo, { levelsAdded: added, footprint: nFp, pocket: nPk, bridge: nBr, landing: landSet.size });
     return S.dioInfo;
+  };
+
+  /* THE DRAWN ROUTE IS THE CHAIN (DAC v2 PR C2, D31; the chain view only): the route of the objective j is the prefix of ONE tile path that follows the chain piece by piece, door to door, ONLY on tiles of the chain pieces (never on the flattened ground) and, where a Diorama moved, on its landing and, when a goal lies inside it, on the bridge and the footprint.
+     A layered BFS over (visit k, tile, goal flag): layer k = the tiles of piece k of `P.chainSeqs[0]` (the old footprint minus the landing is flattened, so it is not walkable here), edges = the final walking graph `S._walk`, a move to layer k + 1 only across a door edge, every goal (stake, sub-objectives, final goal; `P.chainGoals`, moved with the footprint by `S.dioMove`) forced at its visit in order.
+     Returns { path (stake first), goalIdx (index of each goal in the path), layers, pieces (distinct pieces on the path) } or { fail, failAt, why }; the tree, classify and the walking graph are only READ. */
+  T.chainRoute = function (S, P) {
+    const seq = P.chainSeqs && P.chainSeqs[0], goals = P.chainGoals; if (!seq || !goals || goals.length < 2) return null;
+    if (S._chainRoute !== undefined) return S._chainRoute;
+    const n = S.n, K = seq.length, pc = T.pieces(S, P), nb = E.walkGraph(S, P), dp = S.dioInfo && P.dioPlan && P.dioChain && P.dioChain !== 'off' ? P.dioPlan : null, moved = dp ? dp.items.filter((q) => q.eligible) : [];
+    const mv = (t) => (S.dioMove && S.dioMove.has(t) ? S.dioMove.get(t) : t), gs = goals.map(mv), flat = new Set(), landOf = new Map(), extraOf = new Map();
+    for (const it of moved) { for (const t of it.src) flat.add(t); landOf.set(it.room, new Set(it.landing)); extraOf.set(it.room, [...it.dst, ...it.bridge.inner, ...it.bridge.lat]); }
+    const gp = goals.map((t) => pc.id[t]), goalAt = new Array(K).fill(-1); goalAt[0] = 0; { let gi = 0; for (let k = 1; k < K; k++) if (gi + 1 < gp.length && seq[k] === gp[gi + 1]) { gi++; goalAt[k] = gi; } }
+    const byPiece = new Map(); for (let i = 0; i < n; i++) { const p = pc.id[i]; if (p > 0) { let a = byPiece.get(p); if (!a) byPiece.set(p, a = []); a.push(i); } }
+    const layerSets = seq.map((p, k) => { const room = pc.room[p], land = landOf.get(room), set = new Set(); for (const i of byPiece.get(p) || []) { if (land && flat.has(i) && !land.has(i)) continue; set.add(i); } if (land && goalAt[k] >= 0 && gs[goalAt[k]] !== goals[goalAt[k]]) for (const t of extraOf.get(room)) set.add(t); return set; });
+    const need = (k) => goalAt[k] > 0, goalTile = (k) => (goalAt[k] >= 0 ? gs[goalAt[k]] : -1), f0 = (k, t) => (need(k) ? (t === goalTile(k) ? 1 : 0) : 1), key = (k, t, f) => (k * n + t) * 2 + f;
+    const start = gs[0]; if (!layerSets[0].has(start)) return (S._chainRoute = { fail: true, failAt: 0, why: 'the stake tile is not on its piece' });
+    const par = new Map([[key(0, start, 1), -1]]), q = [[0, start, 1]], last = K - 1, fin = gs[gs.length - 1]; let maxK = 0, endKey = -1;
+    for (let h = 0; h < q.length; h++) { const [k, t, f] = q[h]; if (k > maxK) maxK = k; if (k === last && t === fin && f === 1) { endKey = key(k, t, f); break; }
+      for (const v of nb(t).slice()) { if (layerSets[k].has(v)) { const f2 = need(k) && v === goalTile(k) ? 1 : f, kk = key(k, v, f2); if (!par.has(kk)) { par.set(kk, key(k, t, f)); q.push([k, v, f2]); } }
+        if (k + 1 < K && f === 1 && layerSets[k + 1].has(v)) { const f2 = f0(k + 1, v), kk = key(k + 1, v, f2); if (!par.has(kk)) { par.set(kk, key(k, t, f)); q.push([k + 1, v, f2]); } } } }
+    if (endKey < 0) return (S._chainRoute = { fail: true, failAt: Math.min(maxK + 1, K - 1), why: `no way through visit ${maxK + 1} (piece ${seq[maxK]}) with its own tiles` + (need(maxK) && maxK < K ? ' (door to the next piece or its goal tile)' : '') });
+    const path = [], lay = []; for (let kk = endKey; kk !== -1; kk = par.get(kk)) { const f = kk % 2, rest = (kk - f) / 2, t = rest % n, k = (rest - t) / n; path.push(t); lay.push(k); } path.reverse(); lay.reverse();
+    const goalIdx = goals.map((g, j) => { const k = j === 0 ? 0 : goalAt.indexOf(j); const tile = gs[j]; for (let i = 0; i < path.length; i++) if (lay[i] === k && path[i] === tile) return i; return -1; });
+    return (S._chainRoute = { path, goalIdx, layers: lay, goals: gs, pieces: new Set(path.map((t) => pc.id[t]).filter((p) => p > 0 && seq.includes(p))).size, chainPieces: new Set(seq).size });
+  };
+
+  /* RANK AND TYPE OF A MOVED DIORAMA (DAC v2 PR C2, D31; user's rule 2026-10-23): the RANK of a room over the terraces of the map (0 .. S.N - 1): it TOUCHES the lowest terrace -> 'low', the highest -> 'high', neither -> 'mid'; touching both: the extreme with more of the room's tiles. The rank decides the pocket TYPE:
+     low -> ISLAND, mid -> ARENA, high -> QUEBRADA or CIMA by the FREE SIDE: the 45-degree sector (of 8, radius 18 around the footprint, the footprint itself not counted) with the highest share of tiles that are NOT chain rooms (void counts as free: the D30 pocket-space definition); a share >= T.DIO_FREE (0.6) -> QUEBRADA, else CIMA.
+     (MIRADOR, the fifth type, is deferred.) `P.dioForceRank` ('low' | 'mid' | 'high') is a TEST-ONLY hook (not in the pack, not in the UI). */
+  T.DIO_FREE = 0.6;
+  T.dioRank = function (S, P, room) {
+    if (P && P.dioForceRank) return P.dioForceRank; const N = S.N; if (!(N > 1)) return 'mid'; let lo = 0, hi = 0;
+    for (let i = 0; i < S.n; i++) if (S.roomMap[i] === room && !(S.void && S.void[i])) { if (S.ter[i] === 0) lo++; else if (S.ter[i] === N - 1) hi++; }
+    return lo && !hi ? 'low' : hi && !lo ? 'high' : lo && hi ? (lo > hi ? 'low' : 'high') : 'mid';
+  };
+  T.dioFreeSide = function (S, chainSet, cx, cy, skip, R) {
+    const W = S.W, H = S.H, rad = R || 18, tot = new Array(8).fill(0), fr = new Array(8).fill(0);
+    for (let y = Math.max(0, Math.round(cy) - rad); y < Math.min(H, Math.round(cy) + rad); y++) for (let x = Math.max(0, Math.round(cx) - rad); x < Math.min(W, Math.round(cx) + rad); x++) { const i = y * W + x; if (skip && skip.has(i)) continue;
+      const k = ((Math.round(Math.atan2(y - cy, x - cx) / (Math.PI / 4)) % 8) + 8) % 8; tot[k]++; if ((S.void && S.void[i]) || !(S.roomMap[i] > 0 && chainSet.has(S.roomMap[i]))) fr[k]++; }
+    const shares = tot.map((t, k) => (t ? fr[k] / t : 0)); let b = 0; for (let k = 1; k < 8; k++) if (shares[k] > shares[b]) b = k;
+    return { sector: b, share: shares[b], shares, dir: [Math.cos(b * Math.PI / 4), Math.sin(b * Math.PI / 4)] };
+  };
+  T.dioType = function (rank, free, thr) { return rank === 'low' ? 'island' : rank === 'mid' ? 'arena' : free && free.share >= (thr === undefined ? T.DIO_FREE : thr) ? 'quebrada' : 'cima'; }; // `thr` / `P.dioFree`: test-only override of the 60 % threshold
+
+  /* POCKET PROFILES (DAC v2 PR C2, D31; user's types 2026-10-23: ISLAND, CIMA, ARENA, QUEBRADA; MIRADOR is deferred): the pocket is decorative (not walkable) and its height is a PROFILE relative to the footprint and to the landing level (a function of the distance and the direction from the footprint), never an absolute height of its own,
+     so it reads the same on terrace 1 and on terrace 10; the footprint keeps its shape and its internal relative heights and is placed by the type (offset from the landing level Href, in terH: island 0, cima +1.5, arena -1.2, quebrada +1.0). Every profile keeps a FRAME MASK: the pocket tiles within 2 of the bridge or the landing are lowered under the bridge height so the paths that
+     connect the Diorama are framed, not buried. The camera side tests use the FIXED reference camera (Cam 1, T.DIO_REF_YAW), never the active one: the geometry of a Diorama does not depend on the camera.
+       island (rank Low): water flat below the footprint and the landing (min(fp min, Href) - 0.7), a land strip (within 1 of the bridge and the landing) at the bridge height: water on both sides of the paths.
+       cima (High, no free side): stepped flanks from the footprint top down to the ground (the flattened chain ground), the camera-side flank capped at 1/3 of that height; the pocket maximum is below the footprint top.
+       arena (Middle): the footprint at the bottom, the pocket rises all around (+2.5 over 6 rings), the rim on the camera side cut low (+0.3), the bridge enters through the frame gap.
+       quebrada (High, free side >= T.DIO_FREE): a high rock wall behind the footprint (+1.5 over 2 rings), the DROP on the free side (the whole free half is the DECLARED cliff face: the fall within 3 rings, a notch of +-3 facing the free side, the chasm floor at the ground - 1.5).
+     SLOPE CAP T.DIO_SLOPE (3.0 terH between 4-adjacent pocket tiles); the declared cliff face of the quebrada is exempt (its slope is reported apart); a profile that does not fit -> the Diorama is drawn as Ascension with the reason.
+     Returns { type, dz, fpH (per dst tile), bridgeH (Map tile -> height), heights / roles (per pocket tile; role 2 deco, 4 water), cliff, Href, top, min, greyH, slopeMax, slopeNoCliff, pocketMax, pocketMin, ok, why }. */
+  T.DIO_REF_YAW = 45; T.DIO_SLOPE = 3.0;
+  T.dioGround = function (S) { const g = S.levelMeta ? S.levelMeta.findIndex((m) => m && m.grey) : -1; return g >= 0 ? S.levelH[g] : S.levelH[0] - 0.002; }; // the flattened chain ground (the grey level is inserted just under the lowest level)
+  T.dioProfile = function (S, P, it) {
+    const W = S.W, lv = (t) => S.levelH[S.fine[t]], terH = P.terH, greyH = T.dioGround(S), type = it.type || 'cima', yaw = T.DIO_REF_YAW * Math.PI / 180, ux = Math.sin(yaw), uy = Math.cos(yaw);
+    const med = (a) => { const q = a.slice().sort((x, y) => x - y); return q[(q.length - 1) >> 1]; }, Href = med(it.landing.map(lv)), sm = med(it.src.map(lv));
+    const dz = Href - sm + ({ island: 0, cima: 1.5, arena: -1.2, quebrada: 1.0 }[type] || 0) * terH, fpH = it.dst.map((j, k) => lv(it.src[k]) + dz); let top = -1e9, mn = 1e9; for (const h of fpH) { if (h > top) top = h; if (h < mn) mn = h; }
+    const b = it.bridge, hL = lv(b.from), hF = fpH[it.dst.indexOf(b.to)], m = b.inner.length, bridgeH = new Map(); b.inner.forEach((j, q) => bridgeH.set(j, hL + (hF - hL) * (q + 1) / (m + 1)));
+    for (const j of b.lat) { let bq = 0, bd = 1e9; b.inner.forEach((c, q) => { const d = Math.abs((c % W) - (j % W)) + Math.abs(((c / W) | 0) - ((j / W) | 0)); if (d < bd) { bd = d; bq = q; } }); bridgeH.set(j, hL + (hF - hL) * (bq + 1) / (m + 1)); }
+    const brT = [...bridgeH.keys()], brX = brT.map((t) => t % W), brY = brT.map((t) => (t / W) | 0), brHs = brT.map((t) => bridgeH.get(t)), lnX = it.landing.map((t) => t % W), lnY = it.landing.map((t) => (t / W) | 0);
+    const cx = it.dst.reduce((a, j) => a + (j % W), 0) / it.dst.length, cy = it.dst.reduce((a, j) => a + ((j / W) | 0), 0) / it.dst.length, ring = it.pdist, D = Math.max(1, ...ring), f = it.free ? it.free.dir : [1, 0];
+    const N = it.pocket.length, heights = new Float64Array(N), roles = new Uint8Array(N), cliff = new Uint8Array(N);
+    for (let k = 0; k < N; k++) { const j = it.pocket[k], x = j % W, y = (j / W) | 0, d = ring[k], toward = ((x - cx) * ux + (y - cy) * uy) > 0;
+      let bd = 1e9, bh = Href; for (let q = 0; q < brT.length; q++) { const dd = Math.abs(brX[q] - x) + Math.abs(brY[q] - y); if (dd < bd) { bd = dd; bh = brHs[q]; } } let ld = 1e9; for (let q = 0; q < lnX.length; q++) { const dd = Math.max(Math.abs(lnX[q] - x), Math.abs(lnY[q] - y)); if (dd < ld) ld = dd; }
+      const cw3 = Math.max(0, Math.min(1, ((x - cx) * ux + (y - cy) * uy) / 3)), fd = Math.min(bd, ld), fw = fd <= 2 ? 1 : fd >= 5 ? 0 : (5 - fd) / 3, frm = (h0) => h0 + (Math.min(h0, bh - 0.35) - h0) * fw; let h, r = 2; // the frame gap (2 tiles around the paths) opens gradually over 3 more tiles
+      if (type === 'island') { if (bd <= 1 || ld <= 1) h = Math.min(Href, bh) - 0.05; else { r = 4; h = Math.min(mn, Href) - 0.7 * terH; } }
+      else if (type === 'cima') { const span = Math.max(0, top - greyH); h = greyH + span * (1 - d / (D + 1)); h = h + (Math.min(h, greyH + span / 3) - h) * cw3; h = Math.max(frm(h), greyH + 0.05); }
+      else if (type === 'arena') { const rim = top + 2.5 * terH; h = top + (rim - top) * Math.min(1, d / 6); h = h + (Math.min(h, top + 0.3) - h) * cw3; h = Math.max(frm(h), greyH + 0.05); }
+      else { const proj = (x - cx) * f[0] + (y - cy) * f[1], perp = Math.abs((x - cx) * -f[1] + (y - cy) * f[0]);
+        if (proj < 0) h = top + 1.5 * terH * Math.min(1, d / 2); else { const low = greyH - 1.5 * terH; h = top + (low - top) * Math.min(1, d / 3); cliff[k] = 1; if (perp <= 3) h = Math.min(h, low); } // the whole drop side (the free half: the fall within 3 rings, the notch, the chasm floor) is the DECLARED cliff face, exempt from the slope cap
+        h = frm(h); }
+      heights[k] = h; roles[k] = r; }
+    const at = new Map(it.pocket.map((j, k) => [j, k])); let slopeMax = 0, slopeNoCliff = 0, pmax = -1e9, pmin = 1e9;
+    for (let k = 0; k < N; k++) { const j = it.pocket[k]; if (roles[k] === 2) { if (heights[k] > pmax) pmax = heights[k]; if (heights[k] < pmin) pmin = heights[k]; } for (const q of [j + 1, j + W]) { const k2 = at.get(q); if (k2 === undefined || (q === j + 1 && (q % W) === 0)) continue; const d = Math.abs(heights[k] - heights[k2]); if (d > slopeMax) slopeMax = d; if (!cliff[k] && !cliff[k2] && d > slopeNoCliff) slopeNoCliff = d; } }
+    const dsl = P.dioSlope !== undefined ? P.dioSlope : T.DIO_SLOPE; let ok = true, why = '';
+    slopeMax /= terH; slopeNoCliff /= terH; // in terraces (terH units) per tile
+    if (slopeNoCliff > dsl + 1e-9) { ok = false; why = `pocket ${type}: slope ${slopeNoCliff.toFixed(2)} terraces per tile > cap ${dsl}`; }
+    else if (type === 'cima' && pmax >= top - 1e-6) { ok = false; why = 'pocket cima: the pocket reaches the footprint top'; }
+    return { type, dz, fpH, bridgeH, heights, roles, cliff, Href, top, min: mn, greyH, slopeMax: +slopeMax.toFixed(2), slopeNoCliff: +slopeNoCliff.toFixed(2), pocketMax: pmax, pocketMin: pmin, ok, why };
+  };
+  /* FRAMING of the connecting paths (D31): the share of the footprint perimeter (the edges that do not face the bridge) whose outside tile is pocket, and the share of both sides of the bridge (the 4-neighbours of the bridge outside the footprint, the landing and the bridge) that are pocket */
+  T.dioFraming = function (S, it, chainSet) {
+    const W = S.W, H = S.H, dst = new Set(it.dst), pk = new Set(it.pocket), br = new Set([...it.bridge.inner, ...it.bridge.lat]), land = new Set(it.landing), O = [[1, 0], [-1, 0], [0, 1], [0, -1]]; let pe = 0, pc = 0, pw = 0, bs = 0, bc = 0;
+    for (const j of it.dst) { const x = j % W, y = (j / W) | 0; for (const [dx, dy] of O) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const q = ny * W + nx; if (dst.has(q) || br.has(q)) continue; if (chainSet && !pk.has(q) && S.roomMap[q] > 0 && chainSet.has(S.roomMap[q]) && !(S.roomMap[q] === it.room)) { pw++; continue; } pe++; if (pk.has(q)) pc++; } }
+    const seen = new Set(); for (const j of br) { const x = j % W, y = (j / W) | 0; for (const [dx, dy] of O) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const q = ny * W + nx; if (br.has(q) || dst.has(q) || land.has(q) || seen.has(q)) continue; seen.add(q); if (chainSet && !pk.has(q) && S.roomMap[q] > 0 && chainSet.has(S.roomMap[q]) && S.roomMap[q] !== it.room) continue; bs++; if (pk.has(q)) bc++; } }
+    return { perimeter: pe ? +(100 * pc / pe).toFixed(1) : null, perimeterEdges: pe, perimeterAgainstChain: pw, bridgeSides: bs ? +(100 * bc / bs).toFixed(1) : null, bridgeSideTiles: bs };
+  };
+
+  /* ANALYTIC LINE OF SIGHT (DAC v2 PR C2, D31): the share of the footprint tiles visible from a camera, over a height map, without rendering: from the centre of a tile at its top the ray goes toward the camera (ground direction (sin yaw, cos yaw), rising tan(pitch) per tile, the orthographic cameras of the bank) and the tile is hidden if any tile along it is higher than the ray.
+     `heightOf(t)` (-Infinity for void), `tiles` and `tops` (parallel: the height of the point of each tile). The reference camera is FIXED (Cam 1: yaw 45, pitch 35; T.DIO_REF_YAW / T.DIO_REF_PITCH): the plan never depends on the active camera. It was validated against the Box pick render (tools/ui/measure_dio_los.js, D31). */
+  T.DIO_REF_PITCH = 35; T.DIO_VIS = false; T.DIO_VIS_MIN = 0.95; // DROPPED by the user's 2-point rule: the analytic test disagrees with the Box pick render by up to 4.3 points (tools/ui/measure_dio_los.js, D31), so the criterion is OFF (the smallest valid shift is taken); P.dioVis: true re-enables it for diagnostics
+  T.dioLOS = function (W, H, heightOf, tiles, tops, yawDeg, pitchDeg, maxH) {
+    const yaw = (yawDeg === undefined ? T.DIO_REF_YAW : yawDeg) * Math.PI / 180, pit = (pitchDeg === undefined ? T.DIO_REF_PITCH : pitchDeg) * Math.PI / 180, dx = Math.sin(yaw), dy = Math.cos(yaw), tn = Math.tan(pit); let vis = 0;
+    for (let k = 0; k < tiles.length; k++) { const t = tiles[k], x0 = (t % W) + 0.5, y0 = ((t / W) | 0) + 0.5, h0 = tops[k]; let hid = false;
+      for (let s = 0.5; s <= 80; s += 0.5) { const rh = h0 + s * tn; if (maxH !== undefined && rh > maxH) break; const x = x0 + dx * s, y = y0 + dy * s, ix = Math.floor(x), iy = Math.floor(y); if (ix < 0 || iy < 0 || ix >= W || iy >= H) break; const q = iy * W + ix; if (q === t) continue; if (heightOf(q) > rh + 1e-6) { hid = true; break; } }
+      if (!hid) vis++; }
+    return tiles.length ? vis / tiles.length : 0;
   };
 })(window.EVO = window.EVO || {});
