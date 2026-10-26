@@ -493,7 +493,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   };
 
   /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
-  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH', 'chainExtra', 'ascCut', 'ascGate', 'roomRule', 'cakeCut', 'dioChain']; // the optional `viewer` block of the manifest
+  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH', 'chainExtra', 'ascCut', 'ascGate', 'roomRule', 'cakeCut', 'dioChain', 'dioProto']; // the optional `viewer` block of the manifest
+  E.VIEWER_PROTOS = ['cima-leaf', 'cima-corridor', 'arena-leaf', 'arena-corridor', 'isla-leaf', 'isla-corridor', 'quebrada', 'mirador']; // the ids of the prototypes of src/modes.js (tools/test_diocorr.js checks that they agree)
   E.VIEWER_MODES = ['terrain', 'rooms', 'stage', 'curves', 'floors', 'macroform']; // the ids of src/modes.js (tools/test_modes.js checks that they agree)
   E.parseManifest = function (json) {
     if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
@@ -525,7 +526,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       if (v.dacView !== undefined && !['chain', 'whole'].includes(v.dacView)) throw new Error('Manifest: viewer.dacView must be "chain" or "whole".');
       if (v.anchorH !== undefined && !(typeof v.anchorH === 'number' && v.anchorH >= 0.25 && v.anchorH <= 2)) throw new Error('Manifest: viewer.anchorH must be a number from 0.25 to 2.');
       if (v.roomRule !== undefined && !['v164', 'route'].includes(v.roomRule)) throw new Error('Manifest: viewer.roomRule must be "v164" or "route".');
-      if (v.dioChain !== undefined && !['off', 'm1', 'm2'].includes(v.dioChain)) throw new Error('Manifest: viewer.dioChain must be "off", "m1" or "m2" (absent = off).');
+      if (v.dioChain !== undefined && !['off', 'm1', 'm2', 'corr'].includes(v.dioChain)) throw new Error('Manifest: viewer.dioChain must be "off", "m1", "m2" or "corr" (absent = off).');
+      if (v.dioProto !== undefined && !E.VIEWER_PROTOS.includes(v.dioProto)) throw new Error('Manifest: viewer.dioProto must be one of ' + E.VIEWER_PROTOS.join(', ') + ' (absent = none).');
       if (v.cakeCut !== undefined && !['off', 'quadrant', 'half'].includes(v.cakeCut)) throw new Error('Manifest: viewer.cakeCut must be "off", "quadrant" or "half".');
       if (v.ascCut !== undefined && !(typeof v.ascCut === 'number' && v.ascCut >= 0.15 && v.ascCut <= 3)) throw new Error('Manifest: viewer.ascCut must be a number from 0.15 to 3.');
       if (v.ascGate !== undefined && !(Number.isInteger(v.ascGate) && v.ascGate >= 0 && v.ascGate <= 5)) throw new Error('Manifest: viewer.ascGate must be an integer from 0 to 5.');
@@ -2823,11 +2825,11 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       if (around.length) { const m2 = med(around); for (const k of comp) fpH[k] = m2; info.tiles += comp.length; info.comps++; info.list.push(comp.length); } }
     return info; };
   /* the CLOSED footprint (corr, Cima and Mirador): the notches and slots of the outline (dilate 2, erode 2, never over a bridge or a landing, only over pocket tiles) become filler at the height of the nearest footprint tile, flush with it, so no one-tile column stands in a slot; the skirt starts outside the closed shape. */
-  T.dioClosed = function (S, it) {
+  T.dioClosed = function (S, it, R0) {
     const W = S.W, H = S.H, fpS = new Set(it.dst), pk = new Set(it.pocket), N8c = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]], skip = new Set(it.landing); for (const b of it.bridges || [it.bridge]) for (const t of [...b.inner, ...b.lat, b.from, b.to]) skip.add(t);
     const dil = (set) => { const o = new Set(set); for (const t of set) { const x = t % W, y = (t / W) | 0; for (const [dx, dy] of N8c) { const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < W && ny < H) o.add(ny * W + nx); } } return o; };
     const ero = (set) => { const o = new Set(); for (const t of set) { const x = t % W, y = (t / W) | 0; if (N8c.every(([dx, dy]) => { const nx = x + dx, ny = y + dy; return nx >= 0 && ny >= 0 && nx < W && ny < H && set.has(ny * W + nx); })) o.add(t); } return o; };
-    let c1 = fpS; const R = T.DIO_CLOSE; for (let q = 0; q < R; q++) c1 = dil(c1); for (let q = 0; q < R; q++) c1 = ero(c1);
+    let c1 = fpS; const R = R0 !== undefined ? R0 : T.DIO_CLOSE; for (let q = 0; q < R; q++) c1 = dil(c1); for (let q = 0; q < R; q++) c1 = ero(c1);
     const fill = new Set([...c1].filter((t) => !fpS.has(t) && pk.has(t) && !skip.has(t))); return fill; };
   T.DIO_CLOSE = 2;
   T.dioGround = function (S) { const g = S.levelMeta ? S.levelMeta.findIndex((m) => m && m.grey) : -1; return g >= 0 ? S.levelH[g] : S.levelH[0] - 0.002; }; // the flattened chain ground (the grey level is inserted just under the lowest level)
@@ -2841,7 +2843,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const cx = it.dst.reduce((a, j) => a + (j % W), 0) / it.dst.length, cy = it.dst.reduce((a, j) => a + ((j / W) | 0), 0) / it.dst.length, ring = it.pdist, D = Math.max(1, ...ring), f = it.free ? it.free.dir : [1, 0];
     const N = it.pocket.length, heights = new Float64Array(N), roles = new Uint8Array(N), cliff = new Uint8Array(N);
     // corr, Cima and Mirador: the closed footprint (flush filler in the notches), the height of the nearest footprint tile of every pocket tile, the skirt distance from the closed shape
-    const fill = corr && (type === 'cima' || type === 'mirador') ? T.dioClosed(S, it) : null, nearH = new Map(), effD = new Map(); let De = 1;
+    const fill = corr && (type === 'cima' || type === 'mirador') ? T.dioClosed(S, it, P.dioClose) : null, nearH = new Map(), effD = new Map(); let De = 1;
     if (fill) { const N8c = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]], q = [], pk0 = new Set(it.pocket); it.dst.forEach((j2, k2) => { nearH.set(j2, fpH[k2]); q.push(j2); });
       for (let h2 = 0; h2 < q.length; h2++) { const t = q[h2], x = t % W, y = (t / W) | 0; for (const [dx, dy] of N8c) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= S.H) continue; const q2 = ny * W + nx; if (pk0.has(q2) && !nearH.has(q2)) { nearH.set(q2, nearH.get(t)); q.push(q2); } } }
       const q3 = []; for (const t of fill) { effD.set(t, 0); q3.push(t); } for (const j2 of it.dst) { effD.set(j2, 0); q3.push(j2); }
@@ -2886,6 +2888,14 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     else if (corr && type === 'mirador' && !hito) { ok = false; why = 'pocket mirador: no room for the landmark (7 tiles from every bridge and landing, 9 x 9 tiles of pocket on the background axis)'; }
     return { flat, hito, type, dz, fpH, bridgeH, heights, roles, cliff, Href, top, min: mn, greyH, slopeMax: +slopeMax.toFixed(2), slopeNoCliff: +slopeNoCliff.toFixed(2), pocketMax: pmax, pocketMin: pmin, ok, why };
   };
+  /* DIAGNOSTIC (D32): the pocket tiles that stand as ONE-TILE COLUMNS beside the structure ("stumps"): a decoration tile at least 0.4 terH over at least 5 of its 8 neighbours (footprint, bridge and decoration tiles), the landmark, the pond and the DECLARED cliff face of a Quebrada (its drop side is a feature, not a stump) excluded; and the "holes" of the landmark: decoration tiles
+     of the pocket of which at least 6 of 8 neighbours are rock tiles but that are not rock themselves (a pit at the base of the spire). Returns { stumps: [tile], holes: [tile] }; nothing is drawn or changed by it. */
+  T.dioStumps = function (S, P, it) {
+    const W = S.W, pf = it.prof, terH = P.terH, H = new Map(), rock = new Set(), D8 = [1, -1, W, -W, W + 1, W - 1, -W + 1, -W - 1];
+    it.dst.forEach((j, k) => H.set(j, pf.fpH[k])); for (const [j, h] of pf.bridgeH) H.set(j, h); it.pocket.forEach((j, k) => { if (pf.roles[k] === 2) H.set(j, pf.heights[k]); });
+    if (pf.hito) { for (const j of pf.hito.tiles) rock.add(j); if (pf.hito.pond) for (const j of pf.hito.pond.tiles) rock.add(j); }
+    const stumps = [], holes = []; it.pocket.forEach((j, k) => { if (pf.roles[k] !== 2 || rock.has(j) || (pf.cliff && pf.cliff[k] && !(pf.hito))) return; let n = 0, hi = 0, nr = 0; for (const d of D8) { const v = H.get(j + d); if (rock.has(j + d)) nr++; if (v === undefined) continue; n++; if (pf.heights[k] - v >= 0.4 * terH) hi++; } if (n >= 5 && hi >= 5) stumps.push(j); if (nr >= 6) holes.push(j); });
+    return { stumps, holes }; };
   /* FRAMING of the connecting paths (D31): the share of the footprint perimeter (the edges that do not face the bridge) whose outside tile is pocket, and the share of both sides of the bridge (the 4-neighbours of the bridge outside the footprint, the landing and the bridge) that are pocket */
   T.dioFraming = function (S, it, chainSet) {
     const W = S.W, H = S.H, dst = new Set(it.dst), pk = new Set(it.pocket), br = new Set((it.bridges || [it.bridge]).flatMap((b2) => [...b2.inner, ...b2.lat])), land = new Set(it.landing), O = [[1, 0], [-1, 0], [0, 1], [0, -1]]; let pe = 0, pc = 0, pw = 0, bs = 0, bc = 0;
@@ -4877,10 +4887,10 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
 
   /* The Box pick render as an image (CSS pixels, one code per pixel: walls kind 2 by tile, caps kind 4 by tile): the visibility test of the art contract. */
-  E.pickBuffer = (S, P, view, w, h) => {
+  E.pickBuffer = (S, P, view, w, h, o) => { // `o` (optional): extra options of the pick render, e.g. { pickWalls: true } (the Ascension walls as occluders)
     const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
     const ctx = cv.getContext('2d', { willReadFrequently: true }); ctx.antialias = false;
-    drawScene(ctx, w, h, S, P, 'box', view, { pick: true });
+    drawScene(ctx, w, h, S, P, 'box', view, Object.assign({ pick: true }, o));
     return { data: ctx.getImageData(0, 0, w, h).data, w, h };
   };
 
@@ -5602,7 +5612,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     e('gateMarks', '#t-gateMarks', '2 Room types', ALL, [...RM, 'chainOn'], 'Gate markers (chain view): the open borders between consecutive rooms of the chain as a bright line, and the low camera-side Ascension wall stubs (the Zelda cut) darker than the full walls, so a gate and a cut wall cannot be confused.'),
     e('chainExtra', '#s-chainExtra', '2 Room types', ALL, [...RM, 'chainOn'], 'Chain: extra rooms per leg (N). Each leg (stake -> objective 1 -> ...) may be up to N rooms longer than its shortest path; the longest simple room path without a blocked edge or a repeated room is taken.'),
     e('roomRule', '#roomRule', '2 Room types', ALL, [...RM, 'chainOn'], 'Room type rule in the chain view: V16.4 (the usual classification) or Along the route (by role: entry terrace != exit terrace = Cake, Up if it climbs; >= 2 terraces and no used internal terrace edge = Diorama; the rest Ascension). A second Diorama in a row becomes Ascension in both.'),
-    e('dioChain', '#dioChain', '2 Room types', ALL, [...RM, 'chainOn'], 'Diorama in chain view: Off, or M2 (the Diorama footprint moves into the free grey space, a pocket grows around it, the route keeps passing on a transit landing at the old place and a bridge leads to the footprint) / M1 (the footprint moves to the centre of its own old place plus the nearest free tiles). Only the Dioramas of the chain; one that fails the 50 % free-perimeter rule, the shift cap or the bridge test is drawn as Ascension. The Pocket view is a different thing.'),
+    e('dioChain', '#dioChain', '2 Room types', ALL, [...RM, 'chainOn'], 'Diorama in chain view: Off, or Corridor (DAC: the doors the chain uses decide the structure, one bridge per door; the type follows the ascent of the footprint and the rank; see docs/crystallizers/02-room-types/README.md D32), or M2 (the Diorama footprint moves into the free grey space, a pocket grows around it, the route keeps passing on a transit landing at the old place and a bridge leads to the footprint) / M1 (the footprint moves to the centre of its own old place plus the nearest free tiles). Only the Dioramas of the chain; one that fails the 50 % free-perimeter rule, the shift cap or the bridge test is drawn as Ascension. The Pocket view is a different thing.'),
+    e('dioProto', '#dioProto', '2 Room types', ALL, RM, 'Diorama prototype: one click loads the host scene of one of the eight prototypes of the corridor Diorama (Cima leaf / corridor, Arena leaf / corridor, Isla leaf / corridor, Quebrada, Mirador), places the stake and the objectives, sets Cam 1 at terH 1, switches the Diorama option to Corridor (DAC) and frames the host room. Where the type is not the natural one of the host, it is forced (Isla has no natural host in the four fixed scenes). Off clears the forced type.'),
     e('cakeCut', '#cakeCut', '2 Room types', ALL, [...CAKE, 'cakeOn'], 'Cake camera cut: Off, or remove the Quadrant / Half of each ring toward the camera so the platform is seen (Down: the tile drops to the core floor; Up: no ring). Rings stay per link.'),
     e('anchors', '#t-anchors', '2 Room types', ALL, RM, 'Non-walkable as anchors: the tiles that are not walkable in the rooms layer (isolated terrain, wall / cliff / Steep margins) are drawn grey and RAISED by the anchor height, as a reminder of the structural anchors, instead of the flat not-walkable tone. Visual only: walking does not change. In the Chain view it applies to the chain rooms.'),
     e('anchorH', '#s-anchorH', '2 Room types', ALL, [...RM, 'anchorsOn'], 'Anchor height, in terraces (x terrace height).'),
@@ -5776,7 +5787,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         { id: 'images', label: 'Your images (PNG + roles)', images: true, rooms: true }
       ],
       camera: 'isoE', cameras: CAMS, tech: 'A', techs: ['box', 'A', 'B', 'C'], compare: false, compareDefault: false,
-      main: ['roomsPreset', 'dacAuto', 't-cake', 't-ascWalls', 'ascHeight', 't-pocket', 'pocketFraming', 'pocketHeight', 'dacShow', 'dacView', 'chainExtra', 'roomRule', 'cakeCut', 'dioChain', 'gateMarks', 'anchors', 'anchorH', 'roomChips', 'typeTint'],
+      main: ['roomsPreset', 'dacAuto', 't-cake', 't-ascWalls', 'ascHeight', 't-pocket', 'pocketFraming', 'pocketHeight', 'dacShow', 'dacView', 'chainExtra', 'roomRule', 'cakeCut', 'dioChain', 'dioProto', 'gateMarks', 'anchors', 'anchorH', 'roomChips', 'typeTint'],
       advanced: ['ascCut', 'ascGate', 'roomsMinCore', 'rRadius', 'roomsCross', 'roomsIsoLimit', 'cakeLayers', 'cakeStep', 'cakePer', 'cakeSeam', 'roomBorders', 'roomTint', 'nowalk', 'dioOutline'],
       slice: [], fixed: ['t-rooms'], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
@@ -5822,6 +5833,19 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       main: ['macroView'], advanced: [], slice: [], fixed: [], terrain: null,
       common: { shared: ['outlines'], overlays: true, incursion: false, diagnostics: true }
     }
+  ];
+  /* THE EIGHT PROTOTYPES of the corridor Dioramas (DAC v2 PR D, D32; selector "Diorama prototype" of mode 2, `viewer.dioProto`): one click loads the host scene of the example, places the stake and the objectives (K = 1 keeps the sub-objective, K = 0 only the final goal), sets Cam 1 at terH 1, switches the Diorama option to Corridor,
+     frames the host room and, where the type is not the natural one of the host, forces it (`P.dioForce`). `structure` = the bridges BUILT by the plan at the host (1 leaf, 2 corridor). Hosts (user's decision, Gate 2): Cima leaf = Balanced room 7 (natural); Cima corridor = Chain 5 K = 1 room 10 (natural); Isla / Arena leaf + Quebrada = Balanced K = 1 room 66 (Quebrada natural);
+     Isla / Arena corridor + Mirador = Balanced K = 0 room 20 (Mirador natural). Isla has no natural host in the four fixed scenes: it is always forced. The flat room-66 Cima exists only as a forced test hook (`P.dioForce`), never natural. */
+  const PROTOS = [
+    { id: 'cima-leaf', label: 'Cima · leaf (Balanced, room 7)', example: 'real_balanced', k: 1, room: 7, type: 'cima', force: false, structure: 1 },
+    { id: 'cima-corridor', label: 'Cima · corridor (Chain 5, room 10)', example: 'real_chain5', k: 1, room: 10, type: 'cima', force: false, structure: 2 },
+    { id: 'arena-leaf', label: 'Arena · leaf (Balanced, room 66)', example: 'real_balanced', k: 1, room: 66, type: 'arena', force: true, structure: 1 },
+    { id: 'arena-corridor', label: 'Arena · corridor (Balanced K0, room 20)', example: 'real_balanced', k: 0, room: 20, type: 'arena', force: true, structure: 2 },
+    { id: 'isla-leaf', label: 'Isla · leaf (Balanced, room 66)', example: 'real_balanced', k: 1, room: 66, type: 'island', force: true, structure: 1 },
+    { id: 'isla-corridor', label: 'Isla · corridor (Balanced K0, room 20)', example: 'real_balanced', k: 0, room: 20, type: 'island', force: true, structure: 2 },
+    { id: 'quebrada', label: 'Quebrada (Balanced, room 66)', example: 'real_balanced', k: 1, room: 66, type: 'quebrada', force: false, structure: 1 },
+    { id: 'mirador', label: 'Mirador (Balanced K0, room 20)', example: 'real_balanced', k: 0, room: 20, type: 'mirador', force: false, structure: 2 }
   ];
   const byId = (id) => MODES.find((m) => m.id === id) || null;
   const IDS = MODES.map((m) => m.id);
@@ -5917,7 +5941,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     L.push('## Common to every mode', '', `- View bar: ${list(COMMON.view)} (cameras and techniques filtered by the mode; Compare only where the mode has it).`, `- "Your images" example (modes with it): ${list(COMMON.images)}.`, `- Only without modes (\`EVO_NO_MODES\`): ${list(COMMON.legacy)}.`, '');
     return L.join('\n');
   }
-  E.modes = { MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };
+  E.modes = { PROTOS, MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };
 })(typeof window !== 'undefined' ? (window.EVO = window.EVO || {}) : (globalThis.EVO = globalThis.EVO || {}));
 
 /* UI wiring */
@@ -5952,7 +5976,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   const packs = {};
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
   const NO_MODES = !!window.EVO_NO_MODES; // test-only flag (tools/ui/common.js): the whole panel as before the modes layer
-  const st = { dacAuto: true, dacShow: 'all', dacView: 'chain', roomRule: 'v164', modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  const st = { dioProto: 'off', dioFocus: null, dacAuto: true, dacShow: 'all', dacView: 'chain', roomRule: 'v164', modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -6007,9 +6031,36 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     if (show === 'all') { set('typeTint', 't-typeTint', true); set('dioOutline', 't-dioOutline', true); return; }
     set('typeTint', 't-typeTint', false); set('roomBorders', 't-roomBorders', false); set('dioOutline', 't-dioOutline', show === 'diorama');
   }
+  /* DIORAMA PROTOTYPES (D32, src/modes.js PROTOS). `st.dioProto` = the id or 'off'; `P.dioForce` = { room, type } where the prototype forces a type that is not the natural one of its host (the planner reads it); `st.dioFocus` = the room to frame once the plan exists. */
+  function setProto(id) { st.dioProto = id; const pr = E.modes.PROTOS.find((x) => x.id === id); P.dioForce = pr && pr.force ? { room: pr.room, type: pr.type } : null; const el = $('#dioProto'); if (el) el.value = id; }
+  function clearProto() { st.dioFocus = null; setProto('off'); }
+  async function applyProto(id) { // one click: the host scene, the marks, Cam 1, terH 1, the Corridor option, the host framed
+    const pr = E.modes.PROTOS.find((x) => x.id === id); if (!pr || NO_MODES) return;
+    if (st.modeId !== 'rooms') { st.modeId = 'rooms'; $('#modeSel').value = 'rooms'; E.modes.resetFolds(document); buildExamples(); }
+    const m = curMode(), ex = m.examples.find((x) => x.id === pr.example); st.exampleId = ex.id; await applyScenario(ex, m); enforceMode();
+    if (pr.k === 0 && inc.objectives.length > 1) inc.objectives = inc.objectives.slice(-1); // K = 0: no sub-objective, only the final goal
+    setParam('terH', 1); st.preset = 'isoE'; st.zoom = 1; st.panX = st.panY = 0; P.dioChain = 'corr'; const dcc = $('#dioChain'); if (dcc) dcc.value = 'corr';
+    setProto(id); st.dioFocus = pr.room; refreshMessage(); invalidate(true);
+  }
+  function focusDio(room) { // frames the moved footprint with its bridges and landings (the host of a prototype); true = handled (or impossible), false = the plan is not ready yet
+    const dp = P.dioPlan; if (!dp || !S || !S.dioRole) return false; const it = dp.items.find((q) => q.room === room && q.eligible); if (!it) return true;
+    const W = S.W, core = [...it.dst, ...it.landing, ...it.bridges.flatMap((b) => [...b.inner, ...b.lat, b.from, b.to])]; let x0 = 1e9, x1 = -1, y0 = 1e9, y1 = -1; for (const t of core) { const x = t % W, y = (t / W) | 0; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+    const f0 = $('#stage').children[0], cv = f0 && f0.querySelector('canvas'), cw = (cv && cv.clientWidth) || f0.clientWidth, ch = (cv && cv.clientHeight) || f0.clientHeight; if (!(cw > 0 && ch > 0 && st.fitSc > 0)) return false;
+    const tl = Math.max(40, Math.ceil(Math.max(x1 - x0, y1 - y0) * 1.2 + 14)), z = (cw / tl) / st.fitSc, v = view(); v.zoom = z; v.panX = 0; v.panY = 0;
+    const p0 = E.makeCam(S, P, v, cw, ch).p((x0 + x1) / 2 + 0.5, (y0 + y1) / 2 + 0.5, S.levelH[S.fine[it.landing[0]]]); st.zoom = z; st.panX = cw / 2 - p0[0]; st.panY = ch / 2 - p0[1]; return true;
+  }
+  /* the visibility of the parts of a moved Diorama as COUNTS [visible, in view, total] (the Box pick render with the Ascension walls as occluders; only the tiles inside the view count) */
+  function dioVis(it) {
+    const f0 = $('#stage').children[0], cv = f0 && f0.querySelector('canvas'); if (!cv || !S || !S.dioRole) return null;
+    const w = cv.clientWidth, h = cv.clientHeight, W = S.W, n = S.n, v = view(), D = E.pickBuffer(S, P, v, w, h, { pickWalls: true }).data, cam = E.makeCam(S, P, v, w, h), seen = new Uint8Array(n);
+    for (let q = 0; q < w * h; q++) { const code = (D[4 * q] << 16) | (D[4 * q + 1] << 8) | D[4 * q + 2], k = code >> 20, t = code & 0xfffff; if (D[4 * q + 3] === 255 && k >= 2 && k <= 4 && t < n) seen[t] = 1; }
+    const cnt = (tl) => { let iv = 0, sv = 0; for (const t of tl) { const q = cam.p((t % W) + 0.5, ((t / W) | 0) + 0.5, S.levelH[S.fine[t]]); if (q[0] >= 0 && q[1] >= 0 && q[0] < w && q[1] < h) { iv++; if (seen[t]) sv++; } } return [sv, iv, tl.length]; };
+    const hi = it.prof && it.prof.hito; return { footprint: cnt(it.dst), landing: cnt(it.landing), bridges: it.bridges.map((b) => cnt([...b.inner, ...b.lat, b.from, b.to])), pocket: cnt(it.pocket), hito: hi ? cnt(hi.tiles) : null };
+  }
   async function applyScenario(sc, mode) { // mode (optional, the modes layer): the example of a mode; without it this is the old scenario button, unchanged
     if (sc.src && !(await selectSource(sc.src))) return;
     P.chainIds = null; P.chainSeqs = null; P.chainGoals = null; P.dioPlan = null; P.chainKey = ''; P.chainTypes = null; P.chainBlocked = null; P.chainFail = ''; P.chainInfo = null; // the chain view belongs to the state of mode 2 (D23): an example starts without one, draw() derives it from the routes
+    clearProto(); // a prototype (D32) belongs to the click that loaded it: any other example starts without a forced type
     const tick = (id, v) => { const el = $('#' + id); if (el) el.checked = v; };
     // the base every scenario starts from (so the same click always gives the same state): the defaults of the parameters the scenarios touch
     setParam('terraces', 5); setParam('spread', 1); setParam('minPlateau', 5); P.spreadCentre = 'largest'; P.cake = false; P.ascWalls = false; O.contract = false; tick('t-cake', false); tick('t-ascWalls', false); tick('t-contract', false);
@@ -6044,12 +6095,12 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
   const MODE2_DEF = { dioChain: 'm2', ascGate: 3, ascCut: 0.5 }, LEGACY_DEF = { dioChain: 'off', ascGate: 0, ascCut: 0.15 }; // D31: the defaults of mode 2 (announced) and the values of every other mode / the legacy panel / a manifest that does not name them
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; b.dacView = st.dacView; if (P.chainExtra !== 3) b.chainExtra = P.chainExtra; if (st.roomRule !== 'v164') b.roomRule = st.roomRule; if (P.cakeCut !== 'off') b.cakeCut = P.cakeCut; b.dioChain = P.dioChain; b.ascCut = P.ascCut; b.ascGate = P.ascGate; /* D31: written ALWAYS in mode 2 (explicit values): an absent key in a loaded manifest means the OLD values (Off / 0.15 / 0), not the new mode-2 defaults */ if (P.anchors) b.anchors = true; if (P.anchorH !== 0.5) b.anchorH = P.anchorH; } if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; b.dacView = st.dacView; if (P.chainExtra !== 3) b.chainExtra = P.chainExtra; if (st.roomRule !== 'v164') b.roomRule = st.roomRule; if (P.cakeCut !== 'off') b.cakeCut = P.cakeCut; b.dioChain = P.dioChain; if (st.dioProto !== 'off') b.dioProto = st.dioProto; b.ascCut = P.ascCut; b.ascGate = P.ascGate; /* D31: written ALWAYS in mode 2 (explicit values): an absent key in a loaded manifest means the OLD values (Off / 0.15 / 0), not the new mode-2 defaults */ if (P.anchors) b.anchors = true; if (P.anchorH !== 0.5) b.anchorH = P.anchorH; } if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
     for (const k of ['terraces', 'roomsMinCore', 'rRadius', 'minPlateau']) setParam(k, w[k]);
-    setParam('chainExtra', w.chainExtra !== undefined ? w.chainExtra : 3); setParam('ascCut', w.ascCut !== undefined ? w.ascCut : 0.15); setParam('ascGate', w.ascGate !== undefined ? w.ascGate : 0); st.roomRule = w.roomRule === 'route' ? 'route' : 'v164'; const rru = $('#roomRule'); if (rru) rru.value = st.roomRule; P.cakeCut = ['quadrant', 'half'].includes(w.cakeCut) ? w.cakeCut : 'off'; const ccu = $('#cakeCut'); if (ccu) ccu.value = P.cakeCut; P.dioChain = ['m1', 'm2'].includes(w.dioChain) ? w.dioChain : 'off'; const dcu = $('#dioChain'); if (dcu) dcu.value = P.dioChain; // absent = 3, V16.4, Off
+    setParam('chainExtra', w.chainExtra !== undefined ? w.chainExtra : 3); setParam('ascCut', w.ascCut !== undefined ? w.ascCut : 0.15); setParam('ascGate', w.ascGate !== undefined ? w.ascGate : 0); st.roomRule = w.roomRule === 'route' ? 'route' : 'v164'; const rru = $('#roomRule'); if (rru) rru.value = st.roomRule; P.cakeCut = ['quadrant', 'half'].includes(w.cakeCut) ? w.cakeCut : 'off'; const ccu = $('#cakeCut'); if (ccu) ccu.value = P.cakeCut; P.dioChain = ['m1', 'm2', 'corr'].includes(w.dioChain) ? w.dioChain : 'off'; const dcu = $('#dioChain'); if (dcu) dcu.value = P.dioChain; setProto(P.dioChain === 'corr' && E.modes.PROTOS.some((x) => x.id === w.dioProto) ? w.dioProto : 'off'); // the prototype of a manifest only sets the forced type and the selector: the scene is the manifest's own // absent = 3, V16.4, Off
     P.anchors = w.anchors === true; const tan = $('#t-anchors'); if (tan) tan.checked = P.anchors; setParam('anchorH', w.anchorH !== undefined ? w.anchorH : 0.5); // absent = off, 0.5
     st.dacView = w.dacView === 'chain' ? 'chain' : 'whole'; const dvw = $('#dacView'); if (dvw) dvw.value = st.dacView; // absent = the whole map (a manifest saved before the Chain view)
     st.dacShow = ['cake', 'ascension', 'diorama'].includes(w.dacShow) ? w.dacShow : 'all'; const dsh = $('#dacShow'); if (dsh) dsh.value = st.dacShow; // absent = All
@@ -6082,7 +6133,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         const lcc = document.createElement('label'); lcc.className = 'sl'; lcc.innerHTML = '<span>Cake camera cut</span><select id="cakeCut"><option value="off">Off</option><option value="quadrant">Quadrant</option><option value="half">Half</option></select>';
         if (NO_MODES) lcc.hidden = true; lcc.querySelector('select').value = P.cakeCut; lcc.querySelector('select').addEventListener('change', (e) => { P.cakeCut = e.target.value; refreshMessage(); invalidate(true); }); sl.appendChild(lcc);
         const ldc = document.createElement('label'); ldc.className = 'sl'; ldc.innerHTML = '<span>Diorama in chain view</span><select id="dioChain"><option value="off">Off</option><option value="m2">M2 (the footprint moves)</option><option value="m1">M1 (region)</option><option value="corr">Corridor (DAC)</option></select>';
-        if (NO_MODES) ldc.hidden = true; ldc.querySelector('select').value = P.dioChain; ldc.querySelector('select').addEventListener('change', (e) => { P.dioChain = e.target.value; refreshMessage(); invalidate(true); }); sl.appendChild(ldc);
+        if (NO_MODES) ldc.hidden = true; ldc.querySelector('select').value = P.dioChain; ldc.querySelector('select').addEventListener('change', (e) => { P.dioChain = e.target.value; if (P.dioChain !== 'corr') clearProto(); refreshMessage(); invalidate(true); }); sl.appendChild(ldc);
+        const lpr = document.createElement('label'); lpr.className = 'sl'; lpr.innerHTML = '<span>Diorama prototype</span><select id="dioProto"><option value="off">Off</option>' + E.modes.PROTOS.map((x) => `<option value="${x.id}">${x.label}</option>`).join('') + '</select>';
+        if (NO_MODES) lpr.hidden = true; lpr.querySelector('select').value = st.dioProto; lpr.querySelector('select').addEventListener('change', (e) => { if (e.target.value === 'off') { clearProto(); refreshMessage(); invalidate(true); } else applyProto(e.target.value); }); sl.appendChild(lpr);
         const lan = document.createElement('label'); lan.className = 'tg'; lan.innerHTML = '<input type="checkbox" id="t-anchors"><span>Non-walkable as anchors (raised, grey; needs Rooms)</span>';
         if (NO_MODES) lan.hidden = true; // mode 2 only (the panel without modes has no such checkbox)
         const ian = lan.querySelector('input'); ian.checked = !!P.anchors; ian.addEventListener('change', () => { P.anchors = ian.checked; refreshMessage(); invalidate(true); }); sl.appendChild(lan);
@@ -6199,7 +6252,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
   function chainSig() { // what the chain depends on: the stake and the final goal, N, the type rule, the rooms layer and the ramp parameters (the graph is read from the WHOLE shape: a rebuilt chain shape is flattened and cannot be read again)
     const gs = chainGoals(); if (!gs || !S.rooms) return '';
-    return [gs.stake, gs.subs.join('.'), gs.goal, P.chainExtra, P.chainNodes || '', st.roomRule, P.dioChain, st.pack, P.roomsMinCore, P.rRadius, P.minPlateau, P.roomsCross, P.terraces, P.stairW, P.rampDepth, P.stairStyle].join('|');
+    return [gs.stake, gs.subs.join('.'), gs.goal, P.chainExtra, P.chainNodes || '', st.roomRule, P.dioChain, P.dioChain === 'corr' ? P.terH + ':' + (P.dioForce ? P.dioForce.room + P.dioForce.type : '') : '', st.pack, P.roomsMinCore, P.rRadius, P.minPlateau, P.roomsCross, P.terraces, P.stairW, P.rampDepth, P.stairStyle].join('|');
   }
   const ROUTE_CAP = 30, ROUTE_KEEP = 10;
   const roomsView = () => !NO_MODES && st.modeId === 'rooms' && !!(S && S.roomMap && S.types);
@@ -6549,7 +6602,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
               const TT = E.roomTypes, ty0 = S.types, typeOf = (r) => (tp.map.has(r) ? tp.map.get(r).type : (ty0.rooms.get(r) || {}).type), goals = res.goalTiles && res.goalTiles.length ? res.goalTiles : [gl.stake, gl.goal];
               const dp = TT.dioPlan(S, P, { chainIds: P.chainIds, pieces: res.pieces, goals, typeOf }); P.dioPlan = dp;
               for (const r of dp.demoted) { const v = res.rooms.filter((x) => x === r).length; tp.map.set(r, { type: TT.ASCENSION, up: false }); if (P.chainInfo.counts.Dio >= v) { P.chainInfo.counts.Dio -= v; P.chainInfo.counts.Asc += v; } }
-              P.dioSummary = { mode: dp.mode, cap: dp.cap, total: dp.items.length, eligible: dp.eligible.length, why: dp.why, items: dp.items.map((q) => ({ room: q.room, eligible: q.eligible, perim: q.perim, shift: q.shift, bridge: q.bridgeLen, why: q.why })) };
+              P.dioSummary = { mode: dp.mode, cap: dp.cap, total: dp.items.length, eligible: dp.eligible.length, why: dp.why, items: dp.items.map((q) => ({ room: q.room, eligible: q.eligible, perim: q.perim, shift: q.shift, bridge: q.bridgeLen, why: q.why, type: q.type, step: q.step, structure: q.structure, ring: q.ring, bridgeLens: q.bridgeLens, asc: q.ascEntry, flat: q.prof && q.prof.flat ? q.prof.flat.tiles : 0, kept: q.prof && q.prof.flat ? q.prof.flat.kept : 0, hito: q.prof && q.prof.hito ? q.prof.hito.tiles.length : 0 })) };
             }
             invalidate(true); return;
           }
@@ -6576,6 +6629,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const multi = fl && st.floors !== 'single' && view().kind !== 'persp'; // the stack and the cutaway are orthographic only: Cam 6 shows the selected floor
     const FLS = multi ? E.floors.layers(S, raw, P, view(), st.floors, !!st.dragging) : null; O.incursion = FLS ? null : O.incursion; st.floorsLayers = FLS;
     const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = volView ? E.volume.fitScale(raw, view(), f0.clientWidth, f0.clientHeight) : E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
+    if (st.dioFocus && !volView && focusDio(st.dioFocus)) st.dioFocus = null; // a prototype frames its host once the plan exists (before the view is read below)
     const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
     const lateKey = (t) => (t === 'B' ? 'Bready:' + P.radius + ':' + P.anchor : 'Cready:' + E.curves.key(P)), late = techs.filter((t) => (t === 'B' || t === 'C') && (!S.cache[lateKey(t)] || (FLS && FLS.dirty))), needB = late.length > 0; // B and C: the first draw is the slow one, painted after the other panels
     const paint = (t, i) => {
@@ -6712,6 +6766,12 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   function dioText() { // D30: what the Diorama option did (the plan is made on the whole shape, the apply on the rebuilt one)
     const d = P.dioSummary, a = S.dioInfo; if (!d) return '';
     const el = d.items.filter((q) => q.eligible), no = d.items.filter((q) => !q.eligible);
+    if (d.mode === 'corr') { // D32: the corridor Dioramas: type, structure (bridges BUILT: 1 leaf, 2 corridor, 3 or more crossing), ring of the landing, shift, bridge lengths, ascent against the terrace of the piece the chain enters by, flattened tiles, summit kept, landmark tiles, visible / in view / total tile counts
+      const STRUCT = { 1: 'leaf', 2: 'corridor' }, TYPE = { cima: 'Cima', island: 'Isla', arena: 'Arena', quebrada: 'Quebrada', mirador: 'Mirador' }, pr = st.dioProto !== 'off' ? E.modes.PROTOS.find((x) => x.id === st.dioProto) : null, cnt = (c) => (c ? c.join('/') : '-');
+      const one = (q) => { let t = `room ${q.room}: ${TYPE[q.type] || q.type}${P.dioForce && P.dioForce.room === q.room ? ' (FORCED' + (q.type === 'island' ? ': Isla has no natural host in the four fixed scenes' : '') + ')' : ''}, ${STRUCT[q.structure] || 'crossing'} (${q.structure} bridge${q.structure === 1 ? '' : 's'} built, ${q.step}), landing ring ${q.ring}, shift ${q.shift}, bridges ${q.bridgeLens.join(' / ')}, ascent ${q.asc} % against the piece terrace, ${q.flat} tiles flattened (summit kept ${q.kept})` + (q.hito ? `, landmark ${q.hito} tiles` : '');
+        if (pr && pr.room === q.room) { const it = P.dioPlan && P.dioPlan.items.find((x) => x.room === q.room && x.eligible), vs = it && dioVis(it); if (vs) t += `; visible / in view / total tiles: footprint ${cnt(vs.footprint)}, landing ${cnt(vs.landing)}, bridges ${vs.bridges.map(cnt).join(' ')}, pocket ${cnt(vs.pocket)}` + (vs.hito ? `, landmark ${cnt(vs.hito)}` : ''); } return t; };
+      return `; Diorama in chain view CORRIDOR: ${el.length} of ${d.total} Dioramas moved (cap ${d.cap} tiles)` + (pr ? `; prototype ${pr.label}` : '') + (el.length ? ' (' + el.slice().sort((x, y) => (pr && pr.room === y.room) - (pr && pr.room === x.room)).map(one).join('; ') + ')' : '') + (no.length ? `; shown as Ascension: ${no.map((q) => `room ${q.room} (${q.why})`).join('; ')}` : '') + (a && el.length ? `; ${a.footprint} footprint / ${a.pocket} pocket / ${a.bridge} bridge / ${a.landing} landing tiles, ${a.levelsAdded} levels added` : '') + (pr && !el.some((q) => q.room === pr.room) ? `; the host room ${pr.room} of the prototype was NOT moved in this scene` : '');
+    }
     return `; Diorama in chain view ${d.mode.toUpperCase()}: ${el.length} of ${d.total} Dioramas moved (cap ${d.cap} tiles)` + (el.length ? ' (' + el.map((q) => `room ${q.room}: shift ${q.shift}, bridge ${q.bridge}`).join('; ') + ')' : '') + (no.length ? `; shown as Ascension: ${no.map((q) => `room ${q.room} (${q.why})`).join('; ')}` : '') + (a && el.length ? `; ${a.footprint} footprint / ${a.pocket} pocket / ${a.bridge} bridge / ${a.landing} landing tiles, ${a.levelsAdded} levels added` : '');
   }
   function chainText() {

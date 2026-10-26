@@ -872,6 +872,14 @@
     else if (corr && type === 'mirador' && !hito) { ok = false; why = 'pocket mirador: no room for the landmark (7 tiles from every bridge and landing, 9 x 9 tiles of pocket on the background axis)'; }
     return { flat, hito, type, dz, fpH, bridgeH, heights, roles, cliff, Href, top, min: mn, greyH, slopeMax: +slopeMax.toFixed(2), slopeNoCliff: +slopeNoCliff.toFixed(2), pocketMax: pmax, pocketMin: pmin, ok, why };
   };
+  /* DIAGNOSTIC (D32): the pocket tiles that stand as ONE-TILE COLUMNS beside the structure ("stumps"): a decoration tile at least 0.4 terH over at least 5 of its 8 neighbours (footprint, bridge and decoration tiles), the landmark, the pond and the DECLARED cliff face of a Quebrada (its drop side is a feature, not a stump) excluded; and the "holes" of the landmark: decoration tiles
+     of the pocket of which at least 6 of 8 neighbours are rock tiles but that are not rock themselves (a pit at the base of the spire). Returns { stumps: [tile], holes: [tile] }; nothing is drawn or changed by it. */
+  T.dioStumps = function (S, P, it) {
+    const W = S.W, pf = it.prof, terH = P.terH, H = new Map(), rock = new Set(), D8 = [1, -1, W, -W, W + 1, W - 1, -W + 1, -W - 1];
+    it.dst.forEach((j, k) => H.set(j, pf.fpH[k])); for (const [j, h] of pf.bridgeH) H.set(j, h); it.pocket.forEach((j, k) => { if (pf.roles[k] === 2) H.set(j, pf.heights[k]); });
+    if (pf.hito) { for (const j of pf.hito.tiles) rock.add(j); if (pf.hito.pond) for (const j of pf.hito.pond.tiles) rock.add(j); }
+    const stumps = [], holes = []; it.pocket.forEach((j, k) => { if (pf.roles[k] !== 2 || rock.has(j) || (pf.cliff && pf.cliff[k] && !(pf.hito))) return; let n = 0, hi = 0, nr = 0; for (const d of D8) { const v = H.get(j + d); if (rock.has(j + d)) nr++; if (v === undefined) continue; n++; if (pf.heights[k] - v >= 0.4 * terH) hi++; } if (n >= 5 && hi >= 5) stumps.push(j); if (nr >= 6) holes.push(j); });
+    return { stumps, holes }; };
   /* FRAMING of the connecting paths (D31): the share of the footprint perimeter (the edges that do not face the bridge) whose outside tile is pocket, and the share of both sides of the bridge (the 4-neighbours of the bridge outside the footprint, the landing and the bridge) that are pocket */
   T.dioFraming = function (S, it, chainSet) {
     const W = S.W, H = S.H, dst = new Set(it.dst), pk = new Set(it.pocket), br = new Set((it.bridges || [it.bridge]).flatMap((b2) => [...b2.inner, ...b2.lat])), land = new Set(it.landing), O = [[1, 0], [-1, 0], [0, 1], [0, -1]]; let pe = 0, pc = 0, pw = 0, bs = 0, bc = 0;

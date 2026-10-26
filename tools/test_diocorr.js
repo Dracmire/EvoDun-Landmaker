@@ -4,7 +4,7 @@
    Every check recomputes its property from the plan output and the built shape, never from the planner's own internals. */
 const fs = require('fs'), path = require('path'), vm = require('vm');
 global.window = global;
-for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes', 'pocket']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
+for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes', 'pocket', 'modes']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
 const E = window.EVO, T = E.roomTypes; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log('FAIL', name, extra === undefined ? '' : extra); } };
 const src = fs.readFileSync(path.join(__dirname, 'test_roomtypes.js'), 'utf8'), P0 = eval('(' + src.match(/const P0 = (\{[^;]*\});/)[1] + ')');
@@ -48,7 +48,7 @@ const structureRoute = (it, path) => { const cs = it.bridges.map((b) => crosses(
     ok(`${key}: the Diorama set of the plan is the expected one (${Object.keys(EXPECT[key]).join(', ')})`, items.map((q) => q.room).sort((a, c) => a - c).join() === Object.keys(EXPECT[key]).map(Number).sort((a, c) => a - c).join(), items.map((q) => q.room));
     for (const it of items) { const e = EXPECT[key][it.room]; const got = it.eligible ? [it.step, it.ring, it.shift, it.bridgeLens] : null;
       ok(`${key} room ${it.room}: ${e ? 'accepted as ' + e[0] + ' ring ' + e[1] + ' shift ' + e[2] + ' bridges ' + JSON.stringify(e[3]) : 'falls to Ascension'}`, JSON.stringify(got) === JSON.stringify(e), JSON.stringify(got) + ' ' + (it.why || '').slice(0, 200)); }
-    for (const it of items.filter((q) => q.eligible)) { const tag = `${key} room ${it.room}`, L = lens(W, it);
+    const c0 = scenes[key]; for (const it of items.filter((q) => q.eligible)) { const tag = `${key} room ${it.room}`, L = lens(W, it);
       ok(`${tag}: structure = the number of bridges built (${it.bridges.length}), leaf 1 / corridor 2 / lateral 1, one bridge per door group in a corridor`, it.structure === it.bridges.length && (it.step === 'lateral' ? it.bridges.length === 1 : it.bridges.length === it.nGroups), [it.step, it.structure, it.nGroups]);
       ok(`${tag}: every bridge is between ${T.DIO_MIN_BRIDGE} and ${T.DIO_MAX_BRIDGE} tiles (measured: ${L.map((x) => x.toFixed(1))})`, L.every((x) => x >= T.DIO_MIN_BRIDGE - 1e-9 && x <= T.DIO_MAX_BRIDGE + 1e-9), L);
       ok(`${tag}: the gap between the footprint and EVERY landing is >= ${T.DIO_GAP} (centre distance, measured ${gapOf(W, it)})`, gapOf(W, it) >= T.DIO_GAP);
@@ -56,7 +56,8 @@ const structureRoute = (it, path) => { const cs = it.bridges.map((b) => crosses(
       ok(`${tag}: TILE-SET rule: the width-3 tile sets of two bridges share no tile and no tile is a 4-neighbour of another (${touching(W, it)} touching pairs)`, touching(W, it) === 0);
       ok(`${tag}: the landings of two doors of the same piece are >= ${T.DIO_LAND_SEP} apart (measured ${landSep(W, it)})`, landSep(W, it) >= T.DIO_LAND_SEP);
       ok(`${tag}: the pocket is complete (3 x the area = ${3 * it.tiles}) and never overlaps the footprint, a bridge or a landing`, it.pocket.length >= 3 * it.tiles && (() => { const own = new Set([...it.dst, ...it.landing, ...it.bridges.flatMap((b) => [...b.inner, ...b.lat])]); return it.pocket.every((t) => !own.has(t)); })());
-      ok(`${tag}: each bridge starts on a walkable landing tile and ends on a walkable footprint tile (the source tile is walkable), no chain room crossed`, it.bridges.every((b) => it.landing.includes(b.from) && it.dst.includes(b.to) && b.inner.every((t) => !(b.inner.length && b.xChain)) && b.inner.every((t) => !(b.xChain || b.xOcc))));
+      const walkEnd = (it) => it.bridges.every((b) => it.landing.includes(b.from) && it.dst.includes(b.to) && !b.xChain && !b.xOcc && (() => { const k = it.dst.indexOf(b.to), sTile = it.src[k]; return !c0.S0.block[sTile] && c0.S0.region[sTile] >= 0; })());
+      ok(`${tag}: each bridge starts on a landing tile and ends on a footprint tile whose SOURCE tile is walkable (the end fix), no chain room crossed`, walkEnd(it));
       ok(`${tag}: the type follows rule A (ascent against the piece the chain enters by ${it.ascEntry} %; rank ${it.rank}; ${it.bridges.length} bridge(s)) -> ${it.type}`, it.type === (it.ascEntry >= 25 ? 'cima' : it.rank === 'low' ? 'island' : it.rank === 'mid' ? 'arena' : it.bridges.length >= 2 ? 'mirador' : 'quebrada'), it.type); }
     // the shared Diorama rules against EARLIER Dioramas: no tile of the structure of one is a tile of another
     { const seen = new Map(); let dup = 0; for (const it of items.filter((q) => q.eligible)) for (const t of [...it.dst, ...it.pocket, ...it.bridges.flatMap((b) => [...b.inner, ...b.lat])]) { if (seen.has(t) && seen.get(t) !== it.room) dup++; seen.set(t, it.room); } ok(`${key}: no tile belongs to the structure of two Dioramas (placement order = the chain order, an earlier Diorama keeps its place)`, dup === 0, dup); }
@@ -92,6 +93,30 @@ const structureRoute = (it, path) => { const cs = it.bridges.map((b) => crosses(
     const noFb = get(plan(c, { dioNoFallback: true }), 53); ok('MUTATION no shortest-pair fallback: K = 1 room 53 (a corridor only with the fallback) falls to a lateral or Ascension', !noFb.eligible || noFb.step !== 'corridor', noFb.step); }
   { const bb = build(pack, scenes['balanced-K1'], { dioBridgeAdj: false, dioAxisSep: 0 }), it = bb.dp.items.find((q) => q.room === 20), o = it && it.eligible ? oracle(bb.S, bb.PP, it) : null;
     ok('MUTATION both separation rules off: the ORACLE fails on K = 1 room 20 (the landings of two doors are joined by a shared lane tile)', o && o.joined.length > 0, o && JSON.stringify(o)); }
+
+  // ---- 4b. the remaining approved mutations: ladder step skipped, the 50 % rule on, type by rank only, the end-of-bridge fix off, and the forced type (P.dioForce)
+  { const c = scenes['balanced-K1'], k0 = scenes['balanced-K0'], W = c.S0.W, get = (dp, r) => dp.items.find((q) => q.room === r);
+    const sk = get(plan(k0, { dioSkip: 'corridor' }), 66); ok('MUTATION ladder step skipped (corridor): the ladder check fails: K = 0 room 66 is no longer a corridor (the expected plan says corridor ring 0 shift 22.6)', !(sk.eligible && sk.step === 'corridor'), sk.eligible ? sk.step : sk.why);
+    const sl = get(plan(c, { dioSkip: 'lateral' }), 66); ok('MUTATION ladder step skipped (lateral): the ladder check fails: K = 1 room 66 (accepted as a lateral) falls to Ascension', !sl.eligible, sl.step);
+    const p50 = plan(c, { dioPerim: 50 }).items.filter((q) => EXPECT['balanced-K1'][q.room] && !q.eligible); ok('MUTATION the 50 % free-perimeter rule on: the ladder check fails: a Diorama that the plan accepts without it falls to Ascension (' + p50.map((q) => q.room + ' at ' + q.perim + ' %') + ')', p50.length > 0 && p50.every((q) => q.perim < 50), p50.map((q) => q.perim));
+    const th = plan(c, { dioCimaThr: 2 }), r7 = get(th, 7); ok('MUTATION type by rank only (the 25 % threshold never reached): the type check fails: K = 1 room 7 (ascent 29.1 %) is Quebrada instead of Cima', r7.eligible && r7.type !== 'cima' && r7.ascEntry >= 25, [r7.type, r7.ascEntry]);
+    const ea = plan(k0, { dioEndAny: true }).items.filter((q) => q.eligible && q.bridges.some((b) => { const kk = q.dst.indexOf(b.to), sT = q.src[kk]; return k0.S0.block[sT] || !(k0.S0.region[sT] >= 0); })).length + plan(c, { dioEndAny: true }).items.filter((q) => q.eligible && q.bridges.some((b) => { const kk = q.dst.indexOf(b.to), sT = q.src[kk]; return c.S0.block[sT] || !(c.S0.region[sT] >= 0); })).length;
+    ok('MUTATION end-of-bridge fix off (a bridge ends at the first footprint tile, walkable or not): the walkable-end check fails on at least one accepted Diorama of K = 1 / K = 0', ea > 0, ea);
+    const f1 = plan(c, { dioForce: { room: 66, type: 'arena' } }), f0 = plan(c, {}), same = f1.items.filter((q) => q.room !== 66).every((q) => q.type === get(f0, q.room).type && q.eligible === get(f0, q.room).eligible);
+    ok('P.dioForce forces the type of ONE room only: room 66 becomes Arena (natural: Quebrada), every other Diorama keeps its natural type and acceptance', get(f1, 66).type === 'arena' && get(f0, 66).type === 'quebrada' && same, [get(f1, 66).type, get(f0, 66).type]);
+    const fo = plan(c, { dioForce: { room: 999, type: 'arena' } }); ok('P.dioForce on a room that is not a Diorama of the chain changes nothing (the other rooms are natural)', fo.items.every((q) => q.type === get(f0, q.room).type && q.eligible === get(f0, q.room).eligible)); }
+
+  // ---- 4c. the prototype table (src/modes.js) against the planner: every prototype's host moves with the type and the bridges BUILT that the table says, and the manifest validation (src/fields.js)
+  { const PR = E.modes.PROTOS, scene = { 'real_balanced|1': 'balanced-K1', 'real_balanced|0': 'balanced-K0', 'real_chain5|1': 'chain5-K1' };
+    ok('the prototype ids of src/modes.js equal the ids that src/fields.js validates (viewer.dioProto), 8 of them', PR.length === 8 && PR.map((x) => x.id).join() === E.VIEWER_PROTOS.join(), PR.map((x) => x.id));
+    for (const pr of PR) { const c = scenes[scene[pr.example + '|' + pr.k]], dp = plan(c, pr.force ? { dioForce: { room: pr.room, type: pr.type } } : {}), it = dp.items.find((q) => q.room === pr.room);
+      ok(`prototype ${pr.id}: host ${pr.example} K = ${pr.k} room ${pr.room} is moved as ${pr.type} with ${pr.structure} bridge(s) built (${pr.force ? 'forced' : 'natural'})`, it && it.eligible && it.type === pr.type && it.structure === pr.structure, it && [it.eligible, it.type, it.structure, it.why]);
+      if (!pr.force) ok(`prototype ${pr.id}: the type is the NATURAL one of the host (no force needed)`, plan(c, {}).items.find((q) => q.room === pr.room).type === pr.type); }
+    ok('Isla has no natural host in the four fixed scenes (no accepted Diorama of any scene is an Isla)', Object.values(scenes).every((c) => plan(c, {}).items.every((q) => !q.eligible || q.type !== 'island')));
+    const pm = (v) => { try { E.parseManifest({ format: 'evodun-pack/0.3', width: 2, height: 2, viewer: v }); return 'ok'; } catch (e) { return e.message; } };
+    ok('manifest: viewer.dioChain "corr" and every prototype id are accepted', pm({ dioChain: 'corr' }) === 'ok' && PR.every((x) => pm({ dioChain: 'corr', dioProto: x.id }) === 'ok'), pm({ dioChain: 'corr' }));
+    ok('manifest: an unknown dioChain or an unknown dioProto is refused, and the message names the valid values', /corr/.test(pm({ dioChain: 'm3' })) && /mirador/.test(pm({ dioProto: 'cima' })), [pm({ dioChain: 'm3' }), pm({ dioProto: 'cima' })]);
+    ok('manifest: the viewer key dioProto is a known key (E.VIEWER_KEYS)', E.VIEWER_KEYS.includes('dioProto')); }
 
   // ---- 5. type rule A (pure function) and the Mirador / Quebrada split by the number of bridges BUILT
   { const ty = T.dioTypeCorr;
