@@ -13,7 +13,7 @@ const IDS = ['cima-leaf', 'cima-corridor', 'arena-leaf', 'arena-corridor', 'isla
     for (const t of TH) for (const cam of CAMS) {
       if (t !== 1) { await a.slider('terH', t); await a.idle(); await a.idle(); } // the host stays framed only at the first terH of the click: re-frame by choosing the prototype again
       if (t !== 1) { await page.selectOption('#dioProto', 'off'); await a.idle(); await page.selectOption('#dioProto', id); await a.idle(); await a.slider('terH', t); await a.idle(); await a.idle(); }
-      await a.preset(cam); await a.idle();
+      if (cam !== 'isoE') { await a.preset(cam); await a.idle(); } // the prototype already sets Cam 1 (isoE) and frames the host: a camera click would reset the framing
       const info = await ev(() => { const t = document.querySelector('#info').textContent, i = t.indexOf('Diorama in chain view'); const P = window.__evo.P; return { terH: P.terH, text: t.slice(i, i + 900) }; });
       const cv = await page.$('#stage canvas'); const f = `proto_${id}_terH${t}_${cam}.png`; await cv.screenshot({ path: path.join(OUT, f) }); res.push({ id, terH: t, cam, file: f, info: info.text });
       console.log(f);
