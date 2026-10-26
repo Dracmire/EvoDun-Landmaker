@@ -809,11 +809,11 @@
       if (around.length) { const m2 = med(around); for (const k of comp) fpH[k] = m2; info.tiles += comp.length; info.comps++; info.list.push(comp.length); } }
     return info; };
   /* the CLOSED footprint (corr, Cima and Mirador): the notches and slots of the outline (dilate 2, erode 2, never over a bridge or a landing, only over pocket tiles) become filler at the height of the nearest footprint tile, flush with it, so no one-tile column stands in a slot; the skirt starts outside the closed shape. */
-  T.dioClosed = function (S, it) {
+  T.dioClosed = function (S, it, R0) {
     const W = S.W, H = S.H, fpS = new Set(it.dst), pk = new Set(it.pocket), N8c = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]], skip = new Set(it.landing); for (const b of it.bridges || [it.bridge]) for (const t of [...b.inner, ...b.lat, b.from, b.to]) skip.add(t);
     const dil = (set) => { const o = new Set(set); for (const t of set) { const x = t % W, y = (t / W) | 0; for (const [dx, dy] of N8c) { const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < W && ny < H) o.add(ny * W + nx); } } return o; };
     const ero = (set) => { const o = new Set(); for (const t of set) { const x = t % W, y = (t / W) | 0; if (N8c.every(([dx, dy]) => { const nx = x + dx, ny = y + dy; return nx >= 0 && ny >= 0 && nx < W && ny < H && set.has(ny * W + nx); })) o.add(t); } return o; };
-    let c1 = fpS; const R = T.DIO_CLOSE; for (let q = 0; q < R; q++) c1 = dil(c1); for (let q = 0; q < R; q++) c1 = ero(c1);
+    let c1 = fpS; const R = R0 !== undefined ? R0 : T.DIO_CLOSE; for (let q = 0; q < R; q++) c1 = dil(c1); for (let q = 0; q < R; q++) c1 = ero(c1);
     const fill = new Set([...c1].filter((t) => !fpS.has(t) && pk.has(t) && !skip.has(t))); return fill; };
   T.DIO_CLOSE = 2;
   T.dioGround = function (S) { const g = S.levelMeta ? S.levelMeta.findIndex((m) => m && m.grey) : -1; return g >= 0 ? S.levelH[g] : S.levelH[0] - 0.002; }; // the flattened chain ground (the grey level is inserted just under the lowest level)
@@ -827,7 +827,7 @@
     const cx = it.dst.reduce((a, j) => a + (j % W), 0) / it.dst.length, cy = it.dst.reduce((a, j) => a + ((j / W) | 0), 0) / it.dst.length, ring = it.pdist, D = Math.max(1, ...ring), f = it.free ? it.free.dir : [1, 0];
     const N = it.pocket.length, heights = new Float64Array(N), roles = new Uint8Array(N), cliff = new Uint8Array(N);
     // corr, Cima and Mirador: the closed footprint (flush filler in the notches), the height of the nearest footprint tile of every pocket tile, the skirt distance from the closed shape
-    const fill = corr && (type === 'cima' || type === 'mirador') ? T.dioClosed(S, it) : null, nearH = new Map(), effD = new Map(); let De = 1;
+    const fill = corr && (type === 'cima' || type === 'mirador') ? T.dioClosed(S, it, P.dioClose) : null, nearH = new Map(), effD = new Map(); let De = 1;
     if (fill) { const N8c = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]], q = [], pk0 = new Set(it.pocket); it.dst.forEach((j2, k2) => { nearH.set(j2, fpH[k2]); q.push(j2); });
       for (let h2 = 0; h2 < q.length; h2++) { const t = q[h2], x = t % W, y = (t / W) | 0; for (const [dx, dy] of N8c) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= S.H) continue; const q2 = ny * W + nx; if (pk0.has(q2) && !nearH.has(q2)) { nearH.set(q2, nearH.get(t)); q.push(q2); } } }
       const q3 = []; for (const t of fill) { effD.set(t, 0); q3.push(t); } for (const j2 of it.dst) { effD.set(j2, 0); q3.push(j2); }
