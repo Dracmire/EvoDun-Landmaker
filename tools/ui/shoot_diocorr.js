@@ -27,8 +27,9 @@ const specs = JSON.parse(fs.readFileSync(specFile, 'utf8')), HOOKS = ['dioForce'
   for (const sp of specs) {
     const key = sp.id + '|' + sp.K; if (key !== last) { await page.click(`#examples button[data-id="${sp.id}"]`); await a.idle(); await a.tech('A'); if (sp.K === 0) { await ev(() => { window.__evo.inc.objectives.splice(0, window.__evo.inc.objectives.length - 1); }); await page.selectOption('#roomRule', 'route'); await a.idle(); await page.selectOption('#roomRule', 'v164'); await a.idle(); } last = key; }
     await a.slider('terH', sp.terH || 1);
+    await page.selectOption('#dioChain', 'off'); await a.idle(); // switching the option away from Corridor clears a forced type (the selector's rule), so the hooks are written AFTER it
     await ev(({ hooks, f }) => { const P = window.__evo.P; for (const k of hooks) P[k] = undefined; Object.assign(P, f); }, { hooks: HOOKS, f: sp.flags || {} });
-    await page.selectOption('#dioChain', 'off'); await a.idle(); await page.selectOption('#dioChain', 'corr'); await a.idle();
+    await page.selectOption('#dioChain', 'corr'); await a.idle();
     const moved = await ev(() => (window.__evo.P.dioPlan ? window.__evo.P.dioPlan.items.map((q) => [q.room, q.eligible ? q.step : 'no']) : null));
     for (const [cam, cn] of [['isoE', 'cam1'], ['oblique', 'cam3']]) { if (sp.cams && !sp.cams.includes(cn)) continue; await a.preset(cam); await a.idle(); const m = await frame(sp); if (!m) { console.log(JSON.stringify({ name: sp.name, cam: cn, error: 'room not moved', moved })); continue; } await a.idle();
       const cv = await page.$('#stage canvas'); await cv.screenshot({ path: path.join(OUT, `${sp.name}_${cn}.png`) }); console.log(JSON.stringify({ name: sp.name, cam: cn, room: sp.room, ...m })); }
