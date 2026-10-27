@@ -231,7 +231,8 @@
   };
 
   /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
-  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH', 'chainExtra', 'ascCut', 'ascGate', 'roomRule', 'cakeCut', 'dioChain']; // the optional `viewer` block of the manifest
+  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH', 'chainExtra', 'ascCut', 'ascGate', 'roomRule', 'cakeCut', 'dioChain', 'dioProto']; // the optional `viewer` block of the manifest
+  E.VIEWER_PROTOS = ['cima-leaf', 'cima-corridor', 'arena-leaf', 'arena-corridor', 'isla-leaf', 'isla-corridor', 'quebrada', 'mirador']; // the ids of the prototypes of src/modes.js (tools/test_diocorr.js checks that they agree)
   E.VIEWER_MODES = ['terrain', 'rooms', 'stage', 'curves', 'floors', 'macroform']; // the ids of src/modes.js (tools/test_modes.js checks that they agree)
   E.parseManifest = function (json) {
     if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
@@ -263,7 +264,8 @@
       if (v.dacView !== undefined && !['chain', 'whole'].includes(v.dacView)) throw new Error('Manifest: viewer.dacView must be "chain" or "whole".');
       if (v.anchorH !== undefined && !(typeof v.anchorH === 'number' && v.anchorH >= 0.25 && v.anchorH <= 2)) throw new Error('Manifest: viewer.anchorH must be a number from 0.25 to 2.');
       if (v.roomRule !== undefined && !['v164', 'route'].includes(v.roomRule)) throw new Error('Manifest: viewer.roomRule must be "v164" or "route".');
-      if (v.dioChain !== undefined && !['off', 'm1', 'm2'].includes(v.dioChain)) throw new Error('Manifest: viewer.dioChain must be "off", "m1" or "m2" (absent = off).');
+      if (v.dioChain !== undefined && !['off', 'm1', 'm2', 'corr'].includes(v.dioChain)) throw new Error('Manifest: viewer.dioChain must be "off", "m1", "m2" or "corr" (absent = off).');
+      if (v.dioProto !== undefined && !E.VIEWER_PROTOS.includes(v.dioProto)) throw new Error('Manifest: viewer.dioProto must be one of ' + E.VIEWER_PROTOS.join(', ') + ' (absent = none).');
       if (v.cakeCut !== undefined && !['off', 'quadrant', 'half'].includes(v.cakeCut)) throw new Error('Manifest: viewer.cakeCut must be "off", "quadrant" or "half".');
       if (v.ascCut !== undefined && !(typeof v.ascCut === 'number' && v.ascCut >= 0.15 && v.ascCut <= 3)) throw new Error('Manifest: viewer.ascCut must be a number from 0.15 to 3.');
       if (v.ascGate !== undefined && !(Number.isInteger(v.ascGate) && v.ascGate >= 0 && v.ascGate <= 5)) throw new Error('Manifest: viewer.ascGate must be an integer from 0 to 5.');

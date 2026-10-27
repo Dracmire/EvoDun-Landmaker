@@ -784,10 +784,10 @@
   }
 
   /* The Box pick render as an image (CSS pixels, one code per pixel: walls kind 2 by tile, caps kind 4 by tile): the visibility test of the art contract. */
-  E.pickBuffer = (S, P, view, w, h) => {
+  E.pickBuffer = (S, P, view, w, h, o) => { // `o` (optional): extra options of the pick render, e.g. { pickWalls: true } (the Ascension walls as occluders)
     const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
     const ctx = cv.getContext('2d', { willReadFrequently: true }); ctx.antialias = false;
-    drawScene(ctx, w, h, S, P, 'box', view, { pick: true });
+    drawScene(ctx, w, h, S, P, 'box', view, Object.assign({ pick: true }, o));
     return { data: ctx.getImageData(0, 0, w, h).data, w, h };
   };
 

@@ -52,7 +52,7 @@
         { id: 'images', label: 'Your images (PNG + roles)', images: true, rooms: true }
       ],
       camera: 'isoE', cameras: CAMS, tech: 'A', techs: ['box', 'A', 'B', 'C'], compare: false, compareDefault: false,
-      main: ['roomsPreset', 'dacAuto', 't-cake', 't-ascWalls', 'ascHeight', 't-pocket', 'pocketFraming', 'pocketHeight', 'dacShow', 'dacView', 'chainExtra', 'roomRule', 'cakeCut', 'dioChain', 'gateMarks', 'anchors', 'anchorH', 'roomChips', 'typeTint'],
+      main: ['roomsPreset', 'dacAuto', 't-cake', 't-ascWalls', 'ascHeight', 't-pocket', 'pocketFraming', 'pocketHeight', 'dacShow', 'dacView', 'chainExtra', 'roomRule', 'cakeCut', 'dioChain', 'dioProto', 'gateMarks', 'anchors', 'anchorH', 'roomChips', 'typeTint'],
       advanced: ['ascCut', 'ascGate', 'roomsMinCore', 'rRadius', 'roomsCross', 'roomsIsoLimit', 'cakeLayers', 'cakeStep', 'cakePer', 'cakeSeam', 'roomBorders', 'roomTint', 'nowalk', 'dioOutline'],
       slice: [], fixed: ['t-rooms'], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
@@ -98,6 +98,19 @@
       main: ['macroView'], advanced: [], slice: [], fixed: [], terrain: null,
       common: { shared: ['outlines'], overlays: true, incursion: false, diagnostics: true }
     }
+  ];
+  /* THE EIGHT PROTOTYPES of the corridor Dioramas (DAC v2 PR D, D32; selector "Diorama prototype" of mode 2, `viewer.dioProto`): one click loads the host scene of the example, places the stake and the objectives (K = 1 keeps the sub-objective, K = 0 only the final goal), sets Cam 1 at terH 1, switches the Diorama option to Corridor,
+     frames the host room and, where the type is not the natural one of the host, forces it (`P.dioForce`). `structure` = the bridges BUILT by the plan at the host (1 leaf, 2 corridor). Hosts (user's decision, Gate 2): Cima leaf = Balanced room 7 (natural); Cima corridor = Chain 5 K = 1 room 10 (natural); Isla / Arena leaf + Quebrada = Balanced K = 1 room 66 (Quebrada natural);
+     Isla / Arena corridor + Mirador = Balanced K = 0 room 20 (Mirador natural). Isla has no natural host in the four fixed scenes: it is always forced. The flat room-66 Cima exists only as a forced test hook (`P.dioForce`), never natural. */
+  const PROTOS = [
+    { id: 'cima-leaf', label: 'Cima · leaf (Balanced, room 7)', example: 'real_balanced', k: 1, room: 7, type: 'cima', force: false, structure: 1 },
+    { id: 'cima-corridor', label: 'Cima · corridor (Chain 5, room 10)', example: 'real_chain5', k: 1, room: 10, type: 'cima', force: false, structure: 2 },
+    { id: 'arena-leaf', label: 'Arena · leaf (Balanced, room 66)', example: 'real_balanced', k: 1, room: 66, type: 'arena', force: true, structure: 1 },
+    { id: 'arena-corridor', label: 'Arena · corridor (Balanced K0, room 20)', example: 'real_balanced', k: 0, room: 20, type: 'arena', force: true, structure: 2 },
+    { id: 'isla-leaf', label: 'Isla · leaf (Balanced, room 66)', example: 'real_balanced', k: 1, room: 66, type: 'island', force: true, structure: 1 },
+    { id: 'isla-corridor', label: 'Isla · corridor (Balanced K0, room 20)', example: 'real_balanced', k: 0, room: 20, type: 'island', force: true, structure: 2 },
+    { id: 'quebrada', label: 'Quebrada (Balanced, room 66)', example: 'real_balanced', k: 1, room: 66, type: 'quebrada', force: false, structure: 1 },
+    { id: 'mirador', label: 'Mirador (Balanced K0, room 20)', example: 'real_balanced', k: 0, room: 20, type: 'mirador', force: false, structure: 2 }
   ];
   const byId = (id) => MODES.find((m) => m.id === id) || null;
   const IDS = MODES.map((m) => m.id);
@@ -193,5 +206,5 @@
     L.push('## Common to every mode', '', `- View bar: ${list(COMMON.view)} (cameras and techniques filtered by the mode; Compare only where the mode has it).`, `- "Your images" example (modes with it): ${list(COMMON.images)}.`, `- Only without modes (\`EVO_NO_MODES\`): ${list(COMMON.legacy)}.`, '');
     return L.join('\n');
   }
-  E.modes = { MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };
+  E.modes = { PROTOS, MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };
 })(typeof window !== 'undefined' ? (window.EVO = window.EVO || {}) : (globalThis.EVO = globalThis.EVO || {}));

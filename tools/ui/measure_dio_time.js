@@ -10,9 +10,9 @@ const med = (a) => { const q = a.slice().sort((x, y) => x - y); return q[(q.leng
     const timed = async (sel) => { const t0 = Date.now(); await page.selectOption('#dioChain', sel); await a.idle(); return Date.now() - t0; };
     await ev(() => window.__evo.setMode('rooms')); await a.idle();
     const t0 = Date.now(); await page.click('#examples button[data-id="real_balanced"]'); await a.idle(); const cold = Date.now() - t0; await a.tech(tech);
-    const seq = ['off', 'm2', 'off', 'm2', 'off', 'm2', 'm1', 'off', 'm1'], got = {}; for (const m of seq) (got[m] = got[m] || []).push(await timed(m));
-    const lv = await ev(() => window.__evo.S().levelH.length); const r = res[tech] = res[tech] || { cold: [], off: [], m2: [], m1: [], levels: lv };
-    r.cold.push(cold); for (const m of ['off', 'm2', 'm1']) r[m].push(...got[m]); await a.browser.close();
+    /* DIO_CORR=1 adds the Corridor option (D32) to the alternation (the default protocol is the one of D31) */ const seq = process.env.DIO_CORR ? ['off', 'm2', 'off', 'm2', 'off', 'm2', 'corr', 'off', 'corr', 'off', 'corr', 'm1', 'off', 'm1'] : ['off', 'm2', 'off', 'm2', 'off', 'm2', 'm1', 'off', 'm1'], got = {}; for (const m of seq) (got[m] = got[m] || []).push(await timed(m));
+    const lv = await ev(() => window.__evo.S().levelH.length); const r = res[tech] = res[tech] || { cold: [], off: [], m2: [], m1: [], corr: [], levels: lv };
+    r.cold.push(cold); for (const m of ['off', 'm2', 'm1', 'corr']) r[m].push(...(got[m] || [])); await a.browser.close();
   }
-  for (const [tech, r] of Object.entries(res)) console.log(JSON.stringify({ tech, coldFirstDrawM2: { median: med(r.cold), all: r.cold }, warmOff: { median: med(r.off), min: Math.min(...r.off), max: Math.max(...r.off), n: r.off.length }, warmM2: { median: med(r.m2), min: Math.min(...r.m2), max: Math.max(...r.m2), n: r.m2.length }, warmM1: { median: med(r.m1), min: Math.min(...r.m1), max: Math.max(...r.m1), n: r.m1.length } }));
+  for (const [tech, r] of Object.entries(res)) console.log(JSON.stringify({ tech, coldFirstDrawM2: { median: med(r.cold), all: r.cold }, warmOff: { median: med(r.off), min: Math.min(...r.off), max: Math.max(...r.off), n: r.off.length }, warmM2: { median: med(r.m2), min: Math.min(...r.m2), max: Math.max(...r.m2), n: r.m2.length }, warmM1: { median: med(r.m1), min: Math.min(...r.m1), max: Math.max(...r.m1), n: r.m1.length }, ...(r.corr.length ? { warmCorr: { median: med(r.corr), min: Math.min(...r.corr), max: Math.max(...r.corr), n: r.corr.length } } : {}), levels: r.levels }));
 })().catch((e) => { console.error(e); process.exit(1); });
