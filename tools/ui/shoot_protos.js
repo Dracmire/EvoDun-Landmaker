@@ -14,8 +14,9 @@ const IDS = ['cima-leaf', 'cima-corridor', 'arena-leaf', 'arena-corridor', 'isla
       if (t !== 1) { await a.slider('terH', t); await a.idle(); await a.idle(); } // the host stays framed only at the first terH of the click: re-frame by choosing the prototype again
       if (t !== 1) { await page.selectOption('#dioProto', 'off'); await a.idle(); await page.selectOption('#dioProto', id); await a.idle(); await a.slider('terH', t); await a.idle(); await a.idle(); }
       if (cam !== 'isoE') { await a.preset(cam); await a.idle(); } // the prototype already sets Cam 1 (isoE) and frames the host: a camera click would reset the framing
-      const info = await ev(() => { const t = document.querySelector('#info').textContent, i = t.indexOf('Diorama in chain view'); const P = window.__evo.P; return { terH: P.terH, text: t.slice(i, i + 900) }; });
-      const cv = await page.$('#stage canvas'); const f = `proto_${id}_terH${t}_${cam}.png`; await cv.screenshot({ path: path.join(OUT, f) }); res.push({ id, terH: t, cam, file: f, info: info.text });
+      const info = await ev(() => { const e = window.__evo, P = e.P, S = e.S(), T = window.EVO.roomTypes, html = document.querySelector('#info').innerHTML, seg = html.split('<br>').slice(0, 2).join(' | ').replace(/<[^>]+>/g, ''), pr = window.EVO.modes.PROTOS.find((x) => x.id === e.st.dioProto), it = P.dioPlan && P.dioPlan.items.find((q) => q.room === pr.room && q.eligible);
+        let st = null; if (it) { const a = T.dioStumps(S, P, it, 0.4), b = T.dioStumps(S, P, it, 0.25), v = e.dioVis(it, { s04: a.stumps, s025: b.stumps }).extra; st = { n04: a.stumps.length, n025: b.stumps.length, vis04: v.s04, vis025: v.s025 }; } return { terH: P.terH, text: seg, stumps: st }; });
+      const cv = await page.$('#stage canvas'); const f = `proto_${id}_terH${t}_${cam}.png`; await cv.screenshot({ path: path.join(OUT, f) }); res.push({ id, terH: t, cam, file: f, info: info.text, stumps: info.stumps });
       console.log(f);
     }
   }

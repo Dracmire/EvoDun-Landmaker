@@ -104,12 +104,12 @@
     const p0 = E.makeCam(S, P, v, cw, ch).p((x0 + x1) / 2 + 0.5, (y0 + y1) / 2 + 0.5, S.levelH[S.fine[it.landing[0]]]); st.zoom = z; st.panX = cw / 2 - p0[0]; st.panY = ch / 2 - p0[1]; return true;
   }
   /* the visibility of the parts of a moved Diorama as COUNTS [visible, in view, total] (the Box pick render with the Ascension walls as occluders; only the tiles inside the view count) */
-  function dioVis(it) {
+  function dioVis(it, extra) { // `extra` (optional) = { name: [tiles] }: more tile sets counted the same way, returned in `.extra`
     const f0 = $('#stage').children[0], cv = f0 && f0.querySelector('canvas'); if (!cv || !S || !S.dioRole) return null;
     const w = cv.clientWidth, h = cv.clientHeight, W = S.W, n = S.n, v = view(), D = E.pickBuffer(S, P, v, w, h, { pickWalls: true }).data, cam = E.makeCam(S, P, v, w, h), seen = new Uint8Array(n);
     for (let q = 0; q < w * h; q++) { const code = (D[4 * q] << 16) | (D[4 * q + 1] << 8) | D[4 * q + 2], k = code >> 20, t = code & 0xfffff; if (D[4 * q + 3] === 255 && k >= 2 && k <= 4 && t < n) seen[t] = 1; }
     const cnt = (tl) => { let iv = 0, sv = 0; for (const t of tl) { const q = cam.p((t % W) + 0.5, ((t / W) | 0) + 0.5, S.levelH[S.fine[t]]); if (q[0] >= 0 && q[1] >= 0 && q[0] < w && q[1] < h) { iv++; if (seen[t]) sv++; } } return [sv, iv, tl.length]; };
-    const hi = it.prof && it.prof.hito; return { footprint: cnt(it.dst), landing: cnt(it.landing), bridges: it.bridges.map((b) => cnt([...b.inner, ...b.lat, b.from, b.to])), pocket: cnt(it.pocket), hito: hi ? cnt(hi.tiles) : null };
+    const hi = it.prof && it.prof.hito, ex = {}; for (const [k, tl] of Object.entries(extra || {})) ex[k] = cnt(tl); return { extra: ex, footprint: cnt(it.dst), landing: cnt(it.landing), bridges: it.bridges.map((b) => cnt([...b.inner, ...b.lat, b.from, b.to])), pocket: cnt(it.pocket), hito: hi ? cnt(hi.tiles) : null };
   }
   async function applyScenario(sc, mode) { // mode (optional, the modes layer): the example of a mode; without it this is the old scenario button, unchanged
     if (sc.src && !(await selectSource(sc.src))) return;
@@ -656,7 +656,7 @@
               const TT = E.roomTypes, ty0 = S.types, typeOf = (r) => (tp.map.has(r) ? tp.map.get(r).type : (ty0.rooms.get(r) || {}).type), goals = res.goalTiles && res.goalTiles.length ? res.goalTiles : [gl.stake, gl.goal];
               const dp = TT.dioPlan(S, P, { chainIds: P.chainIds, pieces: res.pieces, goals, typeOf }); P.dioPlan = dp;
               for (const r of dp.demoted) { const v = res.rooms.filter((x) => x === r).length; tp.map.set(r, { type: TT.ASCENSION, up: false }); if (P.chainInfo.counts.Dio >= v) { P.chainInfo.counts.Dio -= v; P.chainInfo.counts.Asc += v; } }
-              P.dioSummary = { mode: dp.mode, cap: dp.cap, total: dp.items.length, eligible: dp.eligible.length, why: dp.why, items: dp.items.map((q) => ({ room: q.room, eligible: q.eligible, perim: q.perim, shift: q.shift, bridge: q.bridgeLen, why: q.why, type: q.type, step: q.step, structure: q.structure, ring: q.ring, bridgeLens: q.bridgeLens, asc: q.ascEntry, flat: q.prof && q.prof.flat ? q.prof.flat.tiles : 0, kept: q.prof && q.prof.flat ? q.prof.flat.kept : 0, hito: q.prof && q.prof.hito ? q.prof.hito.tiles.length : 0 })) };
+              P.dioSummary = { mode: dp.mode, cap: dp.cap, total: dp.items.length, eligible: dp.eligible.length, why: dp.why, items: dp.items.map((q) => ({ room: q.room, eligible: q.eligible, perim: q.perim, shift: q.shift, bridge: q.bridgeLen, why: q.why, type: q.type, natural: q.natural, step: q.step, structure: q.structure, ring: q.ring, bridgeLens: q.bridgeLens, asc: q.ascEntry, flat: q.prof && q.prof.flat ? q.prof.flat.tiles : 0, kept: q.prof && q.prof.flat ? q.prof.flat.kept : 0, hito: q.prof && q.prof.hito ? q.prof.hito.tiles.length : 0 })) };
             }
             invalidate(true); return;
           }
@@ -817,14 +817,21 @@
     const cr = P.chainGoals && S.chain ? E.roomTypes.chainRoute(S, P) : null; if (!cr) return '';
     return cr.fail ? `; no route through the chain (${cr.why}): the shortest route is drawn` : `; the drawn route follows the chain: ${cr.path.length} tiles through ${cr.pieces} of ${cr.chainPieces} pieces, door to door`;
   }
+  /* the SHORT line of the host of the chosen prototype (D32), first line of the info: type (and the natural type where it is forced), structure (bridges BUILT), ring, shift, bridge lengths, ascent, flattened tiles, landmark, visible / in view / total tile counts */
+  function dioHostLine() {
+    const pr = st.dioProto !== 'off' ? E.modes.PROTOS.find((x) => x.id === st.dioProto) : null, d = P.dioSummary; if (!pr || !d || d.mode !== 'corr' || !S) return '';
+    const TYPE = { cima: 'Cima', island: 'Isla', arena: 'Arena', quebrada: 'Quebrada', mirador: 'Mirador' }, SH = { 1: 'leaf', 2: 'corridor' }, q = d.items.find((x) => x.room === pr.room && x.eligible), cnt = (c) => (c ? c.join('/') : '-');
+    if (!q) return `<b>Prototype ${pr.label}</b>: the host room ${pr.room} was NOT moved in this scene (see the list of rooms that stay Ascension below)<br>`;
+    const forced = P.dioForce && P.dioForce.room === q.room, it = P.dioPlan && P.dioPlan.items.find((x) => x.room === q.room && x.eligible), vs = it && dioVis(it);
+    return `<b>Prototype ${pr.label}</b> · room ${q.room}: <b>${TYPE[q.type] || q.type}</b>${forced ? ` (FORCED, natural: ${TYPE[q.natural] || q.natural}${q.type === 'island' ? '; Isla has no natural host in the four fixed scenes' : ''})` : ' (natural)'} · ${SH[q.structure] || 'crossing'}, ${q.structure} bridge${q.structure === 1 ? '' : 's'} built (${q.step}) · ring ${q.ring} · shift ${q.shift} · bridges ${q.bridgeLens.join(' / ')} · ascent ${q.asc} % · flattened ${q.flat} (summit kept ${q.kept})` + (q.hito ? ` · landmark ${q.hito} tiles` : '') + (vs ? `<br>tiles visible / in view / total: footprint ${cnt(vs.footprint)} · landing ${cnt(vs.landing)} · bridges ${vs.bridges.map(cnt).join(' ')} · pocket ${cnt(vs.pocket)}` + (vs.hito ? ` · landmark ${cnt(vs.hito)}` : '') : '') + '<br>';
+  }
   function dioText() { // D30: what the Diorama option did (the plan is made on the whole shape, the apply on the rebuilt one)
     const d = P.dioSummary, a = S.dioInfo; if (!d) return '';
     const el = d.items.filter((q) => q.eligible), no = d.items.filter((q) => !q.eligible);
-    if (d.mode === 'corr') { // D32: the corridor Dioramas: type, structure (bridges BUILT: 1 leaf, 2 corridor, 3 or more crossing), ring of the landing, shift, bridge lengths, ascent against the terrace of the piece the chain enters by, flattened tiles, summit kept, landmark tiles, visible / in view / total tile counts
-      const STRUCT = { 1: 'leaf', 2: 'corridor' }, TYPE = { cima: 'Cima', island: 'Isla', arena: 'Arena', quebrada: 'Quebrada', mirador: 'Mirador' }, pr = st.dioProto !== 'off' ? E.modes.PROTOS.find((x) => x.id === st.dioProto) : null, cnt = (c) => (c ? c.join('/') : '-');
-      const one = (q) => { let t = `room ${q.room}: ${TYPE[q.type] || q.type}${P.dioForce && P.dioForce.room === q.room ? ' (FORCED' + (q.type === 'island' ? ': Isla has no natural host in the four fixed scenes' : '') + ')' : ''}, ${STRUCT[q.structure] || 'crossing'} (${q.structure} bridge${q.structure === 1 ? '' : 's'} built, ${q.step}), landing ring ${q.ring}, shift ${q.shift}, bridges ${q.bridgeLens.join(' / ')}, ascent ${q.asc} % against the piece terrace, ${q.flat} tiles flattened (summit kept ${q.kept})` + (q.hito ? `, landmark ${q.hito} tiles` : '');
-        if (pr && pr.room === q.room) { const it = P.dioPlan && P.dioPlan.items.find((x) => x.room === q.room && x.eligible), vs = it && dioVis(it); if (vs) t += `; visible / in view / total tiles: footprint ${cnt(vs.footprint)}, landing ${cnt(vs.landing)}, bridges ${vs.bridges.map(cnt).join(' ')}, pocket ${cnt(vs.pocket)}` + (vs.hito ? `, landmark ${cnt(vs.hito)}` : ''); } return t; };
-      return `; Diorama in chain view CORRIDOR: ${el.length} of ${d.total} Dioramas moved (cap ${d.cap} tiles)` + (pr ? `; prototype ${pr.label}` : '') + (el.length ? ' (' + el.slice().sort((x, y) => (pr && pr.room === y.room) - (pr && pr.room === x.room)).map(one).join('; ') + ')' : '') + (no.length ? `; shown as Ascension: ${no.map((q) => `room ${q.room} (${q.why})`).join('; ')}` : '') + (a && el.length ? `; ${a.footprint} footprint / ${a.pocket} pocket / ${a.bridge} bridge / ${a.landing} landing tiles, ${a.levelsAdded} levels added` : '') + (pr && !el.some((q) => q.room === pr.room) ? `; the host room ${pr.room} of the prototype was NOT moved in this scene` : '');
+    if (d.mode === 'corr') { // D32: the corridor Dioramas. The host of a chosen prototype has its own SHORT line at the START of the info (`dioHostLine`); here: how many moved, the others in a few words, the rooms that stay Ascension
+      const TYPE = { cima: 'Cima', island: 'Isla', arena: 'Arena', quebrada: 'Quebrada', mirador: 'Mirador' }, SHORT = { 1: 'leaf', 2: 'corridor' }, pr = st.dioProto !== 'off' ? E.modes.PROTOS.find((x) => x.id === st.dioProto) : null;
+      const others = el.filter((q) => !(pr && pr.room === q.room)).map((q) => `${q.room} ${TYPE[q.type] || q.type} ${SHORT[q.structure] || 'crossing'}`);
+      return `; Diorama in chain view CORRIDOR: ${el.length} of ${d.total} Dioramas moved (cap ${d.cap} tiles)` + (others.length ? `; ${pr ? 'other ' : ''}moved (room, type, structure): ${others.join(', ')}` : '') + (no.length ? `; no structure fits, drawn as Ascension (the reason of each is in window.__evo.P.dioPlan.why): rooms ${no.map((q) => q.room).join(', ')}` : '') + (a && el.length ? `; ${a.footprint} footprint / ${a.pocket} pocket / ${a.bridge} bridge / ${a.landing} landing tiles, ${a.levelsAdded} levels added` : '') + (pr && !el.some((q) => q.room === pr.room) ? `; the host room ${pr.room} of the prototype was NOT moved in this scene` : '');
     }
     return `; Diorama in chain view ${d.mode.toUpperCase()}: ${el.length} of ${d.total} Dioramas moved (cap ${d.cap} tiles)` + (el.length ? ' (' + el.map((q) => `room ${q.room}: shift ${q.shift}, bridge ${q.bridge}`).join('; ') + ')' : '') + (no.length ? `; shown as Ascension: ${no.map((q) => `room ${q.room} (${q.why})`).join('; ')}` : '') + (a && el.length ? `; ${a.footprint} footprint / ${a.pocket} pocket / ${a.bridge} bridge / ${a.landing} landing tiles, ${a.levelsAdded} levels added` : '');
   }
@@ -857,7 +864,7 @@
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText() + macroText();
+    $('#info').innerHTML = (NO_MODES ? '' : dioHostLine()) + `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText() + macroText();
     E.controls.refresh(document, controlsCtx()); // requirements of every control, from the live state
     modeRefresh(); // the modes layer: what the current mode shows (after the requirements, so the greyed tooltips are already set)
   }
@@ -924,7 +931,7 @@
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
-    window.__evo = { fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});
