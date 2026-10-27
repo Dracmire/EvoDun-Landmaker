@@ -306,7 +306,7 @@
   }
   function chainSig() { // what the chain depends on: the stake and the final goal, N, the type rule, the rooms layer and the ramp parameters (the graph is read from the WHOLE shape: a rebuilt chain shape is flattened and cannot be read again)
     const gs = chainGoals(); if (!gs || !S.rooms) return '';
-    return [gs.stake, gs.subs.join('.'), gs.goal, P.chainExtra, P.chainNodes || '', st.roomRule, P.dioChain, P.dioChain === 'corr' ? P.terH + ':' + (P.dioForce ? P.dioForce.room + P.dioForce.type : '') : '', st.pack, P.roomsMinCore, P.rRadius, P.minPlateau, P.roomsCross, P.terraces, P.stairW, P.rampDepth, P.stairStyle].join('|');
+    return [gs.stake, gs.subs.join('.'), gs.goal, st.roomRule, st.pack, E.roomTypes.chainParamKey(P)].join('|') // PR E0: every parameter that changes the shape, the chain or the plan (src/roomtypes.js T.CHAIN_KEY);
   }
   const ROUTE_CAP = 30, ROUTE_KEEP = 10;
   const roomsView = () => !NO_MODES && st.modeId === 'rooms' && !!(S && S.roomMap && S.types);

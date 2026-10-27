@@ -792,6 +792,27 @@
        quebrada (High, free side >= T.DIO_FREE): a high rock wall behind the footprint (+1.5 over 2 rings), the DROP on the free side (the whole free half is the DECLARED cliff face: the fall within 3 rings, a notch of +-3 facing the free side, the chasm floor at the ground - 1.5).
      SLOPE CAP T.DIO_SLOPE (3.0 terH between 4-adjacent pocket tiles); the declared cliff face of the quebrada is exempt (its slope is reported apart); a profile that does not fit -> the Diorama is drawn as Ascension with the reason.
      Returns { type, dz, fpH (per dst tile), bridgeH (Map tile -> height), heights / roles (per pocket tile; role 2 deco, 4 water), cliff, Href, top, min, greyH, slopeMax, slopeNoCliff, pocketMax, pocketMin, ok, why }. */
+  /* THE KEY OF THE CHAIN AND OF THE DIORAMA PLAN (PR E0). The plan (T.dioPlan / T.dioPlanCorr) is computed ONCE per key from the WHOLE shape and applied to the next one, so the key must hold every parameter that changes that shape or the chain: before
+     PR E0 it held only the rooms layer, the ramp parameters and, for Corridor, terH, so a change of terH (or of any other height parameter) with M1 / M2 on kept the plan of the old heights: the pocket relief of the old terH on the new terraces
+     (stale plan: Balanced K0, terH 1 -> 3, pocket top 1 terH instead of 3). `T.CHAIN_KEY` = the inputs read by the shape (shape.js, rooms.js: heights, terraces, sub-terraces, quantization, gates, ramps, rooms layer, isolated limit), by the shapes that feed the plan
+     (Cake and anchors change S.fine) and by the chain and plan themselves; `T.CHAIN_NOT_KEY` = the fields that the same files read and that are NOT inputs of the plan, each with its reason; every other `dio*` field (the test hooks) is part of the key through
+     `chainParamKey`. tools/test_chainkey.js scans the sources and requires every `P.<name>` read of those files to be listed in one of the two (a new parameter forces a decision) and checks the plan hash against a session built directly at the final settings. */
+  T.CHAIN_KEY = ['rooms', 'terraces', 'subs', 'subH', 'terH', 'climb', 'tread', 'spread', 'spreadCentre', 'minPlateau', 'minSub', 'pre', 'passGap', 'gateThr', 'gateMin', 'stairW', 'stairStyle', 'rampDepth', 'rampKeep', 'rampShift', 'noUnmerge', 'roomsIsoLimit',
+    'rGentle', 'rSteep', 'rExp', 'rHTol', 'rRadius', 'rMinRoom', 'rHardEdge', 'rMinSizeEdge', 'roomsMinCore', 'roomsCross', 'rScanFirst', 'cake', 'cakeLayers', 'cakePer', 'cakeStep', 'cakeSeam', 'cakeMargin', 'cakeCorridor', 'cakeUpV1', 'cakeCoreOpen', 'cakeCut',
+    'anchors', 'anchorH', 'chainExtra', 'chainNodes', 'chainJustified', 'dioChain'];
+  T.CHAIN_NOT_KEY = {
+    chainIds: 'derived: the chain the plan is computed for (an output of roomChain)', chainSeqs: 'derived (output of roomChain)', chainGoals: 'derived (output of roomChain)', chainTypes: 'derived (output of chainTypes)', chainBlocked: 'derived (output of roomChain)',
+    dioPlan: 'derived: the plan itself', ascRouteFaces: 'derived: the faces crossed by the drawn routes, set after the shape is built (Ascension gates)',
+    ascWalls: 'Ascension walls are built from the shape after the plan (S.ascWalls); they change neither S.fine, the regions nor the walking graph', ascHeight: 'height of the Ascension walls (S.ascWalls only)', ascCut: 'low part of the Ascension walls (S.ascWalls only)', ascGate: 'gate width of the Ascension walls (S.ascWalls only)',
+    pocket: 'Pocket view of ONE chosen Diorama; the chain view is the whole map', pocketFraming: 'Pocket view only', pocketHeight: 'Pocket view only', pocketYaw: 'the camera axis of the Pocket view; it reaches the plan only through the Cake camera cut (cakeCut), see chainParamKey'
+  };
+  T.chainParamKey = function (P) {
+    const v = (x) => (x === undefined ? '' : x && typeof x === 'object' ? JSON.stringify(x) : String(x)), out = T.CHAIN_KEY.map((k) => v(P[k]));
+    out.push(P.cakeCut && P.cakeCut !== 'off' ? v(P.pocketYaw) : ''); // the camera cut of the Cake rings is composed along the camera axis
+    out.push(P.dioForce ? P.dioForce.room + P.dioForce.type : '');
+    for (const k of Object.keys(P).sort()) if (/^dio/.test(k) && k !== 'dioChain' && k !== 'dioForce' && k !== 'dioPlan' && k !== 'dioSummary' && P[k] !== undefined) out.push(k + '=' + v(P[k])); // the test hooks of the plan (dioMin, dioFlat ...)
+    return out.join('|');
+  };
   T.DIO_REF_YAW = 45; T.DIO_SLOPE = 3.0;
   /* FLATTEN of the MINOR terrace islands of a footprint (DAC v2 PR D, D32; `corr` only; VISUAL only: it changes the drawn heights `fpH` of the footprint, never `S.ter`, the walking graph, the regions or the route). A footprint keeps its internal relief, but a small high or low patch of it (a one-tile post, a thin tongue) is multiplied by terH and reads as a pillar or a stump.
      RULE: an ISLAND is a 4-connected component of equal SOURCE terrace that is not the dominant terrace of the footprint and (a) has fewer than 12 tiles, or (b) is thinner than 3 tiles (it has no tile whose four neighbours are all in it), or (c) its terrace holds less than 8 % of the footprint tiles. Its tiles take the MEDIAN height of the footprint tiles around it (8-neighbours, outside the island).
