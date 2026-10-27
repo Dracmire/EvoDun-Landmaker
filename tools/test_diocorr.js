@@ -9,7 +9,7 @@ const E = window.EVO, T = E.roomTypes; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) pass++; else { fail++; console.log('FAIL', name, extra === undefined ? '' : extra); } };
 const src = fs.readFileSync(path.join(__dirname, 'test_roomtypes.js'), 'utf8'), P0 = eval('(' + src.match(/const P0 = (\{[^;]*\});/)[1] + ')');
 const EX = { balanced: { P: { ...P0, terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 }, stake: [200, 62], subs: [[122, 201]], fin: [47, 75] }, chain5: { P: { ...P0, terraces: 5, roomsMinCore: 100, rRadius: 5, minPlateau: 120 }, stake: [200, 62], subs: [[87, 136]], fin: [25, 128] } };
-const setup = (pack, ex, k) => { const P = { ...ex.P, pocketYaw: 45 }, S0 = E.shape(pack, P, null), at = (xy) => (xy[1] - S0.oy) * S0.W + xy[0] - S0.ox, st = at(ex.stake), fin = at(ex.fin), subs = k ? ex.subs.map(at) : [];
+const setup = (pack, ex, k, th) => { const P = { ...ex.P, pocketYaw: 45, ...(th ? { terH: th } : {}) }, S0 = E.shape(pack, P, null), at = (xy) => (xy[1] - S0.oy) * S0.W + xy[0] - S0.ox, st = at(ex.stake), fin = at(ex.fin), subs = k ? ex.subs.map(at) : [];
   const ch = T.roomChain(S0, P, st, fin, undefined, subs), tp = T.chainTypes(S0, P, ch, 'v164', st, fin), goals = ch.goalTiles && ch.goalTiles.length ? ch.goalTiles : [st, fin], ids = [...new Set(ch.rooms)].sort((a, b) => a - b);
   const typeOf = (r) => (tp.map.has(r) ? tp.map.get(r).type : (S0.types.rooms.get(r) || {}).type); return { P, S0, ch, tp, goals, ids, typeOf }; };
 const PPof = (c, extra) => ({ ...c.P, dioChain: 'corr', chainIds: c.ids, chainSeqs: [c.ch.pieces], chainGoals: c.goals, chainBlocked: c.ch.blocked, chainExtra: 3, ...(extra || {}) });
@@ -40,6 +40,8 @@ const structureRoute = (it, path) => { const cs = it.bridges.map((b) => crosses(
 (async () => {
   const { mk } = await require('./real_pack.js').load(E), pack = mk(), scenes = {};
   for (const [nm, k] of [['balanced', 1], ['balanced', 0], ['chain5', 1], ['chain5', 0]]) scenes[`${nm}-K${k}`] = setup(pack, EX[nm], k);
+  // a scene at another terrace height is built from scratch: the levels of the shape scale with terH, so a plan made with another terH over a shape of terH 1 mixes two scales (the node tests of terH 3 / 6 used it before this fix)
+  const atMemo = new Map(), sceneAt = (key, th) => { const k = key + '@' + th; if (!atMemo.has(k)) { const [nm, kk] = key.split('-K'); atMemo.set(k, setup(pack, EX[nm], +kk, th)); } return atMemo.get(k); };
   const B = {}; for (const [key, c] of Object.entries(scenes)) B[key] = build(pack, c, {});
   // ---- 1. the ladder on the real scenes: what is accepted (step, ring, shift, bridge lengths), what falls to Ascension
   const EXPECT = { 'balanced-K1': { 53: ['corridor', 0, 21.5, [8.5, 21.2]], 66: ['lateral', 2, 13.9, [11.2]], 20: ['lateral', 2, 42.4, [12]], 22: ['lateral', 2, 24, [10]], 64: ['lateral', 2, 24, [19]], 7: ['leaf', 0, 11.3, [8.9]], 74: null, 35: null, 34: null },
@@ -148,7 +150,7 @@ const structureRoute = (it, path) => { const cs = it.bridges.map((b) => crosses(
 
   // ---- 7. step 3: the profiles of `corr` (Cima hugging flank, flatten with the summit exception, Mirador v7, snapping) on the real scenes; Isla / Arena / Quebrada keep their D31 offsets
   { const OFF = { island: 0, cima: 1.5, arena: -1.2, quebrada: 1.0, mirador: 1.0 }, med = (a) => { const q = a.slice().sort((x, y) => x - y); return q[(q.length - 1) >> 1]; };
-    const run = (key, room, extra, th) => { const c = scenes[key], dp = plan(c, { terH: th || 1, ...(extra || {}) }); return { it: dp.items.find((q) => q.room === room), c, S: c.S0 }; };
+    const run = (key, room, extra, th) => { const c = th && th !== 1 ? sceneAt(key, th) : scenes[key], dp = plan(c, { terH: th || 1, ...(extra || {}) }); return { it: dp.items.find((q) => q.room === room), c, S: c.S0 }; };
     const lvS = (S, t) => S.levelH[S.fine[t]];
     // the drawn offset of the footprint over the landing level, in terH, measured from the plan output (the median of fpH - level of the SOURCE tile, flattened tiles excluded)
     const offOf = (S, it, th) => { const d = []; it.dst.forEach((j, k) => { if (Math.abs(it.prof.fpH[k] - (lvS(S, it.src[k]) + it.prof.dz)) < 1e-9) d.push(it.prof.fpH[k] - lvS(S, it.src[k])); }); return (med(d) + med(it.src.map((t) => lvS(S, t))) - med(it.landing.map((t) => lvS(S, t)))) / th; };
@@ -164,7 +166,7 @@ const structureRoute = (it, path) => { const cs = it.bridges.map((b) => crosses(
     const inRange = (it, isl) => { const hs = isl.around.map((k) => it.prof.fpH[k] - 0), lo = Math.min(...hs), hi = Math.max(...hs); return isl.comp.every((k) => it.prof.fpH[k] >= lo - 1e-9 && it.prof.fpH[k] <= hi + 1e-9); };
     for (const th of [3, 6]) for (const [key, room, type] of [['balanced-K1', 66, 'cima'], ['balanced-K1', 66, 'quebrada']]) { const { it, S } = run(key, room, { dioForce: { room, type } }, th), isl = islandsOf(S, it);
       ok(`${key} room ${room} (${type}) at terH ${th}: the minor terrace islands (3 islands, 23 tiles) are flattened: every drawn height lies inside the range of the footprint tiles around it, so no post or stump stands on the top`, isl.length === 3 && isl.reduce((a, q) => a + q.comp.length, 0) === 23 && isl.every((q) => inRange(it, q)) && it.prof.flat.tiles === 23, [isl.length, it.prof.flat]); }
-    { const { it, S } = run('balanced-K1', 66, { dioFlat: false, dioForce: { room: 66, type: 'cima' } }, 6), isl = islandsOf(S, it); ok('MUTATION flatten off (the pillar fix reverted): the no-post check fails on K = 1 room 66 at terH 6 (an island is outside the range of the tiles around it)', isl.some((q) => !inRange(it, q))); }
+    { const { it, S } = run('balanced-K1', 66, { dioFlat: false, dioForce: { room: 66, type: 'cima' } }, 6); ok('MUTATION flatten off (the pillar fix reverted): the no-post check fails on K = 1 room 66 at terH 6: with the pillars in place the Cima is REJECTED by the pocket-top check ("the pocket reaches the footprint top"), or an island lies outside the range of the tiles around it', (!it.eligible && /reaches the footprint top/.test(it.why)) || (it.eligible && islandsOf(S, it).some((q) => !inRange(it, q))), it.eligible ? 'eligible' : it.why.slice(0, 200)); }
     // the SUMMIT exception: an ascending footprint (>= 25 %) never loses its top terrace; Chain 5 room 6 (44 %) keeps 4 tiles of its top terrace, room 7 (29.1 %) keeps 1, room 10 flattens nothing
     for (const [key, room, kept, flatT] of [['chain5-K1', 6, 4, 67], ['balanced-K1', 7, 1, 0], ['chain5-K1', 10, 0, 0]]) { const { it, S } = run(key, room, {}, 3), isl = islandsOf(S, it), top = isl.filter((q) => q.top);
       ok(`${key} room ${room} (Cima, ascent ${it.ascEntry} %): flatten takes ${flatT} tiles and the summit exception keeps ${kept} top-terrace island tile(s) at their own height`, it.prof.flat.tiles === flatT && it.prof.flat.kept === kept && top.reduce((a, q) => a + q.comp.length, 0) === kept && top.every((q) => q.comp.every((k) => Math.abs(it.prof.fpH[k] - (lvS(S, it.src[k]) + it.prof.dz)) < 1e-9)), [it.prof.flat]); }
