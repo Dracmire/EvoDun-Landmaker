@@ -62,7 +62,15 @@
      it is inside the contour of level L and outside the contour of level L+1: that is what makes it a step of its own.
      Coverage of a tile = share of its area (4x4 samples) that is well drawn. A tread is closed when the mean coverage of
      its tiles is below 0.5; a stair is lost when any tread is closed and degraded when only some tile is below 0.9. */
+  /* STAIR SURVIVAL ONCE PER SHAPE (PR E1c): the survival of the stair footprints depends only on the shape and on the contours of the technique, never on the camera, so it is computed once per (shape, technique, contour parameters) and read from the cache of the shape on
+     every later frame (before: every redraw, about 35 ms per frame of technique A, 19 ms of B, in the real map's chain view). The key holds every parameter that `loopsOf` reads: A `smooth`, B `radius`, C the curves key, and the anchor switch; `E.stairSurvivalKey` is read at call time
+     so that tools/test_survival_cache.js can mutate it. The result object is shared and read-only. */
+  E.stairSurvivalKey = (tech, P) => 'surv:' + tech + ':' + (tech === 'A' ? P.smooth : tech === 'B' ? P.radius : E.curves ? E.curves.key(P) : '') + (P.anchor === false ? 'n' : '');
   E.stairSurvival = function (S, P, tech) {
+    const key = E.stairSurvivalKey(tech, P); if (S.cache[key]) return S.cache[key];
+    return (S.cache[key] = E.stairSurvivalCompute(S, P, tech));
+  };
+  E.stairSurvivalCompute = function (S, P, tech) {
     const loopsOf = E.loopsOf(tech), memo = new Map();
     const get = (L) => { // loops of a level with their boxes, for a quick rejection in the point tests
       if (L > S.maxFine) return [];
