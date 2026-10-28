@@ -32,11 +32,11 @@ const GOOD = (m) => 100 * m.big40 / m.pixels <= 0.1; // GROSS sanity (a wrong of
     for (const th of THS) { if (ONLY && +ONLY[1] !== th) continue; await a.slider('terH', th); await a.idle();
       for (const mode of MODES) { if (ONLY && ONLY[2] !== mode) continue; await page.selectOption('#dioChain', mode); await a.idle(); const all = await ev(POSITIONS);
         for (const cam of CAMS) { await a.preset(cam); await a.idle();
-          for (const ppt of ZOOMS) { const pos = FULL ? all : [0, 1, 2, 3].map((j) => all[(combo * 4 + j) % all.length]); combo++; let bad = [], noBlit = 0, mid = { diff: 0, big: 0, maxDelta: 0, pixels: 1 };
+          for (const ppt of ZOOMS) { const pos = FULL ? all : [0, 1, 2, 3].map((j) => all[(combo * 4 + j) % all.length]); combo++; let bad = [], noBlit = 0, mid = { diff: 0, big: 0, big40: 0, maxDelta: 0, pixels: 1 };
             for (const [x, y] of pos) { await goto({ x, y, ppt }); const f0 = await ev(() => window.__evo.st.panFrames || 0); await drag(6); const f1 = await ev(() => window.__evo.st.panFrames || 0); if (f1 <= f0) noBlit++;
               const r = await ev(COMPARE); if (!r.same) bad.push(`(${x},${y}):${r.diff}px`);
               // (ii) one blit frame at this position vs a fresh render at the same pan
-              await goto({ x, y, ppt }); const p = await ev(() => ({ x: window.__evo.st.panX, y: window.__evo.st.panY })); const m = await ev(BLITCMP, { px: p.x + 3, py: p.y + 2, cmp: CMP_SRC }); checks++; if (m.big > mid.big || (m.big === mid.big && m.diff > mid.diff)) mid = m; }
+              await goto({ x, y, ppt }); const p = await ev(() => ({ x: window.__evo.st.panX, y: window.__evo.st.panY })); const m = await ev(BLITCMP, { px: p.x + 3, py: p.y + 2, cmp: CMP_SRC }); checks++; if (m.big > mid.big || (m.big === mid.big && m.diff > mid.diff)) mid = m; mid.pixels = m.pixels; }
             ok(`AT REST ${tech} terH ${th} ${mode} ${cam} ${ppt} px/tile: after a real drag (blit frames used) the canvas is byte-identical to a fresh render at ${pos.length} positions`, bad.length === 0 && noBlit === 0, (bad.join(' ') + (noBlit ? ` (${noBlit} drags used no blit frame)` : '')).trim());
             ok(`MID-GESTURE ${tech} terH ${th} ${mode} ${cam} ${ppt} px/tile: the blit frame differs from a fresh render in at most ${mid.diff} of ${mid.pixels} pixels (${(100 * mid.diff / mid.pixels).toFixed(3)} %), of them ${mid.big} by more than 2 levels, largest ${mid.maxDelta}`, GOOD(mid));
             worst.big = Math.max(worst.big, mid.big); worst.diff = Math.max(worst.diff, mid.diff); worst.pct = Math.max(worst.pct, 100 * mid.diff / mid.pixels); worst.maxDelta = Math.max(worst.maxDelta, mid.maxDelta); } } } }
