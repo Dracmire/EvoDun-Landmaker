@@ -2,7 +2,7 @@
 (function (E) {
   const $ = (s) => document.querySelector(s);
   const P = { ascCut: 0.15, ascGate: 0, ascRouteFaces: null, ascRouteKey: '', chainExtra: 3, cakeCut: 'off', dioChain: 'off', dioPlan: null, anchors: false, anchorH: 0.5, terraces: 5, subs: 3, terH: 1.0, spread: 1, spreadCentre: 'largest', curves: 'ordered', wallPass: 't3', wallExtrude: 0.25, wallStrata: 3, wallColumn: 1.2, t2Spacing: 0.9, t2Rows: 6, t2Group: 1.0, t2Jitter: 0.4, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2, tread: 2, stairW: 3, stairStyle: 1, rampDepth: 2, gateThr: 0.05, gateMin: 3, margin: 24, rooms: false, ascWalls: false, ascHeight: 1.5, pocket: false, pocketFraming: 'auto', pocketHeight: 2.5, backdrop: false, backdropGap: 0, backdropHeight: 2, roomsMinCore: 20, roomsCross: 10, roomsIsoLimit: 100, rRadius: 9, cake: false, cakeLayers: 3, cakeStep: 0.3, cakePer: 1, cakeSeam: 5 };
-  const O = { gateMarks: true, outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, dress: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
+  const O = { gateMarks: true, outlines: true, gradient: true, features: true, regions: false, veil: true, border: true, markers: true, rampLines: true, passes: false, roomBorders: true, dioOutline: false, roomTint: false, typeTint: false, contract: false, dress: false, panCache: false, nowalk: true, edgeWarn: true, zones: false, edges: false, masks: false };
   /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
      persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
   const PRESETS = [
@@ -23,7 +23,7 @@
     ['Rooms', [['roomsMinCore', 'Min core size, tiles', 5, 250, 1], ['rRadius', 'Room radius, tiles', 3, 30, 1], ['anchorH', 'Anchor height, terraces (non-walkable raised)', 0.25, 2, 0.05], ['chainExtra', 'Chain: extra rooms per leg (N)', 0, 8, 1], ['roomsCross', 'Gate crossing cost, tiles', 0, 40, 1], ['roomsIsoLimit', 'Isolated limit, tiles', 20, 1000, 1], ['cakeLayers', 'Cake · rings (layers)', 1, 10, 1], ['cakeStep', 'Cake · ring step (x terrace height)', 0.1, 0.6, 0.05], ['cakePer', 'Cake · tiles per ring', 1, 3, 1], ['cakeSeam', 'Cake · seam window (bowl), tiles', 2, 12, 1], ['pocketHeight', 'Pocket height (decoration relief x)', 1, 4, 0.1], ['ascHeight', 'Ascension wall height (absolute)', 0.5, 3, 0.1], ['ascCut', 'Wall cut height (camera-facing walls)', 0.15, 3, 0.05], ['ascGate', 'Gate width, tiles (0 = every transition open)', 0, 5, 1]]],
     ['Slice', [['margin', 'Scenery margin (tiles)', 0, 128, 1]]]
   ];
-  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['gateMarks', 'Gate markers (chain view)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI'], ['contract', 'Art contract (Stage placeholders: body, wrapper, footprint, props)'], ['dress', 'Wall dressing (strata, lip, foot, base rocks; Box, A, B, C)']];
+  const TOGGLES = [['outlines', 'Outlines'], ['gradient', 'Cliff gradient'], ['features', 'Water / snake / cave'], ['markers', 'Landmarks'], ['rampLines', 'Ramp cross lines'], ['regions', 'Walk regions'], ['passes', 'Stair marks'], ['roomBorders', 'Room borders (rooms on)'], ['dioOutline', 'Diorama footprint outline (rooms on)'], ['gateMarks', 'Gate markers (chain view)'], ['typeTint', 'Room type tint (Cake orange / Diorama green / Ascension blue)'], ['roomTint', 'Room tint (rooms on)'], ['nowalk', 'Not walkable tone (rooms on)'], ['edgeWarn', 'Edge-problem outline (rooms on)'], ['veil', 'Veil outside the slice'], ['border', 'Slice border line'], ['zones', 'Zones (from roles)'], ['edges', 'Edge map (from roles)'], ['masks', 'Path / vegetation / POI'], ['contract', 'Art contract (Stage placeholders: body, wrapper, footprint, props)'], ['panCache', 'Pan with a cached bitmap (smoother dragging; the frame is redrawn when you stop)'], ['dress', 'Wall dressing (strata, lip, foot, base rocks; Box, A, B, C)']];
   const WALL_KEYS = new Set(['wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter']);
   const TECH = [['box', 'Box'], ['A', 'A · Contour'], ['B', 'B · Distance'], ['C', 'C · Curves']], ALL_TECH = TECH.map((t) => t[0]);
 
@@ -149,7 +149,7 @@
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
   const MODE2_DEF = { dioChain: 'm2', ascGate: 3, ascCut: 0.5 }, LEGACY_DEF = { dioChain: 'off', ascGate: 0, ascCut: 0.15 }; // D31: the defaults of mode 2 (announced) and the values of every other mode / the legacy panel / a manifest that does not name them
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; b.dacView = st.dacView; if (P.chainExtra !== 3) b.chainExtra = P.chainExtra; if (st.roomRule !== 'v164') b.roomRule = st.roomRule; if (P.cakeCut !== 'off') b.cakeCut = P.cakeCut; b.dioChain = P.dioChain; if (st.dioProto !== 'off') b.dioProto = st.dioProto; b.ascCut = P.ascCut; b.ascGate = P.ascGate; /* D31: written ALWAYS in mode 2 (explicit values): an absent key in a loaded manifest means the OLD values (Off / 0.15 / 0), not the new mode-2 defaults */ if (P.anchors) b.anchors = true; if (P.anchorH !== 0.5) b.anchorH = P.anchorH; } if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; b.dacView = st.dacView; if (P.chainExtra !== 3) b.chainExtra = P.chainExtra; if (st.roomRule !== 'v164') b.roomRule = st.roomRule; if (P.cakeCut !== 'off') b.cakeCut = P.cakeCut; b.dioChain = P.dioChain; if (st.dioProto !== 'off') b.dioProto = st.dioProto; b.ascCut = P.ascCut; b.ascGate = P.ascGate; /* D31: written ALWAYS in mode 2 (explicit values): an absent key in a loaded manifest means the OLD values (Off / 0.15 / 0), not the new mode-2 defaults */ if (P.anchors) b.anchors = true; if (P.anchorH !== 0.5) b.anchorH = P.anchorH; } if (O.panCache) b.panCache = true; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
@@ -162,6 +162,7 @@
     if (!NO_MODES && (w.mode || st.modeId) === 'rooms' && st.dacAuto && st.dacShow !== 'all') dacIsolate(st.dacShow); // the Display toggles are not in the manifest: a saved single-type view must load isolated (a Diorama view needs its outline); only while the rule is on (with it off the selector has no effect); absent or All touches nothing
     syncRoomsPreset();
     st.preset = PRESETS.some((x) => x.id === w.camera) ? w.camera : 'oblique'; st.yawOff = st.pitchOff = 0; // absent = the default camera
+    O.panCache = w.panCache === true; const tpc = $('#t-panCache'); if (tpc) tpc.checked = O.panCache; // absent = off
     P.curves = E.curves.PRESETS[w.curves] ? w.curves : 'ordered'; const cs = $('#curvesPreset'); if (cs) cs.value = P.curves; // absent = Ordered
     P.wallPass = ['t3', 't2', 'off'].includes(w.wallPass) ? w.wallPass : E.wallc.DEF.wallPass; const wsel = $('#wallPass'); if (wsel) wsel.value = P.wallPass; for (const k of WALL_KEYS) setParam(k, w[k] !== undefined ? w[k] : E.wallc.DEF[k]); // absent = the defaults
   }
@@ -268,12 +269,13 @@
     $('#stage').addEventListener('pointermove', (e) => {
       if (!drag) return;
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-      if (drag.shift) { st.panX = drag.px + dx; st.panY = drag.py + dy; }
+      if (drag.shift) { st.panX = drag.px + dx; st.panY = drag.py + dy; if (O.panCache && st.panCand) { schedulePan(); return; } } // PR E2: a pan frame is the cached layer translated by the pointer delta
       else { st.yawOff = Math.max(-20, Math.min(20, drag.yo + dx * 0.15)); st.pitchOff = Math.max(-15, Math.min(15, drag.po - dy * 0.15)); }
       invalidate(false);
     });
     $('#stage').addEventListener('pointerup', (e) => {
       const moved = drag ? Math.hypot(e.clientX - drag.x, e.clientY - drag.y) : 99, was = drag; drag = null;
+      if (st.panRaf || st.panIdle) panRest(); // the gesture is over: the frame at rest is the normal full render
       if (st.dragging) { st.dragging = false; if (E.hasFloors(packs[st.pack].pack) && st.floors === 'cut') invalidate(false); } // the cutaway plane follows the yaw: recomputed on release, not on every move
       if (inc.mode && was && !was.shift && e.button === 0 && moved < 4) clickMap(e);
       else if (!inc.mode && P.pocket && P.rooms && was && !was.shift && e.button === 0 && moved < 4) clickRoom(e);
@@ -603,7 +605,28 @@
     a.download = 'pack.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
-  function invalidate(reshape) {
+  /* PAN WITH A CACHED BITMAP (PR E2, `O.panCache`, off by default; E.renderLayer / E.blitPan in src/render.js). During a shift-drag the terrain layer (rendered once, larger than the viewport by PAN_MARGIN of it on every side) is translated by the integer pointer delta; the background and the overlays
+     are drawn per frame. The layer is valid only for the state it was rendered in: the epoch (bumped by every `invalidate` except the pan's own redraw), the shape object, the technique, the camera angle, the zoom and the panel size; anything else makes the next frame render a new layer centred on the pointer. When the margin is
+     exhausted the layer is rendered again centred on the current pan (one hitch). After PAN_IDLE ms without a move, and on pointer up, the frame is redrawn as today (the normal full render, never the blit). `E.panNoInvalidate` (a test) skips every validity check: the MUTATION of tools/ui/test_pan_ui.js. */
+  const PAN_MARGIN = 0.5, PAN_IDLE = 120;
+  function panLayer() {
+    const f = $('#stage').children[0], cv = f.querySelector('canvas'), w = cv.clientWidth, h = cv.clientHeight, dpr = window.devicePixelRatio || 1, key = [st.epoch, st.panTech, st.preset, st.yawOff, st.pitchOff, st.zoom, st.fitSc, st.persH, w, h, dpr].join('|'), Lr = st.layer;
+    const dx = Lr ? st.panX - Lr.panX : 0, dy = Lr ? st.panY - Lr.panY : 0, covers = Lr && Math.abs(dx) <= Lr.mx && Math.abs(dy) <= Lr.my;
+    if (Lr && covers && (E.panNoInvalidate || (Lr.key === key && Lr.S === S))) return Lr;
+    const mx = Math.round(w * PAN_MARGIN), my = Math.round(h * PAN_MARGIN), lcv = Lr ? Lr.cv : document.createElement('canvas'), t0 = performance.now();
+    E.renderLayer(lcv, w + 2 * mx, h + 2 * my, S, P, st.panTech, view(), O); // the same pan as the viewport: the layer's pixel (x + mx, y + my) is the viewport's pixel (x, y)
+    return (st.layer = { cv: lcv, mx, my, panX: st.panX, panY: st.panY, key, S, ms: performance.now() - t0, bytes: (w + 2 * mx) * (h + 2 * my) * dpr * dpr * 4 });
+  }
+  function panFrame() {
+    st.panRaf = 0; if (!S || !st.panCand) return; const f = $('#stage').children[0], cv = f.querySelector('canvas'), Lr = panLayer(); // (a new layer is rendered here when the old one is not valid or does not cover the viewport)
+    E.blitPan(cv, Lr, S, P, st.panTech, view(), O, st.panX - Lr.panX, st.panY - Lr.panY); st.panFrames = (st.panFrames || 0) + 1;
+    clearTimeout(st.panIdle); st.panIdle = setTimeout(panRest, PAN_IDLE);
+  }
+  function schedulePan() { if (!st.panRaf) st.panRaf = requestAnimationFrame(panFrame); }
+  function panRest() { if (st.panRaf) { cancelAnimationFrame(st.panRaf); st.panRaf = 0; } clearTimeout(st.panIdle); st.panIdle = 0; invalidate(false, true); } // the frame at rest: the normal render at the final position; the layer stays valid for the next drag
+
+  function invalidate(reshape, keep) { // keep: the redraw of a pan (the cached terrain layer stays valid); every other caller invalidates the layer (PR E2)
+    if (!keep && !E.panNoInvalidate) st.epoch = (st.epoch || 0) + 1;
     if (reshape) { S = null; $('#busy').hidden = false; } // painted before the (possibly slow) recompute starts
     st.t0 = performance.now(); st.cold = !!reshape; drawToken++; // a pending panel (B computing) of an older state is dropped
     if (!raf) raf = requestAnimationFrame(() => setTimeout(draw, 0));
@@ -685,6 +708,8 @@
     const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = volView ? E.volume.fitScale(raw, view(), f0.clientWidth, f0.clientHeight) : E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
     if (st.dioFocus && !volView && focusDio(st.dioFocus)) st.dioFocus = null; // a prototype frames its host once the plan exists (before the view is read below)
     const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
+    if (!O.panCache) st.layer = null; // the option is off: release the layer
+    st.panCand = !FLS && !volView && techs.length === 1 && !O.contract && v.kind !== 'persp'; st.panTech = techs[0]; // PR E2: one panel, an orthographic / oblique camera, no art contract (it reads the viewport): a drag may be a translation of the cached terrain layer
     const lateKey = (t) => (t === 'B' ? 'Bready:' + P.radius + ':' + P.anchor : 'Cready:' + E.curves.key(P)), late = techs.filter((t) => (t === 'B' || t === 'C') && (!S.cache[lateKey(t)] || (FLS && FLS.dirty))), needB = late.length > 0; // B and C: the first draw is the slow one, painted after the other panels
     const paint = (t, i) => {
       const f = stage.children[i], cv = f.querySelector('canvas'), pend = f.querySelector('.pending');
@@ -931,7 +956,7 @@
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
-    window.__evo = { fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { panFrameTest: (px, py) => { st.panX = px; st.panY = py; panFrame(); return st.layer; }, panLayerInfo: () => st.layer ? { ms: st.layer.ms, bytes: st.layer.bytes, mx: st.layer.mx, my: st.layer.my, panX: st.layer.panX, panY: st.layer.panY } : null, panRest, fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

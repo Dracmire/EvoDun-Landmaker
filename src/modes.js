@@ -9,7 +9,7 @@
   /* the built-in sources an example may name (the ids of the source selector; 'image' = the user's images) */
   const SOURCES = ['snake_surface', 'snake', 'shrine_pier', 'shrine_pier_x4', 'noise', 'real_map', 'snake_floors', 'snake_macroform', 'image'];
   const TERRAIN_MAIN = ['terraces', 'subs', 'terH', 'spread', 'stairW', 'stairStyle', 'rampDepth', 'smooth', 'radius'];
-  const SHARED = ['outlines', 'gradient', 'rampLines', 'dress'], OVERLAYS = ['features', 'markers', 'zones', 'edges', 'masks', 'veil', 'border'], DIAGNOSTICS = ['regions', 'passes', 'edgeWarn'];
+  const SHARED = ['outlines', 'gradient', 'rampLines', 'dress', 'panCache'], OVERLAYS = ['features', 'markers', 'zones', 'edges', 'masks', 'veil', 'border'], DIAGNOSTICS = ['regions', 'passes', 'edgeWarn'];
   /* controls that are not tied to a mode */
   const COMMON = {
     view: ['cams', 'tech', 'mode', 'reset'],               // the view bar: cameras and techniques are filtered by the mode, Compare only where the mode has it

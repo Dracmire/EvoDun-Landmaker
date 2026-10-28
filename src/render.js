@@ -791,14 +791,17 @@
     if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
     else renderLevels(ctx, cam, S, P, o, st, E.loopsOf(tech), tech);
     if (!PICK) {
-      if (o.passes) drawPassMarks(ctx, cam, S, P);
-      if (o.markers) drawMarkers(ctx, cam, S, P);
-      if (o.incursion) drawIncursion(ctx, cam, S, o.incursion);
+      if (!o.noOverlay) drawOverlays(ctx, cam, S, P, tech, view, o, w, h); // o.noOverlay: the terrain layer of the pan cache (the overlays are drawn per frame, E.renderOverlays)
       if (o.dress) S.dressInfo = Object.assign(S.dressInfo || {}, { [tech]: st.dress }); // wall dressing counts per technique
-      if (o.contract && E.contract) S.contractInfo = Object.assign(S.contractInfo || {}, { [tech]: E.contract.draw(ctx, cam, S, P, tech, view, o, w, h) }); // art contract placeholders (switch off = nothing here)
     }
     st.ms = performance.now() - t0; DBG = false; PICK = false;
     return { st, cam };
+  }
+  function drawOverlays(ctx, cam, S, P, tech, view, o, w, h) { // stair marks, landmarks, the route / stake / objectives, the art contract: drawn after the terrain, in this order (the order of the former inline code)
+    if (o.passes) drawPassMarks(ctx, cam, S, P);
+    if (o.markers) drawMarkers(ctx, cam, S, P);
+    if (o.incursion) drawIncursion(ctx, cam, S, o.incursion);
+    if (o.contract && E.contract) S.contractInfo = Object.assign(S.contractInfo || {}, { [tech]: E.contract.draw(ctx, cam, S, P, tech, view, o, w, h) }); // art contract placeholders (switch off = nothing here)
   }
 
   /* The Box pick render as an image (CSS pixels, one code per pixel: walls kind 2 by tile, caps kind 4 by tile): the visibility test of the art contract. */
@@ -809,14 +812,23 @@
     return { data: ctx.getImageData(0, 0, w, h).data, w, h };
   };
 
+  const BG = (ctx, w, h) => { const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424'); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); }; // the background of the panel: a vertical gradient over the VIEWPORT (never part of a cached layer)
+  const sizeCv = (cv, w, h) => { const dpr = window.devicePixelRatio || 1; if (cv.width !== (w * dpr | 0) || cv.height !== (h * dpr | 0)) { cv.width = w * dpr; cv.height = h * dpr; } const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); return ctx; };
   E.render = function (cv, S, P, tech, view, o) {
-    const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
-    if (cv.width !== (w * dpr | 0) || cv.height !== (h * dpr | 0)) { cv.width = w * dpr; cv.height = h * dpr; }
-    const ctx = cv.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424');
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+    const w = cv.clientWidth, h = cv.clientHeight, ctx = sizeCv(cv, w, h);
+    BG(ctx, w, h);
     return drawScene(ctx, w, h, S, P, tech, view, o).st;
+  };
+
+  /* PAN WITH A CACHED BITMAP (PR E2; display option `O.panCache`, off by default; src/ui.js `panFrame`). The TERRAIN of the panel (the caps, walls, ramps, dressing: everything but the background gradient and the overlays) is rendered once into a layer larger than the viewport
+     (`E.renderLayer`, margin on every side, transparent); while the pointer drags, a frame is that layer translated by the INTEGER pointer delta over a fresh background plus the overlays drawn live (`E.blitPan`); nothing viewport-dependent is in the layer (the background gradient and the
+     overlays are drawn per frame; the layer is rendered with the same pan as the viewport, so a canvas of width w + 2 mx has the same screen origin shifted by mx). At rest the frame is the normal full render (`E.render`), not the blit. */
+  E.renderLayer = function (cv, w, h, S, P, tech, view, o) { const ctx = sizeCv(cv, w, h); ctx.clearRect(0, 0, w, h); return drawScene(ctx, w, h, S, P, tech, view, Object.assign({}, o, { noBg: true, noOverlay: true })).st; };
+  E.renderOverlays = function (ctx, S, P, tech, view, o, w, h) { const cam = makeCam(S, P, view, w, h); ctx.lineJoin = 'round'; ctx.lineCap = 'round'; drawOverlays(ctx, cam, S, P, tech, view, o, w, h); };
+  E.blitPan = function (cv, layer, S, P, tech, view, o, dx, dy) { // dx, dy: how far the world moved on screen since the layer was rendered (CSS px, rounded to the pixel grid here)
+    const w = cv.clientWidth, h = cv.clientHeight, ctx = sizeCv(cv, w, h), dpr = window.devicePixelRatio || 1;
+    BG(ctx, w, h); ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(layer.cv, Math.round((dx - layer.mx) * dpr), Math.round((dy - layer.my) * dpr)); ctx.restore();
+    E.renderOverlays(ctx, S, P, tech, view, o, w, h);
   };
 
   /* The layers of the floors views (src/floors.js), bottom to top: [{ S, dz, ghost }]. Each layer is drawn by the normal pipeline of the technique on its own shape, raised by dz (exploded stack); a ghost layer is drawn

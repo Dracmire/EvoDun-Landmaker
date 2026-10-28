@@ -151,6 +151,7 @@
     e('outlines', '#t-outlines', 'Shared passes', ALL, [], 'Dark outlines on caps and walls.'),
     e('gradient', '#t-gradient', 'Shared passes', ALL, [], 'Shading gradient on cliffs.'),
     e('rampLines', '#t-rampLines', 'Shared passes', ALL, ['stairs', 'ramp'], 'Cross lines on ramps: a steep ramp reads as a flight of steps.'),
+    e('panCache', '#t-panCache', 'Shared passes', ALL, [], 'Pan with a cached bitmap: while you drag (shift-drag or right-drag) the terrain is moved as a picture instead of being drawn again; the frame is redrawn when you stop (about 0.1 s later). One panel, orthographic and oblique cameras only, no art contract. Off by default.'),
     e('dress', '#t-dress', 'Shared passes', ALL, [], 'Wall dressing: strata, lip, foot and base rocks on cliffs of 0.5 terrace or more. The same pass in all techniques; not the same as Wall pass (C only).'),
     // ---- Overlays
     e('features', '#t-features', 'Overlays', ALL, ['packMasks'], 'Water, waterfall and cave masks of the pack.'),
