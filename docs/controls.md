@@ -141,6 +141,7 @@ Techniques: Box, A, B, C = the panels the control changes; a badge [A] / [B] / [
 | gradient | all | - | Shading gradient on cliffs. |
 | rampLines | all | set Stair / ramp width above 0 · set Style to 1 (ramp) | Cross lines on ramps: a steep ramp reads as a flight of steps. |
 | panCache | all | - | Pan with a cached bitmap: while you drag (shift-drag or right-drag) the terrain is moved as a picture instead of being drawn again; the frame is redrawn when you stop (about 0.1 s later). One panel, orthographic and oblique cameras only, no art contract. Off by default. |
+| sliced | all | - | Time-sliced frame: the exact frame (the same picture, byte for byte) is drawn in the background a few milliseconds at a time, so the page never blocks; while it is pending you see the last picture moved by the camera, with the route and markers live, and a calculating message; any move cancels it and a new one starts about 0.1 s after the last input. One panel, orthographic and oblique cameras only, no art contract (Compare, Floors, Macroform, Cam 6 and the first draw of B / C keep the normal frame). Wins over "Pan with a cached bitmap" when both are on. Off by default. |
 | dress | all | - | Wall dressing: strata, lip, foot and base rocks on cliffs of 0.5 terrace or more. The same pass in all techniques; not the same as Wall pass (C only). |
 
 ## Overlays

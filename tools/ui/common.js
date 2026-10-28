@@ -13,7 +13,7 @@ exports.mapFile = (dir, name) => path.join(CACHE, dir, name + '.png');
 exports.open = async (opts = {}) => {
   const bin = process.env.CHROMIUM || (fs.existsSync(DEFAULT_BIN) ? DEFAULT_BIN : undefined);
   const browser = await chromium.launch({ executablePath: bin, args: ['--no-sandbox'] });
-  const page = await browser.newPage({ viewport: { width: opts.w || 1500, height: opts.h || 900 } });
+  const page = await browser.newPage({ viewport: { width: opts.w || 1500, height: opts.h || 900 }, deviceScaleFactor: opts.dpr || 1 }); // opts.dpr: devicePixelRatio (PR F1': the sliced frame is tested at 1, 1.25 and 2)
   const errs = [];
   page.on('pageerror', (e) => errs.push('pageerror: ' + e.message));
   page.on('console', (m) => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
@@ -25,7 +25,7 @@ exports.open = async (opts = {}) => {
   await page.waitForFunction(() => window.__evo);
   const api = {
     browser, page, errs,
-    idle: () => page.waitForFunction(() => document.querySelector('#busy').hidden, null, { timeout: 180000 }).then(() => page.waitForTimeout(350)),
+    idle: () => page.waitForFunction(() => document.querySelector('#busy').hidden && !(window.__evo && window.__evo.slStats && window.__evo.slStats().pending), null, { timeout: 180000 }).then(() => page.waitForTimeout(350)),
     load: async (dir, names = ['height', 'zones', 'edges']) => { await page.setInputFiles('#file', names.map((n) => exports.mapFile(dir, n))); await page.waitForTimeout(1200); await api.idle(); },
     zone: async (id) => { await page.click(`#zoneChips .chip[data-id="${id}"]`); await api.idle(); },
     tech: async (t) => { await page.click(`#techs button[data-id=${t}]`); await api.idle(); },

@@ -552,7 +552,11 @@
   }
 
   /* ---- Box reference: one column per tile ---- */
-  function renderBox(ctx, cam, S, P, o, st) {
+  /* TIME-SLICED FRAMES (PR F1', `E.sliceStart`; display option `O.sliced`, off by default). renderBox / renderLevels / drawSceneG are GENERATORS: the same canvas operations in the same order as the monolithic frame, with a yield point inside every long loop. `SL` is the slicer of the slice that is running now
+     (null in a monolithic frame: `drawScene` drives the generator to the end and a yield point is then only `SL &&`, nothing else); `SL.tick()` counts the iterations and reads the clock every SL.N of them (never per edge), true = the budget of the slice is spent, the loop yields. A frame can be abandoned at any yield point: nothing but the private canvas and
+     the generator's locals holds its state (the module flags DBG / PICK are set at the start of every slice). */
+  let SL = null;
+  function* renderBox(ctx, cam, S, P, o, st) {
     const { W, H } = S, order = [];
     for (let i = 0; i < S.n; i++) if (!S.void || !S.void[i]) order.push(i); // void is not terrain
     const key = (i) => cam.ry(i % W + 0.5, ((i / W) | 0) + 0.5);
@@ -563,7 +567,9 @@
     const face = (i2, b) => { const bp = []; borderFaces(bp, S, cam, i2, 1 << b, S.levelH[S.fine[i2]]); strokeBorder(ctx, bp); };
     const ASC = ascByKey(S, (w) => (rank[w.i] > rank[w.j] ? w.i : w.j)); // each wall after the later (painter order) of the two tiles of its face
 
+    let bn = 0;
     for (const i of order) {
+      if (SL && SL.tick()) yield; st.progress = bn++ / order.length;
       const x = i % W, y = (i / W) | 0, f = S.fine[i], hh = S.levelH[f], si = ST && ST.get(i), c = si ? stairColor(si) : levelColor(S, f, P);
       const isRamp = !!(si && si.rec);
       if (PICK) PKC = pcode(2, i);
@@ -635,12 +641,15 @@
   }
 
   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
-  function renderLevels(ctx, cam, S, P, o, st, loopsOf, tech) {
+  function* renderLevels(ctx, cam, S, P, o, st, loopsOf, tech) {
     const DRESS = !!o.dress && !PICK, lvl = S.fineMask || S.fine, th = P.terH; // wall dressing: the same pass as in Box
     const WP = tech === 'C' && !PICK && E.wallc ? E.wallc.get(S, P) : null; // the wall pass of technique C (null: off); the pick render never sees it
     const ST = hasStairs(S) ? stairTiles(S) : null, PIECES = ST ? rampPieces(S, cam) : new Map(); // ramp pieces by level band
-    const CULL = cullOf(cam, o), ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) { if (CULL) { const [bx0, bx1, by0, by1] = E.roomTypes.ascBox(w); if (boxOff(CULL, bx0, by0, bx1, by1, w.hb, w.hb + Math.max(S.ascWalls.height, S.ascWalls.lowH === undefined ? E.roomTypes.ASC_LOW : S.ascWalls.lowH))) { st.culled.asc++; continue; } } for (const bd of ascBands(S, w, ascLow(o, cam, w))) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
-    for (let L = 0; L <= S.maxFine; L++) {
+    const CULL = cullOf(cam, o), ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) { if (SL && SL.tick()) yield; if (CULL) { const [bx0, bx1, by0, by1] = E.roomTypes.ascBox(w); if (boxOff(CULL, bx0, by0, bx1, by1, w.hb, w.hb + Math.max(S.ascWalls.height, S.ascWalls.lowH === undefined ? E.roomTypes.ASC_LOW : S.ascWalls.lowH))) { st.culled.asc++; continue; } } for (const bd of ascBands(S, w, ascLow(o, cam, w))) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
+    const LORD = o.testOrder; // (a test: the levels in another order: the MUTATION 'reorder two slices' of tools/ui/test_sliced_ui.js)
+    for (let Li = 0; Li <= S.maxFine; Li++) {
+      const L = LORD ? LORD[Li] : Li;
+      if (SL && SL.tick()) yield; st.progress = Li / (S.maxFine + 1);
       const loops = loopsOf(S, L, P), pcs = PIECES.get(L) || [];
       if (!loops.length && !pcs.length) continue;
       if (!loops.length) { pcs.sort((p, q) => p.d - q.d); for (const pc of pcs) rampPiece(ctx, cam, S, o, pc.tile, pc.rec, ST, st, pc.sa, pc.sb); continue; }
@@ -670,6 +679,7 @@
         const n = loop.length; st.verts += n;
         const vn = DRESS ? loop.map((p, k) => { const pr = loop[(k + n - 1) % n], nx = loop[(k + 1) % n], vx = (p[1] - pr[1]) + (nx[1] - p[1]), vy = -(p[0] - pr[0]) - (nx[0] - p[0]), l = Math.hypot(vx, vy); return l > 1e-9 ? [vx / l, vy / l] : [nx[1] - p[1], -(nx[0] - p[0])]; }) : null; // outward normals (dy, -dx) summed over the two segments of a vertex (longer segment weighs more)
         for (let k = 0; k < n; k++) {
+          if (SL && SL.tick()) yield;
           const a = loop[k], b = loop[(k + 1) % n], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
           if (len < 1e-6) continue;
           if (CULL && edgeOff(CULL, a[0], a[1], b[0], b[1], hb, ht)) { st.culled.walls++; continue; } // PR E1a: the wall of this edge is off screen (it keeps nothing the canvas can show)
@@ -699,6 +709,7 @@
       }
       segs.sort((p, q) => p.d - q.d);
       for (const s of segs) {
+        if (SL && SL.tick()) yield;
         if (s.pf) { // a block face: the cliff colour of the upper level, with the dressing when it is on (no foot: the base is not on the lower cap)
           const f = s.pf, veiled = !!(o.veil && S.slice && !S.pocket && !inSlice(S, (f.ax + f.bx) / 2, (f.ay + f.by) / 2));
           if (DBG) { const q = [cam.p(f.ax, f.ay, f.zhi), cam.p(f.bx, f.by, f.zhi), cam.p(f.bx, f.by, f.zlo), cam.p(f.ax, f.ay, f.zlo)]; ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(q[k][0], q[k][1]); ctx.closePath(); ctx.fillStyle = '#ff0000'; ctx.fill(); continue; } // test mode: pure red, like the ramps
@@ -737,17 +748,19 @@
       }
       const path = new Path2D();
       for (const loop of loops) {
-        loop.forEach((p, k) => { const q = cam.p(p[0], p[1], ht); k ? path.lineTo(q[0], q[1]) : path.moveTo(q[0], q[1]); });
+        for (let k = 0; k < loop.length; k++) { if (SL && SL.tick()) yield; const p = loop[k], q = cam.p(p[0], p[1], ht); k ? path.lineTo(q[0], q[1]) : path.moveTo(q[0], q[1]); }
         path.closePath();
       }
       st.polys += loops.length;
       ctx.fillStyle = PICK ? pcode(1, L) : rgb(c); ctx.fill(path, 'evenodd');
       ctx.save(); ctx.clip(path, 'evenodd');
       if (ST && !PICK) for (const i of S.byLevel[L]) {
+        if (SL && SL.tick()) yield;
         const si = ST.get(i); if (!si) continue;
         tileQuad(ctx, cam, i % S.W, (i / S.W) | 0, ht); ctx.fillStyle = rgb(stairColor(si)); ctx.fill();
       }
       for (const i of S.byLevel[L]) {
+        if (SL && SL.tick()) yield;
         const ov = tileOverlay(S, P, o, i);
         if (!ov.length) continue;
         const x = i % S.W, y = (i / S.W) | 0;
@@ -759,22 +772,23 @@
         ctx.strokeStyle = terraceLevel ? OUT : 'rgba(24,20,34,0.42)'; ctx.lineWidth = terraceLevel ? 1.7 : 0.7; ctx.lineJoin = 'round';
         ctx.stroke(path);
       }
-      if (ST) for (const i of S.byLevel[L]) drawStairEdges(ctx, cam, S, i, ht);
+      if (ST) for (const i of S.byLevel[L]) { if (SL && SL.tick()) yield; drawStairEdges(ctx, cam, S, i, ht); }
       if (o.border && S.border) {
         const bp = [];
-        for (const i of S.byLevel[L]) if (S.border[i]) borderFaces(bp, S, cam, i, S.border[i], ht);
+        for (const i of S.byLevel[L]) { if (SL && SL.tick()) yield; if (S.border[i]) borderFaces(bp, S, cam, i, S.border[i], ht); }
         if (bp.length) strokeBorder(ctx, bp);
       }
       const RB = o.dioOutline && S.roomBitsDio ? S.roomBitsDio : S.roomBits;
       if (((o.roomBorders || o.edgeWarn || o.dioOutline) && RB || (o.gateMarks && (S.gateBits || S.blockBits))) && !PICK) { // a face belongs to the higher of its two tiles (the lower index when they are level)
         const bp = [], dd = [[0, -1], [1, 0], [0, 1], [-1, 0]];
         for (const i of S.byLevel[L]) {
+          if (SL && SL.tick()) yield;
           const rbm = faceBits(S, o, i, RB); if (!rbm) continue; const x = i % S.W, y = (i / S.W) | 0;
           for (let b = 0; b < 4; b++) { if (!(rbm >> b & 1)) continue; const j = (y + dd[b][1]) * S.W + x + dd[b][0]; if (S.fine[j] > L || (S.fine[j] === L && j < i)) continue; roomFaces(bp, S, cam, i, b, ht, o); }
         }
         if (bp.length) strokeRoomFaces(ctx, bp);
       }
-      const aw = ASCL.get(L); if (aw) { aw.sort((p, q) => ascWallDepth(cam, p.w) - ascWallDepth(cam, q.w) || p.bd.lo - q.bd.lo); for (const q of aw) drawAscWall(ctx, cam, S, o, q.w, st, q.bd); }
+      const aw = ASCL.get(L); if (aw) { aw.sort((p, q) => ascWallDepth(cam, p.w) - ascWallDepth(cam, q.w) || p.bd.lo - q.bd.lo); for (const q of aw) { if (SL && SL.tick()) yield; drawAscWall(ctx, cam, S, o, q.w, st, q.bd); } }
     }
   }
 
@@ -782,20 +796,27 @@
     E.makeCam = makeCam;
   E.fitScale = (S, P, view, w, h) => makeCam(S, P, Object.assign({}, view, { fitSc: 0, zoom: 1, panX: 0, panY: 0 }), w, h).fit; // px per tile at zoom 1 for a panel of w x h // exposed for the UI tests (screen position of a tile)
 
-  function drawScene(ctx, w, h, S, P, tech, view, o) {
+  function* drawSceneG(ctx, w, h, S, P, tech, view, o) {
     DBG = !!o.debug; PICK = !!o.pick;
-    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, culled: { walls: 0, asc: 0 }, dress: { walls: 0, strata: 0, lips: 0, foot: 0, rocks: 0, items: o.dressItems ? [] : null } }; // o.dressItems (tests): the anchor points of the foot strips and the rocks, to compare them with a reference
+    const t0 = performance.now(), st = o.stIn || {}; Object.assign(st, { walls: 0, polys: 0, verts: 0, culled: { walls: 0, asc: 0 }, dress: { walls: 0, strata: 0, lips: 0, foot: 0, rocks: 0, items: o.dressItems ? [] : null } }); // o.dressItems (tests): the anchor points of the foot strips and the rocks, to compare them with a reference
     const cam = makeCam(S, P, view, w, h);
     if (o.zShift) { const p0 = cam.p, zs = o.zShift; cam.p = (x, y, hh) => p0(x, y, hh + zs); } // a layer of the floors views (exploded stack): every height raised, the camera is the same
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
-    else renderLevels(ctx, cam, S, P, o, st, E.loopsOf(tech), tech);
+    if (tech === 'box') yield* renderBox(ctx, cam, S, P, o, st);
+    else yield* renderLevels(ctx, cam, S, P, o, st, E.loopsOf(tech), tech);
+    if (o.onTerrain) o.onTerrain(ctx, cam); // a sliced frame: the terrain is done (the placeholder of the next frames is taken here, before the overlays)
+    if (SL && SL.tick(true)) yield;
     if (!PICK) {
       if (!o.noOverlay) drawOverlays(ctx, cam, S, P, tech, view, o, w, h); // o.noOverlay: the terrain layer of the pan cache (the overlays are drawn per frame, E.renderOverlays)
       if (o.dress) S.dressInfo = Object.assign(S.dressInfo || {}, { [tech]: st.dress }); // wall dressing counts per technique
     }
     st.ms = performance.now() - t0; DBG = false; PICK = false;
     return { st, cam };
+  }
+  /* the monolithic frame: the generator driven to its end with no slicer (a yield point is then `SL &&`, nothing else) */
+  function drawScene(ctx, w, h, S, P, tech, view, o) {
+    const g = drawSceneG(ctx, w, h, S, P, tech, view, o), prev = SL; SL = null;
+    try { for (;;) { const r = g.next(); if (r.done) return r.value; } } finally { SL = prev; }
   }
   function drawOverlays(ctx, cam, S, P, tech, view, o, w, h) { // stair marks, landmarks, the route / stake / objectives, the art contract: drawn after the terrain, in this order (the order of the former inline code)
     if (o.passes) drawPassMarks(ctx, cam, S, P);
@@ -814,6 +835,44 @@
 
   const BG = (ctx, w, h) => { const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424'); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); }; // the background of the panel: a vertical gradient over the VIEWPORT (never part of a cached layer)
   const sizeCv = (cv, w, h) => { const dpr = window.devicePixelRatio || 1; if (cv.width !== (w * dpr | 0) || cv.height !== (h * dpr | 0)) { cv.width = w * dpr; cv.height = h * dpr; } const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); return ctx; };
+  /* TIME-SLICED EXACT FRAME (PR F1', display option `O.sliced`; src/ui.js `slicedStart`). `E.sliceStart` starts a frame that is drawn into the PRIVATE canvas `opts.off` (the same device size and the same operations as `E.render`: background, terrain, overlays) a few milliseconds at a time:
+     `task.step(ms)` runs one slice (true = the frame is complete), `task.finish()` swaps the complete frame into the panel canvas with a 1:1 drawImage (opaque pixels: the panel is then byte-identical to the monolithic frame), `task.cancel()` drops it (nothing else holds its state). `opts.onTerrain(ctx, cam)`: called when the terrain is
+     done and before the overlays (the UI keeps a copy as the placeholder of the next frames). `task.st.progress` = the share of levels (tiles in Box) done. Cam 6 and the layered floors views do not use it (the UI decides). */
+  const SLICER = { N: 64, c: 0, t0: 0, budget: 10, tick(force) { if (!force && ++this.c < this.N) return false; this.c = 0; return performance.now() - this.t0 >= this.budget; } };
+  E.sliceStart = function (cv, S, P, tech, view, o, opts) {
+    opts = opts || {}; const off = opts.off, w = cv.clientWidth, h = cv.clientHeight, dpr = window.devicePixelRatio || 1;
+    const T = E.sliceTest || {}; if (!T.noReset) { off.width = w * dpr | 0; off.height = h * dpr | 0; } // a new frame starts from a clean context (a cancelled one may have left a save() or a clip); E.sliceTest (tests): the MUTATIONS of tools/ui/test_sliced_ui.js
+    const ctx = off.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); BG(ctx, w, h);
+    const st = {}, o2 = Object.assign({}, o, { stIn: st, onTerrain: opts.onTerrain }), gen = drawSceneG(ctx, w, h, S, P, tech, view, o2);
+    const task = { cv, off, w, h, dpr, done: false, cancelled: false, slices: 0, jsMs: 0, flushMs: 0, rho: 1, maxStep: 0, st, result: null, t0: performance.now(),
+      step(budget) {
+        if (task.done || task.cancelled) return task.done;
+        if ((E.sliceTest || {}).skipAt === task.slices) { off.width = off.width; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); } // MUTATION: the pixels of the earlier slices are lost
+        const target = budget || 10; SLICER.budget = Math.max(2, target / (1 + task.rho)); SLICER.t0 = performance.now(); SLICER.c = 0; const prev = SL; SL = SLICER; DBG = false; PICK = false; let r;
+        try { r = gen.next(); } finally { SL = prev; DBG = false; PICK = false; }
+        const t1 = performance.now(); // the canvas records its operations and rasterises them later, at moments of its own choosing: a 1x1 read at the end of every slice makes the slice pay for its own raster, so the slice lengths are real (the JS part is budgeted by the measured raster / JS ratio)
+        if (!opts.noFlush) ctx.getImageData(0, 0, 1, 1);
+        const t2 = performance.now(), dt = t2 - SLICER.t0; task.rho = 0.7 * task.rho + 0.3 * ((t2 - t1) / Math.max(t1 - SLICER.t0, 0.5)); task.slices++; task.jsMs += t1 - SLICER.t0; task.flushMs += t2 - t1; if (dt > task.maxStep) task.maxStep = dt;
+        if (r.done) { task.done = true; task.result = r.value; task.st.ms = performance.now() - task.t0; }
+        return task.done;
+      },
+      finish() { if ((E.sliceTest || {}).partialSwap) return this.partial(); const c2 = cv.getContext('2d'); sizeCv(cv, w, h); c2.setTransform(1, 0, 0, 1, 0, 0); c2.drawImage(off, 0, 0); c2.setTransform(dpr, 0, 0, dpr, 0, 0); },
+      partial() { const c2 = cv.getContext('2d'); sizeCv(cv, w, h); c2.setTransform(1, 0, 0, 1, 0, 0); c2.drawImage(off, 0, 0); c2.setTransform(dpr, 0, 0, dpr, 0, 0); }, // the progress of a first frame (no placeholder yet)
+      cancel() { task.cancelled = true; }
+    };
+    return task;
+  };
+  /* the placeholder while a sliced frame is pending: the background, the last complete terrain (`snap`, taken at the view `snapView`) moved by the camera delta (a translation and, on a wheel step, a scale about the point the zoom keeps fixed: screen' = s * screen + (w/2 + pan') - s * (w/2 + pan)),
+     and the overlays drawn live at the CURRENT camera */
+  E.slPlaceholder = function (cv, snap, snapView, S, P, tech, view, o) {
+    const w = cv.clientWidth, h = cv.clientHeight, dpr = window.devicePixelRatio || 1, ctx = sizeCv(cv, w, h); BG(ctx, w, h);
+    if (snap && snapView) {
+      const s = view.zoom / snapView.zoom, tx = w / 2 + view.panX - s * (w / 2 + snapView.panX), ty = h / 2 + view.panY - s * (h / 2 + snapView.panY);
+      ctx.save(); ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * tx, dpr * ty); ctx.drawImage(snap, 0, 0, w, h); ctx.restore();
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); E.renderOverlays(ctx, S, P, tech, view, o, w, h);
+  };
+
   E.render = function (cv, S, P, tech, view, o) {
     const w = cv.clientWidth, h = cv.clientHeight, ctx = sizeCv(cv, w, h);
     BG(ctx, w, h);
