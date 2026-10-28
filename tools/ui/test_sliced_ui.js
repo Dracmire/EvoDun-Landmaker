@@ -89,7 +89,7 @@ const PANEL_VS_MONO = (hs) => { const E = window.EVO, e = window.__evo, S = e.S(
     await page.check('#t-outlines'); await settle(page, a); r = await ev(PANEL_VS_MONO, HASH_SRC);
     ok('after the mutation the real code is exact again (the outline switch back on)', r.same);
     // a render input missing from the placeholder key: after a change of an option the old terrain must NOT be shown
-    const toggled = async (ign) => { await page.click('#reset'); await settle(page, a); await ev((i) => { window.EVO.sliceTest = i ? { keyIgnoreO: true } : null; }, ign); await page.uncheck('#t-gradient'); await page.waitForTimeout(60); const r2 = await ev(PANEL_VS_BG, HASH_SRC); await ev(() => { window.EVO.sliceTest = null; }); await settle(page, a); await page.check('#t-gradient'); await settle(page, a); return r2.sameAsBg; };
+    const toggled = async (ign) => { await ev((i) => { window.EVO.sliceTest = i ? { keyIgnoreO: true } : null; }, ign); await page.click('#reset'); await settle(page, a); await page.uncheck('#t-gradient'); await page.waitForTimeout(60); const r2 = await ev(PANEL_VS_BG, HASH_SRC); await ev(() => { window.EVO.sliceTest = null; }); await settle(page, a); await page.check('#t-gradient'); await settle(page, a); return r2.sameAsBg; };
     const bgOk = await toggled(false), bgBad = await toggled(true);
     ok(`PLACEHOLDER KEY: after a change of a display option the old terrain is NOT shown while the new frame is pending (the panel is the background and the live overlays: ${bgOk})`, bgOk);
     ok(`MUTATION a render input (the display options) missing from the placeholder key: the old terrain IS shown (the panel is not the background alone: ${!bgBad}): the PLACEHOLDER KEY check FAILS`, !bgBad);
