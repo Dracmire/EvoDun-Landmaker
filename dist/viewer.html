@@ -6652,7 +6652,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
 
   function draw() {
-    raf = 0;
+    raf = 0; st.draws = (st.draws || 0) + 1; // (a counter for the tests: the frame at rest of a pan is drawn asynchronously)
     if (S && S.pocket && S.pocketYaw !== baseYaw()) S = null; // a pocket is composed for ONE camera axis: any way of changing the camera (preset, scenario, mode, manifest, Stage preset) that changes the base yaw rebuilds it (a world shape does not depend on the yaw)
     P.pocketYaw = baseYaw();
     const raw = packs[st.pack].pack, fl = E.hasFloors(raw); // a floors package (crystallizer 5): the shape is the one of the selected layer (the exterior in the stack and cutaway views)
