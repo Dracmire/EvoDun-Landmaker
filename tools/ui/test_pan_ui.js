@@ -17,7 +17,7 @@ const COMPARE = () => { const E = window.EVO, e = window.__evo, S = e.S(), cv = 
   E.render(off, S, e.P, e.st.panTech || e.st.tech, e.view(), e.O); const a = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data, b = off.getContext('2d').getImageData(0, 0, off.width, off.height).data; off.remove(); let diff = 0, big = 0, mx = 0;
   for (let i = 0; i < a.length; i += 4) { let d = 0; for (let c = 0; c < 4; c++) d = Math.max(d, Math.abs(a[i + c] - b[i + c])); if (d) { diff++; if (d > 2) big++; if (d > mx) mx = d; } } return { same: diff === 0, diff, big, maxDelta: mx, pixels: cv.width * cv.height }; };
 // one blit frame at the pan (px, py) and, IN THE SAME TASK (no draw can run in between), its comparison with a fresh render
-const BLITCMP = ({ px, py }) => { window.__evo.panFrameTest(px, py); return COMPARE(); };
+const CMP_SRC = COMPARE.toString(), BLITCMP = ({ px, py, cmp }) => { window.__evo.panFrameTest(px, py); return eval('(' + cmp + ')')(); }; // (a function of this script is not visible in the page: its source is passed)
 const GOOD = (m) => 100 * m.big / m.pixels <= 0.1 && m.maxDelta <= 40;
 (async () => {
   let fails = 0, combo = 0, checks = 0; const worst = { diff: 0, pct: 0, maxDelta: 0, big: 0 }; const ok = (name, c, extra) => { console.log((c ? 'PASS ' : 'FAIL ') + name + (extra ? '  ' + extra : '')); if (!c) fails++; };
@@ -34,7 +34,7 @@ const GOOD = (m) => 100 * m.big / m.pixels <= 0.1 && m.maxDelta <= 40;
             for (const [x, y] of pos) { await goto({ x, y, ppt }); const f0 = await ev(() => window.__evo.st.panFrames || 0); await drag(6); const f1 = await ev(() => window.__evo.st.panFrames || 0); if (f1 <= f0) noBlit++;
               const r = await ev(COMPARE); if (!r.same) bad.push(`(${x},${y}):${r.diff}px`);
               // (ii) one blit frame at this position vs a fresh render at the same pan
-              await goto({ x, y, ppt }); const p = await ev(() => ({ x: window.__evo.st.panX, y: window.__evo.st.panY })); const m = await ev(BLITCMP, { px: p.x + 3, py: p.y + 2 }); checks++; if (m.big > mid.big || (m.big === mid.big && m.diff > mid.diff)) mid = m; }
+              await goto({ x, y, ppt }); const p = await ev(() => ({ x: window.__evo.st.panX, y: window.__evo.st.panY })); const m = await ev(BLITCMP, { px: p.x + 3, py: p.y + 2, cmp: CMP_SRC }); checks++; if (m.big > mid.big || (m.big === mid.big && m.diff > mid.diff)) mid = m; }
             ok(`AT REST ${tech} terH ${th} ${mode} ${cam} ${ppt} px/tile: after a real drag (blit frames used) the canvas is byte-identical to a fresh render at ${pos.length} positions`, bad.length === 0 && noBlit === 0, (bad.join(' ') + (noBlit ? ` (${noBlit} drags used no blit frame)` : '')).trim());
             ok(`MID-GESTURE ${tech} terH ${th} ${mode} ${cam} ${ppt} px/tile: the blit frame differs from a fresh render in at most ${mid.diff} of ${mid.pixels} pixels (${(100 * mid.diff / mid.pixels).toFixed(3)} %), of them ${mid.big} by more than 2 levels, largest ${mid.maxDelta}`, GOOD(mid));
             worst.big = Math.max(worst.big, mid.big); worst.diff = Math.max(worst.diff, mid.diff); worst.pct = Math.max(worst.pct, 100 * mid.diff / mid.pixels); worst.maxDelta = Math.max(worst.maxDelta, mid.maxDelta); } } } }
@@ -43,7 +43,7 @@ const GOOD = (m) => 100 * m.big / m.pixels <= 0.1 && m.maxDelta <= 40;
       await ev((m) => { window.EVO.panNoInvalidate = m; }, mutate);
       const nth = tech === 'A' ? 'B' : 'A', steps = [['terH', async () => { await a.slider('terH', 6); await a.idle(); }], ['technique', async () => { await a.tech(nth); await a.idle(); }], ['display option (outlines)', async () => { await page.uncheck('#t-outlines'); await a.idle(); }]];
       for (const [name, change] of steps) { await change(); const pp = await ev(() => ({ x: window.__evo.st.panX, y: window.__evo.st.panY })); // the change re-rendered the frame at rest; ONE blit frame at a pan the stale layer still covers
-        const m1 = await ev(BLITCMP, { px: pp.x + 5, py: pp.y + 1 }), good = GOOD(m1);
+        const m1 = await ev(BLITCMP, { px: pp.x + 5, py: pp.y + 1, cmp: CMP_SRC }), good = GOOD(m1);
         if (!mutate) ok(`INVALIDATION ${tech}: after a change of ${name} the next blit frame equals a fresh render (${m1.diff} differing pixels, ${m1.big} by more than 2 levels)`, good);
         else ok(`MUTATION no invalidation (E.panNoInvalidate; ${tech}, change of ${name}): the INVALIDATION check FAILS (${m1.diff} differing pixels, ${m1.big} by more than 2 levels: the frame shows the old state)`, !good); }
       await ev(() => { window.EVO.panNoInvalidate = false; }); await page.check('#t-outlines'); await a.slider('terH', 3); await a.idle(); if (tech !== 'A') await a.tech(tech); else await a.tech('A'); await a.idle(); }
