@@ -852,7 +852,7 @@
         try { r = gen.next(); } finally { SL = prev; DBG = false; PICK = false; }
         const t1 = performance.now(); // the canvas records its operations and rasterises them later, at moments of its own choosing: a 1x1 read at the end of every slice makes the slice pay for its own raster, so the slice lengths are real (the JS part is budgeted by the measured raster / JS ratio)
         if (!opts.noFlush) ctx.getImageData(0, 0, 1, 1);
-        const t2 = performance.now(), dt = t2 - SLICER.t0; task.rho = 0.7 * task.rho + 0.3 * ((t2 - t1) / Math.max(t1 - SLICER.t0, 0.5)); task.slices++; task.jsMs += t1 - SLICER.t0; task.flushMs += t2 - t1; if (dt > task.maxStep) task.maxStep = dt;
+        const t2 = performance.now(), dt = t2 - SLICER.t0; task.rho = 0.7 * task.rho + 0.3 * ((t2 - t1) / Math.max(t1 - SLICER.t0, 0.5)); if (opts.trace) opts.trace.push([+(t1 - SLICER.t0).toFixed(1), +(t2 - t1).toFixed(1), +(task.st.progress || 0).toFixed(3)]); task.slices++; task.jsMs += t1 - SLICER.t0; task.flushMs += t2 - t1; if (dt > task.maxStep) task.maxStep = dt;
         if (r.done) { task.done = true; task.result = r.value; task.st.ms = performance.now() - task.t0; }
         return task.done;
       },
@@ -919,6 +919,9 @@
     const ctx = cv.getContext('2d', { willReadFrequently: true });
     ctx.antialias = false;
     const { cam } = drawScene(ctx, w, h, S, P, tech, view, { pick: true });
+    return pickRead(ctx, cam, S, P, tech, w, h, px, py);
+  };
+  function pickRead(ctx, cam, S, P, tech, w, h, px, py) { // the code under (px, py) of a finished pick render, as a tile
     const x0 = Math.round(px), y0 = Math.round(py);
     const valid = (code) => { const k = code >> 20, v = code & 0xfffff; return (k === 1 && v <= S.maxFine) || ((k === 2 || k === 3 || k === 4) && v < S.n); }; // blended edge pixels are not codes
     const at = (x, y) => { if (x < 0 || y < 0 || x >= w || y >= h) return -1; const q = ctx.getImageData(x, y, 1, 1).data; return q[3] === 255 ? (q[0] << 16) | (q[1] << 8) | q[2] : -1; };
@@ -942,5 +945,21 @@
       return ix >= 0 && iy >= 0 && ix < S.W && iy < S.H ? { tile: iy * S.W + ix, kind: 'cap' } : { tile: -1, kind: 'none' };
     }
     return { tile: -1, kind: 'none' };
-  };
+  }
+  /* The pick renders as SLICED tasks (PR F1', for the sliced option): the same generator with the PICK flag, 10 ms slices through a MessageChannel, so a click (or the Diorama visibility line) does not block the page for the second a Box render of the whole viewport takes. `done(result)` is called when the render is complete;
+     the returned handle cancels it. A pick render is drawn on a CPU canvas (willReadFrequently): its operations run as they are made, so a slice is as long as it looks. */
+  function runPickSliced(S, P, tech, view, w, h, o, done) {
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const ctx = cv.getContext('2d', { willReadFrequently: true }); ctx.antialias = false;
+    const gen = drawSceneG(ctx, w, h, S, P, tech, view, Object.assign({ pick: true }, o)), ch = new MessageChannel(); let dead = false;
+    ch.port1.onmessage = () => {
+      if (dead) { ch.port1.close(); return; }
+      SLICER.budget = 10; SLICER.t0 = performance.now(); SLICER.c = 0; const prev = SL; SL = SLICER; DBG = false; PICK = true; let r;
+      try { r = gen.next(); } finally { SL = prev; DBG = false; PICK = false; }
+      if (!r.done) { ch.port2.postMessage(0); return; }
+      ch.port1.close(); done(ctx, r.value.cam);
+    };
+    ch.port2.postMessage(0); return { cancel() { dead = true; } };
+  }
+  E.pickTileSliced = (S, P, tech, view, w, h, px, py, cb) => runPickSliced(S, P, tech, view, w, h, null, (ctx, cam) => cb(pickRead(ctx, cam, S, P, tech, w, h, px, py)));
+  E.pickBufferSliced = (S, P, view, w, h, o, cb) => runPickSliced(S, P, 'box', view, w, h, o, (ctx) => cb({ data: ctx.getImageData(0, 0, w, h).data, w, h }));
 })(window.EVO = window.EVO || {});

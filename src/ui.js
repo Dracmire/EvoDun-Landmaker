@@ -106,7 +106,17 @@
   /* the visibility of the parts of a moved Diorama as COUNTS [visible, in view, total] (the Box pick render with the Ascension walls as occluders; only the tiles inside the view count) */
   function dioVis(it, extra) { // `extra` (optional) = { name: [tiles] }: more tile sets counted the same way, returned in `.extra`
     const f0 = $('#stage').children[0], cv = f0 && f0.querySelector('canvas'); if (!cv || !S || !S.dioRole) return null;
-    const w = cv.clientWidth, h = cv.clientHeight, W = S.W, n = S.n, v = view(), D = E.pickBuffer(S, P, v, w, h, { pickWalls: true }).data, cam = E.makeCam(S, P, v, w, h), seen = new Uint8Array(n);
+    const w = cv.clientWidth, h = cv.clientHeight, v = view();
+    if (O.sliced && !extra) { // PR F1': the Box pick render of this line is computed in slices AFTER the frame (the line is left out until it is ready; the info is composed again then)
+      const key = [S._sid || (S._sid = ++slSid), JSON.stringify(v), w, h, it.room].join('|');
+      if (st.dioVisCache && st.dioVisCache.key === key) return st.dioVisCache.val;
+      if (!st.dioVisJob || st.dioVisJob.key !== key) { if (st.dioVisJob) st.dioVisJob.h.cancel(); const job = { key, h: null }; st.dioVisJob = job; job.h = E.pickBufferSliced(S, P, v, w, h, { pickWalls: true }, (buf) => { if (st.dioVisJob !== job) return; st.dioVisJob = null; st.dioVisCache = { key, val: dioVisFrom(buf.data, it, extra, w, h, v) }; refreshMessage(); const sv = {}; if (st.tech !== 'box') sv[st.tech] = E.stairSurvival(S, P, st.tech); info(sv, shownTechs()); }); }
+      return null;
+    }
+    return dioVisFrom(E.pickBuffer(S, P, v, w, h, { pickWalls: true }).data, it, extra, w, h, v);
+  }
+  function dioVisFrom(D, it, extra, w, h, v) {
+    const W = S.W, n = S.n, cam = E.makeCam(S, P, v, w, h), seen = new Uint8Array(n);
     for (let q = 0; q < w * h; q++) { const code = (D[4 * q] << 16) | (D[4 * q + 1] << 8) | D[4 * q + 2], k = code >> 20, t = code & 0xfffff; if (D[4 * q + 3] === 255 && k >= 2 && k <= 4 && t < n) seen[t] = 1; }
     const cnt = (tl) => { let iv = 0, sv = 0; for (const t of tl) { const q = cam.p((t % W) + 0.5, ((t / W) | 0) + 0.5, S.levelH[S.fine[t]]); if (q[0] >= 0 && q[1] >= 0 && q[0] < w && q[1] < h) { iv++; if (seen[t]) sv++; } } return [sv, iv, tl.length]; };
     const hi = it.prof && it.prof.hito, ex = {}; for (const [k, tl] of Object.entries(extra || {})) ex[k] = cnt(tl); return { extra: ex, footprint: cnt(it.dst), landing: cnt(it.landing), bridges: it.bridges.map((b) => cnt([...b.inner, ...b.lat, b.from, b.to])), pocket: cnt(it.pocket), hito: hi ? cnt(hi.tiles) : null };
@@ -360,6 +370,7 @@
     for (let k = 0; k < figs.length; k++) {
       const cv = figs[k].querySelector('canvas'), r = cv.getBoundingClientRect();
       if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
+      if (O.sliced) { message('Picking…'); st.pickJob = E.pickTileSliced(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top, (hit) => { message(''); placeMark(hit.tile); }); return; } // PR F1': the pick render in slices, the page stays alive
       const hit = E.pickTile(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top);
       return placeMark(hit.tile);
     }
@@ -372,9 +383,10 @@
     for (let k = 0; k < figs.length; k++) {
       const cv = figs[k].querySelector('canvas'), r = cv.getBoundingClientRect();
       if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
-      const hit = E.pickTile(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top);
-      const id = hit.tile >= 0 ? S.roomMap[hit.tile] : 0, o = id > 0 && S.types ? S.types.rooms.get(id) : null;
-      if (o && o.type === E.roomTypes.DIORAMA) { sliceSel.whole = false; sliceSel.rooms.clear(); sliceSel.rooms.add(id); applyDacRule(); syncRoomChips(); refreshMessage(); invalidate(true); }
+      const act = (hit) => { const id = hit.tile >= 0 ? S.roomMap[hit.tile] : 0, o = id > 0 && S.types ? S.types.rooms.get(id) : null;
+        if (o && o.type === E.roomTypes.DIORAMA) { sliceSel.whole = false; sliceSel.rooms.clear(); sliceSel.rooms.add(id); applyDacRule(); syncRoomChips(); refreshMessage(); invalidate(true); } };
+      if (O.sliced) { st.pickJob = E.pickTileSliced(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top, act); return; } // PR F1': in slices
+      act(E.pickTile(S, P, techs[k], view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top));
       return;
     }
   }

@@ -95,6 +95,16 @@ const PANEL_VS_MONO = (hs) => { const E = window.EVO, e = window.__evo, S = e.S(
     ok(`MUTATION a render input (the display options) missing from the placeholder key: the old terrain IS shown (the panel is not the background alone: ${!bgBad}): the PLACEHOLDER KEY check FAILS`, !bgBad);
     ok('no page error', a.errs.length === 0, a.errs.join(' | '));
     await a.browser.close(); }
+  // ---- the PICK render in slices: the same answer as the monolithic E.pickTile (a click does not block the page) and the stake placed through the real click
+  { const { a, page, ev } = await open2(1, 'real_chain5');
+    const r = await ev(() => new Promise((resolve) => { const E = window.EVO, e = window.__evo, S = e.S(), cv = document.querySelector('#stage canvas'), w = cv.clientWidth, h = cv.clientHeight, pts = [[0.5, 0.5], [0.35, 0.4], [0.6, 0.55], [0.45, 0.3], [0.7, 0.7], [0.2, 0.8], [0.55, 0.45], [0.4, 0.6]].map(([fx, fy]) => [fx * w, fy * h]), out = { n: 0, bad: [], maxSlice: 0 };
+      let i = 0; const next = () => { if (i >= pts.length) return resolve(out); const [px, py] = pts[i++], ref = E.pickTile(S, e.P, 'A', e.view(), w, h, px, py); E.pickTileSliced(S, e.P, 'A', e.view(), w, h, px, py, (hit) => { out.n++; if (hit.tile !== ref.tile || hit.kind !== ref.kind) out.bad.push([px | 0, py | 0, ref.tile, hit.tile]); next(); }); }; next(); }));
+    ok(`PICK in slices: ${r.n} points of the viewport give the same tile and kind as the monolithic E.pickTile (differences: ${r.bad.length ? JSON.stringify(r.bad) : 'none'})`, r.n === 8 && r.bad.length === 0);
+    const b = await (await page.$('#stage canvas')).boundingBox(), px = b.x + b.width * 0.5, py = b.y + b.height * 0.5;
+    const ref = await ev(({ fx, fy }) => { const E = window.EVO, e = window.__evo, cv = document.querySelector('#stage canvas'); return E.pickTile(e.S(), e.P, e.st.tech, e.view(), cv.clientWidth, cv.clientHeight, fx * cv.clientWidth, fy * cv.clientHeight); }, { fx: 0.5, fy: 0.5 });
+    await ev(() => { window.__evo.inc.stake = null; window.__evo.setIncMode('stake'); }); const t0 = Date.now(); await page.mouse.click(px, py); await page.waitForFunction(() => window.__evo.inc.stake, null, { timeout: 60000 }); const st = await ev(() => { const s = window.__evo.S(), k = window.__evo.inc.stake; return { tile: k.y * s.W + k.x, k }; });
+    ok(`CLICK with the sliced option: the stake is placed on the tile the monolithic pick gives (${st.tile} vs ${ref.tile}), the page not blocked`, st.tile === ref.tile, `(${Date.now() - t0} ms)`);
+    ok('no page error', a.errs.length === 0, a.errs.join(' | ')); await a.browser.close(); }
   // ---- (D) the Floors view keeps its floor index (the first version of E2 stored its layer in st.layer: 'No floor null')
   { const a = await open({ w: 1500, h: 900 }), page = a.page, ev = (f, x) => page.evaluate(f, x); // (the whole panel: the source selector of the Floors package)
     await page.selectOption('#src', 'snake_floors'); await a.idle(); await page.click('#mode'); await a.idle(); await page.check('#t-sliced'); await settle(page, a);
