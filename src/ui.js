@@ -610,12 +610,12 @@
      exhausted the layer is rendered again centred on the current pan (one hitch). After PAN_IDLE ms without a move, and on pointer up, the frame is redrawn as today (the normal full render, never the blit). `E.panNoInvalidate` (a test) skips every validity check: the MUTATION of tools/ui/test_pan_ui.js. */
   const PAN_MARGIN = 0.5, PAN_IDLE = 120;
   function panLayer() {
-    const f = $('#stage').children[0], cv = f.querySelector('canvas'), w = cv.clientWidth, h = cv.clientHeight, dpr = window.devicePixelRatio || 1, key = [st.epoch, st.panTech, st.preset, st.yawOff, st.pitchOff, st.zoom, st.fitSc, st.persH, w, h, dpr].join('|'), Lr = st.layer;
+    const f = $('#stage').children[0], cv = f.querySelector('canvas'), w = cv.clientWidth, h = cv.clientHeight, dpr = window.devicePixelRatio || 1, key = [st.epoch, st.panTech, st.preset, st.yawOff, st.pitchOff, st.zoom, st.fitSc, st.persH, w, h, dpr].join('|'), Lr = st.panLay;
     const dx = Lr ? st.panX - Lr.panX : 0, dy = Lr ? st.panY - Lr.panY : 0, covers = Lr && Math.abs(dx) <= Lr.mx && Math.abs(dy) <= Lr.my;
     if (Lr && covers && (E.panNoInvalidate || (Lr.key === key && Lr.S === S))) return Lr;
     const mx = Math.round(w * PAN_MARGIN), my = Math.round(h * PAN_MARGIN), lcv = Lr ? Lr.cv : document.createElement('canvas'), t0 = performance.now();
     E.renderLayer(lcv, w + 2 * mx, h + 2 * my, S, P, st.panTech, view(), O); // the same pan as the viewport: the layer's pixel (x + mx, y + my) is the viewport's pixel (x, y)
-    return (st.layer = { cv: lcv, mx, my, panX: st.panX, panY: st.panY, key, S, ms: performance.now() - t0, bytes: (w + 2 * mx) * (h + 2 * my) * dpr * dpr * 4 });
+    return (st.panLay = { cv: lcv, mx, my, panX: st.panX, panY: st.panY, key, S, ms: performance.now() - t0, bytes: (w + 2 * mx) * (h + 2 * my) * dpr * dpr * 4 });
   }
   function panFrame() {
     st.panRaf = 0; if (!S || !st.panCand) return; const f = $('#stage').children[0], cv = f.querySelector('canvas'), Lr = panLayer(); // (a new layer is rendered here when the old one is not valid or does not cover the viewport)
@@ -708,7 +708,7 @@
     const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = volView ? E.volume.fitScale(raw, view(), f0.clientWidth, f0.clientHeight) : E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
     if (st.dioFocus && !volView && focusDio(st.dioFocus)) st.dioFocus = null; // a prototype frames its host once the plan exists (before the view is read below)
     const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
-    if (!O.panCache) st.layer = null; // the option is off: release the layer
+    if (!O.panCache) st.panLay = null; // the option is off: release the layer
     st.panCand = !FLS && !volView && techs.length === 1 && !O.contract && v.kind !== 'persp'; st.panTech = techs[0]; // PR E2: one panel, an orthographic / oblique camera, no art contract (it reads the viewport): a drag may be a translation of the cached terrain layer
     const lateKey = (t) => (t === 'B' ? 'Bready:' + P.radius + ':' + P.anchor : 'Cready:' + E.curves.key(P)), late = techs.filter((t) => (t === 'B' || t === 'C') && (!S.cache[lateKey(t)] || (FLS && FLS.dirty))), needB = late.length > 0; // B and C: the first draw is the slow one, painted after the other panels
     const paint = (t, i) => {
@@ -956,7 +956,7 @@
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
-    window.__evo = { panFrameTest: (px, py) => { st.panX = px; st.panY = py; panFrame(); return st.layer; }, panLayerInfo: () => st.layer ? { ms: st.layer.ms, bytes: st.layer.bytes, mx: st.layer.mx, my: st.layer.my, panX: st.layer.panX, panY: st.layer.panY } : null, panRest, fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { panFrameTest: (px, py) => { st.panX = px; st.panY = py; panFrame(); return st.panLay; }, panLayerInfo: () => st.panLay ? { ms: st.panLay.ms, bytes: st.panLay.bytes, mx: st.panLay.mx, my: st.panLay.my, panX: st.panLay.panX, panY: st.panLay.panY } : null, panRest, fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});
