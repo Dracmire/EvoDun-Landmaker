@@ -22,13 +22,15 @@ const RUN = ({ tech, ppt, pos, hs }) => {
   c0.remove(); c1.remove(); off.remove(); return res; };
 const GOTO_POINT = ({ x, y, ppt }) => { const E = window.EVO, e = window.__evo, S = e.S(), cv = document.querySelector('#stage canvas'), w = cv.clientWidth, h = cv.clientHeight, v = e.view(); v.zoom = ppt / e.st.fitSc; v.panX = 0; v.panY = 0; const t = Math.max(0, Math.min(S.n - 1, y * S.W + x)), hh = S.void && S.void[t] ? S.levelH[0] : S.levelH[S.fine[t]], p0 = E.makeCam(S, e.P, v, w, h).p(x + 0.5, y + 0.5, hh); e.st.zoom = ppt / e.st.fitSc; e.st.panX = w / 2 - p0[0]; e.st.panY = h / 2 - p0[1]; };
 // the panel against a monolithic frame of the same state into an offscreen canvas of the same size: { same }
+// the hash of the panel and of the BACKGROUND + LIVE OVERLAYS alone (what an invalid placeholder shows): they differ when the old terrain is on the panel
+const PANEL_VS_BG = (hs) => { const E = window.EVO, e = window.__evo, S = e.S(), cv = document.querySelector('#stage canvas'), w = cv.clientWidth, h = cv.clientHeight, hash = eval(hs), off = document.createElement('canvas'); off.style.cssText = `width:${w}px;height:${h}px;position:absolute;left:-9999px`; document.body.appendChild(off); E.slPlaceholder(off, null, null, S, e.P, e.st.tech, e.view(), e.O); const r = { sameAsBg: hash(cv) === hash(off) }; off.remove(); return r; };
 const PANEL_VS_MONO = (hs) => { const E = window.EVO, e = window.__evo, S = e.S(), cv = document.querySelector('#stage canvas'), w = cv.clientWidth, h = cv.clientHeight, hash = eval(hs), off = document.createElement('canvas'); off.style.cssText = `width:${w}px;height:${h}px;position:absolute;left:-9999px`; document.body.appendChild(off); E.render(off, S, e.P, e.st.tech, e.view(), e.O); const r = { same: hash(cv) === hash(off), px: [cv.width, cv.height], sl: window.__evo.slStats() }; off.remove(); return r; };
 (async () => {
   let fails = 0, pairs = 0; const ok = (name, c, extra) => { console.log((c ? 'PASS ' : 'FAIL ') + name + (extra ? '  ' + extra : '')); if (!c) fails++; };
   const settle = (page, a) => page.waitForFunction(() => !window.__evo.slStats().pending, null, { timeout: 300000 }).then(() => a.idle());
   // ---- (A) the matrix at render level
   let combo = 0;
-  for (const tech of TECHS) { if (ONLY && ONLY[0] !== tech) continue;
+  for (const tech of TECHS) { if ((ONLY && ONLY[0] !== tech) || process.env.SL_UI_ONLY) continue; // (SL_UI_ONLY: skip the matrix, run the rest)
     const a = await open({ w: 1500, h: 900, modes: true }), page = a.page, ev = (f, x) => page.evaluate(f, x);
     await ev(() => window.__evo.setMode('rooms')); await a.idle(); await page.click('#examples button[data-id="real_balanced"]'); await a.idle(); if (tech !== 'A') await a.tech(tech);
     for (const th of THS) { await a.slider('terH', th); await a.idle();
@@ -71,8 +73,8 @@ const PANEL_VS_MONO = (hs) => { const E = window.EVO, e = window.__evo, S = e.S(
   { const { a, page, ev } = await open2(1, 'real_chain5'); const b = await (await page.$('#stage canvas')).boundingBox(), wheel = async (n, gap) => { await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); for (let i = 0; i < n; i++) { await page.mouse.wheel(0, -100); if (gap) await page.waitForTimeout(gap); } };
     let r = await ev(PANEL_VS_MONO, HASH_SRC); ok('the first frame of the sliced option (no placeholder yet) is byte-identical to the monolithic frame', r.same);
     const s0 = await ev(() => window.__evo.slStats()); await wheel(1, 0); await page.waitForTimeout(40);
-    const during = await ev(() => { const cv = document.querySelector('#stage canvas'), d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let nonBg = 0; for (let i = 0; i < d.length; i += 4 * 17) if (d[i] > 90 || d[i + 1] > 90) nonBg++; return { pending: window.__evo.slStats().pending, label: !!document.querySelector('#stage .pending'), nonBg, started: window.__evo.slStats().started }; });
-    ok(`PLACEHOLDER: 40 ms after a wheel notch the panel shows the last terrain moved (${during.nonBg} lit samples), the calculating label is up and no new frame has started (${during.started - s0.started} started)`, during.pending && during.label && during.nonBg > 50 && during.started === s0.started);
+    const during = await ev(() => ({ pending: window.__evo.slStats().pending, label: !!document.querySelector('#stage .pending'), started: window.__evo.slStats().started })), bgOnly = await ev(PANEL_VS_BG, HASH_SRC);
+    ok(`PLACEHOLDER: 40 ms after a wheel notch the panel shows the last terrain moved (not the background alone: ${!bgOnly.sameAsBg}), the calculating label is up and no new frame has started (${during.started - s0.started} started)`, during.pending && during.label && !bgOnly.sameAsBg && during.started === s0.started);
     await settle(page, a); r = await ev(PANEL_VS_MONO, HASH_SRC); ok('after the notch the completed frame equals the monolithic frame', r.same);
     const s1 = await ev(() => window.__evo.slStats()); await wheel(10, 0); await settle(page, a); const s2 = await ev(() => window.__evo.slStats()); r = await ev(PANEL_VS_MONO, HASH_SRC);
     ok(`COALESCING: ten quick wheel notches start ${s2.started - s1.started} render(s) (about 0.12 s after the last notch) and the frame is exact`, s2.started - s1.started === 1 && r.same);
@@ -81,21 +83,20 @@ const PANEL_VS_MONO = (hs) => { const E = window.EVO, e = window.__evo, S = e.S(
     await page.check('#t-panCache'); await a.idle(); await page.keyboard.down('Shift'); await page.mouse.move(b.x + 300, b.y + 300); await page.mouse.down(); for (let i = 1; i <= 6; i++) await page.mouse.move(b.x + 300 + i * 8, b.y + 300 + i * 3); await page.mouse.up(); await page.keyboard.up('Shift'); await settle(page, a);
     const pl = await ev(() => ({ lay: !!window.__evo.st.panLay, frames: window.__evo.st.panFrames || 0 })); r = await ev(PANEL_VS_MONO, HASH_SRC); ok(`WITH BOTH OPTIONS ON the sliced frame wins: no pan-cache layer (${pl.lay}), no blit frames (${pl.frames}), the frame after a drag is exact`, !pl.lay && pl.frames === 0 && r.same);
     // MUTATIONS in the UI: an option changed while a frame is pending
-    await page.uncheck('#t-panCache'); await a.idle(); await wheel(1, 0); await page.waitForTimeout(300); // a frame is running now
+    await page.uncheck('#t-panCache'); await a.idle(); await page.click('#reset'); await settle(page, a); await wheel(1, 0); await page.waitForTimeout(250); // the default framing (a frame of about a second) is running now
     await ev(() => { window.EVO.sliceTest = { keepStale: true }; }); await page.uncheck('#t-outlines'); await page.waitForTimeout(100); await ev(() => { window.EVO.sliceTest = null; });
     await settle(page, a); r = await ev(PANEL_VS_MONO, HASH_SRC); ok('MUTATION a pending frame not cancelled by a change of the state: the frame after the change FAILS the IDENTITY check', !r.same);
     await page.check('#t-outlines'); await settle(page, a); r = await ev(PANEL_VS_MONO, HASH_SRC);
     ok('after the mutation the real code is exact again (the outline switch back on)', r.same);
     // a render input missing from the placeholder key: after a change of an option the old terrain must NOT be shown
-    const blank = await ev(() => { const cv = document.querySelector('#stage canvas'), h = (c) => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let a = 2166136261; for (let i = 0; i < d.length; i++) { a ^= d[i]; a = Math.imul(a, 16777619) >>> 0; } return a; }; return h(cv); });
-    const toggled = async (ign) => { await ev((i) => { window.EVO.sliceTest = i ? { keyIgnoreO: true } : null; }, ign); await page.uncheck('#t-gradient'); await page.waitForTimeout(60); const lit = await ev(() => { const cv = document.querySelector('#stage canvas'), d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4 * 17) if (d[i] > 90 || d[i + 1] > 90) n++; return n; }); await ev(() => { window.EVO.sliceTest = null; }); await settle(page, a); await page.check('#t-gradient'); await settle(page, a); return lit; };
-    const litOk = await toggled(false), litBad = await toggled(true);
-    ok(`PLACEHOLDER KEY: after a change of a display option the old terrain is NOT shown while the new frame is pending (${litOk} lit samples)`, litOk < 50);
-    ok(`MUTATION a render input (the display options) missing from the placeholder key: the old terrain IS shown (${litBad} lit samples): the PLACEHOLDER KEY check FAILS`, litBad > 50);
-    ok(`(info) ${blank !== 0 ? 'canvas hashed' : ''} no page error`, a.errs.length === 0, a.errs.join(' | '));
+    const toggled = async (ign) => { await page.click('#reset'); await settle(page, a); await ev((i) => { window.EVO.sliceTest = i ? { keyIgnoreO: true } : null; }, ign); await page.uncheck('#t-gradient'); await page.waitForTimeout(60); const r2 = await ev(PANEL_VS_BG, HASH_SRC); await ev(() => { window.EVO.sliceTest = null; }); await settle(page, a); await page.check('#t-gradient'); await settle(page, a); return r2.sameAsBg; };
+    const bgOk = await toggled(false), bgBad = await toggled(true);
+    ok(`PLACEHOLDER KEY: after a change of a display option the old terrain is NOT shown while the new frame is pending (the panel is the background and the live overlays: ${bgOk})`, bgOk);
+    ok(`MUTATION a render input (the display options) missing from the placeholder key: the old terrain IS shown (the panel is not the background alone: ${!bgBad}): the PLACEHOLDER KEY check FAILS`, !bgBad);
+    ok('no page error', a.errs.length === 0, a.errs.join(' | '));
     await a.browser.close(); }
   // ---- (D) the Floors view keeps its floor index (the first version of E2 stored its layer in st.layer: 'No floor null')
-  { const a = await open({ w: 1500, h: 900, modes: true }), page = a.page, ev = (f, x) => page.evaluate(f, x);
+  { const a = await open({ w: 1500, h: 900 }), page = a.page, ev = (f, x) => page.evaluate(f, x); // (the whole panel: the source selector of the Floors package)
     await page.selectOption('#src', 'snake_floors'); await a.idle(); await page.click('#mode'); await a.idle(); await page.check('#t-sliced'); await settle(page, a);
     for (const k of [1, 2]) { await page.click(`#floorChips button[data-floor="${k}"]`); await settle(page, a); const r = await ev(() => ({ layer: window.__evo.st.layer, sl: window.__evo.slStats() })); const m = await ev(PANEL_VS_MONO, HASH_SRC);
       ok(`FLOORS with the sliced option: floor ${k} selected, st.layer = ${r.layer}, the frame is exact`, r.layer === k && m.same); }
