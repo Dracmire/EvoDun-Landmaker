@@ -4180,7 +4180,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const fit = Math.min((w - 20) / (x1 - x0), (h - 20) / (y1 - y0)), sc = (view.fitSc || fit) * view.zoom; // view.fitSc: the scale of the first panel, shared by all panels
     const ox = w / 2 - (x0 + x1) / 2 * sc + view.panX, oy = h / 2 - (y0 + y1) / 2 * sc + view.panY;
     return {
-      sc, base, fit,
+      sc, base, fit, aff: { sc, ox, oy, cy, sy, sp, cp, W2: S.W / 2, H2: S.H / 2, w, h }, // aff: the affine map of the camera (screen = sc * raw + (ox, oy)), read by the viewport culling (PR E1a); the perspective camera has none
       p: (x, y, hh) => { const [a, b] = raw(x, y, hh); return [a * sc + ox, b * sc + oy]; },
       panFor: (x, y, hh) => { const [a, b] = raw(x, y, hh); return [w / 2 - (a * sc + ox - view.panX), h / 2 - (b * sc + oy - view.panY)]; }, // the pan (px) that brings the point to the screen centre
       unp: (px, py, hh) => { const a = (px - ox) / sc, b = (py - oy) / sc + hh * cp, c = b / sp; return [cy * a + sy * c + S.W / 2, -sy * a + cy * c + S.H / 2]; }, // screen point -> ground point on the plane at height hh
@@ -4252,6 +4252,23 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
 
   /* hb / ht: a number, or [at a, at b] for a wall whose bottom or top is sloped (ramp flanks) */
+  /* VIEWPORT CULLING OF WALLS (PR E1a; orthographic and oblique cameras only; the perspective camera has no `aff`, the floors views (o.zShift) and `o.noCull` (tests) switch it off). A wall edge or an Ascension wall box whose projected box (both heights, so the wall height is inside it) lies
+     entirely outside the canvas enlarged by a margin is not built and not drawn. PIXEL-IDENTICAL by construction: nothing outside the margin reaches a pixel of the canvas (wall stroke 0.8 px, Ascension wall outline 0.9 px, dressing foot 0.55 tile and rocks 0.3 tile, all inside the margin), and the
+     walls that stay keep their order (the sort is stable and its comparator reads only the depth of the wall). Margin = max(64 px, 2 tiles); tests: `o.cullPad` (px, replaces the margin: the MUTATION "margin shrunk") and `o.cullNoHeight` (the box ignores the wall height: the MUTATION "wall height dropped"). `tools/ui/test_cull_ui.js`. */
+  function cullOf(cam, o) { const A = cam.aff; if (!A || o.zShift || o.noCull) return null; return { A, pad: o.cullPad !== undefined ? o.cullPad : Math.max(64, 2 * A.sc), noH: !!o.cullNoHeight }; }
+  function boxOff(C, x0, y0, x1, y1, hlo, hhi) { // the box [x0, x1] x [y0, y1] x [hlo, hhi] (map units) entirely outside the enlarged canvas
+    const A = C.A, lo = C.noH ? hhi : hlo; let mnx = 1e18, mxx = -1e18, mny = 1e18, mxy = -1e18;
+    for (let i = 0; i < 4; i++) { const X = (i & 1 ? x1 : x0) - A.W2, Y = (i & 2 ? y1 : y0) - A.H2, sx = A.sc * (A.cy * X - A.sy * Y) + A.ox, u = (A.sy * X + A.cy * Y) * A.sp, yt = A.sc * (u - hhi * A.cp) + A.oy, yb = A.sc * (u - lo * A.cp) + A.oy;
+      if (sx < mnx) mnx = sx; if (sx > mxx) mxx = sx; if (yt < mny) mny = yt; if (yb > mxy) mxy = yb; if (yb < mny) mny = yb; if (yt > mxy) mxy = yt; }
+    return mxx < -C.pad || mnx > A.w + C.pad || mxy < -C.pad || mny > A.h + C.pad;
+  }
+  function edgeOff(C, ax, ay, bx, by, hb, ht) { // the wall quad of the edge a -> b between hb and ht, entirely outside the enlarged canvas
+    const A = C.A, Xa = ax - A.W2, Ya = ay - A.H2, Xb = bx - A.W2, Yb = by - A.H2, xa = A.sc * (A.cy * Xa - A.sy * Ya) + A.ox, xb = A.sc * (A.cy * Xb - A.sy * Yb) + A.ox;
+    if ((xa < xb ? xb : xa) < -C.pad || (xa < xb ? xa : xb) > A.w + C.pad) return true;
+    const ua = (A.sy * Xa + A.cy * Ya) * A.sp, ub = (A.sy * Xb + A.cy * Yb) * A.sp, lo = C.noH ? ht : hb, yta = A.sc * (ua - ht * A.cp) + A.oy, ytb = A.sc * (ub - ht * A.cp) + A.oy, yba = A.sc * (ua - lo * A.cp) + A.oy, ybb = A.sc * (ub - lo * A.cp) + A.oy;
+    return Math.max(yta, ytb, yba, ybb) < -C.pad || Math.min(yta, ytb, yba, ybb) > A.h + C.pad;
+  }
+
   function wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, c, rnx, o, st, strong, band) {
     const hb0 = Array.isArray(hb) ? hb[0] : hb, hb1 = Array.isArray(hb) ? hb[1] : hb, ht0 = Array.isArray(ht) ? ht[0] : ht, ht1 = Array.isArray(ht) ? ht[1] : ht;
     const p0 = cam.p(ax, ay, ht0), p1 = cam.p(bx, by, ht1), p2 = cam.p(bx, by, hb1), p3 = cam.p(ax, ay, hb0);
@@ -4746,7 +4763,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const DRESS = !!o.dress && !PICK, lvl = S.fineMask || S.fine, th = P.terH; // wall dressing: the same pass as in Box
     const WP = tech === 'C' && !PICK && E.wallc ? E.wallc.get(S, P) : null; // the wall pass of technique C (null: off); the pick render never sees it
     const ST = hasStairs(S) ? stairTiles(S) : null, PIECES = ST ? rampPieces(S, cam) : new Map(); // ramp pieces by level band
-    const ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) for (const bd of ascBands(S, w, ascLow(o, cam, w))) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
+    const CULL = cullOf(cam, o), ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) { if (CULL) { const [bx0, bx1, by0, by1] = E.roomTypes.ascBox(w); if (boxOff(CULL, bx0, by0, bx1, by1, w.hb, w.hb + Math.max(S.ascWalls.height, S.ascWalls.lowH === undefined ? E.roomTypes.ASC_LOW : S.ascWalls.lowH))) { st.culled.asc++; continue; } } for (const bd of ascBands(S, w, ascLow(o, cam, w))) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
     for (let L = 0; L <= S.maxFine; L++) {
       const loops = loopsOf(S, L, P), pcs = PIECES.get(L) || [];
       if (!loops.length && !pcs.length) continue;
@@ -4779,6 +4796,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         for (let k = 0; k < n; k++) {
           const a = loop[k], b = loop[(k + 1) % n], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
           if (len < 1e-6) continue;
+          if (CULL && edgeOff(CULL, a[0], a[1], b[0], b[1], hb, ht)) { st.culled.walls++; continue; } // PR E1a: the wall of this edge is off screen (it keeps nothing the canvas can show)
           if (PICK && len > 1.001) { // picking: every wall is cut into pieces of at most one tile, each owned by the tile it stands on
             const nP = Math.ceil(len - 1e-6);
             for (let q = 0; q < nP; q++) { const p0 = [a[0] + dx * q / nP, a[1] + dy * q / nP], p1 = [a[0] + dx * (q + 1) / nP, a[1] + dy * (q + 1) / nP], sg = mkSeg(p0, p1, p1[0] - p0[0], p1[1] - p0[1], len / nP); if (sg) segs.push(sg); }
@@ -4890,7 +4908,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
 
   function drawScene(ctx, w, h, S, P, tech, view, o) {
     DBG = !!o.debug; PICK = !!o.pick;
-    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, dress: { walls: 0, strata: 0, lips: 0, foot: 0, rocks: 0, items: o.dressItems ? [] : null } }; // o.dressItems (tests): the anchor points of the foot strips and the rocks, to compare them with a reference
+    const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, culled: { walls: 0, asc: 0 }, dress: { walls: 0, strata: 0, lips: 0, foot: 0, rocks: 0, items: o.dressItems ? [] : null } }; // o.dressItems (tests): the anchor points of the foot strips and the rocks, to compare them with a reference
     const cam = makeCam(S, P, view, w, h);
     if (o.zShift) { const p0 = cam.p, zs = o.zShift; cam.p = (x, y, hh) => p0(x, y, hh + zs); } // a layer of the floors views (exploded stack): every height raised, the camera is the same
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
