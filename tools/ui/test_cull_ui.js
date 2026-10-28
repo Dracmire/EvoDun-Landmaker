@@ -33,10 +33,10 @@ const RUN = ({ tech, ppts, pos, opts }) => {
             const w1 = r.reduce((s, q) => s + q.walls[0], 0), w0 = r.reduce((s, q) => s + q.walls[1], 0);
             ok(`IDENTITY ${tech} terH ${th} ${mode} ${cam} ${ppt} px/tile: ${r.length} viewports with the culling ON and OFF are byte-identical (walls drawn ${w1} vs ${w0})`, bad.length === 0, bad.map((q) => `(${q.x},${q.y})`).join(' '));
             if (ppt === 60) ok(`EFFECTIVE ${tech} terH ${th} ${mode} ${cam} 60 px/tile: the culling draws fewer walls (${w1} < ${w0})`, w1 < w0); }
-          if (th === 3 && mode !== 'off' && cam === 'isoE') { // the mutations, on the scenes with walls near the canvas border
-            const pos = all.slice(0, 14); const m1 = await ev(RUN, { tech, ppts: [60], pos, opts: { cullPad: -150 } }), m2 = await ev(RUN, { tech, ppts: [60], pos, opts: { cullNoHeight: true } });
-            ok(`MUTATION margin shrunk (cullPad -150 px; ${tech} ${mode} terH 3 Cam 1 60 px/tile): the IDENTITY check FAILS (${m1.filter((q) => !q.same).length} of ${m1.length} viewports differ)`, m1.some((q) => !q.same));
-            ok(`MUTATION wall height dropped from the box (cullNoHeight; ${tech} ${mode} terH 3 Cam 1 60 px/tile): the IDENTITY check FAILS (${m2.filter((q) => !q.same).length} of ${m2.length} viewports differ)`, m2.some((q) => !q.same)); } } } }
+          if (th === 6 && mode !== 'off' && cam === 'isoE') { // the mutations, on the scenes with TALL walls (terH 6) near the canvas border: 28 viewports (the 14 positions and the same shifted by 6 tiles)
+            const pos = all.concat(all.map(([x, y]) => [x + 6, y + 6])); const m1 = await ev(RUN, { tech, ppts: [60], pos, opts: { cullPad: -150 } }), m2 = await ev(RUN, { tech, ppts: [60], pos, opts: { cullNoHeight: true } });
+            ok(`MUTATION margin shrunk (cullPad -150 px; ${tech} ${mode} terH 6 Cam 1 60 px/tile): the IDENTITY check FAILS (${m1.filter((q) => !q.same).length} of ${m1.length} viewports differ)`, m1.some((q) => !q.same));
+            ok(`MUTATION wall height dropped from the box (cullNoHeight; ${tech} ${mode} terH 6 Cam 1 60 px/tile): the IDENTITY check FAILS (${m2.filter((q) => !q.same).length} of ${m2.length} viewports differ)`, m2.some((q) => !q.same)); } } } }
     await a.browser.close(); }
   console.log(`${pairs} viewport pairs compared (${FULL ? 'full' : 'rotating positions'})`); process.exit(fails ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
