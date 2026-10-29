@@ -654,7 +654,7 @@
   }
 
   function invalidate(reshape) {
-    if (reshape) { S = null; $('#busy').hidden = false; } // painted before the (possibly slow) recompute starts
+    if (reshape) { slCancel(); if (st.pickJob) st.pickJob.cancel(); S = null; $('#busy').hidden = false; } // painted before the (possibly slow) recompute starts
     st.t0 = performance.now(); st.cold = !!reshape; drawToken++; // a pending panel (B computing) of an older state is dropped
     if (!raf) raf = requestAnimationFrame(() => setTimeout(draw, 0));
   }
@@ -983,7 +983,7 @@
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
-    window.__evo = { slStats: () => ({ pending: !!st.slPending || !!raf, started: st.slStarted || 0, done: st.slDone || 0, last: st.slLastStats || null }), redraw: () => invalidate(false), fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { slStats: () => ({ pending: !!st.slPending || !!raf || !!(st.pickJob && st.pickJob.live), pick: !!(st.pickJob && st.pickJob.live), started: st.slStarted || 0, done: st.slDone || 0, last: st.slLastStats || null }), redraw: () => invalidate(false), fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

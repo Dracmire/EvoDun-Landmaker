@@ -941,15 +941,15 @@
      the returned handle cancels it. A pick render is drawn on a CPU canvas (willReadFrequently): its operations run as they are made, so a slice is as long as it looks. */
   function runPickSliced(S, P, tech, view, w, h, o, done) {
     const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const ctx = cv.getContext('2d', { willReadFrequently: true }); ctx.antialias = false;
-    const gen = drawSceneG(ctx, w, h, S, P, tech, view, Object.assign({ pick: true }, o)), ch = new MessageChannel(); let dead = false;
+    const gen = drawSceneG(ctx, w, h, S, P, tech, view, Object.assign({ pick: true }, o)), ch = new MessageChannel(), hd = { live: true, cancel() { dead = true; hd.live = false; } }; let dead = false;
     ch.port1.onmessage = () => {
       if (dead) { ch.port1.close(); return; }
       SLICER.budget = 10; SLICER.t0 = performance.now(); SLICER.c = 0; const prev = SL; SL = SLICER; DBG = false; PICK = true; let r;
       try { r = gen.next(); } finally { SL = prev; DBG = false; PICK = false; }
       if (!r.done) { ch.port2.postMessage(0); return; }
-      ch.port1.close(); done(ctx, r.value.cam);
+      ch.port1.close(); hd.live = false; done(ctx, r.value.cam);
     };
-    ch.port2.postMessage(0); return { cancel() { dead = true; } };
+    ch.port2.postMessage(0); return hd;
   }
   E.pickTileSliced = (S, P, tech, view, w, h, px, py, cb) => runPickSliced(S, P, tech, view, w, h, null, (ctx, cam) => cb(pickRead(ctx, cam, S, P, tech, w, h, px, py)));
   E.pickBufferSliced = (S, P, view, w, h, o, cb) => runPickSliced(S, P, 'box', view, w, h, o, (ctx) => cb({ data: ctx.getImageData(0, 0, w, h).data, w, h }));
