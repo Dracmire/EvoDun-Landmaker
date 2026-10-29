@@ -1,0 +1,124 @@
+diff --git a/src/render.js b/src/render.js
+index dfd12e7..30c0cef 100644
+--- a/src/render.js
++++ b/src/render.js
+@@ -148,6 +148,7 @@
+   function wallQuad(ctx, cam, ax, ay, bx, by, hb, ht, c, rnx, o, st, strong, band) {
+     const hb0 = Array.isArray(hb) ? hb[0] : hb, hb1 = Array.isArray(hb) ? hb[1] : hb, ht0 = Array.isArray(ht) ? ht[0] : ht, ht1 = Array.isArray(ht) ? ht[1] : ht;
+     const p0 = cam.p(ax, ay, ht0), p1 = cam.p(bx, by, ht1), p2 = cam.p(bx, by, hb1), p3 = cam.p(ax, ay, hb0);
++    if (window.__H) { const hh = Math.max(Math.abs(p3[1] - p0[1]), Math.abs(p2[1] - p1[1])), w2 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]), b = hh < 0.25 ? 0 : hh < 0.5 ? 1 : hh < 1 ? 2 : hh < 2 ? 3 : hh < 4 ? 4 : hh < 8 ? 5 : 6; window.__H.h[b]++; window.__H.n++; window.__H.area += hh * Math.max(1, w2); }
+     const k = clamp(0.92 + 0.28 * -rnx, 0.65, 1.2), cs = E.camStats; // E.camStats (a test sets it): wall quads drawn that touch the canvas
+     if (cs && Math.max(p0[0], p1[0], p2[0], p3[0]) >= 0 && Math.min(p0[0], p1[0], p2[0], p3[0]) <= ctx.canvas.width && Math.max(p0[1], p1[1], p2[1], p3[1]) >= 0 && Math.min(p0[1], p1[1], p2[1], p3[1]) <= ctx.canvas.height) cs.quads = (cs.quads || 0) + 1;
+     let gy0 = Math.min(p0[1], p1[1]), gy1 = Math.max(p2[1], p3[1]);
+@@ -636,10 +637,13 @@
+ 
+   /* ---- Contour techniques A / B: one extruded slab per level over the whole slice ---- */
+   function renderLevels(ctx, cam, S, P, o, st, loopsOf, tech) {
+-    const DRESS = !!o.dress && !PICK, lvl = S.fineMask || S.fine, th = P.terH; // wall dressing: the same pass as in Box
++    const __ts = performance.now(); const DRESS = !!o.dress && !PICK, lvl = S.fineMask || S.fine, th = P.terH; // wall dressing: the same pass as in Box
+     const WP = tech === 'C' && !PICK && E.wallc ? E.wallc.get(S, P) : null; // the wall pass of technique C (null: off); the pick render never sees it
+     const ST = hasStairs(S) ? stairTiles(S) : null, PIECES = ST ? rampPieces(S, cam) : new Map(); // ramp pieces by level band
+-    const CULL = cullOf(cam, o), ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) { if (CULL) { const [bx0, bx1, by0, by1] = E.roomTypes.ascBox(w); if (boxOff(CULL, bx0, by0, bx1, by1, w.hb, w.hb + Math.max(S.ascWalls.height, S.ascWalls.lowH === undefined ? E.roomTypes.ASC_LOW : S.ascWalls.lowH))) { st.culled.asc++; continue; } } for (const bd of ascBands(S, w, ascLow(o, cam, w))) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
++    const CULL = cullOf(cam, o), ASCL = new Map(); if (S.ascWalls) for (const w of S.ascWalls.faces) { if (CULL) { const [bx0, bx1, by0, by1] = E.roomTypes.ascBox(w); if (boxOff(CULL, bx0, by0, bx1, by1, w.hb, w.hb + Math.max(S.ascWalls.height, S.ascWalls.lowH === undefined ? E.roomTypes.ASC_LOW : S.ascWalls.lowH))) { st.culled.asc++; continue; } } let __b = ascBands(S, w, ascLow(o, cam, w)); if (o.mockAsc && __b.length > 1) { const l = __b[__b.length - 1]; __b = [{ pass: l.pass, lo: __b[0].lo, hi: l.hi, top: true }]; } for (const bd of __b) { let a = ASCL.get(bd.pass); if (!a) ASCL.set(bd.pass, a = []); a.push({ w, bd }); } } // Ascension walls by bands: each in the pass of the level at the top of its band, after its cap, by depth
++    if (window.__W) window.__W.setup += performance.now() - __ts;
++    const MOCK = o.mock, MT = o.mockT || 3, bandBase = (L) => (L === 0 ? cam.base : S.levelH[L - 1]), hpx = (a, b) => Math.abs(cam.p(0, 0, b)[1] - cam.p(0, 0, a)[1]);
++    const gTop = new Uint8Array(S.maxFine + 1), gBase = new Float64Array(S.maxFine + 1); if (MOCK === 'c') { let g0 = 0; for (let L = 0; L <= S.maxFine; L++) { if (hpx(bandBase(g0), S.levelH[L]) >= MT || L === S.maxFine) { gTop[L] = 1; gBase[L] = bandBase(g0); g0 = L + 1; } } }
+     for (let L = 0; L <= S.maxFine; L++) {
+       const loops = loopsOf(S, L, P), pcs = PIECES.get(L) || [];
+       if (!loops.length && !pcs.length) continue;
+@@ -666,7 +670,9 @@
+         }
+         return seg;
+       };
+-      for (const loop of loops) {
++      const __t0 = performance.now();
++      const skipWalls = (MOCK === 'c' && !gTop[L]) || MOCK === 'd2';
++      for (const loop of (skipWalls ? [] : loops)) {
+         const n = loop.length; st.verts += n;
+         const vn = DRESS ? loop.map((p, k) => { const pr = loop[(k + n - 1) % n], nx = loop[(k + 1) % n], vx = (p[1] - pr[1]) + (nx[1] - p[1]), vy = -(p[0] - pr[0]) - (nx[0] - p[0]), l = Math.hypot(vx, vy); return l > 1e-9 ? [vx / l, vy / l] : [nx[1] - p[1], -(nx[0] - p[0])]; }) : null; // outward normals (dy, -dx) summed over the two segments of a vertex (longer segment weighs more)
+         for (let k = 0; k < n; k++) {
+@@ -697,7 +703,7 @@
+         for (const f of wl.faces) { const mx = (f.ax + f.bx) / 2, my = (f.ay + f.by) / 2, rr = cam.nrm(f.nx, f.ny, mx, my); if (rr[1] > 0.001) segs.push({ pf: f, rnx: rr[0], d: cam.ry(mx, my) }); }
+         for (const t of wl.tops) segs.push({ pt: t, d: cam.ry(t.cx, t.cy) });
+       }
+-      segs.sort((p, q) => p.d - q.d);
++      segs.sort((p, q) => p.d - q.d); const __t1 = performance.now(); if (window.__W) window.__W.build += __t1 - __t0;
+       for (const s of segs) {
+         if (s.pf) { // a block face: the cliff colour of the upper level, with the dressing when it is on (no foot: the base is not on the lower cap)
+           const f = s.pf, veiled = !!(o.veil && S.slice && !S.pocket && !inSlice(S, (f.ax + f.bx) / 2, (f.ay + f.by) / 2));
+@@ -724,6 +730,7 @@
+         let hbs = hb;
+         if (s.clip) { hbs = [Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.a[0], s.a[1], s.clipT))), Math.min(ht, Math.max(hb, E.rampHeight(s.clip, s.b[0], s.b[1], s.clipT)))]; if (hbs[0] >= ht - 1e-6 && hbs[1] >= ht - 1e-6) continue; }
+         if (PICK) PKC = pcode(2, Math.max(0, s.own));
++        if (MOCK === 'c' && gTop[L] && !Array.isArray(hbs)) { wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], gBase[L], ht, s.stair ? stairColor(s.stair) : s.veiled ? cv : c, s.rnx, o, st, false, [gBase[L], ht]); continue; }
+         wallQuad(ctx, cam, s.a[0], s.a[1], s.b[0], s.b[1], hbs, ht, s.stair ? stairColor(s.stair) : s.veiled ? cv : c, s.rnx, o, st);
+         if (DRESS && s.dr && !Array.isArray(hbs)) { // dressing of this piece; foot and rocks right after the wall of the band whose base is the lower cap
+           const d = s.dr, col = s.veiled ? cv : c;
+@@ -735,6 +742,8 @@
+           }
+         }
+       }
++      const __t2 = performance.now(); if (window.__W) window.__W.draw += __t2 - __t1;
++      if (MOCK === 'd2') { const H = hpx(hb, ht), nst = Math.max(1, Math.ceil(H)); ctx.fillStyle = rgb(c, 0.6); for (let q = nst; q >= 1; q--) { const hq = ht - (ht - hb) * q / nst, pw = new Path2D(); for (const loop of loops) { loop.forEach((p, k) => { const qq = cam.p(p[0], p[1], hq); k ? pw.lineTo(qq[0], qq[1]) : pw.moveTo(qq[0], qq[1]); }); pw.closePath(); } ctx.fill(pw, 'evenodd'); } }
+       const path = new Path2D();
+       for (const loop of loops) {
+         loop.forEach((p, k) => { const q = cam.p(p[0], p[1], ht); k ? path.lineTo(q[0], q[1]) : path.moveTo(q[0], q[1]); });
+@@ -774,7 +783,8 @@
+         }
+         if (bp.length) strokeRoomFaces(ctx, bp);
+       }
+-      const aw = ASCL.get(L); if (aw) { aw.sort((p, q) => ascWallDepth(cam, p.w) - ascWallDepth(cam, q.w) || p.bd.lo - q.bd.lo); for (const q of aw) drawAscWall(ctx, cam, S, o, q.w, st, q.bd); }
++      if (window.__W) window.__W.cap += performance.now() - __t2;
++      const __ta = performance.now(); const aw = ASCL.get(L); if (aw) { aw.sort((p, q) => ascWallDepth(cam, p.w) - ascWallDepth(cam, q.w) || p.bd.lo - q.bd.lo); if (window.__ascOn !== undefined) window.__ascOn = true; for (const q of aw) { drawAscWall(ctx, cam, S, o, q.w, st, q.bd); if (window.__ascN !== undefined) window.__ascN++; } if (window.__ascOn !== undefined) window.__ascOn = false; } if (window.__W) window.__W.asc += performance.now() - __ta;
+     }
+   }
+ 
+diff --git a/src/ui.js b/src/ui.js
+index 28add8b..8410fc4 100644
+--- a/src/ui.js
++++ b/src/ui.js
+@@ -644,7 +644,9 @@
+     return { kind: p.kind, yaw: sy0 + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc, persH: st.persH };
+   }
+ 
+-  function draw() {
++  const __m = (n) => { if (window.__perf) window.__perf.m(n); };
++  function draw() { const p = window.__perf; if (p) p.begin(); try { draw1(); } finally { if (p) p.end(); } }
++  function draw1() {
+     raf = 0; st.draws = (st.draws || 0) + 1; // (a counter for the tests: the frame at rest of a pan is drawn asynchronously)
+     if (S && S.pocket && S.pocketYaw !== baseYaw()) S = null; // a pocket is composed for ONE camera axis: any way of changing the camera (preset, scenario, mode, manifest, Stage preset) that changes the base yaw rebuilds it (a world shape does not depend on the yaw)
+     P.pocketYaw = baseYaw();
+@@ -662,7 +664,7 @@
+       if (S.types && applyDacRule()) { invalidate(true); return; } // the classification of a new source / preset / parameters is known only now: if the rule gives other switches than the ones set before it, one more build (the usual case: nothing changes)
+       st.rooms = S.rooms ? { ms: S.rooms.ms, total: Object.values(S.rooms.ms).reduce((x, y) => x + y, 0) } : null;
+     }
+-    const incursion = computeIncursion(); O.incursion = incursion;
++    __m('pre'); const incursion = computeIncursion(); O.incursion = incursion; __m('incursion');
+     if (!NO_MODES) { // CHAIN VIEW (D23): the rooms the routes cross, derived from the routes of the shape just built; a change rebuilds the shape ONCE (the routes of the rebuilt shape are the same: the walking graph is built before the flattening)
+       const sig = st.modeId === 'rooms' && dacChainOn() ? chainSig() : '';
+       if (sig !== (P.chainKey || '')) {
+@@ -707,7 +709,7 @@
+     const FLS = multi ? E.floors.layers(S, raw, P, view(), st.floors, !!st.dragging) : null; O.incursion = FLS ? null : O.incursion; st.floorsLayers = FLS;
+     const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = volView ? E.volume.fitScale(raw, view(), f0.clientWidth, f0.clientHeight) : E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
+     if (st.dioFocus && !volView && focusDio(st.dioFocus)) st.dioFocus = null; // a prototype frames its host once the plan exists (before the view is read below)
+-    const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
++    __m('fit'); const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
+     if (!O.panCache) st.panLay = null; // the option is off: release the layer
+     st.panCand = !FLS && !volView && techs.length === 1 && !O.contract && v.kind !== 'persp'; st.panTech = techs[0]; // PR E2: one panel, an orthographic / oblique camera, no art contract (it reads the viewport): a drag may be a translation of the cached terrain layer
+     const lateKey = (t) => (t === 'B' ? 'Bready:' + P.radius + ':' + P.anchor : 'Cready:' + E.curves.key(P)), late = techs.filter((t) => (t === 'B' || t === 'C') && (!S.cache[lateKey(t)] || (FLS && FLS.dirty))), needB = late.length > 0; // B and C: the first draw is the slow one, painted after the other panels
+@@ -728,13 +730,13 @@
+         f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>computing…</span>`;
+       } else paint(t, i);
+     });
+-    for (const t of techs) survOf(t);
++    __m('paint'); for (const t of techs) survOf(t); __m('surv');
+     const firstMs = performance.now() - t0;
+     st.timing = { cold: !!st.cold, first: firstMs, all: needB ? null : firstMs, techs: techs.slice() };
+     const finish = () => {
+       if (token !== drawToken || !S) return;
+       if (needB) { techs.forEach((t, i) => { if (late.includes(t)) paint(t, i); }); for (const t of late) survOf(t, true); st.timing.all = performance.now() - t0; }
+-      info(surv, techs); $('#busy').hidden = true;
++      info(surv, techs); __m('info'); $('#busy').hidden = true;
+     };
+     if (needB) { info(surv, techs); requestAnimationFrame(() => setTimeout(finish, 0)); } else finish();
+   }

@@ -1,0 +1,12 @@
+diff --git a/src/render.js b/src/render.js
+index dfd12e7..c9742e6 100644
+--- a/src/render.js
++++ b/src/render.js
+@@ -786,6 +786,7 @@
+     DBG = !!o.debug; PICK = !!o.pick;
+     const t0 = performance.now(), st = { walls: 0, polys: 0, verts: 0, culled: { walls: 0, asc: 0 }, dress: { walls: 0, strata: 0, lips: 0, foot: 0, rocks: 0, items: o.dressItems ? [] : null } }; // o.dressItems (tests): the anchor points of the foot strips and the rocks, to compare them with a reference
+     const cam = makeCam(S, P, view, w, h);
++    if (o.q) { const p0 = cam.p, g = o.q; cam.p = (x, y, hh) => { const r = p0(x, y, hh); return [Math.round(r[0] * g) / g, Math.round(r[1] * g) / g]; }; } // PROBE: screen coordinates on a 1/q grid
+     if (o.zShift) { const p0 = cam.p, zs = o.zShift; cam.p = (x, y, hh) => p0(x, y, hh + zs); } // a layer of the floors views (exploded stack): every height raised, the camera is the same
+     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+     if (tech === 'box') renderBox(ctx, cam, S, P, o, st);
