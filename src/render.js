@@ -879,16 +879,7 @@
     return drawScene(ctx, w, h, S, P, tech, view, o).st;
   };
 
-  /* PAN WITH A CACHED BITMAP (PR E2; display option `O.panCache`, off by default; src/ui.js `panFrame`). The TERRAIN of the panel (the caps, walls, ramps, dressing: everything but the background gradient and the overlays) is rendered once into a layer larger than the viewport
-     (`E.renderLayer`, margin on every side, transparent); while the pointer drags, a frame is that layer translated by the INTEGER pointer delta over a fresh background plus the overlays drawn live (`E.blitPan`); nothing viewport-dependent is in the layer (the background gradient and the
-     overlays are drawn per frame; the layer is rendered with the same pan as the viewport, so a canvas of width w + 2 mx has the same screen origin shifted by mx). At rest the frame is the normal full render (`E.render`), not the blit. */
-  E.renderLayer = function (cv, w, h, S, P, tech, view, o) { const ctx = sizeCv(cv, w, h); ctx.clearRect(0, 0, w, h); return drawScene(ctx, w, h, S, P, tech, view, Object.assign({}, o, { noBg: true, noOverlay: true })).st; };
   E.renderOverlays = function (ctx, S, P, tech, view, o, w, h) { const cam = makeCam(S, P, view, w, h); ctx.lineJoin = 'round'; ctx.lineCap = 'round'; drawOverlays(ctx, cam, S, P, tech, view, o, w, h); };
-  E.blitPan = function (cv, layer, S, P, tech, view, o, dx, dy) { // dx, dy: how far the world moved on screen since the layer was rendered (CSS px, rounded to the pixel grid here)
-    const w = cv.clientWidth, h = cv.clientHeight, ctx = sizeCv(cv, w, h), dpr = window.devicePixelRatio || 1;
-    BG(ctx, w, h); ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(layer.cv, Math.round((dx - layer.mx) * dpr), Math.round((dy - layer.my) * dpr)); ctx.restore();
-    E.renderOverlays(ctx, S, P, tech, view, o, w, h);
-  };
 
   /* The layers of the floors views (src/floors.js), bottom to top: [{ S, dz, ghost }]. Each layer is drawn by the normal pipeline of the technique on its own shape, raised by dz (exploded stack); a ghost layer is drawn
      on a transparent canvas and composited once with its opacity (so overlapping polygons do not accumulate). The caller guarantees an orthographic camera and one fit (`S.fitH`) for every layer. */

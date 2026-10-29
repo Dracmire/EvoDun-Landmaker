@@ -23,7 +23,7 @@ Terraces, ramps and the techniques Box, A, B and C on any heightmap: the same da
 | slice controls | `zoneChips`, `crop`, `margin` |
 | terrain controls | main (above) |
 | fixed by the mode (hidden) | - |
-| shared passes | `outlines`, `gradient`, `rampLines`, `dress`, `panCache`, `sliced` |
+| shared passes | `outlines`, `gradient`, `rampLines`, `dress`, `sliced` |
 | overlays | `features`, `markers`, `zones`, `edges`, `masks`, `veil`, `border` |
 | incursion | yes |
 | diagnostics (folded) | `regions`, `passes`, `edgeWarn` |
@@ -46,7 +46,7 @@ Room types (Diorama, Ascension, Cake) on a map with rooms: Cake rings, Ascension
 | slice controls | - |
 | terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |
 | fixed by the mode (hidden) | `t-rooms` |
-| shared passes | `outlines`, `gradient`, `rampLines`, `dress`, `panCache`, `sliced` |
+| shared passes | `outlines`, `gradient`, `rampLines`, `dress`, `sliced` |
 | overlays | `features`, `markers`, `zones`, `edges`, `masks`, `veil`, `border` |
 | incursion | yes |
 | diagnostics (folded) | `regions`, `passes`, `edgeWarn` |
@@ -71,7 +71,7 @@ Banner: **IN REDESIGN: frozen as it is; the Stage waits for its own design pass.
 | slice controls | - |
 | terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |
 | fixed by the mode (hidden) | - |
-| shared passes | `outlines`, `gradient`, `rampLines`, `dress`, `panCache`, `sliced` |
+| shared passes | `outlines`, `gradient`, `rampLines`, `dress`, `sliced` |
 | overlays | `features`, `markers`, `zones`, `edges`, `masks`, `veil`, `border` |
 | incursion | yes |
 | diagnostics (folded) | `regions`, `passes`, `edgeWarn` |
@@ -94,7 +94,7 @@ Tiles to curves (technique C, Unexplored 2 style): displaced Voronoi contours an
 | slice controls | - |
 | terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |
 | fixed by the mode (hidden) | - |
-| shared passes | `outlines`, `gradient`, `rampLines`, `dress`, `panCache`, `sliced` |
+| shared passes | `outlines`, `gradient`, `rampLines`, `dress`, `sliced` |
 | overlays | `features`, `markers`, `zones`, `edges`, `masks`, `veil`, `border` |
 | incursion | yes |
 | diagnostics (folded) | `regions`, `passes`, `edgeWarn` |
@@ -119,7 +119,7 @@ Banner: **CLOSED: the shapes are baked by a script (tools/derive_snake_floors.py
 | slice controls | - |
 | terrain controls | none |
 | fixed by the mode (hidden) | - |
-| shared passes | `outlines`, `gradient`, `rampLines`, `dress`, `panCache`, `sliced` |
+| shared passes | `outlines`, `gradient`, `rampLines`, `dress`, `sliced` |
 | overlays | `features`, `markers`, `zones`, `edges`, `masks`, `veil`, `border` |
 | incursion | single floor only |
 | diagnostics (folded) | `regions`, `passes`, `edgeWarn` |
