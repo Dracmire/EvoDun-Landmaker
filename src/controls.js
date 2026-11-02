@@ -46,6 +46,7 @@
     singleFloor: { ok: (c) => !c.floors || c.floorsView === 'single', text: 'set Floors view to Single floor' },
     backdropOn: { ok: (c) => c.backdrop, text: 'turn on Floor backdrop' },
     cam1: { ok: (c) => c.preset === 'isoE', text: 'use Cam 1: the backdrop is composed for Cam 1 until its camera phase' },
+    stageWin: { ok: (c) => c.stageWin, text: 'choose the example "DAC window (2D-HD, S1)" of mode 3 (the legacy contract examples have no hero)' },
     macroform: { ok: (c) => c.macro, text: 'load a pack with a volume (Snake Mountain macroform)' },
     heightmapView: { ok: (c) => !c.volOn, text: 'set Macroform view to Off' },
     cam15: { ok: (c) => c.camKind === 'ortho', text: 'use Cam 1-5 (an orthographic camera, not Cam 6 or Cam 7)' },
@@ -130,6 +131,11 @@
     // ---- 3 Stage
     e('stagePreset', '#stagePreset', '3 Stage', ALL, [], null, { keep: true }),
     e('contract', '#t-contract', '3 Stage', ALL, [], 'Art contract placeholders: a body tint per face, framing stones at drops, borders and the shore, the landmark footprint shade and props. Drawn in Box, A, B and C. Props only on packs with landmarks (Shrine-Pier, Shrine-Pier x4).'),
+    e('tilesPerH', '#s-tilesPerH', '3 Stage', ALL, ['stageWin'], 'Stage unit: tiles per H, the height of a hero (1 H = this many tiles, horizontally and vertically). 2 = the approved convention "a character is 2 tiles tall". It sets the hero size and the camera distance; the terrain does not change.'),
+    e('heroFrac', '#s-heroFrac', '3 Stage', ALL, ['stageWin'], 'Cam 6 zoom: the hero at the pivot measures this share of the panel height. 0.14 = the reference of the design passes.'),
+    e('stageFollow', '#t-stageFollow', '3 Stage', ALL, ['stageWin'], 'Follow the hero: Cam 6 keeps the hero centre at the screen centre (clamped at the window, never on the far side). A manual pan, zoom or orbit suspends it; press it again (or double-click the view) to follow again.'),
+    e('stagePrev', '#stagePrev', '3 Stage', ALL, ['stageWin'], 'Move the hero to the centre of the previous room of the window.'),
+    e('stageNext', '#stageNext', '3 Stage', ALL, ['stageWin'], 'Move the hero to the centre of the next room of the window.'),
     // ---- 4 Curves (C)
     e('curvesPreset', '#curvesPreset', '4 Curves (C)', ['C'], ['techC'], 'Displacement rules of C: Ordered, Balanced or Natural.', { badge: 'C' }),
     e('wallPass', '#wallPass', '4 Curves (C)', ['C'], ['techC'], 'Blocks built in front of C\'s walls: T3 strata blocks (default), T2 Voronoi blocks, Off. Not the same as Wall dressing (all techniques).', { badge: 'C' }),

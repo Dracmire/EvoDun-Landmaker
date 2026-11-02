@@ -74,16 +74,16 @@
     const yaw = view.yaw * Math.PI / 180, pit = view.pitch * Math.PI / 180, cy = Math.cos(yaw), sy = Math.sin(yaw), sp = Math.sin(pit), cp = Math.cos(pit);
     const base = S.baseH !== undefined ? S.baseH : S.levelH[0] - P.terH, top = S.levelH[S.maxFine];
     const fb = S.sliceBox ? [S.sliceBox.x0 - 2, S.sliceBox.y0 - 2, S.sliceBox.x1 + 2, S.sliceBox.y1 + 2] : [0, 0, S.W, S.H], hs = S.fitH || [base, top + 1.5];
-    const hF = (Math.min(...hs) + Math.max(...hs)) / 2, tanH = Math.tan(PERSP_FOV / 2);
+    const hF = view.focus ? view.focus[2] : (Math.min(...hs) + Math.max(...hs)) / 2 + (E.stageTest && E.stageTest.focusLeak ? 0.01 : 0), tanH = Math.tan(PERSP_FOV / 2); // view.focus = [x, y, h] (optional, the Stage hero tracking, src/stage.js): the pivot is that point; absent = the camera of today
     const relTo = (X0, Y0) => (x, y, hh) => { const X = x - X0, Y = y - Y0, hp = hh - hF, u = sy * X + cy * Y; return [cy * X - sy * Y, u * sp - hp * cp, u * cp + hp * sp]; }; // [a, v, n] around the pivot
     const cornersAt = (X0, Y0) => { const rel = relTo(X0, Y0), c = []; for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of hs) c.push(rel(x, y, hh)); return c; };
     const extentOf = (corners, D) => { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const [a, v, n] of corners) { const k = D / Math.max(D - n, 0.05 * D), px = a * k, py = v * k; x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py); } return [x0, x1, y0, y1]; };
     const f = ((view.persH || h) / 2) / tanH, avail = [w - 20, h - 20], sc1 = view.fitSc || 0;
     // THE PIVOT is the ground point under the screen centre (at the focus height hF, the middle of the fit heights): at zoom 1 it is chosen so that the box is centred. Alternate between the
     // fit scale (when no shared one is given), D = f / sc and the pivot until they agree (a few passes). With a shared fit scale (compare panels) every panel gets the same pivot.
-    let X0 = (fb[0] + fb[2]) / 2, Y0 = (fb[1] + fb[3]) / 2, sc0 = 0;
+    let X0 = view.focus ? view.focus[0] : (fb[0] + fb[2]) / 2, Y0 = view.focus ? view.focus[1] : (fb[1] + fb[3]) / 2, sc0 = 0;
     { const e = extentOf(cornersAt(X0, Y0), 1e9); sc0 = Math.min(avail[0] / (e[1] - e[0]), avail[1] / (e[3] - e[2])); }
-    for (let it = 0; it < 14; it++) {
+    for (let it = 0; it < 14 && !view.focus; it++) { // (with a focus the pivot is given: no fit loop)
       const corners = cornersAt(X0, Y0), dMin = Math.max(...corners.map((c) => c[2])) + 1, D = Math.max(f / (sc1 || sc0), dMin), e = extentOf(corners, D);
       const ecx = (e[0] + e[1]) / 2, ecy = (e[2] + e[3]) / 2, hp = 0, u1 = (ecy * D) / (D * sp + ecy * cp), n1 = u1 * cp, a1 = ecx * (D - n1) / D; // the ground point (on the plane hF) that the centre of the box has on screen, relative to the pivot
       X0 += cy * a1 + sy * u1; Y0 += -sy * a1 + cy * u1;
@@ -794,7 +794,7 @@
 
   E.levelColor = levelColor; // exposed for the tests
     E.makeCam = makeCam;
-  E.fitScale = (S, P, view, w, h) => makeCam(S, P, Object.assign({}, view, { fitSc: 0, zoom: 1, panX: 0, panY: 0 }), w, h).fit; // px per tile at zoom 1 for a panel of w x h // exposed for the UI tests (screen position of a tile)
+  E.fitScale = (S, P, view, w, h) => makeCam(S, P, Object.assign({}, view, { fitSc: 0, zoom: 1, panX: 0, panY: 0, focus: null }), w, h).fit; // px per tile at zoom 1 for a panel of w x h // exposed for the UI tests (screen position of a tile)
 
   function* drawSceneG(ctx, w, h, S, P, tech, view, o) {
     DBG = !!o.debug; PICK = !!o.pick;
@@ -823,6 +823,7 @@
     if (o.markers) drawMarkers(ctx, cam, S, P);
     if (o.incursion) drawIncursion(ctx, cam, S, o.incursion);
     if (o.contract && E.contract) S.contractInfo = Object.assign(S.contractInfo || {}, { [tech]: E.contract.draw(ctx, cam, S, P, tech, view, o, w, h) }); // art contract placeholders (switch off = nothing here)
+    if (o.hero && E.stage) E.stage.drawHero(ctx, cam, o.hero); // the Stage hero (mode 3, src/stage.js): the last thing drawn, always on top (no visibility test: hero occlusion is Unity's)
   }
 
   /* The Box pick render as an image (CSS pixels, one code per pixel: walls kind 2 by tile, caps kind 4 by tile): the visibility test of the art contract. */

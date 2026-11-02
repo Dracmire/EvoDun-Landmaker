@@ -31,6 +31,8 @@
   const inc = { stake: null, objectives: [], mode: null }; // marks in tiles of the WHOLE map
   const NO_MODES = !!window.EVO_NO_MODES; // test-only flag (tools/ui/common.js): the whole panel as before the modes layer
   const st = { dioProto: 'off', dioFocus: null, dacAuto: true, dacShow: 'all', dacView: 'chain', roomRule: 'v164', modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
+  /* STAGE (mode 3, PR S1; src/stage.js): the hero lives in MAP coordinates; stage = the unit H and the zoom; follow = Cam 6 tracks the hero; focus = the last camera target [x, y, h] in map coordinates (frozen while the tracking is suspended) */
+  Object.assign(st, { stage: { tilesPerH: 2, heroFrac: 0.14 }, follow: true, hero: null, stageRooms: [], stageIdx: 0, focus: null, stageClamp: null });
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -132,7 +134,9 @@
     P.rooms = !!sc.rooms || !!(mode && mode.fixed.includes('t-rooms')); tick('t-rooms', P.rooms); P.pocket = !!sc.pocket; tick('t-pocket', P.pocket);
     if (sc.preset) applyRoomsPreset(sc.preset);
     sliceSel.rooms.clear(); if (sc.room) { sliceSel.whole = false; sliceSel.rooms.add(sc.room); } else sliceSel.whole = true;
-    if (sc.stage) $('#stagePreset').click(); // the Stage preset sets Cam 6, B, single view, terraces 7, spread 1.5
+    st.stageRooms = sc.roomSet ? sc.roomSet.slice() : []; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; st.follow = true; st.stage = { tilesPerH: E.stage.DEF.tilesPerH, heroFrac: E.stage.DEF.heroFrac }; syncStageUI(); // the 2D-HD window of mode 3 (an example without a roomSet has no hero)
+    if (sc.roomSet) { sliceSel.whole = false; for (const id of sc.roomSet) sliceSel.rooms.add(id); }
+    if (sc.stage || (E.stageTest && E.stageTest.presetLeak && sc.stageHero)) $('#stagePreset').click(); // (MUTATION presetLeak: the 2D-HD window applying the Stage preset) // the Stage preset sets Cam 6, B, single view, terraces 7, spread 1.5
     if (sc.terraces) setParam('terraces', sc.terraces); // after the Stage preset (an example may keep fewer terraces: the rooms change with them)
     if (sc.contract) { O.contract = true; tick('t-contract', true); }
     if (sc.cam) st.preset = sc.cam;
@@ -144,6 +148,10 @@
       st.dacShow = 'all'; const ds = $('#dacShow'); if (ds) ds.value = 'all';
       st.dacView = sc.view || 'chain'; const dv = $('#dacView'); if (dv) dv.value = st.dacView; st.roomRule = 'v164'; const rr = $('#roomRule'); if (rr) rr.value = 'v164'; setParam('ascCut', MODE2_DEF.ascCut); setParam('ascGate', MODE2_DEF.ascGate); setParam('chainExtra', 3); P.cakeCut = 'off'; const cc = $('#cakeCut'); if (cc) cc.value = 'off'; P.dioChain = MODE2_DEF.dioChain; const dcc = $('#dioChain'); if (dcc) dcc.value = P.dioChain; // the default of mode 2 is the Chain view (D23); D31: with the Diorama in chain view M2, the Ascension gate width 3 and the wall cut height 0.5 (mode 2 ONLY)
       st.dacAuto = true; const da = $('#dacAuto'); if (da) da.checked = true; applyDacRule(sc.type);
+    }
+    else if (mode && sc.stageHero) { // mode 3, the DAC window: the neutral look (no tint, no Diorama outline; the room borders on), none of mode 2's rules (the Stage preset is NOT used)
+      O.typeTint = false; O.dioOutline = false; O.roomBorders = true; tick('t-typeTint', false); tick('t-dioOutline', false); tick('t-roomBorders', true);
+      setParam('ascCut', LEGACY_DEF.ascCut); setParam('ascGate', LEGACY_DEF.ascGate); P.dioChain = LEGACY_DEF.dioChain; const dcs = $('#dioChain'); if (dcs) dcs.value = P.dioChain; syncStageUI();
     }
     else if (mode) { setParam('ascCut', LEGACY_DEF.ascCut); setParam('ascGate', LEGACY_DEF.ascGate); P.dioChain = LEGACY_DEF.dioChain; const dcl = $('#dioChain'); if (dcl) dcl.value = P.dioChain; } // the other modes keep today's values (and pixels)
     syncChips(); syncRoomChips(); refreshMessage(); invalidate(true);
@@ -159,7 +167,7 @@
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
   const MODE2_DEF = { dioChain: 'm2', ascGate: 3, ascCut: 0.5 }, LEGACY_DEF = { dioChain: 'off', ascGate: 0, ascCut: 0.15 }; // D31: the defaults of mode 2 (announced) and the values of every other mode / the legacy panel / a manifest that does not name them
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; b.dacView = st.dacView; if (P.chainExtra !== 3) b.chainExtra = P.chainExtra; if (st.roomRule !== 'v164') b.roomRule = st.roomRule; if (P.cakeCut !== 'off') b.cakeCut = P.cakeCut; b.dioChain = P.dioChain; if (st.dioProto !== 'off') b.dioProto = st.dioProto; b.ascCut = P.ascCut; b.ascGate = P.ascGate; /* D31: written ALWAYS in mode 2 (explicit values): an absent key in a loaded manifest means the OLD values (Off / 0.15 / 0), not the new mode-2 defaults */ if (P.anchors) b.anchors = true; if (P.anchorH !== 0.5) b.anchorH = P.anchorH; } if (!O.sliced) b.sliced = false; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; b.dacView = st.dacView; if (P.chainExtra !== 3) b.chainExtra = P.chainExtra; if (st.roomRule !== 'v164') b.roomRule = st.roomRule; if (P.cakeCut !== 'off') b.cakeCut = P.cakeCut; b.dioChain = P.dioChain; if (st.dioProto !== 'off') b.dioProto = st.dioProto; b.ascCut = P.ascCut; b.ascGate = P.ascGate; /* D31: written ALWAYS in mode 2 (explicit values): an absent key in a loaded manifest means the OLD values (Off / 0.15 / 0), not the new mode-2 defaults */ if (P.anchors) b.anchors = true; if (P.anchorH !== 0.5) b.anchorH = P.anchorH; } if (!O.sliced) b.sliced = false; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; if (!NO_MODES && st.modeId === 'stage') b.stage = { tilesPerH: st.stage.tilesPerH, heroFrac: st.stage.heroFrac, follow: st.follow }; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
@@ -172,6 +180,7 @@
     if (!NO_MODES && (w.mode || st.modeId) === 'rooms' && st.dacAuto && st.dacShow !== 'all') dacIsolate(st.dacShow); // the Display toggles are not in the manifest: a saved single-type view must load isolated (a Diorama view needs its outline); only while the rule is on (with it off the selector has no effect); absent or All touches nothing
     syncRoomsPreset();
     st.preset = PRESETS.some((x) => x.id === w.camera) ? w.camera : 'oblique'; st.yawOff = st.pitchOff = 0; // absent = the default camera
+    { const g = w.stage || {}; st.stage = { tilesPerH: g.tilesPerH !== undefined ? g.tilesPerH : E.stage.DEF.tilesPerH, heroFrac: g.heroFrac !== undefined ? g.heroFrac : E.stage.DEF.heroFrac }; st.follow = g.follow !== false; syncStageUI(); } // mode 3 (PR S1): absent = the defaults (the window list belongs to the example, not to the manifest)
     O.sliced = w.sliced !== false; const tsl = $('#t-sliced'); if (tsl) tsl.checked = O.sliced; // absent = on (PR G); viewer.panCache of older manifests is accepted and ignored (E2 removed)
     P.curves = E.curves.PRESETS[w.curves] ? w.curves : 'ordered'; const cs = $('#curvesPreset'); if (cs) cs.value = P.curves; // absent = Ordered
     P.wallPass = ['t3', 't2', 'off'].includes(w.wallPass) ? w.wallPass : E.wallc.DEF.wallPass; const wsel = $('#wallPass'); if (wsel) wsel.value = P.wallPass; for (const k of WALL_KEYS) setParam(k, w[k] !== undefined ? w[k] : E.wallc.DEF[k]); // absent = the defaults
@@ -236,6 +245,7 @@
         inp.addEventListener('change', () => { P[k] = +inp.value; out.textContent = P[k]; syncRoomsPreset(); refreshMessage(); invalidate(!WALL_KEYS.has(k)); }); // recompute on release (the wall pass only redraws: its parameters are in the cache key)
       }
     }
+    buildStageControls(sl);
     const tg = $('#toggles');
     for (const [k, label] of TOGGLES) {
       const l = document.createElement('label'); l.className = 'tg';
@@ -267,18 +277,25 @@
     for (const [id, k] of [['m-stake', 'stake'], ['m-obj', 'obj'], ['m-rm', 'rm']]) document.getElementById(id).addEventListener('click', () => setIncMode(inc.mode === k ? null : k));
     document.getElementById('m-clear').addEventListener('click', () => { inc.stake = null; inc.objectives = []; setIncMode(null); invalidate(false); });
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && inc.mode) setIncMode(null); });
-    $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; invalidate(false); });
+    window.addEventListener('keydown', stageKey); // mode 3: the arrow keys move the hero
+    $('#reset').addEventListener('click', () => { st.yawOff = st.pitchOff = st.panX = st.panY = 0; st.zoom = 1; if (stageOn()) { st.follow = true; syncStageUI(); } invalidate(false); }); // (mode 3: back to tracking)
     for (const k of ['backdropGap', 'backdropHeight']) { const inp = $('#s-' + k), out = $('#o-' + k); inp.value = P[k]; out.textContent = P[k]; inp.addEventListener('input', () => { out.textContent = inp.value; }); inp.addEventListener('change', () => { P[k] = +inp.value; out.textContent = P[k]; invalidate(true); }); } // the backdrop is part of the shape of the floor: recompute on release
     $('#t-backdrop').addEventListener('change', (e) => { P.backdrop = e.target.checked; invalidate(true); }); // the backdrop is part of the shape of the floor
     $('#macroView').addEventListener('change', (e) => { st.macro = e.target.value; buildMacroChips(); invalidate(false); }); // the volume view of crystallizer 6: only the draw changes (the shape of the exterior stays)
     $('#floorsView').addEventListener('change', (e) => { st.floors = e.target.value; invalidate(true); }); // single floor / exploded stack / cutaway (the shape of the primary layer changes)
     window.addEventListener('resize', () => invalidate(false));
-    $('#stage').addEventListener('wheel', (e) => { e.preventDefault(); st.zoom = Math.max(0.5, Math.min(4, st.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); invalidate(false); }, { passive: false });
+    $('#stage').addEventListener('wheel', (e) => {
+      e.preventDefault(); const f = e.deltaY < 0 ? 1.1 : 0.9;
+      if (stageOn()) { stageSuspend(); st.zoom = Math.max(0.5, Math.min(st.zoom > 4 ? 16 : 4, st.zoom * f)); } // mode 3: the step starts from the CURRENT zoom (the tracking zoom may be above 4: it is not snapped back), one wheel factor around the frozen focus
+      else st.zoom = Math.max(0.5, Math.min(4, st.zoom * f));
+      invalidate(false);
+    }, { passive: false });
     let drag = null;
     $('#stage').addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, yo: st.yawOff, po: st.pitchOff, px: st.panX, py: st.panY, shift: e.shiftKey || e.button === 2 }; st.dragging = !drag.shift; e.currentTarget.setPointerCapture(e.pointerId); });
     $('#stage').addEventListener('pointermove', (e) => {
       if (!drag) return;
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (stageOn() && st.follow && Math.hypot(dx, dy) >= 4) stageSuspend(); // a manual pan / orbit suspends the tracking (the camera does not move)
       if (drag.shift) { st.panX = drag.px + dx; st.panY = drag.py + dy; }
       else { st.yawOff = Math.max(-20, Math.min(20, drag.yo + dx * 0.15)); st.pitchOff = Math.max(-15, Math.min(15, drag.po - dy * 0.15)); }
       invalidate(false);
@@ -287,6 +304,7 @@
       const moved = drag ? Math.hypot(e.clientX - drag.x, e.clientY - drag.y) : 99, was = drag; drag = null;
       if (st.dragging) { st.dragging = false; if (E.hasFloors(packs[st.pack].pack) && st.floors === 'cut') invalidate(false); } // the cutaway plane follows the yaw: recomputed on release, not on every move
       if (inc.mode && was && !was.shift && e.button === 0 && moved < 4) clickMap(e);
+      else if (!inc.mode && stageOn() && was && !was.shift && e.button === 0 && moved < 4) clickHero(e);
       else if (!inc.mode && P.pocket && P.rooms && was && !was.shift && e.button === 0 && moved < 4) clickRoom(e);
     });
     $('#stage').addEventListener('dblclick', () => $('#reset').click());
@@ -668,7 +686,70 @@
     const p = PRESETS.find((x) => x.id === st.preset);
     if (p.kind === 'oblique') return { kind: 'oblique', yaw: 0, pitch: 0, zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc }; // Cam 7 has no angle: the drag variation does not apply
     const sy0 = baseYaw(); // the camera's own yaw (a pack may declare stageYaw: the yaw of Cam 6, no UI)
-    return { kind: p.kind, yaw: sy0 + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc, persH: st.persH };
+    const v = { kind: p.kind, yaw: sy0 + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc, persH: st.persH };
+    if (p.kind === 'persp' && stageOn() && S && st.hero) v.focus = stageFocus(v); // Cam 6 hero tracking (mode 3 with a window only); absent = the camera of today
+    return v;
+  }
+  /* ---- STAGE (mode 3, PR S1): the hero, the tracking, the readout ---- */
+  const stageOn = () => !NO_MODES && st.modeId === 'stage' && st.stageRooms.length > 0;
+  const stageDims = () => { const f = $('#stage').children[0], cv = f && f.querySelector('canvas'); return cv ? [cv.clientWidth, st.persH || cv.clientHeight] : [0, 0]; };
+  function heroWin() { return { x: st.hero.x - S.ox, y: st.hero.y - S.oy }; } // the hero in window coordinates
+  function heroFeet() { const w = heroWin(), i = E.stage.cellOf(S, w.x, w.y); return i < 0 ? S.levelH[0] : E.stage.feetH(S, i); }
+  /* the camera target: the hero centre (feet + 0.5 H), clamped at the rooms box sideways and on the near side; frozen at the last target while the tracking is suspended. Stored in MAP coordinates. */
+  function stageFocus(v) {
+    const sg = E.stage, tp = st.stage.tilesPerH, hc = heroFeet() + (E.stageTest && E.stageTest.pivotGround ? 0 : 0.5 * tp); // (MUTATION pivotGround: the pivot on the ground instead of the hero centre)
+    if (!st.follow && st.focus) return [st.focus[0] - S.ox, st.focus[1] - S.oy, st.focus[2]];
+    const [w, h] = stageDims(), hw = heroWin(), box = S.sliceBox || { x0: 0, y0: 0, x1: S.W, y1: S.H };
+    const c = w > 0 && h > 0 ? sg.clamp(hw.x, hw.y, box, v.yaw, v.pitch, sg.dist(st.stage.heroFrac, tp), w, h) : { x: hw.x, y: hw.y, clamped: false };
+    st.stageClamp = c.clamped ? c : null; st.focus = [c.x + S.ox, c.y + S.oy, hc]; return [c.x, c.y, hc];
+  }
+  function setHero(x, y) { st.hero = { x, y }; invalidate(false); }
+  function stageBeforeDraw() { // in draw(), after the fit: the hero exists, the tracking sets the zoom, O.hero is what the renderer draws
+    O.hero = null; if (!stageOn()) return;
+    if (!st.hero) { const c = E.stage.roomCentre(S, st.stageRooms[st.stageIdx]); if (c) st.hero = { x: S.ox + c.x, y: S.oy + c.y }; }
+    if (!st.hero) return;
+    const sg = E.stage, tp = st.stage.tilesPerH, [, h] = stageDims();
+    if (st.follow && st.fitSc > 0 && h > 0) { st.zoom = sg.scale(h, E.stageTest && E.stageTest.noHeroFrac ? sg.DEF.heroFrac : st.stage.heroFrac /* MUTATION noHeroFrac: the distance not coupled to heroFrac */, tp) / st.fitSc; st.panX = st.panY = 0; } // the tracking owns the zoom and the pan (a manual one suspends it)
+    const w = heroWin(); O.hero = { x: w.x, y: w.y, feet: heroFeet(), hTiles: tp, wTiles: sg.HERO_W * tp };
+  }
+  function stageSuspend() { if (!st.follow) return; if (!st.focus && S && st.hero) stageFocus(view()); st.follow = false; syncStageUI(); } // the camera stays where it is: the frozen focus plus the manual deltas
+  function syncStageUI() { const t = $('#t-stageFollow'); if (t) t.checked = st.follow; for (const k of ['tilesPerH', 'heroFrac']) { const i = $('#s-' + k), o = $('#o-' + k); if (i) i.value = st.stage[k]; if (o) o.textContent = st.stage[k]; } }
+  function stageJump(d) { // the previous / next room of the window list: the hero goes to its centre and the camera follows again
+    if (!S || !stageOn()) return; const n = st.stageRooms.length; st.stageIdx = (st.stageIdx + d + n) % n;
+    const c = E.stage.roomCentre(S, st.stageRooms[st.stageIdx]); if (!c) return; st.follow = true; st.panX = st.panY = st.yawOff = st.pitchOff = 0; syncStageUI(); setHero(S.ox + c.x, S.oy + c.y);
+  }
+  function clickHero(e) { // a click on a walkable cap places the hero (the visible tile, the same pick render as the stake)
+    if (!S || !stageOn()) return; const f = $('#stage').children[0], cv = f.querySelector('canvas'), r = cv.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return;
+    const put = (hit) => { if (hit && hit.tile >= 0 && E.stage.walkable(S, hit.tile)) setHero(S.ox + (hit.tile % S.W) + 0.5, S.oy + ((hit.tile / S.W) | 0) + 0.5); };
+    if (O.sliced) { st.pickJob = E.pickTileSliced(S, P, st.tech, view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top, put); return; }
+    put(E.pickTile(S, P, st.tech, view(), cv.clientWidth, cv.clientHeight, e.clientX - r.left, e.clientY - r.top));
+  }
+  function stageKey(e) {
+    if (!stageOn() || !S || !st.hero || e.ctrlKey || e.metaKey || e.altKey) return; const t = e.target && e.target.tagName; if (/^(INPUT|SELECT|TEXTAREA)$/.test(t) && !(t === 'INPUT' && e.target.type === 'checkbox')) return;
+    const dir = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' }[e.key]; if (!dir) return; e.preventDefault();
+    const n = E.stage.move(S, heroWin(), dir, view().yaw, st.stage.tilesPerH); if (n) setHero(S.ox + n.x, S.oy + n.y);
+  }
+  function stageText() { // the readout of mode 3 (a window example only)
+    if (!stageOn() || !S || !st.hero) return '';
+    const sg = E.stage, tp = st.stage.tilesPerH, ts = sg.terraceSteps(S, P, tp), hw = heroWin(), i = sg.cellOf(S, hw.x, hw.y), [w, h] = stageDims(), hs = O.hero && O.hero.stats;
+    let rt = null; try { const cam = E.makeCam(S, P, view(), w, h); rt = sg.ratios(cam, w, h, heroFeet()); } catch (err) { rt = null; }
+    const c = st.stageClamp, flags = c ? [c.side === 'C' ? 'narrow window' : c.side === 'L' ? 'left' : c.side === 'R' ? 'right' : '', c.near ? 'near' : ''].filter(Boolean).join(' + ') : '';
+    return `<b>Stage</b> (2D-HD S1): 1 H = ${tp} tiles · terrace step ${ts ? (ts.min === ts.max || ts.max - ts.min < 1e-9 ? ts.min.toFixed(2) : ts.min.toFixed(2) + '-' + ts.max.toFixed(2)) : '-'} H · hero ${hs && h ? (100 * hs.hpx / h).toFixed(1) + ' % of the panel' : '-'} · near/hero ${rt ? rt.near.toFixed(2) : '-'} · far/hero ${rt ? rt.far.toFixed(2) : '-'} · cell (${Math.floor(st.hero.x)}, ${Math.floor(st.hero.y)}) · room ${i >= 0 ? S.roomMap[i] : 0} · ${!st.follow ? 'follow off' : c ? '<b>CLAMP</b> (' + flags + ')' : 'following'}<br>`; // first in the line: the fixed-height info box scrolls, the readout of mode 3 must be the first thing seen
+  }
+  function buildStageControls(sl) { // the controls of mode 3 (the panel without modes hides them)
+    for (const [k, label, [mn, mx, step]] of [['tilesPerH', 'Stage unit: tiles per H (hero height)', E.stage.RANGE.tilesPerH], ['heroFrac', 'Hero share of the panel height (Cam 6 zoom)', E.stage.RANGE.heroFrac]]) {
+      const row = document.createElement('label'); row.className = 'sl'; row.innerHTML = `<span>${label}</span><output id="o-${k}"></output><input type="range" id="s-${k}" min="${mn}" max="${mx}" step="${step}">`;
+      if (NO_MODES) row.hidden = true; sl.appendChild(row);
+      const inp = row.querySelector('input'), out = row.querySelector('output'); inp.value = st.stage[k]; out.textContent = st.stage[k];
+      inp.addEventListener('input', () => { out.textContent = inp.value; });
+      inp.addEventListener('change', () => { st.stage[k] = +inp.value; out.textContent = st.stage[k]; invalidate(false); });
+    }
+    const lf = document.createElement('label'); lf.className = 'tg'; lf.innerHTML = '<input type="checkbox" id="t-stageFollow"><span>Follow the hero (Cam 6)</span>'; if (NO_MODES) lf.hidden = true;
+    const fi = lf.querySelector('input'); fi.checked = st.follow; fi.addEventListener('change', () => { st.follow = fi.checked; if (st.follow) st.panX = st.panY = st.yawOff = st.pitchOff = 0; invalidate(false); }); sl.appendChild(lf);
+    for (const [id, label, d] of [['stagePrev', '‹ Previous room', -1], ['stageNext', 'Next room ›', 1]]) {
+      const r = document.createElement('div'); r.className = 'row'; r.innerHTML = `<button id="${id}">${label}</button>`; if (NO_MODES) r.hidden = true; r.querySelector('button').addEventListener('click', () => stageJump(d)); sl.appendChild(r);
+    }
   }
 
   function draw() {
@@ -733,6 +814,7 @@
     const multi = fl && st.floors !== 'single' && view().kind !== 'persp'; // the stack and the cutaway are orthographic only: Cam 6 shows the selected floor
     const FLS = multi ? E.floors.layers(S, raw, P, view(), st.floors, !!st.dragging) : null; O.incursion = FLS ? null : O.incursion; st.floorsLayers = FLS;
     const f0 = stage.children[0]; st.persH = f0.clientHeight; st.fitSc = volView ? E.volume.fitScale(raw, view(), f0.clientWidth, f0.clientHeight) : E.fitScale(S, P, view(), f0.clientWidth, f0.clientHeight); // persH: the first panel's height, so Cam 6 has one camera for every panel
+    stageBeforeDraw(); // mode 3 with a window: the hero, the tracking zoom and O.hero (O.hero = null everywhere else)
     if (st.dioFocus && !volView && focusDio(st.dioFocus)) st.dioFocus = null; // a prototype frames its host once the plan exists (before the view is read below)
     const token = ++drawToken, v = view(), t0 = st.t0 || performance.now();
     const lateKey = (t) => (t === 'B' ? 'Bready:' + P.radius + ':' + P.anchor : 'Cready:' + E.curves.key(P)), late = techs.filter((t) => (t === 'B' || t === 'C') && (!S.cache[lateKey(t)] || (FLS && FLS.dirty))), needB = late.length > 0; // B and C: the first draw is the slow one, painted after the other panels
@@ -744,7 +826,7 @@
       f.querySelector('figcaption').innerHTML = `<b>${TECH.find((x) => x[0] === t)[1]}</b><span>${r.polys} polys · ${r.walls} walls · ${r.verts} verts · ${r.ms.toFixed(0)} ms</span>`;
       if (t === 'B' || t === 'C') S.cache[lateKey(t)] = true;
     };
-    if (O.sliced && !FLS && !volView && techs.length === 1 && !O.contract && v.kind !== 'persp' && !late.includes(techs[0])) { slicedFrame(techs[0], v, techs, token, t0); return; } // PR F1': the exact frame in slices (the others: the monolithic frame below)
+    if (O.sliced && !FLS && !volView && techs.length === 1 && !O.contract && !O.hero && v.kind !== 'persp' && !late.includes(techs[0])) { slicedFrame(techs[0], v, techs, token, t0); return; } // PR F1': the exact frame in slices (the others: the monolithic frame below)
     slCancel(); // (a frame of the sliced option that was pending belongs to a state that is gone)
     const surv = {}, survOf = (t, now) => { if (t !== 'box' && techs.includes(t) && (now || !late.includes(t))) surv[t] = E.stairSurvival(S, P, t); };
     techs.forEach((t, i) => {
@@ -896,7 +978,7 @@
   /* the live state the control requirements are evaluated from (src/controls.js): after every recompute / redraw */
   function controlsCtx() {
     const raw = packs[st.pack] && packs[st.pack].pack, T = S && S.types ? S.types.counts : null, F = (S && S.fields) || {}, any = (a) => !!(a && a.some((v) => v));
-    return { rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket, dacAuto: dacOn(), dacWhole: dacOn() && !sliceSel.rooms.size, dacView: st.dacView, chainOn: !!(S && S.chain), chainView: dacChainOn(), anchors: !!P.anchors,
+    return { stageWin: stageOn(), rooms: !!P.rooms, roomsFound: !!(S && S.rooms && !S.roomsNone), cakeRooms: T ? T.cake : 0, ascRooms: T ? T.ascension : 0, dioRooms: T ? T.diorama : 0, cake: !!P.cake, ascWalls: !!P.ascWalls, pocket: !!P.pocket, dacAuto: dacOn(), dacWhole: dacOn() && !sliceSel.rooms.size, dacView: st.dacView, chainOn: !!(S && S.chain), chainView: dacChainOn(), anchors: !!P.anchors,
       techs: st.mode === 'compare' ? ALL_TECH : [st.tech], wallPass: P.wallPass, stairW: P.stairW, stairStyle: P.stairStyle, subs: P.subs, climb: P.climb, terraces: P.terraces, slice: !!(S && S.slice), passes: S && S.passes ? S.passes.length : 0,
       packMasks: !!S && (any(S.water) || any(S.waterfall) || any(S.cave)), markers: !!S && ((S.markers && S.markers.length > 0) || !!S.landmarks), zoneRole: !!F.zone, edgeRole: !!F.edge, maskRole: !!(F.path || F.vegetation || F.poi), images: imgs.length > 0,
       floors: E.hasFloors(raw), backdrop: !!P.backdrop, floorsView: st.floors, camKind: view().kind, preset: st.preset, macro: !!(E.volume && E.volume.has(raw)), macroView: st.macro, volOn: volActive() };
@@ -916,7 +998,7 @@
     const zn = S.fields.zone ? ` · ${S.fields.zone.info.classes.length} zones` : '';
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
-    $('#info').innerHTML = (NO_MODES ? '' : dioHostLine()) + `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText() + macroText();
+    $('#info').innerHTML = (NO_MODES ? '' : dioHostLine()) + stageText() + `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText() + macroText();
     E.controls.refresh(document, controlsCtx()); // requirements of every control, from the live state
     modeRefresh(); // the modes layer: what the current mode shows (after the requirements, so the greyed tooltips are already set)
   }

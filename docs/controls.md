@@ -103,6 +103,11 @@ Techniques: Box, A, B, C = the panels the control changes; a badge [A] / [B] / [
 |---|---|---|---|
 | stagePreset | all | - | (keeps its own tooltip: see the title in the viewer) |
 | contract | all | - | Art contract placeholders: a body tint per face, framing stones at drops, borders and the shore, the landmark footprint shade and props. Drawn in Box, A, B and C. Props only on packs with landmarks (Shrine-Pier, Shrine-Pier x4). |
+| tilesPerH | all | choose the example "DAC window (2D-HD, S1)" of mode 3 (the legacy contract examples have no hero) | Stage unit: tiles per H, the height of a hero (1 H = this many tiles, horizontally and vertically). 2 = the approved convention "a character is 2 tiles tall". It sets the hero size and the camera distance; the terrain does not change. |
+| heroFrac | all | choose the example "DAC window (2D-HD, S1)" of mode 3 (the legacy contract examples have no hero) | Cam 6 zoom: the hero at the pivot measures this share of the panel height. 0.14 = the reference of the design passes. |
+| stageFollow | all | choose the example "DAC window (2D-HD, S1)" of mode 3 (the legacy contract examples have no hero) | Follow the hero: Cam 6 keeps the hero centre at the screen centre (clamped at the window, never on the far side). A manual pan, zoom or orbit suspends it; press it again (or double-click the view) to follow again. |
+| stagePrev | all | choose the example "DAC window (2D-HD, S1)" of mode 3 (the legacy contract examples have no hero) | Move the hero to the centre of the previous room of the window. |
+| stageNext | all | choose the example "DAC window (2D-HD, S1)" of mode 3 (the legacy contract examples have no hero) | Move the hero to the centre of the next room of the window. |
 
 ## 4 Curves (C)
 

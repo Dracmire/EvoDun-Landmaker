@@ -53,20 +53,20 @@ Room types (Diorama, Ascension, Cake) on a map with rooms: Cake rings, Ascension
 
 ## 3 Stage
 
-The Stage: Cam 6 perspective, technique B and the Art contract (body, wrapper, footprint, props), as it stands.
+The 2D-HD Stage (S1: the base): a window of rooms of the DAC data in hero heights (H), a hero placeholder and the Cam 6 tracking of the hero. The Art contract examples are kept as legacy. Diorama technique (Pocket, M2 height) in mode 3 needs a multi-room Pocket: later PR.
 
-Banner: **IN REDESIGN: frozen as it is; the Stage waits for its own design pass.**
+Banner: **2D-HD crystallizer: in construction (S1)**
 
 | field | value |
 |---|---|
 | id | `stage` |
-| examples (first = default) | Shrine-Pier x4 · Stage (`shrine_pier_x4`); Diorama 31 · Stage (`real_map`) |
+| examples (first = default) | DAC window (2D-HD, S1) (`real_map`); Shrine-Pier x4 · Stage (legacy contract) (`shrine_pier_x4`); Diorama 31 · Stage (legacy contract) (`real_map`) |
 | camera (default) | `stage` |
 | cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic` |
 | technique (default) | `B` |
 | techniques offered | `B` |
 | compare | no |
-| main controls | `contract` |
+| main controls | `contract`, `tilesPerH`, `heroFrac`, `stageFollow`, `stagePrev`, `stageNext` |
 | advanced controls (folded) | - |
 | slice controls | - |
 | terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |

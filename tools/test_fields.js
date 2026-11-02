@@ -206,6 +206,13 @@ const zoneImg = (extra) => rgba(W, H, (x, y) => {
         ok(`manifest viewer block: a non-boolean ${k} is rejected with a clear error`, new RegExp(`viewer\\.${k} must be true or false`).test(m), m);
       }
     }
+    { // stage (PR S1, mode 3): an optional object { tilesPerH 1.5-4, heroFrac 0.08-0.25, follow }, round trip, clear errors, absent = fine
+      const v0 = { mode: 'stage', stage: { tilesPerH: 3, heroFrac: 0.17, follow: false } }, rt = E.parseManifest(JSON.parse(JSON.stringify(E.buildManifest({ name: 'v', roles: {}, viewer: v0 }))));
+      ok('manifest viewer block: stage survives a round trip', JSON.stringify(rt.viewer.stage) === JSON.stringify(v0.stage) && rt.viewer.mode === 'stage', JSON.stringify(rt.viewer));
+      ok('manifest viewer block: a manifest without stage loads', E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { mode: 'stage' } }).viewer.stage === undefined);
+      let n = 0; for (const bad of [{ tilesPerH: 1 }, { tilesPerH: 5 }, { tilesPerH: '2' }, { heroFrac: 0.05 }, { heroFrac: 0.3 }, { follow: 'yes' }, 3, [], null]) { try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { stage: bad } }); } catch (e) { if (/viewer\.stage/.test(e.message)) n++; } }
+      ok('manifest viewer block: out-of-range or wrong-type stage values are rejected with a clear error', n === 9, n);
+    }
     { // dacShow (DAC mode 2 "Show framing", docs/ui-modes.md U11): a closed list, round trip, a clear error
       const rt3 = E.parseManifest(JSON.parse(JSON.stringify(E.buildManifest({ name: 'v', roles: {}, viewer: { mode: 'rooms', dacAuto: true, dacShow: 'diorama' } }))));
       ok('manifest viewer block: dacShow survives a round trip', rt3.viewer.dacShow === 'diorama' && rt3.viewer.dacAuto === true, JSON.stringify(rt3.viewer));
