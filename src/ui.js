@@ -286,7 +286,7 @@
     window.addEventListener('resize', () => invalidate(false));
     $('#stage').addEventListener('wheel', (e) => {
       e.preventDefault(); const f = e.deltaY < 0 ? 1.1 : 0.9;
-      if (stageOn()) { stageSuspend(); st.zoom = Math.max(0.5, Math.min(st.zoom > 4 ? 16 : 4, st.zoom * f)); } // mode 3: the step starts from the CURRENT zoom (the tracking zoom may be above 4: it is not snapped back), one wheel factor around the frozen focus
+      if (stageOn()) { stageSuspend(); st.zoom = Math.max(0.5, Math.min(Math.max(4, 2 * (st.trackZoom || 0)), st.zoom * f)); } // mode 3: the step starts from the CURRENT zoom (the tracking zoom may be above 4: it is not snapped back), one wheel factor around the frozen focus; the cap is max(4, 2 x the last tracking zoom), so the wheel can always get back to the tracking zoom
       else st.zoom = Math.max(0.5, Math.min(4, st.zoom * f));
       invalidate(false);
     }, { passive: false });
@@ -709,7 +709,7 @@
     if (!st.hero) { const c = E.stage.roomCentre(S, st.stageRooms[st.stageIdx]); if (c) st.hero = { x: S.ox + c.x, y: S.oy + c.y }; }
     if (!st.hero) return;
     const sg = E.stage, tp = st.stage.tilesPerH, [, h] = stageDims();
-    if (st.follow && st.fitSc > 0 && h > 0) { st.zoom = sg.scale(h, E.stageTest && E.stageTest.noHeroFrac ? sg.DEF.heroFrac : st.stage.heroFrac /* MUTATION noHeroFrac: the distance not coupled to heroFrac */, tp) / st.fitSc; st.panX = st.panY = 0; } // the tracking owns the zoom and the pan (a manual one suspends it)
+    if (st.follow && st.fitSc > 0 && h > 0) { st.zoom = st.trackZoom = sg.scale(h, E.stageTest && E.stageTest.noHeroFrac ? sg.DEF.heroFrac : st.stage.heroFrac /* MUTATION noHeroFrac: the distance not coupled to heroFrac */, tp) / st.fitSc; st.panX = st.panY = 0; } // the tracking owns the zoom and the pan (a manual one suspends it)
     const w = heroWin(); O.hero = { x: w.x, y: w.y, feet: heroFeet(), hTiles: tp, wTiles: sg.HERO_W * tp };
   }
   function stageSuspend() { if (!st.follow) return; if (!st.focus && S && st.hero) stageFocus(view()); st.follow = false; syncStageUI(); } // the camera stays where it is: the frozen focus plus the manual deltas
