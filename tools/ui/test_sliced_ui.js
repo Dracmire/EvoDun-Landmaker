@@ -79,11 +79,13 @@ const PANEL_VS_MONO = (hs) => { const E = window.EVO, e = window.__evo, S = e.S(
     const s1 = await ev(() => window.__evo.slStats()); await wheel(10, 0); await settle(page, a); const s2 = await ev(() => window.__evo.slStats()); r = await ev(PANEL_VS_MONO, HASH_SRC);
     ok(`COALESCING: ten quick wheel notches start ${s2.started - s1.started} render(s) (about 0.12 s after the last notch) and the frame is exact`, s2.started - s1.started === 1 && r.same);
     const s3 = await ev(() => window.__evo.slStats()); await wheel(10, 30); await settle(page, a); const s4 = await ev(() => window.__evo.slStats()); ok(`COALESCING: ten notches 30 ms apart start ${s4.started - s3.started} render(s)`, s4.started - s3.started === 1);
-    // the pan cache loses to the sliced frame
-    await page.check('#t-panCache'); await a.idle(); await page.keyboard.down('Shift'); await page.mouse.move(b.x + 300, b.y + 300); await page.mouse.down(); for (let i = 1; i <= 6; i++) await page.mouse.move(b.x + 300 + i * 8, b.y + 300 + i * 3); await page.mouse.up(); await page.keyboard.up('Shift'); await settle(page, a);
-    const pl = await ev(() => ({ lay: !!window.__evo.st.panLay, frames: window.__evo.st.panFrames || 0 })); r = await ev(PANEL_VS_MONO, HASH_SRC); ok(`WITH BOTH OPTIONS ON the sliced frame wins: no pan-cache layer (${pl.lay}), no blit frames (${pl.frames}), the frame after a drag is exact`, !pl.lay && pl.frames === 0 && r.same);
+    // RESHAPE WHILE A FRAME IS PENDING (found by test_slice_ui when the option became the default): a shape change sets S = null before draw() runs; the pending frame / pick must be cancelled, not finish on S = null
+    { const e0 = a.errs.length; await page.click('#reset'); await wheel(1, 0); await page.waitForTimeout(250);
+      const sync = await page.evaluate(() => { const e = window.__evo, before = !!e.st.sl; const el = document.querySelector('#s-terraces'); el.value = +el.value === 5 ? 4 : 5; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); return { before, after: !!e.st.sl, shape: e.S() === null }; }); // all in ONE task: no slice can run in between
+      await page.waitForTimeout(400); await settle(page, a);
+      ok(`a shape change while a frame is pending cancels it at once (pending before ${sync.before}, after ${sync.after}, S null ${sync.shape}) and leaves no page error`, sync.before && !sync.after && sync.shape && a.errs.length === e0, a.errs.slice(e0).join(' | ')); }
     // MUTATIONS in the UI: an option changed while a frame is pending
-    await page.uncheck('#t-panCache'); await a.idle(); await page.click('#reset'); await settle(page, a); await wheel(1, 0); await page.waitForTimeout(250); // the default framing (a frame of about a second) is running now
+    await page.click('#reset'); await settle(page, a); await wheel(1, 0); await page.waitForTimeout(250); // the default framing (a frame of about a second) is running now
     await ev(() => { window.EVO.sliceTest = { keepStale: true }; }); await page.uncheck('#t-outlines'); await page.waitForTimeout(100); await ev(() => { window.EVO.sliceTest = null; });
     await settle(page, a); r = await ev(PANEL_VS_MONO, HASH_SRC); ok('MUTATION a pending frame not cancelled by a change of the state: the frame after the change FAILS the IDENTITY check', !r.same);
     await page.check('#t-outlines'); await settle(page, a); r = await ev(PANEL_VS_MONO, HASH_SRC);

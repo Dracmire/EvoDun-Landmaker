@@ -198,7 +198,7 @@ const zoneImg = (extra) => rgba(W, H, (x, y) => {
     ok('manifest viewer block: a partial block keeps only its fields', JSON.stringify(E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { terraces: 3 } }).viewer) === JSON.stringify({ terraces: 3 }));
     let bad = 0; for (const v of [{ terraces: 1 }, { terraces: 25 }, { roomsMinCore: 4 }, { roomsMinCore: 251 }, { rRadius: 2 }, { rRadius: 31 }, { minPlateau: 0 }, { minPlateau: 301 }, { terraces: 3.5 }, { rooms: 'yes' }, { cake: 1 }, { preset: 'other' }]) { try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: v }); } catch (e) { bad++; } }
     ok('manifest viewer block: out-of-range or wrong-type values are rejected', bad === 12, bad);
-    { // sliced (PR F1': Display switch "Time-sliced frame"): a boolean, round trip, a clear error; panCache the same
+    { // sliced (PR F1': Display switch "Time-sliced frame"): a boolean, round trip, a clear error; panCache (E2, removed in PR G) is still accepted and ignored
       for (const k of ['sliced', 'panCache']) {
         const rt = E.parseManifest(JSON.parse(JSON.stringify(E.buildManifest({ name: 'v', roles: {}, viewer: { [k]: true } }))));
         ok(`manifest viewer block: ${k} survives a round trip`, rt.viewer[k] === true, JSON.stringify(rt.viewer));

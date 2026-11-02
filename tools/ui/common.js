@@ -23,6 +23,9 @@ exports.open = async (opts = {}) => {
   if (process.env.EVO_INFO_H) await page.addInitScript((h) => { const add = () => { const st = document.createElement('style'); st.textContent = `#info{box-sizing:border-box;height:${h}px;overflow-y:auto}`; document.documentElement.appendChild(st); }; if (document.documentElement) add(); else new MutationObserver((m, o) => { if (document.documentElement) { o.disconnect(); add(); } }).observe(document, { childList: true }); }, process.env.EVO_INFO_H); // at init time the <html> element may not exist yet: wait for it (a null documentElement made the first version throw and inject nothing)
   await page.goto('file://' + path.join(ROOT, 'index.html'));
   await page.waitForFunction(() => window.__evo);
+  /* the pick render of a click is sliced when the option is on (the default since PR G): the real mouse click returns before the mark is placed, so a test that reads the state right after it waits for the pick (older trees have no slStats().pick: nothing to wait for) */
+  const click0 = page.mouse.click.bind(page.mouse);
+  page.mouse.click = async (...args) => { await click0(...args); await page.waitForFunction(() => !(window.__evo && window.__evo.slStats && window.__evo.slStats().pick), null, { timeout: 180000 }); };
   const api = {
     browser, page, errs,
     idle: () => page.waitForFunction(() => document.querySelector('#busy').hidden && !(window.__evo && window.__evo.slStats && window.__evo.slStats().pending), null, { timeout: 180000 }).then(() => page.waitForTimeout(350)),
