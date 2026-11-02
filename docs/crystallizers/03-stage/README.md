@@ -2,7 +2,36 @@
 
 ## 1. Status
 
-DESIGN DRAFT, not approved. No code. Written 2026-10-09 after a day of throwaway mocks (section 8).
+**REDESIGN IN PROGRESS (2026-11-02).** The 2D-HD design is closed in the user's own project (design passes v25-v91) and becomes mode 3 of the viewer in six PRs, S1-S6. The old Stage (the Cam 6 preset + the Art contract MVP, sections 2-9 below) is kept as **legacy examples** of mode 3 (`x4_stage`, `diorama31_stage`; byte-identical to before S1). The text of sections 2-9 is the history of that MVP; where a decision below is marked SUPERSEDED it no longer rules the new crystallizer.
+
+| PR | Scope |
+|---|---|
+| **S1** (this one) | the base: a DAC window of 6 rooms, units in hero heights H, a hero placeholder, Cam 6 hero tracking with the clamp, the readout |
+| S2 | borders (by type of Diorama) |
+| S3 | transitions (levels) |
+| S4 | objects with a height in H, and the landmark (billboards: R4 below) |
+| S5 | the treatment JSON |
+| S6 | the paired-shot tool |
+
+### Integration rules (S1 and every later Stage PR)
+- **R1** Mode 3 is its row in `src/modes.js` (examples, Cam 6, techniques, controls); the modes layer only shows / hides controls and sets parameters.
+- **R2** Every new Stage pass is a switch in the common pipeline, OFF by default; with it OFF the pixels are identical (`tools/verify.sh regress`: 0 differences). Same rule as crystallizer 2.
+- **R3** Geometry passes are tile-resolution stages common to Box / A / B, like the Cake rings and the Pocket. No mode-3 renderer, no sub-tile field.
+- **R4** Placeholders of OBJECTS (billboards, the landmark; S4) are projected with `cam.p` (they scale with depth), sorted by depth and drawn only where the Box pick buffer sees their base, like the Art contract props. EXCEPTION, the hero: it is ALWAYS drawn on top, with no visibility test (a game shows the player; hero occlusion is Unity's).
+- **R5** Mode 3 uses the same DAC data as mode 2: the same source and parameters, identical terrain. Cake rings and Ascension walls stay off (`applyScenario` sets them off and `applyDacRule` acts only in mode 2); the Pocket comes from the example flag.
+- **R6** The DAC chain is computed only in mode 2 (`dacChainOn`). Bringing the live chain into mode 3 is a later PR of its own.
+- **R7** Shared code (`makePersp`, `contract.js`) changes only through OPTIONAL inputs whose absence gives today's behaviour, byte-identical (S1: `view.focus`).
+- **R8** Nothing is exported (D15).
+
+### S1 as built (`src/stage.js`, `docs/ui-modes.md` mode 3)
+- **Example `dac_stage`** (the default of mode 3): `real_map`, preset Balanced types, terraces 5, spread 1, spread centre `largest`, the Stage preset NOT applied, the window `roomSet` = rooms [17, 10, 20, 27, 6, 5] of the chain of mode 2's `real_chain5` in first-visit order (2 Cake, 2 Diorama, 2 Ascension; 2911 slice tiles; rooms box 109 x 53 tiles). The terrain is the neutral terrain of mode 2's `real_chain5` (the chain view, Cake rings, Ascension walls, the Pocket and the Diorama move are mode-2 rules and are off here): `tools/ui/test_stage_ui.js` T1 (hash of levelH, fine, rooms and types of the whole map equal to mode 2 with its rules neutral), T2 (0 height differences on the 2911 tiles of the window against the whole map), T3 (mode 2 -> 3 -> 2 leaves the chain and the plan unchanged). The two legacy examples and the images of modes 1 and 2 are checked by `tools/ui/regress_modes.js` (in `tools/verify.sh regress`).
+- **Units.** `stage.tilesPerH` (default 2: "a character is 2 tiles tall", the convention approved for the backdrop, `05-floors/option2-backdrop.md` D; range 1.5-4 step 0.25): 1 H = tilesPerH viewer units, horizontally and vertically. Every Stage constant is declared in H and converted at the boundary. `terH` stays 1 tile in S1, so a terrace step is 0.5 H (a 5-terrace window is 2 H high); its value in H is calibrated later with paired shots, together with tilesPerH.
+- **Hero.** A camera-facing billboard 1 H tall and 0.4 H wide, drawn from its projected FEET upward with the depth scale of the feet (about 0.984 at Cam 6 / heroFrac 0.14), always on top. State in map coordinates; click on a walkable cap places it (walkable = not void, not water, inside the slice, not pocketRole 2 / 4); arrow keys move it 0.25 H (blocked only on non-walkable cells: it may cross a cliff edge, it is a placeholder); "Previous / Next room" jump to the centre of the room in the list and resume following.
+- **Cam 6 tracking** (port of the reference rig; behaviour, not code): `view.focus = [x, y, h]` (optional; absent = byte-identical camera, golden hash in `tools/test_stage_cam.js`) makes the pivot the hero centre (feet + 0.5 H) and skips the fit loop; `D = f / sc` is unchanged, with `sc = heroFrac * panelH / H` so `dist = H / (2 heroFrac tan(FOV / 2))`; `heroFrac` default 0.14. Measured from the viewer's own projection: near/hero 1.39 and far/hero 0.60 (the reference values of design pass v73), hero centre at the screen centre +-1 px, drawn height = heroFrac x panel height x 0.984 (inside +-2 %). Clamp against the rooms box (`S.sliceBox`, no scenery margin): sideways (half-width hw = dist tan(FOV / 2) panelW / panelH) and on the near side (near = dist cos p - dist sin p / tan(p + FOV / 2)); the far side is NEVER clamped; the target height always follows the hero. The info line shows CLAMP and the hero leaves the centre.
+- **Suspending the tracking.** A drag, a wheel step or an orbit suspends it WITHOUT moving the camera: the focus is frozen at the last target and the manual deltas start from the current view (one wheel step changes the zoom by exactly one factor around the same focus; the tracking zoom, about 5.9x the fit, is above the 0.5-4 range of the wheel, so in mode 3 the step is taken from the current zoom). The "Follow" toggle, a double click and "Reset view" return to tracking.
+- **Readout** (first in the info line, mode 3 window example only): `1 H = N tiles`, the terrace step in H, the measured hero height as a share of the panel, near/hero, far/hero, cell, room id, `following` / `CLAMP (side)` / `follow off`.
+- **Not in S1:** the Pocket (a Pocket frames ONE room: `shape.js` only builds it for `spec.rooms.length === 1`; with a multi-room window it is silently off: "Diorama technique (Pocket, M2 height) in mode 3 needs a multi-room Pocket: later PR"), borders, transitions, objects, the landmark, the treatment file, shadows, the live chain, other sources, any export.
+- **Test hooks** (`E.stageTest`, undefined in normal use): the six mutations of the acceptance list (pivot on the ground, distance not coupled to heroFrac, hero at a constant screen size, clamp on the far side, a focus that changes the camera when absent, `dac_stage` applying the Stage preset); each fails its named check (`tools/test_stage_cam.js`, `tools/ui/test_stage_ui.js`).
 
 ## 2. Goal
 
@@ -75,12 +104,12 @@ Repos reviewed (2026-10-09). None generates stylised cliffs procedurally; they a
   and slightly sunken. A footprint bigger than its structure is what gives room for framing. (Rendering decision: D18, a soft darkening, not a sculpted contour.)
 - **D10** (2026-10-10) WRAPPER = terminations and boundary: it frames the body and keeps it from spilling. The user's examples: the Greek pillar, the circular platform, the Sea of Stars lookout. Stones stacked behind the edge give thickness (not in the MVP). Where it goes: D19.
 - **D11** (2026-10-10) NO MODULE LENGTH: the body is one piece per tile, the wrapper is continuous (cut only at corners and material changes). The kit decides lengths later, in Unity.
-- **D12** (2026-10-10) STYLIZED heights (Hades), not 1:1 with any data: trees are billboards of a fixed 2.2 terH; the landmarks are placeholders of a fixed height (Shrine 3.2 terH, Pier 1.0 terH).
+- **D12** (2026-10-10; SUPERSEDED by S1 for the hero and, from S4, for objects: heights are declared in H, units section 1) STYLIZED heights (Hades), not 1:1 with any data: trees are billboards of a fixed 2.2 terH; the landmarks are placeholders of a fixed height (Shrine 3.2 terH, Pier 1.0 terH).
 - **D13** (2026-10-10) DECOMPRESSION of a compressed example must keep a shape: cubic ground + bodies re-stamped + relations re-applied, never a bigger blocky square. `data/shrine_pier_x4.json` (40x40) is DERIVED data, not the user's spreadsheets
   (`tools/derive_shrine_pier_x4.py`, needs numpy and scipy; checked: it reproduces the committed JSON bit for bit).
 - **D14** (2026-10-10) PROPS OCCLUSION: fade. A prop between the camera and the STAKE (the player stand-in) that overlaps it on screen is drawn at 25 % opacity (not hidden, not moved).
 - **D15** (2026-10-10) NO EXPORT of anything (no slots file, no manifest field, nothing for Unity) until every crystallizer is done.
-- **D16** (2026-10-10) EXTREME HEIGHTS: the centre is the terrace with the most tiles on the whole map; the jumps grow gradually and WITHOUT a cap the farther they are from it, on both sides (up and down): jump at distance d (1 = next to the centre) = terH * (1 + (spread - 1) * T(d)),
+- **D16** (2026-10-10; SUPERSEDED for mode 3: the Stage preset of 10 terH is not used by `dac_stage`, whose terH stays 1 until the calibration with paired shots; the rule itself stays in the viewer) EXTREME HEIGHTS: the centre is the terrace with the most tiles on the whole map; the jumps grow gradually and WITHOUT a cap the farther they are from it, on both sides (up and down): jump at distance d (1 = next to the centre) = terH * (1 + (spread - 1) * T(d)),
   T(d) = (d - 1) * d / 2 = 0, 1, 3, 6, 10..., so spread 1.5 gives 1, 1.5, 2.5, 4, 6... (it replaces the capped T of the first version, 1, 1.5, 2.5, 2.5; `tools/test_spread.js` changed its expectation for it). Spread 1 is uniform and changes no pixel.
   The jumps per fixed-set map (spread 1.5, rooms off; j -> j+1 from terrace 0; the cap only mattered where the centre is not in the middle):
 
