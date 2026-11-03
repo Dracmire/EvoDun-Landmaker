@@ -25,6 +25,9 @@ const { open } = require('./common');
     const r = await ev(() => { const e = window.__evo, S = e.S(), st = e.st, rec = S.stairs[0], W = S.W, b = rec.bottom[0], bx = S.ox + (b % W), by = S.oy + ((b / W) | 0); st.follow = true; st.hero = { x: bx + 0.5, y: by - 0.5 }; e.redraw(); const R = rec.ramp, jump = Math.abs(R.h1 - R.h0); return { terH: e.P.terH, subH: e.P.subH, rampDepth: e.P.rampDepth, len: R.len, h0: R.h0, h1: R.h1, jump, slope: +(jump / R.len).toFixed(3), lines: Math.max(2, Math.min(10, Math.round(jump / 0.3))), terraceH_in_H: +(e.P.terH / st.stage.tilesPerH).toFixed(2), jumpH: +(jump / st.stage.tilesPerH).toFixed(2) }; });
     report.push(r); await shot(`ramp_terH${th}`);
   }
+  // the hero ON the ramp at terH 4 (units in H), the same Cam 6 framing as ramp_terH*: its feet use the height of the level of the tile (the placeholder does not follow the ramp surface)
+  await ev(() => { const e = window.__evo, S = e.S(), st = e.st, rec = S.stairs[0], W = S.W, ts = rec.steps.flatMap((q) => q.tiles), t = ts[Math.floor(ts.length / 2)]; st.follow = true; st.hero = { x: S.ox + (t % W) + 0.5, y: S.oy + ((t / W) | 0) + 0.5 }; e.redraw(); });
+  await shot('ramp_terH4_hero_on_ramp');
   // the same ramp seen from Cam 3 (oblique 50: a ramp that rises toward the camera, slope above tan(pitch), is back-facing from Cam 6, pitch 25: tan 25 = 0.47): the same three terH, centred on the foot of the ramp at about 54 px per tile
   await page.click('#presets button[data-id="oblique"]'); await a.idle();
   for (const th of [1, 2, 4]) {

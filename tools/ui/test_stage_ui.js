@@ -157,6 +157,15 @@ const PLAN = () => { // the chain and the Diorama plan of mode 2
   // ---- the manifest block
   const mb = await ev(() => { const e = window.__evo; e.st.stage = { tilesPerH: 3, heroFrac: 0.17 }; e.st.follow = false; const b = e.viewerBlock(); e.applyViewerBlock({}); const d = { tp: e.st.stage.tilesPerH, hf: e.st.stage.heroFrac, f: e.st.follow }; e.applyViewerBlock(b); return { b: b.stage, d, back: { tp: e.st.stage.tilesPerH, hf: e.st.stage.heroFrac, f: e.st.follow } }; });
   ok('manifest: viewer.stage is written in mode 3, absent loads the defaults (2, 0.14, follow), and the block restores the values', mb.b && mb.b.tilesPerH === 3 && mb.b.heroFrac === 0.17 && mb.b.follow === false && mb.d.tp === 2 && mb.d.hf === 0.14 && mb.d.f === true && mb.back.tp === 3 && mb.back.hf === 0.17 && mb.back.f === false, mb);
+  // manifests and the switch "Measures in H" (S2a): without the `units` key they behave as before (the switch stays, the units follow the loaded tilesPerH); with it, the switch is set
+  { const ap = (v) => ev((v) => { const e = window.__evo; e.applyViewerBlock(v); return { tp: e.st.stage.tilesPerH, u: e.st.stageUnits, cb: document.querySelector('#t-stageUnits').checked, terH: e.P.terH, subH: e.P.subH }; }, v);
+    await ev(() => { const e = window.__evo; if (!e.st.stageUnits) { document.querySelector('#t-stageUnits').click(); } }); await idle();
+    let r1 = await ap({ stage: { tilesPerH: 3, heroFrac: 0.14 } }); ok('manifest viewer.stage WITHOUT units (a manifest of S1): the switch stays on and terH / subH follow the loaded tilesPerH (3 -> terH 6, subH 1.32)', r1.u && r1.cb && r1.tp === 3 && r1.terH === 6 && Math.abs(r1.subH - 1.32) < 1e-9, r1);
+    r1 = await ap({}); ok('a manifest without the stage block: the defaults (tilesPerH 2) and the units follow (terH 4)', r1.u && r1.tp === 2 && r1.terH === 4, r1);
+    r1 = await ap({ stage: { tilesPerH: 3, units: false } }); ok('manifest viewer.stage with units false: the switch is off (the checkbox too) and terH / subH are not derived (terH stays 4)', !r1.u && !r1.cb && r1.tp === 3 && r1.terH === 4, r1);
+    r1 = await ap({ stage: { tilesPerH: 3, units: true } }); ok('manifest viewer.stage with units true: the switch is on and the units are derived again (terH 6)', r1.u && r1.cb && r1.terH === 6, r1);
+    const wb = await ev(() => window.__evo.viewerBlock().stage); ok('viewerBlock writes the switch in viewer.stage.units', wb && wb.units === true && wb.tilesPerH === 3, wb);
+    await ap({ stage: { tilesPerH: 2, units: true } }); }
   await page.click('#examples button[data-id="dac_stage"]'); await idle(); s = await snap(); ok('re-clicking the example restores the defaults (tilesPerH 2, heroFrac 0.14, following, hero in the first room)', s.tp === 2 && s.hf === 0.14 && s.follow && s.room === WIN[0], s);
   // ---- legacy examples: no hero, no tracking, the controls greyed with a reason
   for (const id of ['x4_stage', 'diorama31_stage']) {
