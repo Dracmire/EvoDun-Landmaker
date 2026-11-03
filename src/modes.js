@@ -59,13 +59,14 @@
     },
     {
       id: 'stage', number: 3, name: 'Stage', group: 'main',
-      purpose: 'The Stage: Cam 6 perspective, technique B and the Art contract (body, wrapper, footprint, props), as it stands.', banner: 'IN REDESIGN: frozen as it is; the Stage waits for its own design pass.',
+      purpose: 'The 2D-HD Stage (S1: the base): a window of rooms of the DAC data in hero heights (H), a hero placeholder and the Cam 6 tracking of the hero. The Art contract examples are kept as legacy. Diorama technique (Pocket, M2 height) in mode 3 needs a multi-room Pocket: later PR.', banner: '2D-HD crystallizer: in construction (S1)',
       examples: [
-        { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage', src: 'shrine_pier_x4', stage: true, contract: true },
-        { id: 'diorama31_stage', label: 'Diorama 31 · Stage', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, terraces: 3, contract: true }
+        { id: 'dac_stage', label: 'DAC window (2D-HD, S1)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, roomSet: [17, 10, 20, 27, 6, 5], stageHero: true },
+        { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage (legacy contract)', src: 'shrine_pier_x4', stage: true, contract: true },
+        { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, terraces: 3, contract: true }
       ],
       camera: 'stage', cameras: CAMS, tech: 'B', techs: ['B'], compare: false, compareDefault: false,
-      main: ['contract'], advanced: [], slice: [], fixed: [], terrain: 'folded',
+      main: ['contract', 'tilesPerH', 'heroFrac', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {

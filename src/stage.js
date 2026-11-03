@@ -1,0 +1,90 @@
+/* STAGE (crystallizer 3, mode 3, PR S1): the base of the 2D-HD crystallizer. Pure logic of the Stage: the unit H (a hero's height, `tilesPerH` viewer units, horizontally and vertically), the Cam 6 hero tracking (distance, clamp at the window), the
+   hero placeholder (walkability, movement, drawing) and the readout. Nothing here changes a shape, a level or a pixel of modes 1 and 2: the viewer reaches it only in mode 3, in an example that declares a window (`roomSet`); src/ui.js owns the state.
+   UNITS: 1 H = tilesPerH tiles (default 2: "a character is 2 tiles tall", option2-backdrop.md D). Every Stage constant is declared in H and converted to tiles only at the boundary (here and in ui.js).
+   CAMERA (port of the reference rig, behaviour not code): the hero centre (feet + 0.5 H) is the pivot of Cam 6 (view.focus, src/render.js makePersp); the scale at the pivot is sc = heroFrac * panelH / H so the camera distance is
+   dist = H / (2 * heroFrac * tan(FOV / 2)); the target is clamped at the window (sideways and on the near side; the far side is never clamped: the background is part of the scene) and the target height always follows the hero.
+   HERO: a camera-facing billboard, 1 H tall and 0.4 H wide, drawn from its projected feet upward with the depth scale of its feet, ALWAYS on top (no visibility test: hero occlusion is Unity's). Nothing is exported (README D15). */
+(function (E) {
+  const FOV = 30 * Math.PI / 180, TAN = Math.tan(FOV / 2); // the vertical field of view of Cam 6 (src/render.js PERSP_FOV)
+  const DEF = { tilesPerH: 2, heroFrac: 0.14 }, RANGE = { tilesPerH: [1.5, 4, 0.25], heroFrac: [0.08, 0.25, 0.01] };
+  const HERO_W = 0.4, STEP_H = 0.25; // in H
+  const ROW_NEAR = 0.95, ROW_FAR = 0.2; // screen rows (from the top, as a share of the panel height) of the near / far readout
+
+  /* px per tile at the pivot, and the camera distance in tiles */
+  const scale = (panelH, heroFrac, tilesPerH) => heroFrac * panelH / tilesPerH;
+  const dist = (heroFrac, tilesPerH) => tilesPerH / (2 * heroFrac * TAN);
+
+  /* the extent of a box {x0, y0, x1, y1} on the camera axes: a = screen right, u = toward the camera */
+  function extent(box, yawDeg) {
+    const y = yawDeg * Math.PI / 180, cy = Math.cos(y), sy = Math.sin(y); let aMin = 1e9, aMax = -1e9, uMin = 1e9, uMax = -1e9;
+    for (const [x, yy] of [[box.x0, box.y0], [box.x1, box.y0], [box.x0, box.y1], [box.x1, box.y1]]) { const a = cy * x - sy * yy, u = sy * x + cy * yy; aMin = Math.min(aMin, a); aMax = Math.max(aMax, a); uMin = Math.min(uMin, u); uMax = Math.max(uMax, u); }
+    return { aMin, aMax, uMin, uMax, cy, sy };
+  }
+  /* CLAMP of the camera target (window coordinates) at the window box. Sideways: half-width hw = dist * tan(FOV / 2) * panelW / panelH, the target stays in [aMin + hw, aMax - hw] (the window centre if it is narrower than 2 hw).
+     Near side: near = dist * cos(pitch) - dist * sin(pitch) / tan(pitch + FOV / 2) is the ground distance from the target to the ground point at the bottom screen edge; the target may come no closer than that to the near edge.
+     The far side is NOT clamped. Returns { x, y, side: 'L' | 'R' | 'C' | null, near: bool, clamped: bool }. */
+  function clamp(tx, ty, box, yawDeg, pitchDeg, dst, w, h) {
+    const e = extent(box, yawDeg), p = pitchDeg * Math.PI / 180, hw = dst * TAN * w / h, near = dst * Math.cos(p) - dst * Math.sin(p) / Math.tan(p + FOV / 2);
+    let a = e.cy * tx - e.sy * ty, u = e.sy * tx + e.cy * ty, side = null, nr = false;
+    const lo = e.aMin + hw, hi = e.aMax - hw;
+    if (lo > hi) { a = (e.aMin + e.aMax) / 2; side = 'C'; } else if (a < lo) { a = lo; side = 'L'; } else if (a > hi) { a = hi; side = 'R'; }
+    if (u > e.uMax - near) { u = e.uMax - near; nr = true; }
+    if (E.stageTest && E.stageTest.clampFar && u < e.uMin + near) u = e.uMin + near; // MUTATION (tools/test_stage_cam.js): the far side clamped too
+    return { x: e.cy * a + e.sy * u, y: -e.sy * a + e.cy * u, side, near: nr, clamped: !!side || nr };
+  }
+
+  /* walkable (the hero): not void, not water, inside the slice (S.block) and not a pocket decoration / water (pocketRole 2, 4) */
+  const walkable = (S, i) => i >= 0 && !S.block[i] && !(S.pocketRole && (S.pocketRole[i] === 2 || S.pocketRole[i] === 4));
+  const cellOf = (S, x, y) => { const cx = Math.floor(x), cy = Math.floor(y); return cx < 0 || cy < 0 || cx >= S.W || cy >= S.H ? -1 : cy * S.W + cx; };
+  const feetH = (S, i) => S.levelH[S.fine[i]];
+
+  /* the walkable tile of room `id` nearest to its centroid (window coordinates, the tile centre) */
+  function roomCentre(S, id) {
+    const W = S.W; let n = 0, sx = 0, sy = 0;
+    for (let i = 0; i < S.roomMap.length; i++) if (S.roomMap[i] === id && walkable(S, i)) { n++; sx += i % W; sy += (i / W) | 0; }
+    if (!n) return null;
+    sx /= n; sy /= n; let best = -1, bd = 1e18;
+    for (let i = 0; i < S.roomMap.length; i++) if (S.roomMap[i] === id && walkable(S, i)) { const d = (i % W + 0.5 - sx) ** 2 + (((i / W) | 0) + 0.5 - sy) ** 2; if (d < bd) { bd = d; best = i; } }
+    return { x: best % W + 0.5, y: ((best / W) | 0) + 0.5, i: best };
+  }
+
+  /* one arrow-key step of 0.25 H on the camera axes (up = away from the camera); blocked only when the new cell is not walkable. Returns the new position or null. */
+  function move(S, pos, dir, yawDeg, tilesPerH) {
+    const y = yawDeg * Math.PI / 180, cy = Math.cos(y), sy = Math.sin(y), st = STEP_H * tilesPerH;
+    const v = dir === 'right' ? [cy, -sy] : dir === 'left' ? [-cy, sy] : dir === 'down' ? [sy, cy] : [-sy, -cy];
+    const nx = pos.x + v[0] * st, ny = pos.y + v[1] * st; return walkable(S, cellOf(S, nx, ny)) ? { x: nx, y: ny } : null;
+  }
+
+  /* near/hero and far/hero from the camera's own projection: the camera-space depth of the ground point (at the hero's feet level) that projects to screen row ROW_NEAR / ROW_FAR of the panel, and dist / z */
+  function ratios(cam, w, h, feet) {
+    if (!cam.persp) return null;
+    const z = (r) => { const g = cam.unp(w / 2, r * h, feet); return cam.D - cam.depth(g[0], g[1], feet); };
+    return { near: cam.D / z(ROW_NEAR), far: cam.D / z(ROW_FAR) };
+  }
+
+  /* the DEPTH SCALE of a point: the size on screen of one unit (perpendicular to the view axis) relative to the pivot; 1 for the orthographic cameras */
+  const depthScale = (cam, x, y, hh) => (cam.persp ? cam.D / Math.max(cam.D - cam.depth(x, y, hh), 0.05 * cam.D) : 1);
+
+  /* the hero: o = { x, y (window tiles), feet (height), hTiles, wTiles }; fills o.stats = { hpx, wpx, k, base: [x, y], centre: [x, y] } and returns it */
+  function drawHero(ctx, cam, o) {
+    const b = cam.p(o.x, o.y, o.feet), k = E.stageTest && E.stageTest.constSize ? 1 : depthScale(cam, o.x, o.y, o.feet), // (MUTATION: the hero at a constant screen size)
+       hpx = o.hTiles * cam.sc * k, wpx = o.wTiles * cam.sc * k, c = cam.p(o.x, o.y, o.feet + o.hTiles / 2);
+    ctx.save(); ctx.lineJoin = 'round';
+    ctx.fillStyle = 'rgba(14,12,22,0.35)'; ctx.beginPath(); ctx.ellipse(b[0], b[1], wpx * 0.7, wpx * 0.22, 0, 0, 7); ctx.fill(); // the contact shade at the feet
+    const x0 = b[0] - wpx / 2, y0 = b[1] - hpx, r = wpx * 0.22;
+    ctx.beginPath(); ctx.moveTo(x0 + r, y0 + hpx * 0.3); ctx.lineTo(x0 + wpx - r, y0 + hpx * 0.3); ctx.quadraticCurveTo(x0 + wpx, y0 + hpx * 0.3, x0 + wpx, y0 + hpx * 0.3 + r); ctx.lineTo(x0 + wpx, y0 + hpx); ctx.lineTo(x0, y0 + hpx); ctx.lineTo(x0, y0 + hpx * 0.3 + r); ctx.quadraticCurveTo(x0, y0 + hpx * 0.3, x0 + r, y0 + hpx * 0.3); ctx.closePath();
+    ctx.fillStyle = '#ff4fa3'; ctx.fill(); ctx.strokeStyle = 'rgba(24,20,34,0.95)'; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(b[0], y0 + hpx * 0.15, wpx * 0.32, hpx * 0.15, 0, 0, 7); ctx.fillStyle = '#ffd0e6'; ctx.fill(); ctx.stroke();
+    ctx.restore();
+    return (o.stats = { hpx, wpx, k, base: b, centre: c });
+  }
+
+  /* the terrace steps of the window in H (min, max over consecutive terraces; equal with spread 1) */
+  function terraceSteps(S, P, tilesPerH) {
+    const N = P.terraces; let lo = 1e9, hi = -1e9;
+    for (let t = 1; t < N; t++) { const d = E.terBase(t, P, S.center) - E.terBase(t - 1, P, S.center); lo = Math.min(lo, d); hi = Math.max(hi, d); }
+    return N < 2 ? null : { min: lo / tilesPerH, max: hi / tilesPerH };
+  }
+
+  E.stage = { FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+})(window.EVO = window.EVO || {});

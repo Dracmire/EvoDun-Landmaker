@@ -231,7 +231,7 @@
   };
 
   /* ---- manifest (evodun-pack/0.3 json: roles by image name, slice, stake and objectives in tiles of the whole map; 0.2 is read too) ---- */
-  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH', 'chainExtra', 'ascCut', 'ascGate', 'roomRule', 'cakeCut', 'dioChain', 'dioProto', 'panCache', 'sliced']; // the optional `viewer` block of the manifest
+  E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH', 'chainExtra', 'ascCut', 'ascGate', 'roomRule', 'cakeCut', 'dioChain', 'dioProto', 'panCache', 'sliced', 'stage']; // the optional `viewer` block of the manifest
   E.VIEWER_PROTOS = ['cima-leaf', 'cima-corridor', 'arena-leaf', 'arena-corridor', 'isla-leaf', 'isla-corridor', 'quebrada', 'mirador']; // the ids of the prototypes of src/modes.js (tools/test_diocorr.js checks that they agree)
   E.VIEWER_MODES = ['terrain', 'rooms', 'stage', 'curves', 'floors', 'macroform']; // the ids of src/modes.js (tools/test_modes.js checks that they agree)
   E.parseManifest = function (json) {
@@ -266,6 +266,13 @@
       if (v.roomRule !== undefined && !['v164', 'route'].includes(v.roomRule)) throw new Error('Manifest: viewer.roomRule must be "v164" or "route".');
       if (v.dioChain !== undefined && !['off', 'm1', 'm2', 'corr'].includes(v.dioChain)) throw new Error('Manifest: viewer.dioChain must be "off", "m1", "m2" or "corr" (absent = off).');
       if (v.panCache !== undefined && typeof v.panCache !== 'boolean') throw new Error('Manifest: viewer.panCache must be true or false (absent = false).');
+      if (v.stage !== undefined) { // the Stage block of mode 3 (PR S1): tilesPerH, heroFrac, follow, all optional
+        const g = v.stage, bad = (k) => { throw new Error('Manifest: viewer.stage.' + k + ' is not valid.'); };
+        if (!g || typeof g !== 'object' || Array.isArray(g)) throw new Error('Manifest: viewer.stage must be an object.');
+        if (g.tilesPerH !== undefined && !(typeof g.tilesPerH === 'number' && g.tilesPerH >= 1.5 && g.tilesPerH <= 4)) bad('tilesPerH (a number from 1.5 to 4)');
+        if (g.heroFrac !== undefined && !(typeof g.heroFrac === 'number' && g.heroFrac >= 0.08 && g.heroFrac <= 0.25)) bad('heroFrac (a number from 0.08 to 0.25)');
+        if (g.follow !== undefined && typeof g.follow !== 'boolean') bad('follow (true or false)');
+      }
       if (v.sliced !== undefined && typeof v.sliced !== 'boolean') throw new Error('Manifest: viewer.sliced must be true or false (absent = false).');
       if (v.dioProto !== undefined && !E.VIEWER_PROTOS.includes(v.dioProto)) throw new Error('Manifest: viewer.dioProto must be one of ' + E.VIEWER_PROTOS.join(', ') + ' (absent = none).');
       if (v.cakeCut !== undefined && !['off', 'quadrant', 'half'].includes(v.cakeCut)) throw new Error('Manifest: viewer.cakeCut must be "off", "quadrant" or "half".');

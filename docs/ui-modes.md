@@ -62,7 +62,7 @@ Rules: a control that does not belong to the current mode is HIDDEN (not greyed)
 |---|---|---|---|---|
 | 1 | Terrain | Snake Mountain surface, Real map 256, Shrine-Pier, Shrine-Pier x4, Snake Mountain (caves subtracted), Value noise, Your images (PNG + roles) | Cam 3 (1-7) | Box / A / B / C; Compare |
 | 2 | Room types (DAC) | Real map · Balanced (3 types, connected), Real map · Default, Cake · bowl (room 60), Cake · bowl + pyramid (room 85), Ascension · walls (room 88), Pocket · Diorama 31, Your images (only examples with rooms, U8; one example per room type, U10) | Cam 1 (1-7); Cam 6 must also work (U7, section 7b) | one of Box / A / B / C (DAC draws in all four, section 7); no Compare |
-| 3 | Stage | Shrine-Pier x4 · Stage, Diorama 31 · Stage | Cam 6 (6, 7, 1-5) | B (the Stage preset); no Compare. Banner: IN REDESIGN, frozen as it is |
+| 3 | Stage | DAC window (2D-HD, S1) [default], Shrine-Pier x4 · Stage (legacy contract), Diorama 31 · Stage (legacy contract) | Cam 6 (6, 7, 1-5) | B; no Compare. Banner: 2D-HD crystallizer: in construction (S1) |
 | 4 | Curves (C) | Snake Mountain surface, Real map · Default, Real map · Balanced types, Shrine-Pier x4 | Cam 3 (1-7) | C; Compare |
 | 5 | Floors | Snake Mountain floors | Cam 1 (1-5, 7) | the Floors view; no Compare. Banner: CLOSED, shapes baked by a script. Under "Archived", not in the main list (U6) |
 | 6 | Macroform | Snake Mountain macroform | Cam 1 (1-5) | the volume (one panel); no Compare. Banner: INCOMPLETE (U9): one baked example, not yet a crystallizer |
@@ -73,7 +73,7 @@ Controls per mode (ids of `src/controls.js`):
 
 - 1 Terrain. Main: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth` [A], `radius` [B]. Advanced: `subH`, `minPlateau`, `minSub`, `pre`, `climb`, `gateThr`, `gateMin`, `passGap`, `tread`. Slice block: `zoneChips` (when the source has zones), `crop`, `margin`.
 - 2 Room types. Rooms is always on in this mode (`t-rooms` hidden). Main: `roomsPreset`, `t-cake`, `t-ascWalls`, `ascHeight`, `t-pocket`, `pocketFraming`, `pocketHeight`, `roomChips`, `typeTint`. Advanced: `roomsMinCore`, `rRadius`, `roomsCross`, `roomsIsoLimit`, `cakeLayers`, `cakeStep`, `cakePer`, `cakeSeam`, `roomBorders`, `roomTint`, `nowalk`, `dioOutline`. Terrain (folded): the main controls of mode 1.
-- 3 Stage. Main: `contract`. Entering the mode applies the Stage preset. Terrain folded. Nothing else until the redesign.
+- 3 Stage (PR S1, `docs/crystallizers/03-stage/README.md`). Main: `contract`, `tilesPerH`, `heroFrac`, `stageFollow`, `stagePrev`, `stageNext` (the last five need the example `dac_stage`: with the legacy contract examples they are greyed with "Requires: choose the example ..."). The default example `dac_stage` does NOT apply the Stage preset (a window of 6 rooms of the real map, terraces 5, spread 1; no mode-2 rules); the legacy examples still apply it. The slice controls are not offered (the window belongs to the example). Terrain folded.
 - 4 Curves. Main: `curvesPreset`, `wallPass`, `wallExtrude`. Advanced: `wallStrata`, `wallColumn`, `t2Spacing`, `t2Rows`, `t2Group`, `t2Jitter`. Terrain folded.
 - 5 Floors. Main: `floorsView` and the floor chips, `t-backdrop`, `backdropGap`, `backdropHeight`.
 - 6 Macroform. Main: `macroView` and the cut chips; "Heightmap (for comparison)" is the old Off. A read-only box "Baked parameters" from `pack.macro.params` (V 2, DZ 0.25, T_SHELL 1.5, HEAD 2.5, SLAB 0.5, RAMP_W 1, SHAFT_R 2.5, STEP 0.75, ground 2.97, provisional) says that changing them needs `tools/derive_snake_macroform.py`.

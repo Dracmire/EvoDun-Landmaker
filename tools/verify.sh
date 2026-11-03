@@ -103,6 +103,10 @@ part_regress() {
     cmp_pass "floors package, backdrop ON, Cam 1 -> Cam 3 -> Cam 1 round trip equals the first Cam 1 image" "$r/rt_bdon/first" "$r/rt_bdon/after"
     EVO_ROOT="$WT" node tools/ui/regress_cams.js "$r/old_cams" 2>&1 | tail -1; node tools/ui/regress_cams.js "$r/new_cams" 2>&1 | tail -1
     cmp_pass "camera bank Cam 1-5 (isoE isoW oblique low top), Box A B, three scenes" "$r/old_cams" "$r/new_cams"
+    EVO_ROOT="$WT" node tools/ui/regress_modes.js "$r/old_modes" 2>&1 | tail -1; node tools/ui/regress_modes.js "$r/new_modes" 2>&1 | tail -1
+    cmp_pass "modes layer: mode 1 and mode 2 examples, the legacy examples of mode 3 (Stage)" "$r/old_modes" "$r/new_modes"
+    node tools/ui/regress_modes.js "$r/rt_modes" --round 2>&1 | tail -2
+    cmp_pass "modes layer, round trip 2 -> 3 -> 2: the images of mode 2 and the legacy examples of mode 3 equal the first visit" "$r/old_modes" "$r/rt_modes"
     # (b) forced rule == native rule: the new tree WITHOUT EVO_INFO_H against the old tree WITH it (stairW 3 oblique/iso Box A B C, rooms on, Cam 1-5)
     env -u EVO_INFO_H node tools/ui/regress.js "$r/native_stairW3" --set stairW=3 2>&1 | tail -1
     cmp_pass "(b) native info height vs forced: rooms off stairW=3" "$r/old_stairW3" "$r/native_stairW3"
