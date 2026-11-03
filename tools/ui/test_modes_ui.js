@@ -14,6 +14,9 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
   const sig = () => sigOf(page);
   const MODES = await ev(() => window.EVO.modes.MODES.map((m) => ({ id: m.id, number: m.number, group: m.group, banner: m.banner, camera: m.camera, cameras: m.cameras, tech: m.tech, techs: m.techs, compare: m.compare, compareDefault: m.compareDefault, main: m.main, advanced: m.advanced, fixed: m.fixed, terrain: m.terrain, examples: m.examples.map((e) => ({ id: e.id, label: e.label, src: e.src || null, images: !!e.images })) })));
   await a.idle();
+  /* S2a: the expectations come from E.modes.plan with the SAME ctx the UI uses (src/ui.js modeRefresh: modeId, exampleId, floorsView, stageWin = mode 3 with a window, stageUnits), never from a hand-written number or list */
+  await ev(() => { window.__tctx = () => { const s = window.__evo.st; return { modeId: s.modeId, exampleId: s.exampleId, floorsView: s.floors, stageWin: s.modeId === 'stage' && s.stageRooms.length > 0, stageUnits: s.stageUnits }; };
+    window.__terrainIds = () => { const E = window.EVO, e = window.__evo, plan = E.modes.plan(E.modes.byId(e.st.modeId), window.__tctx()); return E.controls.TABLE.filter((en) => plan[en.id] === 'fold' && [...document.querySelectorAll(en.dom)].some((el) => el.closest('.grp[data-group="1 Terrain"]'))).map((en) => en.id); }; });
 
   // ---- the state at load: mode 1, Snake Mountain surface, Compare, Cam 3, pixel-identical to the panel without modes
   const st0 = await ev(() => { const e = window.__evo; return { m: e.st.modeId, ex: e.st.exampleId, pack: e.st.pack, preset: e.st.preset, mode: e.st.mode, tech: e.st.tech, n: [...document.querySelectorAll('#stage figure')].filter((f) => !f.hidden).length }; });
@@ -31,7 +34,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
 
   // ---- helpers evaluated in the page: what the tables say vs what the DOM shows
   const domVisible = () => ev(() => {
-    const E = window.EVO, C = E.controls, e = window.__evo, m = E.modes.byId(e.st.modeId), plan = E.modes.plan(m, { exampleId: e.st.exampleId, floorsView: e.st.floors }), res = { bad: [], seen: 0, skipped: [] };
+    const E = window.EVO, C = E.controls, e = window.__evo, m = E.modes.byId(e.st.modeId), plan = E.modes.plan(m, window.__tctx()), res = { bad: [], seen: 0, skipped: [] };
     for (const en of C.TABLE) {
       if (['cams', 'tech', 'mode', 'reset'].includes(en.id)) continue;
       const els = [...document.querySelectorAll(en.dom)]; if (!els.length) { res.skipped.push(en.id); continue; }
@@ -61,7 +64,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
 
     // visible = the tables: first folded, then with every fold opened
     await collapseAll(); await a.idle();
-    const adv0 = await ev(() => { const E = window.EVO, e = window.__evo, m = E.modes.byId(e.st.modeId), plan = E.modes.plan(m, { exampleId: e.st.exampleId, floorsView: e.st.floors }), C = E.controls, hid = [];
+    const adv0 = await ev(() => { const E = window.EVO, e = window.__evo, m = E.modes.byId(e.st.modeId), plan = E.modes.plan(m, window.__tctx()), C = E.controls, hid = [];
       for (const en of C.TABLE) if (plan[en.id] === 'adv' || plan[en.id] === 'fold') { const els = [...document.querySelectorAll(en.dom)]; if (els.length && els.some((el) => el.getClientRects().length > 0)) hid.push(en.id); } return hid; });
     ok(`${tag}: the advanced controls${m.terrain === 'folded' ? ' and the terrain controls' : ''} are folded at entry`, adv0.length === 0, adv0.join(','));
     const hasFold = m.advanced.length > 0 || m.terrain === 'folded';
@@ -76,13 +79,13 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     if (m.terrain === 'folded') { // the terrain controls of modes 2-4 are reachable: the toggle is visible, a real click opens them, one of them works, a second click folds them again
       const TT = '.grp[data-group="1 Terrain"] > .advtoggle', tv = () => ev((q) => { const b = document.querySelector(q); return !!b && b.getClientRects().length > 0; }, TT), sv = () => ev(() => { const b = document.querySelector('#s-terraces'); return !!b && b.getClientRects().length > 0; });
       await ev(() => { document.querySelector('aside').scrollTop = 0; });
-      const vis0 = await tv(), t0txt = vis0 ? await page.textContent(TT) : '';
-      ok(`${tag}: the "Show terrain controls" toggle is visible (the "1 Terrain" section stays on screen)`, vis0 && /^Show terrain controls \(9\)$/.test(t0txt), t0txt || 'not visible');
+      const terrIds = await ev(() => window.__terrainIds()), vis0 = await tv(), t0txt = vis0 ? await page.textContent(TT) : ''; // the folded terrain controls the PLAN lists for this state
+      ok(`${tag}: the "Show terrain controls" toggle is visible (the "1 Terrain" section stays on screen)`, vis0 && t0txt === `Show terrain controls (${terrIds.length})`, `${t0txt || 'not visible'} (plan: ${terrIds.length})`);
       if (vis0) {
         ok(`${tag}: with the terrain folded, Terraces is not visible`, !(await sv()));
         await page.click(TT); await page.waitForTimeout(150);
         const en = await sv(), enabled = en ? await page.isEnabled('#s-terraces') : false;
-        ok(`${tag}: a real click on the toggle shows the 9 terrain controls (Terraces visible and enabled)`, en && enabled && (await ev(() => ['terraces', 'subs', 'terH', 'spread', 'stairW', 'stairStyle', 'rampDepth', 'smooth', 'radius'].filter((id) => !(document.querySelector('#s-' + id).getClientRects().length > 0)).length)) === 0, `visible ${en}, enabled ${enabled}`);
+        ok(`${tag}: a real click on the toggle shows the ${terrIds.length} terrain controls of the plan (Terraces visible and enabled)`, en && enabled && (await ev((ids) => { const E = window.EVO; return ids.filter((id) => ![...document.querySelectorAll(E.controls.TABLE.find((x) => x.id === id).dom)].some((el) => el.getClientRects().length > 0)).length; }, terrIds)) === 0, `visible ${en}, enabled ${enabled}`);
         const b0 = await sig(), old = await ev(() => +document.querySelector('#s-terraces').value);
         await ev((v) => { const el = document.querySelector('#s-terraces'); el.value = String(v); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, old === 4 ? 3 : 4); await a.idle(); await page.waitForTimeout(250);
         const b1 = await sig();
@@ -91,6 +94,21 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
         await page.click(TT); await page.waitForTimeout(150);
         ok(`${tag}: a second click folds the terrain controls again (toggle still visible)`, !(await sv()) && (await tv()) && /^Show terrain controls/.test(await page.textContent(TT)));
       }
+    }
+    if (m.id === 'stage') { // S2a: the terrain controls in BOTH states of the units switch, counted from E.modes.plan (the checks above run in the default state, units ON)
+      const TT2 = '.grp[data-group="1 Terrain"] > .advtoggle', NT = () => ev(() => window.EVO.modes.TERRAIN_MAIN.length), T = () => ev(() => ({ ids: window.__terrainIds(), units: window.__evo.st.stageUnits }));
+      const terHShown = async () => { await ev(() => { document.querySelector('aside').scrollTop = 0; }); const closed = !(await ev(() => { const b = document.querySelector('#s-terH'); return !!b && b.getClientRects().length > 0; })); if (closed) await page.click(TT2); await page.waitForTimeout(150); const r = await ev(() => ['terH', 'subH'].map((id) => { const b = document.querySelector('#s-' + id); return !!b && b.getClientRects().length > 0; })); if (closed) await page.click(TT2); await page.waitForTimeout(150); return r; };
+      const nt = await NT(), on = await T(), onSh = await terHShown();
+      ok(`mode 3 units ON (the default example): ${nt - 1} terrain controls (${nt} minus terH), neither terH nor subH in the plan and none visible when the terrain is unfolded`, on.units && on.ids.length === nt - 1 && !on.ids.includes('terH') && !on.ids.includes('subH') && !onSh[0] && !onSh[1], JSON.stringify({ on, onSh }));
+      await page.click('#t-stageUnits'); await a.idle();
+      const off = await T(), offSh = await terHShown();
+      ok(`mode 3 units OFF (the checkbox off, window example): terH AND subH come back (S2a plan: ${on.ids.length} + 2 = ${on.ids.length + 2} terrain controls, subH folded with the terrain), both visible when the terrain is unfolded`, !off.units && off.ids.length === on.ids.length + 2 && off.ids.includes('terH') && off.ids.includes('subH') && offSh[0] && offSh[1], JSON.stringify({ off, offSh }));
+      await page.click('#t-stageUnits'); await a.idle();
+      const back = await T(); ok('mode 3 units back ON: the same list as the first time', back.units && JSON.stringify(back.ids) === JSON.stringify(on.ids), JSON.stringify(back));
+      await page.click('#examples button[data-id="x4_stage"]'); await a.idle();
+      const leg = await T(), legSh = await terHShown();
+      ok(`mode 3 legacy example (x4_stage, no window): ${nt} terrain controls, terH in the list and visible`, !leg.units && leg.ids.length === nt && leg.ids.includes('terH') && legSh[0], JSON.stringify({ leg, legSh }));
+      await page.click('#examples button[data-id="dac_stage"]'); await a.idle();
     }
     await expandAll();
     const vis = await domVisible();
@@ -118,7 +136,11 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const changed = [], same = [], skipped = [];
     const PREP = { rooms: async () => { await page.click('#roomChips .chip[data-id="31"]'); await a.idle(); }, floors: async () => { await page.click('#floorChips .chip[data-floor="1"]'); await a.idle(); } }; // a datum to act on (a Diorama room, a floor), not a forced requirement
     const needPrep = { 't-pocket': 'rooms', 't-backdrop': 'floors' };
+    /* NAMED EXEMPTION (S2a): `stageUnits` ("Measures in H") changes WHICH controls are shown (terH and subH leave the plan), not the picture or the info line of the default example, so the "changes the canvas or the info line" rule does not apply to it. What it does is checked here (the plan changes, terH enters / leaves) and by tools/ui/test_stage_ui.js (the units switch). No other control is exempt. */
+    const EXEMPT = { stageUnits: async () => { const p0 = await ev(() => window.__terrainIds().includes('terH')); await page.click('#t-stageUnits'); await a.idle(); const p1 = await ev(() => window.__terrainIds().includes('terH')); await page.click('#t-stageUnits'); await a.idle(); return p0 !== p1; } };
+    const exempt = [];
     for (const id of m.main) {
+      if (m.id === 'stage' && EXEMPT[id] && !startDisabled[id]) { ok(`${tag}: ${id} is exempt from the picture rule: switching it changes the plan's terrain controls (terH enters / leaves)`, await EXEMPT[id]()); exempt.push(id); continue; }
       if (startDisabled[id]) { skipped.push(id); continue; }
       if (m.id === 'rooms' && (id === 'pocketFraming' || id === 'pocketHeight')) await PREP.rooms(); // the Pocket sliders change nothing until a Diorama room is chosen (with Framing by room type on, Whole map has no pocket drawn): choose room 31 first, as for the Pocket switch
       if (m.id === 'stage' && id === 'stageReset') { await ev(() => { const el = document.querySelector('#s-heroFrac'); el.value = '0.2'; for (const t of ['input', 'change']) el.dispatchEvent(new Event(t, { bubbles: true })); }); await a.idle(); } // Reset changes nothing from the defaults: start from a changed hero share (S2a)
@@ -151,7 +173,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     }
     results[m.id] = { changed, same, skipped };
     console.log(`  ${tag}: main controls changed the picture / info: ${changed.join(', ') || '-'} | no change: ${same.join(', ') || '-'} | skipped (disabled at the default example): ${skipped.join(', ') || '-'}  [${((Date.now() - t0) / 1000).toFixed(0)} s]`);
-    ok(`${tag}: each main control that is enabled at the default example changes the canvas or the info line`, same.length === 0 && changed.length + skipped.length === m.main.length, same.join(','));
+    ok(`${tag}: each main control that is enabled at the default example changes the canvas or the info line`, same.length === 0 && changed.length + skipped.length + exempt.length === m.main.length, same.join(','));
     // changing the example keeps the mode
     const alt = { terrain: 'shrine_pier', rooms: 'real_default', stage: 'diorama31_stage', curves: 'shrine_pier_x4' }[m.id];
     if (alt) {
