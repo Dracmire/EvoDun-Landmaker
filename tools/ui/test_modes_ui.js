@@ -388,13 +388,13 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     ok('with "cake" chosen the viewer block writes dacShow "cake"', vb.dacShow === 'cake', JSON.stringify(vb));
     const mkMan = (viewer) => { const p = path.join(os.tmpdir(), 'dac2_manifest_' + Math.random().toString(36).slice(2) + '.json'); fs.writeFileSync(p, JSON.stringify({ format: 'evodun-pack/0.3', name: 'dac2 test', roles: { elevation: { image: 'skeleton_heightmap_256.png', channel: 'V' } }, viewer })); return p; };
     const base = { mode: 'rooms', rooms: true, preset: 'balanced', terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120, camera: 'isoE', dacAuto: true };
-    const setDisp = (out) => ev((out) => { const e = window.__evo, want = { typeTint: true, roomBorders: true, dioOutline: out }, id = { typeTint: '#t-typeTint', roomBorders: '#t-roomBorders', dioOutline: '#t-dioOutline' }; for (const k of Object.keys(want)) if (!!e.O[k] !== want[k]) document.querySelector(id[k]).click(); }, out);
+    const setDisp = (out) => ev((out) => { const e = window.__evo, want = { typeTint: true, roomBorders: true, dioOutline: out }, id = { typeTint: '#t-typeTint', roomBorders: '#t-roomBorders', dioOutline: '#t-dioOutline' }; for (const k of Object.keys(want)) { e.O[k] = want[k]; const el = document.querySelector(id[k]); if (el) el.checked = want[k]; } }, out); // S1b: set directly (the checkbox is disabled in mode 1, where rooms are off, and entering mode 1 resets these toggles): the check is about the LOAD not changing them
     const dflags = () => ev(() => { const e = window.__evo; return { tint: !!e.O.typeTint, borders: !!e.O.roomBorders, out: !!e.O.dioOutline }; });
     for (const [label, viewer, wantShow] of [['dacShow cake', Object.assign({}, base, { dacShow: 'cake' }), 'cake'], ['dacShow ascension', Object.assign({}, base, { dacShow: 'ascension' }), 'ascension'], ['dacShow diorama', Object.assign({}, base, { dacShow: 'diorama' }), 'diorama'], ['no dacShow', base, 'all']]) {
       const isoOut = wantShow === 'cake' || wantShow === 'ascension'; // the outline is the one toggle whose isolated value differs: OFF for cake / ascension, ON for diorama
+      await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]'); // S1b: entering mode 1 and picking its example start from the fresh Display defaults, so the state to be checked is set AFTER both (the check is about the LOAD of the manifest, not about the mode change)
       await setDisp(isoOut); // a Display state that is NOT the isolated one (tint on, room borders on, outline ON for cake / ascension, OFF for diorama and the untouched case), so a load that does not isolate is caught; the toggles live in a folded group: DOM clicks
-      const before = await dflags();
-      await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
+      const before = await dflags(); // captured right before the load
       const man = mkMan(viewer); await page.setInputFiles('#file', [PNG, man]); await page.waitForTimeout(2500); await a.idle(); fs.unlinkSync(man);
       await page.waitForFunction(() => { const S = window.__evo.S(); return S && S.rooms && document.querySelector('#busy').hidden; }, null, { timeout: 180000 }); await a.idle();
       m = await meas(); const vb2 = await ev(() => window.__evo.viewerBlock()); const after = await dflags();
@@ -406,7 +406,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       ok(`manifest ${label}: loads with Show framing "${wantShow}" (selector, state and real shape agree) and saves the same value`, m.sel === wantShow && (wantShow === 'all' ? m.rings > 0 && m.faces > 0 : want[wantShow](m)) && (wantShow === 'all' ? vb2.dacShow === undefined : vb2.dacShow === wantShow), JSON.stringify(m));
     }
     { // edge: dacShow saved with the rule OFF -> the selector has no effect, so the load does not isolate the Display toggles either
-      await setDisp(false); const before = await dflags(); await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
+      await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]'); await setDisp(false); const before = await dflags(); // the state is set after the mode change and the example, right before the load
       const man = mkMan(Object.assign({}, base, { dacAuto: false, dacShow: 'cake' })); await page.setInputFiles('#file', [PNG, man]); await page.waitForTimeout(2500); await a.idle(); fs.unlinkSync(man);
       await page.waitForFunction(() => { const S = window.__evo.S(); return S && S.rooms && document.querySelector('#busy').hidden; }, null, { timeout: 180000 }); await a.idle();
       const after = await dflags(), off = await ev(() => !window.__evo.st.dacAuto);
