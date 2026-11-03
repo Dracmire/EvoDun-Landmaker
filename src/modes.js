@@ -61,12 +61,13 @@
       id: 'stage', number: 3, name: 'Stage', group: 'main',
       purpose: 'The 2D-HD Stage (S1: the base): a window of rooms of the DAC data in hero heights (H), a hero placeholder and the Cam 6 tracking of the hero. The Art contract examples are kept as legacy. Diorama technique (Pocket, M2 height) in mode 3 needs a multi-room Pocket: later PR.', banner: '2D-HD crystallizer: in construction (S1)',
       examples: [
-        { id: 'dac_stage', label: 'DAC window (2D-HD, S1)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, roomSet: [17, 10, 20, 27, 6, 5], stageHero: true },
+        { id: 'dac_stage', label: 'DAC window (2D-HD, S1)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, roomSet: [17, 10, 20, 27, 6, 5], stageHero: true,
+          display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }, // S2a: the clean view of the window (the debug aids off; the checkboxes keep working)
         { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage (legacy contract)', src: 'shrine_pier_x4', stage: true, contract: true },
         { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, terraces: 3, contract: true }
       ],
       camera: 'stage', cameras: CAMS, tech: 'B', techs: ['B'], compare: false, compareDefault: false,
-      main: ['contract', 'tilesPerH', 'heroFrac', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
+      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageReset', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {
@@ -130,6 +131,7 @@
     if (c.incursion === true || (c.incursion === 'single' && (ctx.floorsView || 'single') === 'single')) s.incursion = 'show';
     if (c.diagnostics) for (const id of DIAGNOSTICS) s[id] = 'show';
     for (const id of COMMON.view) s[id] = 'show';
+    if (mode.id === 'stage' && ctx.stageWin) { if (ctx.stageUnits) { delete s.terH; delete s.subH; } else s.subH = 'fold'; } // S2a: with "Measures in H" on the shape units (terH, subH) follow the hero scale and are hidden; off, they come back (subH too, it is folded with the terrain controls)
     if (mode.examples.some((e) => e.images) && ctx.exampleId === 'images') for (const id of COMMON.images) s[id] = 'show';
     return s;
   }

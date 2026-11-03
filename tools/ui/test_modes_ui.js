@@ -121,6 +121,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     for (const id of m.main) {
       if (startDisabled[id]) { skipped.push(id); continue; }
       if (m.id === 'rooms' && (id === 'pocketFraming' || id === 'pocketHeight')) await PREP.rooms(); // the Pocket sliders change nothing until a Diorama room is chosen (with Framing by room type on, Whole map has no pocket drawn): choose room 31 first, as for the Pocket switch
+      if (m.id === 'stage' && id === 'stageReset') { await ev(() => { const el = document.querySelector('#s-heroFrac'); el.value = '0.2'; for (const t of ['input', 'change']) el.dispatchEvent(new Event(t, { bubbles: true })); }); await a.idle(); } // Reset changes nothing from the defaults: start from a changed hero share (S2a)
       const base0 = await sig();
       const act = await ev((id) => {
         const en = window.EVO.controls.TABLE.find((x) => x.id === id), els = [...document.querySelectorAll(en.dom)], el = els[0], undo = {};
@@ -136,7 +137,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       (after !== base0 ? changed : same).push(id);
       // undo, so that the next control starts from the default example
       await ev((x) => { const { id, act } = x, en = window.EVO.controls.TABLE.find((q) => q.id === id), el = document.querySelector(en.dom), fire = (n, t) => n.dispatchEvent(new Event(t, { bubbles: true }));
-        if (act.kind === 'range') { el.value = String(act.old); fire(el, 'input'); fire(el, 'change'); } else if (act.kind === 'check') el.click(); else if (act.kind === 'select') { el.value = act.old; fire(el, 'change'); } else if (act.kind === 'chip') document.querySelector(`#roomChips .chip[data-id="${act.value}"]`).click(); else if (act.kind === 'button') document.querySelector({ stageNext: '#stagePrev', stagePrev: '#stageNext' }[id]).click(); }, { id, act });
+        if (act.kind === 'range') { el.value = String(act.old); fire(el, 'input'); fire(el, 'change'); } else if (act.kind === 'check') el.click(); else if (act.kind === 'select') { el.value = act.old; fire(el, 'change'); } else if (act.kind === 'chip') document.querySelector(`#roomChips .chip[data-id="${act.value}"]`).click(); else if (act.kind === 'button') { const u = { stageNext: '#stagePrev', stagePrev: '#stageNext' }[id]; if (u) document.querySelector(u).click(); } }, { id, act });
       await a.idle(); await page.waitForTimeout(150);
       if (m.id === 'rooms' && (id === 'pocketFraming' || id === 'pocketHeight')) { await page.click('#wholeRooms'); await a.idle(); }
     }
