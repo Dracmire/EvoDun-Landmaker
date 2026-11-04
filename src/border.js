@@ -19,7 +19,7 @@
   const datum = (S, nearFp, i) => S.levelH[S.fine[nearFp[i]]];
   const dilate = (a, r, W, H) => { const o = new Uint8Array(a.length); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { if (!a[y * W + x]) continue; for (let dy = -r; dy <= r; dy++) { const ny = y + dy; if (ny < 0 || ny >= H) continue; for (let dx = -r; dx <= r; dx++) { const nx = x + dx; if (nx >= 0 && nx < W) o[ny * W + nx] = 1; } } } return o; };
   const erode = (a, r, W, H) => { const o = new Uint8Array(a.length); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { let ok = 1; for (let dy = -r; dy <= r && ok; dy++) { const ny = y + dy; if (ny < 0 || ny >= H) continue; for (let dx = -r; dx <= r; dx++) { const nx = x + dx; if (nx < 0 || nx >= W) continue; if (!a[ny * W + nx]) { ok = 0; break; } } } o[y * W + x] = ok; } return o; }; // outside the window counts as inside
-  /* apply: opts { type, tilesPerH, yaw (degrees), test (mutation hooks, tests only) }. Returns S.stageBorder = { type, TH, tilesPerH, yaw, tiles, water, levelsAdded, closure, boundary, towardCamera } or null (no footprint). */
+  /* apply: opts { type, tilesPerH, yaw (degrees), test (mutation hooks of tools/test_border.js: noClosure, noGrid, tilesNotH, ignoreYaw, touchFootprint) }. Returns S.stageBorder = { type, TH, tilesPerH, yaw, tiles, water, levelsAdded, closure, boundary, towardCamera } or null (no footprint). */
   function apply(S, opts) {
     const prof = PROFILES[opts.type]; if (!prof) return null;
     const W = S.W, H = S.H, n = S.n, tph = opts.tilesPerH, TH = prof.TH, tm = opts.test || {}, vd = S.void;
@@ -42,10 +42,11 @@
     for (let i = 0; i < n; i++) {
       if (C[i] || src[i] < 0 || (vd && vd[i]) || nearFp[i] < 0) continue; // the closed footprint (footprint + interior) is never touched; void is not terrain
       const b = src[i], x = i % W, y = (i / W) | 0, dt = Math.hypot(x - (b % W), y - ((b / W) | 0)), dr = dt * 3 / tph; let nv = nvCache.get(b); if (nv === undefined) nvCache.set(b, nv = nvOf(b));
-      const r = prof.fn(dr, nv, TH), offg = Math.floor(r.off / gridH + 1e-9) * gridH, h = datum(S, nearFp, i) + offg * tph; // relative grid: floored in H, then added to the datum in tiles
+      const r = prof.fn(dr, nv, TH), offg = tm.noGrid ? r.off : Math.floor(r.off / gridH + 1e-9) * gridH, h = datum(S, nearFp, i) + offg * (tm.tilesNotH ? 1 : tph); // relative grid: floored in H, then added to the datum in tiles
       if (Math.abs(h - S.levelH[S.fine[i]]) < 1e-9) continue;
       moves.set(i, { h, meta: r.water ? { ter: 0, sub: 0, bridge: false, water: true } : { ter: S.ter[i], sub: 0, bridge: false, deco: true } }); if (r.water) water++; if (h > S.levelH[S.fine[i]]) up++; else down++; if (nv > 0) toward++;
     }
+    if (tm.touchFootprint) for (let i = 0; i < n; i++) if (fp[i] && i % 7 === 0) moves.set(i, { h: S.levelH[S.fine[i]] + 0.5, meta: { ter: S.ter[i], sub: 0, bridge: false, deco: true } }); // (MUTATION touchFootprint: a footprint tile moved)
     const before = S.levelH.length, added = moves.size ? E.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
     return (S.stageBorder = { type: opts.type, label: prof.label, TH, tilesPerH: tph, yaw: opts.yaw || 0, footprint: nfp, closure: nC, boundary: bnd.length, tiles: moves.size, water, up, down, towardCamera: toward, levelsBefore: before, levelsAdded: added, grid: gridH });
   }

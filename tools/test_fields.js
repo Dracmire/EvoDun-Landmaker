@@ -213,6 +213,12 @@ const zoneImg = (extra) => rgba(W, H, (x, y) => {
       let n = 0; for (const bad of [{ tilesPerH: 1 }, { tilesPerH: 5 }, { tilesPerH: '2' }, { heroFrac: 0.05 }, { heroFrac: 0.3 }, { follow: 'yes' }, { units: 'yes' }, 3, [], null]) { try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { stage: bad } }); } catch (e) { if (/viewer\.stage/.test(e.message)) n++; } }
       ok('manifest viewer block: out-of-range or wrong-type stage values are rejected with a clear error', n === 10, n);
     }
+    { // stage border (PR S2): "off" | "island" | "quebrada", round trip, a clear error, absent = fine
+      const vb = { mode: 'stage', stage: { border: 'quebrada' } }, rtb = E.parseManifest(JSON.parse(JSON.stringify(E.buildManifest({ name: 'v', roles: {}, viewer: vb }))));
+      ok('manifest viewer block: stage.border survives a round trip', rtb.viewer.stage.border === 'quebrada', JSON.stringify(rtb.viewer));
+      let nb = 0; for (const bad of ['sea', 3, true, null, 'Island']) { try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { stage: { border: bad } } }); } catch (e) { if (/viewer\.stage\.border/.test(e.message)) nb++; } }
+      ok('manifest viewer block: an unknown stage.border is rejected with a clear error', nb === 5, nb);
+    }
     { // dacShow (DAC mode 2 "Show framing", docs/ui-modes.md U11): a closed list, round trip, a clear error
       const rt3 = E.parseManifest(JSON.parse(JSON.stringify(E.buildManifest({ name: 'v', roles: {}, viewer: { mode: 'rooms', dacAuto: true, dacShow: 'diorama' } }))));
       ok('manifest viewer block: dacShow survives a round trip', rt3.viewer.dacShow === 'diorama' && rt3.viewer.dacAuto === true, JSON.stringify(rt3.viewer));
