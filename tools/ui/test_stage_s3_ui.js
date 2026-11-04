@@ -22,7 +22,8 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   ok(`the yaw comes back on exit: Shrine-Pier x4 (pack stageYaw) ${y4} -> 180 -> ${y4b}, Diorama 31 ${y31} -> 180 -> ${y31b}`, y4 === 90 && y4b === y4 && y31 === 0 && y31b === y31, { y4, y4b, y31, y31b });
   await setMode('terrain'); ok('another mode (1 Terrain, Cam 3): no yaw of the window (ortho, 0)', (await ev(() => window.__evo.st.stage.yaw === undefined)) && (await YAW()) === 0);
   await setMode('stage');
-  // the example yaw is NOT a manifest key: saving and loading does not change it, and the stageReset button keeps it
+  // no manifest key: what the viewer writes inside the window carries no yaw (the load side is checked in test_window_session_ui.js, YAW END)
+  await clickEx('dac_stage'); { const vb = await ev(() => window.__evo.viewerBlock()); ok('no manifest key for the yaw: the viewer block written inside the window has viewer.stage without a yaw (and the mode 3 block exists)', vb.stage && !('yaw' in vb.stage) && vb.mode === 'stage', vb); }
   await clickEx('dac_stage'); await page.click('#stageReset'); await idle(); ok('the Reset button of the Stage block keeps the example yaw (it resets the scale, not the camera axis)', (await YAW()) === 180);
   // MUTATION skipYawRestore
   await ev(() => { window.EVO.modesTest = { skipYawRestore: true }; }); await clickEx('dac_stage'); await clickEx('x4_stage'); const yMut = await YAW(); await ev(() => { window.EVO.modesTest = null; }); await clickEx('diorama31_stage');

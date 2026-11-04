@@ -3,7 +3,7 @@
    EVERY exit restores them first, then applies the destination (and the reset of S1b: the examples outside mode 2 start from tint off / outline off / room borders on; mode 2's own examples set tint / outline themselves).
    (a) mode 2 with MANUAL toggles (nowalk and markers off, terH 1.7, subH 0.3) -> dac_stage -> every example of modes 1, 2, 4, 5, 6 (through the mode selector and then the example) and the 2 legacy examples of mode 3: the 10 keys, their checkboxes, P.terH, P.subH and their sliders
    equal those of before entering, except what the destination sets itself; (b) dac_stage pressed twice, then leave; (c) leaving with the mode selector only (the first example of each mode); (d) loading images + a manifest while inside.
-   MUTATIONS (E.modesTest, each must FAIL its named check): skipDisplayRestore, skipUnitsRestore, skipStairsRestore (S3), retakeSnapshot.
+   MUTATIONS (E.modesTest, each must FAIL its named check): skipDisplayRestore, skipUnitsRestore, skipStairsRestore (S3), skipYawEnd (S3: the yaw of the example survives a load), retakeSnapshot.
      NODE_PATH=$(npm root -g) node tools/ui/test_window_session_ui.js */
 const fs = require('fs'), os = require('os'), path = require('path');
 const { open, mapFile } = require('./common');
@@ -63,6 +63,20 @@ const STATE = () => { const e = window.__evo, O = e.O, P = e.P, o = {}, c = {}; 
     const S = await ev(STATE), v = verdict(B0, S, {});
     ok('WINDOW SESSION: (d) loading images + a manifest while inside ends the session and restores the Display keys, P.terH and P.subH', v.badD.length === 0 && v.badU.length === 0 && v.session, [v, S.win]);
     fs.unlinkSync(mpath); }
+  // (e) S3: the example's yaw (dac_stage 180) ends with the window session on the LOAD path too: images + a manifest (viewer.mode 'rooms', camera 'stage' = Cam 6 in mode 2) -> the camera of mode 2 is at yaw 0 (it was 180 before the fix: the viewer block kept st.stage.yaw);
+  // images WITHOUT a manifest (no viewer block at all, the mode stays 3) -> yaw 0 as well. MUTATION skipYawEnd (the yaw survives the load): the same check FAILS.
+  const loadIn = async (withManifest, mut) => { await setMode('stage'); await clickEx('dac_stage'); await ev((f) => { window.EVO.modesTest = f ? { [f]: true } : null; }, mut);
+    const files = ['height', 'zones', 'edges'].map((n) => mapFile('maps', n)); let mp = null;
+    if (withManifest) { mp = path.join(os.tmpdir(), 'yawend_' + process.pid + '_' + Math.random().toString(36).slice(2) + '.json'); fs.writeFileSync(mp, JSON.stringify({ format: 'evodun-pack/0.3', name: 'yaw end', roles: { elevation: { image: 'height.png', channel: 'V' } }, viewer: { mode: 'rooms', camera: 'stage', rooms: true, preset: 'balanced', terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 } })); }
+    const inside = await ev(() => ({ yaw: window.__evo.view().yaw, base: window.__evo.st.stage.yaw }));
+    await page.setInputFiles('#file', mp ? [...files, mp] : files); await page.waitForTimeout(2500); await idle(); await ev(() => { window.EVO.modesTest = null; }); if (mp) fs.unlinkSync(mp);
+    return { inside, after: await ev(() => { const e = window.__evo; return { mode: e.st.modeId, preset: e.st.preset, base: e.st.stage.yaw, view: e.view().yaw, win: !!e.st.win }; }) }; };
+  { const r = await loadIn(true, null);
+    ok(`YAW END: images + a manifest (viewer.mode rooms, Cam 6) loaded inside dac_stage (yaw ${r.inside.yaw}): mode ${r.after.mode}, st.stage.yaw ${r.after.base}, view().yaw ${r.after.view} (0 expected)`, r.inside.yaw === 180 && r.after.mode === 'rooms' && r.after.preset === 'stage' && r.after.base === undefined && r.after.view === 0 && !r.after.win, r);
+    const r2 = await loadIn(false, null);
+    ok(`YAW END: images WITHOUT a manifest loaded inside dac_stage: st.stage.yaw ${r2.after.base}, view().yaw ${r2.after.view} (0 expected)`, r2.after.base === undefined && r2.after.view === 0 && !r2.after.win, r2);
+    const rm = await loadIn(true, 'skipYawEnd');
+    ok(`MUTATION skipYawEnd: the YAW END check FAILS (the yaw survives the load: view().yaw ${rm.after.view} instead of 0)`, rm.after.view !== 0, rm); }
   // MUTATIONS: each must fail its named check (a short run: entering from a state with manual toggles, then a mode-2 example and a mode-1 example)
   const mini = async (flag) => { await ev((f) => { window.EVO.modesTest = f ? { [f]: true } : null; }, flag); const T = [{ mode: 'rooms', ex: MODES.find((q) => q.id === 'rooms').ex[0] }, { mode: 'terrain', ex: MODES.find((q) => q.id === 'terrain').ex[0] }]; const out = { badD: 0, badU: 0, badT: 0, twice: null };
     for (const t of T) { const r = await trial(t, false); out.badD += r.v.badD.length; out.badU += r.v.badU.length; out.badT += r.v.badT.length; }
