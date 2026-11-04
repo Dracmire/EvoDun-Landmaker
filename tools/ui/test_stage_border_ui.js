@@ -1,7 +1,7 @@
 /* STAGE BORDERS (mode 3, PR S2) in the viewer: the select "Stage border" (Off / Island / Quebrada) of the window example `dac_stage`.
    (1) the control exists, is greyed outside a window example (the legacy examples) and enabled in dac_stage; (2) Island / Quebrada change the picture and the info line, Off returns the identical pixels; (3) the footprint, the blocks and the regions are identical on / off (walking does not change);
    (4) the camera side follows the base yaw of the camera: Cam 6 (yaw 180) vs Cam 3 (yaw 0) give different shapes, a preset change rebuilds, MUTATION ignoreYaw (E.borderTest) makes Cam 6 equal Cam 3: the check FAILS;
-   (5) the unit: a new tilesPerH rebuilds the border (the profile is in H); (6) the manifest: viewer.stage.border is written only when not Off, an absent key loads Off, the fields.js validation (tools/test_fields.js) rejects a wrong value.
+   (5) the unit: a new tilesPerH rebuilds the border (the profile is in H); (6) the manifest; (7) dac_stage pressed again resets the border and the select follows (mutation skipBorderSelectSync): viewer.stage.border is written only when not Off, an absent key loads Off, the fields.js validation (tools/test_fields.js) rejects a wrong value.
    The leaks (the border ends with the window session on every exit) are tested in test_window_session_ui.js.
      NODE_PATH=$(npm root -g) node tools/ui/test_stage_border_ui.js */
 const crypto = require('crypto');
@@ -49,6 +49,10 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   // (6) the manifest
   const m = await ev(() => { const e = window.__evo, b1 = e.viewerBlock().stage; e.st.stage.border = 'off'; const b2 = e.viewerBlock().stage; e.st.stage.border = 'island'; e.applyViewerBlock({ mode: 'stage', stage: { border: 'quebrada' } }); const l1 = e.st.stage.border; e.applyViewerBlock({ mode: 'stage', stage: {} }); const l2 = e.st.stage.border; e.applyViewerBlock({ mode: 'stage', stage: { border: 'nonsense' } }); return { w1: b1.border, w2: 'border' in b2, l1, l2, l3: e.st.stage.border }; });
   ok('manifest: viewer.stage.border is written when not Off, not written when Off; loaded: a value is kept, absent = off, an unknown one = off', m.w1 === 'quebrada' && m.w2 === false && m.l1 === 'quebrada' && m.l2 === 'off' && m.l3 === 'off', m);
+  // (7) dac_stage pressed again from inside the window (applyScenario, no winExit) resets the border: the select must follow (found in the review of PR #58). MUTATION skipBorderSelectSync.
+  const again = async (mut) => { await setB('island'); await ev((f) => { window.EVO.modesTest = f ? { [f]: true } : null; }, mut); await clickEx('dac_stage'); const r = await ev(() => { const e = window.__evo; return { sel: document.querySelector('#stageBorder').value, border: e.st.stage.border, has: !!e.S().stageBorder }; }); await ev(() => { window.EVO.modesTest = null; }); return r; };
+  { const r = await again(null); ok(`dac_stage pressed again with Island on: select ${r.sel}, st.stage.border ${r.border}, no border in the shape (all off)`, r.sel === 'off' && r.border === 'off' && !r.has, r);
+    const m = await again('skipBorderSelectSync'); ok(`MUTATION skipBorderSelectSync: the select stays on ${m.sel} while the state is ${m.border}: the check FAILS`, m.sel !== 'off' && m.border === 'off', m); await setB('off'); }
   ok('no page errors', a.errs.length === 0, a.errs);
   await a.browser.close(); console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

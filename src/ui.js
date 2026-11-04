@@ -740,7 +740,7 @@
     const w = heroWin(); O.hero = { x: w.x, y: w.y, feet: heroFeet(), hTiles: tp, wTiles: sg.HERO_W * tp };
   }
   function stageSuspend() { if (!st.follow) return; if (!st.focus && S && st.hero) stageFocus(view()); st.follow = false; syncStageUI(); } // the camera stays where it is: the frozen focus plus the manual deltas
-  function syncStageUI() { const t = $('#t-stageFollow'); if (t) t.checked = st.follow; const tu = $('#t-stageUnits'); if (tu) tu.checked = st.stageUnits; for (const k of ['tilesPerH', 'heroFrac']) { const i = $('#s-' + k), o = $('#o-' + k); if (i) i.value = st.stage[k]; if (o) o.textContent = st.stage[k]; } }
+  function syncStageUI() { const sb = $('#stageBorder'); if (sb && !(E.modesTest && E.modesTest.skipBorderSelectSync)) sb.value = st.stage.border || 'off'; /* S2 follow-up: dac_stage pressed again from inside the window goes through applyScenario (no winExit) and resets st.stage.border: the select must follow (MUTATION skipBorderSelectSync) */ const t = $('#t-stageFollow'); if (t) t.checked = st.follow; const tu = $('#t-stageUnits'); if (tu) tu.checked = st.stageUnits; for (const k of ['tilesPerH', 'heroFrac']) { const i = $('#s-' + k), o = $('#o-' + k); if (i) i.value = st.stage[k]; if (o) o.textContent = st.stage[k]; } }
   function stageJump(d) { // the previous / next room of the window list: the hero goes to its centre and the camera follows again
     if (!S || !stageOn()) return; const n = st.stageRooms.length; st.stageIdx = (st.stageIdx + d + n) % n;
     const c = E.stage.roomCentre(S, st.stageRooms[st.stageIdx]); if (!c) return; st.follow = true; st.panX = st.panY = st.yawOff = st.pitchOff = 0; syncStageUI(); setHero(S.ox + c.x, S.oy + c.y);
