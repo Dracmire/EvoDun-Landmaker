@@ -1310,7 +1310,10 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
           const cand = [];
           for (const mode of ['cut', 'fill']) { const r = ramp || pass.declared ? planRamp(site, mode, lad[vi][0], lad[vi][1]) : plan(site, mode); if (r) cand.push(r); }
           if (vi === 0 && !cand.length) break;   // nothing fits here at all: the next site of the gate (variants are for a ramp that fits but would cut a path)
-          cand.sort((p, q) => q.cols.length - p.cols.length || (p.mode === 'cut' ? -1 : 1));
+          /* S3 (optional input, R7: P.rampPreferFill absent / false = the order of today, byte-identical): a transition along the x axis (lateral for a camera at yaw 0 or 180) is a TRENCH when it is cut into the upper terrace (the near flank hides it); built up on the lower terrace (fill) it reads.
+             So on a TIE of width the fill variant goes first for those (never a narrower one: the widest variant still wins). Measured on the real map (Balanced types, ramps): lateral cut 14 -> 7, fill 8 -> 15, narrowed 5 -> 5, dropped 0 -> 0. */
+          const ST = E.shapeTest || {}, lateralFill = (P.rampPreferFill === true || ST.flagLeak) && cand.length === 2 && cand[0].dir[0] !== 0; // (MUTATION flagLeak: the preference on without the flag)
+          cand.sort((p, q) => (ST.fillAlways && lateralFill ? (p.mode === 'fill' ? -1 : 1) : q.cols.length - p.cols.length) || (lateralFill ? (p.mode === 'fill' ? -1 : 1) : (p.mode === 'cut' ? -1 : 1))); // (MUTATION fillAlways: the fill first even when it is narrower)
           for (const r of cand) if (walkOK(r)) { rec = r; variant = vi; break; }
         }
         if (rec) break;
@@ -2823,7 +2826,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
      (stale plan: Balanced K0, terH 1 -> 3, pocket top 1 terH instead of 3). `T.CHAIN_KEY` = the inputs read by the shape (shape.js, rooms.js: heights, terraces, sub-terraces, quantization, gates, ramps, rooms layer, isolated limit), by the shapes that feed the plan
      (Cake and anchors change S.fine) and by the chain and plan themselves; `T.CHAIN_NOT_KEY` = the fields that the same files read and that are NOT inputs of the plan, each with its reason; every other `dio*` field (the test hooks) is part of the key through
      `chainParamKey`. tools/test_chainkey.js scans the sources and requires every `P.<name>` read of those files to be listed in one of the two (a new parameter forces a decision) and checks the plan hash against a session built directly at the final settings. */
-  T.CHAIN_KEY = ['rooms', 'terraces', 'subs', 'subH', 'terH', 'climb', 'tread', 'spread', 'spreadCentre', 'minPlateau', 'minSub', 'pre', 'passGap', 'gateThr', 'gateMin', 'stairW', 'stairStyle', 'rampDepth', 'rampKeep', 'rampShift', 'noUnmerge', 'roomsIsoLimit',
+  T.CHAIN_KEY = ['rooms', 'terraces', 'subs', 'subH', 'terH', 'climb', 'tread', 'spread', 'spreadCentre', 'minPlateau', 'minSub', 'pre', 'passGap', 'gateThr', 'gateMin', 'stairW', 'stairStyle', 'rampDepth', 'rampPreferFill', 'rampKeep', 'rampShift', 'noUnmerge', 'roomsIsoLimit',
     'rGentle', 'rSteep', 'rExp', 'rHTol', 'rRadius', 'rMinRoom', 'rHardEdge', 'rMinSizeEdge', 'roomsMinCore', 'roomsCross', 'rScanFirst', 'cake', 'cakeLayers', 'cakePer', 'cakeStep', 'cakeSeam', 'cakeMargin', 'cakeCorridor', 'cakeUpV1', 'cakeCoreOpen', 'cakeCut',
     'anchors', 'anchorH', 'chainExtra', 'chainNodes', 'chainJustified', 'dioChain'];
   T.CHAIN_NOT_KEY = {
@@ -6038,7 +6041,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       id: 'stage', number: 3, name: 'Stage', group: 'main',
       purpose: 'The 2D-HD Stage (S1: the base): a window of rooms of the DAC data in hero heights (H), a hero placeholder and the Cam 6 tracking of the hero. The Art contract examples are kept as legacy. Diorama technique (Pocket, M2 height) in mode 3 needs a multi-room Pocket: later PR.', banner: '2D-HD crystallizer: in construction (S1)',
       examples: [
-        { id: 'dac_stage', label: 'DAC window (2D-HD, S1)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, roomSet: [17, 10, 20, 27, 6, 5], stageHero: true,
+        { id: 'dac_stage', label: 'DAC window (2D-HD, S1)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, roomSet: [17, 10, 20, 27, 6, 5], stageHero: true, yaw: 180, stairs: { style: 0, tread: 1, preferFill: true }, /* S3: Cam 6 looks from the north (yaw 180: the 4 ramps of the window rise AWAY from the camera), steps (A1: 3 risers of 0.19 terH, 2 treads) and the fill variant for the lateral transitions */ 
           display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }, // S2a: the clean view of the window (the debug aids off; the checkboxes keep working)
         { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage (legacy contract)', src: 'shrine_pier_x4', stage: true, contract: true },
         { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, terraces: 3, contract: true }
@@ -6320,11 +6323,12 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   /* THE WINDOW SESSION (S2a): the example `dac_stage` (mode 3, sc.stageHero) sets the clean view (the 10 Display keys of DISPLAY_KEYS) and the units in H (P.terH, P.subH); the OTHER modes and examples must not feel it. Entering it from any other state saves the 10 keys (with their
      checkboxes) and P.terH / P.subH (with their sliders); EVERY exit restores them FIRST, before the destination is applied (and before the reset of S1b). The exits: applyScenario (every example, enterMode / the mode selector, the prototypes of mode 2, the legacy examples of mode 3, the scenario buttons),
      and the load of images + manifest (loadFiles, which replaces the state; setModeSoft only runs after it). Pressing `dac_stage` again from inside does NOT save again. */
-  function winEnter() { st.win = { O: Object.fromEntries(DISPLAY_KEYS.map((k) => [k, O[k]])), terH: P.terH, subH: P.subH }; }
+  function winEnter() { st.win = { O: Object.fromEntries(DISPLAY_KEYS.map((k) => [k, O[k]])), terH: P.terH, subH: P.subH, stairStyle: P.stairStyle, tread: P.tread, preferFill: P.rampPreferFill }; } // S3: + the transition style of the window (steps, tread 1, fill preferred for the lateral ones)
   function winExit() {
     const w = st.win; if (!w) return; st.win = null;
     if (!(E.modesTest && E.modesTest.skipDisplayRestore)) for (const k of DISPLAY_KEYS) { O[k] = w.O[k]; const el = $('#t-' + k); if (el) el.checked = w.O[k]; } // (MUTATION skipDisplayRestore)
     if (!(E.modesTest && E.modesTest.skipUnitsRestore)) { setParam('terH', w.terH); setParam('subH', w.subH); } // (MUTATION skipUnitsRestore)
+    if (!(E.modesTest && E.modesTest.skipStairsRestore)) { setParam('stairStyle', w.stairStyle); setParam('tread', w.tread); P.rampPreferFill = w.preferFill; } // (MUTATION skipStairsRestore) S3: the yaw needs no entry here: it lives in st.stage, which every applyScenario resets
     st.stageUnits = false;
   }
   function stageDerive() { const d = E.stage.derive(st.stage.tilesPerH); if (E.stageTest && E.stageTest.noDerive) return; setParam('terH', d.terH); setParam('subH', d.subH); } // MEASURES IN H: terH = 2 x tilesPerH, subH = 0.22 x terH (MUTATION noDerive: terH not derived)
@@ -6343,7 +6347,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     P.rooms = !!sc.rooms || !!(mode && mode.fixed.includes('t-rooms')); tick('t-rooms', P.rooms); P.pocket = !!sc.pocket; tick('t-pocket', P.pocket);
     if (sc.preset) applyRoomsPreset(sc.preset);
     sliceSel.rooms.clear(); if (sc.room) { sliceSel.whole = false; sliceSel.rooms.add(sc.room); } else sliceSel.whole = true;
-    st.stageRooms = sc.roomSet ? sc.roomSet.slice() : []; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; st.follow = true; st.stage = { tilesPerH: E.stage.DEF.tilesPerH, heroFrac: E.stage.DEF.heroFrac }; syncStageUI(); // the 2D-HD window of mode 3 (an example without a roomSet has no hero)
+    st.stageRooms = sc.roomSet ? sc.roomSet.slice() : []; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; st.follow = true; st.stage = { tilesPerH: E.stage.DEF.tilesPerH, heroFrac: E.stage.DEF.heroFrac, yaw: sc.yaw !== undefined ? sc.yaw : (E.modesTest && E.modesTest.skipYawRestore && st.stage ? st.stage.yaw : undefined) } /* S3: the example's own base yaw of Cam 6 (absent = today's: the preset's / the pack's); (MUTATION skipYawRestore: the yaw of the last example survives) */; syncStageUI(); // the 2D-HD window of mode 3 (an example without a roomSet has no hero)
     if (sc.roomSet) { sliceSel.whole = false; for (const id of sc.roomSet) sliceSel.rooms.add(id); }
     if (sc.stage || (E.stageTest && E.stageTest.presetLeak && sc.stageHero)) $('#stagePreset').click(); // (MUTATION presetLeak: the 2D-HD window applying the Stage preset) // the Stage preset sets Cam 6, B, single view, terraces 7, spread 1.5
     if (sc.terraces) setParam('terraces', sc.terraces); // after the Stage preset (an example may keep fewer terraces: the rooms change with them)
@@ -6362,6 +6366,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     else if (mode && sc.stageHero) { // mode 3, the DAC window: the neutral look (no tint, no Diorama outline; the room borders on), none of mode 2's rules (the Stage preset is NOT used)
       for (const k of DISPLAY_KEYS) { const v = sc.display && k in sc.display ? sc.display[k] : O0[k]; O[k] = v; tick('t-' + k, v); } // the example declares its own Display state (the clean view); the keys it does not name start from the fresh defaults
       st.stageUnits = true; stageDerive(); // Measures in H on by default in a window example
+      if (sc.stairs) { setParam('stairStyle', sc.stairs.style); setParam('tread', sc.stairs.tread); P.rampPreferFill = sc.stairs.preferFill === true; } // S3: the transitions of the window (restored by winExit)
       setParam('ascCut', LEGACY_DEF.ascCut); setParam('ascGate', LEGACY_DEF.ascGate); P.dioChain = LEGACY_DEF.dioChain; const dcs = $('#dioChain'); if (dcs) dcs.value = P.dioChain; syncStageUI();
     }
     else if (mode) { setParam('ascCut', LEGACY_DEF.ascCut); setParam('ascGate', LEGACY_DEF.ascGate); P.dioChain = LEGACY_DEF.dioChain; const dcl = $('#dioChain'); if (dcl) dcl.value = P.dioChain; } // the other modes keep today's values (and pixels)
@@ -6391,7 +6396,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     if (!NO_MODES && (w.mode || st.modeId) === 'rooms' && st.dacAuto && st.dacShow !== 'all') dacIsolate(st.dacShow); // the Display toggles are not in the manifest: a saved single-type view must load isolated (a Diorama view needs its outline); only while the rule is on (with it off the selector has no effect); absent or All touches nothing
     syncRoomsPreset();
     st.preset = PRESETS.some((x) => x.id === w.camera) ? w.camera : 'oblique'; st.yawOff = st.pitchOff = 0; // absent = the default camera
-    { const g = w.stage || {}; st.stage = { tilesPerH: g.tilesPerH !== undefined ? g.tilesPerH : E.stage.DEF.tilesPerH, heroFrac: g.heroFrac !== undefined ? g.heroFrac : E.stage.DEF.heroFrac }; st.follow = g.follow !== false; if (stageOn()) { /* S2a: a manifest without `units` keeps the switch as it is; with it on, the shape units follow the loaded tilesPerH */ if (g.units !== undefined) st.stageUnits = g.units; if (st.stageUnits) stageDerive(); } syncStageUI(); } // mode 3 (PR S1): absent = the defaults (the window list belongs to the example, not to the manifest)
+    { const g = w.stage || {}; st.stage = { tilesPerH: g.tilesPerH !== undefined ? g.tilesPerH : E.stage.DEF.tilesPerH, heroFrac: g.heroFrac !== undefined ? g.heroFrac : E.stage.DEF.heroFrac, yaw: st.stage.yaw }; st.follow = g.follow !== false; if (stageOn()) { /* S2a: a manifest without `units` keeps the switch as it is; with it on, the shape units follow the loaded tilesPerH */ if (g.units !== undefined) st.stageUnits = g.units; if (st.stageUnits) stageDerive(); } syncStageUI(); } // mode 3 (PR S1): absent = the defaults (the window list belongs to the example, not to the manifest)
     O.sliced = w.sliced !== false; const tsl = $('#t-sliced'); if (tsl) tsl.checked = O.sliced; // absent = on (PR G); viewer.panCache of older manifests is accepted and ignored (E2 removed)
     P.curves = E.curves.PRESETS[w.curves] ? w.curves : 'ordered'; const cs = $('#curvesPreset'); if (cs) cs.value = P.curves; // absent = Ordered
     P.wallPass = ['t3', 't2', 'off'].includes(w.wallPass) ? w.wallPass : E.wallc.DEF.wallPass; const wsel = $('#wallPass'); if (wsel) wsel.value = P.wallPass; for (const k of WALL_KEYS) setParam(k, w[k] !== undefined ? w[k] : E.wallc.DEF[k]); // absent = the defaults
@@ -6892,6 +6897,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   /* the BASE yaw of the camera (degrees): the preset's own, without the drag variation. The pocket is composed along this axis (E.pocket, P.pocketYaw): Cam 1 45, Cam 2 -45, Cam 3-5 and 7 0, Cam 6 0 or the pack's stageYaw */
   function baseYaw() {
     const p = PRESETS.find((x) => x.id === st.preset); if (p.kind === 'oblique') return 0;
+    if (p.kind === 'persp' && st.stage && st.stage.yaw !== undefined) return st.stage.yaw; // S3: the example's own yaw (dac_stage 180: its ramps then rise AWAY from the camera); absent = the pack's stageYaw or the preset's, as before
     const pk = packs[st.pack] && packs[st.pack].pack; return p.kind === 'persp' && pk && pk.stageYaw ? pk.stageYaw : p.yaw;
   }
   function view() {
@@ -6959,7 +6965,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     }
     const lu = document.createElement('label'); lu.className = 'tg'; lu.innerHTML = '<input type="checkbox" id="t-stageUnits"><span>Measures in H (a terrace is 2 H; hides terH / subH)</span>'; if (NO_MODES) lu.hidden = true;
     const ui_ = lu.querySelector('input'); ui_.checked = st.stageUnits; ui_.addEventListener('change', () => { st.stageUnits = ui_.checked; if (st.stageUnits) { stageDerive(); invalidate(true); } else invalidate(false); modeRefresh(); }); sl.appendChild(lu);
-    const rr = document.createElement('div'); rr.className = 'row'; rr.innerHTML = '<button id="stageReset">Reset</button>'; if (NO_MODES) rr.hidden = true; rr.querySelector('button').addEventListener('click', () => { st.stage = { tilesPerH: E.stage.DEF.tilesPerH, heroFrac: E.stage.DEF.heroFrac }; st.stageUnits = true; stageDerive(); syncStageUI(); invalidate(true); modeRefresh(); }); sl.appendChild(rr);
+    const rr = document.createElement('div'); rr.className = 'row'; rr.innerHTML = '<button id="stageReset">Reset</button>'; if (NO_MODES) rr.hidden = true; rr.querySelector('button').addEventListener('click', () => { st.stage = { tilesPerH: E.stage.DEF.tilesPerH, heroFrac: E.stage.DEF.heroFrac, yaw: st.stage.yaw }; st.stageUnits = true; stageDerive(); syncStageUI(); invalidate(true); modeRefresh(); }); sl.appendChild(rr);
     const lf = document.createElement('label'); lf.className = 'tg'; lf.innerHTML = '<input type="checkbox" id="t-stageFollow"><span>Follow the hero (Cam 6)</span>'; if (NO_MODES) lf.hidden = true;
     const fi = lf.querySelector('input'); fi.checked = st.follow; fi.addEventListener('change', () => { st.follow = fi.checked; if (st.follow) st.panX = st.panY = st.yawOff = st.pitchOff = 0; invalidate(false); }); sl.appendChild(lf);
     for (const [id, label, d] of [['stagePrev', '‹ Previous room', -1], ['stageNext', 'Next room ›', 1]]) {

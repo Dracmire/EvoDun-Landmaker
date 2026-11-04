@@ -797,7 +797,7 @@
      (stale plan: Balanced K0, terH 1 -> 3, pocket top 1 terH instead of 3). `T.CHAIN_KEY` = the inputs read by the shape (shape.js, rooms.js: heights, terraces, sub-terraces, quantization, gates, ramps, rooms layer, isolated limit), by the shapes that feed the plan
      (Cake and anchors change S.fine) and by the chain and plan themselves; `T.CHAIN_NOT_KEY` = the fields that the same files read and that are NOT inputs of the plan, each with its reason; every other `dio*` field (the test hooks) is part of the key through
      `chainParamKey`. tools/test_chainkey.js scans the sources and requires every `P.<name>` read of those files to be listed in one of the two (a new parameter forces a decision) and checks the plan hash against a session built directly at the final settings. */
-  T.CHAIN_KEY = ['rooms', 'terraces', 'subs', 'subH', 'terH', 'climb', 'tread', 'spread', 'spreadCentre', 'minPlateau', 'minSub', 'pre', 'passGap', 'gateThr', 'gateMin', 'stairW', 'stairStyle', 'rampDepth', 'rampKeep', 'rampShift', 'noUnmerge', 'roomsIsoLimit',
+  T.CHAIN_KEY = ['rooms', 'terraces', 'subs', 'subH', 'terH', 'climb', 'tread', 'spread', 'spreadCentre', 'minPlateau', 'minSub', 'pre', 'passGap', 'gateThr', 'gateMin', 'stairW', 'stairStyle', 'rampDepth', 'rampPreferFill', 'rampKeep', 'rampShift', 'noUnmerge', 'roomsIsoLimit',
     'rGentle', 'rSteep', 'rExp', 'rHTol', 'rRadius', 'rMinRoom', 'rHardEdge', 'rMinSizeEdge', 'roomsMinCore', 'roomsCross', 'rScanFirst', 'cake', 'cakeLayers', 'cakePer', 'cakeStep', 'cakeSeam', 'cakeMargin', 'cakeCorridor', 'cakeUpV1', 'cakeCoreOpen', 'cakeCut',
     'anchors', 'anchorH', 'chainExtra', 'chainNodes', 'chainJustified', 'dioChain'];
   T.CHAIN_NOT_KEY = {
