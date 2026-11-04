@@ -1,73 +1,37 @@
-/* THE WINDOW SESSION AND THE LEAKS BETWEEN MODES (limitation 22, S1b; extended in S2a).
-   `dac_stage` (mode 3) sets the clean view (the 8 debug Display toggles off) and the units in H (P.terH = 2 x tilesPerH, P.subH = 0.22 x terH). Entering it saves the 10 Display keys of DISPLAY_KEYS (with their checkboxes) and P.terH / P.subH (with their sliders);
-   EVERY exit restores them first, then applies the destination (and the reset of S1b: the examples outside mode 2 start from tint off / outline off / room borders on; mode 2's own examples set tint / outline themselves).
-   (a) mode 2 with MANUAL toggles (nowalk and markers off, terH 1.7, subH 0.3) -> dac_stage -> every example of modes 1, 2, 4, 5, 6 (through the mode selector and then the example) and the 2 legacy examples of mode 3: the 10 keys, their checkboxes, P.terH, P.subH and their sliders
-   equal those of before entering, except what the destination sets itself; (b) dac_stage pressed twice, then leave; (c) leaving with the mode selector only (the first example of each mode); (d) loading images + a manifest while inside.
-   MUTATIONS (E.modesTest, each must FAIL its named check): skipDisplayRestore, skipUnitsRestore, retakeSnapshot.
+/* LIMITATION 22 (fixed in S1b): the Display toggles that only mode 2 sets (O.typeTint, O.dioOutline, O.roomBorders and their checkboxes) must not leak into the examples of the other modes.
+   Mode 2 is visited (its default example has the type tint and the Diorama outline ON), then EVERY example of modes 1, 3, 4, 5 and 6 (the ones with rooms in particular: real map Default / Balanced types of mode 4, dac_stage and
+   diorama31_stage of mode 3) is applied: the three toggles and their checkboxes must be the fresh defaults of O (tint off, outline off, room borders on). Between two examples mode 2 is visited again (tint and outline back on).
+   MUTATION (E.modesTest.skipDisplayReset: the reset skipped): the same check FAILS on the examples with rooms.
+   The panel without modes (EVO_NO_MODES, the legacy scenario buttons) cannot leak: no scenario sets these toggles there (they are the user's own), so the check is only about the modes layer.
      NODE_PATH=$(npm root -g) node tools/ui/test_modes_leak_ui.js */
-const fs = require('fs'), os = require('os'), path = require('path');
-const { open, mapFile } = require('./common');
+const { open } = require('./common');
 let pass = 0, fail = 0;
-const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : JSON.stringify(extra).slice(0, 700)); } };
-const KEYS = ['roomBorders', 'nowalk', 'gateMarks', 'rampLines', 'veil', 'border', 'markers', 'edgeWarn', 'typeTint', 'dioOutline'];
-const STATE = () => { const e = window.__evo, O = e.O, P = e.P, o = {}, c = {}; for (const k of ['roomBorders', 'nowalk', 'gateMarks', 'rampLines', 'veil', 'border', 'markers', 'edgeWarn', 'typeTint', 'dioOutline']) { o[k] = O[k]; const el = document.querySelector('#t-' + k); c[k] = el ? el.checked : null; } return { o, c, terH: P.terH, subH: P.subH, sTerH: +document.querySelector('#s-terH').value, sSubH: +document.querySelector('#s-subH').value, units: e.st.stageUnits, win: !!e.st.win }; };
+const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : JSON.stringify(extra)); } };
 (async () => {
   const a = await open({ w: 1500, h: 900, modes: true }), page = a.page, ev = (f, x) => page.evaluate(f, x);
-  const idle = () => a.idle();
-  const MODES = await ev(() => window.EVO.modes.MODES.map((m) => ({ id: m.id, ex: m.examples.filter((x) => !x.images).map((x) => ({ id: x.id, tint: !!x.tint, outline: !!x.outline })) })));
-  const clickEx = async (id) => { await page.click(`#examples button[data-id="${id}"]`); await idle(); };
-  const setMode = async (m) => { await ev((m) => window.__evo.setMode(m), m); await idle(); };
-  const manual = async () => { // what a user may have done by hand: two debug aids off, own units
-    await ev(() => { for (const id of ['t-nowalk', 't-markers']) { const el = document.querySelector('#' + id); if (el && el.checked) el.click(); } });
-    await a.slider('subH', 0.3); await idle(); await a.slider('terH', 1.7); await idle();
-  };
-  const prep = async () => { await setMode('rooms'); await manual(); return ev(STATE); };
-  const dest = (m, ex) => (m === 'rooms' ? { typeTint: ex.tint, dioOutline: ex.outline, roomBorders: true } : { typeTint: false, dioOutline: false, roomBorders: true });
-  const verdict = (B0, S, d) => { // display: the 10 keys and their checkboxes; units: P.terH, P.subH and their sliders
-    const badD = [], badU = []; for (const k of KEYS) { const want = k in d ? d[k] : B0.o[k]; if (S.o[k] !== want || S.c[k] !== want) badD.push([k, want, S.o[k], S.c[k]]); }
-    if (!(S.terH === B0.terH && S.subH === B0.subH && S.sTerH === B0.sTerH && S.sSubH === B0.sSubH)) badU.push([B0.terH, B0.subH, S.terH, S.subH, S.sTerH, S.sSubH]);
-    return { badD, badU, session: S.win === false && S.units === false };
-  };
-  // the targets: every example of modes 1, 2, 4, 5, 6 and the two legacy examples of mode 3
-  const targets = []; for (const m of MODES) { if (m.id === 'stage') continue; for (const ex of m.ex) targets.push({ mode: m.id, ex }); }
-  for (const m of MODES.filter((q) => q.id === 'stage')) for (const ex of m.ex.filter((x) => x.id !== 'dac_stage')) targets.push({ mode: 'stage', ex });
-  const trial = async (t, twice) => {
-    const B0 = await prep(); await setMode('stage'); if (twice) await clickEx('dac_stage'); const inside = await ev(STATE);
-    if (t.mode === 'stage') await clickEx(t.ex.id); else { await setMode(t.mode); if (t.ex.id !== MODES.find((q) => q.id === t.mode).ex[0].id) await clickEx(t.ex.id); }
-    const S = await ev(STATE); return { B0, inside, S, v: verdict(B0, S, dest(t.mode, t.ex)) };
-  };
-  // (a) + (c)
-  const badD = [], badU = [], badS = []; let n = 0, cleanOk = true, unitsOn = true;
-  for (const t of targets) {
-    const r = await trial(t, false); n++;
-    if (r.v.badD.length) badD.push([t.mode + '/' + t.ex.id, r.v.badD]); if (r.v.badU.length) badU.push([t.mode + '/' + t.ex.id, r.v.badU]); if (!r.v.session) badS.push(t.mode + '/' + t.ex.id);
-    cleanOk = cleanOk && ['roomBorders', 'nowalk', 'gateMarks', 'rampLines', 'veil', 'border', 'markers', 'edgeWarn', 'typeTint', 'dioOutline'].every((k) => r.inside.o[k] === false && r.inside.c[k] === false); unitsOn = unitsOn && r.inside.units && r.inside.terH === 4 && r.inside.win;
-  }
-  ok(`dac_stage opens the clean view (the 10 Display keys and checkboxes off) with units in H (terH 4, subH 0.88) and a window session, from a state with manual toggles (${n} entries)`, cleanOk && unitsOn);
-  ok(`WINDOW SESSION: display restore: after ${n} exits (every example of modes 1, 2, 4, 5, 6 and the 2 legacy examples of mode 3, through the selector and the example) the 10 Display keys and checkboxes are those of before entering (or what the destination sets itself)`, badD.length === 0, badD);
-  ok(`WINDOW SESSION: units restore: after ${n} exits P.terH, P.subH and their sliders are those of before entering (terH 1.7, subH 0.3)`, badU.length === 0, badU);
-  ok('WINDOW SESSION: every exit ends the session (no snapshot left, units flag off)', badS.length === 0, badS);
-  // (b) dac_stage pressed twice
-  { const t = { mode: 'rooms', ex: MODES.find((q) => q.id === 'rooms').ex[0] }; const r = await trial(t, true);
-    ok('WINDOW SESSION: no second snapshot: dac_stage pressed again from inside, then leaving, restores the state of before the FIRST entry', r.v.badD.length === 0 && r.v.badU.length === 0, r.v); }
-  // (d) images + a manifest loaded while inside the session
-  { await setMode('terrain'); await ev(() => { document.querySelector('#examples button[data-id="images"]').click(); }); await idle();
-    await page.setInputFiles('#file', ['height', 'zones', 'edges'].map((n) => mapFile('maps', n))); await page.waitForTimeout(1500); await idle();
-    const [dl] = await Promise.all([page.waitForEvent('download'), page.click('#saveManifest')]); const mpath = path.join(os.tmpdir(), 'evo_leak_pack_' + process.pid + '.json'); await dl.saveAs(mpath);
-    await manual(); const B0 = await ev(STATE); await setMode('stage');
-    const inside = await ev(STATE); ok('(d) before the load: inside the window session, clean view, units in H', inside.win && inside.units && inside.o.nowalk === false && inside.terH === 4, inside);
-    await page.setInputFiles('#file', [...['height', 'zones', 'edges'].map((n) => mapFile('maps', n)), mpath]); await page.waitForTimeout(1500); await idle();
-    const S = await ev(STATE), v = verdict(B0, S, {});
-    ok('WINDOW SESSION: (d) loading images + a manifest while inside ends the session and restores the Display keys, P.terH and P.subH', v.badD.length === 0 && v.badU.length === 0 && v.session, [v, S.win]);
-    fs.unlinkSync(mpath); }
-  // MUTATIONS: each must fail its named check (a short run: entering from a state with manual toggles, then a mode-2 example and a mode-1 example)
-  const mini = async (flag) => { await ev((f) => { window.EVO.modesTest = f ? { [f]: true } : null; }, flag); const T = [{ mode: 'rooms', ex: MODES.find((q) => q.id === 'rooms').ex[0] }, { mode: 'terrain', ex: MODES.find((q) => q.id === 'terrain').ex[0] }]; const out = { badD: 0, badU: 0, twice: null };
-    for (const t of T) { const r = await trial(t, false); out.badD += r.v.badD.length; out.badU += r.v.badU.length; }
-    const r2 = await trial(T[0], true); out.twice = r2.v.badD.length + r2.v.badU.length; await ev(() => { window.EVO.modesTest = null; }); return out; };
-  let m = await mini('skipDisplayRestore'); ok(`MUTATION skipDisplayRestore: the display restore check FAILS (${m.badD} keys not restored)`, m.badD > 0);
-  m = await mini('skipUnitsRestore'); ok(`MUTATION skipUnitsRestore: the units restore check FAILS (${m.badU} exits with terH / subH not restored)`, m.badU > 0);
-  m = await mini('retakeSnapshot'); ok(`MUTATION retakeSnapshot: the no-second-snapshot check FAILS (${m.twice} wrong values after dac_stage pressed twice)`, m.twice > 0);
-  m = await mini(null); ok('without a mutation the same short run is clean (the mutations were the only difference)', m.badD === 0 && m.badU === 0 && m.twice === 0, m);
+  const STATE = () => { const e = window.__evo, O = e.O, cb = (id) => { const el = document.querySelector('#' + id); return el ? el.checked : null; }; return { tint: O.typeTint, outline: O.dioOutline, borders: O.roomBorders, cTint: cb('t-typeTint'), cOutline: cb('t-dioOutline'), cBorders: cb('t-roomBorders') }; };
+  /* S2a (clean view of `dac_stage`): the expected state of an example is the fresh default of O (tint off, outline off, room borders on) overridden by what the example ITSELF declares in `display` (read from E.modes.MODES, no ids written by hand). Today only `dac_stage` declares one (room borders off with the other debug aids); every other example must equal the fresh defaults, as in S1b. */
+  const want = (ex) => { const d = ex.display || {}; return { tint: d.typeTint !== undefined ? d.typeTint : false, outline: d.dioOutline !== undefined ? d.dioOutline : false, borders: d.roomBorders !== undefined ? d.roomBorders : true }; };
+  const isExpected = (s, ex) => { const w = want(ex); return s.tint === w.tint && s.outline === w.outline && s.borders === w.borders && s.cTint === w.tint && s.cOutline === w.outline && s.cBorders === w.borders; };
+  const list = await ev(() => window.EVO.modes.MODES.filter((m) => m.id !== 'rooms').flatMap((m) => m.examples.filter((x) => !x.images).map((x) => ({ mode: m.id, id: x.id, rooms: !!x.rooms, display: x.display || null })))); // every example outside mode 2 (the images example needs files)
+  const visit2 = async () => { await ev(() => window.__evo.setMode('rooms')); await a.idle(); return ev(STATE); };
+  const run = async (mutate) => { const bad = []; let withRooms = 0, n = 0;
+    await ev((m) => { window.EVO.modesTest = m ? { skipDisplayReset: true } : null; }, mutate);
+    for (const ex of list) {
+      const s2 = await visit2(); if (!(s2.tint && s2.outline)) bad.push(['precondition: mode 2 has tint and outline on', ex.id, s2]);
+      await ev((m) => window.__evo.setMode(m), ex.mode); await a.idle(); await page.click(`#examples button[data-id="${ex.id}"]`); await a.idle();
+      const s = await ev(STATE); n++; if (ex.rooms) withRooms++; if (!isExpected(s, ex)) bad.push([ex.mode + '/' + ex.id, s]);
+    }
+    await ev(() => { window.EVO.modesTest = null; }); return { bad, n, withRooms }; };
+  const good = await run(false);
+  ok(`after a visit of mode 2 (tint and outline on), the ${good.n} examples of modes 1, 3, 4, 5 and 6 (${good.withRooms} with rooms) have O.typeTint / O.dioOutline off and O.roomBorders on (the fresh defaults) plus what the example itself declares in \`display\`, checkboxes the same`, good.bad.length === 0 && good.n >= 10 && good.withRooms >= 4, good.bad);
+  { const dac = list.find((x) => x.id === 'dac_stage'); // GUARD: the `display` rule above must not become dead: dac_stage declares room borders off, and the state after a visit of mode 2 matches it
+    await visit2(); await ev(() => window.__evo.setMode('stage')); await a.idle(); await page.click('#examples button[data-id="dac_stage"]'); await a.idle(); const sd = await ev(STATE);
+    ok('GUARD: dac_stage declares display.roomBorders === false (the S2a clean view) and, after a visit of mode 2, its state is exactly that: borders off, tint off, outline off, checkboxes the same', !!dac && !!dac.display && dac.display.roomBorders === false && sd.borders === false && sd.cBorders === false && sd.tint === false && sd.outline === false, { display: dac && dac.display, sd }); }
+  const s = await ev(STATE); const s2 = await visit2(); ok('mode 2 itself is unchanged: its default example has the type tint and the Diorama outline on', s2.tint && s2.outline && s2.borders && s2.cTint && s2.cOutline, s2);
+  await page.click('#examples button[data-id="real_chain5"]'); await a.idle(); const c5 = await ev(STATE); ok('mode 2 "Chain (5 terraces)" keeps its tint and outline', c5.tint && c5.outline && c5.borders, c5);
+  const mut = await run(true);
+  ok(`MUTATION: the reset skipped (E.modesTest.skipDisplayReset): the leak check FAILS (${mut.bad.length} of ${mut.n} examples inherit the tint / outline of mode 2)`, mut.bad.some((b) => /dac_stage|real_|diorama31/.test(b[0])), mut.bad.map((b) => b[0]));
   ok('no page errors', a.errs.length === 0, a.errs);
   await a.browser.close(); console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

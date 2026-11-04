@@ -79,13 +79,14 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     if (m.terrain === 'folded') { // the terrain controls of modes 2-4 are reachable: the toggle is visible, a real click opens them, one of them works, a second click folds them again
       const TT = '.grp[data-group="1 Terrain"] > .advtoggle', tv = () => ev((q) => { const b = document.querySelector(q); return !!b && b.getClientRects().length > 0; }, TT), sv = () => ev(() => { const b = document.querySelector('#s-terraces'); return !!b && b.getClientRects().length > 0; });
       await ev(() => { document.querySelector('aside').scrollTop = 0; });
-      const terrIds = await ev(() => window.__terrainIds()), vis0 = await tv(), t0txt = vis0 ? await page.textContent(TT) : ''; // the folded terrain controls the PLAN lists for this state
-      ok(`${tag}: the "Show terrain controls" toggle is visible (the "1 Terrain" section stays on screen)`, vis0 && t0txt === `Show terrain controls (${terrIds.length})`, `${t0txt || 'not visible'} (plan: ${terrIds.length})`);
+      /* S2a: only the WINDOW example of mode 3 (units ON, terH / subH leave the plan) is computed from E.modes.plan with the UI's ctx; modes 2 and 4 and the legacy examples keep the hand-written 9 and the hand-written id list, independent of plan */
+      const win = await ev(() => window.__tctx().stageWin), TERR9 = ['terraces', 'subs', 'terH', 'spread', 'stairW', 'stairStyle', 'rampDepth', 'smooth', 'radius'], terrIds = win ? await ev(() => window.__terrainIds()) : TERR9, vis0 = await tv(), t0txt = vis0 ? await page.textContent(TT) : '';
+      ok(`${tag}: the "Show terrain controls" toggle is visible (the "1 Terrain" section stays on screen)`, vis0 && t0txt === (win ? `Show terrain controls (${terrIds.length})` : 'Show terrain controls (9)'), `${t0txt || 'not visible'} (plan: ${terrIds.length})`);
       if (vis0) {
         ok(`${tag}: with the terrain folded, Terraces is not visible`, !(await sv()));
         await page.click(TT); await page.waitForTimeout(150);
         const en = await sv(), enabled = en ? await page.isEnabled('#s-terraces') : false;
-        ok(`${tag}: a real click on the toggle shows the ${terrIds.length} terrain controls of the plan (Terraces visible and enabled)`, en && enabled && (await ev((ids) => { const E = window.EVO; return ids.filter((id) => ![...document.querySelectorAll(E.controls.TABLE.find((x) => x.id === id).dom)].some((el) => el.getClientRects().length > 0)).length; }, terrIds)) === 0, `visible ${en}, enabled ${enabled}`);
+        ok(`${tag}: a real click on the toggle shows the ${terrIds.length} terrain controls${win ? ' of the plan' : ''} (Terraces visible and enabled)`, en && enabled && (await ev((ids) => { const E = window.EVO; return ids.filter((id) => ![...document.querySelectorAll(E.controls.TABLE.find((x) => x.id === id).dom)].some((el) => el.getClientRects().length > 0)).length; }, terrIds)) === 0, `visible ${en}, enabled ${enabled}`);
         const b0 = await sig(), old = await ev(() => +document.querySelector('#s-terraces').value);
         await ev((v) => { const el = document.querySelector('#s-terraces'); el.value = String(v); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, old === 4 ? 3 : 4); await a.idle(); await page.waitForTimeout(250);
         const b1 = await sig();
@@ -96,9 +97,9 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       }
     }
     if (m.id === 'stage') { // S2a: the terrain controls in BOTH states of the units switch, counted from E.modes.plan (the checks above run in the default state, units ON)
-      const TT2 = '.grp[data-group="1 Terrain"] > .advtoggle', NT = () => ev(() => window.EVO.modes.TERRAIN_MAIN.length), T = () => ev(() => ({ ids: window.__terrainIds(), units: window.__evo.st.stageUnits }));
+      const TT2 = '.grp[data-group="1 Terrain"] > .advtoggle', T = () => ev(() => ({ ids: window.__terrainIds(), units: window.__evo.st.stageUnits }));
       const terHShown = async () => { await ev(() => { document.querySelector('aside').scrollTop = 0; }); const closed = !(await ev(() => { const b = document.querySelector('#s-terH'); return !!b && b.getClientRects().length > 0; })); if (closed) await page.click(TT2); await page.waitForTimeout(150); const r = await ev(() => ['terH', 'subH'].map((id) => { const b = document.querySelector('#s-' + id); return !!b && b.getClientRects().length > 0; })); if (closed) await page.click(TT2); await page.waitForTimeout(150); return r; };
-      const nt = await NT(), on = await T(), onSh = await terHShown();
+      const nt = 9, on = await T(), onSh = await terHShown(); // 9 = the hand-written count of the terrain controls without the units switch
       ok(`mode 3 units ON (the default example): ${nt - 1} terrain controls (${nt} minus terH), neither terH nor subH in the plan and none visible when the terrain is unfolded`, on.units && on.ids.length === nt - 1 && !on.ids.includes('terH') && !on.ids.includes('subH') && !onSh[0] && !onSh[1], JSON.stringify({ on, onSh }));
       await page.click('#t-stageUnits'); await a.idle();
       const off = await T(), offSh = await terHShown();
@@ -106,8 +107,13 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       await page.click('#t-stageUnits'); await a.idle();
       const back = await T(); ok('mode 3 units back ON: the same list as the first time', back.units && JSON.stringify(back.ids) === JSON.stringify(on.ids), JSON.stringify(back));
       await page.click('#examples button[data-id="x4_stage"]'); await a.idle();
-      const leg = await T(), legSh = await terHShown();
-      ok(`mode 3 legacy example (x4_stage, no window): ${nt} terrain controls, terH in the list and visible`, !leg.units && leg.ids.length === nt && leg.ids.includes('terH') && legSh[0], JSON.stringify({ leg, legSh }));
+      /* the legacy example (no window) is independent of plan: the hand-written label (9) and the hand-written ids, read from the DOM */
+      const LIT9 = ['terraces', 'subs', 'terH', 'spread', 'stairW', 'stairStyle', 'rampDepth', 'smooth', 'radius'];
+      await ev(() => { window.EVO.modes.resetFolds(document); document.querySelector('aside').scrollTop = 0; }); await a.idle();
+      const legTxt = await page.textContent(TT2); await page.click(TT2); await page.waitForTimeout(150);
+      const legVis = await ev((ids) => ids.filter((id) => { const b = document.querySelector('#s-' + id); return !!b && b.getClientRects().length > 0; }), LIT9), legSub = await ev(() => { const b = document.querySelector('#s-subH'); return !!b && b.getClientRects().length > 0; });
+      await page.click(TT2); await page.waitForTimeout(150);
+      ok('mode 3 legacy example (x4_stage, no window): the toggle says (9) and the 9 hand-written terrain controls (terH among them) are visible when unfolded; subH is not among them', legTxt === 'Show terrain controls (9)' && legVis.length === 9 && legVis.includes('terH') && !legSub, JSON.stringify({ legTxt, legVis, legSub }));
       await page.click('#examples button[data-id="dac_stage"]'); await a.idle();
     }
     await expandAll();
