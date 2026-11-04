@@ -11,6 +11,7 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   const a = await open({ w: 1500, h: 900, modes: true }), page = a.page, ev = (f, x) => page.evaluate(f, x), idle = () => a.idle();
   const clickEx = async (id) => { await page.click(`#examples button[data-id="${id}"]`); await idle(); };
   const setMode = async (m) => { await ev((m) => window.__evo.setMode(m), m); await idle(); };
+  const goHero = async (id) => { await ev((id) => { const e = window.__evo, S = e.S(), c = window.EVO.stage.roomCentre(S, id); e.st.hero = { x: S.ox + c.x, y: S.oy + c.y }; e.st.follow = true; e.redraw(); }, id); await idle(); };
   const YAW = () => ev(() => window.__evo.view().yaw);
   const baseYawOf = () => ev(() => { const e = window.__evo; return { yaw: e.view().yaw, base: e.st.stage.yaw === undefined ? null : e.st.stage.yaw }; });
   // ---- (1) the yaw: the legacy examples first (their yaw is the pack's / 0), then dac_stage, then back
@@ -63,6 +64,49 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
     const got = await ev(() => { const e = window.__evo; return { x: Math.floor(e.st.hero.x - e.S().ox), y: Math.floor(e.st.hero.y - e.S().oy) }; }); if (got.x === t.x && got.y === t.y) exact++;
     await ev(() => { const e = window.__evo, S = e.S(), c = window.EVO.stage.roomCentre(S, 17); e.st.hero = { x: S.ox + c.x, y: S.oy + c.y }; e.redraw(); }); await idle(); }
   ok(`yaw 180: a click resolves to the tile it was projected from (${exact} of ${clicked} sampled tiles on screen; the step-0 sample was 6 of 6)`, clicked >= 4 && exact === clicked, { exact, clicked });
+  // ---- (4) THE WINDOW vs THE WHOLE MAP with steps: they differ ONLY in stair footprints, 11 tiles (deterministic: 3 runs, same count)
+  { await ev(() => { const e = window.__evo; e.st.stage.yaw = 180; }); await page.click('#examples button[data-id="dac_stage"]'); await idle();
+    const w = await ev(() => { const S = window.__evo.S(); return { W: S.W, ox: S.ox, oy: S.oy, hh: Array.from(S.fine, (f) => S.levelH[f]), carved: Array.from(S.carved), slice: Array.from(S.slice), patch: S.passes.filter((x) => x.patch).length }; }); // the slice "patch" sites of the connection tree (a stair's own `site` may be an alternative pair of its pass: count the passes)
+    await ev(() => { document.querySelector('#wholeRooms').click(); }); await idle();
+    const m = await ev(() => { const S = window.__evo.S(); return { W: S.W, hh: Array.from(S.fine, (f) => S.levelH[f]), carved: Array.from(S.carved) }; });
+    let dh = 0, onlyWin = 0, onlyWhole = 0, outside = 0; for (let i = 0; i < w.hh.length; i++) { if (!w.slice[i]) continue; const x = i % w.W, y = (i / w.W) | 0, j = (y + w.oy) * m.W + x + w.ox; if (Math.abs(w.hh[i] - m.hh[j]) > 1e-9) { dh++; if (w.carved[i] && !m.carved[j]) onlyWin++; else if (!w.carved[i] && m.carved[j]) onlyWhole++; else outside++; } }
+    ok(`window vs whole map with the steps: ${dh} tiles differ, ALL of them stair footprints (${onlyWin} carved only in the window = a slice "patch" stair of the connection tree, ${onlyWhole} only in the whole map = the edge of a global stair whose connection leaves the slice; ${outside} elsewhere)`, dh === 11 && onlyWin === 9 && onlyWhole === 2 && outside === 0 && w.patch === 1, { dh, onlyWin, onlyWhole, outside, patch: w.patch });
+    await page.click('#examples button[data-id="dac_stage"]'); await idle(); }
+  // ---- (5) THE YAW 180 COUNTERPARTS of the camera / hero checks of test_stage_ui.js (which runs at yaw 0): hero size, CLAMP L / R / near / far, the arrows, the blocked step. The expectations are DERIVED from the yaw (a = screen right = cos x - sin y, u = toward the camera = sin x + cos y).
+  const SNAP2 = () => { const E = window.EVO, e = window.__evo, S = e.S(), st = e.st, cv = document.querySelector('#stage canvas'), w = cv.clientWidth, h = cv.clientHeight, v = e.view(), tp = st.stage.tilesPerH, hf = st.stage.heroFrac;
+    const hx = st.hero.x - S.ox, hy = st.hero.y - S.oy, i = E.stage.cellOf(S, hx, hy), feet = E.stage.feetH(S, i), hs = e.O.hero && e.O.hero.stats, sg = E.stage, D = sg.dist(hf, tp), p = v.pitch * Math.PI / 180, nearD = D * Math.cos(p) - D * Math.sin(p) / Math.tan(p + sg.FOV / 2), yr = v.yaw * Math.PI / 180, uOf = (x, y) => Math.sin(yr) * x + Math.cos(yr) * y;
+    const box = S.sliceBox, corners = [[box.x0, box.y0], [box.x1, box.y0], [box.x0, box.y1], [box.x1, box.y1]], uMax = Math.max(...corners.map((c) => uOf(c[0], c[1])));
+    return { yaw: v.yaw, w, h, tp, hf, centre: hs && hs.centre, hpx: hs && hs.hpx, k: sg.depthScale(E.makeCam(S, e.P, Object.assign(v, { focus: [st.focus[0] - S.ox, st.focus[1] - S.oy, st.focus[2]] }), w, h), hx, hy, feet), clamp: st.stageClamp && { side: st.stageClamp.side, near: st.stageClamp.near }, hero: [st.hero.x, st.hero.y], walk: i >= 0 && sg.walkable(S, i), wantNear: uOf(hx, hy) > uMax - nearD + 1e-9, nearD, box, ox: S.ox, oy: S.oy }; };
+  const sizes180 = async (pg, b, tag) => { for (const tp of [2, 3]) for (const hf of [0.10, 0.14, 0.17]) {
+    await b.slider('tilesPerH', tp); await b.idle(); await b.slider('heroFrac', hf); await b.idle();
+    await pg.evaluate(() => { const e = window.__evo, S = e.S(), c = window.EVO.stage.roomCentre(S, 17); e.st.hero = { x: S.ox + c.x, y: S.oy + c.y }; e.st.follow = true; e.redraw(); }); await b.idle();
+    const q = await pg.evaluate(SNAP2), cx = Math.abs(q.centre[0] - q.w / 2) <= 1, cy = Math.abs(q.centre[1] - q.h / 2) <= 1;
+    // derived: the hero is centred unless its position is closer to the NEAR edge (the north one at yaw 180) than the camera allows; then it sits below the centre and the near flag is up
+    ok(`${tag} yaw ${q.yaw}, tilesPerH ${tp} heroFrac ${hf}: hero ${q.hpx.toFixed(1)} px = heroFrac x panel x depth scale (${(hf * q.h * q.k).toFixed(1)}); ${q.wantNear ? 'past the near limit: clamp near, hero below the centre' : 'centred +-1 px, no clamp'}`,
+      Math.abs(q.hpx - hf * q.h * q.k) <= 1 && (q.wantNear ? q.clamp && q.clamp.near && q.centre[1] > q.h / 2 + 5 && cx : !q.clamp && cx && cy), q); } };
+  await sizes180(page, a, 'dpr 1,');
+  await a.slider('tilesPerH', 2); await idle(); await a.slider('heroFrac', 0.14); await idle();
+  { const b = await open({ w: 1500, h: 900, modes: true, dpr: 2 }), pg = b.page; await pg.evaluate(() => window.__evo.setMode('stage')); await b.idle(); await sizes180(pg, b, 'dpr 2,'); ok('dpr 2: no page errors', b.errs.length === 0, b.errs); await b.browser.close(); }
+  // CLAMP at the four edges of the rooms box: the expected sides come from the yaw
+  const edges = await ev(() => { const e = window.__evo, S = e.S(), box = S.sliceBox, yr = e.view().yaw * Math.PI / 180, ay = (x, y) => Math.cos(yr) * x - Math.sin(yr) * y, uy = (x, y) => Math.sin(yr) * x + Math.cos(yr) * y, midX = (box.x0 + box.x1) / 2, midY = (box.y0 + box.y1) / 2;
+    const pts = { west: [box.x0 + 0.5, midY], east: [box.x1 - 0.5, midY], north: [midX, box.y0 + 0.5], south: [midX, box.y1 - 0.5] }, cen = [ay(midX, midY), uy(midX, midY)], out = {}; let nearName = null, farName = null, uMaxV = -1e9, uMinV = 1e9;
+    for (const [k, p] of Object.entries(pts)) { const u = uy(p[0], p[1]); if (u > uMaxV) { uMaxV = u; nearName = k; } if (u < uMinV) { uMinV = u; farName = k; } out[k] = { x: p[0], y: p[1], a: ay(p[0], p[1]) - cen[0] }; }
+    return { out, nearName, farName }; });
+  const place = async (x, y) => { await ev(({ x, y, ox, oy }) => { const e = window.__evo; e.st.hero = { x: e.S().ox + x, y: e.S().oy + y }; e.st.follow = true; e.redraw(); }, { x, y }); await idle(); return ev(SNAP2); };
+  const names = ['west', 'east'], res = {}; for (const [k, p] of Object.entries(edges.out)) res[k] = await place(p.x, p.y);
+  for (const k of names) { const q = res[k], wantSide = edges.out[k].a < 0 ? 'L' : 'R'; ok(`CLAMP ${k} edge at yaw 180: screen side ${wantSide} (derived: a = cos x - sin y), the hero is ${wantSide === 'L' ? 'left' : 'right'} of the centre`, q.clamp && q.clamp.side === wantSide && (wantSide === 'L' ? q.centre[0] < q.w / 2 - 5 : q.centre[0] > q.w / 2 + 5), { q, wantSide }); }
+  { const q = res[edges.nearName]; ok(`CLAMP near edge at yaw 180 is the ${edges.nearName} edge (max of u = sin x + cos y): the near flag, the hero below the centre, depth scale > 1.03`, q.clamp && q.clamp.near && q.centre[1] > q.h / 2 + 5 && q.k > 1.03, q); }
+  { const q = res[edges.farName]; ok(`FAR edge at yaw 180 is the ${edges.farName} edge: never clamped, the hero stays at the screen centre`, !q.clamp && Math.abs(q.centre[0] - q.w / 2) <= 1 && Math.abs(q.centre[1] - q.h / 2) <= 1, q); }
+  // the arrows: 'right' = screen right = (cos, -sin) in the map; the key that moves +x is derived; a step into a non-walkable cell is blocked
+  await goHero(17);
+  const window_yaw = 180; // the yaw of the example (asserted at the top: view().yaw === 180)
+  const keyFor = (dx, dy) => { const yr = (window_yaw) * Math.PI / 180, vec = { ArrowRight: [Math.cos(yr), -Math.sin(yr)], ArrowLeft: [-Math.cos(yr), Math.sin(yr)], ArrowDown: [Math.sin(yr), Math.cos(yr)], ArrowUp: [-Math.sin(yr), -Math.cos(yr)] }; return Object.keys(vec).find((k) => Math.round(vec[k][0]) === dx && Math.round(vec[k][1]) === dy); };
+  const keyPlusX = keyFor(1, 0), keyRight = 'ArrowRight';
+  { const q0 = await ev(SNAP2); await page.evaluate(() => document.activeElement && document.activeElement.blur()); await page.keyboard.press(keyRight); await idle(); const q1 = await ev(SNAP2), d = [q1.hero[0] - q0.hero[0], q1.hero[1] - q0.hero[1]], yr = q0.yaw * Math.PI / 180, want = [0.5 * Math.cos(yr), -0.5 * Math.sin(yr)]; // screen right in the map = (cos yaw, -sin yaw), 0.25 H = 0.5 tile
+    ok(`arrow right at yaw ${q0.yaw} moves the hero 0.25 H = 0.5 tile along the screen right (derived (${want.map((v) => v.toFixed(2))}), measured (${d.map((v) => v.toFixed(2))})) and the camera follows (hero at the screen centre)`, Math.abs(d[0] - want[0]) < 1e-9 && Math.abs(d[1] - want[1]) < 1e-9 && Math.abs(q1.centre[0] - q1.w / 2) <= 1, { q0: q0.hero, q1: q1.hero }); }
+  { const blocked = await ev(() => { const E = window.EVO, e = window.__evo, S = e.S(); for (let i = 0; i < S.n - 1; i++) if (S.slice && S.slice[i] && E.stage.walkable(S, i) && !E.stage.walkable(S, i + 1) && (i % S.W) < S.W - 1) return { x: S.ox + (i % S.W) + 0.75, y: S.oy + ((i / S.W) | 0) + 0.5 }; return null; });
+    await ev(({ x, y }) => { const e = window.__evo; e.st.hero = { x, y }; e.redraw(); }, blocked); await idle(); const q0 = await ev(SNAP2); await page.keyboard.press(keyPlusX); await idle(); const q1 = await ev(SNAP2);
+    ok(`yaw 180: an arrow step (${keyPlusX}, the key that moves +x here) into a non-walkable cell is blocked: the hero does not move`, q0.walk && JSON.stringify(q0.hero) === JSON.stringify(q1.hero), [q0.hero, q1.hero]); }
   ok('no page errors', a.errs.length === 0, a.errs);
   await a.browser.close(); console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
