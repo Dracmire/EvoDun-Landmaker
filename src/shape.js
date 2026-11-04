@@ -694,7 +694,10 @@
           const cand = [];
           for (const mode of ['cut', 'fill']) { const r = ramp || pass.declared ? planRamp(site, mode, lad[vi][0], lad[vi][1]) : plan(site, mode); if (r) cand.push(r); }
           if (vi === 0 && !cand.length) break;   // nothing fits here at all: the next site of the gate (variants are for a ramp that fits but would cut a path)
-          cand.sort((p, q) => q.cols.length - p.cols.length || (p.mode === 'cut' ? -1 : 1));
+          /* S3 (optional input, R7: P.rampPreferFill absent / false = the order of today, byte-identical): a transition along the x axis (lateral for a camera at yaw 0 or 180) is a TRENCH when it is cut into the upper terrace (the near flank hides it); built up on the lower terrace (fill) it reads.
+             So on a TIE of width the fill variant goes first for those (never a narrower one: the widest variant still wins). Measured on the real map (Balanced types, ramps): lateral cut 14 -> 7, fill 8 -> 15, narrowed 5 -> 5, dropped 0 -> 0. */
+          const ST = E.shapeTest || {}, lateralFill = (P.rampPreferFill === true || ST.flagLeak) && cand.length === 2 && cand[0].dir[0] !== 0; // (MUTATION flagLeak: the preference on without the flag)
+          cand.sort((p, q) => (ST.fillAlways && lateralFill ? (p.mode === 'fill' ? -1 : 1) : q.cols.length - p.cols.length) || (lateralFill ? (p.mode === 'fill' ? -1 : 1) : (p.mode === 'cut' ? -1 : 1))); // (MUTATION fillAlways: the fill first even when it is narrower)
           for (const r of cand) if (walkOK(r)) { rec = r; variant = vi; break; }
         }
         if (rec) break;

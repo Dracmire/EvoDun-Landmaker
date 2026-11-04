@@ -24,11 +24,14 @@ const PLAN = () => { // the chain and the Diorama plan of mode 2
   for (const v of P.chainIds || []) mix(v); for (const s of P.chainSeqs || []) for (const v of s) mix(v); const dp = P.dioPlan; if (dp) for (const q of dp.items) { mix(q.room); mix(q.eligible ? 1 : 0); mix(q.shift || 0); mix(q.bridgeLen || 0); }
   mix(S.levelH.length); for (let i = 0; i < S.n; i++) mix(S.fine[i]); return { hash: h >>> 0, chain: (P.chainIds || []).length, plan: dp ? dp.items.length : -1 };
 };
+const T2FN = () => { const S = window.__evo.S(), w0 = window.__w0; let tiles = 0, dh = 0, dt = 0; for (let y = 0; y < S.H; y++) for (let x = 0; x < S.W; x++) { const i = y * S.W + x; if (!S.slice || !S.slice[i]) continue; tiles++; const j = (y + S.oy) * w0.W + x + S.ox; if (Math.abs(S.levelH[S.fine[i]] - w0.hh[j]) > 1e-9) dh++; if (S.roomType[i] !== w0.ty[j]) dt++; } return { tiles, dh, dt, win: [S.W, S.H] }; }; // heights and room types of the window vs the whole map captured in window.__w0
 (async () => {
   const a = await open({ w: 1500, h: 900, modes: true }), page = a.page, ev = (f, x) => page.evaluate(f, x);
   const idle = () => a.idle(), set = (k, v) => a.slider(k, v), snap = () => ev(SNAP);
   const setHero = async (x, y) => { await ev(({ x, y }) => { window.__evo.st.hero = { x, y }; window.__evo.redraw(); }, { x, y }); await idle(); };
   const near = (p, q, t) => Math.abs(p - q) <= t;
+  /* S3: the camera / hero mechanics below (hero size, clamp, arrows, picks) are the S1 / S2a expectations, written for the camera at the south (yaw 0). `dac_stage` now declares `yaw: 180`; here its example yaw is set to 0 (a page-side edit of the example table), so every expectation stays exactly as it was. The yaw 180 counterparts (hero size, CLAMP L / R / near / far, the arrows, the blocked step) are in tools/ui/test_stage_s3_ui.js, with the expectations derived from the yaw. */
+  await ev(() => { window.EVO.modes.byId('stage').examples.find((x) => x.id === 'dac_stage').yaw = 0; });
   let t0 = Date.now(); await ev(() => window.__evo.setMode('rooms')); await idle(); const tMode2 = Date.now() - t0;
   // ---- T3 / T1 reference: mode 2, real_chain5, as the user sees it
   await page.click('#examples button[data-id="real_chain5"]'); await idle(); const plan1 = await ev(PLAN);
@@ -47,13 +50,24 @@ const PLAN = () => { // the chain and the Diorama plan of mode 2
   ok('the banner says "2D-HD crystallizer: in construction (S1)" and the purpose names the Pocket limit', /2D-HD crystallizer: in construction \(S1\)/.test(m3.text) && /multi-room Pocket: later PR/.test(m3.text));
   console.log(`(timing, with other work on the machine: mode 2 first entry ${tMode2} ms, mode 3 entry after it ${tEnter} ms)`);
   // ---- T1, T2
+  /* S3: T1 / T2 are about the DAC DATA (rooms, levels, types) against mode 2. The window now opens with steps (A1) and the fill preference; mode 2 has ramps. So they are compared in mode 2's transition style (stairStyle 1, tread 2, rampPreferFill off), applied through the SAME path the window session uses (the example's `stairs` field in applyScenario). The steps of the window and their difference from the whole map are pinned in test_stage_s3_ui.js. */
+  const stairs0 = await ev(() => { const ex = window.EVO.modes.byId('stage').examples.find((x) => x.id === 'dac_stage'), o = ex.stairs; ex.stairs = { style: 1, tread: 2, preferFill: false }; return o; });
+  await page.click('#examples button[data-id="dac_stage"]'); await idle();
   const whole = await page.evaluate(async () => { document.querySelector('#wholeRooms').click(); }); await idle();
   const hashMode3 = await ev(HASH), terr3 = await ev(() => { const P = window.__evo.P, S = window.__evo.S(); return { terraces: P.terraces, spread: P.spread, centre: P.spreadCentre, levels: S.levelH.length }; });
   ok(`T1: the whole-map terrain of dac_stage (hash ${hashMode3}) = mode 2's real_chain5 with its rules neutral (hash ${hashMode2}): levelH, fine, rooms, types`, hashMode3 === hashMode2, [terr2, terr3]);
   await ev(() => { const S = window.__evo.S(); window.__w0 = { W: S.W, hh: Array.from(S.fine, (f) => S.levelH[f]), ty: Uint8Array.from(S.roomType) }; });
   await page.click('#examples button[data-id="dac_stage"]'); await idle();
-  const t2 = await ev(() => { const S = window.__evo.S(), w0 = window.__w0; let tiles = 0, dh = 0, dt = 0; for (let y = 0; y < S.H; y++) for (let x = 0; x < S.W; x++) { const i = y * S.W + x; if (!S.slice || !S.slice[i]) continue; tiles++; const j = (y + S.oy) * w0.W + x + S.ox; if (Math.abs(S.levelH[S.fine[i]] - w0.hh[j]) > 1e-9) dh++; if (S.roomType[i] !== w0.ty[j]) dt++; } return { tiles, dh, dt, win: [S.W, S.H] }; });
+  const t2 = await ev(T2FN);
   ok(`T2: the heights and room types of the window of dac_stage equal the whole map on every tile of the slice (${t2.tiles} tiles, ${t2.dh} height differences, ${t2.dt} type differences)`, t2.tiles > 2000 && t2.dh === 0 && t2.dt === 0, t2);
+  // MUTATIONS of T1 / T2 (a real change of the DAC data: the example's terraces 5 -> 4): each test must FAIL its named check
+  await ev(() => { window.EVO.modes.byId('stage').examples.find((x) => x.id === 'dac_stage').terraces = 4; });
+  await page.click('#examples button[data-id="dac_stage"]'); await idle(); const t2m = await ev(T2FN);
+  ok(`MUTATION T2 (the window built with terraces 4 against the whole map of terraces 5): the "window = whole map" check FAILS (${t2m.dh} height differences)`, t2m.dh > 0, t2m);
+  await page.evaluate(async () => { document.querySelector('#wholeRooms').click(); }); await idle(); const hashMut = await ev(HASH);
+  ok(`MUTATION T1 (dac_stage with terraces 4 against mode 2's real_chain5): the hash check FAILS (hash ${hashMut} vs ${hashMode2})`, hashMut !== hashMode2);
+  await ev((o) => { const ex = window.EVO.modes.byId('stage').examples.find((x) => x.id === 'dac_stage'); ex.terraces = 5; ex.stairs = o; }, stairs0); // back to the example as it is: terraces 5 and the steps of S3
+  await page.click('#examples button[data-id="dac_stage"]'); await idle();
   // ---- the hero
   let s = await snap();
   ok(`the hero starts at the centre of the first room of the list (room ${s.room}, cell ${s.cell}), on a walkable cell`, s.room === WIN[0] && s.walk, s);
@@ -183,7 +197,7 @@ const PLAN = () => { // the chain and the Diorama plan of mode 2
   ok('no page errors', a.errs.length === 0, a.errs);
   await a.browser.close();
   // ---- dpr 2 (a second page: the hero size in CSS px does not depend on the pixel ratio)
-  { const b = await open({ w: 1500, h: 900, modes: true, dpr: 2 }), pg = b.page; await pg.evaluate(() => window.__evo.setMode('stage')); await b.idle();
+  { const b = await open({ w: 1500, h: 900, modes: true, dpr: 2 }), pg = b.page; await pg.evaluate(() => { window.EVO.modes.byId('stage').examples.find((x) => x.id === 'dac_stage').yaw = 0; }); await pg.evaluate(() => window.__evo.setMode('stage')); await b.idle(); // (S3: yaw 0, as above)
     const sz = async (tp, hf) => { await b.slider('tilesPerH', tp); await b.idle(); await b.slider('heroFrac', hf); await b.idle(); return pg.evaluate(SNAP); };
     for (const tp of [2, 3]) for (const hf of [0.10, 0.14, 0.17]) { const q3 = await sz(tp, hf); ok(`dpr 2, tilesPerH ${tp} heroFrac ${hf}: hero ${q3.hpx.toFixed(1)} px = ${(100 * q3.hpx / q3.h).toFixed(2)} % of the panel, centre at the screen centre +-1 px`, Math.abs(q3.hpx / (hf * q3.h) - 1) <= 0.02 && Math.abs(q3.hpx - hf * q3.h * q3.k) <= 1 && near(q3.centre[0], q3.w / 2, 1) && near(q3.centre[1], q3.h / 2, 1), q3); }
     ok('dpr 2: no page errors', b.errs.length === 0, b.errs); await b.browser.close(); }
