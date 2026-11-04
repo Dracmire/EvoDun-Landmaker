@@ -8,6 +8,9 @@
   const FOV = 30 * Math.PI / 180, TAN = Math.tan(FOV / 2); // the vertical field of view of Cam 6 (src/render.js PERSP_FOV)
   const DEF = { tilesPerH: 2, heroFrac: 0.14 }, RANGE = { tilesPerH: [1.5, 4, 0.25], heroFrac: [0.08, 0.25, 0.01] };
   const HERO_W = 0.4, STEP_H = 0.25; // in H
+  /* MEASURES IN H (S2a): with the switch on, the height unit of the shape follows the hero: terH = TERRACE_H x tilesPerH and subH = SUB_RATIO x terH (the proportion of the shape today). TERRACE_H = 2 H is a HYPOTHESIS (the user: a terrace goes from 3 to 6 tiles = 1.5-3 H; the reference has back walls of 2.4 H); S6 calibrates it. A constant, no slider, no manifest key. */
+  const TERRACE_H = 2, SUB_RATIO = 0.22;
+  const derive = (tilesPerH) => { const terH = TERRACE_H * tilesPerH; return { terH, subH: SUB_RATIO * terH }; };
   const ROW_NEAR = 0.95, ROW_FAR = 0.2; // screen rows (from the top, as a share of the panel height) of the near / far readout
 
   /* px per tile at the pivot, and the camera distance in tiles */
@@ -86,5 +89,5 @@
     return N < 2 ? null : { min: lo / tilesPerH, max: hi / tilesPerH };
   }
 
-  E.stage = { FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+  E.stage = { TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
 })(window.EVO = window.EVO || {});

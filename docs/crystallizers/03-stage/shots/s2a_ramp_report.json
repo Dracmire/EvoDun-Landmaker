@@ -1,0 +1,41 @@
+[
+ {
+  "terH": 1,
+  "subH": 0.22,
+  "rampDepth": 2,
+  "len": 2,
+  "h0": 1.44,
+  "h1": 2,
+  "jump": 0.56,
+  "slope": 0.28,
+  "lines": 2,
+  "terraceH_in_H": 0.5,
+  "jumpH": 0.28
+ },
+ {
+  "terH": 2,
+  "subH": 0.44,
+  "rampDepth": 2,
+  "len": 2,
+  "h0": 2.88,
+  "h1": 4,
+  "jump": 1.12,
+  "slope": 0.56,
+  "lines": 4,
+  "terraceH_in_H": 1,
+  "jumpH": 0.56
+ },
+ {
+  "terH": 4,
+  "subH": 0.88,
+  "rampDepth": 2,
+  "len": 2,
+  "h0": 5.76,
+  "h1": 8,
+  "jump": 2.24,
+  "slope": 1.12,
+  "lines": 7,
+  "terraceH_in_H": 2,
+  "jumpH": 1.12
+ }
+]

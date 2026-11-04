@@ -16,7 +16,7 @@ const SNAP = () => {
 };
 const HASH = () => { // the terrain of the shape in hand: heights per tile, level indices, rooms and room types (FNV-1a)
   const S = window.__evo.S(); let h = 2166136261 >>> 0; const mix = (v) => { h = Math.imul((h ^ (v & 0xffffffff)) >>> 0, 16777619) >>> 0; };
-  mix(S.W); mix(S.H); mix(S.levelH.length); for (const v of S.levelH) mix(Math.round(v * 1e6)); for (let i = 0; i < S.n; i++) { mix(S.fine[i]); mix(S.roomMap ? S.roomMap[i] : -1); mix(S.roomType ? S.roomType[i] : -1); mix(S.void && S.void[i] ? 1 : 0); }
+  mix(S.W); mix(S.H); mix(S.levelH.length); const th = window.__evo.P.terH; for (const v of S.levelH) mix(Math.round(v / th * 1e6)); // SCALE INVARIANT (S2a: the window has terH 4, mode 2 has terH 1): the heights in terraces for (let i = 0; i < S.n; i++) { mix(S.fine[i]); mix(S.roomMap ? S.roomMap[i] : -1); mix(S.roomType ? S.roomType[i] : -1); mix(S.void && S.void[i] ? 1 : 0); }
   return h >>> 0;
 };
 const PLAN = () => { // the chain and the Diorama plan of mode 2
@@ -41,7 +41,8 @@ const PLAN = () => { // the chain and the Diorama plan of mode 2
   const m3 = await ev(() => { const e = window.__evo, P = e.P, O = e.O, st = e.st, S = e.S(); const rooms = new Set(); for (let i = 0; i < S.n; i++) if (S.slice && S.slice[i]) rooms.add(S.roomMap[i]); return { id: st.exampleId, preset: st.preset, tech: st.tech, mode: st.mode, pocket: P.pocket, cake: P.cake, asc: P.ascWalls, dio: P.dioChain, terraces: P.terraces, spread: P.spread, centre: P.spreadCentre, tint: O.typeTint, outline: O.dioOutline, borders: O.roomBorders, rooms: [...rooms].sort((x, y) => x - y), list: st.stageRooms, banner: document.querySelector('.banner, #modeBanner, #mode-banner') ? '' : '', text: document.body.innerText }; });
   ok('mode 3 opens on the example dac_stage, Cam 6 (preset stage), technique B, one panel', m3.id === 'dac_stage' && m3.preset === 'stage' && m3.tech === 'B' && m3.mode === 'single', m3);
   ok('dac_stage: terraces 5, spread 1, centre largest, no Cake / Ascension / Pocket, no Diorama move (the Stage preset is NOT applied)', m3.terraces === 5 && m3.spread === 1 && m3.centre === 'largest' && !m3.pocket && !m3.cake && !m3.asc && m3.dio === 'off', m3);
-  ok('dac_stage: no type tint, no Diorama outline, room borders on (no leak from mode 2)', m3.tint === false && m3.outline === false && m3.borders === true, m3);
+  { const dsp = await ev(() => { const O = window.__evo.O, o = {}, c = {}; for (const k of ['roomBorders', 'nowalk', 'gateMarks', 'rampLines', 'veil', 'border', 'markers', 'edgeWarn', 'typeTint', 'dioOutline', 'outlines', 'gradient', 'features']) { o[k] = O[k]; const el = document.querySelector('#t-' + k); c[k] = el ? el.checked : null; } return { o, c }; });
+    ok('dac_stage opens the CLEAN VIEW: the 8 debug aids (room borders, not-walkable tone, gate markers, ramp lines, veil, slice border, landmarks, edge-problem outline) and the tint / outline are off, their checkboxes too; outlines, cliff gradient and water / snake / cave stay on', ['roomBorders', 'nowalk', 'gateMarks', 'rampLines', 'veil', 'border', 'markers', 'edgeWarn', 'typeTint', 'dioOutline'].every((k) => dsp.o[k] === false && dsp.c[k] === false) && ['outlines', 'gradient', 'features'].every((k) => dsp.o[k] === true && dsp.c[k] === true), dsp); }
   ok('dac_stage: the window is exactly the 6 rooms of the list, in chain order', JSON.stringify(m3.rooms) === JSON.stringify(WIN.slice().sort((x, y) => x - y)) && JSON.stringify(m3.list) === JSON.stringify(WIN), m3);
   ok('the banner says "2D-HD crystallizer: in construction (S1)" and the purpose names the Pocket limit', /2D-HD crystallizer: in construction \(S1\)/.test(m3.text) && /multi-room Pocket: later PR/.test(m3.text));
   console.log(`(timing, with other work on the machine: mode 2 first entry ${tMode2} ms, mode 3 entry after it ${tEnter} ms)`);
@@ -58,7 +59,7 @@ const PLAN = () => { // the chain and the Diorama plan of mode 2
   ok(`the hero starts at the centre of the first room of the list (room ${s.room}, cell ${s.cell}), on a walkable cell`, s.room === WIN[0] && s.walk, s);
   ok(`tracking: the hero centre (feet + 0.5 H) projects to the screen centre +-1 px (${s.centre.map((v) => v.toFixed(2))} vs ${s.w / 2}, ${s.h / 2})`, near(s.centre[0], s.w / 2, 1) && near(s.centre[1], s.h / 2, 1), s);
   ok(`near/hero ${s.near.toFixed(3)} (1.39 +-0.01) and far/hero ${s.far.toFixed(3)} (0.60 +-0.01) from the viewer's own projection`, near(s.near, 1.39, 0.01) && near(s.far, 0.60, 0.01), s);
-  ok(`the info line starts with the Stage readout: tilesPerH, terrace step in H, hero share of the panel, near / far, cell, room, state`, /^Stage \(2D-HD S1\): 1 H = 2 tiles · terrace step 0\.50 H · hero 13\.\d % of the panel · near\/hero 1\.39 · far\/hero 0\.60 · cell \(\d+, \d+\) · room 17 · following/.test(s.info), s.info.slice(0, 300));
+  ok(`the info line starts with the Stage readout: tilesPerH, terrace step in H, hero share of the panel, near / far, cell, room, state`, /^Stage \(2D-HD S1\): 1 H = 2 tiles · terrace step 2\.00 H · hero 13\.\d % of the panel · near\/hero 1\.39 · far\/hero 0\.60 · cell \(\d+, \d+\) · room 17 · following/.test(s.info), s.info.slice(0, 300));
   // sizes: heroFrac x tilesPerH (the same at dpr 2 below)
   const sizes = async (tag) => { for (const tp of [2, 3]) for (const hf of [0.10, 0.14, 0.17]) {
     await set('tilesPerH', tp); await idle(); await set('heroFrac', hf); await idle(); const q = await snap();
@@ -66,6 +67,32 @@ const PLAN = () => { // the chain and the Diorama plan of mode 2
       Math.abs(q.hpx / (hf * q.h) - 1) <= 0.02 && Math.abs(q.hpx - hf * q.h * q.k) <= 1 && near(q.centre[0], q.w / 2, 1) && near(q.centre[1], q.h / 2, 1), q);
   } await set('tilesPerH', 2); await set('heroFrac', 0.14); await idle(); };
   await sizes('dpr 1,');
+  // ---- MEASURES IN H (S2a): terH = 2 x tilesPerH, subH = 0.22 x terH, the relief in H and everything that is not a height unchanged
+  { const MEAS = () => ev(() => { const E = window.EVO, e = window.__evo, S = e.S(), P = e.P, tp = e.st.stage.tilesPerH; let lo = 1e9, hi = -1e9, nw = 0, h = 2166136261 >>> 0; const mix = (v) => { h = Math.imul((h ^ (v & 0xffffffff)) >>> 0, 16777619) >>> 0; };
+      for (let i = 0; i < S.n; i++) if (S.slice && S.slice[i]) { mix(S.roomMap[i]); if (!(S.void && S.void[i])) { const q = S.levelH[S.fine[i]]; lo = Math.min(lo, q); hi = Math.max(hi, q); } if (S.nowalk && S.nowalk[i]) nw++; }
+      const rs = S.regionSizes || [], big = Math.max(0, ...rs), tot = rs.reduce((x, y) => x + y, 0), sv = E.stairSurvival(S, P, 'B');
+      return { tp, terH: P.terH, subH: P.subH, subHeff: E.subHeight(P), relH: (hi - lo) / tp, roomsHash: h >>> 0, nowalk: nw, regions: rs.length, bigPct: Math.round(1000 * big / Math.max(1, tot)) / 10, stairs: (S.stairs || []).length, carved: S.carved ? Array.from(S.carved).filter(Boolean).length : 0, cov: sv.coverage, lost: sv.lost, levels: S.levelH.length }; });
+    const rows = []; for (const tpv of [1.5, 2, 3, 4]) { await set('tilesPerH', tpv); await idle(); rows.push(await MEAS()); }
+    ok(`MEASURES IN H: with the switch on terH = 2 x tilesPerH for tilesPerH 1.5, 2, 3, 4 (${rows.map((r) => r.terH).join(', ')} tiles), subH = 0.22 x terH and the effective sub-terrace height is subH (the proportion is kept)`, rows.every((r) => Math.abs(r.terH - 2 * r.tp) < 1e-9 && Math.abs(r.subH - 0.22 * r.terH) < 1e-9 && Math.abs(r.subHeff - r.subH) < 1e-9), rows);
+    ok(`MEASURES IN H: the relief of the window in H does not change with tilesPerH (${rows.map((r) => r.relH.toFixed(3)).join(', ')} H)`, rows.every((r) => Math.abs(r.relH - rows[0].relH) < 1e-6), rows);
+    // the invariance measured in the step 0: the same rooms, not-walkable tiles, regions and stairs as with terH 1 (the switch off, the units by hand)
+    await ev(() => { const el = document.querySelector('#t-stageUnits'); if (el.checked) el.click(); }); await a.slider('subH', 0.22); await idle(); await a.slider('terH', 1); await idle(); const m1 = await MEAS();
+    ok(`the shape does not depend on the height unit: with terH ${m1.terH} (tiles) the rooms, not-walkable tiles (${m1.nowalk}), regions (${m1.regions}, largest ${m1.bigPct} %), stairs (${m1.stairs}, ${m1.carved} tiles, coverage ${m1.cov}) and levels (${m1.levels}) equal those at terH ${rows[1].terH} / 4 / 6 / 8`,
+      rows.every((r) => r.roomsHash === m1.roomsHash && r.nowalk === m1.nowalk && r.regions === m1.regions && r.bigPct === m1.bigPct && r.stairs === m1.stairs && r.carved === m1.carved && r.cov === m1.cov && r.lost === m1.lost && r.levels === m1.levels), [m1, rows]);
+    ok('the relief in TILES scales with terH exactly: terH 1 -> ' + (m1.relH * m1.tp).toFixed(3) + ' tiles (' + m1.relH.toFixed(3) + ' H at tilesPerH ' + m1.tp + '), terH ' + rows[1].terH + ' -> ' + (rows[1].relH * rows[1].tp).toFixed(3) + ' tiles = ' + rows[1].relH.toFixed(3) + ' H at tilesPerH ' + rows[1].tp, Math.abs((rows[1].relH * rows[1].tp) / (m1.relH * m1.tp) - rows[1].terH / m1.terH) < 1e-6, [m1, rows[1]]);
+    // the controls: terH / subH hidden with the switch on, back (folded with the terrain controls) with it off
+    const vis = () => ev(() => ['#s-terH', '#s-subH'].map((q) => document.querySelector(q).getClientRects().length > 0));
+    await ev(() => { const g = document.querySelector('[data-group="1 Terrain"]'), t = g && g.querySelector(':scope > .advtoggle'); if (g && t && g.dataset.adv !== '1') t.click(); }); await page.waitForTimeout(150);
+    const vOff = await vis(); await ev(() => { document.querySelector('#t-stageUnits').click(); }); await idle(); await page.waitForTimeout(150); const vOn = await vis();
+    ok('the terH and subH controls come back with the switch off (terrain controls open) and are hidden with it on', vOff[0] && vOff[1] && !vOn[0] && !vOn[1], [vOff, vOn]);
+    const mOn = await MEAS(); ok('turning the switch on again derives terH and subH again (it overwrites the manual values)', Math.abs(mOn.terH - 2 * mOn.tp) < 1e-9 && Math.abs(mOn.subH - 0.22 * mOn.terH) < 1e-9, mOn);
+    // Reset: tilesPerH 2, heroFrac 0.14, the switch on
+    await set('tilesPerH', 3); await idle(); await set('heroFrac', 0.2); await idle(); await ev(() => { const el = document.querySelector('#t-stageUnits'); if (el.checked) el.click(); }); await idle();
+    await page.click('#stageReset'); await idle(); const rs = await ev(() => { const e = window.__evo; return { tp: e.st.stage.tilesPerH, hf: e.st.stage.heroFrac, u: e.st.stageUnits, terH: e.P.terH, cb: document.querySelector('#t-stageUnits').checked }; });
+    ok('Reset: tilesPerH 2, heroFrac 0.14, Measures in H on (terH 4)', rs.tp === 2 && rs.hf === 0.14 && rs.u && rs.cb && rs.terH === 4, rs);
+    // MUTATION: terH not derived
+    await ev(() => { window.EVO.stageTest = { noDerive: true }; }); await set('tilesPerH', 3); await idle(); const mm = await MEAS(); await ev(() => { window.EVO.stageTest = null; }); await set('tilesPerH', 2); await idle();
+    ok(`MUTATION: terH not derived from tilesPerH: the "terH = 2 x tilesPerH" check FAILS (tilesPerH ${mm.tp}, terH ${mm.terH})`, !(Math.abs(mm.terH - 2 * mm.tp) < 1e-9), mm); }
   // ---- the clamp at the edges of the rooms box (hero placed by hand, camera tracking)
   const box = s.box, ox = s.ox, oy = s.oy, midX = (box.x0 + box.x1) / 2, midY = (box.y0 + box.y1) / 2;
   const edge = async (name, wx, wy) => { await setHero(ox + wx, oy + wy); return { name, q: await snap() }; };
@@ -130,6 +157,15 @@ const PLAN = () => { // the chain and the Diorama plan of mode 2
   // ---- the manifest block
   const mb = await ev(() => { const e = window.__evo; e.st.stage = { tilesPerH: 3, heroFrac: 0.17 }; e.st.follow = false; const b = e.viewerBlock(); e.applyViewerBlock({}); const d = { tp: e.st.stage.tilesPerH, hf: e.st.stage.heroFrac, f: e.st.follow }; e.applyViewerBlock(b); return { b: b.stage, d, back: { tp: e.st.stage.tilesPerH, hf: e.st.stage.heroFrac, f: e.st.follow } }; });
   ok('manifest: viewer.stage is written in mode 3, absent loads the defaults (2, 0.14, follow), and the block restores the values', mb.b && mb.b.tilesPerH === 3 && mb.b.heroFrac === 0.17 && mb.b.follow === false && mb.d.tp === 2 && mb.d.hf === 0.14 && mb.d.f === true && mb.back.tp === 3 && mb.back.hf === 0.17 && mb.back.f === false, mb);
+  // manifests and the switch "Measures in H" (S2a): without the `units` key they behave as before (the switch stays, the units follow the loaded tilesPerH); with it, the switch is set
+  { const ap = (v) => ev((v) => { const e = window.__evo; e.applyViewerBlock(v); return { tp: e.st.stage.tilesPerH, u: e.st.stageUnits, cb: document.querySelector('#t-stageUnits').checked, terH: e.P.terH, subH: e.P.subH }; }, v);
+    await ev(() => { const e = window.__evo; if (!e.st.stageUnits) { document.querySelector('#t-stageUnits').click(); } }); await idle();
+    let r1 = await ap({ stage: { tilesPerH: 3, heroFrac: 0.14 } }); ok('manifest viewer.stage WITHOUT units (a manifest of S1): the switch stays on and terH / subH follow the loaded tilesPerH (3 -> terH 6, subH 1.32)', r1.u && r1.cb && r1.tp === 3 && r1.terH === 6 && Math.abs(r1.subH - 1.32) < 1e-9, r1);
+    r1 = await ap({}); ok('a manifest without the stage block: the defaults (tilesPerH 2) and the units follow (terH 4)', r1.u && r1.tp === 2 && r1.terH === 4, r1);
+    r1 = await ap({ stage: { tilesPerH: 3, units: false } }); ok('manifest viewer.stage with units false: the switch is off (the checkbox too) and terH / subH are not derived (terH stays 4)', !r1.u && !r1.cb && r1.tp === 3 && r1.terH === 4, r1);
+    r1 = await ap({ stage: { tilesPerH: 3, units: true } }); ok('manifest viewer.stage with units true: the switch is on and the units are derived again (terH 6)', r1.u && r1.cb && r1.terH === 6, r1);
+    const wb = await ev(() => window.__evo.viewerBlock().stage); ok('viewerBlock writes the switch in viewer.stage.units', wb && wb.units === true && wb.tilesPerH === 3, wb);
+    await ap({ stage: { tilesPerH: 2, units: true } }); }
   await page.click('#examples button[data-id="dac_stage"]'); await idle(); s = await snap(); ok('re-clicking the example restores the defaults (tilesPerH 2, heroFrac 0.14, following, hero in the first room)', s.tp === 2 && s.hf === 0.14 && s.follow && s.room === WIN[0], s);
   // ---- legacy examples: no hero, no tracking, the controls greyed with a reason
   for (const id of ['x4_stage', 'diorama31_stage']) {
