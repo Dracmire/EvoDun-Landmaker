@@ -19,7 +19,7 @@
   const datum = (S, nearFp, i) => S.levelH[S.fine[nearFp[i]]];
   const dilate = (a, r, W, H) => { const o = new Uint8Array(a.length); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { if (!a[y * W + x]) continue; for (let dy = -r; dy <= r; dy++) { const ny = y + dy; if (ny < 0 || ny >= H) continue; for (let dx = -r; dx <= r; dx++) { const nx = x + dx; if (nx >= 0 && nx < W) o[ny * W + nx] = 1; } } } return o; };
   const erode = (a, r, W, H) => { const o = new Uint8Array(a.length); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { let ok = 1; for (let dy = -r; dy <= r && ok; dy++) { const ny = y + dy; if (ny < 0 || ny >= H) continue; for (let dx = -r; dx <= r; dx++) { const nx = x + dx; if (nx < 0 || nx >= W) continue; if (!a[ny * W + nx]) { ok = 0; break; } } } o[y * W + x] = ok; } return o; }; // outside the window counts as inside
-  /* apply: opts { type, tilesPerH, yaw (degrees), test (mutation hooks of tools/test_border.js: noClosure, noGrid, tilesNotH, ignoreYaw, touchFootprint) }. Returns S.stageBorder = { type, TH, tilesPerH, yaw, tiles, water, levelsAdded, closure, boundary, towardCamera } or null (no footprint). */
+  /* apply: opts { type, tilesPerH, yaw (degrees), test (mutation hooks of tools/test_stage_border.js: noClosure, noGrid, tilesNotH, ignoreYaw, touchFootprint) }. Returns S.stageBorder = { type, TH, tilesPerH, yaw, tiles, water, levelsAdded, closure, boundary, towardCamera } or null (no footprint). */
   function apply(S, opts) {
     const prof = PROFILES[opts.type]; if (!prof) return null;
     const W = S.W, H = S.H, n = S.n, tph = opts.tilesPerH, TH = prof.TH, tm = opts.test || {}, vd = S.void;
