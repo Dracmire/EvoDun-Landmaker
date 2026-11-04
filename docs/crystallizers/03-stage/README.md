@@ -7,7 +7,7 @@
 | PR | Scope |
 |---|---|
 | **S1** (this one) | the base: a DAC window of 6 rooms, units in hero heights H, a hero placeholder, Cam 6 hero tracking with the clamp, the readout |
-| S2 | borders (by type of Diorama) |
+| **S2** (built: ISLA + QUEBRADA) | borders outside the footprint of the window (ARENA, CIMA, MIRADOR: S2b) |
 | **S3** (built) | transitions: the window's own camera yaw, steps, the fill preference for lateral ramps |
 | S4 | objects with a height in H, and the landmark (billboards: R4 below) |
 | S5 | the treatment JSON |
@@ -45,6 +45,15 @@
   - **REQUIREMENT FOR S2 (borders).** The border module must compute the normal `nv` (and every "toward the camera" test) against the REAL camera yaw (`view().yaw`, the example's `yaw`), NOT against the +y axis of the map: with `dac_stage` at yaw 180 the camera is at the north, so the footprint edge that faces it is the one with the outward normal toward -y.
 - **Not in S1:** the Pocket (a Pocket frames ONE room: `shape.js` only builds it for `spec.rooms.length === 1`; with a multi-room window it is silently off: "Diorama technique (Pocket, M2 height) in mode 3 needs a multi-room Pocket: later PR"), borders, transitions, objects, the landmark, the treatment file, shadows, the live chain, other sources, any export.
 - **Test hooks** (`E.stageTest`, undefined in normal use): the six mutations of the acceptance list (pivot on the ground, distance not coupled to heroFrac, hero at a constant screen size, clamp on the far side, a focus that changes the camera when absent, `dac_stage` applying the Stage preset); each fails its named check (`tools/test_stage_cam.js`, `tools/ui/test_stage_ui.js`).
+
+### S2 as built (`src/border.js`; select "Stage border" in mode 3 with a window; `node tools/test_border.js`, `tools/ui/test_stage_border_ui.js`, `tools/ui/test_window_session_ui.js`)
+- **What.** The ground OUTSIDE the footprint of the window gets a profile that closes the stage: **ISLA** (a shallow moat of water, -0.7 TH within 6 rings of the border, flagged `water`) and **QUEBRADA** (far side +1.5 TH, camera side -4.5 TH, the camera side is the one the real camera looks from). Visual only: the footprint (the tiles that are not `S.block`) is never touched, walking, regions and routes are computed before it runs, and the outside tiles were already blocked, so no mark is added. Off (the default) never calls the module: identical pixels (`tools/verify.sh regress`).
+- **Semantics (a) (user's decision).** Height of an outside tile = the height of the NEAREST footprint tile (the datum, one function `datum` so it can change later) + the profile offset. The offset is in H (independent of `tilesPerH`: tested at 2, 2.5 and 3), floored to a RELATIVE grid of 0.25 TH and ADDED to the datum; the absolute height is not rounded. TH is one constant per profile in the module table: 0.8 H for ISLA and QUEBRADA (a hypothesis, S6 calibrates).
+- **Interior.** The footprint is closed first (dilate then erode, Chebyshev K = 4, module constant). The tiles the closure fills that are not footprint (separators between rooms, holes: 136 on `dac_stage`) are interior: no profile, they keep their source height. Only the outer border gets a profile.
+- **Camera side.** `nv` = the outward normal of the closed footprint (gradient of the blurred inside mask, radius 3) projected on (sin yaw, cos yaw) of the REAL base yaw (`baseYaw()`: `dac_stage` is 180, so its camera-facing edge is the north one). A change of the camera preset or of `tilesPerH` rebuilds the border (`S.stageBorder.yaw / tilesPerH` against the current ones).
+- **State.** `st.stage.border` (`off` | `island` | `quebrada`), default off, UI state like the rest of `st.stage`; it ends with the window session on EVERY exit (`winExit`, `applyScenario`, the viewer block of a loaded manifest, images with or without a manifest). Manifest `viewer.stage.border`, written only when not off. Mutation hooks: `E.modesTest.skipBorderRestore / skipBorderEnd`, `E.borderTest` (`noClosure`, `noGrid`, `tilesNotH`, `ignoreYaw`, `touchFootprint`), each makes a named check fail.
+- **Limits (documented).** The west side of `dac_stage` touches the map edge (x = 0, no scenery margin), so it has no border there. ARENA, CIMA, QUEBRADA-half and MIRADOR (the table is extensible) are S2b; full MIRADOR is out of S2. Internal separators get no profile. QUEBRADA / MIRADOR never go to a Hub [U]. New height jumps outside the footprint are not smoothed (pure semantics (a)).
+- **Figures** (measured, headless, `tools/ui/measure_border.js`): see the S2 report in the PR; levels added, frame time and new jumps are listed there.
 
 ## 2. Goal
 
