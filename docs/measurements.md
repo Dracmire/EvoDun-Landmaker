@@ -132,3 +132,6 @@ headless (software rasteriser, +-30 %), 1500x800 window, columns layout, synthet
 | whole map | 24 | 1688 | 10203 | 8515 |
 
 Moving the camera afterwards only paints (the contours of every level are cached). B dominates: one distance field per level.
+
+## Environment note: Chromium 1243 and `tools/ui/test_backdrop_ui.js` (2026-11-05)
+After the cloud container restart of 2026-11-04 the headless Chromium is 1243 (before: 1194). With it `tools/ui/test_backdrop_ui.js` (Floors backdrop, floor 2, about 50 px per tile) reports 6 FAIL of the "HARD RULE in pixels" check (floor 2: gap 0 x1 / x2 / x4, gap 4 x2, n5 x2, noise x2: 1 interior pixel shows an apron / wall tile, 197329 floor pixels; 0.0172 % blended), 93 PASS. The same 6 lines fail identically on origin/main (585f4e3) and on the polish-1 branch in the same environment (595 s / 594 s), so it is the rasteriser of this Chromium (one antialiased pixel), not a change of the code. Not a blocker; no expectation was changed. The numbers of the earlier rounds (99 PASS) were measured with 1194.
