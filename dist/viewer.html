@@ -536,6 +536,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         if (g.follow !== undefined && typeof g.follow !== 'boolean') bad('follow (true or false)');
         if (g.units !== undefined && typeof g.units !== 'boolean') bad('units (true or false: Measures in H)');
         if (g.border !== undefined && !['off', 'island', 'quebrada'].includes(g.border)) bad('border ("off", "island" or "quebrada")');
+        if (g.objects !== undefined && !['off', 'on'].includes(g.objects)) bad('objects ("off" or "on")');
       }
       if (v.sliced !== undefined && typeof v.sliced !== 'boolean') throw new Error('Manifest: viewer.sliced must be true or false (absent = false).');
       if (v.dioProto !== undefined && !E.VIEWER_PROTOS.includes(v.dioProto)) throw new Error('Manifest: viewer.dioProto must be one of ' + E.VIEWER_PROTOS.join(', ') + ' (absent = none).');
@@ -4969,7 +4970,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     if (o.markers) drawMarkers(ctx, cam, S, P);
     if (o.incursion) drawIncursion(ctx, cam, S, o.incursion);
     if (o.contract && E.contract) S.contractInfo = Object.assign(S.contractInfo || {}, { [tech]: E.contract.draw(ctx, cam, S, P, tech, view, o, w, h) }); // art contract placeholders (switch off = nothing here)
-    if (o.hero && E.stage) E.stage.drawHero(ctx, cam, o.hero); // the Stage hero (mode 3, src/stage.js): the last thing drawn, always on top (no visibility test: hero occlusion is Unity's)
+    if (o.objects && E.objects) E.objects.draw(ctx, cam, S, P, tech, view, o, w, h); // S4a: the declared billboards and the hero in ONE depth order (switch off = o.objects absent = the line below, as before)
+    else if (o.hero && E.stage) E.stage.drawHero(ctx, cam, o.hero); // the Stage hero (mode 3, src/stage.js): the last thing drawn, always on top (no visibility test: hero occlusion is Unity's)
   }
 
   /* The Box pick render as an image (CSS pixels, one code per pixel: walls kind 2 by tile, caps kind 4 by tile): the visibility test of the art contract. */
@@ -5411,6 +5413,128 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
 
   E.stage = { TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+})(window.EVO = window.EVO || {});
+
+/* STAGE BORDERS (mode 3, PR S2; `E.border.apply(S, opts)`; docs/crystallizers/03-stage/README.md "S2"): the ground OUTSIDE the footprint of the 2D-HD window gets a profile that closes the stage: ISLA (a shallow moat of water around the footprint) and QUEBRADA (a rise on the far side, a deep drop on the camera side).
+   VISUAL ONLY: the footprint (the tiles that are not S.block) is never touched, walking, regions and routes are computed before this runs, and the outside tiles are already blocked (S.block = 1): no new mark. Called by ui.js right after E.shape, only in mode 3 with a window and a border other than Off; Off = this file is never called (identical pixels).
+   SEMANTICS (a) (user's decision): the height of an outside tile = the height of the NEAREST footprint tile (the datum, one function: `datum`, so it can switch to another source later) + the profile offset of the type. The offset is defined in H (the hero height), independent of tilesPerH, is floored to a RELATIVE grid of 0.25 TH
+   (it is ADDED to the datum; the absolute height is never rounded) and converted to tiles with tilesPerH. The footprint is CLOSED first (dilate then erode, Chebyshev radius K = 4): the tiles of the closure that are not footprint (holes, 136 on dac_stage) are INTERIOR: no profile, they keep their source height.
+   The separators between rooms are interior too (they are inside the closure). Only the OUTER border gets a profile. New levels go through E.roomTypes.insertLevels as it is (D-shared with Cake / Pocket / anchors); S.cache is reset (B contours are cached by level key).
+   CAMERA: the "toward the camera" side is computed against the REAL base yaw of the camera (opts.yaw, degrees: baseYaw() of ui.js): the camera looks from (sin yaw, cos yaw) in map x / y (yaw 0: +y, the south edge; yaw 180: the north edge); nv = outward normal . that vector, +1 = faces the camera.
+   TABLE: one row per type, with its own TH (hypothesis, S6 calibrates; 0.8 H for ISLA and QUEBRADA), the profile in H, and whether the offset tiles are water. ARENA / CIMA / MIRADOR are S2b (the table is extensible); QUEBRADA / MIRADOR never go to a Hub [U]. */
+(function (E) {
+  'use strict';
+  const K = 4, GRID = 0.25, BLUR = 3;
+  const clip = (v, a, b) => Math.max(a, Math.min(b, v));
+  /* profiles in H: (dr, nv, TH) -> { off (H), water }; dr = distance to the border in rings of 1/3 H (distance in tiles * 3 / tilesPerH) */
+  const PROFILES = {
+    island: { label: 'Isla', TH: 0.8, fn: (dr, nv, TH) => ({ off: dr <= 6 ? -0.7 * TH : 0, water: dr <= 6 }) },
+    quebrada: { label: 'Quebrada', TH: 0.8, fn: (dr, nv, TH) => ({ off: nv < 0 ? 1.5 * TH * Math.min(1, dr / 2) : (-3 * TH - 1.5 * TH) * Math.min(1, dr / 3), water: false }) }
+  };
+  const TYPES = Object.keys(PROFILES);
+  /* THE DATUM: the height an outside tile starts from, before the profile. (a) = the height of the nearest footprint tile (the source tile carried by the sweep). Kept in ONE place on purpose. */
+  const datum = (S, nearFp, i) => S.levelH[S.fine[nearFp[i]]];
+  const dilate = (a, r, W, H) => { const o = new Uint8Array(a.length); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { if (!a[y * W + x]) continue; for (let dy = -r; dy <= r; dy++) { const ny = y + dy; if (ny < 0 || ny >= H) continue; for (let dx = -r; dx <= r; dx++) { const nx = x + dx; if (nx >= 0 && nx < W) o[ny * W + nx] = 1; } } } return o; };
+  const erode = (a, r, W, H) => { const o = new Uint8Array(a.length); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { let ok = 1; for (let dy = -r; dy <= r && ok; dy++) { const ny = y + dy; if (ny < 0 || ny >= H) continue; for (let dx = -r; dx <= r; dx++) { const nx = x + dx; if (nx < 0 || nx >= W) continue; if (!a[ny * W + nx]) { ok = 0; break; } } } o[y * W + x] = ok; } return o; }; // outside the window counts as inside
+  /* apply: opts { type, tilesPerH, yaw (degrees), test (mutation hooks of tools/test_stage_border.js: noClosure, noGrid, tilesNotH, ignoreYaw, touchFootprint) }. Returns S.stageBorder = { type, TH, tilesPerH, yaw, tiles, water, levelsAdded, closure, boundary, towardCamera } or null (no footprint). */
+  function apply(S, opts) {
+    const prof = PROFILES[opts.type]; if (!prof) return null;
+    const W = S.W, H = S.H, n = S.n, tph = opts.tilesPerH, TH = prof.TH, tm = opts.test || {}, vd = S.void;
+    const fp = new Uint8Array(n); let nfp = 0; for (let i = 0; i < n; i++) if (!S.block[i] && !(vd && vd[i])) { fp[i] = 1; nfp++; }
+    if (!nfp) return (S.stageBorder = null);
+    const C = tm.noClosure ? fp : erode(dilate(fp, K, W, H), K, W, H); let nC = 0; for (let i = 0; i < n; i++) if (C[i] && !fp[i]) nC++;
+    // boundary of the closed footprint, the outward normal from the gradient of the blurred inside mask
+    const bl = new Float32Array(n), cnt = (2 * BLUR + 1) * (2 * BLUR + 1);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { let s = 0; for (let dy = -BLUR; dy <= BLUR; dy++) for (let dx = -BLUR; dx <= BLUR; dx++) { const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < W && ny < H) s += C[ny * W + nx]; } bl[y * W + x] = s / cnt; }
+    const bnd = []; for (let i = 0; i < n; i++) { if (!C[i]) continue; const x = i % W, y = (i / W) | 0; let b = false; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < W && ny < H && !C[ny * W + nx]) b = true; } if (b) bnd.push(i); }
+    // the nearest footprint tile of every tile (8-neighbour sweep) and the nearest boundary tile of every outside tile (the source of the profile)
+    const sweep = (seeds, free) => { const src = new Int32Array(n).fill(-1), q = []; for (const i of seeds) { src[i] = i; q.push(i); } for (let h = 0; h < q.length; h++) { const i = q[h], x = i % W, y = (i / W) | 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const j = ny * W + nx; if (src[j] < 0 && free(j)) { src[j] = src[i]; q.push(j); } } } return src; };
+    const fpList = []; for (let i = 0; i < n; i++) if (fp[i]) fpList.push(i);
+    const nearFp = sweep(fpList, () => true), src = sweep(bnd, (j) => !C[j]);
+    // camera direction in map x / y: yaw 0 = the camera is on the +y side
+    const yaw = (tm.ignoreYaw ? 0 : opts.yaw || 0) * Math.PI / 180, cx = Math.sin(yaw), cy = Math.cos(yaw);
+    const g = (xx, yy) => bl[clip(yy, 0, H - 1) * W + clip(xx, 0, W - 1)];
+    const nvOf = (b) => { const x = b % W, y = (b / W) | 0, gx = g(x + 1, y) - g(x - 1, y), gy = g(x, y + 1) - g(x, y - 1), m = Math.hypot(gx, gy) || 1; return (-gx * cx - gy * cy) / m; };
+    const nvCache = new Map(), gridH = GRID * TH, moves = new Map(); let water = 0, up = 0, down = 0, toward = 0;
+    for (let i = 0; i < n; i++) {
+      if (C[i] || src[i] < 0 || (vd && vd[i]) || nearFp[i] < 0) continue; // the closed footprint (footprint + interior) is never touched; void is not terrain
+      const b = src[i], x = i % W, y = (i / W) | 0, dt = Math.hypot(x - (b % W), y - ((b / W) | 0)), dr = dt * 3 / tph; let nv = nvCache.get(b); if (nv === undefined) nvCache.set(b, nv = nvOf(b));
+      const r = prof.fn(dr, nv, TH), offg = tm.noGrid ? r.off : Math.floor(r.off / gridH + 1e-9) * gridH, h = datum(S, nearFp, i) + offg * (tm.tilesNotH ? 1 : tph); // relative grid: floored in H, then added to the datum in tiles
+      if (Math.abs(h - S.levelH[S.fine[i]]) < 1e-9) continue;
+      moves.set(i, { h, meta: r.water ? { ter: 0, sub: 0, bridge: false, water: true } : { ter: S.ter[i], sub: 0, bridge: false, deco: true } }); if (r.water) water++; if (h > S.levelH[S.fine[i]]) up++; else down++; if (nv > 0) toward++;
+    }
+    if (tm.touchFootprint) for (let i = 0; i < n; i++) if (fp[i] && i % 7 === 0) moves.set(i, { h: S.levelH[S.fine[i]] + 0.5, meta: { ter: S.ter[i], sub: 0, bridge: false, deco: true } }); // (MUTATION touchFootprint: a footprint tile moved)
+    const before = S.levelH.length, added = moves.size ? E.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
+    return (S.stageBorder = { type: opts.type, label: prof.label, TH, tilesPerH: tph, yaw: opts.yaw || 0, footprint: nfp, closure: nC, boundary: bnd.length, tiles: moves.size, water, up, down, towardCamera: toward, levelsBefore: before, levelsAdded: added, grid: gridH });
+  }
+  E.border = { K, GRID, TYPES, PROFILES, datum, apply };
+})(window.EVO || (window.EVO = {}));
+
+/* STAGE OBJECTS, BILLBOARDS (mode 3, PR S4a; `E.objects`; docs/crystallizers/03-stage/README.md "S4a"): a DECLARED list of placeholder billboards in the window of the 2D-HD stage: [{ kind, x, y, hH }], x / y in MAP coordinates (the window offset S.ox / S.oy is subtracted here), hH in hero heights H.
+   The list is declared by the example (`objects` of `dac_stage` in src/modes.js) with the format of the future `billboards` entry of the treatment; rules that DERIVE objects from the rooms (Z / X / Hub, flanks of a transition, the back of a room) need a direction and a role per room that does not exist in the repo yet: not here.
+   VISUAL ONLY. Nothing here touches the terrain: no height of S changes, E.shape is never called for the objects, switching them on or off only redraws (`S` and its cache stay the same object). Off (the default) = this file is never called: identical pixels. The contract (src/contract.js) and the legacy examples are untouched.
+   HEIGHT = the convention of the HERO (src/stage.js drawHero): a camera-facing sprite, 1 H = the pixels the hero measures at that depth (`hTiles * cam.sc * k`, k = depthScale of the base point), so an object of hH H is hH hero heights tall at its own depth; width, line widths and the font scale with the same k.
+   (A segment that is vertical in the 3D projection is about 8 % shorter than the hero sprite at pitch 25 degrees: the volumes of S4b are real geometry and follow that projection; the billboards do not.) The pack's `h` is NOT read: in data/shrine_pier_x4.json it is the terrain elevation of the landmark platform (tools/derive_shrine_pier_x4.py), not an object height.
+   BASE = the ground of the tile under (x, y) (E.stage.feetH). VISIBILITY = the Box pick render, like the contract (`ownGround`): an object whose base is not on its own tile in the image (a higher terrain in front, or outside the panel) is not drawn.
+   ORDER = ONE depth-sorted list with the hero (cam.ry, larger = nearer the camera): an object nearer than the hero is painted over it; the hero no longer comes last when the objects are on. Tall objects may leave the panel at the top: expected (a cut silhouette).
+   Test hooks (`E.objectsTest`, tests only, undefined in normal use): constSize, constStroke, tilesNotH, ignoreHidden, heroAlwaysTop. */
+(function (E) {
+  'use strict';
+  const LW0 = 1.6, FONT0 = 11; // the line width of the hero sprite and a base font size, both multiplied by the depth scale k
+  /* kinds: width in H and the placeholder look (R4: placeholders, no final art; Unity owns the art) */
+  const KINDS = {
+    banner: { wH: 0.5, color: '#c2563a' },
+    lamp: { wH: 0.4, color: '#f2d78a' },
+    shrub: { wH: 0.9, color: '#3f8a4a' },
+    pillar: { wH: 0.6, color: '#b9b2a6' }
+  };
+  const KIND_NAMES = Object.keys(KINDS);
+  const T = () => E.objectsTest || {};
+
+  /* the size on screen of an object of hH hero heights standing on the ground point (x, y, feet) (window coordinates): the hero's convention */
+  function sizeAt(cam, tilesPerH, hH, wH, x, y, feet) {
+    const t = T(), k = t.constSize ? 1 : E.stage.depthScale(cam, x, y, feet), tp = t.tilesNotH ? 1 : tilesPerH;
+    return { k, hpx: hH * tp * cam.sc * k, wpx: wH * tp * cam.sc * k, lw: t.constStroke ? LW0 : LW0 * k, font: FONT0 * k };
+  }
+
+  function shape(ctx, kind, b, sz) { // b = the base point on screen; the placeholder, a contact shade, a label
+    const { hpx, wpx, lw, font } = sz, col = KINDS[kind].color;
+    ctx.save(); ctx.lineJoin = 'round'; ctx.lineWidth = lw; ctx.strokeStyle = 'rgba(24,20,34,0.95)';
+    ctx.fillStyle = 'rgba(14,12,22,0.35)'; ctx.beginPath(); ctx.ellipse(b[0], b[1], wpx * 0.7, wpx * 0.22, 0, 0, 7); ctx.fill();
+    if (kind === 'shrub') { ctx.beginPath(); ctx.ellipse(b[0], b[1] - hpx / 2, wpx / 2, hpx / 2, 0, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
+    else if (kind === 'pillar') { ctx.beginPath(); ctx.rect(b[0] - wpx / 2, b[1] - hpx, wpx, hpx); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.rect(b[0] - wpx * 0.62, b[1] - hpx, wpx * 1.24, Math.min(hpx * 0.06, wpx * 0.3)); ctx.fillStyle = '#d8d2c6'; ctx.fill(); ctx.stroke(); }
+    else { // banner and lamp: a pole and a head
+      ctx.beginPath(); ctx.rect(b[0] - wpx * 0.06, b[1] - hpx, wpx * 0.12, hpx); ctx.fillStyle = '#5b3f2a'; ctx.fill(); ctx.stroke();
+      if (kind === 'banner') { ctx.beginPath(); ctx.rect(b[0] + wpx * 0.06, b[1] - hpx, wpx * 0.9, hpx * 0.28); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
+      else { ctx.beginPath(); ctx.arc(b[0], b[1] - hpx, wpx * 0.45, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
+    }
+    ctx.fillStyle = '#1a1624'; ctx.font = `700 ${font.toFixed(1)}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.fillText(`${kind} ${sz.hH} H`, b[0], b[1] + font * 1.35);
+    ctx.restore();
+  }
+
+  /* draw the objects and the hero in one depth order. Returns nothing; the per-object figures go to o.objects.stats (tests and the readout). */
+  function draw(ctx, cam, S, P, tech, view, o, w, h) {
+    const list = (o.objects && o.objects.list) || [], tp = o.objects.tilesPerH, t = T(), stats = [], items = [];
+    const wantPick = list.length > 0 && !t.ignoreHidden; let D = null;
+    const code = (px, py) => { const x = Math.round(px), y = Math.round(py); if (!D || x < 0 || y < 0 || x >= w || y >= h) return -1; const q = (y * w + x) * 4; return D[q + 3] === 255 ? (D[q] << 16) | (D[q + 1] << 8) | D[q + 2] : -1; };
+    const ownGround = (p, i) => { for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = code(p[0] + dx, p[1] + dy); if (k === ((4 << 20) | i) || k === ((3 << 20) | i)) return true; } return false; }; // a cap (kind 4) or a ramp (kind 3) of the tile at the point or one pixel around it
+    if (wantPick) D = E.pickBuffer(S, P, view, w, h).data;
+    for (const ob of list) {
+      const kd = KINDS[ob.kind]; if (!kd) continue;
+      const x = ob.x - S.ox, y = ob.y - S.oy, i = E.stage.cellOf(S, x, y), st = { kind: ob.kind, hH: ob.hH, x: ob.x, y: ob.y, tile: i, drawn: false, visible: false };
+      stats.push(st); if (i < 0) continue;
+      const feet = E.stage.feetH(S, i), b = cam.p(x, y, feet), sz = sizeAt(cam, tp, ob.hH, kd.wH, x, y, feet); sz.hH = ob.hH;
+      st.visible = t.ignoreHidden ? true : ownGround(b, i); Object.assign(st, { hpx: sz.hpx, wpx: sz.wpx, k: sz.k, lw: sz.lw, font: sz.font, base: b, ry: cam.ry(x, y) });
+      if (!st.visible) continue;
+      items.push({ ry: st.ry, st, paint: () => { shape(ctx, ob.kind, b, sz); st.drawn = true; } });
+    }
+    if (o.hero && E.stage) { const ry = cam.ry(o.hero.x, o.hero.y); items.push({ ry: t.heroAlwaysTop ? Infinity : ry, paint: () => E.stage.drawHero(ctx, cam, o.hero) }); } // (MUTATION heroAlwaysTop: the hero last, as before S4a) a tie: the hero is pushed last and Array.sort is stable, so it stays on top
+    items.sort((p, q) => p.ry - q.ry);
+    for (const it of items) it.paint();
+    o.objects.stats = stats;
+  }
+
+  E.objects = { KINDS, KIND_NAMES, LW0, FONT0, sizeAt, draw };
 })(window.EVO = window.EVO || {});
 
 /* EvoDun crystal viewer - crystallizer 5, FLOORS: the layers of a floors package (exterior + interior floors, `E.hasFloors`) and the two multi-layer views.
@@ -5865,6 +5989,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     e('contract', '#t-contract', '3 Stage', ALL, [], 'Art contract placeholders: a body tint per face, framing stones at drops, borders and the shore, the landmark footprint shade and props. Drawn in Box, A, B and C. Props only on packs with landmarks (Shrine-Pier, Shrine-Pier x4).'),
     e('tilesPerH', '#s-tilesPerH', '3 Stage', ALL, ['stageWin'], 'Stage unit: tiles per H, the height of a hero (1 H = this many tiles, horizontally and vertically). 2 = the approved convention "a character is 2 tiles tall". It sets the hero size and the camera distance; the terrain does not change.'),
     e('heroFrac', '#s-heroFrac', '3 Stage', ALL, ['stageWin'], 'Cam 6 zoom: the hero at the pivot measures this share of the panel height. 0.14 = the reference of the design passes.'),
+    e('stageObjects', '#t-stageObjects', '3 Stage', ALL, ['stageWin'], 'Stage objects (S4a): the declared placeholder billboards of the window example (banner, lamp, shrub, pillar), each hH hero heights tall (the hero convention: 1 H = the pixels the hero measures at that depth, line widths and labels included), sorted by depth with the hero. Visual only: the terrain does not change and the shape is not rebuilt. Off = the scene as it is.'),
     e('stageBorder', '#stageBorder', '3 Stage', ALL, ['stageWin'], 'Stage border (S2): the ground outside the footprint of the window closes the stage. Off = the scenery as it is; Island = a shallow moat of water around the footprint; Quebrada = a rise on the far side and a deep drop on the camera side (the camera side follows the real yaw of Cam 6). Visual only: the footprint and the walking do not change. Profile heights are in H, TH = 0.8 H (a hypothesis, S6 calibrates).'),
     e('stageUnits', '#t-stageUnits', '3 Stage', ALL, ['stageWin'], 'Measures in H: the height of a terrace is 2 H (terH = 2 x tiles per H, subH = 0.22 x terH) and the terH / subH controls are hidden, so the terrain follows the hero scale. Off: terH and subH are yours again (they keep the derived values). Turning it on again derives them again.'),
     e('stageReset', '#stageReset', '3 Stage', ALL, ['stageWin'], 'Reset: tiles per H 2, hero share 0.14 and Measures in H on.'),
@@ -6044,12 +6169,16 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       purpose: 'The 2D-HD Stage (S1: the base): a window of rooms of the DAC data in hero heights (H), a hero placeholder and the Cam 6 tracking of the hero. The Art contract examples are kept as legacy. Diorama technique (Pocket, M2 height) in mode 3 needs a multi-room Pocket: later PR.', banner: '2D-HD crystallizer: in construction (S1)',
       examples: [
         { id: 'dac_stage', label: 'DAC window (2D-HD, S1)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, roomSet: [17, 10, 20, 27, 6, 5], stageHero: true, yaw: 180, stairs: { style: 0, tread: 1, preferFill: true }, /* S3: Cam 6 looks from the north (yaw 180: the 4 ramps of the window rise AWAY from the camera), steps (A1: 3 risers of 0.19 terH, 2 treads) and the fill variant for the lateral transitions */ 
-          display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }, // S2a: the clean view of the window (the debug aids off; the checkboxes keep working)
+          display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false }, // S2a: the clean view of the window (the debug aids off; the checkboxes keep working)
+          /* S4a: the declared billboards (switch "Stage objects"), MAP coordinates (tile centres), hH in hero heights, the format of the future `billboards` entry of the treatment. All on walkable tiles outside the 3 columns of every transition and at least 2 tiles (Chebyshev) from their bottom / top tiles (tools/ui/test_stage_objects_ui.js checks it).
+             Hero start (61.5, 117.5, room 17): (1) a 1 H banner 3 tiles to its side at the same depth and on the same terrace (x 58.5; the tiles at x 62-63 are within 2 tiles of the transition and x 64.5 is in a pit hidden behind the rim, measured) = the comparison rule; (2) a 3 H pillar in room 20, which fits the panel; (3, 4) two 2 H lamps flanking the 3-step transition next to the start (beyond its 3 columns); (5) a 3 H banner in room 5, about 7 H beyond the hero, whose top leaves the panel
+             (the cut silhouette); the rest fill the other rooms (6 shrub room 6, 7 lamp room 27, 8 shrub on the other side of the start (x 66.5), 9 pillar room 10, the far, high one). */
+          objects: [{ kind: 'banner', x: 58.5, y: 117.5, hH: 1 }, { kind: 'pillar', x: 80.5, y: 121.5, hH: 3 }, { kind: 'lamp', x: 59.5, y: 119.5, hH: 2 }, { kind: 'lamp', x: 63.5, y: 119.5, hH: 2 }, { kind: 'banner', x: 45.5, y: 132.5, hH: 3 }, { kind: 'shrub', x: 20.5, y: 128.5, hH: 1.5 }, { kind: 'lamp', x: 87.5, y: 135.5, hH: 2 }, { kind: 'shrub', x: 66.5, y: 117.5, hH: 1.5 }, { kind: 'pillar', x: 62.5, y: 142.5, hH: 2 }] },
         { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage (legacy contract)', src: 'shrine_pier_x4', stage: true, contract: true },
         { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, terraces: 3, contract: true }
       ],
       camera: 'stage', cameras: CAMS, tech: 'B', techs: ['B'], compare: false, compareDefault: false,
-      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageReset', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
+      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageObjects', 'stageReset', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {
@@ -6231,7 +6360,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   const NO_MODES = !!window.EVO_NO_MODES; // test-only flag (tools/ui/common.js): the whole panel as before the modes layer
   const st = { dioProto: 'off', dioFocus: null, dacAuto: true, dacShow: 'all', dacView: 'chain', roomRule: 'v164', modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   /* STAGE (mode 3, PR S1; src/stage.js): the hero lives in MAP coordinates; stage = the unit H and the zoom; follow = Cam 6 tracks the hero; focus = the last camera target [x, y, h] in map coordinates (frozen while the tracking is suspended) */
-  Object.assign(st, { stage: { tilesPerH: 2, heroFrac: 0.14, border: 'off' }, follow: true, hero: null, stageRooms: [], stageIdx: 0, focus: null, stageClamp: null, win: null, stageUnits: false });
+  Object.assign(st, { stage: { tilesPerH: 2, heroFrac: 0.14, border: 'off', objects: 'off', objectList: [] }, follow: true, hero: null, stageRooms: [], stageIdx: 0, focus: null, stageClamp: null, win: null, stageUnits: false });
   let S = null, raf = 0, drawToken = 0;
 
   function setPack(id, label, pack) {
@@ -6333,6 +6462,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     if (!(E.modesTest && E.modesTest.skipStairsRestore)) { setParam('stairStyle', w.stairStyle); setParam('tread', w.tread); P.rampPreferFill = w.preferFill; } // (MUTATION skipStairsRestore)
     if (!(E.modesTest && (E.modesTest.skipYawRestore || E.modesTest.skipYawEnd))) st.stage.yaw = undefined; // S3: the example's yaw (st.stage.yaw) ends with the session on EVERY exit, also the ones that do not go through applyScenario (the load of images, with or without a manifest); applyScenario resets st.stage too and the viewer block of a manifest sets yaw undefined. (MUTATIONS skipYawRestore, skipYawEnd)
     if (!(E.modesTest && (E.modesTest.skipBorderRestore || E.modesTest.skipBorderEnd))) { st.stage.border = 'off'; const sb = $('#stageBorder'); if (sb) sb.value = 'off'; } // S2: the border belongs to the window session too: it ends on EVERY exit (MUTATIONS skipBorderRestore, skipBorderEnd)
+    if (!(E.modesTest && E.modesTest.skipObjectsEnd)) { st.stage.objects = 'off'; st.stage.objectList = []; const so = $('#t-stageObjects'); if (so) so.checked = false; } // S4a: the objects switch and the declared list end with the window session on EVERY exit (MUTATION skipObjectsEnd)
     st.stageUnits = false;
   }
   function stageDerive() { const d = E.stage.derive(st.stage.tilesPerH); if (E.stageTest && E.stageTest.noDerive) return; setParam('terH', d.terH); setParam('subH', d.subH); } // MEASURES IN H: terH = 2 x tilesPerH, subH = 0.22 x terH (MUTATION noDerive: terH not derived)
@@ -6351,7 +6481,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     P.rooms = !!sc.rooms || !!(mode && mode.fixed.includes('t-rooms')); tick('t-rooms', P.rooms); P.pocket = !!sc.pocket; tick('t-pocket', P.pocket);
     if (sc.preset) applyRoomsPreset(sc.preset);
     sliceSel.rooms.clear(); if (sc.room) { sliceSel.whole = false; sliceSel.rooms.add(sc.room); } else sliceSel.whole = true;
-    st.stageRooms = sc.roomSet ? sc.roomSet.slice() : []; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; st.follow = true; st.stage = { tilesPerH: E.stage.DEF.tilesPerH, heroFrac: E.stage.DEF.heroFrac, yaw: sc.yaw !== undefined ? sc.yaw : (E.modesTest && E.modesTest.skipYawRestore && st.stage ? st.stage.yaw : undefined), border: sc.border || (E.modesTest && E.modesTest.skipBorderRestore && st.stage && st.stage.border ? st.stage.border : 'off') } /* S3: the example's own base yaw of Cam 6 (absent = today's: the preset's / the pack's); (MUTATION skipYawRestore: the yaw of the last example survives) */; syncStageUI(); // the 2D-HD window of mode 3 (an example without a roomSet has no hero)
+    st.stageRooms = sc.roomSet ? sc.roomSet.slice() : []; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; st.follow = true; st.stage = { tilesPerH: E.stage.DEF.tilesPerH, heroFrac: E.stage.DEF.heroFrac, yaw: sc.yaw !== undefined ? sc.yaw : (E.modesTest && E.modesTest.skipYawRestore && st.stage ? st.stage.yaw : undefined), border: sc.border || (E.modesTest && E.modesTest.skipBorderRestore && st.stage && st.stage.border ? st.stage.border : 'off'), objects: E.modesTest && E.modesTest.skipObjectsEnd && st.stage && st.stage.objects ? st.stage.objects : 'off', objectList: sc.objects ? sc.objects.map((q) => Object.assign({}, q)) : [] /* S4a: the declared billboards of the example; the switch is always off at the start (MUTATION skipObjectsEnd keeps the last one) */ } /* S3: the example's own base yaw of Cam 6 (absent = today's: the preset's / the pack's); (MUTATION skipYawRestore: the yaw of the last example survives) */; syncStageUI(); // the 2D-HD window of mode 3 (an example without a roomSet has no hero)
     if (sc.roomSet) { sliceSel.whole = false; for (const id of sc.roomSet) sliceSel.rooms.add(id); }
     if (sc.stage || (E.stageTest && E.stageTest.presetLeak && sc.stageHero)) $('#stagePreset').click(); // (MUTATION presetLeak: the 2D-HD window applying the Stage preset) // the Stage preset sets Cam 6, B, single view, terraces 7, spread 1.5
     if (sc.terraces) setParam('terraces', sc.terraces); // after the Stage preset (an example may keep fewer terraces: the rooms change with them)
@@ -6387,7 +6517,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
   function applyRoomsPreset(name) { for (const [k, v] of Object.entries(ROOMS_PRESETS[name])) setParam(k, v); syncRoomsPreset(); }
   const MODE2_DEF = { dioChain: 'm2', ascGate: 3, ascCut: 0.5 }, LEGACY_DEF = { dioChain: 'off', ascGate: 0, ascCut: 0.15 }; // D31: the defaults of mode 2 (announced) and the values of every other mode / the legacy panel / a manifest that does not name them
-  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; b.dacView = st.dacView; if (P.chainExtra !== 3) b.chainExtra = P.chainExtra; if (st.roomRule !== 'v164') b.roomRule = st.roomRule; if (P.cakeCut !== 'off') b.cakeCut = P.cakeCut; b.dioChain = P.dioChain; if (st.dioProto !== 'off') b.dioProto = st.dioProto; b.ascCut = P.ascCut; b.ascGate = P.ascGate; /* D31: written ALWAYS in mode 2 (explicit values): an absent key in a loaded manifest means the OLD values (Off / 0.15 / 0), not the new mode-2 defaults */ if (P.anchors) b.anchors = true; if (P.anchorH !== 0.5) b.anchorH = P.anchorH; } if (!O.sliced) b.sliced = false; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; if (!NO_MODES && st.modeId === 'stage') b.stage = { tilesPerH: st.stage.tilesPerH, heroFrac: st.stage.heroFrac, follow: st.follow, units: st.stageUnits }; if (!NO_MODES && st.modeId === 'stage' && st.stage.border && st.stage.border !== 'off') b.stage.border = st.stage.border; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
+  function viewerBlock() { const b = { preset: ($('#roomsPreset') || {}).value || 'custom', rooms: !!P.rooms, cake: !!P.cake, terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau }; if (st.preset !== 'oblique') b.camera = st.preset; if (!NO_MODES && st.modeId) b.mode = st.modeId; if (!NO_MODES && st.modeId === 'rooms') { b.dacAuto = !!st.dacAuto; if (st.dacShow !== 'all') b.dacShow = st.dacShow; b.dacView = st.dacView; if (P.chainExtra !== 3) b.chainExtra = P.chainExtra; if (st.roomRule !== 'v164') b.roomRule = st.roomRule; if (P.cakeCut !== 'off') b.cakeCut = P.cakeCut; b.dioChain = P.dioChain; if (st.dioProto !== 'off') b.dioProto = st.dioProto; b.ascCut = P.ascCut; b.ascGate = P.ascGate; /* D31: written ALWAYS in mode 2 (explicit values): an absent key in a loaded manifest means the OLD values (Off / 0.15 / 0), not the new mode-2 defaults */ if (P.anchors) b.anchors = true; if (P.anchorH !== 0.5) b.anchorH = P.anchorH; } if (!O.sliced) b.sliced = false; if (P.curves !== 'ordered') b.curves = P.curves; for (const k of ['wallPass', ...WALL_KEYS]) if (P[k] !== E.wallc.DEF[k]) b[k] = P[k]; if (!NO_MODES && st.modeId === 'stage') b.stage = { tilesPerH: st.stage.tilesPerH, heroFrac: st.stage.heroFrac, follow: st.follow, units: st.stageUnits }; if (!NO_MODES && st.modeId === 'stage' && st.stage.border && st.stage.border !== 'off') b.stage.border = st.stage.border; if (!NO_MODES && st.modeId === 'stage' && st.stage.objects === 'on') b.stage.objects = 'on'; return b; } // only the values that are not the default, so a pack saved before the wall pass is unchanged // camera: written only when it is not the default (Cam 3), so a pack saved before the bank is unchanged
   function applyViewerBlock(v) { // manifest -> viewer (absent fields keep the defaults, so a pack without the block loads as before)
     const d = { rooms: false, cake: false, terraces: 5, roomsMinCore: 20, rRadius: 9, minPlateau: 5 }, w = Object.assign({}, d, v || {});
     P.rooms = !!w.rooms; P.cake = !!w.cake; const tr = $('#t-rooms'), tc = $('#t-cake'); if (tr) tr.checked = P.rooms; if (tc) tc.checked = P.cake;
@@ -6400,7 +6530,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     if (!NO_MODES && (w.mode || st.modeId) === 'rooms' && st.dacAuto && st.dacShow !== 'all') dacIsolate(st.dacShow); // the Display toggles are not in the manifest: a saved single-type view must load isolated (a Diorama view needs its outline); only while the rule is on (with it off the selector has no effect); absent or All touches nothing
     syncRoomsPreset();
     st.preset = PRESETS.some((x) => x.id === w.camera) ? w.camera : 'oblique'; st.yawOff = st.pitchOff = 0; // absent = the default camera
-    { const g = w.stage || {}; st.stage = { tilesPerH: g.tilesPerH !== undefined ? g.tilesPerH : E.stage.DEF.tilesPerH, heroFrac: g.heroFrac !== undefined ? g.heroFrac : E.stage.DEF.heroFrac, yaw: E.modesTest && E.modesTest.skipYawEnd ? st.stage.yaw : undefined, border: E.modesTest && E.modesTest.skipBorderEnd ? st.stage.border : (['island', 'quebrada'].includes(g.border) ? g.border : 'off') }; const sbo = $('#stageBorder'); if (sbo) sbo.value = st.stage.border; /* S3: the example's yaw ends with the example: a loaded manifest (and the window session it closes) never keeps it (MUTATION skipYawEnd) */ st.follow = g.follow !== false; if (stageOn()) { /* S2a: a manifest without `units` keeps the switch as it is; with it on, the shape units follow the loaded tilesPerH */ if (g.units !== undefined) st.stageUnits = g.units; if (st.stageUnits) stageDerive(); } syncStageUI(); } // mode 3 (PR S1): absent = the defaults (the window list belongs to the example, not to the manifest)
+    { const g = w.stage || {}; st.stage = { tilesPerH: g.tilesPerH !== undefined ? g.tilesPerH : E.stage.DEF.tilesPerH, heroFrac: g.heroFrac !== undefined ? g.heroFrac : E.stage.DEF.heroFrac, yaw: E.modesTest && E.modesTest.skipYawEnd ? st.stage.yaw : undefined, border: E.modesTest && E.modesTest.skipBorderEnd ? st.stage.border : (['island', 'quebrada'].includes(g.border) ? g.border : 'off'), objects: E.modesTest && E.modesTest.skipObjectsEnd ? st.stage.objects : (g.objects === 'on' ? 'on' : 'off'), objectList: [] /* S4a: a value saved in the manifest, inert at load (the window session is over); the list belongs to the example */ }; const sbo = $('#stageBorder'); if (sbo) sbo.value = st.stage.border; /* S3: the example's yaw ends with the example: a loaded manifest (and the window session it closes) never keeps it (MUTATION skipYawEnd) */ st.follow = g.follow !== false; if (stageOn()) { /* S2a: a manifest without `units` keeps the switch as it is; with it on, the shape units follow the loaded tilesPerH */ if (g.units !== undefined) st.stageUnits = g.units; if (st.stageUnits) stageDerive(); } syncStageUI(); } // mode 3 (PR S1): absent = the defaults (the window list belongs to the example, not to the manifest)
     O.sliced = w.sliced !== false; const tsl = $('#t-sliced'); if (tsl) tsl.checked = O.sliced; // absent = on (PR G); viewer.panCache of older manifests is accepted and ignored (E2 removed)
     P.curves = E.curves.PRESETS[w.curves] ? w.curves : 'ordered'; const cs = $('#curvesPreset'); if (cs) cs.value = P.curves; // absent = Ordered
     P.wallPass = ['t3', 't2', 'off'].includes(w.wallPass) ? w.wallPass : E.wallc.DEF.wallPass; const wsel = $('#wallPass'); if (wsel) wsel.value = P.wallPass; for (const k of WALL_KEYS) setParam(k, w[k] !== undefined ? w[k] : E.wallc.DEF[k]); // absent = the defaults
@@ -6795,7 +6925,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         }
       } else values = defaultRoles(next);
       if (st.win) winExit(); // the window session ends here (the images replace the example)
-      if (!(E.modesTest && E.modesTest.skipStageStateEnd)) { st.stageRooms = []; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; } // polish-1 (bug b): the window STATE ends with the load too: the new shape has no window rooms, and a stale stageRooms kept stageOn() true with no roomMap (MUTATION skipStageStateEnd)
+      if (!(E.modesTest && E.modesTest.skipStageStateEnd)) { st.stageRooms = []; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; if (!(E.modesTest && E.modesTest.skipObjectsEnd)) { st.stage.objects = 'off'; st.stage.objectList = []; } } // polish-1 (bug b); S4a: the objects end here too: the window STATE ends with the load too: the new shape has no window rooms, and a stale stageRooms kept stageOn() true with no roomMap (MUTATION skipStageStateEnd)
       imgs.splice(0, imgs.length, ...next); // everything decoded and consistent: replace the previous state
       manifest = man;
       sliceSel.zones.clear(); sliceSel.whole = false; for (const id of cropIds) $('#' + id).value = '';
@@ -6915,6 +7045,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
   /* ---- STAGE (mode 3, PR S1): the hero, the tracking, the readout ---- */
   const borderOn = () => !NO_MODES && !!st.win && st.stageRooms.length > 0 && st.modeId === 'stage' && !!st.stage.border && st.stage.border !== 'off'; // S2: only in mode 3 with a window session
+  const objectsOn = () => !NO_MODES && !!st.win && st.stageRooms.length > 0 && st.modeId === 'stage' && st.stage.objects === 'on'; // S4a: only in mode 3 with a window session
   const stageOn = () => !NO_MODES && st.modeId === 'stage' && st.stageRooms.length > 0;
   const stageDims = () => { const f = $('#stage').children[0], cv = f && f.querySelector('canvas'); return cv ? [cv.clientWidth, st.persH || cv.clientHeight] : [0, 0]; };
   function heroWin() { return { x: st.hero.x - S.ox, y: st.hero.y - S.oy }; } // the hero in window coordinates
@@ -6929,15 +7060,16 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   }
   function setHero(x, y) { st.hero = { x, y }; invalidate(false); }
   function stageBeforeDraw() { // in draw(), after the fit: the hero exists, the tracking sets the zoom, O.hero is what the renderer draws
-    O.hero = null; if (!stageOn()) return;
+    O.hero = null; O.objects = null; if (!stageOn()) return;
     if (!st.hero) { const c = E.stage.roomCentre(S, st.stageRooms[st.stageIdx]); if (c) st.hero = { x: S.ox + c.x, y: S.oy + c.y }; }
     if (!st.hero) return;
     const sg = E.stage, tp = st.stage.tilesPerH, [, h] = stageDims();
     if (st.follow && st.fitSc > 0 && h > 0) { st.zoom = st.trackZoom = sg.scale(h, E.stageTest && E.stageTest.noHeroFrac ? sg.DEF.heroFrac : st.stage.heroFrac /* MUTATION noHeroFrac: the distance not coupled to heroFrac */, tp) / st.fitSc; st.panX = st.panY = 0; } // the tracking owns the zoom and the pan (a manual one suspends it)
     const w = heroWin(); O.hero = { x: w.x, y: w.y, feet: heroFeet(), hTiles: tp, wTiles: sg.HERO_W * tp };
+    if (objectsOn()) O.objects = { list: st.stage.objectList, tilesPerH: tp }; // S4a: the declared billboards (map coordinates); drawn in ONE depth order with the hero
   }
   function stageSuspend() { if (!st.follow) return; if (!st.focus && S && st.hero) stageFocus(view()); st.follow = false; syncStageUI(); } // the camera stays where it is: the frozen focus plus the manual deltas
-  function syncStageUI() { const sb = $('#stageBorder'); if (sb && !(E.modesTest && E.modesTest.skipBorderSelectSync)) sb.value = st.stage.border || 'off'; /* S2 follow-up: dac_stage pressed again from inside the window goes through applyScenario (no winExit) and resets st.stage.border: the select must follow (MUTATION skipBorderSelectSync) */ const t = $('#t-stageFollow'); if (t) t.checked = st.follow; const tu = $('#t-stageUnits'); if (tu) tu.checked = st.stageUnits; for (const k of ['tilesPerH', 'heroFrac']) { const i = $('#s-' + k), o = $('#o-' + k); if (i) i.value = st.stage[k]; if (o) o.textContent = st.stage[k]; } }
+  function syncStageUI() { const sb = $('#stageBorder'); if (sb && !(E.modesTest && E.modesTest.skipBorderSelectSync)) sb.value = st.stage.border || 'off'; /* S2 follow-up: dac_stage pressed again from inside the window goes through applyScenario (no winExit) and resets st.stage.border: the select must follow (MUTATION skipBorderSelectSync) */ const so = $('#t-stageObjects'); if (so) so.checked = st.stage.objects === 'on'; /* S4a */ const t = $('#t-stageFollow'); if (t) t.checked = st.follow; const tu = $('#t-stageUnits'); if (tu) tu.checked = st.stageUnits; for (const k of ['tilesPerH', 'heroFrac']) { const i = $('#s-' + k), o = $('#o-' + k); if (i) i.value = st.stage[k]; if (o) o.textContent = st.stage[k]; } }
   function stageJump(d) { // the previous / next room of the window list: the hero goes to its centre and the camera follows again
     if (!S || !stageOn()) return; const n = st.stageRooms.length; st.stageIdx = (st.stageIdx + d + n) % n;
     const c = E.stage.roomCentre(S, st.stageRooms[st.stageIdx]); if (!c) return; st.follow = true; st.panX = st.panY = st.yawOff = st.pitchOff = 0; syncStageUI(); setHero(S.ox + c.x, S.oy + c.y);
@@ -6973,7 +7105,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const ui_ = lu.querySelector('input'); ui_.checked = st.stageUnits; ui_.addEventListener('change', () => { st.stageUnits = ui_.checked; if (st.stageUnits) { stageDerive(); invalidate(true); } else invalidate(false); modeRefresh(); }); sl.appendChild(lu);
     const lb = document.createElement('label'); lb.className = 'sl'; lb.innerHTML = '<span>Stage border (outside the footprint)</span><select id="stageBorder"><option value="off">Off</option><option value="island">Island</option><option value="quebrada">Quebrada</option></select>'; if (NO_MODES) lb.hidden = true;
     const bs = lb.querySelector('select'); bs.value = st.stage.border || 'off'; bs.addEventListener('change', () => { st.stage.border = bs.value; invalidate(true); }); sl.appendChild(lb);
-    const rr = document.createElement('div'); rr.className = 'row'; rr.innerHTML = '<button id="stageReset">Reset</button>'; if (NO_MODES) rr.hidden = true; rr.querySelector('button').addEventListener('click', () => { st.stage = { tilesPerH: E.stage.DEF.tilesPerH, heroFrac: E.stage.DEF.heroFrac, yaw: st.stage.yaw, border: st.stage.border }; st.stageUnits = true; stageDerive(); syncStageUI(); invalidate(true); modeRefresh(); }); sl.appendChild(rr);
+    const lo = document.createElement('label'); lo.className = 'tg'; lo.innerHTML = '<input type="checkbox" id="t-stageObjects"><span>Stage objects (declared billboards, in H)</span>'; if (NO_MODES) lo.hidden = true;
+    const oi = lo.querySelector('input'); oi.checked = st.stage.objects === 'on'; oi.addEventListener('change', () => { st.stage.objects = oi.checked ? 'on' : 'off'; invalidate(false); }); sl.appendChild(lo); // S4a: a redraw only, the shape S is not rebuilt
+    const rr = document.createElement('div'); rr.className = 'row'; rr.innerHTML = '<button id="stageReset">Reset</button>'; if (NO_MODES) rr.hidden = true; rr.querySelector('button').addEventListener('click', () => { st.stage = { tilesPerH: E.stage.DEF.tilesPerH, heroFrac: E.stage.DEF.heroFrac, yaw: st.stage.yaw, border: st.stage.border, objects: st.stage.objects, objectList: st.stage.objectList }; st.stageUnits = true; stageDerive(); syncStageUI(); invalidate(true); modeRefresh(); }); sl.appendChild(rr);
     const lf = document.createElement('label'); lf.className = 'tg'; lf.innerHTML = '<input type="checkbox" id="t-stageFollow"><span>Follow the hero (Cam 6)</span>'; if (NO_MODES) lf.hidden = true;
     const fi = lf.querySelector('input'); fi.checked = st.follow; fi.addEventListener('change', () => { st.follow = fi.checked; if (st.follow) st.panX = st.panY = st.yawOff = st.pitchOff = 0; invalidate(false); }); sl.appendChild(lf);
     for (const [id, label, d] of [['stagePrev', '‹ Previous room', -1], ['stageNext', 'Next room ›', 1]]) {

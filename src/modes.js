@@ -62,12 +62,16 @@
       purpose: 'The 2D-HD Stage (S1: the base): a window of rooms of the DAC data in hero heights (H), a hero placeholder and the Cam 6 tracking of the hero. The Art contract examples are kept as legacy. Diorama technique (Pocket, M2 height) in mode 3 needs a multi-room Pocket: later PR.', banner: '2D-HD crystallizer: in construction (S1)',
       examples: [
         { id: 'dac_stage', label: 'DAC window (2D-HD, S1)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, roomSet: [17, 10, 20, 27, 6, 5], stageHero: true, yaw: 180, stairs: { style: 0, tread: 1, preferFill: true }, /* S3: Cam 6 looks from the north (yaw 180: the 4 ramps of the window rise AWAY from the camera), steps (A1: 3 risers of 0.19 terH, 2 treads) and the fill variant for the lateral transitions */ 
-          display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }, // S2a: the clean view of the window (the debug aids off; the checkboxes keep working)
+          display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false }, // S2a: the clean view of the window (the debug aids off; the checkboxes keep working)
+          /* S4a: the declared billboards (switch "Stage objects"), MAP coordinates (tile centres), hH in hero heights, the format of the future `billboards` entry of the treatment. All on walkable tiles outside the 3 columns of every transition and at least 2 tiles (Chebyshev) from their bottom / top tiles (tools/ui/test_stage_objects_ui.js checks it).
+             Hero start (61.5, 117.5, room 17): (1) a 1 H banner 3 tiles to its side at the same depth and on the same terrace (x 58.5; the tiles at x 62-63 are within 2 tiles of the transition and x 64.5 is in a pit hidden behind the rim, measured) = the comparison rule; (2) a 3 H pillar in room 20, which fits the panel; (3, 4) two 2 H lamps flanking the 3-step transition next to the start (beyond its 3 columns); (5) a 3 H banner in room 5, about 7 H beyond the hero, whose top leaves the panel
+             (the cut silhouette); the rest fill the other rooms (6 shrub room 6, 7 lamp room 27, 8 shrub on the other side of the start (x 66.5), 9 pillar room 10, the far, high one). */
+          objects: [{ kind: 'banner', x: 58.5, y: 117.5, hH: 1 }, { kind: 'pillar', x: 80.5, y: 121.5, hH: 3 }, { kind: 'lamp', x: 59.5, y: 119.5, hH: 2 }, { kind: 'lamp', x: 63.5, y: 119.5, hH: 2 }, { kind: 'banner', x: 45.5, y: 132.5, hH: 3 }, { kind: 'shrub', x: 20.5, y: 128.5, hH: 1.5 }, { kind: 'lamp', x: 87.5, y: 135.5, hH: 2 }, { kind: 'shrub', x: 66.5, y: 117.5, hH: 1.5 }, { kind: 'pillar', x: 62.5, y: 142.5, hH: 2 }] },
         { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage (legacy contract)', src: 'shrine_pier_x4', stage: true, contract: true },
         { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, terraces: 3, contract: true }
       ],
       camera: 'stage', cameras: CAMS, tech: 'B', techs: ['B'], compare: false, compareDefault: false,
-      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageReset', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
+      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageObjects', 'stageReset', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {
