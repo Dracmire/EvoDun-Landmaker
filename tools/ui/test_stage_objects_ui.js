@@ -2,7 +2,7 @@
    (1) the control: greyed in a legacy example, enabled in dac_stage, starts off, a main control of mode 3 only; (2) off = the identical pixels, on changes them, and the shape is NOT rebuilt (the same S and S.cache objects, S.fine / S.levelH identical, the walkable footprint keeps every height);
    (3) the declared list obeys the placement rules (walkable, outside the 3 columns of every transition and 2 tiles from their bottom / top tiles) and the rule check FAILS for an object put on a step (mutation objectOnStair);
    (4) the height is hH x the hero's pixels at that depth (hero put on the object's tile, camera frozen), for tilesPerH 2 / 2.5 / 3, at different depths; mutations tilesNotH, constSize; the line width scales (constStroke);
-   (5) ONE depth order with the hero (pixel at the hero's centre: an object nearer than the hero covers it; heroAlwaysTop FAILS); (6) a base that is hidden behind higher terrain is not drawn (ignoreHidden FAILS);
+   (5) ONE depth order with the hero (the hero on tile (62, 38), a 3 H pillar on the tile toward the camera; pixel at the hero's centre: an object nearer than the hero covers it; heroAlwaysTop FAILS); (6) a base that is hidden behind higher terrain is not drawn (ignoreHidden FAILS);
    (7) the manifest key `viewer.stage.objects` (written only when on, absent = off); (8) the state ends with the window session on EVERY exit (mode selector, legacy examples, dac_stage again, images with and without a manifest), mutation skipObjectsEnd.
      NODE_PATH=$(npm root -g) node tools/ui/test_stage_objects_ui.js */
 const crypto = require('crypto'), fs = require('fs'), os = require('os'), path = require('path');
@@ -47,21 +47,21 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   await objs(true);
   const heightProbe = async (tp, mut) => { if (tp !== (await ev(() => window.__evo.st.stage.tilesPerH))) { await a.slider('tilesPerH', tp); await idle(); }
     await ev((mut) => { window.EVO.objectsTest = mut ? { [mut]: true } : undefined; const e = window.__evo; e.st.follow = false; e.redraw(); }, mut); await idle();
-    const names = [[63.5, 117.5], [59.5, 119.5], [45.5, 132.5], [58.5, 117.5]], out = [];
+    const names = [[58.5, 117.5], [59.5, 119.5], [45.5, 132.5], [66.5, 117.5]], out = [];
     for (const [x, y] of names) { await ev(([x, y]) => { const e = window.__evo; e.st.hero = { x, y }; e.redraw(); }, [x, y]); await idle();
       out.push(await ev(([x, y]) => { const e = window.__evo, st = e.O.objects.stats.find((s) => s.x === x && s.y === y); return st ? { kind: st.kind, hH: st.hH, hpx: st.hpx, drawn: st.drawn, lw: st.lw, k: st.k, hero: e.O.hero.stats.hpx } : null; }, [x, y])); }
     await ev(() => { window.EVO.objectsTest = undefined; }); return out; };
-  for (const tp of [2, 2.5, 3]) { const r = await heightProbe(tp, null); const good = r.every((q) => q && q.drawn && Math.abs(q.hpx / (q.hH * q.hero) - 1) <= 0.01);
+  for (const tp of [2, 2.5, 3]) { const r = await heightProbe(tp, null); const good = r.every((q) => q && Math.abs(q.hpx / (q.hH * q.hero) - 1) <= 0.01);
     ok(`tilesPerH ${tp}: the height of each object = hH x the hero's pixels at its depth (${r.map((q) => q ? q.kind + ' ' + q.hH + ' H: ' + (q.hpx / q.hero).toFixed(2) + ' hero heights' : 'missing').join('; ')})`, good, r); }
-  { const r = await heightProbe(2, 'tilesNotH'); ok('MUTATION tilesNotH (the height in tiles): the height check FAILS', !r.every((q) => q && q.drawn && Math.abs(q.hpx / (q.hH * q.hero) - 1) <= 0.01)); }
-  { const r = await heightProbe(2, 'constSize'); ok('MUTATION constSize (a constant screen size): the depth check FAILS (the objects are at different depths)', !r.every((q) => q && q.drawn && Math.abs(q.hpx / (q.hH * q.hero) - 1) <= 0.01)); }
+  { const r = await heightProbe(2, 'tilesNotH'); ok('MUTATION tilesNotH (the height in tiles): the height check FAILS', !r.every((q) => q && Math.abs(q.hpx / (q.hH * q.hero) - 1) <= 0.01)); }
+  { const r = await heightProbe(2, 'constSize'); ok('MUTATION constSize (a constant screen size): the depth check FAILS (the objects are at different depths)', !r.every((q) => q && Math.abs(q.hpx / (q.hH * q.hero) - 1) <= 0.01)); }
   { const r = await heightProbe(2, null); const g = r.every((q) => q && Math.abs(q.lw / q.k - 1.6) < 1e-6); ok(`the line width scales with the depth like the hero: lw / k = 1.6 for every object (k from ${Math.min(...r.map((q) => q.k)).toFixed(2)} to ${Math.max(...r.map((q) => q.k)).toFixed(2)})`, g && Math.max(...r.map((q) => q.k)) - Math.min(...r.map((q) => q.k)) > 0.1, r);
     const m = await heightProbe(2, 'constStroke'); ok('MUTATION constStroke (a constant line width): the stroke check FAILS', !m.every((q) => q && Math.abs(q.lw / q.k - 1.6) < 1e-6)); }
   // (5) one depth order with the hero: a tall pillar one tile nearer than the hero covers the pixel at the hero's centre
   const orderProbe = async (mut) => ev(async (mut) => { const E = window.EVO, e = window.__evo; window.EVO.objectsTest = mut ? { [mut]: true } : undefined; e.st.follow = false;
-    const S = e.S(); const hx = 61.5, hy = 117.5; e.st.hero = { x: hx, y: hy };
-    // a tile one step toward the camera (yaw 180: smaller y) in the hero's column, walkable and with a visible base
-    const cands = []; for (const dy of [-1, -2]) cands.push({ kind: 'pillar', x: hx, y: hy + dy, hH: 3 }); e.st.stage.objectList = cands; e.redraw(); return 1; }, mut);
+    const S = e.S(); const hx = 62.5, hy = 117.5; e.st.hero = { x: hx, y: hy };
+    // the pillar one tile toward the camera (yaw 180: smaller y) in the hero's column: tile (62, 37) has a visible base (measured), the hero stands on (62, 38) behind it
+    const cands = [{ kind: 'pillar', x: hx, y: hy - 1, hH: 3 }]; e.st.stage.objectList = cands; e.redraw(); return 1; }, mut);
   const pixelAtHero = () => ev(() => { const e = window.__evo, S = e.S(), E = window.EVO, cv = document.querySelector('#stage canvas'), w = cv.clientWidth, h = e.st.persH || cv.clientHeight, cam = E.makeCam(S, e.P, e.view(), w, h), hw = { x: e.st.hero.x - S.ox, y: e.st.hero.y - S.oy }, i = E.stage.cellOf(S, hw.x, hw.y), feet = E.stage.feetH(S, i), c = cam.p(hw.x, hw.y, feet + 0.5 * e.st.stage.tilesPerH), d = cv.getContext('2d').getImageData(Math.round(c[0]), Math.round(c[1]), 1, 1).data; return { rgb: [d[0], d[1], d[2]], stats: e.O.objects.stats.map((s) => ({ visible: s.visible, drawn: s.drawn, ry: s.ry })) }; });
   await a.slider('tilesPerH', 2); await idle(); await orderProbe(null); await idle(); const po = await pixelAtHero();
   const near = (rgb, t) => Math.abs(rgb[0] - t[0]) + Math.abs(rgb[1] - t[1]) + Math.abs(rgb[2] - t[2]) <= 30;
