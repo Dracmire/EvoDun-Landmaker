@@ -37,7 +37,7 @@ for (const tph of [2, 2.5, 3]) {
 for (const flat of [true, false]) {
   const S = shape(flat), before = hash(S), hb = Float64Array.from({ length: S.n }, (_, i) => S.levelH[S.fine[i]]), bl = Uint8Array.from(S.block), rg = S.region ? Int32Array.from(S.region) : null;
   const v = vol(S, [{ x: 52, y: 20, w: 3, d: 3, hH: 2 }, { x: 24, y: 8, w: 6, d: 3, hH: 1 }]); let moved = 0; for (let i = 0; i < S.n; i++) if (fp[i] && Math.abs(S.levelH[S.fine[i]] - hb[i]) > 1e-9) moved++;
-  ok(`${flat ? 'flat' : 'relief'}: 0 footprint tiles touched (of ${nfp}), blocks and regions identical, S.stageVolumes describes the ${v.tiles} tiles and ${v.levelsAdded} new levels`, (!flat || true) && moved === 0 && S.block.every((q, i) => q === bl[i]) && (!rg || S.region.every((q, i) => q === rg[i])) && v.tiles > 0 && S.levelH.length === v.levelsBefore + v.levelsAdded && S.stageVolumes === v);
+  ok(`${flat ? 'flat' : 'relief'}: 0 footprint tiles touched (of ${nfp}), blocks and regions identical, S.stageVolumes describes the ${v.tiles} tiles and ${v.levelsAdded} new levels`, moved === 0 && S.block.every((q, i) => q === bl[i]) && (!rg || S.region.every((q, i) => q === rg[i])) && v.tiles > 0 && S.levelH.length === v.levelsBefore + v.levelsAdded && S.stageVolumes === v);
   if (flat) { const T = shape(true); vol(T, [{ x: 52, y: 20, w: 3, d: 3, hH: 2 }], 2, { touchFootprint: true }); let fm = 0; for (let i = 0; i < T.n; i++) if (fp[i] && Math.abs(T.levelH[T.fine[i]] - L0) > 1e-9) fm++; ok('MUTATION touchFootprint (a footprint tile moved): the footprint check FAILS', fm > 0, fm); }
 }
 // 3. only blocked tiles: a rectangle that crosses the east edge of the box (x 44..51): the 4 walkable columns are omitted with the reason
