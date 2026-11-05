@@ -17,6 +17,8 @@ Time limit: one Bash call is cut at 10 minutes and the parts are slow (node ~2 m
   `nohup tools/verify.sh regress > /tmp/evo-verify/regress.out 2>&1 &` then poll `/tmp/evo-verify/<date>/regress.log` and the `.result` file (`until [ -f <part>.result ]; do sleep 5; done`, each poll under ~100 s);
 - the logs and results live in `/tmp/evo-verify/<date>/<part>.log|.result|.time`, plus `summary.txt` and `summary.json` (pass/fail per part, key figures, seconds, screenshot paths). Read those files for the report.
 
+Subsets: `--only <globs>` / `--shard i/n` (node and ui only) run part of a part and mark its figures `SUBSET (..., k de N scripts)`: report a SUBSET as a subset, never as a full pass; `--list` prints what would run without running; every script header and summary.txt carry the seconds (summary lists the 5 slowest per part).
+
 Options: `--expect <globs>` when the task announced pixel differences (reported as "expected"; only unannounced ones fail); `--extra chip:<id>|pocket:<id>|walls` for the `shots` part. Screenshots go outside the repo (`/tmp/evo-verify/<date>/shots/`); never copy them into the repo.
 
 Not applicable, not a warning: the Snake Mountain SURFACE pack (40x40) with rooms on and the Default parameters finds no room, so the rooms layer is not applied and the picture is the rooms-off one (the info line says so). Report it as "not applicable" with that reason. Any other warning is reported as a WARNING.
