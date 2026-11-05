@@ -599,6 +599,7 @@
         }
       } else values = defaultRoles(next);
       if (st.win) winExit(); // the window session ends here (the images replace the example)
+      if (!(E.modesTest && E.modesTest.skipStageStateEnd)) { st.stageRooms = []; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; } // polish-1 (bug b): the window STATE ends with the load too: the new shape has no window rooms, and a stale stageRooms kept stageOn() true with no roomMap (MUTATION skipStageStateEnd)
       imgs.splice(0, imgs.length, ...next); // everything decoded and consistent: replace the previous state
       manifest = man;
       sliceSel.zones.clear(); sliceSel.whole = false; for (const id of cropIds) $('#' + id).value = '';
@@ -762,7 +763,7 @@
     const sg = E.stage, tp = st.stage.tilesPerH, ts = sg.terraceSteps(S, P, tp), hw = heroWin(), i = sg.cellOf(S, hw.x, hw.y), [w, h] = stageDims(), hs = O.hero && O.hero.stats;
     let rt = null; try { const cam = E.makeCam(S, P, view(), w, h); rt = sg.ratios(cam, w, h, heroFeet()); } catch (err) { rt = null; }
     const c = st.stageClamp, flags = c ? [c.side === 'C' ? 'narrow window' : c.side === 'L' ? 'left' : c.side === 'R' ? 'right' : '', c.near ? 'near' : ''].filter(Boolean).join(' + ') : '';
-    return `<b>Stage</b> (2D-HD S1): 1 H = ${tp} tiles · terrace step ${ts ? (ts.min === ts.max || ts.max - ts.min < 1e-9 ? ts.min.toFixed(2) : ts.min.toFixed(2) + '-' + ts.max.toFixed(2)) : '-'} H · hero ${hs && h ? (100 * hs.hpx / h).toFixed(1) + ' % of the panel' : '-'} · near/hero ${rt ? rt.near.toFixed(2) : '-'} · far/hero ${rt ? rt.far.toFixed(2) : '-'} · cell (${Math.floor(st.hero.x)}, ${Math.floor(st.hero.y)}) · room ${i >= 0 ? S.roomMap[i] : 0} · ${!st.follow ? 'follow off' : c ? '<b>CLAMP</b> (' + flags + ')' : 'following'}${S.stageBorder ? ` · border ${S.stageBorder.label}: ${S.stageBorder.tiles} tiles, +${S.stageBorder.levelsAdded} levels, TH ${S.stageBorder.TH} H` : ''}<br>`; // first in the line: the fixed-height info box scrolls, the readout of mode 3 must be the first thing seen
+    return `<b>Stage</b> (2D-HD S1): 1 H = ${tp} tiles · terrace step ${ts ? (ts.min === ts.max || ts.max - ts.min < 1e-9 ? ts.min.toFixed(2) : ts.min.toFixed(2) + '-' + ts.max.toFixed(2)) : '-'} H · hero ${hs && h ? (100 * hs.hpx / h).toFixed(1) + ' % of the panel' : '-'} · near/hero ${rt ? rt.near.toFixed(2) : '-'} · far/hero ${rt ? rt.far.toFixed(2) : '-'} · cell (${Math.floor(st.hero.x)}, ${Math.floor(st.hero.y)}) · room ${i >= 0 && S.roomMap && i < S.roomMap.length ? S.roomMap[i] : 0} · ${!st.follow ? 'follow off' : c ? '<b>CLAMP</b> (' + flags + ')' : 'following'}${S.stageBorder ? ` · border ${S.stageBorder.label}: ${S.stageBorder.tiles} tiles, +${S.stageBorder.levelsAdded} levels, TH ${S.stageBorder.TH} H` : ''}<br>`; // first in the line: the fixed-height info box scrolls, the readout of mode 3 must be the first thing seen
   }
   function buildStageControls(sl) { // the controls of mode 3 (the panel without modes hides them)
     for (const [k, label, [mn, mx, step]] of [['tilesPerH', 'Stage unit: tiles per H (hero height)', E.stage.RANGE.tilesPerH], ['heroFrac', 'Hero share of the panel height (Cam 6 zoom)', E.stage.RANGE.heroFrac]]) {
@@ -1099,7 +1100,7 @@
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
-    window.__evo = { slStats: () => ({ pending: !!st.slPending || !!raf || !!(st.pickJob && st.pickJob.live), pick: !!(st.pickJob && st.pickJob.live), started: st.slStarted || 0, done: st.slDone || 0, last: st.slLastStats || null }), redraw: () => invalidate(false), fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { stageOn, slStats: () => ({ pending: !!st.slPending || !!raf || !!(st.pickJob && st.pickJob.live), pick: !!(st.pickJob && st.pickJob.live), started: st.slStarted || 0, done: st.slDone || 0, last: st.slLastStats || null }), redraw: () => invalidate(false), fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});
