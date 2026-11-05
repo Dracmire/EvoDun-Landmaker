@@ -103,7 +103,7 @@ const STATE = () => { const e = window.__evo, O = e.O, P = e.P, o = {}, c = {}; 
     ok(`STAGE STATE END: images WITHOUT a manifest: stageOn() ${r2.on}, stageRooms ${r2.stageRooms}, #busy visible ${r2.busy}, page errors ${r2.errs.length}`, !r2.on && r2.stageRooms === 0 && r2.hero === null && !r2.busy && r2.errs.length === 0, r2);
     const m = await loadStage(true, 'skipStageStateEnd'); // the readout guard in stageText() keeps this state from throwing; the state itself is what the mutation breaks
     ok(`MUTATION skipStageStateEnd: the STAGE STATE END check FAILS (stageOn() ${m.on}, stageRooms ${m.stageRooms}, #busy visible ${m.busy})`, m.on && m.stageRooms > 0, m);
-    await setMode('stage'); await clickEx('dac_stage'); }
+    await setMode('terrain'); } // leave the window session cleanly (no mutation active): the short runs below start outside it
   // MUTATIONS: each must fail its named check (a short run: entering from a state with manual toggles, then a mode-2 example and a mode-1 example)
   const mini = async (flag) => { await ev((f) => { window.EVO.modesTest = f ? { [f]: true } : null; }, flag); const T = [{ mode: 'rooms', ex: MODES.find((q) => q.id === 'rooms').ex[0] }, { mode: 'terrain', ex: MODES.find((q) => q.id === 'terrain').ex[0] }]; const out = { badD: 0, badU: 0, badT: 0, twice: null };
     for (const t of T) { const r = await trial(t, false); out.badD += r.v.badD.length; out.badU += r.v.badU.length; out.badT += r.v.badT.length; }
