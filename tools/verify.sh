@@ -14,9 +14,11 @@
 #   --only <globs>: node and ui only: run just the scripts whose BASE NAME matches one of the comma-separated globs (e.g. --only 'test_pick_ui.js,*stage*'). It has NO effect on regress, zbuf and shots
 #             (they are not split into scripts here); asking only for those parts with --only / --shard is an error (exit 2). With --only or --shard and no part named, the parts are `node ui` (not the default four:
 #             regress would run in full). A selectable part with no matching script is skipped with a note; if NO selectable part matches anything, exit 2.
-#   --shard i/n: node and ui only: split the list of scripts (sorted, after --only) by position: the script at index k (from 0) goes to shard (k mod n)+1; this run keeps shard i. Run the n shards in parallel
-#             with a different --out each. Combinable with --only. Same restrictions as --only.
-#   --list:   print, per part, the scripts that would run (with --only and --shard applied) as `<part><TAB><script>` lines (`#` lines are counts) and exit 0 without running anything or writing any file.
+#   --shard i/n: node and ui only: split the list of scripts (sorted, after --only) into n shards BY ESTIMATED TIME, not by position: with the weights of tools/verify_weights.txt (seconds per script) the scripts are taken in decreasing weight (tie: the order of the list)
+#             and each goes to the shard with the smallest running sum (greedy; tie: the lowest index); a script with no weight weighs the MEDIAN of the weights of its part (1 if there are none). Without the weights file (or with VERIFY_WEIGHTS=<other file>) every script weighs the
+#             same and the split is exactly the old one, script k of the list -> shard (k mod n)+1. This run keeps shard i. Run the n shards in parallel with a different --out each. Combinable with --only. Same restrictions as --only.
+#             REFRESH THE WEIGHTS after a full pass: copy the first two columns (name, seconds) of <out>/ui.scripts and <out>/node.scripts (every shard's, if the pass was sharded) into tools/verify_weights.txt; they are times with several processes at once, only the relative size matters.
+#   --list:   print, per part, the scripts that would run (with --only and --shard applied) as `<part><TAB><script>` lines (`#` lines are counts; with --shard also `# shard s/n: k scripts, ~S s (part)` for EVERY shard s, S = the estimated seconds) and exit 0 without running anything or writing any file.
 #   A part that ran with --only / --shard is NOT a full pass: its figures line starts with `SUBSET (--only <globs> --shard i/n, k de N scripts): ` (k selected, N total of the part) and summary.json marks it "subset": true.
 #   Seconds: the header of every script in the log is `== <file> (exit N, ..., S s)` (node: `exit N, S s`; ui: `exit N, X PASS, Y FAIL, S s`; zbuf: `exit N, S s`); regress logs `-- seconds: S s` after every block (renders + compare);
 #   <part>.scripts holds `name<TAB>seconds<TAB>exit` per script / block, and summary.txt / summary.json list the 5 slowest per part ("slowest").
@@ -60,14 +62,33 @@ matches_only() { # path -> 0 if its base name matches a --only glob (always 0 wi
   local b g; b="$(basename "$1")"; IFS=',' read -ra G <<< "$ONLY"
   for g in "${G[@]}"; do [ -n "$g" ] && case "$b" in $g) return 0;; esac; done; return 1
 }
-select_part() { # part -> fills SEL_<part>
-  local part="$1" f k=0 arr=() all=()
+# WEIGHTS: tools/verify_weights.txt (name<TAB>seconds, `#` lines are comments); VERIFY_WEIGHTS overrides the file (a missing file = no weights = every script weighs the same)
+WFILE="${VERIFY_WEIGHTS-$REPO/tools/verify_weights.txt}"; declare -A WT=()
+if [ -f "$WFILE" ]; then while IFS=$'\t' read -r nm sec _; do case "$nm" in ''|'#'*) continue;; esac; [[ "$sec" =~ ^[0-9]+(\.[0-9]+)?$ ]] && WT["$nm"]="$sec"; done < "$WFILE"; fi
+part_median() { # part -> the median of the weights of the scripts of the part that have one (1 if none)
+  local all=() f b; if [ "$1" = node ]; then all=("${ALL_node[@]}"); else all=("${ALL_ui[@]}"); fi
+  for f in "${all[@]}"; do b="$(basename "$f")"; [ -n "${WT[$b]+x}" ] && echo "${WT[$b]}"; done | sort -n | awk '{a[NR]=$1} END{ if (NR==0) print 1; else if (NR%2) print a[(NR+1)/2]; else print (a[NR/2]+a[NR/2+1])/2 }'
+}
+PLAN_IDX=(); PLAN_SUM=(); PLAN_CNT=()
+shard_plan() { # part script... -> PLAN_IDX[position in the list] = shard (1..n), PLAN_SUM[s] / PLAN_CNT[s] = estimated seconds / scripts of shard s: greedy by decreasing weight (tie: the order of the list), onto the shard with the smallest sum (tie: the lowest index)
+  local part="$1" med f w idx=0 lines="" kind a b c; shift; med="$(part_median "$part")"; PLAN_IDX=(); PLAN_SUM=(); PLAN_CNT=(); for ((a=1; a<=SH_N; a++)); do PLAN_SUM[$a]=0; PLAN_CNT[$a]=0; done
+  for f in "$@"; do b="$(basename "$f")"; w="${WT[$b]:-$med}"; lines+="$idx"$'\t'"$w"$'\n'; idx=$((idx+1)); done
+  while IFS=$'\t' read -r kind a b; do
+    case "$kind" in A) PLAN_IDX[$a]="$b"; PLAN_CNT[$b]=$((PLAN_CNT[$b]+1));; S) PLAN_SUM[$a]="$b";; esac
+  done < <(printf '%s' "$lines" | awk -v n="$SH_N" 'BEGIN { FS = "\t" } { id[NR] = $1; w[NR] = $2 }
+    END { for (a = 1; a <= NR; a++) ord[a] = a
+          for (a = 2; a <= NR; a++) { v = ord[a]; b = a - 1; while (b >= 1 && (w[ord[b]] < w[v] || (w[ord[b]] == w[v] && id[ord[b]] > id[v]))) { ord[b + 1] = ord[b]; b-- } ord[b + 1] = v }
+          for (s = 1; s <= n; s++) sum[s] = 0
+          for (a = 1; a <= NR; a++) { k = ord[a]; m = 1; for (s = 2; s <= n; s++) if (sum[s] < sum[m]) m = s; sum[m] += w[k]; print "A\t" id[k] "\t" m }
+          for (s = 1; s <= n; s++) print "S\t" s "\t" sum[s] }')
+}
+FLT_node=(); FLT_ui=()
+select_part() { # part -> fills SEL_<part> (and FLT_<part>, the list after --only)
+  local part="$1" f arr=() all=() flt=() k
   if [ "$part" = node ]; then all=("${ALL_node[@]}"); else all=("${ALL_ui[@]}"); fi
-  for f in "${all[@]}"; do
-    matches_only "$f" || continue
-    if [ -n "$SHARD" ]; then [ $((k % SH_N + 1)) -eq "$SH_I" ] && arr+=("$f"); k=$((k+1)); else arr+=("$f"); fi
-  done
-  if [ "$part" = node ]; then SEL_node=("${arr[@]+"${arr[@]}"}"); else SEL_ui=("${arr[@]+"${arr[@]}"}"); fi
+  for f in "${all[@]}"; do matches_only "$f" && flt+=("$f"); done
+  if [ -n "$SHARD" ]; then shard_plan "$part" "${flt[@]+"${flt[@]}"}"; for k in "${!flt[@]}"; do [ "${PLAN_IDX[$k]}" = "$SH_I" ] && arr+=("${flt[$k]}"); done; else arr=("${flt[@]+"${flt[@]}"}"); fi
+  if [ "$part" = node ]; then SEL_node=("${arr[@]+"${arr[@]}"}"); FLT_node=("${flt[@]+"${flt[@]}"}"); else SEL_ui=("${arr[@]+"${arr[@]}"}"); FLT_ui=("${flt[@]+"${flt[@]}"}"); fi
 }
 SEL_node=("${ALL_node[@]}"); SEL_ui=("${ALL_ui[@]}")
 if [ $SEL_ACTIVE -eq 1 ]; then select_part node; select_part ui; fi
@@ -85,8 +106,14 @@ fi
 if [ $LIST -eq 1 ]; then # nothing runs, nothing is written
   for p in "${PARTS[@]}"; do
     case "$p" in
-      node) printf '# node: %d de %d scripts\n' "${#SEL_node[@]}" "${#ALL_node[@]}"; for f in "${SEL_node[@]+"${SEL_node[@]}"}"; do printf 'node\t%s\n' "$f"; done;;
-      ui) printf '# ui: %d de %d scripts\n' "${#SEL_ui[@]}" "${#ALL_ui[@]}"; for f in "${SEL_ui[@]+"${SEL_ui[@]}"}"; do printf 'ui\t%s\n' "$f"; done;;
+      node|ui)
+        if [ "$p" = node ]; then n_sel=${#SEL_node[@]}; n_all=${#ALL_node[@]}; else n_sel=${#SEL_ui[@]}; n_all=${#ALL_ui[@]}; fi
+        printf '# %s: %d de %d scripts\n' "$p" "$n_sel" "$n_all"; if [ "$p" = node ]; then for f in "${SEL_node[@]+"${SEL_node[@]}"}"; do printf 'node\t%s\n' "$f"; done; else for f in "${SEL_ui[@]+"${SEL_ui[@]}"}"; do printf 'ui\t%s\n' "$f"; done; fi
+        if [ -n "$SHARD" ]; then
+          if [ "$p" = node ]; then shard_plan node "${FLT_node[@]+"${FLT_node[@]}"}"; else shard_plan ui "${FLT_ui[@]+"${FLT_ui[@]}"}"; fi
+          for ((a=1; a<=SH_N; a++)); do printf '# shard %d/%d: %d scripts, ~%.0f s (%s)\n' "$a" "$SH_N" "${PLAN_CNT[$a]}" "${PLAN_SUM[$a]}" "$p"; done
+          [ ${#WT[@]} -eq 0 ] && printf '# weights: none (every script weighs the same: the split is by position)\n'
+        fi;;
       zbuf) printf '# zbuf: %d specs (--only / --shard do not apply)\n' "${#ZSPECS[@]}"; for spec in "${ZSPECS[@]}"; do ex="${spec#*:}"; printf 'zbuf\ttools/ui/%s.js%s\n' "${spec%%:*}" "${ex:+ $ex}"; done;;
       regress) printf '# regress: one part (pixel regression blocks against origin/main; --only / --shard do not apply)\nregress\t(whole part)\n';;
       shots) printf '# shots: one part (--only / --shard do not apply)\nshots\t(whole part)\n';;
