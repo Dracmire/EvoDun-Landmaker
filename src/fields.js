@@ -275,6 +275,7 @@
         if (g.units !== undefined && typeof g.units !== 'boolean') bad('units (true or false: Measures in H)');
         if (g.border !== undefined && !['off', 'island', 'quebrada'].includes(g.border)) bad('border ("off", "island" or "quebrada")');
         if (g.objects !== undefined && !['off', 'on'].includes(g.objects)) bad('objects ("off" or "on")');
+        if (g.volumes !== undefined && !['off', 'on'].includes(g.volumes)) bad('volumes ("off" or "on")');
       }
       if (v.sliced !== undefined && typeof v.sliced !== 'boolean') throw new Error('Manifest: viewer.sliced must be true or false (absent = false).');
       if (v.dioProto !== undefined && !E.VIEWER_PROTOS.includes(v.dioProto)) throw new Error('Manifest: viewer.dioProto must be one of ' + E.VIEWER_PROTOS.join(', ') + ' (absent = none).');
