@@ -3,7 +3,7 @@
    EVERY exit restores them first, then applies the destination (and the reset of S1b: the examples outside mode 2 start from tint off / outline off / room borders on; mode 2's own examples set tint / outline themselves).
    (a) mode 2 with MANUAL toggles (nowalk and markers off, terH 1.7, subH 0.3) -> dac_stage -> every example of modes 1, 2, 4, 5, 6 (through the mode selector and then the example) and the 2 legacy examples of mode 3: the 10 keys, their checkboxes, P.terH, P.subH and their sliders
    equal those of before entering, except what the destination sets itself; (b) dac_stage pressed twice, then leave; (c) leaving with the mode selector only (the first example of each mode); (d) loading images + a manifest while inside.
-   MUTATIONS (E.modesTest, each must FAIL its named check): skipDisplayRestore, skipUnitsRestore, skipStairsRestore (S3), skipYawEnd (S3: the yaw of the example survives a load), skipBorderEnd / skipBorderRestore (S2: the stage border ends with the session on every exit), retakeSnapshot.
+   MUTATIONS (E.modesTest, each must FAIL its named check): skipDisplayRestore, skipUnitsRestore, skipStairsRestore (S3), skipYawEnd (S3: the yaw of the example survives a load), skipBorderEnd / skipBorderRestore (S2: the stage border ends with the session on every exit), skipStageStateEnd (polish-1: the window state ends with a load), retakeSnapshot.
      NODE_PATH=$(npm root -g) node tools/ui/test_window_session_ui.js */
 const fs = require('fs'), os = require('os'), path = require('path');
 const { open, mapFile } = require('./common');
@@ -90,6 +90,20 @@ const STATE = () => { const e = window.__evo, O = e.O, P = e.P, o = {}, c = {}; 
   const exits = { 'legacy example of mode 3': async () => { await clickEx('x4_stage'); }, 'the mode selector (mode 1)': async () => { await setMode('terrain'); }, 'a mode 2 example': async () => { await setMode('rooms'); }, 'dac_stage pressed again': async () => { await clickEx('dac_stage'); } };
   for (const [name, go] of Object.entries(exits)) { const r = await exitBorder(go, null); ok(`BORDER END: exit through ${name}: st.stage.border ${r.border}, no border in the shape`, r.border === 'off' && !r.has, r); }
   { const r = await exitBorder(exits['a mode 2 example'], 'skipBorderRestore'); ok(`MUTATION skipBorderRestore: leaving to mode 2 keeps the border (${r.border}): the exit check FAILS`, r.border !== 'off', r); }
+  // (g) polish-1, bug (b): loading images (with a manifest viewer.mode 'stage' that turns no rooms on, or without any manifest) from inside dac_stage ends the window STATE too (st.stageRooms, st.hero, st.focus, st.stageClamp):
+  // before the fix stageOn() stayed true with the new shape having no roomMap and stageText() threw "Cannot read properties of undefined (reading '30013')", leaving #busy visible. MUTATION skipStageStateEnd: the same check FAILS.
+  const loadStage = async (withManifest, mut) => { await setMode('stage'); await clickEx('dac_stage'); await ev((f) => { window.EVO.modesTest = f ? { [f]: true } : null; }, mut);
+    const files = ['height', 'zones', 'edges'].map((n) => mapFile('maps', n)); let mp = null; const e0 = a.errs.length;
+    if (withManifest) { mp = path.join(os.tmpdir(), 'stagestate_' + process.pid + '_' + Math.random().toString(36).slice(2) + '.json'); fs.writeFileSync(mp, JSON.stringify({ format: 'evodun-pack/0.3', name: 'stage state', roles: { elevation: { image: 'height.png', channel: 'V' } }, viewer: { mode: 'stage', camera: 'stage' } })); }
+    await page.setInputFiles('#file', mp ? [...files, mp] : files); await page.waitForTimeout(3000); await idle(); await ev(() => { window.EVO.modesTest = null; }); if (mp) fs.unlinkSync(mp);
+    const r = await ev(() => { const e = window.__evo; return { mode: e.st.modeId, rooms: !!e.P.rooms, stageRooms: e.st.stageRooms.length, hero: e.st.hero, on: !!e.stageOn(), busy: !document.querySelector('#busy').hidden, roomMap: !!(e.S() && e.S().roomMap) }; });
+    return Object.assign(r, { errs: a.errs.slice(e0) }); };
+  { const r = await loadStage(true, null), r2 = await loadStage(false, null);
+    ok(`STAGE STATE END: images + a manifest {mode stage, camera stage} without rooms loaded inside dac_stage: stageOn() ${r.on}, stageRooms ${r.stageRooms}, hero ${JSON.stringify(r.hero)}, #busy visible ${r.busy}, page errors ${r.errs.length}`, r.mode === 'stage' && !r.rooms && !r.on && r.stageRooms === 0 && r.hero === null && !r.busy && r.errs.length === 0, r);
+    ok(`STAGE STATE END: images WITHOUT a manifest: stageOn() ${r2.on}, stageRooms ${r2.stageRooms}, #busy visible ${r2.busy}, page errors ${r2.errs.length}`, !r2.on && r2.stageRooms === 0 && r2.hero === null && !r2.busy && r2.errs.length === 0, r2);
+    const m = await loadStage(true, 'skipStageStateEnd'); // the readout guard in stageText() keeps this state from throwing; the state itself is what the mutation breaks
+    ok(`MUTATION skipStageStateEnd: the STAGE STATE END check FAILS (stageOn() ${m.on}, stageRooms ${m.stageRooms}, #busy visible ${m.busy})`, m.on && m.stageRooms > 0, m);
+    await setMode('stage'); await clickEx('dac_stage'); }
   // MUTATIONS: each must fail its named check (a short run: entering from a state with manual toggles, then a mode-2 example and a mode-1 example)
   const mini = async (flag) => { await ev((f) => { window.EVO.modesTest = f ? { [f]: true } : null; }, flag); const T = [{ mode: 'rooms', ex: MODES.find((q) => q.id === 'rooms').ex[0] }, { mode: 'terrain', ex: MODES.find((q) => q.id === 'terrain').ex[0] }]; const out = { badD: 0, badU: 0, badT: 0, twice: null };
     for (const t of T) { const r = await trial(t, false); out.badD += r.v.badD.length; out.badU += r.v.badU.length; out.badT += r.v.badT.length; }
