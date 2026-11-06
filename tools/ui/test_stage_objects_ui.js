@@ -22,7 +22,7 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   ok('the checkbox exists in mode 3 and is greyed in a legacy example (no window): requirement stageWin', c1 && c1.dis === true, c1);
   await clickEx('dac_stage');
   const c2 = await ev(() => { const s = document.querySelector('#t-stageObjects'); return { dis: s.disabled, on: s.checked, n: window.__evo.st.stage.objectList.length, kinds: [...new Set(window.__evo.st.stage.objectList.map((q) => q.kind))].sort().join() }; });
-  ok(`in dac_stage it is enabled and starts off; the example declares ${c2.n} objects (kinds ${c2.kinds})`, !c2.dis && !c2.on && c2.n === 9 && c2.kinds === 'banner,lamp,pillar,shrub', c2);
+  ok(`in dac_stage it is enabled and starts off; the example declares ${c2.n} objects (kinds ${c2.kinds})`, !c2.dis && !c2.on && c2.n === 10 && c2.kinds === 'banner,lamp,landmark,pillar,shrub', c2);
   ok('stageObjects is a main control of mode 3 only', (await ev(() => window.EVO.modes.MODES.filter((x) => x.main.includes('stageObjects')).map((x) => x.id))).join() === 'stage');
   // (2) off = identical pixels; on changes them; S is not rebuilt
   const p0 = await pix(), S0 = await ev(() => { const e = window.__evo, S = e.S(), tiles = []; for (let i = 0; i < S.n; i++) if (!S.block[i] && !(S.void && S.void[i])) tiles.push(+S.levelH[S.fine[i]].toFixed(6)); window.__S0 = S; window.__C0 = S.cache; let h = 7; for (let i = 0; i < S.n; i++) h = (h * 31 + S.fine[i]) % 1000000007; for (const v of S.levelH) h = (h * 31 + Math.round(v * 1e4)) % 1000000007; return { h, tiles: tiles.join(',') }; });
@@ -34,7 +34,7 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   // (3) placement rules
   const RULES = (list) => ev((list) => { const e = window.__evo, S = e.S(), W = S.W, H = S.H, E = window.EVO, bad = [], foot = new Set(), bt = [];
     for (const r of S.stairs) { for (const st of r.steps) for (const t of st.tiles) foot.add(t); for (const t of r.bottom) { foot.add(t); bt.push(t); } for (const t of r.top) { foot.add(t); bt.push(t); } }
-    list.forEach((q, k) => { const x = Math.floor(q.x - S.ox), y = Math.floor(q.y - S.oy), i = y * W + x; if (!E.objects.KINDS[q.kind]) bad.push([k, 'kind']); if (!(q.hH > 0)) bad.push([k, 'hH']);
+    list.forEach((q, k) => { const x = Math.floor(q.x - S.ox), y = Math.floor(q.y - S.oy), i = y * W + x; if (!E.objects.KINDS[q.kind]) bad.push([k, 'kind']); if (q.kind === 'landmark') { if (E.checkLandmark(q)) bad.push([k, 'landmark parameters']); } else if (!(q.hH > 0)) bad.push([k, 'hH']); /* S4c: a landmark entry has no hH, its height comes from its own parameters, validated by E.checkLandmark */
       if (x < 0 || y < 0 || x >= W || y >= H) { bad.push([k, 'window']); return; } if (S.block[i] || (S.void && S.void[i]) || !(S.region[i] >= 0) || (S.nowalk && S.nowalk[i])) bad.push([k, 'walkable']); if (foot.has(i)) bad.push([k, 'stair columns']);
       for (const t of bt) if (Math.max(Math.abs((t % W) - x), Math.abs(((t / W) | 0) - y)) < 2) { bad.push([k, 'bottom/top']); break; } });
     return bad; }, list);
@@ -80,7 +80,7 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   const enterOn = async () => { await setMode('stage'); await clickEx('dac_stage'); await objs(true); };
   const exits = { 'the mode selector (mode 1)': async () => { await setMode('terrain'); }, 'a mode 2 example': async () => { await setMode('rooms'); }, 'a legacy example of mode 3': async () => { await clickEx('x4_stage'); }, 'dac_stage pressed again': async () => { await clickEx('dac_stage'); } };
   const exitRun = async (go, mut) => { await enterOn(); await ev((f) => { window.EVO.modesTest = f ? { [f]: true } : null; }, mut); const before = await STATE(); await go(); const r = await STATE(); await ev(() => { window.EVO.modesTest = null; }); return Object.assign({ before }, r); };
-  for (const [name, go] of Object.entries(exits)) { const r = await exitRun(go, null); ok(`EXIT through ${name}: objects on (${r.before.obj}, ${r.before.list} declared) -> ${r.obj}, list ${r.list}, checkbox ${r.cb}, nothing drawn`, r.before.obj === 'on' && r.obj === 'off' && r.list === (name === 'dac_stage pressed again' ? 9 : 0) && r.cb === false && r.drawn === null, r); }
+  for (const [name, go] of Object.entries(exits)) { const r = await exitRun(go, null); ok(`EXIT through ${name}: objects on (${r.before.obj}, ${r.before.list} declared) -> ${r.obj}, list ${r.list}, checkbox ${r.cb}, nothing drawn`, r.before.obj === 'on' && r.obj === 'off' && r.list === (name === 'dac_stage pressed again' ? 10 : 0) && r.cb === false && r.drawn === null, r); }
   { const r = await exitRun(exits['a mode 2 example'], 'skipObjectsEnd'); ok(`MUTATION skipObjectsEnd: leaving to mode 2 keeps the state (${r.obj}, ${r.list} declared): the exit check FAILS`, r.obj === 'on' || r.list > 0, r); }
   const loadRun = async (withManifest, mut) => { await enterOn(); await ev((f) => { window.EVO.modesTest = f ? { [f]: true } : null; }, mut);
     const files = ['height', 'zones', 'edges'].map((n) => mapFile('maps', n)); let mp = null; const e0 = a.errs.length;

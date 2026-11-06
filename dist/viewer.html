@@ -496,6 +496,16 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH', 'chainExtra', 'ascCut', 'ascGate', 'roomRule', 'cakeCut', 'dioChain', 'dioProto', 'panCache', 'sliced', 'stage']; // the optional `viewer` block of the manifest
   E.VIEWER_PROTOS = ['cima-leaf', 'cima-corridor', 'arena-leaf', 'arena-corridor', 'isla-leaf', 'isla-corridor', 'quebrada', 'mirador']; // the ids of the prototypes of src/modes.js (tools/test_diocorr.js checks that they agree)
   E.VIEWER_MODES = ['terrain', 'rooms', 'stage', 'curves', 'floors', 'macroform']; // the ids of src/modes.js (tools/test_modes.js checks that they agree)
+  /* S4c: the parameters of a `landmark` billboard entry travel in the entry itself: hFar, hNear, dFar, dNear in H, numbers > 0, hFar <= hNear and dNear < dFar (an absent one takes the default of src/objects.js). Returns an error text or null; other kinds are not checked here. */
+  E.checkLandmark = (q) => {
+    if (q.kind !== 'landmark') return null;
+    const D = { hFar: 1.5, hNear: 3, dFar: 8, dNear: 2 };
+    for (const k of Object.keys(D)) if (q[k] !== undefined && !(typeof q[k] === 'number' && isFinite(q[k]) && q[k] > 0)) return k + ' must be a number > 0';
+    const v = (k) => (q[k] !== undefined ? q[k] : D[k]);
+    if (v('hFar') > v('hNear')) return 'hFar must be <= hNear';
+    if (!(v('dNear') < v('dFar'))) return 'dNear must be < dFar';
+    return null;
+  };
   E.parseManifest = function (json) {
     if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
     const known = new Set([...E.ROLES.map((r) => r[0]), ...E.RESERVED_ROLES]), roles = {}, notes = [];
@@ -538,6 +548,10 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
         if (g.border !== undefined && !['off', 'island', 'quebrada'].includes(g.border)) bad('border ("off", "island" or "quebrada")');
         if (g.objects !== undefined && !['off', 'on'].includes(g.objects)) bad('objects ("off" or "on")');
         if (g.volumes !== undefined && !['off', 'on'].includes(g.volumes)) bad('volumes ("off" or "on")');
+        if (g.billboards !== undefined) { // S4c: the future `billboards` entry of the treatment (inert at load: S5 gives it effect); the landmark entries are validated
+          if (!Array.isArray(g.billboards)) bad('billboards (a list)');
+          g.billboards.forEach((q, k) => { const m = q && typeof q === 'object' ? E.checkLandmark(q) : 'an entry must be an object'; if (m) bad('billboards[' + k + '] (' + m + ')'); });
+        }
       }
       if (v.sliced !== undefined && typeof v.sliced !== 'boolean') throw new Error('Manifest: viewer.sliced must be true or false (absent = false).');
       if (v.dioProto !== undefined && !E.VIEWER_PROTOS.includes(v.dioProto)) throw new Error('Manifest: viewer.dioProto must be one of ' + E.VIEWER_PROTOS.join(', ') + ' (absent = none).');
@@ -5478,7 +5492,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
    (A segment that is vertical in the 3D projection is about 8 % shorter than the hero sprite at pitch 25 degrees: the volumes of S4b are real geometry and follow that projection; the billboards do not.) The pack's `h` is NOT read: in data/shrine_pier_x4.json it is the terrain elevation of the landmark platform (tools/derive_shrine_pier_x4.py), not an object height.
    BASE = the ground of the tile under (x, y) (E.stage.feetH). VISIBILITY = the Box pick render, like the contract (`ownGround`): an object whose base is not on its own tile in the image (a higher terrain in front, or outside the panel) is not drawn.
    ORDER = ONE depth-sorted list with the hero (cam.ry, larger = nearer the camera): an object nearer than the hero is painted over it; the hero no longer comes last when the objects are on. Tall objects may leave the panel at the top: expected (a cut silhouette).
-   Test hooks (`E.objectsTest`, tests only, undefined in normal use): constSize, constStroke, tilesNotH, ignoreHidden, heroAlwaysTop. */
+   Test hooks (`E.objectsTest`, tests only, undefined in normal use): constSize, constStroke, tilesNotH, ignoreHidden, heroAlwaysTop; S4c: noDistance, hardStep, detailAlways, detailNever, pieceIgnoreHidden. */
 (function (E) {
   'use strict';
   const LW0 = 1.6, FONT0 = 11; // the line width of the hero sprite and a base font size, both multiplied by the depth scale k
@@ -5487,10 +5501,20 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     banner: { wH: 0.5, color: '#c2563a' },
     lamp: { wH: 0.4, color: '#f2d78a' },
     shrub: { wH: 0.9, color: '#3f8a4a' },
-    pillar: { wH: 0.6, color: '#b9b2a6' }
+    pillar: { wH: 0.6, color: '#b9b2a6' },
+    landmark: { wH: 1.2, color: '#b9b2a6' } // S4c: a wide neutral tower (R4: the pillar's stone palette, no colours of its own); its height changes with the hero's distance
   };
   const KIND_NAMES = Object.keys(KINDS);
   const T = () => E.objectsTest || {};
+  /* S4c, THE LANDMARK (docs/crystallizers/03-stage/README.md "S4c"): an entry `{ kind: 'landmark', x, y, hFar, hNear, dFar, dNear }` of the objects list (the format of the future `billboards` entry), the apparent height in H changes with the ground distance d (in H) between the hero's feet and its base:
+     h(d) = hFar + (hNear - hFar) * smoothstep(t), t = clamp((dFar - d) / (dFar - dNear), 0, 1). HYPOTHESES (variant C of v80, measured only in a mock, NOT in the viewer): hFar 1.5, hNear 3, dFar 8, dNear 2. It is a scale in the DRAWING: nothing touches the terrain or the shape. */
+  const LANDMARK = { hFar: 1.5, hNear: 3, dFar: 8, dNear: 2 };
+  /* S4c, THE BASE DETAIL ("fragment" of v79 / v80), ONE table of HYPOTHESES for S6 to calibrate: it appears when d <= startMul * dNear (alpha 0) and is full at fullMul * dNear (smoothstep between); three placeholders stuck to the base, offsets in H, multiplied by tilesPerH ((side) perpendicular to the camera, (front) toward the camera: 0.5 H = 1 tile at tilesPerH 2). They are part of the landmark (no entries of the list): they need its base to be visible AND, each one, the rule of S4a for its own base (not on its own tile in the image = not drawn); NO real volume (a pedestal would depend on the volumes switch and on a blocked tile). */
+  const DETAIL = { startMul: 2, fullMul: 1.5, pieces: [{ kind: 'lamp', hH: 1.2, side: -0.5, front: 0 }, { kind: 'lamp', hH: 1.2, side: 0.5, front: 0 }, { kind: 'banner', hH: 0.6, side: 0, front: 0.5 }] };
+  const smoothstep = (t) => t * t * (3 - 2 * t), clamp01 = (v) => Math.max(0, Math.min(1, v));
+  const landmarkParams = (ob) => { const p = Object.assign({}, LANDMARK); for (const k of Object.keys(p)) if (ob[k] > 0) p[k] = ob[k]; return p; };
+  const landmarkH = (d, p) => { p = p || LANDMARK; return p.hFar + (p.hNear - p.hFar) * smoothstep(clamp01((p.dFar - d) / (p.dFar - p.dNear))); };
+  const baseAlpha = (d, p) => { p = p || LANDMARK; const a = smoothstep(clamp01((DETAIL.startMul * p.dNear - d) / ((DETAIL.startMul - DETAIL.fullMul) * p.dNear))); return a < 0.004 ? 0 : a; }; // an alpha under 0.004 (1 / 255) is not visible: it counts as 0 (at exactly d = startMul * dNear it was 2e-30 and three invisible pieces were painted)
 
   /* the size on screen of an object of hH hero heights standing on the ground point (x, y, feet) (window coordinates): the hero's convention */
   function sizeAt(cam, tilesPerH, hH, wH, x, y, feet) {
@@ -5498,18 +5522,18 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     return { k, hpx: hH * tp * cam.sc * k, wpx: wH * tp * cam.sc * k, lw: t.constStroke ? LW0 : LW0 * k, font: FONT0 * k };
   }
 
-  function shape(ctx, kind, b, sz) { // b = the base point on screen; the placeholder, a contact shade, a label
+  function shape(ctx, kind, b, sz, label) { // b = the base point on screen; the placeholder, a contact shade, a label
     const { hpx, wpx, lw, font } = sz, col = KINDS[kind].color;
     ctx.save(); ctx.lineJoin = 'round'; ctx.lineWidth = lw; ctx.strokeStyle = 'rgba(24,20,34,0.95)';
     ctx.fillStyle = 'rgba(14,12,22,0.35)'; ctx.beginPath(); ctx.ellipse(b[0], b[1], wpx * 0.7, wpx * 0.22, 0, 0, 7); ctx.fill();
     if (kind === 'shrub') { ctx.beginPath(); ctx.ellipse(b[0], b[1] - hpx / 2, wpx / 2, hpx / 2, 0, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
-    else if (kind === 'pillar') { ctx.beginPath(); ctx.rect(b[0] - wpx / 2, b[1] - hpx, wpx, hpx); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.rect(b[0] - wpx * 0.62, b[1] - hpx, wpx * 1.24, Math.min(hpx * 0.06, wpx * 0.3)); ctx.fillStyle = '#d8d2c6'; ctx.fill(); ctx.stroke(); }
+    else if (kind === 'pillar' || kind === 'landmark') { ctx.beginPath(); ctx.rect(b[0] - wpx / 2, b[1] - hpx, wpx, hpx); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.rect(b[0] - wpx * 0.62, b[1] - hpx, wpx * 1.24, Math.min(hpx * 0.06, wpx * 0.3)); ctx.fillStyle = '#d8d2c6'; ctx.fill(); ctx.stroke(); }
     else { // banner and lamp: a pole and a head
       ctx.beginPath(); ctx.rect(b[0] - wpx * 0.06, b[1] - hpx, wpx * 0.12, hpx); ctx.fillStyle = '#5b3f2a'; ctx.fill(); ctx.stroke();
       if (kind === 'banner') { ctx.beginPath(); ctx.rect(b[0] + wpx * 0.06, b[1] - hpx, wpx * 0.9, hpx * 0.28); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
       else { ctx.beginPath(); ctx.arc(b[0], b[1] - hpx, wpx * 0.45, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
     }
-    ctx.fillStyle = '#1a1624'; ctx.font = `700 ${font.toFixed(1)}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.fillText(`${kind} ${sz.hH} H`, b[0], b[1] + font * 1.35);
+    if (label !== false) { ctx.fillStyle = '#1a1624'; ctx.font = `700 ${font.toFixed(1)}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.fillText(`${kind} ${+(+sz.hH).toFixed(2)} H`, b[0], b[1] + font * 1.35); }
     ctx.restore();
   }
 
@@ -5524,10 +5548,25 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
       const kd = KINDS[ob.kind]; if (!kd) continue;
       const x = ob.x - S.ox, y = ob.y - S.oy, i = E.stage.cellOf(S, x, y), st = { kind: ob.kind, hH: ob.hH, x: ob.x, y: ob.y, tile: i, drawn: false, visible: false };
       stats.push(st); if (i < 0) continue;
-      const feet = E.stage.feetH(S, i), b = cam.p(x, y, feet), sz = sizeAt(cam, tp, ob.hH, kd.wH, x, y, feet); sz.hH = ob.hH;
+      let hH = ob.hH, lp = null, d = Infinity;
+      if (ob.kind === 'landmark') { // S4c: the apparent height from the ground distance (in H) to the hero's feet
+        lp = landmarkParams(ob); if (o.hero) d = Math.hypot(o.hero.x - x, o.hero.y - y) / (t.tilesNotH ? 1 : tp); // (MUTATION tilesNotH: the distance in tiles)
+        hH = t.noDistance ? (lp.hFar + lp.hNear) / 2 : t.hardStep ? (d < (lp.dFar + lp.dNear) / 2 ? lp.hNear : lp.hFar) : landmarkH(d, lp); // (MUTATIONS noDistance: a constant height; hardStep: a jump instead of the smoothstep)
+        Object.assign(st, { hH, d, lm: lp });
+      }
+      const feet = E.stage.feetH(S, i), b = cam.p(x, y, feet), sz = sizeAt(cam, tp, hH, kd.wH, x, y, feet); sz.hH = hH;
       st.visible = t.ignoreHidden ? true : ownGround(b, i); Object.assign(st, { hpx: sz.hpx, wpx: sz.wpx, k: sz.k, lw: sz.lw, font: sz.font, base: b, ry: cam.ry(x, y) });
       if (!st.visible) continue;
       items.push({ ry: st.ry, st, paint: () => { shape(ctx, ob.kind, b, sz); st.drawn = true; } });
+      if (lp) { // the base detail: alpha from the distance, the three pieces drawn with the hero's convention at the depth of their own feet
+        const al = t.detailAlways ? 1 : t.detailNever ? 0 : baseAlpha(d, lp), ya = (o.objects.yaw || 0) * Math.PI / 180, cx = Math.sin(ya), cy = Math.cos(ya); st.alpha = al; st.detail = [];
+        if (al > 0) for (const pc of DETAIL.pieces) {
+          const x2 = x + (pc.side * cy + pc.front * cx) * tp, y2 = y + (-pc.side * cx + pc.front * cy) * tp, i2 = E.stage.cellOf(S, x2, y2); if (i2 < 0) continue;
+          const f2 = E.stage.feetH(S, i2), b2 = cam.p(x2, y2, f2), s2 = sizeAt(cam, tp, pc.hH, KINDS[pc.kind].wH, x2, y2, f2); s2.hH = pc.hH;
+          const vis2 = t.ignoreHidden || t.pieceIgnoreHidden ? true : ownGround(b2, i2), ds = { kind: pc.kind, visible: vis2, drawn: false }; st.detail.push(ds); if (!vis2) continue; // the rule of S4a for every piece: a base that is not on its own tile in the image is not drawn (MUTATION pieceIgnoreHidden: drawn anyway)
+          items.push({ ry: cam.ry(x2, y2), paint: () => { ctx.save(); ctx.globalAlpha = al; shape(ctx, pc.kind, b2, s2, false); ctx.restore(); ds.drawn = true; } });
+        }
+      }
     }
     if (o.hero && E.stage) { const ry = cam.ry(o.hero.x, o.hero.y); items.push({ ry: t.heroAlwaysTop ? Infinity : ry, paint: () => E.stage.drawHero(ctx, cam, o.hero) }); } // (MUTATION heroAlwaysTop: the hero last, as before S4a) a tie: the hero is pushed last and Array.sort is stable, so it stays on top
     items.sort((p, q) => p.ry - q.ry);
@@ -5535,7 +5574,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     o.objects.stats = stats;
   }
 
-  E.objects = { KINDS, KIND_NAMES, LW0, FONT0, sizeAt, draw };
+  E.objects = { KINDS, KIND_NAMES, LW0, FONT0, LANDMARK, DETAIL, landmarkH, baseAlpha, landmarkParams, sizeAt, draw };
 })(window.EVO = window.EVO || {});
 
 /* STAGE VOLUMES (mode 3, PR S4b; `E.volumes.apply(S, opts)`; docs/crystallizers/03-stage/README.md "S4b"): DECLARED volumes (rectangles of tiles, flat roofs) raised on tiles that are ALREADY blocked, in hero heights H: [{ x, y, w, d, hH }], x / y = the integer MIN corner in MAP coordinates (the window offset S.ox / S.oy is subtracted here), w x d in tiles.
@@ -6223,7 +6262,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
           /* S4a: the declared billboards (switch "Stage objects"), MAP coordinates (tile centres), hH in hero heights, the format of the future `billboards` entry of the treatment. All on walkable tiles outside the 3 columns of every transition and at least 2 tiles (Chebyshev) from their bottom / top tiles (tools/ui/test_stage_objects_ui.js checks it).
              Hero start (61.5, 117.5, room 17): (1) a 1 H banner 3 tiles to its side at the same depth and on the same terrace (x 58.5; the tiles at x 62-63 are within 2 tiles of the transition and x 64.5 is in a pit hidden behind the rim, measured) = the comparison rule; (2) a 3 H pillar in room 20, which fits the panel; (3, 4) two 2 H lamps flanking the 3-step transition next to the start (beyond its 3 columns); (5) a 3 H banner in room 5, about 7 H beyond the hero, whose top leaves the panel
              (the cut silhouette); the rest fill the other rooms (6 shrub room 6, 7 lamp room 27, 8 shrub on the other side of the start (x 66.5), 9 pillar room 10, the far, high one). */
-          objects: [{ kind: 'banner', x: 58.5, y: 117.5, hH: 1 }, { kind: 'pillar', x: 80.5, y: 121.5, hH: 3 }, { kind: 'lamp', x: 59.5, y: 119.5, hH: 2 }, { kind: 'lamp', x: 63.5, y: 119.5, hH: 2 }, { kind: 'banner', x: 45.5, y: 132.5, hH: 3 }, { kind: 'shrub', x: 20.5, y: 128.5, hH: 1.5 }, { kind: 'lamp', x: 87.5, y: 135.5, hH: 2 }, { kind: 'shrub', x: 66.5, y: 117.5, hH: 1.5 }, { kind: 'pillar', x: 62.5, y: 142.5, hH: 2 }],
+          objects: [{ kind: 'banner', x: 58.5, y: 117.5, hH: 1 }, { kind: 'pillar', x: 80.5, y: 121.5, hH: 3 }, { kind: 'lamp', x: 59.5, y: 119.5, hH: 2 }, { kind: 'lamp', x: 63.5, y: 119.5, hH: 2 }, { kind: 'banner', x: 45.5, y: 132.5, hH: 3 }, { kind: 'shrub', x: 20.5, y: 128.5, hH: 1.5 }, { kind: 'lamp', x: 87.5, y: 135.5, hH: 2 }, { kind: 'shrub', x: 66.5, y: 117.5, hH: 1.5 }, { kind: 'pillar', x: 62.5, y: 142.5, hH: 2 }, { kind: 'landmark', x: 55.5, y: 135.5, hFar: 1.5, hNear: 3, dFar: 8, dNear: 2 }],
+          /* S4c: the LANDMARK (last entry of `objects`, same switch): the far end of the LAST room of the chain (room 5, x 34-56, y 126-137: 160 walkable tiles, 23 x 12), at (55.5, 135.5) = the east end of its far side. The central depth axis (x ~ 45) does not work: from there the room is too shallow for a hero at 8 H or 6 H (16 / 12 tiles) and
+             the base is hidden from the 8 H positions of every candidate near the axis; at (55, 135) the hero positions (42.5, 126.5) at 8 H, (47.5, 126.5) at 6 H, (50.5, 129.5) at 4 H and (51.5, 134.5) at 2 H all see its base (measured with the pick buffer: tools/ui/test_stage_landmark_ui.js). Walkable, outside the 3 columns of every transition, >= 2 tiles from their bottom / top tiles. */
           /* S4b: the declared VOLUMES (switch "Stage volumes"), MAP coordinates, x / y = the integer MIN corner, w x d tiles, hH in hero heights above the nearest walkable ground (a 0.25 H grid). All on tiles that are already blocked, none within 2 tiles of a transition (the nearest blocked tile is 3 tiles away, at (22, 136), and any volume there hides walkable tiles: the limit case is tested in tools/test_volumes.js instead),
              and no walkable tile loses more than 25 % of its pixels to a volume at Cam 6 yaw 180 (worst measured: 16.9 %, partial lateral occlusion by perspective next to a volume); with the other cameras of mode 3 the volumes can hide tiles (measured at yaw 0, 90 and 270) (tools/ui/test_stage_volumes_ui.js measures it against the pick buffer). Chosen by that measurement: (1) a 1 H low block on the far flank, south of the footprint; (2) a 3 H column 2 x 2 on the same flank beside the south edge of the rooms; (3) a 2 H wall of 6 tiles along it (the three heights 1 / 2 / 3 H side by side on the far flank; the east flank was tried first and its volumes camouflage against the high rock there); (4) a 1 H block in the hole between rooms (a
              closure-interior tile of the border, no profile); (5) a 2 H block in the exterior beyond the border (to see the island / quebrada interaction). */
@@ -7121,7 +7162,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const sg = E.stage, tp = st.stage.tilesPerH, [, h] = stageDims();
     if (st.follow && st.fitSc > 0 && h > 0) { st.zoom = st.trackZoom = sg.scale(h, E.stageTest && E.stageTest.noHeroFrac ? sg.DEF.heroFrac : st.stage.heroFrac /* MUTATION noHeroFrac: the distance not coupled to heroFrac */, tp) / st.fitSc; st.panX = st.panY = 0; } // the tracking owns the zoom and the pan (a manual one suspends it)
     const w = heroWin(); O.hero = { x: w.x, y: w.y, feet: heroFeet(), hTiles: tp, wTiles: sg.HERO_W * tp };
-    if (objectsOn()) O.objects = { list: st.stage.objectList, tilesPerH: tp }; // S4a: the declared billboards (map coordinates); drawn in ONE depth order with the hero
+    if (objectsOn()) O.objects = { list: st.stage.objectList, tilesPerH: tp, yaw: baseYaw() }; // S4a: the declared billboards (map coordinates); drawn in ONE depth order with the hero
   }
   function stageSuspend() { if (!st.follow) return; if (!st.focus && S && st.hero) stageFocus(view()); st.follow = false; syncStageUI(); } // the camera stays where it is: the frozen focus plus the manual deltas
   function syncStageUI() { const sb = $('#stageBorder'); if (sb && !(E.modesTest && E.modesTest.skipBorderSelectSync)) sb.value = st.stage.border || 'off'; /* S2 follow-up: dac_stage pressed again from inside the window goes through applyScenario (no winExit) and resets st.stage.border: the select must follow (MUTATION skipBorderSelectSync) */ const so = $('#t-stageObjects'); if (so) so.checked = st.stage.objects === 'on'; /* S4a */ const sv = $('#t-stageVolumes'); if (sv) sv.checked = st.stage.volumes === 'on'; /* S4b */ const t = $('#t-stageFollow'); if (t) t.checked = st.follow; const tu = $('#t-stageUnits'); if (tu) tu.checked = st.stageUnits; for (const k of ['tilesPerH', 'heroFrac']) { const i = $('#s-' + k), o = $('#o-' + k); if (i) i.value = st.stage[k]; if (o) o.textContent = st.stage[k]; } }
@@ -7176,6 +7217,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     raf = 0; st.draws = (st.draws || 0) + 1; // (a counter for the tests: the frame at rest of a pan is drawn asynchronously)
     if (S && S.pocket && S.pocketYaw !== baseYaw()) S = null; // a pocket is composed for ONE camera axis: any way of changing the camera (preset, scenario, mode, manifest, Stage preset) that changes the base yaw rebuilds it (a world shape does not depend on the yaw)
     if (S && S.stageBorder && (S.stageBorder.yaw !== baseYaw() || S.stageBorder.tilesPerH !== st.stage.tilesPerH)) S = null; // the border depends on the camera axis (the camera side) and on the unit: a preset change or a new unit rebuilds it
+    if (S && E.objectsTest && E.objectsTest.rebuildOnMove) S = null; // (MUTATION rebuildOnMove, tests only: the shape rebuilt on every frame, which the hero's move must never do)
     if (S && S.stageVolumes && S.stageVolumes.tilesPerH !== st.stage.tilesPerH) S = null; // the roofs are measured in H: a new unit rebuilds them
     P.pocketYaw = baseYaw();
     const raw = packs[st.pack].pack, fl = E.hasFloors(raw); // a floors package (crystallizer 5): the shape is the one of the selected layer (the exterior in the stack and cutaway views)
