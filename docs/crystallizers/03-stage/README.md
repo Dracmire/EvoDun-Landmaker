@@ -325,6 +325,38 @@ First of three PRs of the CORE of the "mock T" plan (C1 orientation, C2 rule of 
 - The X rule uses a blocked-tile band behind the room; at the edge of the map (room 44 at y = 0) there is no band.
 - The hero's room is read from the tile under the hero: on a ramp tile or a nowalk tile the yaw keeps the last room's.
 
+### C2 as built: planes by room (`src/planes.js`; switch "Planes by room" in mode 3 with a window; `node tools/test_planes.js`, `tools/ui/test_stage_planes_ui.js`, `tools/ui/c2_shots.js`)
+Second of three PRs of the CORE of the "mock T" plan: features 2 (planes), 3 (closing wall) and 4 (frame: the columns). The rule is applied for the CURRENT room (the hero's) with the yaw of C1.
+- **Classification per column** (the columns are perpendicular to the view axis; the view frame is turned to the camera of the room): for the tiles OUTSIDE the room's footprint, inside `S` and inside a ring of `R` tiles around the footprint, that are NOT walkable (any room) and not void: **BACK** = beyond the far end of the room in that column, **FRONT** = before the near end, **SIDE** = in a column the room does not cover (or between its near and far ends). A tile in two classes: BACK > SIDE > FRONT (the per-column rule gives one). Walkable tiles are never classified.
+- **What is done** (the mechanism of S2 / S4b: `E.roomTypes.insertLevels`; lowering is also a `moves` entry, so there is NO new mechanism in the shared code): BACK -> the closing WALL = the first `wallDepth` tiles of the back band raised to the highest walkable ground of the room + `wallH` H; SIDE -> 1 x 1 COLUMNS of `colH` H over the local ground of the room's edge, one every `colEvery` rows along the axis, on the first non-walkable tile beside the room on each side (over void: none, counted in `skipped.void`); FRONT -> the tiles of the first `frontDepth` tiles of the front band that are above the lowest walkable ground of the room are lowered to that ground - `frontDrop` H. The walkable footprint never changes height (tested on the 8 rooms).
+- **ONE table of hypotheses (`E.planes.HYP`, for S6):** R 8 tiles, wallDepth 2 tiles, wallH 3 H, colH 3 H, colEvery 3 rows, frontDepth 4 tiles, frontDrop 0.5 H (the H are multiplied by `tilesPerH`).
+- **Table (real map, the P of `dac_stage`, every room with its C1 yaw; `tools/test_planes.js` keeps it stable).** Classes = tiles classified in the ring; effects = tiles actually changed:
+
+| room | yaw | BACK | SIDE | FRONT | wall | columns | front lowered |
+|---|---|---|---|---|---|---|---|
+| 17 | 0 | 189 | 215 | 74 | 42 | 7 | 27 |
+| 10 | 270 | 32 | 240 | 134 | 10 | 9 | 56 |
+| 20 | 270 | 290 | 276 | 191 | 44 | 10 | 64 |
+| 27 | 180 | 437 | 247 | 351 | 84 | 4 | 69 |
+| 6 | 90 | 119 | 312 | 508 | 17 | 13 | 127 |
+| 5 | 90 | 191 | 261 | 42 | 30 | 13 | 27 |
+| 14 | 180 | 315 | 366 | 300 | 44 | 11 | 70 |
+| 44 | 90 | 0 | 230 | 718 | 0 | 9 | 111 |
+
+  Room 14 (Z, yaw 180): a wall behind 22 of its 24 columns, BACK to the south (the high terrace), FRONT to the north, SIDE on the east (the west is void). `shots/c2/mockt_z14_clases.png` shows it from above.
+- **Switch "Planes by room"** (`st.stage.planes`, manifest `viewer.stage.planes` written only when on, inert at load): ON in `dac_stage` and in the two one-room examples, off elsewhere; toggling REBUILDS the shape (the planes are terrain), also when the hero crosses to another room or the yaw changes (a cut: 0.9 s headless at 17 -> 20). It combines with the island / quebrada border (default off). The declared lists of `dac_stage` (volumes, objects, landmark) are NOT switched on by the planes; they were measured at yaw 180 (see C1).
+- **Test-only flag** `window.EVO_NO_ORIENT` also starts the examples with the planes off (the old stage tests measure `S`).
+
+#### Para polish (found in C2, not fixed here)
+- **Room 44 has no wall:** with the yaw of C1 (90) the back of the room is void and the rule only classifies tiles that are not void; the closing wall needs the orientation rule to put solid ground behind, or a void-aware wall.
+- **Columns over void are not placed** (14 of room 6, 12 of room 14, 48 of room 44); the west side of room 14 is void along its whole length, so it has columns only on the east.
+- The wall is FLAT at the highest ground of the room + 3 H; with a high terrace far from the wall the wall reads low, and it ignores the terrain of other rooms behind it (walkable tiles of other rooms are never touched, so a wall can be interrupted by them).
+- The new levels use the Pocket decoration palette (dark, desaturated): not tuned.
+- The columns take the height of the local edge of the room; on a steep edge they look irregular.
+- The FRONT lowering exposes walls of the neighbouring blocked terrain; the amount (0.5 H below the lowest ground) is a hypothesis.
+- A crossing between rooms rebuilds the shape each time (a cut); caching one shape per room would remove the wait.
+- The classification ring (R 8) and the bands are Chebyshev squares around the footprint; a diagonal room (14) gets a stepped wall.
+
 ## 9. Known limits and open questions
 
 - The viewer cannot make the art; it can only place it.
