@@ -357,6 +357,35 @@ Second of three PRs of the CORE of the "mock T" plan: features 2 (planes), 3 (cl
 - A crossing between rooms rebuilds the shape each time (a cut); caching one shape per room would remove the wait.
 - The classification ring (R 8) and the bands are Chebyshev squares around the footprint; a diagonal room (14) gets a stepped wall.
 
+### C3 as built: props by room (`src/props.js`; switch "Props by room" in mode 3 with a window; `node tools/test_props.js`, `tools/ui/test_stage_props_ui.js`, `tools/ui/c3_shots.js`)
+Third PR of the CORE of the "mock T" plan: features 4 (torches along the axis) and 5 (the goal at the back). BILLBOARDS ONLY (the objects of S4a / S4c): the shape `S` is never rebuilt for them, no terrain height changes. Generated for the current room (the hero's) with the yaw of C1, redone when the hero crosses.
+- **Path:** the walkable route (BFS over the room's tiles of the walking graph, in the largest connected piece of the room) from a START to an END. Room with an entry AND an exit gate: from the room tile nearest the entry gate to the one nearest the exit gate. First / last room and a window of one room: from the end nearest the camera (smallest view depth, nearest the middle across) to the goal tile.
+- **Torches:** `lamp` 1.2 H, a pair on both sides of the path, `torchSide` H from its axis along the normal of the local tangent, one pair every `torchEvery` path steps (the first and last 2 steps are skipped). Only on walkable tiles of the room, never on a step / ramp / gate tile nor within 1 tile of them; one without a visible base is not drawn (the S4a rule).
+- **Goal:** the last room of the window and a window of one room: a `landmark` (S4c, default parameters) on the highest terrace of the BACK half of the room (the half with the larger view depth), at the tile of that terrace nearest the column of the path's start; S4c rules (not on a transition, >= 2 tiles from its bottom / top; if no tile fits, >= 1 is taken, and if none, the farthest reachable tile). **Door pillars:** every room with an exit gate to the next room of the list gets 2 `pillar` of 2 H at both sides of that gate (`gateSide` tiles beyond its extent across the view); a side whose tile is not walkable and free in the room is omitted.
+- **ONE table of hypotheses (`E.props.HYP`, for S6):** torchSide 1 H, torchEvery 4 tiles, torchH 1.2 H, gatePillarH 2 H, gateSide 2 tiles.
+- **Table (real map, the P of `dac_stage`; `tools/test_props.js` keeps it stable):**
+
+| room | yaw | path steps | torches | pillars | goal |
+|---|---|---|---|---|---|
+| 17 | 0 | 21 | 7 | 1 | - |
+| 10 | 270 | 1 | 0 | 1 | - |
+| 20 | 270 | 8 | 1 | 1 | - |
+| 27 | 180 | 24 | 9 | 0 | - |
+| 6 | 90 | 67 | 23 | 1 | - |
+| 5 | 90 | 24 | 7 | 0 | yes (back half, terrace 2) |
+| 14 | 180 | 41 | 13 | 0 | yes (back half, terrace 3) |
+| 44 | 90 | 61 | 26 | 0 | yes (back half, terrace 4) |
+
+- **Switch "Props by room"** (`st.stage.props`, manifest `viewer.stage.props` written only when on, inert at load): ON in `dac_stage` and in the two one-room examples; independent of the "Stage objects" switch (the hand-declared lists of `dac_stage` stay off by default and, when on, are drawn together with the props in one depth order). The test-only flag `window.EVO_NO_ORIENT` also starts the examples with the props off.
+
+#### Para polish (found in C3, not fixed here)
+- Rooms 10 and 20 are tiny: the entry and exit gates leave a 1-8 step path and 0-1 torches.
+- Room 27 has no walking edge to room 6, so it has no exit gate and no door pillars; room 6 has no entry gate (its path starts at the near end).
+- The path is a plain shortest BFS path (it jogs along terrace edges); a smoothed centre line would place the torches more evenly. A torch whose side tile is not walkable or is next to a transition is omitted (a pair may be a single torch).
+- A pillar side that falls outside the room (a gate at the room's edge) is omitted: rooms 17, 10, 20 and 6 get 1 pillar instead of 2.
+- The landmark's base detail (S4c) and the torches are separate lists with their own visibility; they may overlap near the goal.
+- The goal height is the S4c smoothstep of the hero's distance; in room framing (no hero walking) it keeps the distance of the hero's standing tile.
+
 ## 9. Known limits and open questions
 
 - The viewer cannot make the art; it can only place it.
