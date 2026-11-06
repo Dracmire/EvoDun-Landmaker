@@ -292,6 +292,39 @@ What exists for the Stage: the camera bank (D7) and the Art contract MVP (`node 
    foreground conifers. Low orthographic camera vs emulated perspective: almost no difference (D4). The closest so far.
    The real Diorama pocket seen from a low camera does not work (it was designed for Iso).
 
+### C1 as built: orientation by room (`src/orient.js`; switch "Orientation by room" and select "Framing" in mode 3 with a window; `node tools/test_orient.js`, `tools/ui/test_stage_orient_ui.js`, `tools/ui/c1_shots.js`)
+First of three PRs of the CORE of the "mock T" plan (C1 orientation, C2 rule of planes, C3 frame and goal); the details go to a polish pass. Feature 1 of the mock: the camera looks along the axis of the room.
+- **Direction per room (P3), from the geometry of the window and the order of its list, NOT from the DAC type.** (1) AXIS of the walk = from the entry gate (the previous room of the list) to the exit gate (the next room); a gate = the centroid of the walking edges between two consecutive rooms (the same walking graph as the rooms layer). In the first / last room: from the gate toward the HIGHEST part of the room (the centroid of the tiles above the 75th height percentile); with no gate (a window of one room): from the LOWEST part (below the 25th percentile) to the highest. (2) LENGTH along the axis / WIDTH across it (the extent of the walkable tiles on each): ratio >= 1.5 -> **Z**, <= 1 / 1.5 -> **X**, in between -> **Hub**. `E.orient.RATIO = 1.5` is a HYPOTHESIS, one constant (as are `BLOCK_W`, `BAND`, the percentiles). (3) YAW in multiples of 90 degrees (the camera of Cam 6 sits at (sin yaw, cos yaw) in map x / y, as in `border.js`): Z and Hub = the camera looks ALONG the axis, the exit (or the high part) at the BACK; X = the camera looks ACROSS the axis, the side with the higher mean height (plus 0.5 x the share of blocked tiles in an 8-tile band behind the room) at the back.
+- **The table (real map, the P of `dac_stage`: Balanced types, terraces 5; `tools/test_orient.js` keeps it stable).**
+
+| room | direction | length / width | ratio | yaw | axis from |
+|---|---|---|---|---|---|
+| 17 (first) | Hub | 25.5 / 21.3 | 1.20 | 0 | exit gate -> highest part |
+| 10 | Hub | 16.2 / 17.6 | 0.92 | 270 | entry gate -> exit gate |
+| 20 | Hub | 30.4 / 31.5 | 0.97 | 270 | entry gate -> exit gate |
+| 27 | Hub | 30.6 / 25.4 | 1.21 | 180 | entry gate -> highest part |
+| 6 | Z | 63.1 / 34.6 | 1.83 | 90 | exit gate -> highest part (no gate with 27 in the walking graph) |
+| 5 (last) | X | 14.3 / 22.8 | 0.63 | 90 | entry gate -> highest part |
+| 14 (window of one room) | Z | 39.4 / 18.8 | 2.09 | 180 | lowest -> highest part |
+| 44 (window of one room) | Hub | 96.4 / 70.3 | 1.37 | 90 | lowest -> highest part |
+
+  Four of the six rooms of `dac_stage` are Hub (ratios 0.92-1.21: nearly square rooms), one Z, one X: the three directions occur, the table is not degenerate.
+- **The yaw of the room of the hero** is the camera yaw (a CUT when the hero crosses to another room, also with Previous / Next room; the smooth transition is for polish). Everything that depends on the yaw (the border) is rebuilt by the guard that already exists for a yaw change (1-2 s headless). The table is computed lazily from `S` and dropped with it (nothing in `S` changes). Switch off (or a legacy example) = the example yaw, as before.
+- **Framing (select "Framing": Hero / Room).** Hero = the follow camera of S1 (default; `heroFrac` 0.14, 53.69 px per tile at tilesPerH 2: unchanged). Room = the same Cam 6 (pitch, FOV) centred on the room's box at its mean height, with the largest zoom at which the 8 corners of the box (at its lowest and highest tile) fit the panel with a 6 % margin (`FRAME_MARGIN`); the hero stays drawn. Measured: the 8 rooms fit (the tests).
+- **Technique.** The default of mode 3 is now Box (`techs` = Box, B). The window examples declare `tech: 'box'`; the legacy examples (`x4_stage`, `diorama31_stage`) declare `tech: 'B'`, so they do not change (the table of `src/modes.js` accepts a technique per example through `sc.tech`).
+- **New examples:** `mockt_z14` and `mockt_x44` (a window of ONE room, no declared volumes or objects). Shots in `shots/c1/`.
+- **Manifest:** `viewer.stage.orient` ("on" written only when on) and `viewer.stage.frame` ("room" written only then), validated in `fields.js`, inert at load (the window session ends).
+- **Test-only flag** `window.EVO_NO_ORIENT` (set by `tools/ui/common.js`, like `EVO_NO_MODES`; `open({ orient: true })` is the real behaviour): the window examples start with the orientation off, so the stage tests written for the example yaw (180) and the hero framing run unchanged.
+
+#### Para polish (found in C1, not fixed here)
+- **The declared lists of `dac_stage` (S4a objects, S4b volumes, S4c landmark) were MEASURED at yaw 180** (occlusion, visibility of the landmark base, the placement of the volumes). With the orientation on, rooms 6 and 5 (yaw 90), 10 and 20 (270) and 17 (0) see them from another side: those invariants hold only at yaw 180.
+- `P.rampPreferFill` / the S3 choice (the ramps rise AWAY from the camera at yaw 180) is a carving decision that does not follow the yaw per room.
+- The yaw change is a CUT; a smooth rotation between rooms is polish. Crossing rooms with the border on rebuilds the shape each time (1-2 s).
+- Room 44 (Hub, yaw 90): the rule puts the void side behind it (the axis lowest -> highest part points west); for a window of one room there is no gate to orient by, and a wide room is ambiguous.
+- Room 6 has no walking edge with 27 in the window (no entry gate), so it is oriented as a first room.
+- The X rule uses a blocked-tile band behind the room; at the edge of the map (room 44 at y = 0) there is no band.
+- The hero's room is read from the tile under the hero: on a ramp tile or a nowalk tile the yaw keeps the last room's.
+
 ## 9. Known limits and open questions
 
 - The viewer cannot make the art; it can only place it.
