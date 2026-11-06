@@ -742,7 +742,7 @@
     const sg = E.stage, tp = st.stage.tilesPerH, [, h] = stageDims();
     if (st.follow && st.fitSc > 0 && h > 0) { st.zoom = st.trackZoom = sg.scale(h, E.stageTest && E.stageTest.noHeroFrac ? sg.DEF.heroFrac : st.stage.heroFrac /* MUTATION noHeroFrac: the distance not coupled to heroFrac */, tp) / st.fitSc; st.panX = st.panY = 0; } // the tracking owns the zoom and the pan (a manual one suspends it)
     const w = heroWin(); O.hero = { x: w.x, y: w.y, feet: heroFeet(), hTiles: tp, wTiles: sg.HERO_W * tp };
-    if (objectsOn()) O.objects = { list: st.stage.objectList, tilesPerH: tp }; // S4a: the declared billboards (map coordinates); drawn in ONE depth order with the hero
+    if (objectsOn()) O.objects = { list: st.stage.objectList, tilesPerH: tp, yaw: baseYaw() }; // S4a: the declared billboards (map coordinates); drawn in ONE depth order with the hero
   }
   function stageSuspend() { if (!st.follow) return; if (!st.focus && S && st.hero) stageFocus(view()); st.follow = false; syncStageUI(); } // the camera stays where it is: the frozen focus plus the manual deltas
   function syncStageUI() { const sb = $('#stageBorder'); if (sb && !(E.modesTest && E.modesTest.skipBorderSelectSync)) sb.value = st.stage.border || 'off'; /* S2 follow-up: dac_stage pressed again from inside the window goes through applyScenario (no winExit) and resets st.stage.border: the select must follow (MUTATION skipBorderSelectSync) */ const so = $('#t-stageObjects'); if (so) so.checked = st.stage.objects === 'on'; /* S4a */ const sv = $('#t-stageVolumes'); if (sv) sv.checked = st.stage.volumes === 'on'; /* S4b */ const t = $('#t-stageFollow'); if (t) t.checked = st.follow; const tu = $('#t-stageUnits'); if (tu) tu.checked = st.stageUnits; for (const k of ['tilesPerH', 'heroFrac']) { const i = $('#s-' + k), o = $('#o-' + k); if (i) i.value = st.stage[k]; if (o) o.textContent = st.stage[k]; } }
@@ -797,6 +797,7 @@
     raf = 0; st.draws = (st.draws || 0) + 1; // (a counter for the tests: the frame at rest of a pan is drawn asynchronously)
     if (S && S.pocket && S.pocketYaw !== baseYaw()) S = null; // a pocket is composed for ONE camera axis: any way of changing the camera (preset, scenario, mode, manifest, Stage preset) that changes the base yaw rebuilds it (a world shape does not depend on the yaw)
     if (S && S.stageBorder && (S.stageBorder.yaw !== baseYaw() || S.stageBorder.tilesPerH !== st.stage.tilesPerH)) S = null; // the border depends on the camera axis (the camera side) and on the unit: a preset change or a new unit rebuilds it
+    if (S && E.objectsTest && E.objectsTest.rebuildOnMove) S = null; // (MUTATION rebuildOnMove, tests only: the shape rebuilt on every frame, which the hero's move must never do)
     if (S && S.stageVolumes && S.stageVolumes.tilesPerH !== st.stage.tilesPerH) S = null; // the roofs are measured in H: a new unit rebuilds them
     P.pocketYaw = baseYaw();
     const raw = packs[st.pack].pack, fl = E.hasFloors(raw); // a floors package (crystallizer 5): the shape is the one of the selected layer (the exterior in the stack and cutaway views)

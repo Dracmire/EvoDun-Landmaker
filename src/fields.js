@@ -234,6 +234,16 @@
   E.VIEWER_KEYS = ['preset', 'rooms', 'cake', 'terraces', 'roomsMinCore', 'rRadius', 'minPlateau', 'camera', 'curves', 'wallPass', 'wallExtrude', 'wallStrata', 'wallColumn', 't2Spacing', 't2Rows', 't2Group', 't2Jitter', 'mode', 'dacAuto', 'dacShow', 'dacView', 'anchors', 'anchorH', 'chainExtra', 'ascCut', 'ascGate', 'roomRule', 'cakeCut', 'dioChain', 'dioProto', 'panCache', 'sliced', 'stage']; // the optional `viewer` block of the manifest
   E.VIEWER_PROTOS = ['cima-leaf', 'cima-corridor', 'arena-leaf', 'arena-corridor', 'isla-leaf', 'isla-corridor', 'quebrada', 'mirador']; // the ids of the prototypes of src/modes.js (tools/test_diocorr.js checks that they agree)
   E.VIEWER_MODES = ['terrain', 'rooms', 'stage', 'curves', 'floors', 'macroform']; // the ids of src/modes.js (tools/test_modes.js checks that they agree)
+  /* S4c: the parameters of a `landmark` billboard entry travel in the entry itself: hFar, hNear, dFar, dNear in H, numbers > 0, hFar <= hNear and dNear < dFar (an absent one takes the default of src/objects.js). Returns an error text or null; other kinds are not checked here. */
+  E.checkLandmark = (q) => {
+    if (q.kind !== 'landmark') return null;
+    const D = { hFar: 1.5, hNear: 3, dFar: 8, dNear: 2 };
+    for (const k of Object.keys(D)) if (q[k] !== undefined && !(typeof q[k] === 'number' && isFinite(q[k]) && q[k] > 0)) return k + ' must be a number > 0';
+    const v = (k) => (q[k] !== undefined ? q[k] : D[k]);
+    if (v('hFar') > v('hNear')) return 'hFar must be <= hNear';
+    if (!(v('dNear') < v('dFar'))) return 'dNear must be < dFar';
+    return null;
+  };
   E.parseManifest = function (json) {
     if (!json || (json.format !== 'evodun-pack/0.2' && json.format !== 'evodun-pack/0.3')) throw new Error('Manifest: expected format "evodun-pack/0.3" (or 0.2, without stake and objectives).');
     const known = new Set([...E.ROLES.map((r) => r[0]), ...E.RESERVED_ROLES]), roles = {}, notes = [];
@@ -276,6 +286,10 @@
         if (g.border !== undefined && !['off', 'island', 'quebrada'].includes(g.border)) bad('border ("off", "island" or "quebrada")');
         if (g.objects !== undefined && !['off', 'on'].includes(g.objects)) bad('objects ("off" or "on")');
         if (g.volumes !== undefined && !['off', 'on'].includes(g.volumes)) bad('volumes ("off" or "on")');
+        if (g.billboards !== undefined) { // S4c: the future `billboards` entry of the treatment (inert at load: S5 gives it effect); the landmark entries are validated
+          if (!Array.isArray(g.billboards)) bad('billboards (a list)');
+          g.billboards.forEach((q, k) => { const m = q && typeof q === 'object' ? E.checkLandmark(q) : 'an entry must be an object'; if (m) bad('billboards[' + k + '] (' + m + ')'); });
+        }
       }
       if (v.sliced !== undefined && typeof v.sliced !== 'boolean') throw new Error('Manifest: viewer.sliced must be true or false (absent = false).');
       if (v.dioProto !== undefined && !E.VIEWER_PROTOS.includes(v.dioProto)) throw new Error('Manifest: viewer.dioProto must be one of ' + E.VIEWER_PROTOS.join(', ') + ' (absent = none).');
