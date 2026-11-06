@@ -225,6 +225,12 @@ const zoneImg = (extra) => rgba(W, H, (x, y) => {
       let no = 0; for (const bad of ['yes', true, 1, null, 'On']) { try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { stage: { objects: bad } } }); } catch (e) { if (/viewer\.stage\.objects/.test(e.message)) no++; } }
       ok('manifest viewer block: an unknown stage.objects is rejected with a clear error', no === 5, no);
     }
+    { // stage volumes (PR S4b): "off" | "on", round trip, a clear error, absent = fine
+      const vbv = { mode: 'stage', stage: { volumes: 'on' } }, rtv = E.parseManifest(JSON.parse(JSON.stringify(E.buildManifest({ name: 'v', roles: {}, viewer: vbv }))));
+      ok('manifest viewer block: stage.volumes survives a round trip', rtv.viewer.stage.volumes === 'on', JSON.stringify(rtv.viewer));
+      let nv = 0; for (const bad of ['yes', true, 1, null, 'On']) { try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { stage: { volumes: bad } } }); } catch (e) { if (/viewer\.stage\.volumes/.test(e.message)) nv++; } }
+      ok('manifest viewer block: an unknown stage.volumes is rejected with a clear error', nv === 5, nv);
+    }
     { // dacShow (DAC mode 2 "Show framing", docs/ui-modes.md U11): a closed list, round trip, a clear error
       const rt3 = E.parseManifest(JSON.parse(JSON.stringify(E.buildManifest({ name: 'v', roles: {}, viewer: { mode: 'rooms', dacAuto: true, dacShow: 'diorama' } }))));
       ok('manifest viewer block: dacShow survives a round trip', rt3.viewer.dacShow === 'diorama' && rt3.viewer.dacAuto === true, JSON.stringify(rt3.viewer));
