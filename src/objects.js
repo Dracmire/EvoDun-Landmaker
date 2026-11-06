@@ -5,7 +5,7 @@
    (A segment that is vertical in the 3D projection is about 8 % shorter than the hero sprite at pitch 25 degrees: the volumes of S4b are real geometry and follow that projection; the billboards do not.) The pack's `h` is NOT read: in data/shrine_pier_x4.json it is the terrain elevation of the landmark platform (tools/derive_shrine_pier_x4.py), not an object height.
    BASE = the ground of the tile under (x, y) (E.stage.feetH). VISIBILITY = the Box pick render, like the contract (`ownGround`): an object whose base is not on its own tile in the image (a higher terrain in front, or outside the panel) is not drawn.
    ORDER = ONE depth-sorted list with the hero (cam.ry, larger = nearer the camera): an object nearer than the hero is painted over it; the hero no longer comes last when the objects are on. Tall objects may leave the panel at the top: expected (a cut silhouette).
-   Test hooks (`E.objectsTest`, tests only, undefined in normal use): constSize, constStroke, tilesNotH, ignoreHidden, heroAlwaysTop; S4c: noDistance, hardStep, detailAlways, detailNever. */
+   Test hooks (`E.objectsTest`, tests only, undefined in normal use): constSize, constStroke, tilesNotH, ignoreHidden, heroAlwaysTop; S4c: noDistance, hardStep, detailAlways, detailNever, pieceIgnoreHidden. */
 (function (E) {
   'use strict';
   const LW0 = 1.6, FONT0 = 11; // the line width of the hero sprite and a base font size, both multiplied by the depth scale k
@@ -22,12 +22,12 @@
   /* S4c, THE LANDMARK (docs/crystallizers/03-stage/README.md "S4c"): an entry `{ kind: 'landmark', x, y, hFar, hNear, dFar, dNear }` of the objects list (the format of the future `billboards` entry), the apparent height in H changes with the ground distance d (in H) between the hero's feet and its base:
      h(d) = hFar + (hNear - hFar) * smoothstep(t), t = clamp((dFar - d) / (dFar - dNear), 0, 1). HYPOTHESES (variant C of v80, measured only in a mock, NOT in the viewer): hFar 1.5, hNear 3, dFar 8, dNear 2. It is a scale in the DRAWING: nothing touches the terrain or the shape. */
   const LANDMARK = { hFar: 1.5, hNear: 3, dFar: 8, dNear: 2 };
-  /* S4c, THE BASE DETAIL ("fragment" of v79 / v80), ONE table of HYPOTHESES for S6 to calibrate: it appears when d <= startMul * dNear (alpha 0) and is full at fullMul * dNear (smoothstep between); three placeholders stuck to the base, offsets in TILES ((side) perpendicular to the camera, (front) toward the camera). They are part of the landmark: they inherit its visibility, no entries of the list; NO real volume (a pedestal would depend on the volumes switch and on a blocked tile). */
-  const DETAIL = { startMul: 2, fullMul: 1.5, pieces: [{ kind: 'lamp', hH: 1.2, side: -1, front: 0 }, { kind: 'lamp', hH: 1.2, side: 1, front: 0 }, { kind: 'banner', hH: 0.6, side: 0, front: 1 }] };
+  /* S4c, THE BASE DETAIL ("fragment" of v79 / v80), ONE table of HYPOTHESES for S6 to calibrate: it appears when d <= startMul * dNear (alpha 0) and is full at fullMul * dNear (smoothstep between); three placeholders stuck to the base, offsets in H, multiplied by tilesPerH ((side) perpendicular to the camera, (front) toward the camera: 0.5 H = 1 tile at tilesPerH 2). They are part of the landmark (no entries of the list): they need its base to be visible AND, each one, the rule of S4a for its own base (not on its own tile in the image = not drawn); NO real volume (a pedestal would depend on the volumes switch and on a blocked tile). */
+  const DETAIL = { startMul: 2, fullMul: 1.5, pieces: [{ kind: 'lamp', hH: 1.2, side: -0.5, front: 0 }, { kind: 'lamp', hH: 1.2, side: 0.5, front: 0 }, { kind: 'banner', hH: 0.6, side: 0, front: 0.5 }] };
   const smoothstep = (t) => t * t * (3 - 2 * t), clamp01 = (v) => Math.max(0, Math.min(1, v));
   const landmarkParams = (ob) => { const p = Object.assign({}, LANDMARK); for (const k of Object.keys(p)) if (ob[k] > 0) p[k] = ob[k]; return p; };
   const landmarkH = (d, p) => { p = p || LANDMARK; return p.hFar + (p.hNear - p.hFar) * smoothstep(clamp01((p.dFar - d) / (p.dFar - p.dNear))); };
-  const baseAlpha = (d, p) => { p = p || LANDMARK; return smoothstep(clamp01((DETAIL.startMul * p.dNear - d) / ((DETAIL.startMul - DETAIL.fullMul) * p.dNear))); };
+  const baseAlpha = (d, p) => { p = p || LANDMARK; const a = smoothstep(clamp01((DETAIL.startMul * p.dNear - d) / ((DETAIL.startMul - DETAIL.fullMul) * p.dNear))); return a < 0.004 ? 0 : a; }; // an alpha under 0.004 (1 / 255) is not visible: it counts as 0 (at exactly d = startMul * dNear it was 2e-30 and three invisible pieces were painted)
 
   /* the size on screen of an object of hH hero heights standing on the ground point (x, y, feet) (window coordinates): the hero's convention */
   function sizeAt(cam, tilesPerH, hH, wH, x, y, feet) {
@@ -74,8 +74,9 @@
       if (lp) { // the base detail: alpha from the distance, the three pieces drawn with the hero's convention at the depth of their own feet
         const al = t.detailAlways ? 1 : t.detailNever ? 0 : baseAlpha(d, lp), ya = (o.objects.yaw || 0) * Math.PI / 180, cx = Math.sin(ya), cy = Math.cos(ya); st.alpha = al; st.detail = [];
         if (al > 0) for (const pc of DETAIL.pieces) {
-          const x2 = x + pc.side * cy + pc.front * cx, y2 = y - pc.side * cx + pc.front * cy, i2 = E.stage.cellOf(S, x2, y2); if (i2 < 0) continue;
-          const f2 = E.stage.feetH(S, i2), b2 = cam.p(x2, y2, f2), s2 = sizeAt(cam, tp, pc.hH, KINDS[pc.kind].wH, x2, y2, f2); s2.hH = pc.hH; const ds = { kind: pc.kind, drawn: false }; st.detail.push(ds);
+          const x2 = x + (pc.side * cy + pc.front * cx) * tp, y2 = y + (-pc.side * cx + pc.front * cy) * tp, i2 = E.stage.cellOf(S, x2, y2); if (i2 < 0) continue;
+          const f2 = E.stage.feetH(S, i2), b2 = cam.p(x2, y2, f2), s2 = sizeAt(cam, tp, pc.hH, KINDS[pc.kind].wH, x2, y2, f2); s2.hH = pc.hH;
+          const vis2 = t.ignoreHidden || t.pieceIgnoreHidden ? true : ownGround(b2, i2), ds = { kind: pc.kind, visible: vis2, drawn: false }; st.detail.push(ds); if (!vis2) continue; // the rule of S4a for every piece: a base that is not on its own tile in the image is not drawn (MUTATION pieceIgnoreHidden: drawn anyway)
           items.push({ ry: cam.ry(x2, y2), paint: () => { ctx.save(); ctx.globalAlpha = al; shape(ctx, pc.kind, b2, s2, false); ctx.restore(); ds.drawn = true; } });
         }
       }

@@ -2,10 +2,10 @@
    (1) the example declares it (10 entries) and it obeys the placement rules of S4a (walkable, outside the 3 columns of every transition, >= 2 tiles from their bottom / top tiles) in the last room of the chain (room 5); mutation landmarkOnStair;
    (2) the apparent height: with the hero at d = 10, 8, 6, 4, 2, 1 H (tilesPerH 2, 2.5, 3; the hero stands d * tilesPerH tiles from it) the landmark's pixel height / (tilesPerH * cam.sc * k at its depth) = landmarkH(d) within 1 %; mutation tilesNotH;
    (3) continuity and monotony over a sweep of d from 10 to 1 H in 0.25 H steps (never drops when approaching, <= 0.1 H per step, hFar / hNear plateaus); mutations noDistance, hardStep;
-   (4) the base detail: absent at 5 H, partial at 3.5 H, full at 3 H and nearer, three pieces drawn; mutations detailAlways, detailNever;
+   (4) the base detail: absent at 5 H, partial at 3.5 H, full at 3 H and nearer; each piece is drawn only if its own base is on its own tile in the pick buffer (an independent oracle), a case with the 3 pieces visible (a temporary landmark on flat ground) and the case of the example (the sign hidden behind the rim, the lamps drawn); mutations detailAlways, detailNever, pieceIgnoreHidden;
    (5) NOTHING REBUILDS S: 22 hero positions between 10 and 1 H and the switch on / off leave S and S.cache the same objects (S.fine / S.levelH hash equal); mutation rebuildOnMove; off = the identical pixels and the 9 S4a objects have the same stats with and without the landmark;
    (6) the common depth order (a landmark nearer than the hero covers it; heroAlwaysTop FAILS) and a hidden base is not drawn (ignoreHidden FAILS);
-   (7) the MEASURED TABLE d -> (px height, margin of the top over the panel's top edge, as a share of the panel height) at Cam 6 yaw 180, printed.
+   (7) the MEASURED TABLE (and the minimum margin of the top over every walkable tile of room 5 with the base visible: no top outside the panel at tilesPerH 2; LM_SCAN_ALL=1 also prints tilesPerH 2.5 and 3) d -> (px height, margin of the top over the panel's top edge, as a share of the panel height) at Cam 6 yaw 180, printed.
      NODE_PATH=$(npm root -g) node tools/ui/test_stage_landmark_ui.js */
 const crypto = require('crypto');
 const { open } = require('./common');
@@ -22,7 +22,10 @@ const LX = 55.5, LY = 135.5, DIR = [-13 / Math.hypot(13, 9), -9 / Math.hypot(13,
   const atD = async (d, tp) => { const x = LX + DIR[0] * d * tp, y = LY + DIR[1] * d * tp; await ev(([x, y]) => { const e = window.__evo; e.st.follow = true; e.st.hero = { x, y }; e.redraw(); }, [x, y]); await idle(); };
   // the landmark's figures of the last frame: d, h in H, its pixel height over the pixels of one H at its depth (tilesPerH * cam.sc * k), the top margin
   const LM = () => ev(() => { const e = window.__evo, E = window.EVO, S = e.S(), st = e.O.objects.stats.find((s) => s.kind === 'landmark'); if (!st) return null; const cv = document.querySelector('#stage canvas'), w = cv.clientWidth, h = e.st.persH || cv.clientHeight, cam = E.makeCam(S, e.P, e.view(), w, h), tp = e.st.stage.tilesPerH, x = st.x - S.ox, y = st.y - S.oy, i = E.stage.cellOf(S, x, y), k = E.stage.depthScale(cam, x, y, E.stage.feetH(S, i)), unit = tp * cam.sc * k;
-    return { d: st.d, hH: st.hH, hpx: st.hpx, ratio: st.hpx / unit, visible: st.visible, drawn: st.drawn, alpha: st.alpha, detail: (st.detail || []).map((q) => q.drawn), top: st.base[1] - st.hpx, margin: (st.base[1] - st.hpx) / h, panelH: h, heroPx: e.O.hero.stats ? e.O.hero.stats.hpx : null }; });
+    // the oracle of the base detail: is each piece's base on its own tile in the pick buffer (an independent re-implementation of the S4a ownGround)?
+    const D = E.pickBuffer(S, e.P, e.view(), w, h).data, code = (px, py) => { const X = Math.round(px), Y = Math.round(py); if (X < 0 || Y < 0 || X >= w || Y >= h) return -1; const q = (Y * w + X) * 4; return D[q + 3] === 255 ? (D[q] << 16) | (D[q + 1] << 8) | D[q + 2] : -1; }, ya = (e.st.stage.yaw || 0) * Math.PI / 180, cx = Math.sin(ya), cy = Math.cos(ya);
+    const oracle = E.objects.DETAIL.pieces.map((pc) => { const x2 = x + (pc.side * cy + pc.front * cx) * tp, y2 = y + (-pc.side * cx + pc.front * cy) * tp, i2 = E.stage.cellOf(S, x2, y2); if (i2 < 0) return null; const b2 = cam.p(x2, y2, E.stage.feetH(S, i2)); return [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => { const c = code(b2[0] + dx, b2[1] + dy); return c === ((4 << 20) | i2) || c === ((3 << 20) | i2); }); });
+    return { d: st.d, hH: st.hH, hpx: st.hpx, ratio: st.hpx / unit, visible: st.visible, drawn: st.drawn, alpha: st.alpha, detail: (st.detail || []).map((q) => ({ kind: q.kind, visible: q.visible, drawn: q.drawn })), oracle, top: st.base[1] - st.hpx, margin: (st.base[1] - st.hpx) / h, panelH: h, heroPx: e.O.hero.stats ? e.O.hero.stats.hpx : null }; });
   const SHASH = () => ev(() => { const S = window.__evo.S(); let h = 7; for (let i = 0; i < S.n; i++) h = (h * 31 + S.fine[i]) % 1000000007; for (const v of S.levelH) h = (h * 31 + Math.round(v * 1e6)) % 1000000007; return h; });
   const expected = (d) => ev((d) => window.EVO.objects.landmarkH(d), d);
   // (1) the example and the placement rules
@@ -52,10 +55,23 @@ const LX = 55.5, LY = 135.5, DIR = [-13 / Math.hypot(13, 9), -9 / Math.hypot(13,
   for (const m of ['noDistance', 'hardStep']) { await mut(m); const j = judge(await sweep()); await mut(null); ok(`MUTATION ${m}: the continuity / plateau check FAILS (${JSON.stringify(j)})`, !j.ok, j); }
   // (4) the base detail
   const DET = async (d, m) => { if (m) await mut(m); await atD(d, 2); const r = await LM(); if (m) await mut(null); return r; };
+  const atXY = async (x, y) => { await ev(([x, y]) => { const e = window.__evo; e.st.follow = true; e.st.hero = { x, y }; e.redraw(); }, [x, y]); await idle(); };
+  const same = (r) => r.detail.length === 3 && r.detail.every((q, k) => q.drawn === r.oracle[k] && q.visible === r.oracle[k]);
   { const r5 = await DET(5), r35 = await DET(3.5), r3 = await DET(3), r2 = await DET(2);
-    ok(`base detail: absent at 5 H (alpha ${r5.alpha}), partial at 3.5 H (alpha ${(r35.alpha || 0).toFixed(2)}), full at 3 H and 2 H (alpha ${r3.alpha} / ${r2.alpha}), the 3 pieces drawn when there is alpha`, r5.visible && r5.alpha === 0 && r5.detail.length === 0 && r35.alpha > 0.05 && r35.alpha < 0.95 && r35.detail.length === 3 && r35.detail.every(Boolean) && r3.alpha === 1 && r2.alpha === 1 && r3.detail.length === 3 && r2.detail.every(Boolean), { r5, r35, r3, r2 });
+    ok(`base detail alpha: absent at 5 H (alpha ${r5.alpha}, no pieces), partial at 3.5 H (${(r35.alpha || 0).toFixed(2)}), full at 3 H and 2 H (${r3.alpha} / ${r2.alpha}), 3 pieces examined when there is alpha`, r5.visible && r5.alpha === 0 && r5.detail.length === 0 && r35.alpha > 0.05 && r35.alpha < 0.95 && r3.alpha === 1 && r2.alpha === 1 && [r35, r3, r2].every((r) => r.detail.length === 3), { r5, r35, r3, r2 });
+    ok(`the pieces drawn = the pieces whose base is visible in the pick buffer (3.5 H: ${r35.detail.map((q) => +q.drawn).join('')}, 3 H: ${r3.detail.map((q) => +q.drawn).join('')}, 2 H: ${r2.detail.map((q) => +q.drawn).join('')})`, same(r35) && same(r3) && same(r2), { r35, r3, r2 });
     const ma = await DET(5, 'detailAlways'), mn = await DET(3, 'detailNever');
     ok('MUTATION detailAlways (the detail at 5 H): the absent-at-5-H check FAILS', ma.alpha === 1 && ma.detail.length === 3, ma); ok('MUTATION detailNever (no detail at 3 H): the full-at-3-H check FAILS', mn.alpha === 0 && mn.detail.length === 0, mn); }
+  // (4a) a temporary landmark on flat ground of the start terrace, the hero 3 H toward the camera: the 3 pieces are visible and drawn
+  { let found = null; const cands = []; for (const yy of [118.5, 116.5, 114.5, 120.5]) for (const xx of [58.5, 56.5, 60.5, 54.5, 62.5, 52.5]) cands.push([xx, yy]);
+    for (const [xx, yy] of cands) { await ev(([xx, yy]) => { window.__evo.st.stage.objectList = [{ kind: 'landmark', x: xx, y: yy }]; }, [xx, yy]); await atXY(xx, yy - 6); const r = await LM(); if (r && r.visible && r.detail.length === 3 && r.detail.every((q) => q.visible)) { found = { at: [xx, yy], r }; break; } }
+    ok(`(a) a temporary landmark at ${found ? found.at.join(', ') : '-'} (flat ground, hero 3 H toward the camera): the 3 pieces have their base visible and are drawn, equal to the pick-buffer oracle`, found && found.r.detail.every((q) => q.drawn) && same(found.r) && Math.abs(found.r.d - 3) < 0.01, found);
+    await ev((l) => { window.__evo.st.stage.objectList = l; }, L0);
+    // (4b) the example: hero at (50.5, 131.5) (3.2 H): the sign's base is behind the rim of the terrace (not on its own tile): NOT drawn; the two lamps are
+    await atXY(50.5, 131.5); const rb = await LM();
+    ok(`(b) the example at the hero (50.5, 131.5), d ${rb.d.toFixed(2)} H: the lamps are drawn and the sign is NOT (its base is not on its own tile in the image): [${rb.detail.map((q) => q.kind + ':' + (q.drawn ? 'drawn' : 'hidden')).join(', ')}], equal to the oracle`, rb.visible && rb.alpha > 0.5 && rb.detail.map((q) => q.drawn).join() === 'true,true,false' && same(rb), rb);
+    await mut('pieceIgnoreHidden'); await atXY(50.5, 131.5); const rm = await LM(); await mut(null);
+    ok('MUTATION pieceIgnoreHidden (the pieces drawn although their base is hidden): the sign is drawn and the case (b) FAILS', rm.detail[2] && rm.detail[2].drawn === true && !same(rm), rm); }
   // (5) nothing rebuilds S
   { await ev(() => { const e = window.__evo; window.__S0 = e.S(); window.__C0 = e.S().cache; }); const h0 = await SHASH(); // (the tilesPerH slider above rebuilt S: the reference is taken now)
     await atD(10, 2); let same = true, n = 0; for (let k = 0; k < 22; k++) { const d = 10 - k * (9 / 21); await atD(d, 2); n++; if (!(await ev(() => window.__evo.S() === window.__S0 && window.__evo.S().cache === window.__C0))) same = false; }
@@ -83,6 +99,14 @@ const LX = 55.5, LY = 135.5, DIR = [-13 / Math.hypot(13, 9), -9 / Math.hypot(13,
   const table = []; for (const d of [8, 6, 4, 2]) { await atD(d, 2); const r = await LM(); table.push({ d, hH: +r.hH.toFixed(3), hpx: Math.round(r.hpx), perH: +(r.hpx / r.hH).toFixed(1), heroPx: r.heroPx && Math.round(r.heroPx), topY: Math.round(r.top), margin: +r.margin.toFixed(3), inside: r.top >= 0, visible: r.visible, alpha: r.alpha }); }
   console.log('TABLE d(H)  h(H)   px   px/H  hero px  top y  margin(top / panel)  inside  base visible  detail alpha  (panel height ' + (await LM()).panelH + ' px)');
   for (const r of table) console.log(`TABLE ${r.d}  ${r.hH}  ${r.hpx}  ${r.perH}  ${r.heroPx}  ${r.topY}  ${r.margin}  ${r.inside}  ${r.visible}  ${r.alpha}`);
+  // (7b) the minimum margin of the top over EVERY walkable tile of room 5 whose landmark base is visible (the hero standing on it)
+  const scanTop = async (tp) => { if (tp !== (await ev(() => window.__evo.st.stage.tilesPerH))) { await a.slider('tilesPerH', tp); await idle(); }
+    const tiles = await ev(() => { const S = window.__evo.S(), out = []; for (let i = 0; i < S.n; i++) if (S.roomMap[i] === 5 && !S.block[i] && !(S.void && S.void[i]) && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i])) out.push([(i % S.W) + S.ox + 0.5, ((i / S.W) | 0) + S.oy + 0.5]); return out; });
+    let vis = 0, out = 0, min = { m: 9 }; for (const [x, y] of tiles) { await atXY(x, y); const r = await LM(); if (!r || !r.visible) continue; vis++; if (r.top < 0) out++; if (r.margin < min.m) min = { m: +r.margin.toFixed(3), x, y, d: +r.d.toFixed(2) }; } return { tp, tiles: tiles.length, visible: vis, out, min }; };
+  { const r2 = await scanTop(2); console.log(`SCAN tilesPerH 2: ${r2.visible} of ${r2.tiles} walkable tiles of room 5 see the landmark base; minimum margin of the top ${r2.min.m} at (${r2.min.x}, ${r2.min.y}), d ${r2.min.d} H; tops outside the panel: ${r2.out}`);
+    ok('tilesPerH 2: no top of the landmark (hero on any walkable tile of room 5 with the base visible) is outside the panel (top >= 0)', r2.visible > 20 && r2.out === 0, r2);
+    if (process.env.LM_SCAN_ALL) for (const tp of [2.5, 3]) { const r = await scanTop(tp); console.log(`SCAN tilesPerH ${tp}: ${r.visible} of ${r.tiles} see the base; minimum margin ${r.min.m} at (${r.min.x}, ${r.min.y}), d ${r.min.d} H; tops outside the panel: ${r.out}`); }
+    await a.slider('tilesPerH', 2); await idle(); }
   ok('the table is measured (4 rows, the landmark grows when approaching)', table.length === 4 && table[3].hpx > table[0].hpx, table);
   ok('no page errors', a.errs.length === 0, a.errs);
   await a.browser.close(); console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);

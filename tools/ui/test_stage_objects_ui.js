@@ -34,7 +34,7 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   // (3) placement rules
   const RULES = (list) => ev((list) => { const e = window.__evo, S = e.S(), W = S.W, H = S.H, E = window.EVO, bad = [], foot = new Set(), bt = [];
     for (const r of S.stairs) { for (const st of r.steps) for (const t of st.tiles) foot.add(t); for (const t of r.bottom) { foot.add(t); bt.push(t); } for (const t of r.top) { foot.add(t); bt.push(t); } }
-    list.forEach((q, k) => { const x = Math.floor(q.x - S.ox), y = Math.floor(q.y - S.oy), i = y * W + x; if (!E.objects.KINDS[q.kind]) bad.push([k, 'kind']); if (!(q.hH > 0) && q.kind !== 'landmark') bad.push([k, 'hH']); /* S4c: a landmark entry has no hH, its height comes from its own parameters */
+    list.forEach((q, k) => { const x = Math.floor(q.x - S.ox), y = Math.floor(q.y - S.oy), i = y * W + x; if (!E.objects.KINDS[q.kind]) bad.push([k, 'kind']); if (q.kind === 'landmark') { if (E.checkLandmark(q)) bad.push([k, 'landmark parameters']); } else if (!(q.hH > 0)) bad.push([k, 'hH']); /* S4c: a landmark entry has no hH, its height comes from its own parameters, validated by E.checkLandmark */
       if (x < 0 || y < 0 || x >= W || y >= H) { bad.push([k, 'window']); return; } if (S.block[i] || (S.void && S.void[i]) || !(S.region[i] >= 0) || (S.nowalk && S.nowalk[i])) bad.push([k, 'walkable']); if (foot.has(i)) bad.push([k, 'stair columns']);
       for (const t of bt) if (Math.max(Math.abs((t % W) - x), Math.abs(((t / W) | 0) - y)) < 2) { bad.push([k, 'bottom/top']); break; } });
     return bad; }, list);
