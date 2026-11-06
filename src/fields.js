@@ -286,6 +286,8 @@
         if (g.border !== undefined && !['off', 'island', 'quebrada'].includes(g.border)) bad('border ("off", "island" or "quebrada")');
         if (g.objects !== undefined && !['off', 'on'].includes(g.objects)) bad('objects ("off" or "on")');
         if (g.volumes !== undefined && !['off', 'on'].includes(g.volumes)) bad('volumes ("off" or "on")');
+        if (g.orient !== undefined && !['off', 'on'].includes(g.orient)) bad('orient ("off" or "on")');
+        if (g.frame !== undefined && !['hero', 'room'].includes(g.frame)) bad('frame ("hero" or "room")');
         if (g.billboards !== undefined) { // S4c: the future `billboards` entry of the treatment (inert at load: S5 gives it effect); the landmark entries are validated
           if (!Array.isArray(g.billboards)) bad('billboards (a list)');
           g.billboards.forEach((q, k) => { const m = q && typeof q === 'object' ? E.checkLandmark(q) : 'an entry must be an object'; if (m) bad('billboards[' + k + '] (' + m + ')'); });

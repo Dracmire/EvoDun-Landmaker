@@ -60,13 +60,13 @@ Banner: **2D-HD crystallizer: in construction (S1)**
 | field | value |
 |---|---|
 | id | `stage` |
-| examples (first = default) | DAC window (2D-HD, S1) (`real_map`); Shrine-Pier x4 · Stage (legacy contract) (`shrine_pier_x4`); Diorama 31 · Stage (legacy contract) (`real_map`) |
+| examples (first = default) | DAC window (2D-HD, S1) (`real_map`); Shrine-Pier x4 · Stage (legacy contract) (`shrine_pier_x4`); Diorama 31 · Stage (legacy contract) (`real_map`); Room 14 · orientation (mock T Z) (`real_map`); Room 44 · orientation (mock T X) (`real_map`) |
 | camera (default) | `stage` |
 | cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic` |
-| technique (default) | `B` |
-| techniques offered | `B` |
+| technique (default) | `box` |
+| techniques offered | `box`, `B` |
 | compare | no |
-| main controls | `contract`, `tilesPerH`, `heroFrac`, `stageUnits`, `stageBorder`, `stageObjects`, `stageVolumes`, `stageReset`, `stageFollow`, `stagePrev`, `stageNext` |
+| main controls | `contract`, `tilesPerH`, `heroFrac`, `stageUnits`, `stageBorder`, `stageObjects`, `stageVolumes`, `stageOrient`, `stageFrame`, `stageReset`, `stageFollow`, `stagePrev`, `stageNext` |
 | advanced controls (folded) | - |
 | slice controls | - |
 | terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |
