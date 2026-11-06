@@ -14,7 +14,7 @@ const STATE = () => { const e = window.__evo, O = e.O, P = e.P, o = {}, c = {}; 
 (async () => {
   const a = await open({ w: 1500, h: 900, modes: true }), page = a.page, ev = (f, x) => page.evaluate(f, x);
   const idle = () => a.idle();
-  const MODES = await ev(() => window.EVO.modes.MODES.map((m) => ({ id: m.id, ex: m.examples.filter((x) => !x.images).map((x) => ({ id: x.id, tint: !!x.tint, outline: !!x.outline })) })));
+  const MODES = await ev(() => window.EVO.modes.MODES.map((m) => ({ id: m.id, ex: m.examples.filter((x) => !x.images).map((x) => ({ id: x.id, tint: !!x.tint, outline: !!x.outline, win: !!x.roomSet })) })));
   const clickEx = async (id) => { await page.click(`#examples button[data-id="${id}"]`); await idle(); };
   const setMode = async (m) => { await ev((m) => window.__evo.setMode(m), m); await idle(); };
   const manual = async () => { // what a user may have done by hand: two debug aids off, own units
@@ -31,7 +31,7 @@ const STATE = () => { const e = window.__evo, O = e.O, P = e.P, o = {}, c = {}; 
   };
   // the targets: every example of modes 1, 2, 4, 5, 6 and the two legacy examples of mode 3
   const targets = []; for (const m of MODES) { if (m.id === 'stage') continue; for (const ex of m.ex) targets.push({ mode: m.id, ex }); }
-  for (const m of MODES.filter((q) => q.id === 'stage')) for (const ex of m.ex.filter((x) => x.id !== 'dac_stage')) targets.push({ mode: 'stage', ex });
+  for (const m of MODES.filter((q) => q.id === 'stage')) for (const ex of m.ex.filter((x) => !x.win) /* C1: the one-room examples are window examples like dac_stage, not legacy */) targets.push({ mode: 'stage', ex });
   const trial = async (t, twice) => {
     const B0 = await prep(); await setMode('stage'); if (twice) await clickEx('dac_stage'); const inside = await ev(STATE);
     if (t.mode === 'stage') await clickEx(t.ex.id); else { await setMode(t.mode); if (t.ex.id !== MODES.find((q) => q.id === t.mode).ex[0].id) await clickEx(t.ex.id); }

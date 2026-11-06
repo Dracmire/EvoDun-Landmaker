@@ -61,7 +61,7 @@
       id: 'stage', number: 3, name: 'Stage', group: 'main',
       purpose: 'The 2D-HD Stage (S1: the base): a window of rooms of the DAC data in hero heights (H), a hero placeholder and the Cam 6 tracking of the hero. The Art contract examples are kept as legacy. Diorama technique (Pocket, M2 height) in mode 3 needs a multi-room Pocket: later PR.', banner: '2D-HD crystallizer: in construction (S1)',
       examples: [
-        { id: 'dac_stage', label: 'DAC window (2D-HD, S1)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, roomSet: [17, 10, 20, 27, 6, 5], stageHero: true, yaw: 180, stairs: { style: 0, tread: 1, preferFill: true }, /* S3: Cam 6 looks from the north (yaw 180: the 4 ramps of the window rise AWAY from the camera), steps (A1: 3 risers of 0.19 terH, 2 treads) and the fill variant for the lateral transitions */ 
+        { id: 'dac_stage', label: 'DAC window (2D-HD, S1)', src: 'real_map', rooms: true, preset: 'balanced', terraces: 5, roomSet: [17, 10, 20, 27, 6, 5], stageHero: true, yaw: 180, tech: 'box', orient: true, /* C1: Box is the technique of the window examples (B stays offered); the orientation by room is on (the yaw above is the fallback of the switch off) */ stairs: { style: 0, tread: 1, preferFill: true }, /* S3: Cam 6 looks from the north (yaw 180: the 4 ramps of the window rise AWAY from the camera), steps (A1: 3 risers of 0.19 terH, 2 treads) and the fill variant for the lateral transitions */ 
           display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false }, // S2a: the clean view of the window (the debug aids off; the checkboxes keep working)
           /* S4a: the declared billboards (switch "Stage objects"), MAP coordinates (tile centres), hH in hero heights, the format of the future `billboards` entry of the treatment. All on walkable tiles outside the 3 columns of every transition and at least 2 tiles (Chebyshev) from their bottom / top tiles (tools/ui/test_stage_objects_ui.js checks it).
              Hero start (61.5, 117.5, room 17): (1) a 1 H banner 3 tiles to its side at the same depth and on the same terrace (x 58.5; the tiles at x 62-63 are within 2 tiles of the transition and x 64.5 is in a pit hidden behind the rim, measured) = the comparison rule; (2) a 3 H pillar in room 20, which fits the panel; (3, 4) two 2 H lamps flanking the 3-step transition next to the start (beyond its 3 columns); (5) a 3 H banner in room 5, about 7 H beyond the hero, whose top leaves the panel
@@ -73,11 +73,11 @@
              and no walkable tile loses more than 25 % of its pixels to a volume at Cam 6 yaw 180 (worst measured: 16.9 %, partial lateral occlusion by perspective next to a volume); with the other cameras of mode 3 the volumes can hide tiles (measured at yaw 0, 90 and 270) (tools/ui/test_stage_volumes_ui.js measures it against the pick buffer). Chosen by that measurement: (1) a 1 H low block on the far flank, south of the footprint; (2) a 3 H column 2 x 2 on the same flank beside the south edge of the rooms; (3) a 2 H wall of 6 tiles along it (the three heights 1 / 2 / 3 H side by side on the far flank; the east flank was tried first and its volumes camouflage against the high rock there); (4) a 1 H block in the hole between rooms (a
              closure-interior tile of the border, no profile); (5) a 2 H block in the exterior beyond the border (to see the island / quebrada interaction). */
           volumes: [{ x: 50, y: 147, w: 6, d: 2, hH: 1 }, { x: 85, y: 147, w: 2, d: 2, hH: 3 }, { x: 66, y: 147, w: 6, d: 1, hH: 2 }, { x: 30, y: 132, w: 4, d: 2, hH: 1 }, { x: 60, y: 152, w: 3, d: 3, hH: 2 }] },
-        { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage (legacy contract)', src: 'shrine_pier_x4', stage: true, contract: true },
-        { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, terraces: 3, contract: true }
+        { id: 'x4_stage', label: 'Shrine-Pier x4 · Stage (legacy contract)', src: 'shrine_pier_x4', stage: true, tech: 'B', contract: true },
+        { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, tech: 'B', terraces: 3, contract: true }
       ],
-      camera: 'stage', cameras: CAMS, tech: 'B', techs: ['B'], compare: false, compareDefault: false,
-      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageObjects', 'stageVolumes', 'stageReset', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
+      camera: 'stage', cameras: CAMS, tech: 'box', techs: ['box', 'B'], compare: false, compareDefault: false,
+      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageObjects', 'stageVolumes', 'stageOrient', 'stageFrame', 'stageReset', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {
@@ -218,6 +218,10 @@
     }
     L.push('## Common to every mode', '', `- View bar: ${list(COMMON.view)} (cameras and techniques filtered by the mode; Compare only where the mode has it).`, `- "Your images" example (modes with it): ${list(COMMON.images)}.`, `- Only without modes (\`EVO_NO_MODES\`): ${list(COMMON.legacy)}.`, '');
     return L.join('\n');
+  }
+  { // C1: two examples of mode 3 with ONE room each (no declared volumes / objects): the rooms of the "mock T" comparison
+    const stg = MODES.find((m) => m.id === 'stage'), base = stg.examples.find((e) => e.id === 'dac_stage');
+    stg.examples.push(Object.assign({}, base, { id: 'mockt_z14', label: 'Room 14 · orientation (mock T Z)', roomSet: [14], objects: [], volumes: [] }), Object.assign({}, base, { id: 'mockt_x44', label: 'Room 44 · orientation (mock T X)', roomSet: [44], objects: [], volumes: [] }));
   }
   E.modes = { PROTOS, MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };
 })(typeof window !== 'undefined' ? (window.EVO = window.EVO || {}) : (globalThis.EVO = globalThis.EVO || {}));
