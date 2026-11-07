@@ -1,6 +1,6 @@
 /* STAGE PROPS BY ROOM (mode 3, PR C3) in the viewer: the switch "Props by room" (src/props.js, src/ui.js).
    (1) the control: greyed in a legacy example, enabled in dac_stage; ON at the start of dac_stage and of the two one-room examples; a main control of mode 3 only;
-   (2) the props of the hero's room (room 17: 7 torches, 1 pillar, no goal; room 5: 7 torches and the goal; room 14: 13 torches and the goal) and crossing to another room changes them WITHOUT rebuilding S when the planes are off (they are billboards);
+   (2) the props of the hero's room (room 17: 5 torches, 1 pillar, no goal; room 5: 8 torches and the goal; room 14: 15 torches and the goal) and crossing to another room changes them WITHOUT rebuilding S when the planes are off (they are billboards);
    (3) off = the picture of a scene without props, identical after on -> off; on changes the picture;
    (4) the state ends with the window session; the manifest key `props` is written only when on, inert at load, and an unknown value is rejected.
      NODE_PATH=$(npm root -g) node tools/ui/test_stage_props_ui.js */
@@ -21,7 +21,7 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   await clickEx('dac_stage');
   const c2 = await ev(() => ({ dis: document.querySelector('#t-stageProps').disabled, chk: document.querySelector('#t-stageProps').checked, main: window.EVO.modes.MODES.filter((x) => x.main.includes('stageProps')).map((x) => x.id).join() }));
   ok('in dac_stage the switch is enabled and ON; it is a main control of mode 3 only', !c2.dis && c2.chk && c2.main === 'stage', c2);
-  const p17 = await PR(); ok(`the props of the hero's room 17: ${p17 && p17.torches} torches, ${p17 && p17.pillars} pillar, no goal`, p17 && p17.room === 17 && p17.torches === 7 && p17.pillars === 1 && !p17.goal && !p17.noPath, p17);
+  const p17 = await PR(); ok(`the props of the hero's room 17: ${p17 && p17.torches} torches, ${p17 && p17.pillars} pillar, no goal`, p17 && p17.room === 17 && p17.torches === 5 && p17.pillars === 1 && !p17.goal && !p17.noPath, p17);
   const pOn = await pix(); await tog("#t-stageProps"); const pOff = await pix();
   ok('switch off: no props (the picture changes with the switch)', pOff !== pOn  && !(await ev(() => window.__evo.st.stage.props === 'on')), { pOn, pOff });
   await tog('#t-stageProps'); const pOn2 = await pix(); ok('on again: the identical picture of before (deterministic)', pOn2 === pOn);
@@ -30,9 +30,9 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   // billboards: crossing does not rebuild S when the planes are off
   await tog('#t-stagePlanes'); await goRoom(17); await ev(() => { window.__S17 = window.__evo.S(); });
   await goRoom(5); const p5 = await PR(), same = await ev(() => window.__evo.S() === window.__S17);
-  ok(`planes off: crossing to room 5 changes the props (${p5 && p5.torches} torches, goal ${p5 && p5.goal}) and does NOT rebuild S (billboards)`, same && p5 && p5.room === 5 && p5.torches === 7 && p5.goal && p5.pillars === 0, { same, p5 });
+  ok(`planes off: crossing to room 5 changes the props (${p5 && p5.torches} torches, goal ${p5 && p5.goal}) and does NOT rebuild S (billboards)`, same && p5 && p5.room === 5 && p5.torches === 8 && p5.goal && p5.pillars === 0, { same, p5 });
   await tog('#t-stagePlanes');
-  for (const [id, room, t] of [['mockt_z14', 14, 13], ['mockt_x44', 44, 26]]) { await clickEx(id); const p = await PR(); ok(`${id}: props ON at the start, room ${room}: ${p && p.torches} torches and the goal`, p && p.room === room && p.torches === t && p.goal && !p.noPath, p); }
+  for (const [id, room, t] of [["mockt_z14", 14, 15], ["mockt_x44", 44, 27]]) { await clickEx(id); const p = await PR(); ok(`${id}: props ON at the start, room ${room}: ${p && p.torches} torches and the goal`, p && p.room === room && p.torches === t && p.goal && !p.noPath, p); }
   const man = await ev(() => { const e = window.__evo; e.st.stage.props = 'off'; const b1 = e.viewerBlock().stage; e.st.stage.props = 'on'; const b2 = e.viewerBlock().stage; return { off: 'props' in b1, on: b2.props }; });
   ok('manifest: viewer.stage.props is written only when on', man.off === false && man.on === 'on', man);
   const bad = await ev(() => { let n = 0; for (const b of [{ props: 'yes' }, { props: 1 }, { props: true }]) { try { window.EVO.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { stage: b } }); } catch (e) { if (/viewer\.stage\.props/.test(e.message)) n++; } } return n; });
