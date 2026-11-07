@@ -27,7 +27,7 @@ ok('a mode that folds the terrain controls lists none of them as its own', M.MOD
 const p1 = M.plan(M.byId('terrain'), {}), p2 = M.plan(M.byId('rooms'), {}), p5s = M.plan(M.byId('floors'), { floorsView: 'single' }), p5c = M.plan(M.byId('floors'), { floorsView: 'cut' }), p6 = M.plan(M.byId('macroform'), {});
 ok('plan: mode 1 shows the terrain controls; mode 2 folds them and hides t-rooms', p1.terraces === 'show' && p2.terraces === 'fold' && !p2['t-rooms'] && p2.roomsPreset === 'show' && p2.roomsMinCore === 'adv');
 ok('plan: the incursion is hidden in mode 6 and in the Stack / Cutaway of mode 5', !p6.incursion && p5s.incursion === 'show' && !p5c.incursion);
-ok('plan: the images controls only with the example "Your images"', !p1.file && M.plan(M.byId('terrain'), { exampleId: 'images' }).file === 'show' && !M.plan(M.byId('stage'), { exampleId: 'images' }).file);
+ok('plan: the images controls only with the example "Your images" (modes 1, 2, 4 and, since M2b, mode 3; not with its other examples)', !p1.file && M.plan(M.byId('terrain'), { exampleId: 'images' }).file === 'show' && M.plan(M.byId('stage'), { exampleId: 'images' }).file === 'show' && !M.plan(M.byId('stage'), { exampleId: 'dac_stage' }).file);
 // the manifest: viewer.mode takes the ids of the table
 const ctx = { window: {} }; ctx.globalThis = ctx; vm.createContext(ctx);
 for (const f of ['src/fields.js']) vm.runInContext(fs.readFileSync(path.join(__dirname, '..', f), 'utf8'), ctx, { filename: f });

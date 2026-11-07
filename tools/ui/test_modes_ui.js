@@ -197,7 +197,8 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
   ok('mode 1: the file loader and the source selector are hidden until the example "Your images"', (await imgsVis()).file === false && (await imgsVis()).src === false);
   await page.click('#examples button[data-id="images"]'); await a.idle();
   ok('mode 1: the example "Your images" shows the file loader (the source selector stays hidden)', (await imgsVis()).file === true && (await imgsVis()).src === false);
-  for (const id of ['stage', 'floors', 'macroform']) { await ev((id) => window.__evo.setMode(id), id); await a.idle(); ok(`mode ${MODES.find((m) => m.id === id).number} ${id}: no "Your images" example and no file loader`, !MODES.find((m) => m.id === id).examples.some((e) => e.images) && (await imgsVis()).file === false); }
+  for (const id of ['floors', 'macroform']) { await ev((id) => window.__evo.setMode(id), id); await a.idle(); ok(`mode ${MODES.find((m) => m.id === id).number} ${id}: no "Your images" example and no file loader`, !MODES.find((m) => m.id === id).examples.some((e) => e.images) && (await imgsVis()).file === false); }
+  { await ev(() => window.__evo.setMode('stage')); await a.idle(); const before = (await imgsVis()).file; await page.click('#examples button[data-id="images"]'); await a.idle(); const after = (await imgsVis()).file; ok('mode 3 stage (M2b): "Your images" is a window example of the mode; the file loader is hidden with the default example and appears with it', MODES.find((m) => m.id === 'stage').examples.some((e) => e.images && e.stageHero) && before === false && after === true, { before, after }); await page.click('#examples button[data-id="dac_stage"]'); await a.idle(); }
 
   // ---- viewer.mode: written on save, applied on load
   await ev(() => window.__evo.setMode('terrain')); await a.idle(); await page.click('#examples button[data-id="images"]');
