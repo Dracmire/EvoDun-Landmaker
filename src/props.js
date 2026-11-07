@@ -1,12 +1,12 @@
 /* STAGE PROPS BY ROOM (mode 3, PR C3; `E.props`; docs/crystallizers/03-stage/README.md "C3"): features 4 (torches along the axis) and 5 (the goal at the back) of the "mock T", for the room the hero stands in, with the C1 yaw. BILLBOARDS ONLY (src/objects.js): the shape S is never rebuilt and nothing changes in the terrain.
    - PATH: the walkable route from a START to an END. P1: it follows the CENTRE LINE of the room along the view axis (the middle of the walkable width of each row perpendicular to the axis, snapped to the nearest walkable tile of the row, the consecutive centres joined by the shortest walkable route; test hook `shortestPath` = the plain shortest route of C3). A room with an entry gate AND an exit gate: from the room tile nearest the entry gate to the one nearest the exit gate. The first / last room and a window of one room: from the end nearest the camera (smallest view depth, nearest the middle of the room across) to the GOAL tile.
-   - TORCHES: `lamp` HYP.torchH H, on both sides of the path, HYP.torchSide H from its axis (along the normal of the local tangent), one pair every HYP.torchEvery rows of view depth along the path. Only on walkable tiles of the room, never on the steps / ramps / gates nor within 1 tile of them, and (P1) none closer than HYP.goalClear tiles to the base of the goal.
+   - TORCHES: `lamp` HYP.torchH H, on both sides of the path, HYP.torchSide H from its axis (along the normal of the local tangent), one pair every HYP.torchEvery rows of view depth. P2: the pairs are STRAIGHT ROWS: a straight line is fitted to the path (two straight segments at most when it bends more than HYP.bendTol tiles) and each pair sits at +-torchSide (perpendicular) of that line, like the two rows of torches of the mock T; a torch is moved to the nearest valid walkable tile within 1 tile, or omitted alone (not its pair); hook `followPath` = the torches hang from the path (P1). Only on walkable tiles of the room, never on the steps / ramps / gates nor within 1 tile of them, and (P1) none closer than HYP.goalClear tiles to the base of the goal.
    - GOAL (the last room of the window, and a window of one room): a `landmark` (S4c, default parameters) on the highest terrace of the BACK half of the room (the half of the view depth farther from the camera), at the tile of that terrace nearest the path axis (the start's column), S4c rules (not on a transition, >= 2 tiles from its bottom / top).
    - DOOR PILLARS (every room with an exit gate, the last one has none): 2 `pillar` HYP.gatePillarH H at both sides of the exit gate, HYP.gateSide tiles beyond its extent across the view.
    ONE table of hypotheses for S6 (H are multiplied by tilesPerH). Test hooks (`E.propsTest`, tests only): shortestPath, onStairs (no exclusion around transitions / gates), torchEvery (a number), metaFront (the goal in the NEAR half). */
 (function (E) {
   'use strict';
-  const HYP = { smoothRows: 1, goalClear: 2, torchSide: 1, torchEvery: 4, torchH: 1.2, gatePillarH: 2, gateSide: 2 };
+  const HYP = { bendTol: 2.5, smoothRows: 1, goalClear: 2, torchSide: 1, torchEvery: 4, torchH: 1.2, gatePillarH: 2, gateSide: 2 };
   /* compute(S, P, rec, { tilesPerH, last, next, test }) -> { room, yaw, noPath, path (tile list), start, end, torches [{ x, y, tile, k, side }], pillars [{ x, y, tile }], goal { x, y, tile, ter, h } | null, aMid } ; x / y = window tile coordinates (continuous), tile = index */
   function compute(S, P, rec, o) {
     const T = o.test || E.propsTest || {}, tp = o.tilesPerH, W = S.W, H = S.H, n = S.n, vd = S.void, look = E.orient.lookOf(rec.yaw), f = [look[0], look[1]], r = [-f[1], f[0]];
@@ -61,14 +61,28 @@
       const path = [start]; let okc = true, cur = start; for (let k = 1; k < wps.length && okc; k++) { const w = wps[k], last = k === wps.length - 1, seg = route(cur, w); if (!seg) { okc = false; break; } const man = Math.abs((w % W) - (cur % W)) + Math.abs(((w / W) | 0) - ((cur / W) | 0)); if (!last && seg.length > man + 3) continue; /* a centre that needs a detour (another terrace, reached only by a ramp elsewhere) is skipped: the line goes on to the next one */ for (const t of seg) path.push(t); cur = w; }
       if (okc) out.path = path; else { const pth = []; for (let i = end; i >= 0; i = par[i]) pth.push(i); pth.reverse(); out.path = pth; }
     }
-    // TORCHES
+    // TORCHES: PAIRS at +-side of a STRAIGHT line fitted to the path (two straight segments at most when the room bends), one pair every `every` rows of view depth
     const path = out.path, every = T.torchEvery || HYP.torchEvery, side = HYP.torchSide * tp;
-    let lastA = path.length ? A(path[0]) - every / 2 : 0; // one pair every `every` rows of view depth along the path (not every N steps: a jog of the path would crowd them)
-    if (path.length) for (let k = 2; k <= path.length - 3; k++) { if (Math.abs(A(path[k]) - lastA) < every) continue; lastA = A(path[k]);
-      const a0 = path[Math.max(0, k - 3)], a1 = path[Math.min(path.length - 1, k + 3)];
-      let tx = (a1 % W) - (a0 % W), ty = ((a1 / W) | 0) - ((a0 / W) | 0); const m = Math.hypot(tx, ty); if (m < 1e-9) continue; tx /= m; ty /= m;
-      const cx = (path[k] % W) + 0.5, cy = ((path[k] / W) | 0) + 0.5;
-      for (const s of [-1, 1]) { const x = cx - s * ty * side, y = cy + s * tx * side, xi = Math.floor(x), yi = Math.floor(y); if (xi < 0 || yi < 0 || xi >= W || yi >= H) continue; const t = yi * W + xi; if (!inRoom[t] || ex1[t]) continue; if (out.goal && Math.hypot(x - out.goal.x, y - out.goal.y) < HYP.goalClear) continue; out.torches.push({ x, y, tile: t, k, a: A(path[k]), side: s }); }
+    const place = (x, y, row, sd, pair) => { // the tile that holds (x, y), or its nearest valid neighbour (within 1 tile); none = this torch is omitted (not its pair)
+      const xi0 = Math.floor(x), yi0 = Math.floor(y); let best = -1, bd = 1e9;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const xi = xi0 + dx, yi = yi0 + dy; if (xi < 0 || yi < 0 || xi >= W || yi >= H) continue; const t = yi * W + xi; if (!inRoom[t] || ex1[t]) continue; const cx = xi + 0.5, cy = yi + 0.5; if (out.goal && Math.hypot(cx - out.goal.x, cy - out.goal.y) < HYP.goalClear) continue; const d = Math.hypot(cx - x, cy - y); if (d <= 1.0 + 1e-9 && d < bd) { bd = d; best = t; } }
+      if (best < 0) return; const bx = (best % W) + 0.5, by = ((best / W) | 0) + 0.5, moved = best !== yi0 * W + xi0; out.torches.push({ x: moved ? bx : x, y: moved ? by : y, tile: best, a: row, side: sd, pair });
+    };
+    if (T.followPath) { // (MUTATION followPath: the torches hang from the path, as in C3 / P1)
+      let lastA = path.length ? A(path[0]) - every / 2 : 0;
+      if (path.length) for (let k = 2; k <= path.length - 3; k++) { if (Math.abs(A(path[k]) - lastA) < every) continue; lastA = A(path[k]);
+        const a0 = path[Math.max(0, k - 3)], a1 = path[Math.min(path.length - 1, k + 3)]; let tx = (a1 % W) - (a0 % W), ty = ((a1 / W) | 0) - ((a0 / W) | 0); const m = Math.hypot(tx, ty); if (m < 1e-9) continue; tx /= m; ty /= m;
+        const cx = (path[k] % W) + 0.5, cy = ((path[k] / W) | 0) + 0.5; for (const sd of [-1, 1]) place(cx - sd * ty * side, cy + sd * tx * side, A(path[k]), sd, k); }
+    } else if (path.length > 3) {
+      const pts = path.map((t) => [A(t), Pc(t) + 0]), fit = (ps) => { // least squares p = m a + c over the points; a degenerate set (one row) is a line of slope 0
+        let n1 = ps.length, sa = 0, sp = 0, saa = 0, sap = 0; for (const [a, p] of ps) { sa += a; sp += p; saa += a * a; sap += a * p; } const den = n1 * saa - sa * sa, m = Math.abs(den) < 1e-9 ? 0 : (n1 * sap - sa * sp) / den; return { m, c: (sp - m * sa) / n1 }; };
+      const resid = (ps, L) => { let mx = 0, at = 0; ps.forEach(([a, p], q) => { const r = Math.abs(p - (L.m * a + L.c)); if (r > mx) { mx = r; at = q; } }); return { mx, at }; };
+      let segs = [{ ps: pts, L: fit(pts) }]; const r0 = resid(pts, segs[0].L);
+      if (r0.mx > HYP.bendTol && r0.at > 2 && r0.at < pts.length - 3) { const p1 = pts.slice(0, r0.at + 1), p2 = pts.slice(r0.at); segs = [{ ps: p1, L: fit(p1) }, { ps: p2, L: fit(p2) }]; }
+      for (const sg of segs) { sg.a0 = Math.min(...sg.ps.map((q) => q[0])); sg.a1 = Math.max(...sg.ps.map((q) => q[0])); }
+      const aS = Math.min(...pts.map((q) => q[0])), aE = Math.max(...pts.map((q) => q[0])); out.axis = segs.map((sg) => ({ a0: sg.a0, a1: sg.a1, m: sg.L.m, c: sg.L.c }));
+      let pairId = 0; for (let row = aS + 2; row <= aE - 2; row += every) { const sg = segs.find((q) => row >= q.a0 - 1e-9 && row <= q.a1 + 1e-9) || segs[segs.length - 1], { m, c } = sg.L, pa = m * row + c, nn = Math.hypot(1, m), na = -m / nn, np = 1 / nn; pairId++;
+        for (const sd of [-1, 1]) { const a = row + sd * side * na, p = pa + sd * side * np; place(a * f[0] + p * r[0], a * f[1] + p * r[1], row, sd, pairId); } }
     }
     // DOOR PILLARS: both sides of the exit gate (the gate with the next room of the window list)
     const nxt = o.next, gt = nxt && gateTo.get(nxt);

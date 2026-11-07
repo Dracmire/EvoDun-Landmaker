@@ -36,7 +36,7 @@
   const st = { dioProto: 'off', dioFocus: null, dacAuto: true, dacShow: 'all', dacView: 'chain', roomRule: 'v164', modeId: null, exampleId: null, floors: 'single', layer: 0, macro: 'off', macroFloor: 1, pack: 'snake_surface', mode: 'compare', fitSc: 0, tech: 'A', preset: 'oblique', zoom: 1, yawOff: 0, pitchOff: 0, panX: 0, panY: 0 };
   /* STAGE (mode 3, PR S1; src/stage.js): the hero lives in MAP coordinates; stage = the unit H and the zoom; follow = Cam 6 tracks the hero; focus = the last camera target [x, y, h] in map coordinates (frozen while the tracking is suspended) */
   Object.assign(st, { stage: { tilesPerH: 2, heroFrac: 0.14, border: 'off', objects: 'off', objectList: [], volumes: 'off', volumeList: [], orient: 'off', frame: 'hero', planes: 'off', props: 'off' }, follow: true, hero: null, stageRooms: [], stageIdx: 0, focus: null, stageClamp: null, win: null, stageUnits: false });
-  let S = null, raf = 0, drawToken = 0;
+  let S = null, raf = 0, drawToken = 0; const roomCache = new Map(); /* P2: the shape S of each room of the window, kept while the window session lasts (see shapeKey) */
 
   function setPack(id, label, pack) {
     packs[id] = { label, pack };
@@ -135,6 +135,7 @@
     if (!(E.modesTest && E.modesTest.skipDisplayRestore)) for (const k of DISPLAY_KEYS) { O[k] = w.O[k]; const el = $('#t-' + k); if (el) el.checked = w.O[k]; } // (MUTATION skipDisplayRestore)
     if (!(E.modesTest && E.modesTest.skipUnitsRestore)) { setParam('terH', w.terH); setParam('subH', w.subH); } // (MUTATION skipUnitsRestore)
     if (!(E.modesTest && E.modesTest.skipStairsRestore)) { setParam('stairStyle', w.stairStyle); setParam('tread', w.tread); P.rampPreferFill = w.preferFill; } // (MUTATION skipStairsRestore)
+    P.rampPreferYaw = undefined; st.prefYaw = undefined; st.yawAnim = null; st.lastBase = undefined; st.preferTries = 0; dropShapes(); // P2: the shapes of the rooms, the yaw of the ramps and the turn end with the window session
     if (!(E.modesTest && (E.modesTest.skipYawRestore || E.modesTest.skipYawEnd))) st.stage.yaw = undefined; // S3: the example's yaw (st.stage.yaw) ends with the session on EVERY exit, also the ones that do not go through applyScenario (the load of images, with or without a manifest); applyScenario resets st.stage too and the viewer block of a manifest sets yaw undefined. (MUTATIONS skipYawRestore, skipYawEnd)
     if (!(E.modesTest && (E.modesTest.skipBorderRestore || E.modesTest.skipBorderEnd))) { st.stage.border = 'off'; const sb = $('#stageBorder'); if (sb) sb.value = 'off'; } // S2: the border belongs to the window session too: it ends on EVERY exit (MUTATIONS skipBorderRestore, skipBorderEnd)
     if (!(E.modesTest && E.modesTest.skipObjectsEnd)) { st.stage.objects = 'off'; st.stage.objectList = []; const so = $('#t-stageObjects'); if (so) so.checked = false; } if (!(E.modesTest && E.modesTest.skipVolumesEnd)) { st.stage.volumes = 'off'; st.stage.volumeList = []; const sv = $('#t-stageVolumes'); if (sv) sv.checked = false; } st.stage.orient = 'off'; st.stage.frame = 'hero'; st.stage.planes = 'off'; st.stage.props = 'off'; st.orientId = null; st.roomFit = null; { const spp = $('#t-stageProps'); if (spp) spp.checked = false; const so3 = $('#t-stageOrient'); if (so3) so3.checked = false; const sp3 = $('#t-stagePlanes'); if (sp3) sp3.checked = false; const sf3 = $('#stageFrame'); if (sf3) sf3.value = 'hero'; } // C1: the orientation by room and the room framing end with the window session on EVERY exit // S4b: the volumes switch and list end with the window session on EVERY exit (MUTATION skipVolumesEnd) // S4a: the objects switch and the declared list end with the window session on EVERY exit (MUTATION skipObjectsEnd)
@@ -175,7 +176,7 @@
     else if (mode && sc.stageHero) { // mode 3, the DAC window: the neutral look (no tint, no Diorama outline; the room borders on), none of mode 2's rules (the Stage preset is NOT used)
       for (const k of DISPLAY_KEYS) { const v = sc.display && k in sc.display ? sc.display[k] : O0[k]; O[k] = v; tick('t-' + k, v); } // the example declares its own Display state (the clean view); the keys it does not name start from the fresh defaults
       st.stageUnits = true; stageDerive(); // Measures in H on by default in a window example
-      if (sc.stairs) { setParam('stairStyle', sc.stairs.style); setParam('tread', sc.stairs.tread); P.rampPreferFill = sc.stairs.preferFill === true; } // S3: the transitions of the window (restored by winExit)
+      if (sc.stairs) { setParam('stairStyle', sc.stairs.style); setParam('tread', sc.stairs.tread); P.rampPreferFill = sc.stairs.preferFill === true; P.rampPreferYaw = undefined; st.prefYaw = undefined; st.yawAnim = null; st.lastBase = undefined; dropShapes(); } // S3: the transitions of the window (restored by winExit)
       setParam('ascCut', LEGACY_DEF.ascCut); setParam('ascGate', LEGACY_DEF.ascGate); P.dioChain = LEGACY_DEF.dioChain; const dcs = $('#dioChain'); if (dcs) dcs.value = P.dioChain; syncStageUI();
     }
     else if (mode) { setParam('ascCut', LEGACY_DEF.ascCut); setParam('ascGate', LEGACY_DEF.ascGate); P.dioChain = LEGACY_DEF.dioChain; const dcl = $('#dioChain'); if (dcl) dcl.value = P.dioChain; } // the other modes keep today's values (and pixels)
@@ -600,7 +601,7 @@
         }
       } else values = defaultRoles(next);
       if (st.win) winExit(); // the window session ends here (the images replace the example)
-      if (!(E.modesTest && E.modesTest.skipStageStateEnd)) { st.stageRooms = []; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; if (!(E.modesTest && E.modesTest.skipObjectsEnd)) { st.stage.objects = 'off'; st.stage.objectList = []; } if (!(E.modesTest && E.modesTest.skipVolumesEnd)) { st.stage.volumes = 'off'; st.stage.volumeList = []; } st.stage.orient = 'off'; st.stage.frame = 'hero'; st.stage.planes = 'off'; st.stage.props = 'off'; st.orientId = null; st.roomFit = null; } // polish-1 (bug b); S4a: the objects end here too: the window STATE ends with the load too: the new shape has no window rooms, and a stale stageRooms kept stageOn() true with no roomMap (MUTATION skipStageStateEnd)
+      if (!(E.modesTest && E.modesTest.skipStageStateEnd)) { st.stageRooms = []; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; if (!(E.modesTest && E.modesTest.skipObjectsEnd)) { st.stage.objects = 'off'; st.stage.objectList = []; } if (!(E.modesTest && E.modesTest.skipVolumesEnd)) { st.stage.volumes = 'off'; st.stage.volumeList = []; } st.stage.orient = 'off'; st.stage.frame = 'hero'; st.stage.planes = 'off'; st.stage.props = 'off'; st.orientId = null; st.roomFit = null; dropShapes(); st.yawAnim = null; st.lastBase = undefined; P.rampPreferYaw = undefined; } // polish-1; P2: the shapes of the rooms end with the load too (bug b); S4a: the objects end here too: the window STATE ends with the load too: the new shape has no window rooms, and a stale stageRooms kept stageOn() true with no roomMap (MUTATION skipStageStateEnd)
       imgs.splice(0, imgs.length, ...next); // everything decoded and consistent: replace the previous state
       manifest = man;
       sliceSel.zones.clear(); sliceSel.whole = false; for (const id of cropIds) $('#' + id).value = '';
@@ -699,7 +700,7 @@
   }
 
   function invalidate(reshape) {
-    if (reshape) { slCancel(); if (st.pickJob) st.pickJob.cancel(); S = null; $('#busy').hidden = false; } // painted before the (possibly slow) recompute starts
+    if (reshape) { slCancel(); if (st.pickJob) st.pickJob.cancel(); S = null; dropShapes(); $('#busy').hidden = false; } // painted before the (possibly slow) recompute starts
     st.t0 = performance.now(); st.cold = !!reshape; drawToken++; // a pending panel (B computing) of an older state is dropped
     if (!raf) raf = requestAnimationFrame(() => setTimeout(draw, 0));
   }
@@ -714,7 +715,7 @@
   function view() {
     const p = PRESETS.find((x) => x.id === st.preset);
     if (p.kind === 'oblique') return { kind: 'oblique', yaw: 0, pitch: 0, zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc }; // Cam 7 has no angle: the drag variation does not apply
-    const sy0 = baseYaw(); // the camera's own yaw (a pack may declare stageYaw: the yaw of Cam 6, no UI)
+    const sy0 = shownYaw(); // the camera's own yaw (P2: the yaw of the turn while it lasts) (a pack may declare stageYaw: the yaw of Cam 6, no UI)
     const v = { kind: p.kind, yaw: sy0 + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc, persH: st.persH };
     if (p.kind === 'persp' && stageOn() && S && st.hero) v.focus = stageFocus(v); // Cam 6 hero tracking (mode 3 with a window only); absent = the camera of today
     return v;
@@ -734,6 +735,22 @@
   const propsOn = () => !NO_MODES && !!st.win && st.stageRooms.length > 0 && st.modeId === 'stage' && st.stage.props === 'on';
   function propsList() { if (!propsOn() || !S) return []; const r = orientRoom(); if (!r) return []; const key = `${r.id}|${baseYaw()}|${st.stage.tilesPerH}|${JSON.stringify(E.propsTest || null)}`; if (!S.propsC || S.propsC.key !== key) { const k = st.stageRooms.indexOf(r.id), res = E.props.list(S, P, r, { tilesPerH: st.stage.tilesPerH, last: k === st.stageRooms.length - 1, next: k >= 0 && k < st.stageRooms.length - 1 ? st.stageRooms[k + 1] : 0, test: E.propsTest }); S.propsC = { key, list: res.list, data: res.data }; } return S.propsC.list; }
   function planeKey() { if (!planesOn()) return ''; const r = orientRoom(); return r ? `${r.id}|${baseYaw()}|${st.stage.tilesPerH}` : ''; }
+  /* P2, THE SHAPE OF EACH ROOM IS KEPT: the first visit to a room builds its S (planes, ramps by its yaw) and keeps it (a window has 6 rooms at most); a return is immediate. The cache is emptied when the window session ends (winExit, applyScenario, loadFiles) and when anything that changes the shape changes (invalidate(true), or a guard that drops S). The key = the room, its yaw and the unit. */
+  const roomKeyOn = () => !NO_MODES && !!st.win && stageOn() && (planesOn() || preferYawOn());
+  function shapeKey() { if (!roomKeyOn() || !S) return ''; const r = orientRoom(); return r ? `${r.id}|${baseYaw()}|${st.stage.tilesPerH}` : ''; }
+  function dropShapes() { roomCache.clear(); }
+  /* P2, RAMPS BY THE YAW OF THE ROOM: the S3 decision (preferFill: the lateral transitions are built up, not cut) uses the yaw of the room of the hero (x is lateral at yaw 0 / 180, y at 90 / 270), not the example's fixed 180; the yaw is known only after a first build, so a shape built with another lateral axis is built once more */
+  const preferYawOn = () => !NO_MODES && !!st.win && stageOn() && orientOn() && P.rampPreferFill === true && !(E.orientTest && E.orientTest.fixedPreferYaw !== undefined);
+  const latClass = (y) => (Math.round(y / 90) % 2 !== 0 ? 1 : 0);
+  /* P2, THE YAW TURNS: crossing to a room whose yaw differs, the camera turns from the shown yaw to the new one in YAW_MS (the shortest way round, smoothstep); the shape of the new room is the one drawn from the first frame of the turn. Orientation off: no turn. Test hook `E.orientTest.snapYaw` (a cut), `E.orientTest.now` (a clock). */
+  const YAW_MS = 400, nowMs = () => (E.orientTest && E.orientTest.now ? E.orientTest.now() : performance.now());
+  function shownYaw() { const a = st.yawAnim, b = baseYaw(); if (!a || !orientOn() || (E.orientTest && E.orientTest.snapYaw)) return b; const t = Math.min(1, (nowMs() - a.t0) / YAW_MS); if (t >= 1) return b; return a.from + a.d * t * t * (3 - 2 * t); }
+  function yawWatch() { // in draw(): notes a change of the room yaw and starts the turn
+    const b = baseYaw(); if (!orientOn() || !st.win || (E.orientTest && E.orientTest.snapYaw)) { st.yawAnim = null; st.lastBase = b; return; }
+    if (st.lastBase === undefined || st.lastBase === null) st.lastBase = b;
+    if (b !== st.lastBase) { const cur = st.yawAnim && nowMs() - st.yawAnim.t0 < YAW_MS ? shownYaw() : st.lastBase, d = ((((b - cur) % 360) + 540) % 360) - 180; st.yawAnim = { from: cur, d, t0: nowMs() }; st.lastBase = b; }
+    if (st.yawAnim && nowMs() - st.yawAnim.t0 >= YAW_MS) st.yawAnim = null;
+  }
   function orientRoom() { const T = orientTable(); if (!T) return null; let id = 0; if (st.hero) { const i = E.stage.cellOf(S, st.hero.x - S.ox, st.hero.y - S.oy); id = i >= 0 ? S.roomMap[i] : 0; } if (id && T.byId.has(id)) st.orientId = id; else if (!st.orientId || !T.byId.has(st.orientId)) st.orientId = st.stageRooms[st.stageIdx]; return T.byId.get(st.orientId) || T.rooms[0] || null; }
   /* the ROOM FRAMING: the Cam 6 pitch and FOV, the camera centred on the room's box at its mean height, the zoom (px per tile) the largest at which the 8 corners of the room's box (at its lowest and highest tile) fit the panel with a margin; cached per room / yaw / panel */
   const FRAME_MARGIN = 0.94;
@@ -770,7 +787,7 @@
     const sg = E.stage, tp = st.stage.tilesPerH, [, h] = stageDims();
     if (st.follow && st.fitSc > 0 && h > 0) { const rf = frameRoom() ? roomFit(orientRoom()) : null; if (rf) st.zoom = st.trackZoom = rf.sc / st.fitSc; else st.zoom = st.trackZoom = sg.scale(h, E.stageTest && E.stageTest.noHeroFrac ? sg.DEF.heroFrac : st.stage.heroFrac /* MUTATION noHeroFrac: the distance not coupled to heroFrac */, tp) / st.fitSc; st.panX = st.panY = 0; } // the tracking owns the zoom and the pan (a manual one suspends it)
     const w = heroWin(); O.hero = { x: w.x, y: w.y, feet: heroFeet(), hTiles: tp, wTiles: sg.HERO_W * tp };
-    { const pl = propsList(); if (objectsOn() || pl.length) O.objects = { list: (objectsOn() ? st.stage.objectList : []).concat(pl), tilesPerH: tp, yaw: baseYaw() }; } // S4a: the declared billboards (map coordinates); drawn in ONE depth order with the hero
+    { const pl = propsList(); if (objectsOn() || pl.length) O.objects = { list: (objectsOn() ? st.stage.objectList : []).concat(pl), tilesPerH: tp, yaw: shownYaw() }; } // S4a: the declared billboards (map coordinates); drawn in ONE depth order with the hero
   }
   function stageSuspend() { if (!st.follow) return; if (!st.focus && S && st.hero) stageFocus(view()); st.follow = false; syncStageUI(); } // the camera stays where it is: the frozen focus plus the manual deltas
   function syncStageUI() { const sb = $('#stageBorder'); if (sb && !(E.modesTest && E.modesTest.skipBorderSelectSync)) sb.value = st.stage.border || 'off'; /* S2 follow-up: dac_stage pressed again from inside the window goes through applyScenario (no winExit) and resets st.stage.border: the select must follow (MUTATION skipBorderSelectSync) */ const so = $('#t-stageObjects'); if (so) so.checked = st.stage.objects === 'on'; /* S4a */ const sor = $('#t-stageOrient'); if (sor) sor.checked = st.stage.orient === 'on'; const spl = $('#t-stagePlanes'); if (spl) spl.checked = st.stage.planes === 'on'; const spr = $('#t-stageProps'); if (spr) spr.checked = st.stage.props === 'on'; const sfr = $('#stageFrame'); if (sfr) sfr.value = st.stage.frame || 'hero'; /* C1 */ const sv = $('#t-stageVolumes'); if (sv) sv.checked = st.stage.volumes === 'on'; /* S4b */ const t = $('#t-stageFollow'); if (t) t.checked = st.follow; const tu = $('#t-stageUnits'); if (tu) tu.checked = st.stageUnits; for (const k of ['tilesPerH', 'heroFrac']) { const i = $('#s-' + k), o = $('#o-' + k); if (i) i.value = st.stage[k]; if (o) o.textContent = st.stage[k]; } }
@@ -830,22 +847,28 @@
   }
 
   function draw() {
-    raf = 0; st.draws = (st.draws || 0) + 1; // (a counter for the tests: the frame at rest of a pan is drawn asynchronously)
-    if (S && S.pocket && S.pocketYaw !== baseYaw()) S = null; // a pocket is composed for ONE camera axis: any way of changing the camera (preset, scenario, mode, manifest, Stage preset) that changes the base yaw rebuilds it (a world shape does not depend on the yaw)
-    if (S && S.stageBorder && (S.stageBorder.yaw !== baseYaw() || S.stageBorder.tilesPerH !== st.stage.tilesPerH)) S = null; // the border depends on the camera axis (the camera side) and on the unit: a preset change or a new unit rebuilds it
-    if (S && E.objectsTest && E.objectsTest.rebuildOnMove) S = null; // (MUTATION rebuildOnMove, tests only: the shape rebuilt on every frame, which the hero's move must never do)
-    if (S && (S.planeKey || '') !== planeKey()) S = null; // C2: the planes belong to the room of the hero, its yaw and the unit
-    if (S && S.stageVolumes && S.stageVolumes.tilesPerH !== st.stage.tilesPerH) S = null; // the roofs are measured in H: a new unit rebuilds them
+    raf = 0; yawWatch(); if (st.yawAnim && !st.yawTick) st.yawTick = setTimeout(() => { st.yawTick = 0; invalidate(false); }, 30); // P2: the turn of the yaw is drawn frame by frame until it ends
+    st.draws = (st.draws || 0) + 1; // (a counter for the tests: the frame at rest of a pan is drawn asynchronously)
+    if (S && S.pocket && S.pocketYaw !== baseYaw()) { S = null; dropShapes(); } // a pocket is composed for ONE camera axis: any way of changing the camera (preset, scenario, mode, manifest, Stage preset) that changes the base yaw rebuilds it (a world shape does not depend on the yaw)
+    if (S && S.stageBorder && (S.stageBorder.yaw !== baseYaw() || S.stageBorder.tilesPerH !== st.stage.tilesPerH)) { S = null; dropShapes(); } // the border depends on the camera axis (the camera side) and on the unit: a preset change or a new unit rebuilds it
+    if (S && E.objectsTest && E.objectsTest.rebuildOnMove) { S = null; dropShapes(); } // (MUTATION rebuildOnMove, tests only: the shape rebuilt on every frame, which the hero's move must never do)
+    if (S && roomKeyOn() && (S.shapeKey || '') !== shapeKey()) { const r = orientRoom(); if (r && preferYawOn()) st.prefYaw = r.yaw; S = E.orientTest && E.orientTest.noCache ? null : roomCache.get(shapeKey()) || null; if (S) /* (MUTATION noCache: every visit rebuilds) */ { st.cacheHits = (st.cacheHits || 0) + 1; } } // P2: the shape of the room of the hero: from the cache when it was visited (immediate), else built below
+    else if (S && !roomKeyOn() && S.shapeKey) { S = null; dropShapes(); } // the window ended: the shape in hand belongs to a room
+    if (S && S.stageVolumes && S.stageVolumes.tilesPerH !== st.stage.tilesPerH) { S = null; dropShapes(); } // the roofs are measured in H: a new unit rebuilds them
     P.pocketYaw = baseYaw();
     const raw = packs[st.pack].pack, fl = E.hasFloors(raw); // a floors package (crystallizer 5): the shape is the one of the selected layer (the exterior in the stack and cutaway views)
     if (!S) {
       const pack = fl ? E.floorPack(raw, st.floors === 'single' ? st.layer : 0) : raw;
       try {
-        S = E.shape(pack, P, fl ? null : sliceSpec());
+        if (!fl) P.rampPreferYaw = preferYawOn() ? (st.prefYaw !== undefined ? st.prefYaw : st.stage.yaw !== undefined ? st.stage.yaw : 180) : undefined; // P2: the yaw whose lateral axis the ramps prefer
+        S = E.shape(pack, P, fl ? null : sliceSpec()); st.shapeBuilds = (st.shapeBuilds || 0) + 1;
         if (!fl && borderOn()) E.border.apply(S, { type: st.stage.border, tilesPerH: st.stage.tilesPerH, yaw: baseYaw(), test: E.borderTest }); // S2: right after the shape, before anything reads the levels
         if (!fl && volumesOn()) E.volumes.apply(S, { list: st.stage.volumeList, tilesPerH: st.stage.tilesPerH, test: E.volumesTest }); // S4b: after the border (a volume on the border's water is skipped), before anything reads the levels
         if (!fl && planesOn()) { const pr = orientRoom(); if (pr) E.planes.apply(S, { room: pr, yaw: baseYaw(), tilesPerH: st.stage.tilesPerH, test: E.planesTest }); } // C2: the planes of the hero's room, after the border and the volumes
         if (!fl) S.planeKey = planeKey();
+        if (!fl && preferYawOn()) { const pr0 = orientRoom(); if (pr0 && latClass(pr0.yaw) !== latClass(P.rampPreferYaw) && (st.preferTries = (st.preferTries || 0) + 1) <= 2) { st.prefYaw = pr0.yaw; S = null; invalidate(false); return; } st.preferTries = 0; } // P2: built with another lateral axis than the room's: once more
+        if (!fl) S.rampPreferYaw = P.rampPreferYaw;
+        if (!fl && roomKeyOn()) { S.shapeKey = shapeKey(); roomCache.set(S.shapeKey, S); }
         if (fl) E.floors.prepare(S, raw, P, st.floors === 'single' ? st.layer : 0);
         if (fl && P.backdrop && E.backdrop && st.floors === 'single' && st.layer > 0 && st.preset === 'isoE') E.backdrop.apply(S, P, raw, st.layer); // Floor backdrop (crystallizer 5, Option 2, phase 1): a band of the mountain behind the floor
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
@@ -1150,7 +1173,7 @@
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
-    window.__evo = { stageOn, slStats: () => ({ pending: !!st.slPending || !!raf || !!(st.pickJob && st.pickJob.live), pick: !!(st.pickJob && st.pickJob.live), started: st.slStarted || 0, done: st.slDone || 0, last: st.slLastStats || null }), redraw: () => invalidate(false), fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { dropShapes, cacheStats: () => { let bytes = 0; const seen = new Set(), walk = (o, d) => { if (!o || typeof o !== 'object' || seen.has(o) || d > 4) return; seen.add(o); if (ArrayBuffer.isView(o)) { bytes += o.byteLength; return; } for (const k of Object.keys(o)) { try { walk(o[k], d + 1); } catch (e) { /* a getter */ } } }; for (const v of roomCache.values()) walk(v, 0); return { rooms: roomCache.size, mb: bytes / 1048576, keys: [...roomCache.keys()] }; }, stageOn, slStats: () => ({ pending: !!st.slPending || !!raf || !!(st.pickJob && st.pickJob.live), pick: !!(st.pickJob && st.pickJob.live), started: st.slStarted || 0, done: st.slDone || 0, last: st.slLastStats || null }), redraw: () => invalidate(false), fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});
