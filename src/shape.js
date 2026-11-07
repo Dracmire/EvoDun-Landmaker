@@ -696,7 +696,7 @@
           if (vi === 0 && !cand.length) break;   // nothing fits here at all: the next site of the gate (variants are for a ramp that fits but would cut a path)
           /* S3 (optional input, R7: P.rampPreferFill absent / false = the order of today, byte-identical): a transition along the x axis (lateral for a camera at yaw 0 or 180) is a TRENCH when it is cut into the upper terrace (the near flank hides it); built up on the lower terrace (fill) it reads.
              So on a TIE of width the fill variant goes first for those (never a narrower one: the widest variant still wins). Measured on the real map (Balanced types, ramps): lateral cut 14 -> 7, fill 8 -> 15, narrowed 5 -> 5, dropped 0 -> 0. */
-          const ST = E.shapeTest || {}, lateralFill = (P.rampPreferFill === true || ST.flagLeak) && cand.length === 2 && cand[0].dir[0] !== 0; // (MUTATION flagLeak: the preference on without the flag)
+          const ST = E.shapeTest || {}, latAx = P.rampPreferYaw !== undefined && !ST.ignoreYaw && Math.round(P.rampPreferYaw / 90) % 2 !== 0 ? 1 : 0, lateralFill = (P.rampPreferFill === true || ST.flagLeak) && cand.length === 2 && cand[0].dir[latAx] !== 0; // P2: the lateral axis follows the yaw of the room (x for a camera at yaw 0 / 180, y at 90 / 270; `P.rampPreferYaw` absent = x, byte-identical) // (MUTATION flagLeak: the preference on without the flag)
           cand.sort((p, q) => (ST.fillAlways && lateralFill ? (p.mode === 'fill' ? -1 : 1) : q.cols.length - p.cols.length) || (lateralFill ? (p.mode === 'fill' ? -1 : 1) : (p.mode === 'cut' ? -1 : 1))); // (MUTATION fillAlways: the fill first even when it is narrower)
           for (const r of cand) if (walkOK(r)) { rec = r; variant = vi; break; }
         }

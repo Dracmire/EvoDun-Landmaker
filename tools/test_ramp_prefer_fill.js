@@ -32,5 +32,13 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   const mAll = stat(build({ ...DEF, rampPreferFill: true }, { fillAlways: true }));
   console.log('  Default fillAlways:', JSON.stringify(mAll));
   ok('MUTATION fillAlways: the "never narrower" check FAILS (more narrowed stairs and fewer lateral columns than the real feature)', mAll.narrowed > D1.narrowed && mAll.colsLat < D1.colsLat, mAll);
+  // P2: the lateral axis follows the yaw of the room (P.rampPreferYaw): x at 0 / 180, y at 90 / 270
+  const latY = (S) => { const l = S.stairs.filter((r) => r.dir[1] !== 0); return { n: l.length, cut: l.filter((r) => r.mode === 'cut').length, fill: l.filter((r) => r.mode === 'fill').length }; };
+  const S3 = build({ rampPreferFill: true, rampPreferYaw: 90 }), S4 = build({ rampPreferFill: true, rampPreferYaw: 180 }), y0 = latY(S0), y2 = latY(S2), y3 = latY(S3);
+  console.log('  y-lateral absent :', JSON.stringify(y0), ' present yaw 180:', JSON.stringify(y2), ' present yaw 90:', JSON.stringify(y3));
+  ok('P2: rampPreferYaw 180 = the S3 behaviour (byte-identical to rampPreferFill alone)', hash(S4) === hash(S2));
+  ok(`P2: with yaw 90 the y-lateral transitions take the fill first (fill ${y0.fill} -> ${y3.fill}, cut ${y0.cut} -> ${y3.cut}) and the x ones stay as the absent case`, y3.fill > y0.fill && y3.cut < y0.cut && S0.stairs.every((r, i) => r.dir[1] !== 0 || (r.mode === S3.stairs[i].mode && JSON.stringify(r.bottom) === JSON.stringify(S3.stairs[i].bottom))), { y0, y3 });
+  const mYaw = build({ rampPreferFill: true, rampPreferYaw: 90 }, { ignoreYaw: true });
+  ok(`MUTATION ignoreYaw (the lateral axis is always x): yaw 90 gives the 180 result (y-lateral fill ${latY(mYaw).fill}, as ${y2.fill} with 180): the yaw check FAILS`, hash(mYaw) === hash(S2) && !(latY(mYaw).fill > y0.fill));
   console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
