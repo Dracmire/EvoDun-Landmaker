@@ -12,7 +12,7 @@ const E = window.EVO; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : extra); } };
 const P = JSON.parse('{"ascCut":0.15,"ascGate":0,"ascRouteKey":"","chainExtra":3,"cakeCut":"off","dioChain":"off","anchors":false,"anchorH":0.5,"terraces":5,"subs":3,"terH":4,"spread":1,"spreadCentre":"largest","curves":"ordered","wallPass":"t3","wallExtrude":0.25,"wallStrata":3,"wallColumn":1.2,"t2Spacing":0.9,"t2Rows":6,"t2Group":1,"t2Jitter":0.4,"subH":0.88,"minPlateau":120,"minSub":3,"pre":1,"smooth":2,"radius":0.9,"passGap":8,"climb":2,"tread":1,"stairW":3,"stairStyle":0,"rampDepth":2,"gateThr":0.05,"gateMin":3,"margin":24,"rooms":true,"ascWalls":false,"ascHeight":1.5,"pocket":false,"pocketFraming":"auto","pocketHeight":2.5,"backdrop":false,"backdropGap":0,"backdropHeight":2,"roomsMinCore":100,"roomsCross":10,"roomsIsoLimit":100,"rRadius":5,"cake":false,"cakeLayers":3,"cakeStep":0.3,"cakePer":1,"cakeSeam":5,"pocketYaw":180,"chainKey":"","chainFail":"","rampPreferFill":true}');
 // [room, back, side, front, wall, cols, front lowered]
-const EXP = { 17: [189, 215, 74, 42, 7, 27], 10: [32, 240, 134, 10, 9, 56], 20: [290, 276, 191, 44, 10, 64], 27: [437, 247, 351, 84, 4, 69], 6: [119, 312, 508, 17, 13, 127], 5: [191, 261, 42, 30, 13, 27], 14: [315, 366, 300, 44, 11, 70], 44: [0, 230, 718, 0, 9, 111] };
+const EXP = { 17: [178, 145, 55, 44, 7, 27], 10: [28, 148, 122, 11, 9, 56], 20: [224, 156, 162, 53, 10, 64], 27: [374, 153, 300, 94, 4, 69], 6: [365, 313, 396, 91, 22, 127], 5: [160, 205, 41, 60, 13, 27], 14: [265, 444, 231, 66, 22, 70], 44: [530, 844, 516, 123, 43, 111] };
 const WINS = [[17, 10, 20, 27, 6, 5], [14], [44]], HYP = E.planes.HYP;
 (async () => {
   const { mk } = await require('./real_pack.js').load(E);
@@ -25,6 +25,12 @@ const WINS = [[17, 10, 20, 27, 6, 5], [14], [44]], HYP = E.planes.HYP;
   ok('the table of the 8 rooms (back / side / front tiles, wall / columns / lowered front) is stable: ' + JSON.stringify(tab), Object.keys(EXP).every((id) => JSON.stringify(tab[id]) === JSON.stringify(EXP[id])), tab);
   ok('no walkable tile of the window changes height, in any of the 8 rooms (the walkable footprint is never touched)', Object.values(changed).every((c) => !c), changed);
   { const x = run(wins[27], recs[27], { wallOnWalkable: true }); ok('MUTATION wallOnWalkable (the wall steps on walkable tiles of the other rooms): the walkable-footprint check FAILS', x.before.some((h, k) => Math.abs(h - x.after[k]) > 1e-9)); }
+  // P1: void is classified like blocked ground in BACK and SIDE (not in FRONT)
+  { const x = run(wins[44], recs[44]), y = run(wins[44], recs[44], { noVoidWall: true }), vd = x.S.void;
+    ok(`room 44 (yaw 90, void behind it): the closing wall exists (${x.r.wall} tiles, ${x.r.voidTiles} of them on former void) and the columns reach the void side (${x.r.cols})`, x.r.wall > 0 && x.r.voidTiles > 0 && x.r.cols >= 9, { wall: x.r.wall, voidTiles: x.r.voidTiles });
+    ok(`MUTATION noVoidWall (void is not classified, the C2 rule): room 44 has wall ${y.r.wall}: the wall check FAILS`, !(y.r.wall > 0), { wall: y.r.wall });
+    // a former void tile is now a drawn, blocked, NOT walkable tile of the wall height
+    const S0 = shape(wins[44]); let n = 0, bad = 0; for (let i = 0; i < S0.n; i++) if (S0.void[i] && !x.S.void[i]) { n++; if (!x.S.block[i]) bad++; } ok(`the ${n} void tiles that took a wall / column are drawn and blocked (${bad} walkable), and the next shape built from the same pack still has them as void`, n === x.r.voidTiles && bad === 0 && S0.void.some((v, i) => v && !x.S.void[i]) , { n, bad }); }
   // room 14: the wall behind the columns of the room
   const wallCols = (x, rec) => { const C = E.planes.classify(x.S, rec, rec.yaw), roof = x.r.floorHigh + HYP.wallH * 2; let cols = 0, withWall = 0; for (const [p, far] of C.far) { cols++; let found = false; for (let i = 0; i < x.S.n; i++) if (C.Pc[i] === p && C.A[i] === far + 1 && x.S.levelH[x.S.fine[i]] >= roof - 1e-6) { found = true; break; } if (found) withWall++; } return { cols, withWall }; };
   { const x = run(wins[14], recs[14]), w = wallCols(x, recs[14]); ok(`room 14: a wall behind ${w.withWall} of its ${w.cols} columns (at least half)`, w.withWall * 2 >= w.cols, w);
