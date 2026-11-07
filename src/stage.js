@@ -91,5 +91,29 @@
     return N < 2 ? null : { min: lo / tilesPerH, max: hi / tilesPerH };
   }
 
-  E.stage = { zoneMap, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+  /* M2b, THE ZONES OF A PNG (mode 3, example "Your images"): the Stage rules read ZONES (E.stage.zoneMap): for a PNG they come from the role `zone`, not from the rooms layer.
+     ORDER [R, a HYPOTHESIS to calibrate against the paired shot]: BFS over the adjacency of the zones (4-neighbour tiles with different ids) from the zone of the LOWEST mean elevation (ties: the lowest id), the neighbours of a zone in ascending id, a zone that the BFS does not reach starts the next one (the lowest mean among the rest). The id of a zone in the window is its place in that order, 1..N (an explicit table: 0 is "none", the raw id of the image is not used), so `stageRooms` = [1] is the lowest zone.
+     FOOTPRINT: only the LARGEST connected piece (walking graph) of a zone of the window is its footprint; the walkable tiles of its other pieces are dropped (0) and counted (`S.stageZonesInfo`, shown in the readout). DAC rooms are not touched. */
+  function zoneTable(pack) {
+    const z = pack.fields && pack.fields.zone; if (!z) return null; if (z.stageTable) return z.stageTable;
+    const W = pack.width, H = pack.height, ids = z.sliceIds || (z.sliceIds = E.fillUnassigned(z.ids, W, H)), sum = new Map(), cnt = new Map(), adj = new Map();
+    const link = (a, b) => { if (!adj.has(a)) adj.set(a, new Set()); if (!adj.has(b)) adj.set(b, new Set()); adj.get(a).add(b); adj.get(b).add(a); };
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x, a = ids[i]; if (a <= 0) continue; const e = pack.elevation[i]; if (e > 0) { sum.set(a, (sum.get(a) || 0) + e); cnt.set(a, (cnt.get(a) || 0) + 1); } else if (!sum.has(a)) { sum.set(a, 0); cnt.set(a, 0); } if (x + 1 < W && ids[i + 1] > 0 && ids[i + 1] !== a) link(a, ids[i + 1]); if (y + 1 < H && ids[i + W] > 0 && ids[i + W] !== a) link(a, ids[i + W]); }
+    const mean = (a) => (cnt.get(a) ? sum.get(a) / cnt.get(a) : Infinity), left = [...sum.keys()].sort((a, b) => a - b), order = [], seen = new Set();
+    while (order.length < left.length) { const start = left.filter((a) => !seen.has(a)).sort((a, b) => mean(a) - mean(b) || a - b)[0], q = [start]; seen.add(start); for (let h = 0; h < q.length; h++) { order.push(q[h]); for (const b of [...(adj.get(q[h]) || [])].sort((p, r) => p - r)) if (!seen.has(b)) { seen.add(b); q.push(b); } } }
+    return (z.stageTable = { order, toK: new Map(order.map((raw, k) => [raw, k + 1])), mean: order.map(mean) });
+  }
+  /* the zone map of the window (ids 1..N, 0 = none) and the footprint of the zones of the window `ks` (their place in the order): `S.stageZones`, `S.stageZonesInfo` */
+  function buildZones(S, P, pack, ks) {
+    const tb = zoneTable(pack), z = pack.fields.zone, ids = z.sliceIds, W = S.W, H = S.H, zm = new Int32Array(S.n);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const px = S.ox + x, py = S.oy + y; if (px < 0 || py < 0 || px >= pack.width || py >= pack.height) continue; zm[y * W + x] = tb.toK.get(ids[py * pack.width + px]) || 0; }
+    const nb = E.walkGraph(S, P), vd = S.void, walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0, info = { zones: tb.order.length, window: ks.slice(), raw: ks.map((k) => tb.order[k - 1]), discarded: {}, total: 0 };
+    for (const k of ks) {
+      const seen = new Uint8Array(S.n); let best = null; const pieces = [];
+      for (let i = 0; i < S.n; i++) { if (zm[i] !== k || !walk(i) || seen[i]) continue; const c = [i]; seen[i] = 1; for (let h = 0; h < c.length; h++) for (const j of nb(c[h])) if (zm[j] === k && walk(j) && !seen[j]) { seen[j] = 1; c.push(j); } pieces.push(c); if (!best || c.length > best.length) best = c; }
+      let d = 0; for (const c of pieces) if (c !== best) { for (const i of c) zm[i] = 0; d += c.length; } info.discarded[k] = d; info.total += d;
+    }
+    S.stageZones = zm; S.stageZonesInfo = info;
+  }
+  E.stage = { zoneTable, buildZones, zoneMap, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
 })(window.EVO = window.EVO || {});

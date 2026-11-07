@@ -76,4 +76,34 @@ g('poi', p)
 import json
 json.dump(np.where(ring, 0, zid)[128].tolist(), open(os.path.join(out('maps'), 'zid_row128.json'), 'w'))   # ground truth of zones.png, row 128
 json.dump(sorted(int(v) for v in set(zid[0]) | set(zid[-1]) | set(zid[:, 0]) | set(zid[:, -1])), open(os.path.join(out('maps_noring'), 'edge_zones.json'), 'w'))
+
+# ---- STAGE FIXTURE (M2b, tools/ui/test_stage_zones_ui.js, tools/test_stage_zones.js): a 96 x 96 image with a STRIP (y 38-57) of THREE zones in a chain along x, ours (no copyright), deterministic (no random
+# numbers) -> tools/ui/.cache/maps_stage/{height,zones,path}.png. zones.png: hue ids 1, 2, 3 (A | B | C along x, wavy borders), black outside the strip. height.png: grey V = height, 0 (VOID) outside the strip,
+# 7 plateaus joined by smooth ramps (A 44 -> 90, B 96 -> 128 -> 160, C 168 -> 198 -> 228: with 5 terraces A has 2, B 3 and C 2 terraces; the zone borders are NOT terrace edges). Two features the rules must cope with:
+# a POND in zone B (height 0 = VOID, the roles have no water) and an ISLAND in zone C (a 5 x 5 walkable patch inside a ring of void: a piece apart from the main one of its zone, 25 tiles).
+# Each zone is about 32 x 20 tiles (length / width 1.6: a Z room for the orientation). path.png: a graded road along y = 48 (not read by the Stage rules).
+M = 96
+ys_, xs_ = np.mgrid[0:M, 0:M]
+strip = (ys_ >= 38) & (ys_ < 58)
+wave = 3 * np.sin(ys_ / 4.0)
+zs3 = np.where(~strip, 0, np.where(xs_ + wave < 32, 1, np.where(xs_ + wave < 64, 2, 3)))
+def sstep(t): t = np.clip(t, 0, 1); return t * t * (3 - 2 * t)
+xr = xs_ + wave
+hh = 44 + 46 * sstep((xr - 14) / 10)                                    # A: 44 -> 90
+hh = np.where(xr >= 32, 96 + 32 * sstep((xr - 40) / 6) + 32 * sstep((xr - 54) / 6), hh)   # B: 96 -> 128 -> 160
+hh = np.where(xr >= 64, 168 + 30 * sstep((xr - 70) / 8) + 30 * sstep((xr - 86) / 6), hh)  # C: 168 -> 198 -> 228
+hh = hh + 4 * np.sin(ys_ / 5.0 + xs_ / 17.0)                            # a gentle relief (sub-terraces)
+hh[~strip] = 0                                                           # outside the strip: void
+hh[(((xs_ - 47) / 8.0) ** 2 + ((ys_ - 48) / 5.0) ** 2) <= 1] = 0        # the pond (void)
+ring = (xs_ >= 80) & (xs_ <= 88) & (ys_ >= 43) & (ys_ <= 51)
+hh[ring & ~((xs_ >= 82) & (xs_ <= 86) & (ys_ >= 45) & (ys_ <= 49))] = 0 # the island: a 5 x 5 patch (x 82-86, y 45-49) inside a ring of void
+g3 = np.clip(np.round(hh), 0, 255).astype(np.uint8)
+def zone3_rgb(z):
+    rgb = np.zeros((M, M, 3), np.uint8)
+    for k in (1, 2, 3):
+        r, g, b = colorsys.hsv_to_rgb(k / 4, 1, 1); rgb[z == k] = [round(r * 255), round(g * 255), round(b * 255)]
+    return rgb
+road = np.where(strip, np.clip(255 * (1 - np.abs(ys_ - 48) / 2), 0, 255), 0).astype(np.uint8)
+def save3(name, rgb): Image.fromarray(np.dstack([rgb, np.full(rgb.shape[:2], 255, np.uint8)]), 'RGBA').save(os.path.join(out('maps_stage'), name + '.png'))
+save3('height', np.dstack([g3] * 3)); save3('zones', zone3_rgb(zs3)); save3('path', np.dstack([road] * 3))
 print('maps written to', cache)
