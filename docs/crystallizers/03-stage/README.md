@@ -392,6 +392,30 @@ Third PR of the CORE of the "mock T" plan: features 4 (torches along the axis) a
 - The landmark's base detail (S4c) and the torches are separate lists with their own visibility; they may overlap near the goal.
 - The goal height is the S4c smoothstep of the hero's distance; in room framing (no hero walking) it keeps the distance of the hero's standing tile.
 
+### M2 as built (M2a + M2b): the mode 3 rules on the ZONES of a PNG (`src/stage.js` `zoneMap` / `zoneTable` / `buildZones`, example "Your images (PNG + roles)" of mode 3; `node tools/test_stage_zones.js`, `tools/ui/test_stage_zones_ui.js`, `tools/ui/m2_hashes.js`, `tools/ui/m2_shots.js`; step M2 of `MVP.md`)
+Sources of the rules: DAC (unchanged) and PNG + roles (new).
+- **M2a, one accessor.** `E.stage.zoneMap(S)` = `S.stageZones || S.roomMap` is the ONE place where the rules read the zones: `orient.js` (tiles per zone, gates), `planes.js` (footprint), `props.js` (tiles of the zone, gates), `stage.js` `roomCentre`, `ui.js` `orientRoom` and the readout. No behaviour change: the canvas (and the text of the info line without its timings) hash the same before and after in 21 states (`tools/ui/m2_hashes.js`: `dac_stage` room by room, three hero positions, the mode 3 switches on and off, objects and volumes on, `mockt_z14`, `mockt_x44`, `x4_stage`, `diorama31_stage`, modes 1 and 2).
+- **M2b, the zones of the image.** The example "Your images" of mode 3 is a window example (clean view, units in H, orientation, planes and props on). After a load (or a change of roles) the window session is entered again; modes 1, 2 and 4 load as before. The levels come from the role `elevation` (the usual quantization), the zones from the role `zone` with the ids of the slice (`E.fillUnassigned`).
+  - **Table raw id -> 1..N and ORDER [R, a HYPOTHESIS to calibrate with the paired shot]:** BFS over the adjacency of the zones (4-neighbour tiles with different ids) from the zone of the LOWEST mean elevation (ties: the lowest id), the neighbours of a zone in ascending id; a zone the BFS does not reach starts the next one. The id in the window is the place in that order (0 = none), never the raw id of the image.
+  - **Default window:** the lowest zone, alone (the selector of any room or zone is M2c; `window.__evo.stageSetWindow([k, ...])` is what it will call and what the tests call today).
+  - **Footprint:** only the LARGEST connected piece (walking graph) of a zone of the window; the walkable tiles of its other pieces get zone 0 and are counted (`S.stageZonesInfo`, in the readout: "PNG zones: N, window zone ..., K walkable tiles dropped"). DAC rooms are not touched.
+- **Fixture** (`tools/ui/gen_maps.py`, set `maps_stage`, generated, never committed; deterministic, ours): a 96 x 96 image with a strip of THREE zones in a chain (32 x 20 tiles each: Z rooms), 5 terraces (A 2, B 3, C 2), a pond of void in B, an island of 25 walkable tiles in C. Zone order 1, 2, 3 (mean elevation 238, 491, 766). Dropped tiles: 25 (zone 3: the island), 0 in zones 1 and 2. Table (`tools/test_stage_zones.js`):
+
+| zone | direction, yaw | planes: wall / columns / front / void tiles (window of the zone) | props, window [1, 2, 3]: path / torches / pillars / goal |
+|---|---|---|---|
+| 1 | Z, 270 | 40 / 23 / 0 / 23 | 33 / 7 / 0 / none |
+| 2 | Z, 270 | 40 / 24 / 8 / 24 | 60 / 10 / 0 / none |
+| 3 | Z, 270 | 0 / 23 / 0 / 23 | 56 / 13 / 0 / goal |
+
+  Captures: `shots/m2/` (zones 1-3 in room and hero framing, the chain, and the top view of the zone map with the dropped island).
+
+#### Para polish (found in M2, not fixed here)
+- An interior hole of void (the pond of zone B) is classified SIDE, so it gets the P1 columns: a tall cluster in the middle of the room (`shots/m2/zona2_encuadre_sala_Box.png`). A DAC room has no such hole; for a PNG the rule could skip void tiles that are not on the outer edge of the footprint.
+- The gate between two zones of the fixture spans the whole 20-tile strip, so no door pillar fits (0 pillars); the pillars need a gate narrower than the room.
+- The default window is one zone: a chain [1, 2, 3] gives entry / exit gates but the order is the BFS one, not a route chosen by the user (the selector, M2c).
+- A PNG without the role `zone` shows "assign the zone role" and enters no window.
+- The hero cannot stand on a dropped piece (it is zone 0); `orientRoom` keeps the previous zone while the hero is on one.
+
 ## 9. Known limits and open questions
 
 - The viewer cannot make the art; it can only place it.
