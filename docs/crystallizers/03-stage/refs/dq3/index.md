@@ -40,10 +40,10 @@ Procedencia: `old/` = rips 16-bit del remix de Paco (la etiqueta con su contacto
 | 33 | `pairs/p_20261029_192251_shop_front_orig_remake.png` | `Captura de pantalla 2026-10-29 192251.png` | Frente de tienda con escalera; ORIGINAL | REMAKE; se ve la interfaz del reproductor |
 | 34 | `pairs/p_20261029_192307_throne_hall_columns_orig_remake.png` | `Captura de pantalla 2026-10-29 192307.png` | Sala con columnas y jarrones; ORIGINAL | REMAKE |
 | 35 | `pairs/p_20261029_231856_castle_gate_remake_orig.png` | `Captura de pantalla 2026-10-29 231856.png` | Puerta de castillo con puente; izquierda REMAKE, derecha original |
-| 36 | `other/o_20261030_013254_dq11_3d_vs_2d_a.png` | `Captura de pantalla 2026-10-30 013254.png` | Dragon Quest XI (no es DQ3): modo 3D | modo 2D, bosque o camino |
-| 37 | `other/o_20261030_013320_dq11_3d_vs_2d_b.png` | `Captura de pantalla 2026-10-30 013320.png` | Dragon Quest XI (no es DQ3): modo 3D | modo 2D, bosque o camino |
-| 38 | `other/o_20261030_013400_dq11_3d_vs_2d_c.png` | `Captura de pantalla 2026-10-30 013400.png` | Dragon Quest XI (no es DQ3): modo 3D | modo 2D, bosque o camino |
-| 39 | `other/o_20261030_013506_dq11_3d_vs_2d_d.png` | `Captura de pantalla 2026-10-30 013506.png` | Dragon Quest XI (no es DQ3): modo 3D | modo 2D, bosque o camino |
+| 36 | `other/o_20261030_013254_dq11_3d_vs_2d_a.png` | `Captura de pantalla 2026-10-30 013254.png` | Dragon Quest XI (no es DQ3): izquierda 3D: héroe sobre una rama con isla flotante al fondo; derecha modo 2D: claro de bosque | modo 2D, bosque o camino |
+| 37 | `other/o_20261030_013320_dq11_3d_vs_2d_b.png` | `Captura de pantalla 2026-10-30 013320.png` | Dragon Quest XI (no es DQ3): izquierda 3D: primer plano del héroe y una compañera; derecha modo 2D: el mismo claro de bosque | modo 2D, bosque o camino |
+| 38 | `other/o_20261030_013400_dq11_3d_vs_2d_c.png` | `Captura de pantalla 2026-10-30 013400.png` | Dragon Quest XI (no es DQ3): izquierda 3D: camino de tierra con minimapa y rótulo «Cobblestone Tor - Base»; derecha modo 2D: claro con camino y vallado | modo 2D, bosque o camino |
+| 39 | `other/o_20261030_013506_dq11_3d_vs_2d_d.png` | `Captura de pantalla 2026-10-30 013506.png` | Dragon Quest XI (no es DQ3): izquierda 3D: escalera de piedra y antorchas, mismo rótulo; derecha modo 2D: escalera a un santuario | modo 2D, bosque o camino |
 
 ## Script de renombres (CC lo adapta si cambia la clasificación)
 
@@ -92,3 +92,13 @@ git mv "Captura de pantalla 2026-10-30 013506.png" "refs/dq3/other/o_20261030_01
 ```
 
 Esperado: 39 renombres en `git status` (R100, mismos bytes), `README.md` y `shots/` de `03-stage` intactos.
+
+
+## Notas tras abrir las 39 imágenes (CC, 2026-11-07)
+La clasificación old / remake / pairs / other se confirma entera: ninguna imagen cambia de carpeta.
+- `other/`: las cuatro son Dragon Quest XI (héroe y rótulo «Cobblestone Tor - Base»), con su versión en modo 2D a la derecha; descripciones afinadas arriba.
+- `remake/r_20261030_050039_pond_peninsula.png` es una foto de una pantalla (marco negro y reflejos), no una captura directa.
+- `remake/r_20261030_140616_forest_slime_dialog.png` tiene encima botones de un visor de imágenes y un texto de resolución, además del diálogo del juego.
+- `pairs/p_20261029_192251_shop_front_orig_remake.png` muestra la barra del reproductor de video (4:59 / 8:00); `pairs/p_20261029_192049_throne_room_orig_remake.png` trae un crédito musical en la esquina; las demás llevan la marca del canal («Cycu…») abajo a la derecha.
+- `pairs/p_20261029_231856_castle_gate_remake_orig.png` es una composición sin rótulos: izquierda remake, derecha original (como dice el nombre).
+- `old/`: las siete llevan dentro la etiqueta de Paco (ver Procedencia).

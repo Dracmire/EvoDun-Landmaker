@@ -1,3 +1,5 @@
+Ver también: [`MVP.md`](MVP.md) (plan del MVP), [`BRUJULA.md`](BRUJULA.md) (brújula del modo 3) y [`refs/`](refs/) (material de referencia DQ3).
+
 # Crystallizer 3 - Stage (framing and dressing)
 
 ## 1. Status
