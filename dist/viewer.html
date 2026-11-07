@@ -5384,12 +5384,14 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   const feetH = (S, i) => S.levelH[S.fine[i]];
 
   /* the walkable tile of room `id` nearest to its centroid (window coordinates, the tile centre) */
+  /* M2: THE ZONE MAP of the window (0 = none): the zones the mode 3 rules read. A zone of a PNG (`S.stageZones`, set by the viewer from the role `zone`) or a DAC room (`S.roomMap`); every rule reads it through this one function. */
+  const zoneMap = (S) => S.stageZones || S.roomMap;
   function roomCentre(S, id) {
-    const W = S.W; let n = 0, sx = 0, sy = 0;
-    for (let i = 0; i < S.roomMap.length; i++) if (S.roomMap[i] === id && walkable(S, i)) { n++; sx += i % W; sy += (i / W) | 0; }
+    const W = S.W, zm = zoneMap(S); let n = 0, sx = 0, sy = 0;
+    for (let i = 0; i < zm.length; i++) if (zm[i] === id && walkable(S, i)) { n++; sx += i % W; sy += (i / W) | 0; }
     if (!n) return null;
     sx /= n; sy /= n; let best = -1, bd = 1e18;
-    for (let i = 0; i < S.roomMap.length; i++) if (S.roomMap[i] === id && walkable(S, i)) { const d = (i % W + 0.5 - sx) ** 2 + (((i / W) | 0) + 0.5 - sy) ** 2; if (d < bd) { bd = d; best = i; } }
+    for (let i = 0; i < zm.length; i++) if (zm[i] === id && walkable(S, i)) { const d = (i % W + 0.5 - sx) ** 2 + (((i / W) | 0) + 0.5 - sy) ** 2; if (d < bd) { bd = d; best = i; } }
     return { x: best % W + 0.5, y: ((best / W) | 0) + 0.5, i: best };
   }
 
@@ -5431,7 +5433,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     return N < 2 ? null : { min: lo / tilesPerH, max: hi / tilesPerH };
   }
 
-  E.stage = { TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+  E.stage = { zoneMap, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
 })(window.EVO = window.EVO || {});
 
 /* STAGE BORDERS (mode 3, PR S2; `E.border.apply(S, opts)`; docs/crystallizers/03-stage/README.md "S2"): the ground OUTSIDE the footprint of the 2D-HD window gets a profile that closes the stage: ISLA (a shallow moat of water around the footprint) and QUEBRADA (a rise on the far side, a deep drop on the camera side).
@@ -5645,9 +5647,9 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   function compute(S, P, rooms, tilesPerH) {
     const W = S.W, n = S.n, tp = tilesPerH || 1, vd = S.void, T = (E.orientTest || {});
     const walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]), hOf = (i) => S.levelH[S.fine[i]] / tp;
-    const nb = E.walkGraph(S, P), tiles = new Map(); for (const id of rooms) tiles.set(id, []);
-    for (let i = 0; i < n; i++) { const r = S.roomMap[i]; if (r > 0 && tiles.has(r) && walk(i)) tiles.get(r).push(i); }
-    const gate = (a, b) => { let sx = 0, sy = 0, c = 0; const inB = (j) => S.roomMap[j] === b; for (const i of tiles.get(a) || []) for (const j of nb(i)) if (inB(j) && walk(j)) { sx += (i % W) + (j % W) + 1; sy += ((i / W) | 0) + ((j / W) | 0) + 1; c += 2; } return c ? [sx / c, sy / c] : null; }; // centroid of the walking edges (tile centres)
+    const nb = E.walkGraph(S, P), zm = E.stage.zoneMap(S), tiles = new Map(); for (const id of rooms) tiles.set(id, []);
+    for (let i = 0; i < n; i++) { const r = zm[i]; if (r > 0 && tiles.has(r) && walk(i)) tiles.get(r).push(i); }
+    const gate = (a, b) => { let sx = 0, sy = 0, c = 0; const inB = (j) => zm[j] === b; for (const i of tiles.get(a) || []) for (const j of nb(i)) if (inB(j) && walk(j)) { sx += (i % W) + (j % W) + 1; sy += ((i / W) | 0) + ((j / W) | 0) + 1; c += 2; } return c ? [sx / c, sy / c] : null; }; // centroid of the walking edges (tile centres)
     const quant = (arr, q) => { const s = arr.slice().sort((p, r) => p - r); return s[Math.min(s.length - 1, Math.max(0, Math.floor(q * (s.length - 1))))]; };
     const out = [], byId = new Map();
     rooms.forEach((id, k) => {
@@ -5705,8 +5707,8 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     opts = opts || {}; const W = S.W, H = S.H, n = S.n, vd = S.void, look = E.orient.lookOf(yaw), f = [look[0], look[1]], r = [-f[1], f[0]];
     const walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]), eligible = (i) => !(vd && vd[i] && opts.noVoid) && (opts.all || !walk(i));
     const A = new Int32Array(n), Pc = new Int32Array(n); for (let i = 0; i < n; i++) { const x = i % W, y = (i / W) | 0; A[i] = x * f[0] + y * f[1]; Pc[i] = x * r[0] + y * r[1]; }
-    const foot = [], inFoot = new Uint8Array(n), near = new Map(), far = new Map();
-    for (let i = 0; i < n; i++) if (S.roomMap[i] === room.id && !S.block[i] && !(vd && vd[i])) { foot.push(i); inFoot[i] = 1; const p = Pc[i], a = A[i]; if (!near.has(p) || a < near.get(p)) near.set(p, a); if (!far.has(p) || a > far.get(p)) far.set(p, a); }
+    const zm = E.stage.zoneMap(S), foot = [], inFoot = new Uint8Array(n), near = new Map(), far = new Map();
+    for (let i = 0; i < n; i++) if (zm[i] === room.id && !S.block[i] && !(vd && vd[i])) { foot.push(i); inFoot[i] = 1; const p = Pc[i], a = A[i]; if (!near.has(p) || a < near.get(p)) near.set(p, a); if (!far.has(p) || a > far.get(p)) far.set(p, a); }
     // the ring: the tiles within HYP.R (Euclidean; a square with the hook `chebyshev`) of the footprint; `dist` = the Euclidean distance to the nearest footprint tile
     const ring = new Uint8Array(n), dist = new Float32Array(n).fill(1e9), cheb = !!opts.chebyshev; for (const i of foot) { const x = i % W, y = (i / W) | 0; for (let dy = -HYP.R; dy <= HYP.R; dy++) { const yy = y + dy; if (yy < 0 || yy >= H) continue; for (let dx = -HYP.R; dx <= HYP.R; dx++) { const xx = x + dx; if (xx < 0 || xx >= W) continue; const d = Math.hypot(dx, dy); if (!cheb && d > HYP.R + 1e-9) continue; const j = yy * W + xx; ring[j] = 1; if (d < dist[j]) dist[j] = d; } } }
     const cls = new Uint8Array(n), counts = { back: 0, side: 0, front: 0, voidBack: 0, voidSide: 0 };
@@ -5758,12 +5760,12 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
     const walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]), nb = E.walkGraph(S, P);
     const A = (i) => (i % W) * f[0] + ((i / W) | 0) * f[1], Pc = (i) => (i % W) * r[0] + ((i / W) | 0) * r[1], hOf = (i) => S.levelH[S.fine[i]];
     const out = { room: rec.id, yaw: rec.yaw, noPath: false, path: [], start: -1, end: -1, torches: [], pillars: [], goal: null, aMid: 0 };
-    const tiles = []; const inRoom = new Uint8Array(n); for (let i = 0; i < n; i++) if (S.roomMap[i] === rec.id && walk(i)) { tiles.push(i); inRoom[i] = 1; }
+    const zm = E.stage.zoneMap(S), tiles = []; const inRoom = new Uint8Array(n); for (let i = 0; i < n; i++) if (zm[i] === rec.id && walk(i)) { tiles.push(i); inRoom[i] = 1; }
     if (!tiles.length) { out.noPath = true; return out; }
     // the transition tiles (steps, bottom, top) and the gate tiles (a room tile that walks into another room, and that neighbour), dilated
     const mark = new Uint8Array(n), gateTo = new Map(); // gateTo: next room id -> room tiles of that gate
     for (const st of S.stairs || []) { for (const s of st.steps || []) for (const t of s.tiles) mark[t] = 1; for (const t of st.bottom || []) mark[t] = 1; for (const t of st.top || []) mark[t] = 1; }
-    for (const i of tiles) for (const j of nb(i)) { const rj = S.roomMap[j]; if (rj !== rec.id && walk(j)) { mark[i] = 1; mark[j] = 1; if (!gateTo.has(rj)) gateTo.set(rj, []); gateTo.get(rj).push(i); } }
+    for (const i of tiles) for (const j of nb(i)) { const rj = zm[j]; if (rj !== rec.id && walk(j)) { mark[i] = 1; mark[j] = 1; if (!gateTo.has(rj)) gateTo.set(rj, []); gateTo.get(rj).push(i); } }
     const dil = (m, d) => { const q = new Uint8Array(n); for (let i = 0; i < n; i++) if (m[i]) { const x = i % W, y = (i / W) | 0; for (let dy = -d; dy <= d; dy++) { const yy = y + dy; if (yy < 0 || yy >= H) continue; for (let dx = -d; dx <= d; dx++) { const xx = x + dx; if (xx >= 0 && xx < W) q[yy * W + xx] = 1; } } } return q; };
     const ex1 = T.onStairs ? new Uint8Array(n) : dil(mark, 1), ex2 = T.onStairs ? new Uint8Array(n) : dil(mark, 2); // (MUTATION onStairs: no exclusion)
     // the view extent of the room
@@ -7374,7 +7376,7 @@ window.EVO_REAL_PNG="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4Aez
   const propsOn = () => !NO_MODES && !!st.win && st.stageRooms.length > 0 && st.modeId === 'stage' && st.stage.props === 'on';
   function propsList() { if (!propsOn() || !S) return []; const r = orientRoom(); if (!r) return []; const key = `${r.id}|${baseYaw()}|${st.stage.tilesPerH}|${JSON.stringify(E.propsTest || null)}`; if (!S.propsC || S.propsC.key !== key) { const k = st.stageRooms.indexOf(r.id), res = E.props.list(S, P, r, { tilesPerH: st.stage.tilesPerH, last: k === st.stageRooms.length - 1, next: k >= 0 && k < st.stageRooms.length - 1 ? st.stageRooms[k + 1] : 0, test: E.propsTest }); S.propsC = { key, list: res.list, data: res.data }; } return S.propsC.list; }
   function planeKey() { if (!planesOn()) return ''; const r = orientRoom(); return r ? `${r.id}|${baseYaw()}|${st.stage.tilesPerH}` : ''; }
-  function orientRoom() { const T = orientTable(); if (!T) return null; let id = 0; if (st.hero) { const i = E.stage.cellOf(S, st.hero.x - S.ox, st.hero.y - S.oy); id = i >= 0 ? S.roomMap[i] : 0; } if (id && T.byId.has(id)) st.orientId = id; else if (!st.orientId || !T.byId.has(st.orientId)) st.orientId = st.stageRooms[st.stageIdx]; return T.byId.get(st.orientId) || T.rooms[0] || null; }
+  function orientRoom() { const T = orientTable(); if (!T) return null; let id = 0; if (st.hero) { const i = E.stage.cellOf(S, st.hero.x - S.ox, st.hero.y - S.oy); id = i >= 0 ? E.stage.zoneMap(S)[i] : 0; } if (id && T.byId.has(id)) st.orientId = id; else if (!st.orientId || !T.byId.has(st.orientId)) st.orientId = st.stageRooms[st.stageIdx]; return T.byId.get(st.orientId) || T.rooms[0] || null; }
   /* the ROOM FRAMING: the Cam 6 pitch and FOV, the camera centred on the room's box at its mean height, the zoom (px per tile) the largest at which the 8 corners of the room's box (at its lowest and highest tile) fit the panel with a margin; cached per room / yaw / panel */
   const FRAME_MARGIN = 0.94;
   function roomFit(r) {

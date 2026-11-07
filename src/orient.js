@@ -14,9 +14,9 @@
   function compute(S, P, rooms, tilesPerH) {
     const W = S.W, n = S.n, tp = tilesPerH || 1, vd = S.void, T = (E.orientTest || {});
     const walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]), hOf = (i) => S.levelH[S.fine[i]] / tp;
-    const nb = E.walkGraph(S, P), tiles = new Map(); for (const id of rooms) tiles.set(id, []);
-    for (let i = 0; i < n; i++) { const r = S.roomMap[i]; if (r > 0 && tiles.has(r) && walk(i)) tiles.get(r).push(i); }
-    const gate = (a, b) => { let sx = 0, sy = 0, c = 0; const inB = (j) => S.roomMap[j] === b; for (const i of tiles.get(a) || []) for (const j of nb(i)) if (inB(j) && walk(j)) { sx += (i % W) + (j % W) + 1; sy += ((i / W) | 0) + ((j / W) | 0) + 1; c += 2; } return c ? [sx / c, sy / c] : null; }; // centroid of the walking edges (tile centres)
+    const nb = E.walkGraph(S, P), zm = E.stage.zoneMap(S), tiles = new Map(); for (const id of rooms) tiles.set(id, []);
+    for (let i = 0; i < n; i++) { const r = zm[i]; if (r > 0 && tiles.has(r) && walk(i)) tiles.get(r).push(i); }
+    const gate = (a, b) => { let sx = 0, sy = 0, c = 0; const inB = (j) => zm[j] === b; for (const i of tiles.get(a) || []) for (const j of nb(i)) if (inB(j) && walk(j)) { sx += (i % W) + (j % W) + 1; sy += ((i / W) | 0) + ((j / W) | 0) + 1; c += 2; } return c ? [sx / c, sy / c] : null; }; // centroid of the walking edges (tile centres)
     const quant = (arr, q) => { const s = arr.slice().sort((p, r) => p - r); return s[Math.min(s.length - 1, Math.max(0, Math.floor(q * (s.length - 1))))]; };
     const out = [], byId = new Map();
     rooms.forEach((id, k) => {

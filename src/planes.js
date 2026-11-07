@@ -17,8 +17,8 @@
     opts = opts || {}; const W = S.W, H = S.H, n = S.n, vd = S.void, look = E.orient.lookOf(yaw), f = [look[0], look[1]], r = [-f[1], f[0]];
     const walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]), eligible = (i) => !(vd && vd[i] && opts.noVoid) && (opts.all || !walk(i));
     const A = new Int32Array(n), Pc = new Int32Array(n); for (let i = 0; i < n; i++) { const x = i % W, y = (i / W) | 0; A[i] = x * f[0] + y * f[1]; Pc[i] = x * r[0] + y * r[1]; }
-    const foot = [], inFoot = new Uint8Array(n), near = new Map(), far = new Map();
-    for (let i = 0; i < n; i++) if (S.roomMap[i] === room.id && !S.block[i] && !(vd && vd[i])) { foot.push(i); inFoot[i] = 1; const p = Pc[i], a = A[i]; if (!near.has(p) || a < near.get(p)) near.set(p, a); if (!far.has(p) || a > far.get(p)) far.set(p, a); }
+    const zm = E.stage.zoneMap(S), foot = [], inFoot = new Uint8Array(n), near = new Map(), far = new Map();
+    for (let i = 0; i < n; i++) if (zm[i] === room.id && !S.block[i] && !(vd && vd[i])) { foot.push(i); inFoot[i] = 1; const p = Pc[i], a = A[i]; if (!near.has(p) || a < near.get(p)) near.set(p, a); if (!far.has(p) || a > far.get(p)) far.set(p, a); }
     // the ring: the tiles within HYP.R (Euclidean; a square with the hook `chebyshev`) of the footprint; `dist` = the Euclidean distance to the nearest footprint tile
     const ring = new Uint8Array(n), dist = new Float32Array(n).fill(1e9), cheb = !!opts.chebyshev; for (const i of foot) { const x = i % W, y = (i / W) | 0; for (let dy = -HYP.R; dy <= HYP.R; dy++) { const yy = y + dy; if (yy < 0 || yy >= H) continue; for (let dx = -HYP.R; dx <= HYP.R; dx++) { const xx = x + dx; if (xx < 0 || xx >= W) continue; const d = Math.hypot(dx, dy); if (!cheb && d > HYP.R + 1e-9) continue; const j = yy * W + xx; ring[j] = 1; if (d < dist[j]) dist[j] = d; } } }
     const cls = new Uint8Array(n), counts = { back: 0, side: 0, front: 0, voidBack: 0, voidSide: 0 };

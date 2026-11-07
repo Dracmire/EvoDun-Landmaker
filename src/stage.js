@@ -42,12 +42,14 @@
   const feetH = (S, i) => S.levelH[S.fine[i]];
 
   /* the walkable tile of room `id` nearest to its centroid (window coordinates, the tile centre) */
+  /* M2: THE ZONE MAP of the window (0 = none): the zones the mode 3 rules read. A zone of a PNG (`S.stageZones`, set by the viewer from the role `zone`) or a DAC room (`S.roomMap`); every rule reads it through this one function. */
+  const zoneMap = (S) => S.stageZones || S.roomMap;
   function roomCentre(S, id) {
-    const W = S.W; let n = 0, sx = 0, sy = 0;
-    for (let i = 0; i < S.roomMap.length; i++) if (S.roomMap[i] === id && walkable(S, i)) { n++; sx += i % W; sy += (i / W) | 0; }
+    const W = S.W, zm = zoneMap(S); let n = 0, sx = 0, sy = 0;
+    for (let i = 0; i < zm.length; i++) if (zm[i] === id && walkable(S, i)) { n++; sx += i % W; sy += (i / W) | 0; }
     if (!n) return null;
     sx /= n; sy /= n; let best = -1, bd = 1e18;
-    for (let i = 0; i < S.roomMap.length; i++) if (S.roomMap[i] === id && walkable(S, i)) { const d = (i % W + 0.5 - sx) ** 2 + (((i / W) | 0) + 0.5 - sy) ** 2; if (d < bd) { bd = d; best = i; } }
+    for (let i = 0; i < zm.length; i++) if (zm[i] === id && walkable(S, i)) { const d = (i % W + 0.5 - sx) ** 2 + (((i / W) | 0) + 0.5 - sy) ** 2; if (d < bd) { bd = d; best = i; } }
     return { x: best % W + 0.5, y: ((best / W) | 0) + 0.5, i: best };
   }
 
@@ -89,5 +91,5 @@
     return N < 2 ? null : { min: lo / tilesPerH, max: hi / tilesPerH };
   }
 
-  E.stage = { TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+  E.stage = { zoneMap, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
 })(window.EVO = window.EVO || {});
