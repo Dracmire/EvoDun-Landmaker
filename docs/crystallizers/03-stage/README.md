@@ -334,18 +334,20 @@ Second of three PRs of the CORE of the "mock T" plan: features 2 (planes), 3 (cl
 
 | room | yaw | BACK | SIDE | FRONT | wall | columns | front lowered |
 |---|---|---|---|---|---|---|---|
-| 17 | 0 | 189 | 215 | 74 | 42 | 7 | 27 |
-| 10 | 270 | 32 | 240 | 134 | 10 | 9 | 56 |
-| 20 | 270 | 290 | 276 | 191 | 44 | 10 | 64 |
-| 27 | 180 | 437 | 247 | 351 | 84 | 4 | 69 |
-| 6 | 90 | 119 | 312 | 508 | 17 | 13 | 127 |
-| 5 | 90 | 191 | 261 | 42 | 30 | 13 | 27 |
-| 14 | 180 | 315 | 366 | 300 | 44 | 11 | 70 |
-| 44 | 90 | 0 | 230 | 718 | 0 | 9 | 111 |
+| 17 | 0 | 178 | 145 | 55 | 44 | 7 | 27 |
+| 10 | 270 | 28 | 148 | 122 | 11 | 9 | 56 |
+| 20 | 270 | 224 | 156 | 162 | 53 | 10 | 64 |
+| 27 | 180 | 374 | 153 | 300 | 94 | 4 | 69 |
+| 6 | 90 | 365 | 313 | 396 | 91 | 22 | 127 |
+| 5 | 90 | 160 | 205 | 41 | 60 | 13 | 27 |
+| 14 | 180 | 265 | 444 | 231 | 66 | 22 | 70 |
+| 44 | 90 | 530 | 844 | 516 | 123 | 43 | 111 |
 
   Room 14 (Z, yaw 180): a wall behind 22 of its 24 columns, BACK to the south (the high terrace), FRONT to the north, SIDE on the east (the west is void). `shots/c2/mockt_z14_clases.png` shows it from above.
 - **Switch "Planes by room"** (`st.stage.planes`, manifest `viewer.stage.planes` written only when on, inert at load): ON in `dac_stage` and in the two one-room examples, off elsewhere; toggling REBUILDS the shape (the planes are terrain), also when the hero crosses to another room or the yaw changes (a cut: 0.9 s headless at 17 -> 20). It combines with the island / quebrada border (default off). The declared lists of `dac_stage` (volumes, objects, landmark) are NOT switched on by the planes; they were measured at yaw 180 (see C1).
 - **Test-only flag** `window.EVO_NO_ORIENT` also starts the examples with the planes off (the old stage tests measure `S`).
+
+**P1 update (void in the planes, Euclidean ring and wall; the table above is the P1 one, the C2 values were 17: 189/215/74/42/7/27, 10: 32/240/134/10/9/56, 20: 290/276/191/44/10/64, 27: 437/247/351/84/4/69, 6: 119/312/508/17/13/127, 5: 191/261/42/30/13/27, 14: 315/366/300/44/11/70, 44: 0/230/718/0/9/111):** VOID tiles of the BACK and SIDE classes are classified like blocked ground and take the wall / the columns (the void tile becomes a drawn, blocked, NOT walkable tile of that height: `S.void` / `S.block` are copied first, the same care as `src/backdrop.js`; the render of void is untouched); VOID in FRONT is left as it is (it reads as a drop). The ring (`R`) and the wall depth use the EUCLIDEAN distance to the footprint (the wall = the BACK tiles within `wallDepth` of it), so a diagonal room (14) has a wall that follows its edge. Room 44: wall 0 -> 123 tiles (157 former-void tiles in room 44's wall and columns), columns 9 -> 43; room 14: columns 11 -> 22. Hooks `noVoidWall` and `chebyshev` (the C2 rule). Items 1, 2 and 4 of the list below are fixed.
 
 #### Para polish (found in C2, not fixed here)
 - **Room 44 has no wall:** with the yaw of C1 (90) the back of the room is void and the rule only classifies tiles that are not void; the closing wall needs the orientation rule to put solid ground behind, or a void-aware wall.
@@ -367,16 +369,18 @@ Third PR of the CORE of the "mock T" plan: features 4 (torches along the axis) a
 
 | room | yaw | path steps | torches | pillars | goal |
 |---|---|---|---|---|---|
-| 17 | 0 | 21 | 7 | 1 | - |
+| 17 | 0 | 29 | 5 | 1 | - |
 | 10 | 270 | 1 | 0 | 1 | - |
-| 20 | 270 | 8 | 1 | 1 | - |
-| 27 | 180 | 24 | 9 | 0 | - |
-| 6 | 90 | 67 | 23 | 1 | - |
-| 5 | 90 | 24 | 7 | 0 | yes (back half, terrace 2) |
-| 14 | 180 | 41 | 13 | 0 | yes (back half, terrace 3) |
-| 44 | 90 | 61 | 26 | 0 | yes (back half, terrace 4) |
+| 20 | 270 | 22 | 3 | 1 | - |
+| 27 | 180 | 36 | 10 | 0 | - |
+| 6 | 90 | 95 | 17 | 1 | - |
+| 5 | 90 | 28 | 8 | 0 | yes (back half, terrace 2) |
+| 14 | 180 | 57 | 15 | 0 | yes (back half, terrace 3) |
+| 44 | 90 | 93 | 27 | 0 | yes (back half, terrace 4) |
 
 - **Switch "Props by room"** (`st.stage.props`, manifest `viewer.stage.props` written only when on, inert at load): ON in `dac_stage` and in the two one-room examples; independent of the "Stage objects" switch (the hand-declared lists of `dac_stage` stay off by default and, when on, are drawn together with the props in one depth order). The test-only flag `window.EVO_NO_ORIENT` also starts the examples with the props off.
+
+**P1 update (centred path, spacing by rows, goal clearance):** the path follows the CENTRE LINE of the room along the view axis (the middle of the walkable width of each row, averaged over +-1 row, snapped to the nearest walkable tile; the consecutive centres joined by the shortest walkable route; a centre that needs a detour (another terrace reached by a ramp elsewhere) is skipped); room 14: the path is within 1 tile of the centre line in 34 of its 37 rows (92 %), the C3 route in 14 (38 %; hook `shortestPath`). The torch pairs are every `torchEvery` ROWS of view depth along the path (not every N steps: the path steps are longer than the rows it crosses), and none is closer than `goalClear` (2) tiles to the base of the goal (room 5: no torch on the landmark). The table above is the P1 one (C3 values: path steps / torches 17: 21/7, 20: 8/1, 27: 24/9, 6: 67/23, 5: 24/7, 14: 41/13, 44: 61/26). Items 3 (the path) of the list below is fixed.
 
 #### Para polish (found in C3, not fixed here)
 - Rooms 10 and 20 are tiny: the entry and exit gates leave a 1-8 step path and 0-1 torches.

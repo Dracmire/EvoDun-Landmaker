@@ -1,12 +1,12 @@
 /* STAGE PROPS BY ROOM (mode 3, PR C3; `E.props`; docs/crystallizers/03-stage/README.md "C3"): features 4 (torches along the axis) and 5 (the goal at the back) of the "mock T", for the room the hero stands in, with the C1 yaw. BILLBOARDS ONLY (src/objects.js): the shape S is never rebuilt and nothing changes in the terrain.
-   - PATH: the walkable route (BFS over the room's tiles of the walking graph) from a START to an END. A room with an entry gate AND an exit gate: from the room tile nearest the entry gate to the one nearest the exit gate. The first / last room and a window of one room: from the end nearest the camera (smallest view depth, nearest the middle of the room across) to the GOAL tile.
-   - TORCHES: `lamp` HYP.torchH H, on both sides of the path, HYP.torchSide H from its axis (along the normal of the local tangent), one pair every HYP.torchEvery path steps. Only on walkable tiles of the room, never on the steps / ramps / gates nor within 1 tile of them.
+   - PATH: the walkable route from a START to an END. P1: it follows the CENTRE LINE of the room along the view axis (the middle of the walkable width of each row perpendicular to the axis, snapped to the nearest walkable tile of the row, the consecutive centres joined by the shortest walkable route; test hook `shortestPath` = the plain shortest route of C3). A room with an entry gate AND an exit gate: from the room tile nearest the entry gate to the one nearest the exit gate. The first / last room and a window of one room: from the end nearest the camera (smallest view depth, nearest the middle of the room across) to the GOAL tile.
+   - TORCHES: `lamp` HYP.torchH H, on both sides of the path, HYP.torchSide H from its axis (along the normal of the local tangent), one pair every HYP.torchEvery rows of view depth along the path. Only on walkable tiles of the room, never on the steps / ramps / gates nor within 1 tile of them, and (P1) none closer than HYP.goalClear tiles to the base of the goal.
    - GOAL (the last room of the window, and a window of one room): a `landmark` (S4c, default parameters) on the highest terrace of the BACK half of the room (the half of the view depth farther from the camera), at the tile of that terrace nearest the path axis (the start's column), S4c rules (not on a transition, >= 2 tiles from its bottom / top).
    - DOOR PILLARS (every room with an exit gate, the last one has none): 2 `pillar` HYP.gatePillarH H at both sides of the exit gate, HYP.gateSide tiles beyond its extent across the view.
-   ONE table of hypotheses for S6 (H are multiplied by tilesPerH). Test hooks (`E.propsTest`, tests only): onStairs (no exclusion around transitions / gates), torchEvery (a number), metaFront (the goal in the NEAR half). */
+   ONE table of hypotheses for S6 (H are multiplied by tilesPerH). Test hooks (`E.propsTest`, tests only): shortestPath, onStairs (no exclusion around transitions / gates), torchEvery (a number), metaFront (the goal in the NEAR half). */
 (function (E) {
   'use strict';
-  const HYP = { torchSide: 1, torchEvery: 4, torchH: 1.2, gatePillarH: 2, gateSide: 2 };
+  const HYP = { smoothRows: 1, goalClear: 2, torchSide: 1, torchEvery: 4, torchH: 1.2, gatePillarH: 2, gateSide: 2 };
   /* compute(S, P, rec, { tilesPerH, last, next, test }) -> { room, yaw, noPath, path (tile list), start, end, torches [{ x, y, tile, k, side }], pillars [{ x, y, tile }], goal { x, y, tile, ter, h } | null, aMid } ; x / y = window tile coordinates (continuous), tile = index */
   function compute(S, P, rec, o) {
     const T = o.test || E.propsTest || {}, tp = o.tilesPerH, W = S.W, H = S.H, n = S.n, vd = S.void, look = E.orient.lookOf(rec.yaw), f = [look[0], look[1]], r = [-f[1], f[0]];
@@ -50,14 +50,25 @@
     }
     out.start = start; out.end = end;
     if (end < 0 || par[end] === -2) { out.noPath = true; }
-    else { const path = []; for (let i = end; i >= 0; i = par[i]) path.push(i); path.reverse(); out.path = path; }
+    else if (T.shortestPath) { const path = []; for (let i = end; i >= 0; i = par[i]) path.push(i); path.reverse(); out.path = path; } // (MUTATION shortestPath: the plain shortest route of C3, which hugs an edge)
+    else { // the centre line: one waypoint per row (a = view depth) between the start's and the end's rows
+      const byAP = new Map(), rowP = new Map(); for (const i of cBest) { const a = A(i), p = Pc(i); byAP.set(a * 4096 + p, i); const r0 = rowP.get(a); if (!r0) rowP.set(a, [p, p]); else { r0[0] = Math.min(r0[0], p); r0[1] = Math.max(r0[1], p); } }
+      const mid = (a) => { const r0 = rowP.get(a); return r0 ? (r0[0] + r0[1]) / 2 : null; }, smooth = (a) => { let sm = 0, c = 0; for (let d = -HYP.smoothRows; d <= HYP.smoothRows; d++) { const m = mid(a + d); if (m !== null) { sm += m; c++; } } return sm / c; }; // the centre of a row, averaged over +-smoothRows rows (a ragged edge does not make the line jump)
+      const centre = (a) => { const r0 = rowP.get(a); if (!r0) return -1; const pm = Math.round(smooth(a)); for (let d = 0; d <= r0[1] - r0[0]; d++) for (const p of d ? [pm - d, pm + d] : [pm]) { const t = byAP.get(a * 4096 + p); if (t !== undefined) return t; } return -1; };
+      const wps = [start], a0 = A(start), a1 = A(end), dir = Math.sign(a1 - a0); if (dir) for (let a = a0 + dir; a !== a1; a += dir) { const t = centre(a); if (t >= 0 && t !== wps[wps.length - 1]) wps.push(t); } if (end !== wps[wps.length - 1]) wps.push(end);
+      const stamp = new Int32Array(n), pr = new Int32Array(n); let gen = 0;
+      const route = (u, v) => { gen++; stamp[u] = gen; pr[u] = -1; const qq = [u]; for (let h = 0; h < qq.length; h++) { const i = qq[h]; if (i === v) break; for (const j of nb(i)) if (inRoom[j] && stamp[j] !== gen) { stamp[j] = gen; pr[j] = i; qq.push(j); } } if (stamp[v] !== gen) return null; const seg = []; for (let i = v; i !== u; i = pr[i]) seg.push(i); return seg.reverse(); };
+      const path = [start]; let okc = true, cur = start; for (let k = 1; k < wps.length && okc; k++) { const w = wps[k], last = k === wps.length - 1, seg = route(cur, w); if (!seg) { okc = false; break; } const man = Math.abs((w % W) - (cur % W)) + Math.abs(((w / W) | 0) - ((cur / W) | 0)); if (!last && seg.length > man + 3) continue; /* a centre that needs a detour (another terrace, reached only by a ramp elsewhere) is skipped: the line goes on to the next one */ for (const t of seg) path.push(t); cur = w; }
+      if (okc) out.path = path; else { const pth = []; for (let i = end; i >= 0; i = par[i]) pth.push(i); pth.reverse(); out.path = pth; }
+    }
     // TORCHES
     const path = out.path, every = T.torchEvery || HYP.torchEvery, side = HYP.torchSide * tp;
-    if (path.length) for (let k = 2; k <= path.length - 3; k += every) {
+    let lastA = path.length ? A(path[0]) - every / 2 : 0; // one pair every `every` rows of view depth along the path (not every N steps: a jog of the path would crowd them)
+    if (path.length) for (let k = 2; k <= path.length - 3; k++) { if (Math.abs(A(path[k]) - lastA) < every) continue; lastA = A(path[k]);
       const a0 = path[Math.max(0, k - 3)], a1 = path[Math.min(path.length - 1, k + 3)];
       let tx = (a1 % W) - (a0 % W), ty = ((a1 / W) | 0) - ((a0 / W) | 0); const m = Math.hypot(tx, ty); if (m < 1e-9) continue; tx /= m; ty /= m;
       const cx = (path[k] % W) + 0.5, cy = ((path[k] / W) | 0) + 0.5;
-      for (const s of [-1, 1]) { const x = cx - s * ty * side, y = cy + s * tx * side, xi = Math.floor(x), yi = Math.floor(y); if (xi < 0 || yi < 0 || xi >= W || yi >= H) continue; const t = yi * W + xi; if (!inRoom[t] || ex1[t]) continue; out.torches.push({ x, y, tile: t, k, side: s }); }
+      for (const s of [-1, 1]) { const x = cx - s * ty * side, y = cy + s * tx * side, xi = Math.floor(x), yi = Math.floor(y); if (xi < 0 || yi < 0 || xi >= W || yi >= H) continue; const t = yi * W + xi; if (!inRoom[t] || ex1[t]) continue; if (out.goal && Math.hypot(x - out.goal.x, y - out.goal.y) < HYP.goalClear) continue; out.torches.push({ x, y, tile: t, k, a: A(path[k]), side: s }); }
     }
     // DOOR PILLARS: both sides of the exit gate (the gate with the next room of the window list)
     const nxt = o.next, gt = nxt && gateTo.get(nxt);
