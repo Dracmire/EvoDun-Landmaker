@@ -207,7 +207,7 @@ incursion border; stake and way-back path visible; geometry offers stylization h
 - `docs/crystallizers/`: one README per crystallizer (`01-terrain`, `02-room-types`, `03-stage` design draft) with its decisions, history, figures and mocks; CLAUDE.md keeps the short rules, the long text lives there (`docs/room-types.md`, `docs/rooms.md`, `docs/measurements.md` stay where they are and are linked from it).
 - `.claude/agents/verifier.md`: subagent `verifier` (haiku, read-only: Read, Grep, Glob, Bash). Runs `tools/verify.sh` and AUDITS the tests with `git diff origin/main -- tools/ data/` (new tests informative; changed
   expectations, loosened thresholds, deleted assertions, modified fixtures reported as "possible symptom hiding" with whether `src/` changed in that area). It does not edit, commit, push or change branch, and it does not replace the
-  visual review (the screenshots are still looked at and sent to the user). A subagent file created in a session may only load in the next one.
+  visual review (the screenshots are still looked at and sent to the user). It is for the full pass ("Verification lanes"), not for every PR. A subagent file created in a session may only load in the next one.
 - `tools/build.py` regenerates `data/packs.js`, `index.html`, `dist/viewer.html`. Run it after touching
   `src/` or `data/`.
 
@@ -390,6 +390,25 @@ incursion border; stake and way-back path visible; geometry offers stylization h
 
 10. STAGE (crystallizer 3): the major design pass was done in the user's own project (design passes v25-v91, 2026-10-14 to 2026-11-02); the 2D-HD crystallizer is built as mode 3 in PRs S1-S6 (S1 the base, IN PROGRESS: see Repo state and `docs/crystallizers/03-stage/README.md` section 1; S2 borders, S3 transitions, S4 objects + landmark, S5 treatment JSON, S6 paired-shot tool). The earlier MVP (preset + Art contract) is the legacy examples.
 
+## Verification lanes
+Reason and scope: `docs/crystallizers/03-stage/MVP.md` section 5. Default lane for a PR (mode 3 work included):
+- the tests AFFECTED by the diff: `tools/verify.sh node --only '<globs>'` and `tools/verify.sh ui --only '<globs>'` (name the part; `--only` has no effect on regress / zbuf / shots);
+- `tools/verify.sh regress` (modes 1, 2 and the legacy examples identical: 0 differing images); it takes no `--only`;
+- the screenshots of the PR (looked at and sent to the user);
+- NO `verifier` subagent and NO full pass. A full pass (`node ui regress zbuf`, run by the `verifier`) only at an MVP milestone, once a week, or when the user asks.
+- Code shared with modes 1, 2 or 4: add the tests of that code and of its consumers with `--only`, not the full pass. A change to `src/modes.js` adds `test_modes_ui.js`.
+- No mutations on hypothesis constants. Known baseline FAILs (not fixed in a mode 3 PR): `test_backdrop_ui` 6, `test_pick_ui` 2.
+- Every PR reports the wall seconds of each verification command it ran. A tool call is cut at 10 minutes: run the slow ones in the background and poll.
+Measured 2026-11-07, ONE process at a time, 4 cores, the cloud container of the session (only what was measured; the rest says "not measured"):
+
+| Command | Wall seconds |
+|---|---|
+| `tools/verify.sh regress` | not measured: still running at 600 s (cut at 10 min) |
+| mode 3 node set (`test_border`, `test_objects`, `test_landmark`, `test_volumes`, `test_orient`, `test_planes`, `test_props`, `test_stage_border`, `test_stage_cam`, `test_fields`) | 25 (test_planes 17, test_orient 4, test_props 3, test_objects 1, the rest < 1) |
+| mode 3 UI set (`--only 'test_stage_*.js'`, 9 scripts) | not measured: cut at 600 s; 8 scripts finished in 428 (landmark 176, ui 78, objects 59, s3 57, orient 23, props 13, planes 12, border 10); `test_stage_volumes_ui` did not finish |
+| `test_modes_ui.js` alone | not measured: cut at 580 s |
+| full pass | not measured in isolation. Logs of other runs, concurrency unknown: ui 7705 s, regress 1033 s, zbuf 102 s (2026-11-05, `/tmp/evo-verify`) |
+
 ## How to work with the user
 - Do not write code until the design is agreed. For each point: read the relevant code, propose the
   approach in a few lines, wait for approval.
@@ -401,4 +420,4 @@ incursion border; stake and way-back path visible; geometry offers stylization h
   and report what was and wasn't checked.
 - Small commits on main with descriptive messages.
 - If a test fails twice in a row after a fix attempt, STOP. Report whether the problem is in the code or in the test. Do not change expectations, thresholds or fixtures without the user's approval.
-- Before reporting a task as done, run the `verifier` subagent (or `tools/verify.sh` if it cannot be loaded) and include its summary and test audit in the report.
+- Before reporting a task as done, run the default lane of "Verification lanes" (affected tests + `tools/verify.sh regress` + screenshots) and report its wall seconds. The `verifier` subagent (with its test audit) is for the full pass only: an MVP milestone, weekly, or when the user asks.
