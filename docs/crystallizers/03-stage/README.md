@@ -416,6 +416,18 @@ Sources of the rules: DAC (unchanged) and PNG + roles (new).
 - A PNG without the role `zone` shows "assign the zone role" and enters no window.
 - The hero cannot stand on a dropped piece (it is zone 0); `orientRoom` keeps the previous zone while the hero is on one.
 
+### M3a as built: Forest, the old map of the game with the zones of v53 (examples "Forest A (v53)" and "Forest B (amplified relief)" of mode 3; `docs/crystallizers/03-stage/refs/dq3/forest_plains/annotated/` (`derive_roles.py`, README there), `node tools/test_forest_roles.js`, `tools/ui/test_forest_ui.js`, `tools/ui/m3a_shots.js`; step M3 of `MVP.md`)
+Judge: by FEATURES (orientation, planes, closing wall, frame, goal), not by an identical place. `src/stage.js` is not touched: the rule of the largest piece meets zones that are connected pieces by construction (the data are normalized in `derive_roles.py`).
+- **Source.** `old/forest.png` (26 x 23 tiles of 16 px, tile rip) and the map of the remake, through the user's v53 recipe (grid reproduced, 0 differences, asserted before normalizing), at x2: 52 x 46 px, 1 px = 1 tile of the viewer, H = 1 old tile at tilesPerH 2. Built-in sources `forest_a` / `forest_b` (the PNGs as base64 in `data/packs.js`, `EVO_FOREST_PNG`, decoded by the same path as loaded files); the examples set the terraces and sub-terraces (A 2 / 6, B 6 / 3: `sc.subs` is new, saved and restored by the window session with the terraces).
+- **Zones.** Six, each one 4-connected piece: valley (170 old tiles), plateau NW (94), plateau SW (35), plateau N + tower (156), slope (110) and slope east (33); pieces of fewer than 10 tiles (`MIN_PIECE`, hypothesis [R]) are fused into the neighbour with the most shared border (31 tiles in 8 pieces). Trails (class 6 of v53) are `path`, not a zone.
+- **Heights, measured in H** (median per zone, `tools/test_forest_roles.js`): A (v53 hypothesis, NOT verified; terraces 2, sub-terraces 6): valley and trails 0, slope 0.267, plateaus 0.533, tower 3.333 (target 0 / 0.3 / 0.6 / 3.5); B (terraces 6, sub-terraces 3): valley 0, slope 2, plateaus NW and N 4, plateau SW 6, tower 10.88. The trails are at valley height in A and follow their zone in B.
+- **Tower and trees.** The tower is a raised mass (45 old tiles, cols 17-21, rows 2-10): its top is a piece apart no ramp reaches, the rule drops it (counted apart, 180 tiles, in the tests). Trees are NOT blocked (a role for blocked terrain does not exist; `masks.water` has the wrong semantics): `trees_blocked.png` (role `vegetation`, unused) is data for the polish.
+- **Discard by the rule** (window [valley], [valley, slope, plateau N], [plateau N]; without the tower): A at most 7.4 %, B at most 17.3 %; the window of all six zones, which no example offers, reaches 21.2 % in B (slope east).
+#### Para polish (found in M3a, not fixed here)
+- The hero starts on the walkable tile nearest the centroid of the zone, which in the plateau N window is the foot of a ramp up to the mass of the tower (a ledge at 1.33 H in A, 4.88 H in B, outside the tower box).
+- A PNG zone whose neighbours are all walkable terrain gets no closing planes (C2 classifies only non-walkable tiles): the route window shows wall 0 / columns 0; and no goal unless the zone is the LAST of the window (C3, `o.last`).
+- Trees as volumes or billboards; a role for blocked terrain (after M4, if needed).
+
 ## 9. Known limits and open questions
 
 - The viewer cannot make the art; it can only place it.
