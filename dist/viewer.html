@@ -5672,10 +5672,10 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
    - the AXIS of the walk = from the entry gate (the previous room of the list) to the exit gate (the next room); in the first / last room, from the gate toward the highest part of the room; with no gate at all (a window of one room), from the lowest part of the room to the highest. A gate = the centroid of the walking edges between two consecutive rooms of the list (the same walking graph as the rooms layer);
    - LENGTH along the axis / WIDTH across it (the extent of the room's walkable tiles projected on each): ratio >= RATIO -> Z, <= 1 / RATIO -> X, in between -> Hub (RATIO = 1.5: a HYPOTHESIS, one constant);
    - the YAW of the room, a multiple of 90 degrees (the camera of Cam 6 sits at (sin yaw, cos yaw) in map x / y, as border.js assumes): Z and Hub = the camera looks ALONG the axis, the exit (or the high part) at the BACK; X = the camera looks ACROSS the axis, the higher / more blocked side at the back (the score of the two sides: the mean height difference in H + BLOCK_W x the share of blocked tiles in a band behind the room: HYPOTHESES).
-   Visual only: nothing here touches S. Test hooks (`E.orientTest`, tests only): fixedYaw (every room gets that yaw), noRoomFrame (the room framing falls back to the hero's). */
+   Visual only: nothing here touches S. Test hooks (`E.orientTest`, tests only): fixedYaw (every room gets that yaw), noRoomFrame (the room framing falls back to the hero's), noPoi (M3c), noCanon (M3c-canon: the sign rule of before). */
 (function (E) {
   'use strict';
-  const RATIO = 1.5, BLOCK_W = 0.5, BAND = 8, HIGH_Q = 0.75, LOW_Q = 0.25;
+  const RATIO = 1.5, BLOCK_W = 0.5, BAND = 8, HIGH_Q = 0.75, LOW_Q = 0.25, CANON = 0.2; // CANON [R, a hypothesis]: |axis[1]| below it (nearly horizontal) = the canonical sign x >= 0 in the degenerate branch
   const norm = (v) => { const m = Math.hypot(v[0], v[1]); return m > 1e-9 ? [v[0] / m, v[1] / m] : null; };
   const yawOf = (look) => { const d = Math.atan2(-look[0], -look[1]) * 180 / Math.PI, q = Math.round(d / 90) * 90; return ((q % 360) + 360) % 360; }; // the camera sits opposite to the look direction
   const lookOf = (yaw) => { const r = yaw * Math.PI / 180; return [-Math.round(Math.sin(r)), -Math.round(Math.cos(r))]; }; // the unit look direction of a yaw that is a multiple of 90
@@ -5703,7 +5703,7 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
       else { axis = norm([high[0] - low[0], high[1] - low[1]]); why = 'lowest part -> highest part'; }
       if (!axis) { // degenerate (the gate on the high part, a flat room): the principal direction of the tiles, pointing to +y (or +x)
         let sxx = 0, syy = 0, sxy = 0; ts.forEach((_, m) => { const dx = xs[m] - cx, dy = ys[m] - cy; sxx += dx * dx; syy += dy * dy; sxy += dx * dy; });
-        const th = 0.5 * Math.atan2(2 * sxy, sxx - syy); axis = [Math.cos(th), Math.sin(th)]; if (axis[1] < -1e-9 || (Math.abs(axis[1]) < 1e-9 && axis[0] < 0)) axis = [-axis[0], -axis[1]]; why += ' (degenerate: principal direction)'; }
+        const th = 0.5 * Math.atan2(2 * sxy, sxx - syy); axis = [Math.cos(th), Math.sin(th)]; const canon = !T.noCanon && Math.abs(axis[1]) < CANON; /* M3c-canon: a nearly horizontal principal direction points to x >= 0 (the sign of a tiny sxy no longer turns the room round); otherwise y >= 0 as before */ if (canon ? axis[0] < -1e-9 : (axis[1] < -1e-9 || (Math.abs(axis[1]) < 1e-9 && axis[0] < 0))) axis = [-axis[0], -axis[1]]; why += ' (degenerate: principal direction)'; }
       const perp = [-axis[1], axis[0]]; let l0 = 1e9, l1 = -1e9, w0 = 1e9, w1 = -1e9;
       ts.forEach((_, m) => { const a = xs[m] * axis[0] + ys[m] * axis[1], b = xs[m] * perp[0] + ys[m] * perp[1]; l0 = Math.min(l0, a); l1 = Math.max(l1, a); w0 = Math.min(w0, b); w1 = Math.max(w1, b); });
       const L = l1 - l0 + 1, Wd = w1 - w0 + 1, ratio = L / Wd, dir = ratio >= RATIO ? 'Z' : ratio <= 1 / RATIO ? 'X' : 'Hub';

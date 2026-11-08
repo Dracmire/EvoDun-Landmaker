@@ -60,5 +60,22 @@ const WIN6 = [17, 10, 20, 27, 6, 5], EXP6 = [[17, 'Hub', 0, 1.2], [10, 'Hub', 27
     withPoi(S14, [[a, 0.4]]);
     ok(`M3c: the highest value wins (1 over 0.8 and 0.667), a tie goes to the tile nearest the centroid of the tied ones, below ${E.stage.POI_MIN} there is no goal`, win.tile === b && tie.tile === near && tie.tied === 3 && E.stage.poiGoal(S14, 14) === null, [win, tie, near]);
   }
+  // M3c-canon: the degenerate branch (a flat room, or the gate on the high part): the principal direction has a canonical sign. A nearly horizontal axis (|axis[1]| < 0.2) points to x >= 0; the sign of a tiny cross-covariance no longer turns the room round
+  {
+    const Wd = 40, Hd = 20, strip = (slope) => {
+      const pack = { format: 'evodun-pack/0.2', name: 'strip', width: Wd, height: Hd, elevation: new Float32Array(Wd * Hd).fill(50), elevRange: [50, 50], voidTiles: 0, masks: {}, markers: [], fields: {}, warnings: [] };
+      const S = E.shape(pack, Object.assign({}, P, { rooms: false, terraces: 3, subs: 3, terH: 4, subH: 0.88 }), null), zm = new Int32Array(S.n);
+      for (let y = 0; y < Hd; y++) for (let x = 0; x < Wd; x++) if (x >= 2 && x <= 37 && Math.abs(y + 0.5 - (10 + slope * (x - 20))) < 2) zm[y * Wd + x] = 1;
+      S.stageZones = zm; return S;
+    };
+    const rec = (S, hook) => { E.orientTest = hook; const r = E.orient.compute(S, P, [1], 2).byId.get(1); E.orientTest = undefined; return r; };
+    const up = rec(strip(0.03)), dn = rec(strip(-0.03));
+    ok(`M3c-canon: a flat strip tilted +0.03 and -0.03 (the sign of a tiny cross-covariance) gives the SAME axis side and yaw (${up.yaw} and ${dn.yaw}, "${up.why}")`, /degenerate/.test(up.why) && up.yaw === dn.yaw && up.axis[0] > 0.99 && dn.axis[0] > 0.99, [up.axis, dn.axis, up.yaw, dn.yaw]);
+    const upN = rec(strip(0.03), { noCanon: true }), dnN = rec(strip(-0.03), { noCanon: true });
+    ok(`MUTATION noCanon: the two tilts turn round again (yaw ${upN.yaw} and ${dnN.yaw}): the check above FAILS without the rule`, upN.yaw !== dnN.yaw && JSON.stringify(upN.axis) === JSON.stringify(up.axis));
+    const s4 = [0.4, -0.4].map((k) => ({ c: rec(strip(k)), n: rec(strip(k), { noCanon: true }) }));
+    ok(`M3c-canon: an inclined degenerate zone (|axis[1]| >= 0.2: tilts +0.4 and -0.4) keeps the rule of before (y >= 0): axes ${JSON.stringify(s4.map((q) => q.c.axis))}`, s4.every((q) => JSON.stringify(q.c.axis) === JSON.stringify(q.n.axis) && q.c.yaw === q.n.yaw && q.c.axis[1] > 0), s4.map((q) => [q.c.axis, q.n.axis]));
+    ok('M3c-canon: the 9 rooms of the DAC tables are not degenerate: nothing changes (the table checks above are the proof)', [w6, w14, w44].every((w) => w.T.rooms.every((r) => !/degenerate/.test(r.why))));
+  }
   console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
