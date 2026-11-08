@@ -392,13 +392,37 @@ incursion border; stake and way-back path visible; geometry offers stylization h
 
 ## Verification lanes
 Reason and scope: `docs/crystallizers/03-stage/MVP.md` section 5. Default lane for a PR (mode 3 work included):
-- the tests AFFECTED by the diff: `tools/verify.sh node --only '<globs>'` and `tools/verify.sh ui --only '<globs>'` (name the part; `--only` has no effect on regress / zbuf / shots);
-- `tools/verify.sh regress` (modes 1, 2 and the legacy examples identical: 0 differing images); it takes no `--only`;
+- the tests AFFECTED by the diff: `tools/verify.sh node --only '<globs>'` and `tools/verify.sh ui --only '<globs>'` (name the part; `--only` has no effect on regress / zbuf / shots); the "module -> affected tests" table below says which;
 - the screenshots of the PR (looked at and sent to the user);
 - NO `verifier` subagent and NO full pass. A full pass (`node ui regress zbuf`, run by the `verifier`) only at an MVP milestone, once a week, or when the user asks.
-- Code shared with modes 1, 2 or 4: add the tests of that code and of its consumers with `--only`, not the full pass. A change to `src/modes.js` adds `test_modes_ui.js`.
+- `tools/verify.sh regress` is NOT in the default lane: it is a TRIGGER (the most expensive command, more than 600 s). Run it only if the diff touches the shared code listed below (it takes no `--only`) and in the full pass. Pixel regression of modes 1, 2 and the legacy examples: 0 differing images.
+- A PR that touches ONLY mode 3's own modules (list below): affected tests + screenshots + a table of canvas hashes before / after (`tools/ui/m2_hashes.js` or the same idea) of the examples with the switches OFF that the request names (modes 1 and 2 and the mode 3 examples), identical. No regress.
+- Code shared with modes 1, 2 or 4: regress, plus the tests of that code and of its consumers with `--only`, not the full pass. A change to `src/modes.js` adds `test_modes_ui.js` and `test_modes_leak_ui.js`.
+- SLOW tests (regress, `test_modes_ui`, `test_window_session_ui`, every UI test over 60 s) are launched in the BACKGROUND (`run_in_background`) and polled; a tool call is cut at 10 minutes.
 - No mutations on hypothesis constants. Known baseline FAILs (not fixed in a mode 3 PR): `test_backdrop_ui` 6, `test_pick_ui` 2.
-- Every PR reports the wall seconds of each verification command it ran. A tool call is cut at 10 minutes: run the slow ones in the background and poll.
+- Every PR reports the wall seconds of each verification command it ran.
+
+SHARED CODE (a closed list; touching any of it triggers `regress`). Derived from `tools/build.py` (`MODULES`, the files `index.html` loads) and from `grep -E "E\.(stage|border|objects|volumes|orient|planes|props)\b" src/*.js`: the only places where shared code calls mode 3's modules are `src/render.js` (lines 826-827: `E.objects.draw` and `E.stage.drawHero`, both guarded by `o.objects` / `o.hero`, which only exist in a window session) and `src/ui.js`.
+- `src/ui.js`, `src/render.js`, `src/shape.js`, `src/tech.js`, `src/curves.js`, `src/wallc.js`, `src/rooms.js`, `src/roomtypes.js`, `src/pocket.js`, `src/contract.js`, `src/fields.js`, `src/png.js`, `src/controls.js`, `src/modes.js`, `src/app.html`;
+- the data and the build: `data/` (packs), `tools/build.py` and what it generates (`index.html`, `dist/viewer.html`, `docs/controls.md`, `docs/modes.md`);
+- the harness that draws the regress: `tools/ui/common.js`, `tools/ui/regress*.js`, `tools/verify.sh`.
+- HYPOTHESIS (not checked with imports): `src/floors.js`, `src/backdrop.js`, `src/volume.js` (modes 5 and 6: `grep` shows them called only from `ui.js` and from each other, not from `render.js` or `shape.js`), so they are NOT in the list; a change to them runs their own tests (`test_floors`, `test_backdrop`, `test_macroform`...) and, if it also touches `ui.js`, regress.
+- Mode 3's OWN modules (no regress by themselves): `src/stage.js`, `src/border.js`, `src/objects.js`, `src/volumes.js`, `src/orient.js`, `src/planes.js`, `src/props.js`. Note that a mode 3 PR usually also edits `src/ui.js` and `src/modes.js` (the example, the switches): then the diff touches shared code and regress is a trigger, unless the change inside `ui.js` is guarded by `stageOn()` / `st.win` and the hash table of the OFF states is identical (say it in the PR: then the call is the author's, the user decides).
+
+MODULE -> AFFECTED TESTS (mode 3; derived from the test names and from `git grep` of what each test loads or calls; "hyp." = by name or by reading, not run both ways). Node = `tools/verify.sh node --only '<globs>'`, UI = `tools/verify.sh ui --only '<globs>'`. A module that another one imports adds the tests of its consumers (`border` <- `volumes`; `orient` <- `planes`, `props`; `stage` <- all).
+
+| Module | Node tests | UI tests |
+|---|---|---|
+| `src/orient.js` | `test_orient.js`, and its consumers `test_planes.js`, `test_props.js` | `test_stage_orient_ui.js`, `test_stage_planes_ui.js`, `test_stage_props_ui.js` (hyp.: the last two only because they import its yaw) |
+| `src/planes.js` | `test_planes.js` | `test_stage_planes_ui.js` |
+| `src/props.js` | `test_props.js` | `test_stage_props_ui.js` |
+| `src/objects.js` (+ the landmark) | `test_objects.js`, `test_landmark.js` | `test_stage_objects_ui.js`, `test_stage_landmark_ui.js` |
+| `src/volumes.js` | `test_volumes.js` | `test_stage_volumes_ui.js` |
+| `src/border.js` (+ S3) | `test_border.js`, `test_stage_border.js`, and its consumer `test_volumes.js` | `test_stage_border_ui.js`, `test_stage_s3_ui.js`, `test_window_session_ui.js` (the border ends with the window session); `test_stage_volumes_ui.js` (consumer) |
+| `src/stage.js` (+ the zones of a PNG, PR #73 when merged: `test_stage_zones.js`, `test_stage_zones_ui.js`) | `test_stage_cam.js`, `test_objects.js`, `test_orient.js`, `test_planes.js`, `test_props.js`, `test_cams.js`, `test_fields.js` | every `test_stage_*_ui.js` (`--only 'test_stage_*.js'`, 9 scripts), `test_window_session_ui.js` |
+| `src/modes.js` (+ examples and switches of the window in `src/ui.js`) | `test_modes.js`, `test_controls.js` (hyp.: `docs/controls.md` and `docs/modes.md` are generated from the tables) | `test_modes_ui.js`, `test_modes_leak_ui.js`, `test_window_session_ui.js` |
+| a NEW module or a change of `MODULES` in `tools/build.py` | `test_dist_modules.js` (hyp.) | none by itself |
+
 Measured 2026-11-07, ONE process at a time, 4 cores, the cloud container of the session (only what was measured; the rest says "not measured"):
 
 | Command | Wall seconds |
@@ -408,6 +432,8 @@ Measured 2026-11-07, ONE process at a time, 4 cores, the cloud container of the 
 | mode 3 UI set (`--only 'test_stage_*.js'`, 9 scripts) | not measured: cut at 600 s; 8 scripts finished in 428 (landmark 176, ui 78, objects 59, s3 57, orient 23, props 13, planes 12, border 10); `test_stage_volumes_ui` did not finish |
 | `test_modes_ui.js` alone | not measured: cut at 580 s |
 | full pass | not measured in isolation. Logs of other runs, concurrency unknown: ui 7705 s, regress 1033 s, zbuf 102 s (2026-11-05, `/tmp/evo-verify`) |
+
+Filled in with the wall seconds each PR reports (rule above); not measured separately.
 
 ## How to work with the user
 - Do not write code until the design is agreed. For each point: read the relevant code, propose the
@@ -420,4 +446,4 @@ Measured 2026-11-07, ONE process at a time, 4 cores, the cloud container of the 
   and report what was and wasn't checked.
 - Small commits on main with descriptive messages.
 - If a test fails twice in a row after a fix attempt, STOP. Report whether the problem is in the code or in the test. Do not change expectations, thresholds or fixtures without the user's approval.
-- Before reporting a task as done, run the default lane of "Verification lanes" (affected tests + `tools/verify.sh regress` + screenshots) and report its wall seconds. The `verifier` subagent (with its test audit) is for the full pass only: an MVP milestone, weekly, or when the user asks.
+- Before reporting a task as done, run the default lane of "Verification lanes" (affected tests + `tools/verify.sh regress` only if the diff touches shared code (see the list) + screenshots) and report its wall seconds. The `verifier` subagent (with its test audit) is for the full pass only: an MVP milestone, weekly, or when the user asks.
