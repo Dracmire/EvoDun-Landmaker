@@ -2,6 +2,7 @@
    (1) the examples exist in mode 3 only and name their sources; the first example of the mode is still dac_stage;
    (2) clicking one enters the window session: pack, zones (6), window = the lowest zone, terraces / sub-terraces of the variant (A 2 / 6, B 6 / 3), the Stage rules on the zones (orientation, planes, props);
    (3) the footprint rule on the windows [valley, main slope, plateau N] (the CONTROL of M3c: unchanged, A 235 tiles with the tower, B 328), [valley, east slope] and [valley, east slope, plateau N] = the frozen numbers of tools/test_forest_roles.js;
+   M3c: the axis of the last zone of [valley, east slope] walks to the POI A; the control and [valley, east slope, plateau N] do not (their last zone has no POI inside);
    (4) the window state ends on EVERY exit: another example (dac_stage gets its own terraces and sub-terraces back), the mode selector; MUTATION skipShapeRestore (the restore of the terraces / sub-terraces) is caught;
    (5) without the modes layer the sources are plain sources: selecting one makes no window and no stage state (R7).
      NODE_PATH=$(npm root -g) node tools/ui/test_forest_ui.js */
@@ -24,6 +25,8 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
     for (const [raws, name] of [[[1, 5, 4], 'control'], [[1, 6], 'route'], [[1, 6, 4], 'route3']]) {
       await ev((raws) => { const e = window.__evo, tb = window.EVO.stage.zoneTable(e.packs[e.st.pack].pack); e.stageSetWindow(raws.map((r) => tb.toK.get(r))); }, raws); await idle(); const r = await ST(), want = TOT[id][name];
       ok(`${id}: the window ${name} [${raws}] drops ${r.info && r.info.total} walkable tiles (tower included), the frozen figure ${want}`, r.info && r.info.total === want, r.info);
+      const wh = await ev(() => { const e = window.__evo, S = e.S(), T = S.orient, last = T.rooms[T.rooms.length - 1]; return { why: last.why, yaw: last.yaw }; });
+      ok(`${id}: M3c, the axis of the LAST zone of the window ${name}: "${wh.why}" (yaw ${wh.yaw})${name === 'route' ? ', it walks to the POI A' : ', no POI inside the footprint of its last zone (as before)'}`, name === 'route' ? /POI goal/.test(wh.why) : !/POI goal/.test(wh.why), wh);
     }
   }
   // (4) exits

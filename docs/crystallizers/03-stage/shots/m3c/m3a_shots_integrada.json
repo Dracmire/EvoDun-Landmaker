@@ -1,0 +1,1346 @@
+{
+ "integrada_A_valle_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 1,
+  "dir": "Z",
+  "yaw": 90,
+  "planes": {
+   "wall": 87,
+   "cols": 12,
+   "front": 10,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 20,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1
+   ],
+   "discarded": {
+    "1": 0
+   },
+   "total": 0
+  },
+  "hero": {
+   "map": [
+    31,
+    37
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    8,
+    34
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  }
+ },
+ "integrada_A_valle_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 1,
+  "dir": "Z",
+  "yaw": 90,
+  "planes": {
+   "wall": 87,
+   "cols": 12,
+   "front": 10,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 20,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1
+   ],
+   "discarded": {
+    "1": 0
+   },
+   "total": 0
+  },
+  "hero": {
+   "map": [
+    31,
+    37
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    8,
+    34
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  }
+ },
+ "integrada_A_valle_taludEste_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 87,
+   "cols": 9,
+   "front": 0,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 20,
+   "pillars": 1,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    4
+   ],
+   "discarded": {
+    "1": 0,
+    "4": 8
+   },
+   "total": 8
+  },
+  "hero": {
+   "map": [
+    31,
+    37
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_A_valle_taludEste_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 87,
+   "cols": 9,
+   "front": 0,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 20,
+   "pillars": 1,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    4
+   ],
+   "discarded": {
+    "1": 0,
+    "4": 8
+   },
+   "total": 8
+  },
+  "hero": {
+   "map": [
+    31,
+    37
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_A_valle_taludEste_ultimaZona_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 4,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 18,
+   "cols": 2,
+   "front": 24,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 3,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1,
+    4
+   ],
+   "discarded": {
+    "1": 0,
+    "4": 8
+   },
+   "total": 8
+  },
+  "hero": {
+   "map": [
+    44,
+    24
+   ],
+   "zoneRaw": 6,
+   "h": 0.267,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    38,
+    24
+   ],
+   "zoneRaw": 6,
+   "h": 0.267,
+   "onTower": false
+  }
+ },
+ "integrada_A_taludEste_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 4,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 35,
+   "cols": 8,
+   "front": 24,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 5,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    4
+   ],
+   "discarded": {
+    "4": 8
+   },
+   "total": 8
+  },
+  "hero": {
+   "map": [
+    44,
+    24
+   ],
+   "zoneRaw": 6,
+   "h": 0.267,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    38,
+    24
+   ],
+   "zoneRaw": 6,
+   "h": 0.267,
+   "onTower": false
+  }
+ },
+ "integrada_A_taludEste_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 4,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 35,
+   "cols": 8,
+   "front": 24,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 5,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    4
+   ],
+   "discarded": {
+    "4": 8
+   },
+   "total": 8
+  },
+  "hero": {
+   "map": [
+    44,
+    24
+   ],
+   "zoneRaw": 6,
+   "h": 0.267,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    38,
+    24
+   ],
+   "zoneRaw": 6,
+   "h": 0.267,
+   "onTower": false
+  }
+ },
+ "integrada_A_mesetaN_torre_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 6,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 55,
+   "cols": 9,
+   "front": 0,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 6,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    6
+   ],
+   "discarded": {
+    "6": 199
+   },
+   "total": 199
+  },
+  "hero": {
+   "map": [
+    33,
+    7
+   ],
+   "zoneRaw": 4,
+   "h": 1.333,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    33,
+    4
+   ],
+   "zoneRaw": 4,
+   "h": 1.333,
+   "onTower": false
+  }
+ },
+ "integrada_A_mesetaN_torre_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 6,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 55,
+   "cols": 9,
+   "front": 0,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 6,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    6
+   ],
+   "discarded": {
+    "6": 199
+   },
+   "total": 199
+  },
+  "hero": {
+   "map": [
+    33,
+    7
+   ],
+   "zoneRaw": 4,
+   "h": 1.333,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    33,
+    4
+   ],
+   "zoneRaw": 4,
+   "h": 1.333,
+   "onTower": false
+  }
+ },
+ "integrada_A_valle_taludEste_mesetaN_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 87,
+   "cols": 6,
+   "front": 0,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 20,
+   "pillars": 1,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    4,
+    6
+   ],
+   "discarded": {
+    "1": 0,
+    "4": 8,
+    "6": 199
+   },
+   "total": 207
+  },
+  "hero": {
+   "map": [
+    31,
+    37
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_A_valle_taludEste_mesetaN_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 87,
+   "cols": 6,
+   "front": 0,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 20,
+   "pillars": 1,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    4,
+    6
+   ],
+   "discarded": {
+    "1": 0,
+    "4": 8,
+    "6": 199
+   },
+   "total": 207
+  },
+  "hero": {
+   "map": [
+    31,
+    37
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_A_valle_taludEste_mesetaN_ultimaZona_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 6,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 46,
+   "cols": 6,
+   "front": 0,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 6,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1,
+    4,
+    6
+   ],
+   "discarded": {
+    "1": 0,
+    "4": 8,
+    "6": 199
+   },
+   "total": 207
+  },
+  "hero": {
+   "map": [
+    33,
+    7
+   ],
+   "zoneRaw": 4,
+   "h": 1.333,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    33,
+    4
+   ],
+   "zoneRaw": 4,
+   "h": 1.333,
+   "onTower": false
+  }
+ },
+ "integrada_A_control_valle_taludPpal_mesetaN_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 270,
+  "planes": {
+   "wall": 18,
+   "cols": 3,
+   "front": 37,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 21,
+   "pillars": 1,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    3,
+    6
+   ],
+   "discarded": {
+    "1": 0,
+    "3": 22,
+    "6": 213
+   },
+   "total": 235
+  },
+  "hero": {
+   "map": [
+    31,
+    37
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_A_control_valle_taludPpal_mesetaN_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 270,
+  "planes": {
+   "wall": 18,
+   "cols": 3,
+   "front": 37,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 21,
+   "pillars": 1,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    3,
+    6
+   ],
+   "discarded": {
+    "1": 0,
+    "3": 22,
+    "6": 213
+   },
+   "total": 235
+  },
+  "hero": {
+   "map": [
+    31,
+    37
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_A_control_valle_taludPpal_mesetaN_ultimaZona_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 6,
+  "dir": "Hub",
+  "yaw": 270,
+  "planes": {
+   "wall": 0,
+   "cols": 3,
+   "front": 16,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 9,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1,
+    3,
+    6
+   ],
+   "discarded": {
+    "1": 0,
+    "3": 22,
+    "6": 213
+   },
+   "total": 235
+  },
+  "hero": {
+   "map": [
+    32,
+    7
+   ],
+   "zoneRaw": 4,
+   "h": 0.267,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    51,
+    11
+   ],
+   "zoneRaw": 4,
+   "h": 0.533,
+   "onTower": false
+  }
+ },
+ "integrada_B_valle_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 0,
+  "planes": {
+   "wall": 108,
+   "cols": 1,
+   "front": 19,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 8,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1
+   ],
+   "discarded": {
+    "1": 12
+   },
+   "total": 12
+  },
+  "hero": {
+   "map": [
+    31,
+    36
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    50,
+    28
+   ],
+   "zoneRaw": 1,
+   "h": 0.88,
+   "onTower": false
+  }
+ },
+ "integrada_B_valle_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 0,
+  "planes": {
+   "wall": 108,
+   "cols": 1,
+   "front": 19,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 8,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1
+   ],
+   "discarded": {
+    "1": 12
+   },
+   "total": 12
+  },
+  "hero": {
+   "map": [
+    31,
+    36
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    50,
+    28
+   ],
+   "zoneRaw": 1,
+   "h": 0.88,
+   "onTower": false
+  }
+ },
+ "integrada_B_valle_taludEste_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 0,
+  "planes": {
+   "wall": 70,
+   "cols": 1,
+   "front": 19,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 7,
+   "pillars": 0,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    4
+   ],
+   "discarded": {
+    "1": 12,
+    "4": 28
+   },
+   "total": 40
+  },
+  "hero": {
+   "map": [
+    31,
+    36
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_B_valle_taludEste_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 0,
+  "planes": {
+   "wall": 70,
+   "cols": 1,
+   "front": 19,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 7,
+   "pillars": 0,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    4
+   ],
+   "discarded": {
+    "1": 12,
+    "4": 28
+   },
+   "total": 40
+  },
+  "hero": {
+   "map": [
+    31,
+    36
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_B_valle_taludEste_ultimaZona_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 4,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 10,
+   "cols": 2,
+   "front": 23,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 5,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1,
+    4
+   ],
+   "discarded": {
+    "1": 12,
+    "4": 28
+   },
+   "total": 40
+  },
+  "hero": {
+   "map": [
+    44,
+    23
+   ],
+   "zoneRaw": 6,
+   "h": 2,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    38,
+    24
+   ],
+   "zoneRaw": 6,
+   "h": 2,
+   "onTower": false
+  }
+ },
+ "integrada_B_taludEste_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 4,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 17,
+   "cols": 8,
+   "front": 23,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 5,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    4
+   ],
+   "discarded": {
+    "4": 28
+   },
+   "total": 28
+  },
+  "hero": {
+   "map": [
+    44,
+    23
+   ],
+   "zoneRaw": 6,
+   "h": 2,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    38,
+    24
+   ],
+   "zoneRaw": 6,
+   "h": 2,
+   "onTower": false
+  }
+ },
+ "integrada_B_taludEste_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 4,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 17,
+   "cols": 8,
+   "front": 23,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 5,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    4
+   ],
+   "discarded": {
+    "4": 28
+   },
+   "total": 28
+  },
+  "hero": {
+   "map": [
+    44,
+    23
+   ],
+   "zoneRaw": 6,
+   "h": 2,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    38,
+    24
+   ],
+   "zoneRaw": 6,
+   "h": 2,
+   "onTower": false
+  }
+ },
+ "integrada_B_mesetaN_torre_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 6,
+  "dir": "Hub",
+  "yaw": 270,
+  "planes": {
+   "wall": 0,
+   "cols": 8,
+   "front": 52,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 10,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    6
+   ],
+   "discarded": {
+    "6": 210
+   },
+   "total": 210
+  },
+  "hero": {
+   "map": [
+    33,
+    7
+   ],
+   "zoneRaw": 4,
+   "h": 4.88,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    44,
+    11
+   ],
+   "zoneRaw": 4,
+   "h": 6.44,
+   "onTower": false
+  }
+ },
+ "integrada_B_mesetaN_torre_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 6,
+  "dir": "Hub",
+  "yaw": 270,
+  "planes": {
+   "wall": 0,
+   "cols": 8,
+   "front": 52,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 10,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    6
+   ],
+   "discarded": {
+    "6": 210
+   },
+   "total": 210
+  },
+  "hero": {
+   "map": [
+    33,
+    7
+   ],
+   "zoneRaw": 4,
+   "h": 4.88,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    44,
+    11
+   ],
+   "zoneRaw": 4,
+   "h": 6.44,
+   "onTower": false
+  }
+ },
+ "integrada_B_valle_taludEste_mesetaN_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 0,
+  "planes": {
+   "wall": 69,
+   "cols": 1,
+   "front": 19,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 7,
+   "pillars": 0,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    4,
+    6
+   ],
+   "discarded": {
+    "1": 12,
+    "4": 28,
+    "6": 206
+   },
+   "total": 246
+  },
+  "hero": {
+   "map": [
+    31,
+    36
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_B_valle_taludEste_mesetaN_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 0,
+  "planes": {
+   "wall": 69,
+   "cols": 1,
+   "front": 19,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 7,
+   "pillars": 0,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    4,
+    6
+   ],
+   "discarded": {
+    "1": 12,
+    "4": 28,
+    "6": 206
+   },
+   "total": 246
+  },
+  "hero": {
+   "map": [
+    31,
+    36
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_B_valle_taludEste_mesetaN_ultimaZona_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 6,
+  "dir": "Hub",
+  "yaw": 90,
+  "planes": {
+   "wall": 46,
+   "cols": 6,
+   "front": 0,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 3,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1,
+    4,
+    6
+   ],
+   "discarded": {
+    "1": 12,
+    "4": 28,
+    "6": 206
+   },
+   "total": 246
+  },
+  "hero": {
+   "map": [
+    33,
+    7
+   ],
+   "zoneRaw": 4,
+   "h": 4.88,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    33,
+    3
+   ],
+   "zoneRaw": 4,
+   "h": 4.88,
+   "onTower": false
+  }
+ },
+ "integrada_B_control_valle_taludPpal_mesetaN_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 1,
+  "dir": "Z",
+  "yaw": 270,
+  "planes": {
+   "wall": 18,
+   "cols": 3,
+   "front": 44,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 21,
+   "pillars": 1,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    3,
+    6
+   ],
+   "discarded": {
+    "1": 12,
+    "3": 60,
+    "6": 256
+   },
+   "total": 328
+  },
+  "hero": {
+   "map": [
+    31,
+    36
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_B_control_valle_taludPpal_mesetaN_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 1,
+  "dir": "Z",
+  "yaw": 270,
+  "planes": {
+   "wall": 18,
+   "cols": 3,
+   "front": 44,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 21,
+   "pillars": 1,
+   "goal": false
+  },
+  "dropped": {
+   "window": [
+    1,
+    3,
+    6
+   ],
+   "discarded": {
+    "1": 12,
+    "3": 60,
+    "6": 256
+   },
+   "total": 328
+  },
+  "hero": {
+   "map": [
+    31,
+    36
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": null
+ },
+ "integrada_B_control_valle_taludPpal_mesetaN_ultimaZona_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 6,
+  "dir": "Hub",
+  "yaw": 270,
+  "planes": {
+   "wall": 0,
+   "cols": 2,
+   "front": 0,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 12,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1,
+    3,
+    6
+   ],
+   "discarded": {
+    "1": 12,
+    "3": 60,
+    "6": 256
+   },
+   "total": 328
+  },
+  "hero": {
+   "map": [
+    33,
+    6
+   ],
+   "zoneRaw": 4,
+   "h": 4.88,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    44,
+    11
+   ],
+   "zoneRaw": 4,
+   "h": 6.44,
+   "onTower": false
+  }
+ }
+}

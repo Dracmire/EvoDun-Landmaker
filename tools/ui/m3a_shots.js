@@ -30,9 +30,13 @@ const VARIANT = { A: { terraces: 2, subs: 6 }, B: { terraces: 6, subs: 3 } };
       for (const k of ['terraces', 'subs']) { await a.slider(k, VARIANT[v][k]); await idle(); await idle(); }
     }
     const dims = await ev(() => window.__evo.S() && [window.__evo.S().W, window.__evo.S().H]); console.log('variant', v, 'shape', dims);
-    for (const [raws, nm] of [[[1], 'valle'], [[1, 6], 'valle_taludEste'], [[4], 'mesetaN_torre'], [[1, 6, 4], 'valle_taludEste_mesetaN'], [[1, 5, 4], 'control_valle_taludPpal_mesetaN']]) {
+    for (const [raws, nm] of [[[1], 'valle'], [[1, 6], 'valle_taludEste'], [[6], 'taludEste'], [[4], 'mesetaN_torre'], [[1, 6, 4], 'valle_taludEste_mesetaN'], [[1, 5, 4], 'control_valle_taludPpal_mesetaN']]) {
       const ks = await ev((raws) => { const e = window.__evo, tb = window.EVO.stage.zoneTable(e.packs[e.st.pack].pack); return raws.map((r) => tb.toK.get(r)); }, raws);
       await win(ks); await frame('room'); await shot(`${v}_${nm}_encuadre_sala.png`); await frame('hero'); await shot(`${v}_${nm}_encuadre_heroe.png`);
+      if (ks.length > 1) { // the hero in the LAST zone of the window (the one that has the goal): the room framing
+        await ev((k) => { const e = window.__evo, S = e.S(), c = window.EVO.stage.roomCentre(S, k); e.st.stageIdx = e.st.stageRooms.indexOf(k); e.st.follow = true; e.st.hero = { x: S.ox + c.x, y: S.oy + c.y }; e.redraw(); }, ks[ks.length - 1]); await idle(); await idle();
+        await frame('room'); await shot(`${v}_${nm}_ultimaZona_encuadre_sala.png`);
+      }
     }
   }
   fs.writeFileSync(path.join(out, BUILTIN ? 'm3a_shots_integrada.json' : 'm3a_shots.json'), JSON.stringify(table, null, 1) + '\n');

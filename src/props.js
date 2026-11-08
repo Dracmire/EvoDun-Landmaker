@@ -39,7 +39,9 @@
     for (let h = 0; h < q.length; h++) { const i = q[h]; for (const j of nb(i)) if (inRoom[j] && par[j] === -2) { par[j] = i; q.push(j); } }
     // END
     let end = -1;
+    const pg = !both && o.last && !T.noPoi ? E.stage.poiGoal(S, rec.id) : null; // M3c: a POI inside the footprint of the LAST zone is its goal (and the end of the path) when the walk from the start reaches it
     if (both) { end = nearest(rec.exit, (i) => !ex1[i] && par[i] !== -2); }
+    else if (pg && par[pg.tile] !== -2) { end = pg.tile; out.goal = { x: (end % W) + 0.5, y: ((end / W) | 0) + 0.5, tile: end, ter: S.ter[end], h: hOf(end) }; }
     else { // the goal: the highest terrace of the BACK half (the NEAR half with the mutation metaFront), nearest the start's column
       const pAxis = Pc(start); let best = null;
       for (const i of q) { if (ex2[i]) continue; const a = A(i); if (T.metaFront ? a >= aMid : a < aMid) continue; const k = [S.ter[i], hOf(i), -Math.abs(Pc(i) - pAxis), T.metaFront ? -a : a]; if (!best || cmp(k, best.k) > 0) best = { i, k }; }

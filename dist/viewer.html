@@ -5458,7 +5458,18 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
     }
     S.stageZones = zm; S.stageZonesInfo = info;
   }
-  E.stage = { zoneTable, buildZones, zoneMap, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+  /* M3c, THE GOAL FROM A POI (docs/crystallizers/03-stage/README.md "M3c"): the role `poi` of the pack (S.fields.poi.values, a graded 0..1 mask: E.shape crops the fields to the window of the slice, so it is indexed like the tiles of S) marks the goal of a zone. Among the walkable tiles of the FOOTPRINT of zone `k` (E.stage.zoneMap) with poi >= POI_MIN [R, a hypothesis] the one with the highest value wins; a tie goes to the tile nearest the centroid of the tied ones. null without the role or without such a tile (the rule of the rules then stays as it was). Used by orient.js and props.js for the LAST zone of a window. */
+  const POI_MIN = 0.5;
+  function poiGoal(S, k) {
+    const v = S.fields && S.fields.poi && S.fields.poi.values; if (!v) return null;
+    const zm = zoneMap(S), W = S.W, vd = S.void; let best = -1, tied = [];
+    for (let i = 0; i < S.n; i++) { if (zm[i] !== k || S.block[i] || (vd && vd[i]) || !(S.region && S.region[i] >= 0) || (S.nowalk && S.nowalk[i])) continue; const q = v[i]; if (!(q >= POI_MIN)) continue; if (q > best + 1e-9) { best = q; tied = [i]; } else if (Math.abs(q - best) <= 1e-9) tied.push(i); }
+    if (!tied.length) return null;
+    let cx = 0, cy = 0; for (const i of tied) { cx += (i % W) + 0.5; cy += ((i / W) | 0) + 0.5; } cx /= tied.length; cy /= tied.length;
+    let tile = tied[0], bd = 1e18; for (const i of tied) { const d = ((i % W) + 0.5 - cx) ** 2 + (((i / W) | 0) + 0.5 - cy) ** 2; if (d < bd - 1e-12) { bd = d; tile = i; } }
+    return { tile, value: best, tied: tied.length };
+  }
+  E.stage = { zoneTable, buildZones, zoneMap, poiGoal, POI_MIN, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
 })(window.EVO = window.EVO || {});
 
 /* STAGE BORDERS (mode 3, PR S2; `E.border.apply(S, opts)`; docs/crystallizers/03-stage/README.md "S2"): the ground OUTSIDE the footprint of the 2D-HD window gets a profile that closes the stage: ISLA (a shallow moat of water around the footprint) and QUEBRADA (a rise on the far side, a deep drop on the camera side).
@@ -5684,7 +5695,9 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
       const high = cen((h) => h >= hHi), low = cen((h) => h <= hLo);
       const entry = k > 0 ? gate(rooms[k - 1], id) || gate(id, rooms[k - 1]) : null, exit = k < rooms.length - 1 ? gate(id, rooms[k + 1]) || gate(rooms[k + 1], id) : null;
       let axis = null, why;
+      const pg = k === rooms.length - 1 && !T.noPoi ? E.stage.poiGoal(S, id) : null; // M3c: the LAST zone of the window (or the only one) with a POI inside its footprint walks to it
       if (entry && exit) { axis = norm([exit[0] - entry[0], exit[1] - entry[1]]); why = 'entry gate -> exit gate'; }
+      else if (pg) { const o0 = entry || low; axis = norm([(pg.tile % W) + 0.5 - o0[0], ((pg.tile / W) | 0) + 0.5 - o0[1]]); why = (entry ? 'entry gate' : 'lowest part') + ' -> POI goal'; }
       else if (exit) { axis = norm([high[0] - exit[0], high[1] - exit[1]]); why = 'exit gate -> highest part'; }
       else if (entry) { axis = norm([high[0] - entry[0], high[1] - entry[1]]); why = 'entry gate -> highest part'; }
       else { axis = norm([high[0] - low[0], high[1] - low[1]]); why = 'lowest part -> highest part'; }
@@ -5811,7 +5824,9 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
     for (let h = 0; h < q.length; h++) { const i = q[h]; for (const j of nb(i)) if (inRoom[j] && par[j] === -2) { par[j] = i; q.push(j); } }
     // END
     let end = -1;
+    const pg = !both && o.last && !T.noPoi ? E.stage.poiGoal(S, rec.id) : null; // M3c: a POI inside the footprint of the LAST zone is its goal (and the end of the path) when the walk from the start reaches it
     if (both) { end = nearest(rec.exit, (i) => !ex1[i] && par[i] !== -2); }
+    else if (pg && par[pg.tile] !== -2) { end = pg.tile; out.goal = { x: (end % W) + 0.5, y: ((end / W) | 0) + 0.5, tile: end, ter: S.ter[end], h: hOf(end) }; }
     else { // the goal: the highest terrace of the BACK half (the NEAR half with the mutation metaFront), nearest the start's column
       const pAxis = Pc(start); let best = null;
       for (const i of q) { if (ex2[i]) continue; const a = A(i); if (T.metaFront ? a >= aMid : a < aMid) continue; const k = [S.ter[i], hOf(i), -Math.abs(Pc(i) - pAxis), T.metaFront ? -a : a]; if (!best || cmp(k, best.k) > 0) best = { i, k }; }
