@@ -1,0 +1,186 @@
+{
+ "integrada_A_valle_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 1,
+  "dir": "Z",
+  "yaw": 270,
+  "planes": {
+   "wall": 18,
+   "cols": 12,
+   "front": 51,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 20,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1
+   ],
+   "discarded": {
+    "1": 0
+   },
+   "total": 0
+  },
+  "hero": {
+   "map": [
+    31,
+    37
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    51,
+    33
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  }
+ },
+ "integrada_A_valle_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 2,
+  "subs": 6,
+  "zone": 1,
+  "dir": "Z",
+  "yaw": 270,
+  "planes": {
+   "wall": 18,
+   "cols": 12,
+   "front": 51,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 20,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1
+   ],
+   "discarded": {
+    "1": 0
+   },
+   "total": 0
+  },
+  "hero": {
+   "map": [
+    31,
+    37
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    51,
+    33
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  }
+ },
+ "integrada_B_valle_encuadre_sala.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 0,
+  "planes": {
+   "wall": 108,
+   "cols": 1,
+   "front": 19,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 8,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1
+   ],
+   "discarded": {
+    "1": 12
+   },
+   "total": 12
+  },
+  "hero": {
+   "map": [
+    31,
+    36
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    50,
+    28
+   ],
+   "zoneRaw": 1,
+   "h": 0.88,
+   "onTower": false
+  }
+ },
+ "integrada_B_valle_encuadre_heroe.png": {
+  "terH": 4,
+  "terraces": 6,
+  "subs": 3,
+  "zone": 1,
+  "dir": "Hub",
+  "yaw": 0,
+  "planes": {
+   "wall": 108,
+   "cols": 1,
+   "front": 19,
+   "voidTiles": 0
+  },
+  "props": {
+   "torches": 8,
+   "pillars": 0,
+   "goal": true
+  },
+  "dropped": {
+   "window": [
+    1
+   ],
+   "discarded": {
+    "1": 12
+   },
+   "total": 12
+  },
+  "hero": {
+   "map": [
+    31,
+    36
+   ],
+   "zoneRaw": 1,
+   "h": 0,
+   "onTower": false
+  },
+  "goal": {
+   "map": [
+    50,
+    28
+   ],
+   "zoneRaw": 1,
+   "h": 0.88,
+   "onTower": false
+  }
+ }
+}
