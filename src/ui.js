@@ -56,10 +56,18 @@
     for (const n of names) { const b = atob(window.EVO_FOREST_PNG[n]), u = new Uint8Array(b.length); for (let k = 0; k < b.length; k++) u[k] = b.charCodeAt(k); const dec = await E.decodePng(u.buffer); ims.push(Object.assign({ name: n + '.png', dec }, E.imageChannels(dec, false))); }
     return E.packFromRoles(ims, { elevation: { image: 0, channel: 'V' }, zone: { image: 1, channel: 'H' }, path: { image: 2, channel: 'V' }, poi: { image: 3, channel: 'V' } }, { name: 'Forest (old map, v53 zones) · heights ' + variant, maxnode: 6, markers: [] });
   }
+  /* AURHEA'S FOUNTAIN (M3b): the old map with water, built in as the PNGs of docs/crystallizers/03-stage/refs/dq3/aurheas_fountain/derived/ (base64 in data/packs.js, `EVO_AUREA_PNG`), through the SAME path as loaded files (decodePng -> imageChannels -> packFromRoles with the roles of the manifest.json there); the water is DATA of the pack: `pack.masks.water` from water.png (packFromRoles is not generalized: the role "Your images" does not carry water). Decoded once, on the first selection. */
+  async function aurheaPack() {
+    const names = ['height', 'zones', 'path', 'poi', 'water'], ims = [];
+    for (const n of names) { const b = atob(window.EVO_AUREA_PNG[n]), u = new Uint8Array(b.length); for (let k = 0; k < b.length; k++) u[k] = b.charCodeAt(k); const dec = await E.decodePng(u.buffer); ims.push(Object.assign({ name: n + '.png', dec }, E.imageChannels(dec, false))); }
+    const pk = E.packFromRoles(ims.slice(0, 4), { elevation: { image: 0, channel: 'V' }, zone: { image: 1, channel: 'H' }, path: { image: 2, channel: 'V' }, poi: { image: 3, channel: 'V' } }, { name: "Aurhea's Fountain (old map)", maxnode: 5, markers: [] });
+    pk.masks.water = Array.from(ims[4].ch.V, (v) => (v > 0.5 ? 1 : 0)); return pk;
+  }
   /* choose a source: the built-in real map is decoded on its first selection; a built-in pack may declare its viewer block (floors: terraces 5 and minPlateau 5); a crop belongs to one map */
   async function selectSource(id) {
     if (id === 'real_map' && !packs.real_map.pack) { message('Decoding the real map…'); try { packs.real_map.pack = await realMapPack(); message(''); } catch (err) { message(err.message); $('#src').value = st.pack; return false; } }
     if ((id === 'forest_a' || id === 'forest_b') && !packs[id].pack) { message('Decoding Forest…'); try { packs[id].pack = await forestPack(id === 'forest_a' ? 'A' : 'B'); message(''); } catch (err) { message(err.message); $('#src').value = st.pack; return false; } }
+    if (id === 'aurhea' && !packs.aurhea.pack) { message("Decoding Aurhea's Fountain…"); try { packs.aurhea.pack = await aurheaPack(); message(''); } catch (err) { message(err.message); $('#src').value = st.pack; return false; } }
     $('#src').value = id; st.pack = id;
     const vk = packs[st.pack] && packs[st.pack].pack && packs[st.pack].pack.viewer; if (vk) applyViewerBlock(vk);
     for (const c of cropIds) $('#' + c).value = '';
@@ -1206,6 +1214,7 @@
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     setPack('real_map', 'Real map 256 (height only)', null); // decoded on the first selection (realMapPack)
     setPack('forest_a', 'Forest (old map, v53 zones) · heights A', null); setPack('forest_b', 'Forest (old map, v53 zones) · heights B', null); // M3a: decoded on the first selection (forestPack)
+    setPack('aurhea', "Aurhea's Fountain (old map, water)", null); // M3b: decoded on the first selection (aurheaPack)
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);

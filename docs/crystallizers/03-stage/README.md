@@ -443,6 +443,13 @@ Judge: by FEATURES (orientation, planes, closing wall, frame, goal), not by an i
 - A PNG zone whose neighbours are all walkable terrain gets no closing planes (C2 classifies only non-walkable tiles): the route window shows wall 0 / columns 0; and no goal unless the zone is the LAST of the window (C3, `o.last`).
 - Trees as volumes or billboards; a role for blocked terrain (after M4, if needed).
 
+### M3b as built: Aurhea's Fountain, an old map with a lake (example "Aurhea's Fountain (old map, water)" of mode 3; `refs/dq3/aurheas_fountain/derived/` (`derive_roles.py`, README there), `node tools/test_aurhea_roles.js`, `tools/ui/test_aurhea_ui.js`; step M3b of `MVP.md`)
+
+- **Data.** The script reads only the map crop (384 x 352 px) of `old/aurheas_fountain.png`; the 16 px grid is LEARNED (distinct blocks: (0, 0) 0.161 against a median of 0.478; (8, 14) from the lake contour alone is wrong), 24 x 22 tiles; water 75 old tiles (300 px at x2); five zones (south meadow 768 px, west 256, east 292, north 480, peninsula 16); POI at the tip of the peninsula (viewer tile (22, 20)).
+- **Water.** It is pack data: `aurheaPack` sets `pack.masks.water`; `S.water` and `S.block` hold all 300 tiles, none is void (elevation 20 grey > 0). Nothing in the window rules was changed for it (R7).
+- **Heights.** Measured, one variant (terraces 1, sub-terraces 5): water 0 H, all land 0.308 H, peninsula 0.923 H. The plan 0 / 1 / 1.5 H cannot be reached (README of the derived folder).
+- **Order of the table** (hypothesis [R], BFS from the lowest mean): k = 1 south, 2 west, 3 east, 4 peninsula, 5 north. Footprint: no tile of any zone is dropped in any window. Planes with water: see the report of the stop (no water rule yet).
+
 ## 9. Known limits and open questions
 
 - The viewer cannot make the art; it can only place it.
