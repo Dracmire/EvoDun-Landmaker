@@ -1,6 +1,6 @@
 /* Screenshots of M3a (Forest, the old map with the zones of v53) into docs/crystallizers/03-stage/shots/m3a/: the roles of docs/crystallizers/03-stage/refs/dq3/forest_plains/annotated/ loaded as "Your images" (the files the user would pick: height_A / height_B, zones, path, poi),
-   mode 3, Cam 6, Box, orientation + planes + props on (the defaults of the example). Windows: the valley [1], the way to the tower [1, 3, 5] (valley, slope, plateau N), the plateau N with the tower [5]; variants A (terraces 2, sub-terraces 6) and B (terraces 6, sub-terraces 3).
-   The trees are walkable terrain (they are not blocked in M3a); the tower is a raised mass. Windows are named by RAW zone id (1 valley, 4 plateau N + tower, 5 slope), turned into the place in the BFS order of the table.
+   mode 3, Cam 6, Box, orientation + planes + props on (the defaults of the example). (M3c: see the windows below); variants A (terraces 2, sub-terraces 6) and B (terraces 6, sub-terraces 3).
+   The trees are walkable terrain (they are not blocked in M3a); the tower is a raised mass. Windows are named by RAW zone id (1 valley, 4 plateau N + tower, 5 main slope, 6 east slope): [valley], [valley, east slope] (the way to the POI A), [plateau N], [valley, east slope, plateau N] and the control [valley, main slope, plateau N], turned into the place in the BFS order of the table.
    M3A_SRC=<dir> shoots another set of PNGs (the data of an older commit); the names of the files are the ones of derive_roles.py.
    --builtin: no files, the examples "Forest A (v53)" and "Forest B (amplified relief)" with the built-in sources (file names prefixed `integrada_`).
      NODE_PATH=$(npm root -g) node tools/ui/m3a_shots.js [outDir] [--builtin] */
@@ -30,7 +30,7 @@ const VARIANT = { A: { terraces: 2, subs: 6 }, B: { terraces: 6, subs: 3 } };
       for (const k of ['terraces', 'subs']) { await a.slider(k, VARIANT[v][k]); await idle(); await idle(); }
     }
     const dims = await ev(() => window.__evo.S() && [window.__evo.S().W, window.__evo.S().H]); console.log('variant', v, 'shape', dims);
-    for (const [raws, nm] of [[[1], 'valle'], [[1, 5, 4], 'ruta_valle_talud_mesetaN'], [[4], 'mesetaN_torre']]) {
+    for (const [raws, nm] of [[[1], 'valle'], [[1, 6], 'valle_taludEste'], [[4], 'mesetaN_torre'], [[1, 6, 4], 'valle_taludEste_mesetaN'], [[1, 5, 4], 'control_valle_taludPpal_mesetaN']]) {
       const ks = await ev((raws) => { const e = window.__evo, tb = window.EVO.stage.zoneTable(e.packs[e.st.pack].pack); return raws.map((r) => tb.toK.get(r)); }, raws);
       await win(ks); await frame('room'); await shot(`${v}_${nm}_encuadre_sala.png`); await frame('hero'); await shot(`${v}_${nm}_encuadre_heroe.png`);
     }

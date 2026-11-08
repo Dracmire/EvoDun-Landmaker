@@ -8,7 +8,7 @@
 | `height_A.png` | `elevation` | variant A, the v53 hypothesis [R, by eye on remake screenshots, NOT verified]: valley and trails grey 20 (0 H), slope 26 (0.3 H), plateaus 32 (0.6 H), tower 90 (3.5 H); 1 H = 20 grey; 0 is void in the viewer so the valley is 20. The heights follow the CLASS of a tile |
 | `height_B.png` | `elevation` | variant B, amplified relief: valley 20, slope 33, plateaus NW and N 45, plateau SW 57, tower 92; the trails follow their zone |
 | `path.png` | `path` | the 44 trail tiles of v53 (255) |
-| `poi.png` | `poi` | A: the walkable tile in front of the tower door, old tile (19, 11), zone 4 (255); B: the west exit (8, 11) (170). The door (19, 10) is NOT marked: the viewer reads `poi` only as a graded overlay and the Stage rules never read it |
+| `poi.png` | `poi` | A: old tile (19, 12), two tiles south of the tower door (19, 10), in the EAST slope (zone 6), inside the footprint of the windows [1, 6], [6] and [1, 6, 4] (4 of 4 px walkable, 0.267 H in A, 2 H in B) (255); B: the west exit (8, 11), in the main slope (zone 5) (170). The door is NOT marked. M3c: the Stage rules read `poi` as the goal of the last zone of a window |
 | `trees_blocked.png` | `vegetation` | 255 = the tower (45 tiles) and the trees (230 tiles whose pixels are foliage or trunk for at least half of the tile). DATA FOR LATER (trees as volumes or billboards): the viewer carries the role `vegetation` and does not use it, so NOTHING is blocked by it in M3a |
 | `manifest.json` | | `evodun-pack/0.2` roles of the files; `variants` names the two elevation images |
 

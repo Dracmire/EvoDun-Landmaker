@@ -11,7 +11,7 @@ Output (52 x 46 = 26 x 23 tiles at x2: each tile of the old game is 2 x 2 px, so
   height_A.png     role `elevation` VARIANT A, the v53 hypothesis [R, by eye on remake screenshots, NOT verified]: valley and paths 0 H, slope 0.3 H, plateaus 0.6 H, tower 3.5 H
   height_B.png     role `elevation` VARIANT B, amplified relief: every zone is at least one terrace away from each neighbour (valley < slope < plateaus < SW plateau < tower)
   path.png         role `path`      graded mask: the class 6 of v53 (the trails), 255 on the trail, 0 elsewhere. The trail tiles belong to the NEAREST zone of 1..5 in `zones.png`
-  poi.png          role `poi`       graded: A (the walkable tile in front of the tower door, (19, 11), zone 4) 255, B (west exit, (8, 11)) 170. The door (19, 10) is not marked: nothing in the viewer reads it (the Stage rules do not read `poi`)
+  poi.png          role `poi`       graded: A (two tiles south of the tower door (19, 10): old tile (19, 12), zone 6 = the east slope, inside the footprint of the windows [1, 6], [6] and [1, 6, 4]) 255, B (west exit, (8, 11)) 170. The door (19, 10) is not marked. M3c: the Stage rules read `poi` as the GOAL of the last zone of a window (E.stage.poiGoal)
   trees_blocked.png      role `vegetation` graded: 255 = the TOWER (cols 17-21, rows 2-10) and the TREES (tile coverage of the foliage and trunk colours >= 0.5 in forest.png; no tree is separated: the sprites overlap). DATA FOR LATER (trees as volumes or billboards): the viewer reads the role `vegetation` and does not use it, nothing is blocked by it
   manifest.json    evodun-pack/0.2: the roles of those images ("Your images" / the viewer read it the same way), flipY false, maxnode 6
 Heights are grey values (V). 0 is VOID in the viewer, so the valley is 20, never 0. The viewer quantizes them into terraces and sub-terraces: the heights it ends up with (in H) are measured, not assumed: tools/ui + README "M3a".
@@ -27,7 +27,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); REFS = os.path.normpath(os.pa
 OLD = os.path.join(REFS, 'old', 'forest.png'); REMAKE = os.path.join(REFS, 'remake', 'r_20261030_141929_shrine_of_the_plains_map.png')
 TW, TH, SC = 26, 23, 2                      # old map in tiles; each tile -> SC x SC px
 TOWER = (17, 21, 2, 10)                     # [v53] columns 17-21, rows 2-10 (old tiles): solid, not walkable
-POI = {'A': (19, 11, 255), 'B': (8, 11, 170)}
+POI = {'A': (19, 12, 255), 'B': (8, 11, 170)}
 MIN_PIECE = 10                              # [R, a HYPOTHESIS] a connected piece of at least this many old tiles is a zone of its own; smaller ones are fused into a neighbour
 # VARIANT A: grey values with 1 H = 20 grey (valley 20 = 0 H): slope +6 (0.3 H), plateaus +12 (0.6 H), tower +70 (3.5 H)
 GREY_A = {'valley': 20, 'path': 20, 'slope': 26, 'plateau': 32, 'tower': 90}
