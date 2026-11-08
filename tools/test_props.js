@@ -45,5 +45,21 @@ const WINS = [[17, 10, 20, 27, 6, 5], [14], [44]], HYP = E.props.HYP;
   { const c = centred({ shortestPath: true }, 14); ok(`MUTATION shortestPath (the C3 route): ${c.good} of ${c.rows} rows (${(100 * c.share).toFixed(0)} %): the centre-line check FAILS`, !(c.share >= 0.9), c); }
   // no torch or pillar within goalClear tiles of the goal
   { let minD = 1e9; for (const id of [5, 14, 44]) { const { d } = run(id); for (const t of d.torches.concat(d.pillars)) minD = Math.min(minD, Math.hypot(t.x - d.goal.x, t.y - d.goal.y)); } ok(`no torch or pillar closer than ${HYP.goalClear} tiles to the goal (the closest: ${minD.toFixed(2)})`, minD >= HYP.goalClear, minD); }
+  // M3c: a POI inside the footprint of the LAST zone is its goal and the end of its path; without `poi`, outside the footprint or in a zone that is not the last: the goal of before
+  {
+    const withPoi = (S, tiles) => { const v = new Float32Array(S.n); for (const [t, q] of tiles) v[t] = q; S.fields = Object.assign({}, S.fields, { poi: { values: v } }); };
+    const S14 = shapes['14'], base = run(14).d, rec14 = recs[14], mid = base.path[Math.floor(base.path.length / 2)];
+    withPoi(S14, [[mid, 1]]); const d1 = E.props.compute(S14, P, rec14, { tilesPerH: 2, last: true, next: 0 });
+    ok(`M3c: a POI on the path of room 14 (a window of one room) is its goal (tile ${d1.goal && d1.goal.tile} = ${mid}) and the end of the path; before: ${base.goal.tile}`, d1.goal && d1.goal.tile === mid && d1.end === mid && base.goal.tile !== mid && !d1.noPath, [d1.goal, d1.end]);
+    ok('M3c: the landmark of the list goes where the goal is', (() => { const L = E.props.list(S14, P, rec14, { tilesPerH: 2, last: true, next: 0 }).list.filter((q) => q.kind === 'landmark'); return L.length === 1 && Math.abs(L[0].x - ((mid % S14.W) + 0.5 + S14.ox)) < 1e-9 && Math.abs(L[0].y - (((mid / S14.W) | 0) + 0.5 + S14.oy)) < 1e-9; })());
+    const dn = E.props.compute(S14, P, rec14, { tilesPerH: 2, last: true, next: 0, test: { noPoi: true } });
+    ok('MUTATION noPoi: the goal is the one of before (the check above FAILS without the rule)', dn.goal && dn.goal.tile === base.goal.tile && dn.end === base.end);
+    const dnl = E.props.compute(S14, P, rec14, { tilesPerH: 2, last: false, next: 0 });
+    ok('M3c: a zone that is not the last (last: false) has no goal even with a POI', !dnl.goal);
+    withPoi(S14, [[0, 1]]); const dout = E.props.compute(S14, P, rec14, { tilesPerH: 2, last: true, next: 0 });
+    ok('M3c: a POI outside the footprint = the goal of before', dout.goal && dout.goal.tile === base.goal.tile && dout.end === base.end);
+    delete S14.fields.poi; const dnone = E.props.compute(S14, P, rec14, { tilesPerH: 2, last: true, next: 0 });
+    ok('M3c: no `poi` in the pack = the goal of before', dnone.goal && dnone.goal.tile === base.goal.tile && JSON.stringify(dnone.torches) === JSON.stringify(base.torches));
+  }
   console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

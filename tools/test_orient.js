@@ -35,5 +35,30 @@ const WIN6 = [17, 10, 20, 27, 6, 5], EXP6 = [[17, 'Hub', 0, 1.2], [10, 'Hub', 27
   ok('deterministic: the same window twice gives the same table', JSON.stringify(row(table(WIN6).T)) === JSON.stringify(row(w6.T)));
   E.orientTest = { fixedYaw: 180 }; const fx = table(WIN6); E.orientTest = undefined;
   ok('MUTATION fixedYaw (one yaw for every room): the table check FAILS', !same(row(fx.T), EXP6) && fx.T.rooms.every((r) => r.yaw === 180));
+  // M3c: the LAST zone of a window walks to the POI inside its footprint (E.stage.poiGoal); without `poi`, a POI outside the footprint, or a zone that is not the last: the rule of before
+  {
+    const withPoi = (S, tiles) => { const v = new Float32Array(S.n); for (const [t, q] of tiles) v[t] = q; S.fields = Object.assign({}, S.fields, { poi: { values: v } }); return S; };
+    const foot = (S, id) => { const zm = E.stage.zoneMap(S), out = []; for (let i = 0; i < S.n; i++) if (zm[i] === id && !S.block[i] && !(S.void && S.void[i]) && S.region && S.region[i] >= 0) out.push(i); return out; };
+    const S14 = table([14]).S, f14 = foot(S14, 14), pt = f14[Math.floor(f14.length * 0.8)], base14 = E.orient.compute(S14, P, [14], 2).byId.get(14);
+    withPoi(S14, [[pt, 1]]); const r14 = E.orient.compute(S14, P, [14], 2).byId.get(14), g = E.stage.poiGoal(S14, 14), ax = [((pt % S14.W) + 0.5 - r14.centre[0]), (((pt / S14.W) | 0) + 0.5 - r14.centre[1])];
+    ok(`M3c: a window of one room with a POI inside its footprint: the axis goes from the lowest part to the POI ("${r14.why}", was "${base14.why}"), the goal tile is the POI (${g && g.tile} = ${pt})`, g && g.tile === pt && r14.why === 'lowest part -> POI goal' && JSON.stringify(r14.axis) !== JSON.stringify(base14.axis), [r14.why, r14.axis, base14.axis]);
+    E.orientTest = { noPoi: true }; const nop = E.orient.compute(S14, P, [14], 2).byId.get(14); E.orientTest = undefined;
+    ok('MUTATION noPoi: the axis is the one of before (the check above FAILS without the rule)', JSON.stringify(nop.axis) === JSON.stringify(base14.axis) && nop.why === base14.why && nop.yaw === base14.yaw, [nop.why, nop.axis]);
+    const other = foot(table([17]).S, 17); const S14b = table([14]).S; withPoi(S14b, [[0, 1]]); // tile 0 is not in the footprint of room 14 (outside the room: not walkable or another zone)
+    ok('M3c: a POI outside the footprint of the last zone = the rule of before (axis, why, yaw)', (() => { const r = E.orient.compute(S14b, P, [14], 2).byId.get(14); return JSON.stringify(r.axis) === JSON.stringify(base14.axis) && r.why === base14.why && r.yaw === base14.yaw; })());
+    ok('M3c: a pack without `poi` = the rule of before; E.stage.poiGoal is null', E.stage.poiGoal(table([14]).S, 14) === null && JSON.stringify(R(w14.T, 14).axis) === JSON.stringify(base14.axis));
+    // a window of two rooms: the POI of the FIRST room does not matter, the one of the LAST one is walked to from the entry gate
+    const S2 = table([17, 10]).S, f17 = foot(S2, 17), f10 = foot(S2, 10), b2 = E.orient.compute(S2, P, [17, 10], 2);
+    withPoi(S2, [[f17[Math.floor(f17.length / 2)], 1]]); const a2 = E.orient.compute(S2, P, [17, 10], 2);
+    ok('M3c: a POI in the first room of a window of two changes nothing (only the last zone reads it)', JSON.stringify(a2.rooms.map((r) => [r.axis, r.why, r.yaw])) === JSON.stringify(b2.rooms.map((r) => [r.axis, r.why, r.yaw])));
+    const t10 = f10[Math.floor(f10.length * 0.7)]; withPoi(S2, [[t10, 1]]); const c2 = E.orient.compute(S2, P, [17, 10], 2), r10b = c2.byId.get(10);
+    ok(`M3c: a POI in the last room of a window of two: the axis goes from its entry gate to the POI ("${r10b.why}"), the first room is as before`, r10b.why === 'entry gate -> POI goal' && JSON.stringify(c2.byId.get(17).axis) === JSON.stringify(b2.byId.get(17).axis), [r10b.why]);
+    // the value decides, a tie goes to the tile nearest the centroid of the tied ones
+    const a = f14[2], b = f14[Math.floor(f14.length / 2)], c = f14[f14.length - 3];
+    withPoi(S14, [[a, 0.667], [b, 1], [c, 0.8]]); const win = E.stage.poiGoal(S14, 14);
+    withPoi(S14, [[a, 1], [b, 1], [c, 1]]); const tie = E.stage.poiGoal(S14, 14), cs = [a, b, c], cx = cs.reduce((p, i) => p + (i % S14.W) + 0.5, 0) / 3, cy = cs.reduce((p, i) => p + ((i / S14.W) | 0) + 0.5, 0) / 3, near = cs.slice().sort((p, q) => Math.hypot((p % S14.W) + 0.5 - cx, ((p / S14.W) | 0) + 0.5 - cy) - Math.hypot((q % S14.W) + 0.5 - cx, ((q / S14.W) | 0) + 0.5 - cy))[0];
+    withPoi(S14, [[a, 0.4]]);
+    ok(`M3c: the highest value wins (1 over 0.8 and 0.667), a tie goes to the tile nearest the centroid of the tied ones, below ${E.stage.POI_MIN} there is no goal`, win.tile === b && tie.tile === near && tie.tied === 3 && E.stage.poiGoal(S14, 14) === null, [win, tie, near]);
+  }
   console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

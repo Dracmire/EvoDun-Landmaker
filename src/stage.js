@@ -115,5 +115,16 @@
     }
     S.stageZones = zm; S.stageZonesInfo = info;
   }
-  E.stage = { zoneTable, buildZones, zoneMap, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+  /* M3c, THE GOAL FROM A POI (docs/crystallizers/03-stage/README.md "M3c"): the role `poi` of the pack (S.fields.poi.values, a graded 0..1 mask: E.shape crops the fields to the window of the slice, so it is indexed like the tiles of S) marks the goal of a zone. Among the walkable tiles of the FOOTPRINT of zone `k` (E.stage.zoneMap) with poi >= POI_MIN [R, a hypothesis] the one with the highest value wins; a tie goes to the tile nearest the centroid of the tied ones. null without the role or without such a tile (the rule of the rules then stays as it was). Used by orient.js and props.js for the LAST zone of a window. */
+  const POI_MIN = 0.5;
+  function poiGoal(S, k) {
+    const v = S.fields && S.fields.poi && S.fields.poi.values; if (!v) return null;
+    const zm = zoneMap(S), W = S.W, vd = S.void; let best = -1, tied = [];
+    for (let i = 0; i < S.n; i++) { if (zm[i] !== k || S.block[i] || (vd && vd[i]) || !(S.region && S.region[i] >= 0) || (S.nowalk && S.nowalk[i])) continue; const q = v[i]; if (!(q >= POI_MIN)) continue; if (q > best + 1e-9) { best = q; tied = [i]; } else if (Math.abs(q - best) <= 1e-9) tied.push(i); }
+    if (!tied.length) return null;
+    let cx = 0, cy = 0; for (const i of tied) { cx += (i % W) + 0.5; cy += ((i / W) | 0) + 0.5; } cx /= tied.length; cy /= tied.length;
+    let tile = tied[0], bd = 1e18; for (const i of tied) { const d = ((i % W) + 0.5 - cx) ** 2 + (((i / W) | 0) + 0.5 - cy) ** 2; if (d < bd - 1e-12) { bd = d; tile = i; } }
+    return { tile, value: best, tied: tied.length };
+  }
+  E.stage = { zoneTable, buildZones, zoneMap, poiGoal, POI_MIN, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
 })(window.EVO = window.EVO || {});
