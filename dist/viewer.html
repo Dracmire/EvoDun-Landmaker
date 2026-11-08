@@ -5741,7 +5741,8 @@ window.EVO_AUREA_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAADAAAAAsCAYAAAAjFjtnAAAAnE
    - SIDE: 1 x 1 COLUMNS of HYP.colH H (over the local ground of the room's edge), one every HYP.colEvery rows along the axis, on the first non-walkable tile beside the room on each side (over void: none, counted);
    - FRONT: the tiles of the first HYP.frontDepth tiles of the front band that are ABOVE the lowest walkable ground of the room are lowered to that ground - HYP.frontDrop H, so they do not hide the room.
    Lowering uses the same insertLevels (a move to a lower height): no new mechanism in the shared code.
-   HYP = ONE table of hypotheses for S6 (tiles or H; H are multiplied by tilesPerH). Test hooks (`E.planesTest`, tests only): noBack, noFront, noCols, colEvery (a number), wallOnWalkable, noVoidWall (void is not classified: the C2 behaviour), chebyshev (the C2 square ring and per-column wall depth). */
+   HYP = ONE table of hypotheses for S6 (tiles or H; H are multiplied by tilesPerH). Test hooks (`E.planesTest`, tests only): noBack, noFront, noCols, colEvery (a number), wallOnWalkable, noVoidWall (void is not classified: the C2 behaviour), chebyshev (the C2 square ring and per-column wall depth), waterEligible (M3b: the water is classified like any blocked ground, the behaviour before the rule).
+   M3b: a tile of `S.water` (pack data, `masks.water`) is NEVER classified: no wall, no column, no lowering; `counts.water` = the water tiles of the ring that were left out. No water in the pack (`S.water` all zeros) = nothing changes. */
 (function (E) {
   'use strict';
   const HYP = { R: 8, wallDepth: 2, wallH: 3, colH: 3, colEvery: 3, frontDepth: 4, frontDrop: 0.5 };
@@ -5756,8 +5757,8 @@ window.EVO_AUREA_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAADAAAAAsCAYAAAAjFjtnAAAAnE
     for (let i = 0; i < n; i++) if (zm[i] === room.id && !S.block[i] && !(vd && vd[i])) { foot.push(i); inFoot[i] = 1; const p = Pc[i], a = A[i]; if (!near.has(p) || a < near.get(p)) near.set(p, a); if (!far.has(p) || a > far.get(p)) far.set(p, a); }
     // the ring: the tiles within HYP.R (Euclidean; a square with the hook `chebyshev`) of the footprint; `dist` = the Euclidean distance to the nearest footprint tile
     const ring = new Uint8Array(n), dist = new Float32Array(n).fill(1e9), cheb = !!opts.chebyshev; for (const i of foot) { const x = i % W, y = (i / W) | 0; for (let dy = -HYP.R; dy <= HYP.R; dy++) { const yy = y + dy; if (yy < 0 || yy >= H) continue; for (let dx = -HYP.R; dx <= HYP.R; dx++) { const xx = x + dx; if (xx < 0 || xx >= W) continue; const d = Math.hypot(dx, dy); if (!cheb && d > HYP.R + 1e-9) continue; const j = yy * W + xx; ring[j] = 1; if (d < dist[j]) dist[j] = d; } } }
-    const cls = new Uint8Array(n), counts = { back: 0, side: 0, front: 0, voidBack: 0, voidSide: 0 };
-    for (let i = 0; i < n; i++) { if (!ring[i] || inFoot[i] || !eligible(i)) continue; const p = Pc[i], a = A[i]; let c;
+    const cls = new Uint8Array(n), counts = { back: 0, side: 0, front: 0, voidBack: 0, voidSide: 0, water: 0 };
+    for (let i = 0; i < n; i++) { if (!ring[i] || inFoot[i] || !eligible(i)) continue; if (S.water && S.water[i] && !opts.waterOk) { counts.water++; continue; } const p = Pc[i], a = A[i]; let c; // M3b: WATER is never classified (a lake is a natural border: blocked, at its own height); `waterOk` is the test hook that gives the behaviour of before
       if (far.has(p)) c = a > far.get(p) ? BACK : a < near.get(p) ? FRONT : SIDE; else c = SIDE;
       if (c === FRONT && vd && vd[i]) continue; // void in FRONT is left as it is (it reads as a drop)
       cls[i] = c; if (c === BACK) { counts.back++; if (vd && vd[i]) counts.voidBack++; } else if (c === SIDE) { counts.side++; if (vd && vd[i]) counts.voidSide++; } else counts.front++; }
@@ -5765,7 +5766,7 @@ window.EVO_AUREA_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAADAAAAAsCAYAAAAjFjtnAAAAnE
   }
   /* apply(S, { room, yaw, tilesPerH, test }) -> S.stagePlanes = { room, yaw, tilesPerH, counts, wall, cols, front, colRows, skipped, levelsAdded, floorLow, floorHigh } or null (no footprint) */
   function apply(S, o) {
-    const T = o.test || E.planesTest || {}, tp = o.tilesPerH, W = S.W, vd = S.void, C = classify(S, o.room, o.yaw, { all: !!T.wallOnWalkable, noVoid: !!T.noVoidWall, chebyshev: !!T.chebyshev });
+    const T = o.test || E.planesTest || {}, tp = o.tilesPerH, W = S.W, vd = S.void, C = classify(S, o.room, o.yaw, { all: !!T.wallOnWalkable, noVoid: !!T.noVoidWall, chebyshev: !!T.chebyshev, waterOk: !!T.waterEligible });
     if (!C.footprint.length) return (S.stagePlanes = null);
     let high = -1e9, low = 1e9; for (const i of C.footprint) if (C.walk(i)) { const h = S.levelH[S.fine[i]]; high = Math.max(high, h); low = Math.min(low, h); } if (high < -1e8) { high = low = S.levelH[S.fine[C.footprint[0]]]; }
     const moves = new Map(), voidMoved = new Set(), skipped = { higher: 0, void: 0 }, hOf = (i) => S.levelH[S.fine[i]], at = (a, p) => { const x = a * C.f[0] + p * C.r[0], y = a * C.f[1] + p * C.r[1]; return x < 0 || y < 0 || x >= W || y >= S.H ? -1 : y * W + x; };
