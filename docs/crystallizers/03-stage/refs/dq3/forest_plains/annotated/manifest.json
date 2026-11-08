@@ -2,7 +2,7 @@
  "format": "evodun-pack/0.2",
  "name": "Forest (old map, v53 zones)",
  "flipY": false,
- "maxnode": 5,
+ "maxnode": 6,
  "roles": {
   "elevation": {
    "image": "height_A.png",

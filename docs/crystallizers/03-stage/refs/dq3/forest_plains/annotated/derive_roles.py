@@ -6,13 +6,14 @@ Deterministic: no random numbers except scikit-learn's KMeans(random_state=0), t
 
 Inputs (relative to refs/dq3/, found from this script's place):  old/forest.png   remake/r_20261030_141929_shrine_of_the_plains_map.png
 Output (52 x 46 = 26 x 23 tiles at x2: each tile of the old game is 2 x 2 px, so 1 px = 1 tile of the viewer and H (the hero) = 1 old tile at tilesPerH 2):
-  zones.png        role `zone`      hue ids (h = id / 6, maxnode 5):  1 valley, 2 plateau NW, 3 plateau SW, 4 plateau N with the tower, 5 slope / dark band
+  zones.png        role `zone`      hue ids (h = id / 7, maxnode 6): a zone is a CONNECTED piece (4-connectivity, old tiles): 1 valley, 2 plateau NW, 3 plateau SW, 4 plateau N with the tower, 5 slope / dark band (main piece), 6 slope, east piece.
+                   Pieces of fewer than MIN_PIECE tiles are fused into the neighbouring piece that shares the most border (tie: lower id) and take its class
   height_A.png     role `elevation` VARIANT A, the v53 hypothesis [R, by eye on remake screenshots, NOT verified]: valley and paths 0 H, slope 0.3 H, plateaus 0.6 H, tower 3.5 H
   height_B.png     role `elevation` VARIANT B, amplified relief: every zone is at least one terrace away from each neighbour (valley < slope < plateaus < SW plateau < tower)
   path.png         role `path`      graded mask: the class 6 of v53 (the trails), 255 on the trail, 0 elsewhere. The trail tiles belong to the NEAREST zone of 1..5 in `zones.png`
-  poi.png          role `poi`       graded: A (the tower, tile (19, 6)) 255, B (west exit, tile (8, 11)) 170, the door of the tower (19, 10) 85
-  trees_blocked.png      role `vegetation` graded: 255 = not walkable terrain: the TOWER (cols 17-21, rows 2-10, solid) and the TREES (tile coverage of the foliage and trunk colours >= 0.5 in forest.png; no tree is separated: the sprites overlap)
-  manifest.json    evodun-pack/0.2: the roles of those images ("Your images" / the viewer read it the same way), flipY false, maxnode 5
+  poi.png          role `poi`       graded: A (the walkable tile in front of the tower door, (19, 11), zone 4) 255, B (west exit, (8, 11)) 170. The door (19, 10) is not marked: nothing in the viewer reads it (the Stage rules do not read `poi`)
+  trees_blocked.png      role `vegetation` graded: 255 = the TOWER (cols 17-21, rows 2-10) and the TREES (tile coverage of the foliage and trunk colours >= 0.5 in forest.png; no tree is separated: the sprites overlap). DATA FOR LATER (trees as volumes or billboards): the viewer reads the role `vegetation` and does not use it, nothing is blocked by it
+  manifest.json    evodun-pack/0.2: the roles of those images ("Your images" / the viewer read it the same way), flipY false, maxnode 6
 Heights are grey values (V). 0 is VOID in the viewer, so the valley is 20, never 0. The viewer quantizes them into terraces and sub-terraces: the heights it ends up with (in H) are measured, not assumed: tools/ui + README "M3a".
 """
 import sys, os, json, colorsys, argparse
@@ -26,11 +27,12 @@ HERE = os.path.dirname(os.path.abspath(__file__)); REFS = os.path.normpath(os.pa
 OLD = os.path.join(REFS, 'old', 'forest.png'); REMAKE = os.path.join(REFS, 'remake', 'r_20261030_141929_shrine_of_the_plains_map.png')
 TW, TH, SC = 26, 23, 2                      # old map in tiles; each tile -> SC x SC px
 TOWER = (17, 21, 2, 10)                     # [v53] columns 17-21, rows 2-10 (old tiles): solid, not walkable
-POI = {'A': (19, 6, 255), 'B': (8, 11, 170), 'door': (19, 10, 85)}
+POI = {'A': (19, 11, 255), 'B': (8, 11, 170)}
+MIN_PIECE = 10                              # [R, a HYPOTHESIS] a connected piece of at least this many old tiles is a zone of its own; smaller ones are fused into a neighbour
 # VARIANT A: grey values with 1 H = 20 grey (valley 20 = 0 H): slope +6 (0.3 H), plateaus +12 (0.6 H), tower +70 (3.5 H)
 GREY_A = {'valley': 20, 'path': 20, 'slope': 26, 'plateau': 32, 'tower': 90}
 # VARIANT B: bands of 12 grey (6 bands 20..92): valley band 0, slope band 1, plateaus NW / N band 2, plateau SW band 3, tower band 5; a value on the start of a band (+1) so the sub-terraces stay low
-GREY_B = {1: 20, 5: 33, 2: 45, 4: 45, 3: 57, 'tower': 92}
+GREY_B = {1: 20, 5: 33, 2: 45, 4: 45, 3: 57, 'tower': 92}   # by CLASS (the zone id of a second piece of a class gets the height of its class)
 
 
 # THE GRID the user verified for v53 (23 rows x 26 columns, old tiles; 1 valley, 2 plateau NW, 3 plateau SW, 4 plateau N, 5 slope, 6 trail); counts 1: 140, 2: 86, 3: 24, 4: 142, 5: 162, 6: 44. If the recipe gives another one, STOP: the zones are not v53's.
@@ -89,6 +91,33 @@ def zones_v53(remake_path):
     return Zt
 
 
+
+def normalize(Z):
+    """A zone is a connected piece. Returns (zid, cls, sizes): zid = zone ids (class c keeps the id c for its largest piece, the other big pieces get 6, 7... in class order), cls = the class (height) of every tile,
+    sizes = the list of the piece sizes per class (for the report). Pieces smaller than MIN_PIECE are fused (largest first) into the neighbouring resolved piece with the most shared border (tie: lower id) and take its class."""
+    four = ndi.generate_binary_structure(2, 1); pieces = []   # (class, size, mask)
+    for c in range(1, 6):
+        lab, n = ndi.label(Z == c, structure=four)
+        for i in range(1, n + 1): m = lab == i; pieces.append([c, int(m.sum()), m])
+    sizes = {c: sorted([p[1] for p in pieces if p[0] == c], reverse=True) for c in range(1, 6)}
+    pieces.sort(key=lambda p: (-p[1], p[0], int(np.argmax(p[2].ravel()))))
+    zid = np.zeros(Z.shape, np.int32); cls = Z.astype(np.int32).copy(); nxt = 6; used = set()
+    for p in pieces:
+        if p[1] < MIN_PIECE: continue
+        if p[0] not in used: zid[p[2]] = p[0]; used.add(p[0])
+        else: zid[p[2]] = nxt; nxt += 1
+    small = [p for p in pieces if p[1] < MIN_PIECE]
+    while small:
+        rest = []
+        for p in small:
+            ring = ndi.binary_dilation(p[2], structure=four) & ~p[2]; ids, cnt = np.unique(zid[ring][zid[ring] > 0], return_counts=True)
+            if not len(ids): rest.append(p); continue
+            best = sorted(zip(ids.tolist(), cnt.tolist()), key=lambda t: (-t[1], t[0]))[0][0]
+            zid[p[2]] = best; cls[p[2]] = cls[zid == best][0]
+        if len(rest) == len(small): raise SystemExit('a small piece has no neighbour')
+        small = rest
+    return zid, cls, sizes
+
 def trees_mask(old_path):
     """Tiles (16 px) of forest.png whose pixels are foliage (olive greens) or trunk (dark browns) for at least half of the tile. Not a count of trees: the sprites (2 tiles wide, 2-3 tall) overlap, so the trunks of about a third are hidden."""
     a = np.array(Image.open(old_path).convert('RGB').crop((0, 0, TW * 16, TH * 16))).astype(int)
@@ -118,24 +147,25 @@ def build():
     Z = Zt.copy(); Z[tr] = Zt[tuple(idx)][tr]                      # the trail tiles take the nearest zone of 1..5
     c0, c1, r0, r1 = TOWER; tower = np.zeros((TH, TW), bool); tower[r0:r1 + 1, c0:c1 + 1] = True
     forced = int((Z[tower] != 4).sum()); Z[tower] = 4              # the tower is part of the plateau N (zone 4)
+    zid, cls, sizes = normalize(Z)                                   # a zone is a connected piece; the heights follow the CLASS
     trees, cov = trees_mask(OLD)
     for k, (x, y, _) in POI.items(): trees[y, x] = False           # the exits and the door stay free
     trees &= ~tower
     blocked = trees | tower
     # heights
     hA = np.zeros((TH, TW), np.uint8)
-    hA[Z == 1] = GREY_A['valley']; hA[Z == 5] = GREY_A['slope']
-    for k in (2, 3, 4): hA[Z == k] = GREY_A['plateau']
+    hA[cls == 1] = GREY_A['valley']; hA[cls == 5] = GREY_A['slope']
+    for k in (2, 3, 4): hA[cls == k] = GREY_A['plateau']
     hA[tr] = GREY_A['path']; hA[tower] = GREY_A['tower']
     hB = np.zeros((TH, TW), np.uint8)
-    for k in (1, 2, 3, 4, 5): hB[Z == k] = GREY_B[k]
+    for k in (1, 2, 3, 4, 5): hB[cls == k] = GREY_B[k]
     hB[tower] = GREY_B['tower']
     path = np.where(tr, 255, 0).astype(np.uint8)
     poi = np.zeros((TH, TW), np.uint8)
     for k, (x, y, v) in POI.items(): poi[y, x] = v
     up = lambda m: np.kron(np.asarray(m), np.ones((SC, SC), dtype=np.asarray(m).dtype))
-    return dict(Zt=Zt, Z=Z, tr=tr, tower=tower, trees=trees, cov=cov, blocked=blocked, forced=forced,
-                zones=up(Z), height_A=up(hA), height_B=up(hB), path=up(path), poi=up(poi), blocked_img=up(np.where(blocked, 255, 0).astype(np.uint8)))
+    return dict(Zt=Zt, Z=zid, Zc=Z, cls=cls, sizes=sizes, tr=tr, tower=tower, trees=trees, cov=cov, blocked=blocked, forced=forced,
+                zones=up(zid), height_A=up(hA), height_B=up(hB), path=up(path), poi=up(poi), blocked_img=up(np.where(blocked, 255, 0).astype(np.uint8)))
 
 
 def rgba_grey(g): return np.dstack([g, g, g, np.full(g.shape, 255, np.uint8)])
@@ -143,8 +173,8 @@ def rgba_grey(g): return np.dstack([g, g, g, np.full(g.shape, 255, np.uint8)])
 
 def zones_rgba(z):
     out = np.zeros(z.shape + (4,), np.uint8); out[..., 3] = 255
-    for k in range(1, 6):
-        r, g, b = colorsys.hsv_to_rgb(k / 6, 1, 1); out[z == k, :3] = [round(r * 255), round(g * 255), round(b * 255)]
+    for k in range(1, int(z.max()) + 1):
+        r, g, b = colorsys.hsv_to_rgb(k / 7, 1, 1); out[z == k, :3] = [round(r * 255), round(g * 255), round(b * 255)]
     return out
 
 
@@ -152,13 +182,13 @@ def files(d):
     return {'zones.png': zones_rgba(d['zones']), 'height_A.png': rgba_grey(d['height_A']), 'height_B.png': rgba_grey(d['height_B']), 'path.png': rgba_grey(d['path']), 'poi.png': rgba_grey(d['poi']), 'trees_blocked.png': rgba_grey(d['blocked_img'])}
 
 
-MANIFEST = {'format': 'evodun-pack/0.2', 'name': 'Forest (old map, v53 zones)', 'flipY': False, 'maxnode': 5,
+MANIFEST = {'format': 'evodun-pack/0.2', 'name': 'Forest (old map, v53 zones)', 'flipY': False, 'maxnode': 6,
             'roles': {'elevation': {'image': 'height_A.png', 'channel': 'V'}, 'zone': {'image': 'zones.png', 'channel': 'H'}, 'path': {'image': 'path.png', 'channel': 'V'}, 'poi': {'image': 'poi.png', 'channel': 'V'}, 'vegetation': {'image': 'trees_blocked.png', 'channel': 'V'}},
             'variants': {'A': {'elevation': {'image': 'height_A.png', 'channel': 'V'}}, 'B': {'elevation': {'image': 'height_B.png', 'channel': 'V'}}}, 'markers': []}
 
 
 def overlay(d, path_out):
-    im = np.array(Image.open(OLD).convert('RGB').crop((0, 0, TW * 16, TH * 16))).astype(float); tint = {1: (255, 255, 0), 2: (0, 200, 255), 3: (255, 0, 255), 4: (255, 128, 0), 5: (0, 0, 0)}
+    im = np.array(Image.open(OLD).convert('RGB').crop((0, 0, TW * 16, TH * 16))).astype(float); tint = {1: (255, 255, 0), 2: (0, 200, 255), 3: (255, 0, 255), 4: (255, 128, 0), 5: (0, 0, 0), 6: (120, 60, 200), 7: (0, 160, 0)}
     for ty in range(TH):
         for tx in range(TW):
             y, x = ty * 16, tx * 16; im[y:y + 16, x:x + 16] = im[y:y + 16, x:x + 16] * 0.6 + np.array(tint[int(d['Z'][ty, tx])], float) * 0.4
@@ -180,8 +210,8 @@ def main():
         if not os.path.exists(p) or open(p).read() != man: bad.append('manifest.json')
     else: open(p, 'w').write(man)
     if a.overlay: overlay(d, a.overlay)
-    cnt = {k: int((d['Z'] == k).sum()) for k in range(1, 6)}
-    print('zones (tiles of the old map):', cnt, '| trail tiles', int(d['tr'].sum()), '| tower tiles', int(d['tower'].sum()), 'of which not zone 4 before:', d['forced'], '| tree tiles', int(d['trees'].sum()), '| visible trunks', len(trunks(OLD)))
+    cnt = {k: int((d['Z'] == k).sum()) for k in range(1, int(d['Z'].max()) + 1)}
+    print('pieces per class (sizes):', d['sizes'], '| MIN_PIECE', MIN_PIECE, '| zones (tiles of the old map):', cnt, '| trail tiles', int(d['tr'].sum()), '| tower tiles', int(d['tower'].sum()), 'of which not zone 4 before:', d['forced'], '| tree tiles', int(d['trees'].sum()), '| visible trunks', len(trunks(OLD)))
     if a.check: print('CHECK', 'OK' if not bad else 'DIFFERS: ' + ', '.join(bad)); sys.exit(1 if bad else 0)
 
 
