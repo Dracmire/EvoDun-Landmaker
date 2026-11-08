@@ -77,7 +77,7 @@
         { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, tech: 'B', terraces: 3, contract: true }
       ],
       camera: 'stage', cameras: CAMS, tech: 'box', techs: ['box', 'B'], compare: false, compareDefault: false,
-      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageObjects', 'stageVolumes', 'stageOrient', 'stagePlanes', 'stageProps', 'stageFrame', 'stageReset', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
+      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageObjects', 'stageVolumes', 'stageOrient', 'stagePlanes', 'stageProps', 'stageFrame', 'stageReset', 'stageFollow', 'stageWindow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {

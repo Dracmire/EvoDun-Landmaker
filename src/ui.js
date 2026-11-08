@@ -760,6 +760,31 @@
     sliceSel.zones.clear(); sliceSel.whole = false; for (const k of list) sliceSel.zones.add(tb.order[k - 1]); st.stageRooms = list; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; st.orientId = null; st.roomFit = null; st.follow = true; invalidate(true); return true;
   }
   function buildStageZones(S) { E.stage.buildZones(S, P, packs[st.pack].pack, st.stageRooms); }
+  /* M2c, THE WINDOW LIST: one row per zone (k, raw id, tiles, mean elevation, the badge = the place in the window); a click marks / unmarks (the order of the marks is the order of the window, the first is where the hero starts; at least one stays); the model is E.stage.zoneList / windowCheck. The warning of non-neighbours goes in its own help line, never in #info. */
+  /* the rooms of DAC (`dac_stage` and the examples with a `roomSet`): the rows come from S.rooms (id, size); the window is `sliceSel.rooms` + `st.stageRooms` like the declared roomSet; "Default window" = the roomSet of the example. No adjacency check for rooms (the list says nothing of neighbours). */
+  const winKind = () => (NO_MODES || !stageOn() ? null : zonePack() ? 'zones' : P.rooms && S && S.rooms ? 'rooms' : null);
+  const curEx = () => { const m = st.modeId && E.modes.byId(st.modeId); return m && m.examples.find((x) => x.id === st.exampleId); };
+  function winRows(kind) { return kind === 'zones' ? E.stage.zoneList(zonePack()) : S.rooms.rooms.map((r) => ({ k: r.id, raw: r.id, tiles: S.rooms.roomSizes[r.id], elev: NaN, adj: [] })); }
+  function stageSetRooms(ids) { // the window = these rooms of the map, in this order; the hero starts in the first (the list of M2c calls this; tests too)
+    if (!stageOn() || !S || !S.rooms) return false; const have = new Set(S.rooms.rooms.map((r) => r.id)), list = ids.filter((id, q) => have.has(id) && ids.indexOf(id) === q); if (!list.length) return false;
+    sliceSel.rooms.clear(); sliceSel.whole = false; for (const id of list) sliceSel.rooms.add(id); st.stageRooms = list; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; st.orientId = null; st.roomFit = null; st.follow = true; invalidate(true); return true;
+  }
+  function winSet(ks) { return winKind() === 'rooms' ? stageSetRooms(ks) : stageSetWindow(ks); }
+  function winDefault() { const ex = curEx(); return winKind() === 'rooms' && ex && ex.roomSet ? ex.roomSet.slice() : [1]; }
+  function stageWinDefault() { winSet(winDefault()); }
+  function winToggle(k) {
+    const cur = st.stageRooms.slice(), at = cur.indexOf(k), help = $('#stageWinHelp');
+    if (at >= 0) { if (cur.length === 1) return; cur.splice(at, 1); } else { if (cur.length >= E.stage.WIN_MAX) { if (help) help.textContent = `a window has at most ${E.stage.WIN_MAX} ${winKind() === 'rooms' ? 'rooms' : 'zones'}: unmark one first`; return; } cur.push(k); }
+    winSet(cur);
+  }
+  function syncWindowList() {
+    const row = $('#stageWinRow'); if (!row) return; const kind = winKind(), box = $('#stageWindow'), help = $('#stageWinHelp'); row.hidden = NO_MODES || !kind;
+    const key = kind ? [kind, st.pack, st.stageRooms.join()].join('|') : ''; if (box.dataset.key === key) return; box.dataset.key = key; if (!kind && E.modesTest && E.modesTest.skipWinListClear) return; /* (MUTATION skipWinListClear: the list outlives the window) */ box.textContent = ''; help.textContent = ''; if (!kind) return;
+    const rows = winRows(kind);
+    for (const r of rows) { const at = st.stageRooms.indexOf(r.k), d = document.createElement('div'); d.className = 'wrow' + (at >= 0 ? ' on' : ''); d.dataset.k = r.k; d.innerHTML = `<b>${at >= 0 ? at + 1 : ''}</b><span>${kind === 'rooms' ? `room ${r.raw} · ${r.tiles} tiles` : `k ${r.k} · id ${r.raw} · ${r.tiles} tiles · elev ${isFinite(r.elev) ? r.elev.toFixed(1) : '-'}`}</span>`; d.addEventListener('click', () => winToggle(r.k)); box.appendChild(d); }
+    const bad = kind === 'zones' ? E.stage.windowCheck(st.stageRooms, rows) : [];
+    help.textContent = bad.length ? bad.map(([a, b]) => `zones ${a} and ${b} are not neighbours: no walking path between them; Next room jumps`).join('; ') : st.stageRooms.length >= E.stage.WIN_MAX ? `limit of ${E.stage.WIN_MAX} ${kind === 'rooms' ? 'rooms' : 'zones'} reached` : '';
+  }
   function planeKey() { if (!planesOn()) return ''; const r = orientRoom(); return r ? `${r.id}|${baseYaw()}|${st.stage.tilesPerH}` : ''; }
   function orientRoom() { const T = orientTable(); if (!T) return null; let id = 0; if (st.hero) { const i = E.stage.cellOf(S, st.hero.x - S.ox, st.hero.y - S.oy); id = i >= 0 ? E.stage.zoneMap(S)[i] : 0; } if (id && T.byId.has(id)) st.orientId = id; else if (!st.orientId || !T.byId.has(st.orientId)) st.orientId = st.stageRooms[st.stageIdx]; return T.byId.get(st.orientId) || T.rooms[0] || null; }
   /* the ROOM FRAMING: the Cam 6 pitch and FOV, the camera centred on the room's box at its mean height, the zoom (px per tile) the largest at which the 8 corners of the room's box (at its lowest and highest tile) fit the panel with a margin; cached per room / yaw / panel */
@@ -853,6 +878,10 @@
     const fi = lf.querySelector('input'); fi.checked = st.follow; fi.addEventListener('change', () => { st.follow = fi.checked; if (st.follow) st.panX = st.panY = st.yawOff = st.pitchOff = 0; invalidate(false); }); sl.appendChild(lf);
     for (const [id, label, d] of [['stagePrev', '‹ Previous room', -1], ['stageNext', 'Next room ›', 1]]) {
       const r = document.createElement('div'); r.className = 'row'; r.innerHTML = `<button id="${id}">${label}</button>`; if (NO_MODES) r.hidden = true; r.querySelector('button').addEventListener('click', () => stageJump(d)); sl.appendChild(r);
+    }
+    { // M2c: the WINDOW list (own elements, hidden outside a window of mode 3): a row per zone, the order of the marks is the order of the window
+      const r = document.createElement('div'); r.className = 'row'; r.id = 'stageWinRow'; r.hidden = true; r.innerHTML = '<span>Window (click to add / remove; the order is the route, the first is where the hero starts)</span><div id="stageWindow"></div><button id="stageWinDefault">Default window</button><div id="stageWinHelp"></div>';
+      r.querySelector('#stageWinDefault').addEventListener('click', () => stageWinDefault()); sl.appendChild(r);
     }
   }
 
@@ -1112,6 +1141,7 @@
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
     $('#info').innerHTML = (NO_MODES ? '' : dioHostLine()) + stageText() + `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText() + macroText();
+    syncWindowList(); // M2c: the window list follows the state (rebuilt only when its key changes)
     E.controls.refresh(document, controlsCtx()); // requirements of every control, from the live state
     modeRefresh(); // the modes layer: what the current mode shows (after the requirements, so the greyed tooltips are already set)
   }
@@ -1179,7 +1209,7 @@
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
-    window.__evo = { stageSetWindow, stageOn, slStats: () => ({ pending: !!st.slPending || !!raf || !!(st.pickJob && st.pickJob.live), pick: !!(st.pickJob && st.pickJob.live), started: st.slStarted || 0, done: st.slDone || 0, last: st.slLastStats || null }), redraw: () => invalidate(false), fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
+    window.__evo = { stageSetWindow, stageSetRooms, stageOn, slStats: () => ({ pending: !!st.slPending || !!raf || !!(st.pickJob && st.pickJob.live), pick: !!(st.pickJob && st.pickJob.live), started: st.slStarted || 0, done: st.slDone || 0, last: st.slLastStats || null }), redraw: () => invalidate(false), fmtRoomSeq, routeRoomIds, enterMode, setMode: (id) => enterMode(id), controlsCtx, scenario: (id) => applyScenario(SCENARIOS.find((x) => x.id === id)), viewerBlock, applyViewerBlock, dioVis, clickRoom, timing: () => st.timing, roomsTiming: () => st.rooms, inc, setIncMode, clickMap, placeMark, P, O, st, packs, sliceSel, S: () => S, sliceSpec, view, draw: () => invalidate(true), set: (o) => Object.assign(st, o) };
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })(window.EVO = window.EVO || {});

@@ -66,7 +66,7 @@ Banner: **2D-HD crystallizer: in construction (S1)**
 | technique (default) | `box` |
 | techniques offered | `box`, `B` |
 | compare | no |
-| main controls | `contract`, `tilesPerH`, `heroFrac`, `stageUnits`, `stageBorder`, `stageObjects`, `stageVolumes`, `stageOrient`, `stagePlanes`, `stageProps`, `stageFrame`, `stageReset`, `stageFollow`, `stagePrev`, `stageNext` |
+| main controls | `contract`, `tilesPerH`, `heroFrac`, `stageUnits`, `stageBorder`, `stageObjects`, `stageVolumes`, `stageOrient`, `stagePlanes`, `stageProps`, `stageFrame`, `stageReset`, `stageFollow`, `stageWindow`, `stagePrev`, `stageNext` |
 | advanced controls (folded) | - |
 | slice controls | - |
 | terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |

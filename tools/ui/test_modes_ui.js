@@ -147,6 +147,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const exempt = [];
     for (const id of m.main) {
       if (m.id === 'stage' && EXEMPT[id] && !startDisabled[id]) { ok(`${tag}: ${id} is exempt from the picture rule: switching it changes the plan's terrain controls (terH enters / leaves)`, await EXEMPT[id]()); exempt.push(id); continue; }
+      if (m.id === 'stage' && id === 'stageWindow' && !startDisabled[id] && !(await ev(() => document.querySelectorAll('#stageWindow .wrow').length > 1))) { ok(`${tag}: stageWindow (M2c) has no list at the default example: exempt from the picture rule`, true); exempt.push(id); continue; } // M2c commit 1: the list is of zones (PNG, Forest); the rooms of DAC come with commit 2
       if (startDisabled[id]) { skipped.push(id); continue; }
       if (m.id === 'rooms' && (id === 'pocketFraming' || id === 'pocketHeight')) await PREP.rooms(); // the Pocket sliders change nothing until a Diorama room is chosen (with Framing by room type on, Whole map has no pocket drawn): choose room 31 first, as for the Pocket switch
       if (m.id === 'stage' && id === 'stageReset') { await ev(() => { const el = document.querySelector('#s-heroFrac'); el.value = '0.2'; for (const t of ['input', 'change']) el.dispatchEvent(new Event(t, { bubbles: true })); }); await a.idle(); } // Reset changes nothing from the defaults: start from a changed hero share (S2a)
@@ -154,6 +155,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       const act = await ev((id) => {
         const en = window.EVO.controls.TABLE.find((x) => x.id === id), els = [...document.querySelectorAll(en.dom)], el = els[0], undo = {};
         const fire = (n, t) => n.dispatchEvent(new Event(t, { bubbles: true }));
+        if (id === 'stageWindow') { const rows = [...document.querySelectorAll('#stageWindow .wrow')]; rows[1].click(); return { kind: 'winrow' }; } // M2c: marking the second row changes the window (undone by marking it again)
         if (id === 'roomChips') { const chips = [...document.querySelectorAll('#roomChips .chip')], c = chips.find((x) => x.dataset.id === '31') || chips[0]; c.click(); return { kind: 'chip', value: c.dataset.id }; }
         if (el.type === 'range') { const mn = +el.min, mx = +el.max, v = +el.value; el.value = String(v - mn < mx - v ? mx : mn); fire(el, 'input'); fire(el, 'change'); return { kind: 'range', old: v, value: el.value }; }
         if (el.type === 'checkbox') { el.click(); return { kind: 'check', value: el.checked }; }
@@ -165,7 +167,7 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
       (after !== base0 ? changed : same).push(id);
       // undo, so that the next control starts from the default example
       await ev((x) => { const { id, act } = x, en = window.EVO.controls.TABLE.find((q) => q.id === id), el = document.querySelector(en.dom), fire = (n, t) => n.dispatchEvent(new Event(t, { bubbles: true }));
-        if (act.kind === 'range') { el.value = String(act.old); fire(el, 'input'); fire(el, 'change'); } else if (act.kind === 'check') el.click(); else if (act.kind === 'select') { el.value = act.old; fire(el, 'change'); } else if (act.kind === 'chip') document.querySelector(`#roomChips .chip[data-id="${act.value}"]`).click(); else if (act.kind === 'button') { const u = { stageNext: '#stagePrev', stagePrev: '#stageNext' }[id]; if (u) document.querySelector(u).click(); } }, { id, act });
+        if (act.kind === 'range') { el.value = String(act.old); fire(el, 'input'); fire(el, 'change'); } else if (act.kind === 'check') el.click(); else if (act.kind === 'select') { el.value = act.old; fire(el, 'change'); } else if (act.kind === 'chip') document.querySelector(`#roomChips .chip[data-id="${act.value}"]`).click(); else if (act.kind === 'winrow') document.querySelectorAll('#stageWindow .wrow')[1].click(); else if (act.kind === 'button') { const u = { stageNext: '#stagePrev', stagePrev: '#stageNext' }[id]; if (u) document.querySelector(u).click(); } }, { id, act });
       await a.idle(); await page.waitForTimeout(150);
       if (m.id === 'rooms' && (id === 'pocketFraming' || id === 'pocketHeight')) { await page.click('#wholeRooms'); await a.idle(); }
     }
