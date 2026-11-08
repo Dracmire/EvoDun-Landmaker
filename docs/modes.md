@@ -60,7 +60,7 @@ Banner: **2D-HD crystallizer: in construction (S1)**
 | field | value |
 |---|---|
 | id | `stage` |
-| examples (first = default) | DAC window (2D-HD, S1) (`real_map`); Shrine-Pier x4 · Stage (legacy contract) (`shrine_pier_x4`); Diorama 31 · Stage (legacy contract) (`real_map`); Room 14 · orientation (mock T Z) (`real_map`); Room 44 · orientation (mock T X) (`real_map`) |
+| examples (first = default) | DAC window (2D-HD, S1) (`real_map`); Shrine-Pier x4 · Stage (legacy contract) (`shrine_pier_x4`); Diorama 31 · Stage (legacy contract) (`real_map`); Your images (PNG + roles); Room 14 · orientation (mock T Z) (`real_map`); Room 44 · orientation (mock T X) (`real_map`) |
 | camera (default) | `stage` |
 | cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic` |
 | technique (default) | `box` |

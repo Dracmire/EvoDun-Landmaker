@@ -221,6 +221,7 @@
   }
   { // C1: two examples of mode 3 with ONE room each (no declared volumes / objects): the rooms of the "mock T" comparison
     const stg = MODES.find((m) => m.id === 'stage'), base = stg.examples.find((e) => e.id === 'dac_stage');
+    stg.examples.push({ id: 'images', label: 'Your images (PNG + roles)', images: true, stageHero: true, stageZones: true, tech: 'box', orient: true, planes: true, props: true, stairs: { style: 0, tread: 1, preferFill: true }, display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }); // M2b: the window of the Stage on the ZONES of a PNG (role `zone`), the levels from the role `elevation`; the loader of the images appears with this example
     stg.examples.push(Object.assign({}, base, { id: 'mockt_z14', label: 'Room 14 · orientation (mock T Z)', roomSet: [14], objects: [], volumes: [] }), Object.assign({}, base, { id: 'mockt_x44', label: 'Room 44 · orientation (mock T X)', roomSet: [44], objects: [], volumes: [] }));
   }
   E.modes = { PROTOS, MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };

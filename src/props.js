@@ -13,12 +13,12 @@
     const walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]), nb = E.walkGraph(S, P);
     const A = (i) => (i % W) * f[0] + ((i / W) | 0) * f[1], Pc = (i) => (i % W) * r[0] + ((i / W) | 0) * r[1], hOf = (i) => S.levelH[S.fine[i]];
     const out = { room: rec.id, yaw: rec.yaw, noPath: false, path: [], start: -1, end: -1, torches: [], pillars: [], goal: null, aMid: 0 };
-    const tiles = []; const inRoom = new Uint8Array(n); for (let i = 0; i < n; i++) if (S.roomMap[i] === rec.id && walk(i)) { tiles.push(i); inRoom[i] = 1; }
+    const zm = E.stage.zoneMap(S), tiles = []; const inRoom = new Uint8Array(n); for (let i = 0; i < n; i++) if (zm[i] === rec.id && walk(i)) { tiles.push(i); inRoom[i] = 1; }
     if (!tiles.length) { out.noPath = true; return out; }
     // the transition tiles (steps, bottom, top) and the gate tiles (a room tile that walks into another room, and that neighbour), dilated
     const mark = new Uint8Array(n), gateTo = new Map(); // gateTo: next room id -> room tiles of that gate
     for (const st of S.stairs || []) { for (const s of st.steps || []) for (const t of s.tiles) mark[t] = 1; for (const t of st.bottom || []) mark[t] = 1; for (const t of st.top || []) mark[t] = 1; }
-    for (const i of tiles) for (const j of nb(i)) { const rj = S.roomMap[j]; if (rj !== rec.id && walk(j)) { mark[i] = 1; mark[j] = 1; if (!gateTo.has(rj)) gateTo.set(rj, []); gateTo.get(rj).push(i); } }
+    for (const i of tiles) for (const j of nb(i)) { const rj = zm[j]; if (rj !== rec.id && walk(j)) { mark[i] = 1; mark[j] = 1; if (!gateTo.has(rj)) gateTo.set(rj, []); gateTo.get(rj).push(i); } }
     const dil = (m, d) => { const q = new Uint8Array(n); for (let i = 0; i < n; i++) if (m[i]) { const x = i % W, y = (i / W) | 0; for (let dy = -d; dy <= d; dy++) { const yy = y + dy; if (yy < 0 || yy >= H) continue; for (let dx = -d; dx <= d; dx++) { const xx = x + dx; if (xx >= 0 && xx < W) q[yy * W + xx] = 1; } } } return q; };
     const ex1 = T.onStairs ? new Uint8Array(n) : dil(mark, 1), ex2 = T.onStairs ? new Uint8Array(n) : dil(mark, 2); // (MUTATION onStairs: no exclusion)
     // the view extent of the room
