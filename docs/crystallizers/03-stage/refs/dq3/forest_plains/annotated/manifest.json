@@ -1,0 +1,43 @@
+{
+ "format": "evodun-pack/0.2",
+ "name": "Forest (old map, v53 zones)",
+ "flipY": false,
+ "maxnode": 6,
+ "roles": {
+  "elevation": {
+   "image": "height_A.png",
+   "channel": "V"
+  },
+  "zone": {
+   "image": "zones.png",
+   "channel": "H"
+  },
+  "path": {
+   "image": "path.png",
+   "channel": "V"
+  },
+  "poi": {
+   "image": "poi.png",
+   "channel": "V"
+  },
+  "vegetation": {
+   "image": "trees_blocked.png",
+   "channel": "V"
+  }
+ },
+ "variants": {
+  "A": {
+   "elevation": {
+    "image": "height_A.png",
+    "channel": "V"
+   }
+  },
+  "B": {
+   "elevation": {
+    "image": "height_B.png",
+    "channel": "V"
+   }
+  }
+ },
+ "markers": []
+}

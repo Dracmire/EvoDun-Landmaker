@@ -1,0 +1,93 @@
+/* FOREST, THE ROLES OF THE OLD MAP (M3a, no browser): the PNGs that `docs/crystallizers/03-stage/refs/dq3/forest_plains/annotated/derive_roles.py` writes (the zones of v53 as CONNECTED pieces, heights A and B, trail, POI, tower and trees mask) read by the SAME path as "Your images"
+   (E.decodePng -> E.imageChannels -> E.packFromRoles with the roles of manifest.json), and what the mode 3 rules do with them (src/stage.js `zoneTable` / `buildZones`, not changed):
+   - the script is deterministic: `derive_roles.py --check` finds the committed files equal to what it generates (SKIP, not a failure, when python or one of numpy / scipy / scikit-learn / Pillow is missing);
+   - 52 x 46 px (26 x 23 old tiles at x2), SIX zones (the slope is two pieces of 10 tiles or more; the 8 smaller ones are fused), the order of the table (a hypothesis [R]: BFS from the lowest mean), the counts;
+   - the heights: A has the greys 20 / 26 / 32 / 90, B five bands; the HEIGHTS IN H that the viewer leaves per zone are a frozen table (measured, not chosen): A = terraces 2, sub-terraces 6; B = terraces 6, sub-terraces 3;
+   - the tower (cols 17-21, rows 2-10 of the old map) is a raised mass: its top is a piece apart (no ramp reaches it) that the footprint rule drops. It is counted APART (expected discard) and is excluded from the 20 % of a zone;
+   - the footprint rule: tiles dropped per zone and window, with and without the tower, frozen (REPORTED); no zone WITHOUT the tower loses more than 20 % of its walkable tiles.
+     node tools/test_forest_roles.js [--dump] */
+const fs = require('fs'), path = require('path'), vm = require('vm'), cp = require('child_process');
+global.window = global;
+for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes', 'stage']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
+const E = window.EVO; let pass = 0, fail = 0; const DUMP = process.argv.includes('--dump'), dump = {};
+const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : JSON.stringify(extra).slice(0, 700)); } };
+const P0 = JSON.parse('{"ascCut":0.15,"ascGate":0,"ascRouteKey":"","chainExtra":3,"cakeCut":"off","dioChain":"off","anchors":false,"anchorH":0.5,"terraces":5,"subs":3,"terH":4,"spread":1,"spreadCentre":"largest","curves":"ordered","wallPass":"t3","wallExtrude":0.25,"wallStrata":3,"wallColumn":1.2,"t2Spacing":0.9,"t2Rows":6,"t2Group":1,"t2Jitter":0.4,"subH":0.88,"minPlateau":120,"minSub":3,"pre":1,"smooth":2,"radius":0.9,"passGap":8,"climb":2,"tread":1,"stairW":3,"stairStyle":0,"rampDepth":2,"gateThr":0.05,"gateMin":3,"margin":24,"rooms":true,"ascWalls":false,"ascHeight":1.5,"pocket":false,"pocketFraming":"auto","pocketHeight":2.5,"backdrop":false,"backdropGap":0,"backdropHeight":2,"roomsMinCore":100,"roomsCross":10,"roomsIsoLimit":100,"rRadius":5,"cake":false,"cakeLayers":3,"cakeStep":0.3,"cakePer":1,"cakeSeam":5,"pocketYaw":180,"chainKey":"","chainFail":"","rampPreferFill":true}');
+const DIR = path.join(__dirname, '../docs/crystallizers/03-stage/refs/dq3/forest_plains/annotated');
+const VARIANT = { A: { terraces: 2, subs: 6 }, B: { terraces: 6, subs: 3 } };   // what the example of each variant sets (M3a)
+const WINDOWS = { valley: [1], route: [1, 5, 4], plateauN: [4], all: [1, 2, 3, 4, 5, 6] };   // RAW zone ids (1 valley, 2 plateau NW, 3 plateau SW, 4 plateau N + tower, 5 slope, 6 slope east); route = valley, slope, plateau N: the way to the tower
+const inTower = (x, y) => (x >> 1) >= 17 && (x >> 1) <= 21 && (y >> 1) >= 2 && (y >> 1) <= 10;
+// frozen (measured 2026-11-08): median height in H of each zone; tiles dropped by the footprint rule per zone and window, with and without the tower
+const EXP = {"order":[[1,3,5,6,2,4],[1,3,5,6,2,4]],"heights":{"A":{"1":0,"2":0.5333,"3":0.5333,"4":0.5333,"5":0.2667,"6":0.2667,"tower":3.3333,"trail":0,"levels":4},"B":{"1":0,"2":4,"3":6,"4":4,"5":2,"6":2,"tower":10.88,"trail":2,"levels":5}},"drops":{"A":{"valley":{"zones":{"1":{"walkable":680,"towerWalkable":0,"dropped":0,"towerDropped":0,"pctWithoutTower":0,"pctWithTower":0}},"towerTopReachedByWalking":0,"towerTopInFootprint":0},"route":{"zones":{"1":{"walkable":680,"towerWalkable":0,"dropped":0,"towerDropped":0,"pctWithoutTower":0,"pctWithTower":0},"4":{"walkable":444,"towerWalkable":180,"dropped":33,"towerDropped":180,"pctWithoutTower":7.4,"pctWithTower":34.1},"5":{"walkable":440,"towerWalkable":0,"dropped":22,"towerDropped":0,"pctWithoutTower":5,"pctWithTower":5}},"towerTopReachedByWalking":0,"towerTopInFootprint":0},"plateauN":{"zones":{"4":{"walkable":444,"towerWalkable":180,"dropped":19,"towerDropped":180,"pctWithoutTower":4.3,"pctWithTower":31.9}},"towerTopReachedByWalking":0,"towerTopInFootprint":0},"all":{"zones":{"1":{"walkable":680,"towerWalkable":0,"dropped":0,"towerDropped":0,"pctWithoutTower":0,"pctWithTower":0},"2":{"walkable":376,"towerWalkable":0,"dropped":0,"towerDropped":0,"pctWithoutTower":0,"pctWithTower":0},"3":{"walkable":140,"towerWalkable":0,"dropped":0,"towerDropped":0,"pctWithoutTower":0,"pctWithTower":0},"4":{"walkable":444,"towerWalkable":180,"dropped":33,"towerDropped":180,"pctWithoutTower":7.4,"pctWithTower":34.1},"5":{"walkable":440,"towerWalkable":0,"dropped":23,"towerDropped":0,"pctWithoutTower":5.2,"pctWithTower":5.2},"6":{"walkable":132,"towerWalkable":0,"dropped":8,"towerDropped":0,"pctWithoutTower":6.1,"pctWithTower":6.1}},"towerTopReachedByWalking":0,"towerTopInFootprint":0}},"B":{"valley":{"zones":{"1":{"walkable":680,"towerWalkable":0,"dropped":12,"towerDropped":0,"pctWithoutTower":1.8,"pctWithTower":1.8}},"towerTopReachedByWalking":0,"towerTopInFootprint":0},"route":{"zones":{"1":{"walkable":680,"towerWalkable":0,"dropped":12,"towerDropped":0,"pctWithoutTower":1.8,"pctWithTower":1.8},"4":{"walkable":444,"towerWalkable":180,"dropped":77,"towerDropped":179,"pctWithoutTower":17.3,"pctWithTower":41},"5":{"walkable":440,"towerWalkable":0,"dropped":60,"towerDropped":0,"pctWithoutTower":13.6,"pctWithTower":13.6}},"towerTopReachedByWalking":0,"towerTopInFootprint":0},"plateauN":{"zones":{"4":{"walkable":444,"towerWalkable":180,"dropped":31,"towerDropped":179,"pctWithoutTower":7,"pctWithTower":33.7}},"towerTopReachedByWalking":0,"towerTopInFootprint":0},"all":{"zones":{"1":{"walkable":680,"towerWalkable":0,"dropped":12,"towerDropped":0,"pctWithoutTower":1.8,"pctWithTower":1.8},"2":{"walkable":376,"towerWalkable":0,"dropped":51,"towerDropped":0,"pctWithoutTower":13.6,"pctWithTower":13.6},"3":{"walkable":140,"towerWalkable":0,"dropped":25,"towerDropped":0,"pctWithoutTower":17.9,"pctWithTower":17.9},"4":{"walkable":444,"towerWalkable":180,"dropped":73,"towerDropped":179,"pctWithoutTower":16.4,"pctWithTower":40.4},"5":{"walkable":440,"towerWalkable":0,"dropped":60,"towerDropped":0,"pctWithoutTower":13.6,"pctWithTower":13.6},"6":{"walkable":132,"towerWalkable":0,"dropped":28,"towerDropped":0,"pctWithoutTower":21.2,"pctWithTower":21.2}},"towerTopReachedByWalking":0,"towerTopInFootprint":0}}}};
+(async () => {
+  // 1. determinism of the script
+  const py = cp.spawnSync('python3', [path.join(DIR, 'derive_roles.py'), '--check'], { encoding: 'utf8' });
+  if (py.status === 0) ok('derive_roles.py --check: the committed PNGs and manifest.json are what the script generates (deterministic) and the zone grid is the v53 one: ' + py.stdout.trim().split('\n').pop(), true);
+  else if (/ModuleNotFoundError|No module named/.test(py.stderr)) console.log('SKIP derive_roles.py --check: ' + py.stderr.trim().split('\n').pop());
+  else ok('derive_roles.py --check', false, (py.stdout + py.stderr).slice(-600));
+  // 2. the files through the path of "Your images"
+  const man = JSON.parse(fs.readFileSync(path.join(DIR, 'manifest.json'), 'utf8'));
+  const cache = {}, load = async (n) => cache[n] || (cache[n] = await (async () => { const dec = await E.decodePng(fs.readFileSync(path.join(DIR, n))); return Object.assign({ name: n, dec }, E.imageChannels(dec, !!man.flipY)); })());
+  const mk = async (variant) => {
+    const use = Object.assign({}, man.roles, { elevation: { image: man.variants[variant].elevation.image, channel: 'V' } }), names = [...new Set(Object.values(use).map((r) => r.image))], imgs = [], roles = {};
+    for (const n of names) imgs.push(await load(n));
+    for (const [role, r] of Object.entries(use)) roles[role] = { image: names.indexOf(r.image), channel: r.channel };
+    return E.packFromRoles(imgs, roles, { name: man.name, maxnode: man.maxnode, markers: [] });
+  };
+  const pA = await mk('A'), pB = await mk('B');
+  ok(`52 x 46 px (26 x 23 old tiles at x2), the images of the pack share the size (${pA.width} x ${pA.height})`, pA.width === 52 && pA.height === 46 && pB.width === 52 && pB.height === 46);
+  ok(`six zones by hue (maxnode ${man.maxnode}), no unreliable hue (${pA.warnings.length} warnings)`, pA.fields.zone.info.classes.length === 6 && pA.warnings.length === 0, pA.warnings);
+  const tbA = E.stage.zoneTable(pA), tbB = E.stage.zoneTable(pB);
+  const z = pA.fields.zone.ids, cnt = {}; for (const v of z) cnt[v] = (cnt[v] || 0) + 1;
+  ok(`the zones are connected pieces at x4 px per old tile (1 valley, 2 plateau NW, 3 plateau SW, 4 plateau N, 5 slope, 6 slope east): ${JSON.stringify(cnt)}`, JSON.stringify(cnt) === JSON.stringify({ 1: 680, 2: 376, 3: 140, 4: 624, 5: 440, 6: 132 }), cnt);
+  { // every zone is ONE 4-connected piece of the old-tile grid
+    const W = pA.width, seen = new Uint8Array(z.length); let pieces = {};
+    for (let i = 0; i < z.length; i++) { if (seen[i]) continue; const id = z[i], q = [i]; seen[i] = 1; for (let h = 0; h < q.length; h++) { const j = q[h], x = j % W, y = (j / W) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= pA.height) continue; const k = yy * W + xx; if (!seen[k] && z[k] === id) { seen[k] = 1; q.push(k); } } } pieces[id] = (pieces[id] || 0) + 1; }
+    ok('each zone is a single connected piece: ' + JSON.stringify(pieces), Object.values(pieces).every((n) => n === 1), pieces);
+  }
+  ok(`the order of the table (hypothesis [R], BFS from the lowest mean): raw ids ${tbA.order} in A and ${tbB.order} in B`, JSON.stringify([tbA.order, tbB.order]) === JSON.stringify(EXP.order || [tbA.order, tbB.order]), [tbA.order, tbB.order]);
+  dump.order = [tbA.order, tbB.order];
+  const greys = (pk) => [...new Set(Array.from(pk.elevation, (v) => Math.round(v / 1000 * 255)))].sort((a, b) => a - b);
+  ok(`heights A: grey ${greys(pA)} (valley and trails 20 = 0 H, slope 26 = 0.3 H, plateaus 32 = 0.6 H, tower 90 = 3.5 H); heights B: grey ${greys(pB)}`, greys(pA).join() === '20,26,32,90' && greys(pB).join() === '20,33,45,57,92', [greys(pA), greys(pB)]);
+  { const poi = pA.fields.poi.values, W = pA.width, at = (tx, ty) => poi[(ty * 2) * W + tx * 2], vals = {}; for (const v of poi) if (v > 0) vals[Math.round(v * 255)] = (vals[Math.round(v * 255)] || 0) + 1;
+    ok(`POI: A at the old tile (19, 11) in front of the door (255) and B at (8, 11) (170), nothing else (${JSON.stringify(vals)}); A is in zone ${z[22 * W + 38]}, walkable ground (not the tower)`, Math.round(at(19, 11) * 255) === 255 && Math.round(at(8, 11) * 255) === 170 && JSON.stringify(vals) === JSON.stringify({ 170: 4, 255: 4 }) && z[22 * W + 38] === 4 && !inTower(38, 22), vals); }
+  // 3. the viewer: heights in H, the footprint
+  const heights = {}, drops = {};
+  for (const [v, pk0] of [['A', pA], ['B', pB]]) {
+    const q = VARIANT[v], P = Object.assign({}, P0, { rooms: false, terraces: q.terraces, subs: q.subs, minPlateau: 5, spread: 1, terH: 4, subH: 0.88, stairStyle: 0, tread: 1, rampPreferFill: true });
+    const S0 = E.shape(await mk(v), P, null), W = pk0.width, zid = pk0.fields.zone.ids, tr = pk0.fields.path.values, med = (a) => { a.sort((x, y) => x - y); return a.length ? +a[a.length >> 1].toFixed(4) : null; };
+    const bk = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], tower: [], trail: [] };
+    for (let i = 0; i < S0.n; i++) { const h = E.stage.feetH(S0, i) / 2; if (inTower(i % W, (i / W) | 0)) bk.tower.push(h); else if (tr[i] > 0.5) bk.trail.push(h); else bk[zid[i]].push(h); }
+    heights[v] = Object.fromEntries(Object.entries(bk).map(([k, a]) => [k, med(a)]));
+    heights[v].levels = new Set(Object.values(heights[v]).filter((x) => x !== null)).size;
+    drops[v] = {};
+    for (const [wn, raws] of Object.entries(WINDOWS)) {
+      const pack = await mk(v), tb = E.stage.zoneTable(pack), ks = raws.map((r) => tb.toK.get(r)), S = E.shape(pack, P, { zones: raws.slice().sort((a, b) => a - b), margin: P.margin }); E.stage.buildZones(S, P, pack, ks);
+      const nb = E.walkGraph(S, P), walk = (i) => !S.block[i] && !(S.void && S.void[i]) && S.region && S.region[i] >= 0, rec = {}; let towerTopReached = 0, towerTopInFoot = 0;
+      for (const r of raws) rec[r] = { walkable: 0, towerWalkable: 0, dropped: 0, towerDropped: 0 };
+      const seen = new Uint8Array(S.n), q2 = []; for (let i = 0; i < S.n; i++) if (S.stageZones[i] && ks.includes(S.stageZones[i]) && walk(i)) { seen[i] = 1; q2.push(i); } for (let h = 0; h < q2.length; h++) for (const j of nb(q2[h])) if (!seen[j] && walk(j)) { seen[j] = 1; q2.push(j); }
+      for (let i = 0; i < S.n; i++) {
+        const x = S.ox + (i % S.W), y = S.oy + ((i / S.W) | 0), raw = pack.fields.zone.sliceIds[y * W + x], r = rec[raw]; if (!r || !walk(i)) continue;
+        const tw = inTower(x, y), top = tw && E.stage.feetH(S, i) / 2 >= heights[v].tower - 1e-6, dropped = S.stageZones[i] === 0;
+        if (tw) { r.towerWalkable++; if (dropped) r.towerDropped++; } else { r.walkable++; if (dropped) r.dropped++; }
+        if (top && seen[i]) towerTopReached++; if (top && !dropped) towerTopInFoot++;
+      }
+      const pct = {}; for (const r of raws) { const a = rec[r]; pct[r] = a.walkable ? +(100 * a.dropped / a.walkable).toFixed(1) : 0; a.pctWithoutTower = pct[r]; a.pctWithTower = a.walkable + a.towerWalkable ? +(100 * (a.dropped + a.towerDropped) / (a.walkable + a.towerWalkable)).toFixed(1) : 0; }
+      drops[v][wn] = { zones: rec, towerTopReachedByWalking: towerTopReached, towerTopInFootprint: towerTopInFoot };
+    }
+  }
+  dump.heights = heights; dump.drops = drops;
+  if (DUMP) { console.log(JSON.stringify(dump, null, 1)); process.exit(0); }
+  ok('A (terraces 2, sub-terraces 6): the heights in H per zone of the viewer = the frozen table ' + JSON.stringify(heights.A), JSON.stringify(heights.A) === JSON.stringify(EXP.heights.A), heights.A);
+  ok('B (terraces 6, sub-terraces 3): the heights in H per zone of the viewer = the frozen table ' + JSON.stringify(heights.B), JSON.stringify(heights.B) === JSON.stringify(EXP.heights.B), heights.B);
+  ok(`A has at least 3 distinct levels (${heights.A.levels}) and keeps the order valley < slope < plateaus < tower; B separates every pair of neighbouring CLASSES of zones by at least one terrace step (2 H)`,
+    heights.A.levels >= 3 && heights.A[1] < heights.A[5] && heights.A[5] < heights.A[4] && heights.A[4] < heights.A.tower && [[1, 3], [1, 5], [2, 3], [2, 5], [3, 5], [4, 5], [4, 6], [3, 6]].every(([a, b]) => Math.abs(heights.B[a] - heights.B[b]) >= 2 - 1e-9), [heights.A, heights.B]);
+  for (const v of ['A', 'B']) {
+    const R = drops[v].route, N = drops[v].plateauN;
+    ok(`${v}: the tower is a raised mass: no ramp reaches its top (tiles at the tower height reached by walking from the window [valley, slope, plateau N]: ${R.towerTopReachedByWalking}; kept in the footprint: ${R.towerTopInFootprint})`, R.towerTopReachedByWalking === 0 && R.towerTopInFootprint === 0 && N.towerTopInFootprint === 0, [R, N]);
+    const worst = Math.max(...['valley', 'route', 'plateauN'].flatMap((w) => Object.values(drops[v][w].zones).map((a) => a.pctWithoutTower))), worstAll = Math.max(...Object.values(drops[v].all.zones).map((a) => a.pctWithoutTower));
+    ok(`${v}: in the windows the example offers (valley, the route valley + slope + plateau N, plateau N) no zone WITHOUT the tower loses more than 20 % of its walkable tiles to the footprint rule (worst ${worst} %)`, worst <= 20, drops[v]);
+    console.log(`INFO ${v}: the window of ALL six zones (not offered by an example) worst zone without the tower ${worstAll} %${worstAll > 20 ? ' (above 20 %: B, slope east, see the report)' : ''}`);
+    ok(`${v}: the footprint rule drops per zone and window (frozen; REPORTED, the tower apart): ` + JSON.stringify(drops[v]), JSON.stringify(drops[v]) === JSON.stringify(EXP.drops[v]), drops[v]);
+  }
+  console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
+})().catch((e) => { console.error(e); process.exit(1); });

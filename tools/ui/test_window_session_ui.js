@@ -14,7 +14,7 @@ const STATE = () => { const e = window.__evo, O = e.O, P = e.P, o = {}, c = {}; 
 (async () => {
   const a = await open({ w: 1500, h: 900, modes: true }), page = a.page, ev = (f, x) => page.evaluate(f, x);
   const idle = () => a.idle();
-  const MODES = await ev(() => window.EVO.modes.MODES.map((m) => ({ id: m.id, ex: m.examples.filter((x) => !x.images).map((x) => ({ id: x.id, tint: !!x.tint, outline: !!x.outline, win: !!x.roomSet })) })));
+  const MODES = await ev(() => window.EVO.modes.MODES.map((m) => ({ id: m.id, ex: m.examples.filter((x) => !x.images).map((x) => ({ id: x.id, tint: !!x.tint, outline: !!x.outline, win: !!x.stageHero })) })));
   const clickEx = async (id) => { await page.click(`#examples button[data-id="${id}"]`); await idle(); };
   const setMode = async (m) => { await ev((m) => window.__evo.setMode(m), m); await idle(); };
   const manual = async () => { // what a user may have done by hand: two debug aids off, own units

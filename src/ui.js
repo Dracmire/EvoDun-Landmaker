@@ -50,9 +50,16 @@
     const b = atob(window.EVO_REAL_PNG), u = new Uint8Array(b.length); for (let k = 0; k < b.length; k++) u[k] = b.charCodeAt(k);
     return E.packFromPng(u.buffer, 'skeleton_heightmap_256.png');
   }
+  /* FOREST (M3a): the old map of the game with the zones of v53, built in as the PNGs of docs/crystallizers/03-stage/refs/dq3/forest_plains/annotated/ (base64 in data/packs.js, `EVO_FOREST_PNG`), through the SAME path as loaded files (decodePng -> imageChannels -> packFromRoles with the roles of the manifest.json there); variant A or B = which height image. Decoded once, on the first selection. */
+  async function forestPack(variant) {
+    const names = ['height_' + variant, 'zones', 'path', 'poi'], ims = [];
+    for (const n of names) { const b = atob(window.EVO_FOREST_PNG[n]), u = new Uint8Array(b.length); for (let k = 0; k < b.length; k++) u[k] = b.charCodeAt(k); const dec = await E.decodePng(u.buffer); ims.push(Object.assign({ name: n + '.png', dec }, E.imageChannels(dec, false))); }
+    return E.packFromRoles(ims, { elevation: { image: 0, channel: 'V' }, zone: { image: 1, channel: 'H' }, path: { image: 2, channel: 'V' }, poi: { image: 3, channel: 'V' } }, { name: 'Forest (old map, v53 zones) · heights ' + variant, maxnode: 6, markers: [] });
+  }
   /* choose a source: the built-in real map is decoded on its first selection; a built-in pack may declare its viewer block (floors: terraces 5 and minPlateau 5); a crop belongs to one map */
   async function selectSource(id) {
     if (id === 'real_map' && !packs.real_map.pack) { message('Decoding the real map…'); try { packs.real_map.pack = await realMapPack(); message(''); } catch (err) { message(err.message); $('#src').value = st.pack; return false; } }
+    if ((id === 'forest_a' || id === 'forest_b') && !packs[id].pack) { message('Decoding Forest…'); try { packs[id].pack = await forestPack(id === 'forest_a' ? 'A' : 'B'); message(''); } catch (err) { message(err.message); $('#src').value = st.pack; return false; } }
     $('#src').value = id; st.pack = id;
     const vk = packs[st.pack] && packs[st.pack].pack && packs[st.pack].pack.viewer; if (vk) applyViewerBlock(vk);
     for (const c of cropIds) $('#' + c).value = '';
@@ -129,11 +136,12 @@
   /* THE WINDOW SESSION (S2a): the example `dac_stage` (mode 3, sc.stageHero) sets the clean view (the 10 Display keys of DISPLAY_KEYS) and the units in H (P.terH, P.subH); the OTHER modes and examples must not feel it. Entering it from any other state saves the 10 keys (with their
      checkboxes) and P.terH / P.subH (with their sliders); EVERY exit restores them FIRST, before the destination is applied (and before the reset of S1b). The exits: applyScenario (every example, enterMode / the mode selector, the prototypes of mode 2, the legacy examples of mode 3, the scenario buttons),
      and the load of images + manifest (loadFiles, which replaces the state; setModeSoft only runs after it). Pressing `dac_stage` again from inside does NOT save again. */
-  function winEnter() { st.win = { O: Object.fromEntries(DISPLAY_KEYS.map((k) => [k, O[k]])), terH: P.terH, subH: P.subH, stairStyle: P.stairStyle, tread: P.tread, preferFill: P.rampPreferFill }; } // S3: + the transition style of the window (steps, tread 1, fill preferred for the lateral ones)
+  function winEnter() { st.win = { O: Object.fromEntries(DISPLAY_KEYS.map((k) => [k, O[k]])), terH: P.terH, subH: P.subH, stairStyle: P.stairStyle, tread: P.tread, preferFill: P.rampPreferFill, terraces: P.terraces, subs: P.subs }; } // M3a: + the terraces and sub-terraces an example of the window may set (Forest) // S3: + the transition style of the window (steps, tread 1, fill preferred for the lateral ones)
   function winExit() {
     const w = st.win; if (!w) return; st.win = null;
     if (!(E.modesTest && E.modesTest.skipDisplayRestore)) for (const k of DISPLAY_KEYS) { O[k] = w.O[k]; const el = $('#t-' + k); if (el) el.checked = w.O[k]; } // (MUTATION skipDisplayRestore)
     if (!(E.modesTest && E.modesTest.skipUnitsRestore)) { setParam('terH', w.terH); setParam('subH', w.subH); } // (MUTATION skipUnitsRestore)
+    if (!(E.modesTest && E.modesTest.skipShapeRestore)) { setParam('terraces', w.terraces); setParam('subs', w.subs); } // M3a (MUTATION skipShapeRestore): the terraces and sub-terraces of the window example end with the session on EVERY exit
     if (!(E.modesTest && E.modesTest.skipStairsRestore)) { setParam('stairStyle', w.stairStyle); setParam('tread', w.tread); P.rampPreferFill = w.preferFill; } // (MUTATION skipStairsRestore)
     if (!(E.modesTest && (E.modesTest.skipYawRestore || E.modesTest.skipYawEnd))) st.stage.yaw = undefined; // S3: the example's yaw (st.stage.yaw) ends with the session on EVERY exit, also the ones that do not go through applyScenario (the load of images, with or without a manifest); applyScenario resets st.stage too and the viewer block of a manifest sets yaw undefined. (MUTATIONS skipYawRestore, skipYawEnd)
     if (!(E.modesTest && (E.modesTest.skipBorderRestore || E.modesTest.skipBorderEnd))) { st.stage.border = 'off'; const sb = $('#stageBorder'); if (sb) sb.value = 'off'; } // S2: the border belongs to the window session too: it ends on EVERY exit (MUTATIONS skipBorderRestore, skipBorderEnd)
@@ -176,6 +184,7 @@
     else if (mode && sc.stageHero) { // mode 3, the DAC window: the neutral look (no tint, no Diorama outline; the room borders on), none of mode 2's rules (the Stage preset is NOT used)
       for (const k of DISPLAY_KEYS) { const v = sc.display && k in sc.display ? sc.display[k] : O0[k]; O[k] = v; tick('t-' + k, v); } // the example declares its own Display state (the clean view); the keys it does not name start from the fresh defaults
       st.stageUnits = true; stageDerive(); // Measures in H on by default in a window example
+      setParam('subs', sc.subs !== undefined ? sc.subs : (st.win ? st.win.subs : P.subs)); // M3a: an example may set the sub-terraces per terrace (Forest); the others keep the value the window was entered with (the terraces: sc.terraces above, after the base reset)
       if (sc.stairs) { setParam('stairStyle', sc.stairs.style); setParam('tread', sc.stairs.tread); P.rampPreferFill = sc.stairs.preferFill === true; } // S3: the transitions of the window (restored by winExit)
       setParam('ascCut', LEGACY_DEF.ascCut); setParam('ascGate', LEGACY_DEF.ascGate); P.dioChain = LEGACY_DEF.dioChain; const dcs = $('#dioChain'); if (dcs) dcs.value = P.dioChain; syncStageUI();
     }
@@ -736,18 +745,21 @@
   const propsOn = () => !NO_MODES && !!st.win && st.stageRooms.length > 0 && st.modeId === 'stage' && st.stage.props === 'on';
   function propsList() { if (!propsOn() || !S) return []; const r = orientRoom(); if (!r) return []; const key = `${r.id}|${baseYaw()}|${st.stage.tilesPerH}|${JSON.stringify(E.propsTest || null)}`; if (!S.propsC || S.propsC.key !== key) { const k = st.stageRooms.indexOf(r.id), res = E.props.list(S, P, r, { tilesPerH: st.stage.tilesPerH, last: k === st.stageRooms.length - 1, next: k >= 0 && k < st.stageRooms.length - 1 ? st.stageRooms[k + 1] : 0, test: E.propsTest }); S.propsC = { key, list: res.list, data: res.data }; } return S.propsC.list; }
   const stageZoneTable = (pack) => E.stage.zoneTable(pack);
-  const stageZonesOn = () => !NO_MODES && st.modeId === 'stage' && st.exampleId === 'images' && st.stageRooms.length > 0 && !P.rooms && st.pack === 'image' && !!(packs.image && packs.image.pack && packs.image.pack.fields.zone);
+  /* M3a: the zone windows belong to the examples that declare `stageZones` ("Your images" and the Forest ones): the pack is the one of the source the example names (`src`; "Your images": `image`) and must have the role `zone` */
+  const zoneEx = () => { const m = st.modeId && E.modes.byId(st.modeId), ex = m && m.examples.find((x) => x.id === st.exampleId); return ex && ex.stageZones ? ex : null; };
+  const zonePack = () => { const ex = zoneEx(); return ex && st.pack === (ex.src || 'image') && packs[st.pack] && packs[st.pack].pack && packs[st.pack].pack.fields && packs[st.pack].pack.fields.zone ? packs[st.pack].pack : null; };
+  const stageZonesOn = () => !NO_MODES && st.modeId === 'stage' && !!zonePack() && st.stageRooms.length > 0 && !P.rooms;
   function stageZonesInit() { // the default window of "Your images": the lowest zone, alone (the selector comes in M2c)
     const pack = packs[st.pack] && packs[st.pack].pack, tb = pack && stageZoneTable(pack); sliceSel.zones.clear();
     if (!tb || !tb.order.length) { message('The Stage windows are zones: assign the zone role to a channel first.'); st.stageRooms = []; return; }
     sliceSel.whole = false; sliceSel.zones.add(tb.order[0]); st.stageRooms = [1]; st.stageIdx = 0;
   }
   function stageSetWindow(ks) { // the window = these zones of the images (by their place in the order, 1..N), in this order; the hero starts in the first (the selector of M2c will call this; tests call it today)
-    if (!stageZonesOn() && !(st.modeId === 'stage' && st.exampleId === 'images' && packs.image && packs.image.pack)) return false; const tb = stageZoneTable(packs.image.pack); if (!tb) return false;
+    if (!stageZonesOn() && !(st.modeId === 'stage' && zoneEx() && st.pack === (zoneEx().src || 'image') && packs[st.pack] && packs[st.pack].pack)) return false; const tb = stageZoneTable(packs[st.pack].pack); if (!tb) return false;
     const list = ks.filter((k, q) => k >= 1 && k <= tb.order.length && ks.indexOf(k) === q); if (!list.length) return false;
     sliceSel.zones.clear(); sliceSel.whole = false; for (const k of list) sliceSel.zones.add(tb.order[k - 1]); st.stageRooms = list; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; st.orientId = null; st.roomFit = null; st.follow = true; invalidate(true); return true;
   }
-  function buildStageZones(S) { E.stage.buildZones(S, P, packs.image.pack, st.stageRooms); }
+  function buildStageZones(S) { E.stage.buildZones(S, P, packs[st.pack].pack, st.stageRooms); }
   function planeKey() { if (!planesOn()) return ''; const r = orientRoom(); return r ? `${r.id}|${baseYaw()}|${st.stage.tilesPerH}` : ''; }
   function orientRoom() { const T = orientTable(); if (!T) return null; let id = 0; if (st.hero) { const i = E.stage.cellOf(S, st.hero.x - S.ox, st.hero.y - S.oy); id = i >= 0 ? E.stage.zoneMap(S)[i] : 0; } if (id && T.byId.has(id)) st.orientId = id; else if (!st.orientId || !T.byId.has(st.orientId)) st.orientId = st.stageRooms[st.stageIdx]; return T.byId.get(st.orientId) || T.rooms[0] || null; }
   /* the ROOM FRAMING: the Cam 6 pitch and FOV, the camera centred on the room's box at its mean height, the zoom (px per tile) the largest at which the 8 corners of the room's box (at its lowest and highest tile) fit the panel with a margin; cached per room / yaw / panel */
@@ -1163,6 +1175,7 @@
     setPack('snake_macroform', 'Snake Mountain macroform (volume: shell, serpent, shaft, floors, derived)', window.EVO_PACKS.snake_mountain_macroform);
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     setPack('real_map', 'Real map 256 (height only)', null); // decoded on the first selection (realMapPack)
+    setPack('forest_a', 'Forest (old map, v53 zones) · heights A', null); setPack('forest_b', 'Forest (old map, v53 zones) · heights B', null); // M3a: decoded on the first selection (forestPack)
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);
