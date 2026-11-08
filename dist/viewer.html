@@ -66,6 +66,7 @@ details.grp>summary{cursor:pointer;font-size:10.5px;text-transform:uppercase;let
 #modePurpose{margin:6px 0 0}
 #modeBanner{margin:6px 0 0;padding:5px 8px;border:1px solid var(--acc);border-radius:6px;color:var(--acc);font-size:11.5px}
 #examples{margin-top:6px}
+#stageWindow{max-height:140px;overflow-y:auto;width:100%;border:1px solid #3a3a52;border-radius:4px} .wrow{display:flex;gap:6px;padding:1px 6px;font-size:12px;cursor:pointer} .wrow b{min-width:14px;text-align:right} .wrow.on{background:#2c3c5a} #stageWinHelp{font-size:11px;width:100%}
 aside.modes #roomChips,aside.modes #zoneChips{max-height:140px;overflow-y:auto;padding-right:2px} /* about 5 chip rows: 88 room chips must not push the controls of the mode off the first screen */
 #bakedBox{margin-top:8px;padding:6px 8px;border:1px solid var(--line);border-radius:6px}
 #bakedBox pre{margin:4px 0 0;white-space:pre-wrap;font:11px/1.4 ui-monospace,monospace;color:var(--mut)}
@@ -5444,7 +5445,7 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x, a = ids[i]; if (a <= 0) continue; const e = pack.elevation[i]; if (e > 0) { sum.set(a, (sum.get(a) || 0) + e); cnt.set(a, (cnt.get(a) || 0) + 1); } else if (!sum.has(a)) { sum.set(a, 0); cnt.set(a, 0); } if (x + 1 < W && ids[i + 1] > 0 && ids[i + 1] !== a) link(a, ids[i + 1]); if (y + 1 < H && ids[i + W] > 0 && ids[i + W] !== a) link(a, ids[i + W]); }
     const mean = (a) => (cnt.get(a) ? sum.get(a) / cnt.get(a) : Infinity), left = [...sum.keys()].sort((a, b) => a - b), order = [], seen = new Set();
     while (order.length < left.length) { const start = left.filter((a) => !seen.has(a)).sort((a, b) => mean(a) - mean(b) || a - b)[0], q = [start]; seen.add(start); for (let h = 0; h < q.length; h++) { order.push(q[h]); for (const b of [...(adj.get(q[h]) || [])].sort((p, r) => p - r)) if (!seen.has(b)) { seen.add(b); q.push(b); } } }
-    return (z.stageTable = { order, toK: new Map(order.map((raw, k) => [raw, k + 1])), mean: order.map(mean) });
+    return (z.stageTable = { order, toK: new Map(order.map((raw, k) => [raw, k + 1])), mean: order.map(mean), cnt, adj });
   }
   /* the zone map of the window (ids 1..N, 0 = none) and the footprint of the zones of the window `ks` (their place in the order): `S.stageZones`, `S.stageZonesInfo` */
   function buildZones(S, P, pack, ks) {
@@ -5469,7 +5470,12 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
     let tile = tied[0], bd = 1e18; for (const i of tied) { const d = ((i % W) + 0.5 - cx) ** 2 + (((i / W) | 0) + 0.5 - cy) ** 2; if (d < bd - 1e-12) { bd = d; tile = i; } }
     return { tile, value: best, tied: tied.length };
   }
-  E.stage = { zoneTable, buildZones, zoneMap, poiGoal, POI_MIN, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+  /* M2c, THE WINDOW SELECTOR (pure model, no interface): one row per zone in the order of zoneTable: { k (the place in the order, 1..N), raw (the id of the image), tiles (land tiles), elev (the mean elevation of zoneTable), adj (the k of the neighbouring zones, ascending) }.
+     windowCheck(ks, list) -> the CONSECUTIVE pairs of the window [ka, kb] that are not neighbours (no walking path between them: the window still works, "Next room" jumps). WIN_MAX = 12 [R, a hypothesis]: the most zones or rooms of a window. */
+  const WIN_MAX = 12;
+  function zoneList(pack) { const tb = zoneTable(pack); if (!tb) return null; return tb.order.map((raw, i) => ({ k: i + 1, raw, tiles: tb.cnt.get(raw) || 0, elev: tb.mean[i], adj: [...(tb.adj.get(raw) || [])].map((r) => tb.toK.get(r)).sort((a, b) => a - b) })); }
+  function windowCheck(ks, list) { const bad = []; for (let q = 1; q < ks.length; q++) { const a = list[ks[q - 1] - 1]; if (!a || !a.adj.includes(ks[q])) bad.push([ks[q - 1], ks[q]]); } return bad; }
+  E.stage = { zoneTable, buildZones, zoneMap, poiGoal, POI_MIN, zoneList, windowCheck, WIN_MAX, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
 })(window.EVO = window.EVO || {});
 
 /* STAGE BORDERS (mode 3, PR S2; `E.border.apply(S, opts)`; docs/crystallizers/03-stage/README.md "S2"): the ground OUTSIDE the footprint of the 2D-HD window gets a profile that closes the stage: ISLA (a shallow moat of water around the footprint) and QUEBRADA (a rise on the far side, a deep drop on the camera side).
@@ -6341,6 +6347,7 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
     e('stageUnits', '#t-stageUnits', '3 Stage', ALL, ['stageWin'], 'Measures in H: the height of a terrace is 2 H (terH = 2 x tiles per H, subH = 0.22 x terH) and the terH / subH controls are hidden, so the terrain follows the hero scale. Off: terH and subH are yours again (they keep the derived values). Turning it on again derives them again.'),
     e('stageReset', '#stageReset', '3 Stage', ALL, ['stageWin'], 'Reset: tiles per H 2, hero share 0.14 and Measures in H on.'),
     e('stageFollow', '#t-stageFollow', '3 Stage', ALL, ['stageWin'], 'Follow the hero: Cam 6 keeps the hero centre at the screen centre (clamped at the window, never on the far side). A manual pan, zoom or orbit suspends it; press it again (or double-click the view) to follow again.'),
+    e('stageWindow', '#stageWindow, #stageWinDefault', '3 Stage', ALL, ['stageWin'], 'Window (M2c): the zones of the window, in order. Click a row to add or remove a zone; the order of the marks is the order of the route and the first one is where the hero starts. Zones that are not neighbours are allowed (a warning below the list; Next room jumps). Default window = the lowest zone alone.'),
     e('stagePrev', '#stagePrev', '3 Stage', ALL, ['stageWin'], 'Move the hero to the centre of the previous room of the window.'),
     e('stageNext', '#stageNext', '3 Stage', ALL, ['stageWin'], 'Move the hero to the centre of the next room of the window.'),
     // ---- 4 Curves (C)
@@ -6531,7 +6538,7 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
         { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, tech: 'B', terraces: 3, contract: true }
       ],
       camera: 'stage', cameras: CAMS, tech: 'box', techs: ['box', 'B'], compare: false, compareDefault: false,
-      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageObjects', 'stageVolumes', 'stageOrient', 'stagePlanes', 'stageProps', 'stageFrame', 'stageReset', 'stageFollow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
+      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageObjects', 'stageVolumes', 'stageOrient', 'stagePlanes', 'stageProps', 'stageFrame', 'stageReset', 'stageFollow', 'stageWindow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {
@@ -7445,6 +7452,25 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
     sliceSel.zones.clear(); sliceSel.whole = false; for (const k of list) sliceSel.zones.add(tb.order[k - 1]); st.stageRooms = list; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; st.orientId = null; st.roomFit = null; st.follow = true; invalidate(true); return true;
   }
   function buildStageZones(S) { E.stage.buildZones(S, P, packs[st.pack].pack, st.stageRooms); }
+  /* M2c, THE WINDOW LIST: one row per zone (k, raw id, tiles, mean elevation, the badge = the place in the window); a click marks / unmarks (the order of the marks is the order of the window, the first is where the hero starts; at least one stays); the model is E.stage.zoneList / windowCheck. The warning of non-neighbours goes in its own help line, never in #info. */
+  const winKind = () => (NO_MODES || !stageOn() ? null : zonePack() ? 'zones' : null);
+  function winRows(kind) { return kind === 'zones' ? E.stage.zoneList(zonePack()) : []; }
+  function winSet(ks) { return stageSetWindow(ks); }
+  function winDefault() { return [1]; }
+  function stageWinDefault() { winSet(winDefault()); }
+  function winToggle(k) {
+    const cur = st.stageRooms.slice(), at = cur.indexOf(k), help = $('#stageWinHelp');
+    if (at >= 0) { if (cur.length === 1) return; cur.splice(at, 1); } else { if (cur.length >= E.stage.WIN_MAX) { if (help) help.textContent = `a window has at most ${E.stage.WIN_MAX} zones: unmark one first`; return; } cur.push(k); }
+    winSet(cur);
+  }
+  function syncWindowList() {
+    const row = $('#stageWinRow'); if (!row) return; const kind = winKind(), box = $('#stageWindow'), help = $('#stageWinHelp'); row.hidden = NO_MODES || !kind;
+    const key = kind ? [kind, st.pack, st.stageRooms.join()].join('|') : ''; if (box.dataset.key === key) return; box.dataset.key = key; if (!kind && E.modesTest && E.modesTest.skipWinListClear) return; /* (MUTATION skipWinListClear: the list outlives the window) */ box.textContent = ''; help.textContent = ''; if (!kind) return;
+    const rows = winRows(kind);
+    for (const r of rows) { const at = st.stageRooms.indexOf(r.k), d = document.createElement('div'); d.className = 'wrow' + (at >= 0 ? ' on' : ''); d.dataset.k = r.k; d.innerHTML = `<b>${at >= 0 ? at + 1 : ''}</b><span>k ${r.k} · id ${r.raw} · ${r.tiles} tiles · elev ${isFinite(r.elev) ? r.elev.toFixed(1) : '-'}</span>`; d.addEventListener('click', () => winToggle(r.k)); box.appendChild(d); }
+    const bad = E.stage.windowCheck(st.stageRooms, rows);
+    help.textContent = bad.length ? bad.map(([a, b]) => `zones ${a} and ${b} are not neighbours: no walking path between them; Next room jumps`).join('; ') : st.stageRooms.length >= E.stage.WIN_MAX ? `limit of ${E.stage.WIN_MAX} zones reached` : '';
+  }
   function planeKey() { if (!planesOn()) return ''; const r = orientRoom(); return r ? `${r.id}|${baseYaw()}|${st.stage.tilesPerH}` : ''; }
   function orientRoom() { const T = orientTable(); if (!T) return null; let id = 0; if (st.hero) { const i = E.stage.cellOf(S, st.hero.x - S.ox, st.hero.y - S.oy); id = i >= 0 ? E.stage.zoneMap(S)[i] : 0; } if (id && T.byId.has(id)) st.orientId = id; else if (!st.orientId || !T.byId.has(st.orientId)) st.orientId = st.stageRooms[st.stageIdx]; return T.byId.get(st.orientId) || T.rooms[0] || null; }
   /* the ROOM FRAMING: the Cam 6 pitch and FOV, the camera centred on the room's box at its mean height, the zoom (px per tile) the largest at which the 8 corners of the room's box (at its lowest and highest tile) fit the panel with a margin; cached per room / yaw / panel */
@@ -7538,6 +7564,10 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
     const fi = lf.querySelector('input'); fi.checked = st.follow; fi.addEventListener('change', () => { st.follow = fi.checked; if (st.follow) st.panX = st.panY = st.yawOff = st.pitchOff = 0; invalidate(false); }); sl.appendChild(lf);
     for (const [id, label, d] of [['stagePrev', '‹ Previous room', -1], ['stageNext', 'Next room ›', 1]]) {
       const r = document.createElement('div'); r.className = 'row'; r.innerHTML = `<button id="${id}">${label}</button>`; if (NO_MODES) r.hidden = true; r.querySelector('button').addEventListener('click', () => stageJump(d)); sl.appendChild(r);
+    }
+    { // M2c: the WINDOW list (own elements, hidden outside a window of mode 3): a row per zone, the order of the marks is the order of the window
+      const r = document.createElement('div'); r.className = 'row'; r.id = 'stageWinRow'; r.hidden = true; r.innerHTML = '<span>Window (click to add / remove; the order is the route, the first is where the hero starts)</span><div id="stageWindow"></div><button id="stageWinDefault">Default window</button><div id="stageWinHelp"></div>';
+      r.querySelector('#stageWinDefault').addEventListener('click', () => stageWinDefault()); sl.appendChild(r);
     }
   }
 
@@ -7797,6 +7827,7 @@ window.EVO_FOREST_PNG={height_A:"iVBORw0KGgoAAAANSUhEUgAAADQAAAAuCAYAAABnNToWAAA
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
     $('#info').innerHTML = (NO_MODES ? '' : dioHostLine()) + stageText() + `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText() + macroText();
+    syncWindowList(); // M2c: the window list follows the state (rebuilt only when its key changes)
     E.controls.refresh(document, controlsCtx()); // requirements of every control, from the live state
     modeRefresh(); // the modes layer: what the current mode shows (after the requirements, so the greyed tooltips are already set)
   }

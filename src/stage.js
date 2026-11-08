@@ -101,7 +101,7 @@
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x, a = ids[i]; if (a <= 0) continue; const e = pack.elevation[i]; if (e > 0) { sum.set(a, (sum.get(a) || 0) + e); cnt.set(a, (cnt.get(a) || 0) + 1); } else if (!sum.has(a)) { sum.set(a, 0); cnt.set(a, 0); } if (x + 1 < W && ids[i + 1] > 0 && ids[i + 1] !== a) link(a, ids[i + 1]); if (y + 1 < H && ids[i + W] > 0 && ids[i + W] !== a) link(a, ids[i + W]); }
     const mean = (a) => (cnt.get(a) ? sum.get(a) / cnt.get(a) : Infinity), left = [...sum.keys()].sort((a, b) => a - b), order = [], seen = new Set();
     while (order.length < left.length) { const start = left.filter((a) => !seen.has(a)).sort((a, b) => mean(a) - mean(b) || a - b)[0], q = [start]; seen.add(start); for (let h = 0; h < q.length; h++) { order.push(q[h]); for (const b of [...(adj.get(q[h]) || [])].sort((p, r) => p - r)) if (!seen.has(b)) { seen.add(b); q.push(b); } } }
-    return (z.stageTable = { order, toK: new Map(order.map((raw, k) => [raw, k + 1])), mean: order.map(mean) });
+    return (z.stageTable = { order, toK: new Map(order.map((raw, k) => [raw, k + 1])), mean: order.map(mean), cnt, adj });
   }
   /* the zone map of the window (ids 1..N, 0 = none) and the footprint of the zones of the window `ks` (their place in the order): `S.stageZones`, `S.stageZonesInfo` */
   function buildZones(S, P, pack, ks) {
@@ -126,5 +126,10 @@
     let tile = tied[0], bd = 1e18; for (const i of tied) { const d = ((i % W) + 0.5 - cx) ** 2 + (((i / W) | 0) + 0.5 - cy) ** 2; if (d < bd - 1e-12) { bd = d; tile = i; } }
     return { tile, value: best, tied: tied.length };
   }
-  E.stage = { zoneTable, buildZones, zoneMap, poiGoal, POI_MIN, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+  /* M2c, THE WINDOW SELECTOR (pure model, no interface): one row per zone in the order of zoneTable: { k (the place in the order, 1..N), raw (the id of the image), tiles (land tiles), elev (the mean elevation of zoneTable), adj (the k of the neighbouring zones, ascending) }.
+     windowCheck(ks, list) -> the CONSECUTIVE pairs of the window [ka, kb] that are not neighbours (no walking path between them: the window still works, "Next room" jumps). WIN_MAX = 12 [R, a hypothesis]: the most zones or rooms of a window. */
+  const WIN_MAX = 12;
+  function zoneList(pack) { const tb = zoneTable(pack); if (!tb) return null; return tb.order.map((raw, i) => ({ k: i + 1, raw, tiles: tb.cnt.get(raw) || 0, elev: tb.mean[i], adj: [...(tb.adj.get(raw) || [])].map((r) => tb.toK.get(r)).sort((a, b) => a - b) })); }
+  function windowCheck(ks, list) { const bad = []; for (let q = 1; q < ks.length; q++) { const a = list[ks[q - 1] - 1]; if (!a || !a.adj.includes(ks[q])) bad.push([ks[q - 1], ks[q]]); } return bad; }
+  E.stage = { zoneTable, buildZones, zoneMap, poiGoal, POI_MIN, zoneList, windowCheck, WIN_MAX, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
 })(window.EVO = window.EVO || {});

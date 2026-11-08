@@ -760,6 +760,25 @@
     sliceSel.zones.clear(); sliceSel.whole = false; for (const k of list) sliceSel.zones.add(tb.order[k - 1]); st.stageRooms = list; st.stageIdx = 0; st.hero = null; st.focus = null; st.stageClamp = null; st.orientId = null; st.roomFit = null; st.follow = true; invalidate(true); return true;
   }
   function buildStageZones(S) { E.stage.buildZones(S, P, packs[st.pack].pack, st.stageRooms); }
+  /* M2c, THE WINDOW LIST: one row per zone (k, raw id, tiles, mean elevation, the badge = the place in the window); a click marks / unmarks (the order of the marks is the order of the window, the first is where the hero starts; at least one stays); the model is E.stage.zoneList / windowCheck. The warning of non-neighbours goes in its own help line, never in #info. */
+  const winKind = () => (NO_MODES || !stageOn() ? null : zonePack() ? 'zones' : null);
+  function winRows(kind) { return kind === 'zones' ? E.stage.zoneList(zonePack()) : []; }
+  function winSet(ks) { return stageSetWindow(ks); }
+  function winDefault() { return [1]; }
+  function stageWinDefault() { winSet(winDefault()); }
+  function winToggle(k) {
+    const cur = st.stageRooms.slice(), at = cur.indexOf(k), help = $('#stageWinHelp');
+    if (at >= 0) { if (cur.length === 1) return; cur.splice(at, 1); } else { if (cur.length >= E.stage.WIN_MAX) { if (help) help.textContent = `a window has at most ${E.stage.WIN_MAX} zones: unmark one first`; return; } cur.push(k); }
+    winSet(cur);
+  }
+  function syncWindowList() {
+    const row = $('#stageWinRow'); if (!row) return; const kind = winKind(), box = $('#stageWindow'), help = $('#stageWinHelp'); row.hidden = NO_MODES || !kind;
+    const key = kind ? [kind, st.pack, st.stageRooms.join()].join('|') : ''; if (box.dataset.key === key) return; box.dataset.key = key; if (!kind && E.modesTest && E.modesTest.skipWinListClear) return; /* (MUTATION skipWinListClear: the list outlives the window) */ box.textContent = ''; help.textContent = ''; if (!kind) return;
+    const rows = winRows(kind);
+    for (const r of rows) { const at = st.stageRooms.indexOf(r.k), d = document.createElement('div'); d.className = 'wrow' + (at >= 0 ? ' on' : ''); d.dataset.k = r.k; d.innerHTML = `<b>${at >= 0 ? at + 1 : ''}</b><span>k ${r.k} · id ${r.raw} · ${r.tiles} tiles · elev ${isFinite(r.elev) ? r.elev.toFixed(1) : '-'}</span>`; d.addEventListener('click', () => winToggle(r.k)); box.appendChild(d); }
+    const bad = E.stage.windowCheck(st.stageRooms, rows);
+    help.textContent = bad.length ? bad.map(([a, b]) => `zones ${a} and ${b} are not neighbours: no walking path between them; Next room jumps`).join('; ') : st.stageRooms.length >= E.stage.WIN_MAX ? `limit of ${E.stage.WIN_MAX} zones reached` : '';
+  }
   function planeKey() { if (!planesOn()) return ''; const r = orientRoom(); return r ? `${r.id}|${baseYaw()}|${st.stage.tilesPerH}` : ''; }
   function orientRoom() { const T = orientTable(); if (!T) return null; let id = 0; if (st.hero) { const i = E.stage.cellOf(S, st.hero.x - S.ox, st.hero.y - S.oy); id = i >= 0 ? E.stage.zoneMap(S)[i] : 0; } if (id && T.byId.has(id)) st.orientId = id; else if (!st.orientId || !T.byId.has(st.orientId)) st.orientId = st.stageRooms[st.stageIdx]; return T.byId.get(st.orientId) || T.rooms[0] || null; }
   /* the ROOM FRAMING: the Cam 6 pitch and FOV, the camera centred on the room's box at its mean height, the zoom (px per tile) the largest at which the 8 corners of the room's box (at its lowest and highest tile) fit the panel with a margin; cached per room / yaw / panel */
@@ -853,6 +872,10 @@
     const fi = lf.querySelector('input'); fi.checked = st.follow; fi.addEventListener('change', () => { st.follow = fi.checked; if (st.follow) st.panX = st.panY = st.yawOff = st.pitchOff = 0; invalidate(false); }); sl.appendChild(lf);
     for (const [id, label, d] of [['stagePrev', '‹ Previous room', -1], ['stageNext', 'Next room ›', 1]]) {
       const r = document.createElement('div'); r.className = 'row'; r.innerHTML = `<button id="${id}">${label}</button>`; if (NO_MODES) r.hidden = true; r.querySelector('button').addEventListener('click', () => stageJump(d)); sl.appendChild(r);
+    }
+    { // M2c: the WINDOW list (own elements, hidden outside a window of mode 3): a row per zone, the order of the marks is the order of the window
+      const r = document.createElement('div'); r.className = 'row'; r.id = 'stageWinRow'; r.hidden = true; r.innerHTML = '<span>Window (click to add / remove; the order is the route, the first is where the hero starts)</span><div id="stageWindow"></div><button id="stageWinDefault">Default window</button><div id="stageWinHelp"></div>';
+      r.querySelector('#stageWinDefault').addEventListener('click', () => stageWinDefault()); sl.appendChild(r);
     }
   }
 
@@ -1112,6 +1135,7 @@
     const si = S.sliceInfo, sinfo = si ? `slice ${si.tiles} tiles · window ${si.window.w}×${si.window.h} at (${si.window.x0}, ${si.window.y0}) of ${S.mapW}×${S.mapH}` : 'whole map';
     $('#sliceInfo').textContent = sinfo;
     $('#info').innerHTML = (NO_MODES ? '' : dioHostLine()) + stageText() + `<b>${S.name}</b> · ${S.mapW}×${S.mapH}${zn} · ${S.levelCount.terraces} terraces, ${S.levelCount.levels} levels in the ${si ? 'slice' : 'map'} · ${stairText}${borderText} · ${rs.length} regions in the ${si ? 'slice' : 'map'} (${Math.max(0, rs.length - 1)} not connected to the largest), largest ${(big / tot * 100).toFixed(0)}%` + roomsText() + typesText() + ascText() + pocketText() + contractText() + dressText() + curvesText() + wallText() + floorsText() + macroText();
+    syncWindowList(); // M2c: the window list follows the state (rebuilt only when its key changes)
     E.controls.refresh(document, controlsCtx()); // requirements of every control, from the live state
     modeRefresh(); // the modes layer: what the current mode shows (after the requirements, so the greyed tooltips are already set)
   }
