@@ -4,7 +4,7 @@
    (c) WIN_MAX: a window of at most WIN_MAX zones (the limit is lowered in the page to test it);
    (d) the end of the session: the list is emptied and hidden, sliceSel goes back; MUTATION skipWinListClear breaks it;
    (e) outside mode 3 and without the modes layer the list is hidden, and the chips of mode 1 (zone chips of "Your images") do what they did: no window state;
-   (f) M2c commit 2: dac_stage lists its rooms (88 with scroll); marking the roomSet of the example in its order = the example, canvas for canvas; "Default window" goes back to it.
+   (f) M2c commit 2: dac_stage lists its rooms (the whole map, with scroll); marking the roomSet of the example in its order = the example, canvas for canvas; "Default window" goes back to it.
      NODE_PATH=$(npm root -g) node tools/ui/test_stage_window_ui.js */
 const crypto = require('crypto');
 const { open, mapFile } = require('./common');
@@ -56,6 +56,22 @@ const sha = (b) => crypto.createHash('sha1').update(b).digest('hex').slice(0, 12
   const c0 = await ev(() => ({ rooms: window.__evo.st.stageRooms.length, row: document.querySelector('#stageWinRow').hidden, chips: document.querySelectorAll('#zoneChips .chip').length, zones: [...window.__evo.sliceSel.zones] }));
   await page.click('#zoneChips .chip:nth-child(2)'); await idle(); const c1 = await ev(() => ({ rooms: window.__evo.st.stageRooms.length, row: document.querySelector('#stageWinRow').hidden, zones: [...window.__evo.sliceSel.zones], win: !!window.__evo.st.win }));
   ok(`mode 1 with images: the window list is hidden and a zone chip does what it did (zones ${JSON.stringify(c0.zones)} -> ${JSON.stringify(c1.zones)}), no window state (stageRooms ${c1.rooms}, session ${c1.win})`, c0.row && c1.row && c0.rooms === 0 && c1.rooms === 0 && !c1.win && JSON.stringify(c0.zones) !== JSON.stringify(c1.zones), [c0, c1]);
+  // (f) the rooms of DAC (M2c commit 2)
+  await ev(() => window.__evo.setMode('stage')); await idle(); await page.click('#examples button[data-id="dac_stage"]'); await idle();
+  const nRooms = await ev(() => window.__evo.S().rooms.rooms.length), d0 = await rows(), dsnap = await snap(), dwin = await win();
+  const sc = await ev(() => { const b = document.querySelector('#stageWindow'); return { ch: b.clientHeight, sh: b.scrollHeight, mh: getComputedStyle(b).maxHeight }; });
+  ok(`dac_stage: the list has ${d0.length} rows (the ${nRooms} rooms of the map) with a scroll box (${sc.mh}, content ${sc.sh} px in ${sc.ch}); the roomSet ${JSON.stringify(dwin)} is marked 1..6 in its order`, d0.length === nRooms && nRooms > 60 && sc.sh > sc.ch && d0.filter((r) => r.on).map((r) => [r.k, r.badge]).sort((p, q) => +p[1] - +q[1]).map((r) => r[0]).join() === '17,10,20,27,6,5' && d0.filter((r) => r.on).every((r) => r.badge === String(dwin.indexOf(r.k) + 1)), [d0.length, sc]);
+  ok('the rows of rooms read "room id · tiles" (no elevation, no neighbours)', /^room 17 · \d+ tiles$/.test(d0.find((r) => r.k === 17).text));
+  await ev(() => window.__evo.stageSetRooms([17])); await idle(); for (const id of [10, 20, 27, 6, 5]) await click(id); const viaClicks = await snap(), wClicks = await win();
+  ok(`marking 10, 20, 27, 6 and 5 after 17 gives the roomSet of the example ${JSON.stringify(wClicks)} and the same canvas and info as the example untouched (${viaClicks} = ${dsnap})`, wClicks.join() === dwin.join() && viaClicks === dsnap);
+  const extra = d0.find((r) => !r.on).k; await click(extra); const w7 = await win(); await page.click('#stageWinDefault'); await idle(); const wBack = await win(), sBack = await snap();
+  ok(`a seventh room (${extra}) joins the window ${JSON.stringify(w7)}; "Default window" goes back to the roomSet of the example (${JSON.stringify(wBack)}), canvas for canvas`, w7.length === 7 && wBack.join() === dwin.join() && sBack === dsnap);
+  await ev(() => { window.EVO.stage.WIN_MAX = 7; }); const refused = d0.filter((r) => !r.on && r.k !== extra)[0].k; await click(extra); await click(refused); const w8 = await win(), h8 = await help(); await ev(() => { window.EVO.stage.WIN_MAX = 12; }); await page.click('#stageWinDefault'); await idle();
+  ok(`WIN_MAX with rooms (lowered to 7): an eighth room is refused (${JSON.stringify(w8)}), help "${h8}"`, w8.length === 7 && /at most 7 rooms/.test(h8), [w8, h8]);
+  // the cost of a window of 12 rooms
+  const ids12 = d0.slice(0, 12).map((r) => r.k), t0 = Date.now(); await ev((ids) => window.__evo.stageSetRooms(ids), ids12); await idle(); const ms12 = Date.now() - t0, w12 = await win();
+  console.log(`INFO a window of ${w12.length} DAC rooms (${ids12}) builds and draws in ${ms12} ms (set + idle)`); ok(`a window of 12 rooms works (${w12.length} rooms in the window, ${ms12} ms)`, w12.length === 12);
+  await page.click('#stageWinDefault'); await idle();
   ok('no page errors', a.errs.length === 0, a.errs);
   await a.browser.close();
   const b = await open({ w: 1500, h: 900 }); const nm = await b.page.evaluate(() => { const r = document.querySelector('#stageWinRow'); return !r || r.hidden; });
