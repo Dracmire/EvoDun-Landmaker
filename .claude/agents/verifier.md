@@ -1,6 +1,6 @@
 ---
 name: verifier
-description: "Runs the project's standard verification (tests, pixel regression, z-buffer order, fixed test set screenshots) and audits test changes. Use before reporting any task as done."
+description: "Runs the project's standard verification (tests, pixel regression, z-buffer order, fixed test set screenshots) and audits test changes. Use for the full pass (MVP milestone, weekly, or when the user asks), not for every PR."
 model: haiku
 tools: Read, Grep, Glob, Bash
 disallowedTools: Edit, Write
