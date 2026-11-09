@@ -225,6 +225,28 @@
     const forest = (v, label, terraces, subs) => ({ id: 'forest_' + v.toLowerCase(), label, src: 'forest_' + v.toLowerCase(), stageHero: true, stageZones: true, tech: 'box', orient: true, planes: true, props: true, terraces, subs, stairs: { style: 0, tread: 1, preferFill: true }, display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }); // M3a: Forest, the old map of the game with the zones of v53 (a built-in source: PNGs of docs/crystallizers/03-stage/refs/dq3/forest_plains/annotated/), terraces and sub-terraces per variant
     stg.examples.push(forest('A', 'Forest A (v53)', 2, 6), forest('B', 'Forest B (amplified relief)', 4, 3));
     stg.examples.push({ id: 'aurhea', label: "Aurhea's Fountain (old map, water)", src: 'aurhea', stageHero: true, stageZones: true, tech: 'box', orient: true, planes: true, props: true, terraces: 1, subs: 5, stairs: { style: 0, tread: 1, preferFill: true }, display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }); // M3b: the old map with a LAKE (water = pack data, blocked), five zones, the peninsula as the last zone; terraces 1 and sub-terraces 5 (heights measured in tools/test_aurhea_roles.js)
+    /* GOLDEN SHOT 1 (M4c-1): Forest B' with the four layers of the frame of the remake capture "Shrine of Plains 17.17" placed BY HAND as data (a capability test: later the rules generate them): window [valley, east slope], the hero declared, yaw 0, no orientation by room, no props by rule. The data are in the block below. */
+    stg.examples.push(Object.assign({}, forest('B', 'Golden shot 1 · Shrine door (hand-placed layers)', 4, 3), { id: 'golden_door', window: [1, 6], heroAt: { x: 49.5, y: 31.5 }, heroFrac: 0.098, yaw: 0, orient: false, props: false, // heroFrac 0.098: the hero measures 0.12 of the valid height at its feet (perspective: the pivot is at the centre of the panel)
+      /* ---- golden shot 1: hand-placed, a hypothesis, not a rule. The four layers of the frame of "Shrine of Plains 17.17" (remake). Coordinates are MAP tiles (centres); the terrain is filler (Forest B'), the shrine is declared on the POI A tile (the goal, 2 H). ---- */
+      objects: [
+        // R (route and goal): the facade (6.3 H wide, constant height, its roof is cut by the top edge), the arched door in front of it, the torch beside it
+        { kind: 'landmark', x: 38.5, y: 24.5, hH: 5.5, hFar: 5.5, hNear: 5.5, wH: 7.4 }, // the shrine facade (landmark with a constant height and a width), on the goal tile
+        { kind: 'pillar', x: 38.5, y: 25.1, hH: 2.1, wH: 1.75 }, // the door in the arch: 1.5 H wide, 1.8 H high, a little in front of the facade
+        { kind: 'lamp', x: 36.1, y: 24.7, hH: 0.7 }, // the torch to the left of the door
+        // G (guide): pairs of small props (grass and stone tufts) along the path that get smaller with the distance
+        { kind: 'shrub', x: 36.0, y: 36.5, hH: 0.35, wH: 0.55 }, { kind: 'shrub', x: 40.5, y: 36.5, hH: 0.35, wH: 0.55 },
+        { kind: 'shrub', x: 36.5, y: 31.5, hH: 0.3, wH: 0.5 }, { kind: 'shrub', x: 40.0, y: 31.5, hH: 0.3, wH: 0.5 },
+        // F (background): the tree canopy to the right up to the top edge, its trunk, the dark vegetation on the left
+        { kind: 'shrub', x: 51.9, y: 23.5, hH: 9, wH: 13.5 }, { kind: 'shrub', x: 51.5, y: 24.5, hH: 7.5, wH: 8 }, { kind: 'shrub', x: 51.5, y: 30.3, hH: 7.3, wH: 8.2 }, { kind: 'pillar', x: 51.0, y: 30.5, hH: 2.6, wH: 0.9 },
+        { kind: 'shrub', x: 31.5, y: 27.5, hH: 2.2, wH: 1.8 }, { kind: 'shrub', x: 31.5, y: 22.5, hH: 3, wH: 1.6 },
+        // P (foreground): the rock that cuts the bottom right corner (its base is below the bottom edge)
+        { kind: 'pillar', x: 50.5, y: 39.6, hH: 1.2, wH: 1.2, always: true }
+      ],
+      volumes: [],
+      ribbon: [ // G: the dirt path from the bottom left to the foot of the door (1.6 H wide), and the crossing path to the right at the bottom
+        { pts: [[33.5, 40.5], [35.5, 36.5], [37.5, 32.5], [38.5, 30.0], [38.5, 25.4]], wH: 1.6 },
+        { pts: [[39.0, 36.5], [44.5, 35.5], [50.0, 36.5]], wH: 1.3 }
+      ] }));
     stg.examples.push(Object.assign({}, base, { id: 'mockt_z14', label: 'Room 14 · orientation (mock T Z)', roomSet: [14], objects: [], volumes: [] }), Object.assign({}, base, { id: 'mockt_x44', label: 'Room 44 · orientation (mock T X)', roomSet: [44], objects: [], volumes: [] }));
   }
   E.modes = { PROTOS, MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };
