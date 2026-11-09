@@ -3,7 +3,7 @@
      M5a  hero height / panel height as DRAWN (tilesPerH * cam.sc * k, k = the depth scale at the hero's FEET, `drawHero` in src/stage.js): heroFrac x 0.984 with the hero at the pivot (his feet are 0.5 H below it: 13.8 % for 0.14). M5aPivot = the same with k at the hero's centre = the pivot: equal to `heroFrac` BY CONSTRUCTION.
      fx, fy  the hero's CENTRE (feet + 0.5 H) as a share of the panel width / height (fyFeet: the feet).
      M5b  the width of the walkable strip across the view at the hero's position, in H (the run of walkable ground through the hero along the screen-horizontal ground direction).
-     M8b  the row of the FAR EDGE of the ground beyond the hero: going away from the camera along the hero's column, the first blocked tile (water, void, wall) and then the first walkable tile after it = the far shore; its near edge projected at its own height. In H above the hero's head (head) and above his feet (feet), measured with the hero's px height. With no gap: the last walkable point (gap = 0).
+     M8b  the row of the FAR EDGE of the ground beyond the hero: going away from the camera along the hero's column, the first non-walkable tile and then the first GROUND tile (not water, not void; the tiles outside the slice count as ground) after it = the far shore; its near edge projected at its own height. In H above the hero's head (head) and above his feet (feet), measured with the hero's px height. With no gap: the last walkable point (gap = 0).
      M3a  the BACKGROUND IS CLOSED: the far edge of the window grid (where the hero's column leaves the grid, at the ground height there) projects at or above the top of the panel (row <= 0); otherwise `bandFrac` = row / h is the share of the panel above the edge that shows nothing.
      M4   the goal / landmark ({ x, y, h }, window coordinates) projects inside the panel.
      M1   the number of distinct walkable levels among the walkable tiles whose centre projects inside the panel (heights in H).
@@ -24,6 +24,8 @@ const BANDS = {
   wall: { H: 2.4, src: 'back wall 2.4 H [Ref]' }, vertical: { band: [3, 6], src: 'verticals M10 3-6 H [Ref]' }, clearing: { band: [7, 16], src: 'clearing M5c 7-16 H [Ref]' }
 };
 
+/* GROUND (for the far shore): not water and not void; the tiles outside the slice are BLOCKED in S.block (not walkable) but they are ground (the scenery under the veil) */
+const groundAt = (S, x, y) => { const cx = Math.floor(x), cy = Math.floor(y); if (cx < 0 || cy < 0 || cx >= S.W || cy >= S.H) return false; const i = cy * S.W + cx; return !(S.water && S.water[i]) && !(S.void && S.void[i]); };
 const walkableAt = (S, x, y) => { const cx = Math.floor(x), cy = Math.floor(y); if (cx < 0 || cy < 0 || cx >= S.W || cy >= S.H) return false; const i = cy * S.W + cx; return !S.block[i] && !(S.void && S.void[i]); };
 const feetAt = (S, x, y) => { const cx = Math.max(0, Math.min(S.W - 1, Math.floor(x))), cy = Math.max(0, Math.min(S.H - 1, Math.floor(y))); return S.levelH[S.fine[cy * S.W + cx]]; };
 
@@ -37,8 +39,8 @@ function compute(S, cam, w, h, o) {
   const M5b = (run(a[0], a[1]) + run(-a[0], -a[1])) / tp;
   // far edge beyond the hero
   let t = run(far[0], far[1]), gap = 0, edge = { x: hx + far[0] * t, y: hy + far[1] * t, h: feetAt(S, hx + far[0] * t, hy + far[1] * t) };
-  { let g = t + STEP; const lim = 400; while (g < lim && !walkableAt(S, hx + far[0] * g, hy + far[1] * g) && Math.floor(hx + far[0] * g) >= 0 && Math.floor(hy + far[1] * g) >= 0 && hx + far[0] * g < S.W && hy + far[1] * g < S.H) g += STEP;
-    if (g < lim && walkableAt(S, hx + far[0] * g, hy + far[1] * g)) { gap = g - t; edge = { x: hx + far[0] * g, y: hy + far[1] * g, h: feetAt(S, hx + far[0] * g, hy + far[1] * g) }; } }
+  { let g = t + STEP; const lim = 400; while (g < lim && !groundAt(S, hx + far[0] * g, hy + far[1] * g) && Math.floor(hx + far[0] * g) >= 0 && Math.floor(hy + far[1] * g) >= 0 && hx + far[0] * g < S.W && hy + far[1] * g < S.H) g += STEP;
+    if (g < lim && groundAt(S, hx + far[0] * g, hy + far[1] * g)) { gap = g - t - STEP; edge = { x: hx + far[0] * g, y: hy + far[1] * g, h: feetAt(S, hx + far[0] * g, hy + far[1] * g) }; } }
   const pe = cam.p(edge.x, edge.y, edge.h), M8b = { head: (pH[1] - pe[1]) / hpx, feet: (pF[1] - pe[1]) / hpx, row: pe[1] / h, gapH: gap / tp };
   // the far edge of the window grid along the hero's column
   let t2 = 0; while (hx + far[0] * (t2 + STEP) >= 0 && hy + far[1] * (t2 + STEP) >= 0 && hx + far[0] * (t2 + STEP) <= S.W && hy + far[1] * (t2 + STEP) <= S.H && t2 < 1000) t2 += STEP;
@@ -69,4 +71,4 @@ function verdict(name, v, photo, judge) {
     default: return 'INFO';
   }
 }
-module.exports = { BANDS, compute, kReading, verdict, walkableAt };
+module.exports = { BANDS, compute, kReading, verdict, walkableAt, groundAt };

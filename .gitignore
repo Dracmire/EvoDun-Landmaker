@@ -1,3 +1,4 @@
 tools/ui/.cache/
 rooms_out/
 __pycache__/
+tools/ui/out/
