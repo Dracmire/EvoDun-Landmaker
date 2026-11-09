@@ -38,20 +38,20 @@
     const meta = (kind) => ({ ter: 0, sub: 0, bridge: false, deco: true, plane: kind });
     let wall = 0, cols = 0, front = 0; const colRows = { '-1': [], '1': [] };
     // BACK: the closing wall
-    if (!T.noBack) { const roof = high + HYP.wallH * tp; for (let i = 0; i < S.n; i++) { if (C.cls[i] !== BACK) continue; const isV = !!(vd && vd[i]), d = T.chebyshev ? C.A[i] - C.far.get(C.Pc[i]) : C.dist[i]; if (T.chebyshev ? (d < 1 || d > HYP.wallDepth) : d > HYP.wallDepth + 1e-9) continue; if (!isV && hOf(i) >= roof - 1e-9) { skipped.higher++; continue; } moves.set(i, { h: roof, meta: meta('wall') }); if (isV) voidMoved.add(i); wall++; } }
+    if (!T.noBack) { const roof = high + E.stage.exag(HYP.wallH, o.exag) * tp; for (let i = 0; i < S.n; i++) { if (C.cls[i] !== BACK) continue; const isV = !!(vd && vd[i]), d = T.chebyshev ? C.A[i] - C.far.get(C.Pc[i]) : C.dist[i]; if (T.chebyshev ? (d < 1 || d > HYP.wallDepth) : d > HYP.wallDepth + 1e-9) continue; if (!isV && hOf(i) >= roof - 1e-9) { skipped.higher++; continue; } moves.set(i, { h: roof, meta: meta('wall') }); if (isV) voidMoved.add(i); wall++; } }
     // SIDE: columns every colEvery rows along the axis, beside the room, on both sides
     if (!T.noCols) { const every = T.colEvery || HYP.colEvery; let aMin = 1e9, aMax = -1e9; for (const i of C.footprint) { aMin = Math.min(aMin, C.A[i]); aMax = Math.max(aMax, C.A[i]); }
       const rowTiles = new Map(); for (const i of C.footprint) { const a = C.A[i]; if (!rowTiles.has(a)) rowTiles.set(a, []); rowTiles.get(a).push(i); }
       for (let a0 = aMin; a0 <= aMax; a0 += every) { const ts = rowTiles.get(a0); if (!ts) continue; let pMin = 1e9, pMax = -1e9, iMin = -1, iMax = -1; for (const i of ts) { if (C.Pc[i] < pMin) { pMin = C.Pc[i]; iMin = i; } if (C.Pc[i] > pMax) { pMax = C.Pc[i]; iMax = i; } }
         for (const s of [-1, 1]) { const p0 = s > 0 ? pMax : pMin, edge = s > 0 ? iMax : iMin; let placed = false;
           for (let k = 1; k <= HYP.R && !placed; k++) { const j = at(a0, p0 + s * k); if (j < 0) break; const isV = !!(vd && vd[j]); if (isV && T.noVoidWall) { skipped.void++; break; } if (C.walk(j)) continue; if (C.cls[j] !== SIDE) continue;
-            const roof = hOf(edge) + HYP.colH * tp; if (!isV && hOf(j) >= roof - 1e-9) { skipped.higher++; placed = true; break; } if (moves.has(j)) { placed = true; break; } moves.set(j, { h: roof, meta: meta('col') }); if (isV) voidMoved.add(j); cols++; colRows[s].push(a0); placed = true; } } } }
+            const roof = hOf(edge) + E.stage.exag(HYP.colH, o.exag) * tp; if (!isV && hOf(j) >= roof - 1e-9) { skipped.higher++; placed = true; break; } if (moves.has(j)) { placed = true; break; } moves.set(j, { h: roof, meta: meta('col') }); if (isV) voidMoved.add(j); cols++; colRows[s].push(a0); placed = true; } } } }
     // FRONT: the tiles above the lowest ground of the room are lowered below it
     if (!T.noFront) { const target = low - HYP.frontDrop * tp; for (let i = 0; i < S.n; i++) { if (C.cls[i] !== FRONT) continue; const d = C.near.get(C.Pc[i]) - C.A[i]; if (d < 1 || d > HYP.frontDepth) continue; if (hOf(i) <= low + 1e-9 || moves.has(i)) continue; moves.set(i, { h: target, meta: meta('front') }); front++; } }
     // P1: a void tile that gets a wall / column becomes a drawn, blocked tile (own copies: `S.void` and `S.block` are shared with the quantization cached on the pack, the same care as src/backdrop.js)
     if (voidMoved.size) { S.void = Uint8Array.from(S.void); S.block = Uint8Array.from(S.block); for (const i of voidMoved) { S.void[i] = 0; S.block[i] = 1; } }
     const before = S.levelH.length, added = moves.size ? E.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
-    return (S.stagePlanes = { voidTiles: voidMoved.size, room: o.room.id, yaw: o.yaw, tilesPerH: tp, counts: C.counts, wall, cols, front, colRows, skipped, levelsBefore: before, levelsAdded: added, floorLow: low, floorHigh: high });
+    return (S.stagePlanes = { voidTiles: voidMoved.size, room: o.room.id, yaw: o.yaw, tilesPerH: tp, exag: o.exag === undefined ? 1 : o.exag, counts: C.counts, wall, cols, front, colRows, skipped, levelsBefore: before, levelsAdded: added, floorLow: low, floorHigh: high });
   }
   E.planes = { HYP, BACK, SIDE, FRONT, classify, apply };
 })(window.EVO = window.EVO || {});

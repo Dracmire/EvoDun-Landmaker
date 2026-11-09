@@ -9,7 +9,7 @@ Output (52 x 46 = 26 x 23 tiles at x2: each tile of the old game is 2 x 2 px, so
   zones.png        role `zone`      hue ids (h = id / 7, maxnode 6): a zone is a CONNECTED piece (4-connectivity, old tiles): 1 valley, 2 plateau NW, 3 plateau SW, 4 plateau N with the tower, 5 slope / dark band (main piece), 6 slope, east piece.
                    Pieces of fewer than MIN_PIECE tiles are fused into the neighbouring piece that shares the most border (tie: lower id) and take its class
   height_A.png     role `elevation` VARIANT A, the v53 hypothesis [R, by eye on remake screenshots, NOT verified]: valley and paths 0 H, slope 0.3 H, plateaus 0.6 H, tower 3.5 H
-  height_B.png     role `elevation` VARIANT B, amplified relief: every zone is at least one terrace away from each neighbour (valley < slope < plateaus < SW plateau < tower)
+  height_B.png     role `elevation` VARIANT B (B', since 2026-11-09), amplified relief: every zone is at least one terrace away from each neighbour (valley < slope < plateaus < SW plateau; the tower is the maximum, 68 grey, 6.88 H with the 4 terraces of the example forest_b)
   path.png         role `path`      graded mask: the class 6 of v53 (the trails), 255 on the trail, 0 elsewhere. The trail tiles belong to the NEAREST zone of 1..5 in `zones.png`
   poi.png          role `poi`       graded: A (two tiles south of the tower door (19, 10): old tile (19, 12), zone 6 = the east slope, inside the footprint of the windows [1, 6], [6] and [1, 6, 4]) 255, B (west exit, (8, 11)) 170. The door (19, 10) is not marked. M3c: the Stage rules read `poi` as the GOAL of the last zone of a window (E.stage.poiGoal)
   trees_blocked.png      role `vegetation` graded: 255 = the TOWER (cols 17-21, rows 2-10) and the TREES (tile coverage of the foliage and trunk colours >= 0.5 in forest.png; no tree is separated: the sprites overlap). DATA FOR LATER (trees as volumes or billboards): the viewer reads the role `vegetation` and does not use it, nothing is blocked by it
@@ -31,8 +31,8 @@ POI = {'A': (19, 12, 255), 'B': (8, 11, 170)}
 MIN_PIECE = 10                              # [R, a HYPOTHESIS] a connected piece of at least this many old tiles is a zone of its own; smaller ones are fused into a neighbour
 # VARIANT A: grey values with 1 H = 20 grey (valley 20 = 0 H): slope +6 (0.3 H), plateaus +12 (0.6 H), tower +70 (3.5 H)
 GREY_A = {'valley': 20, 'path': 20, 'slope': 26, 'plateau': 32, 'tower': 90}
-# VARIANT B: bands of 12 grey (6 bands 20..92): valley band 0, slope band 1, plateaus NW / N band 2, plateau SW band 3, tower band 5; a value on the start of a band (+1) so the sub-terraces stay low
-GREY_B = {1: 20, 5: 33, 2: 45, 4: 45, 3: 57, 'tower': 92}   # by CLASS (the zone id of a second piece of a class gets the height of its class)
+# VARIANT B: bands of 12 grey with 4 terraces (20..68): valley band 0, slope band 1, plateaus NW / N band 2, plateau SW band 3; a value on the start of a band (+1) so the sub-terraces stay low. B' (2026-11-09): the tower is the MAXIMUM of the map and the viewer quantizes with the global range, so its cima is always the last sub-terrace of the last terrace: 92 (6 terraces) gave 10.88 H; 68 with 4 terraces gives 6.88 H (any of 66-69 does the same). The example forest_b sets 4 terraces / 3 sub-terraces
+GREY_B = {1: 20, 5: 33, 2: 45, 4: 45, 3: 57, 'tower': 68}   # by CLASS (the zone id of a second piece of a class gets the height of its class)
 
 
 # THE GRID the user verified for v53 (23 rows x 26 columns, old tiles; 1 valley, 2 plateau NW, 3 plateau SW, 4 plateau N, 5 slope, 6 trail); counts 1: 140, 2: 86, 3: 24, 4: 142, 5: 162, 6: 44. If the recipe gives another one, STOP: the zones are not v53's.

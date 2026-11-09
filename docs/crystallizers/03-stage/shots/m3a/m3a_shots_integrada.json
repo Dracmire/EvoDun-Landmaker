@@ -269,7 +269,7 @@
  },
  "integrada_B_valle_encuadre_sala.png": {
   "terH": 4,
-  "terraces": 6,
+  "terraces": 4,
   "subs": 3,
   "zone": 1,
   "dir": "Hub",
@@ -315,7 +315,7 @@
  },
  "integrada_B_valle_encuadre_heroe.png": {
   "terH": 4,
-  "terraces": 6,
+  "terraces": 4,
   "subs": 3,
   "zone": 1,
   "dir": "Hub",
@@ -361,34 +361,34 @@
  },
  "integrada_B_ruta_valle_talud_mesetaN_encuadre_sala.png": {
   "terH": 4,
-  "terraces": 6,
+  "terraces": 4,
   "subs": 3,
   "zone": 1,
-  "dir": "Z",
-  "yaw": 270,
+  "dir": "Hub",
+  "yaw": 0,
   "planes": {
-   "wall": 18,
-   "cols": 3,
-   "front": 44,
+   "wall": 69,
+   "cols": 1,
+   "front": 19,
    "voidTiles": 0
   },
   "props": {
-   "torches": 21,
-   "pillars": 1,
+   "torches": 7,
+   "pillars": 0,
    "goal": false
   },
   "dropped": {
    "window": [
     1,
-    3,
+    4,
     6
    ],
    "discarded": {
     "1": 12,
-    "3": 60,
-    "6": 256
+    "4": 30,
+    "6": 201
    },
-   "total": 328
+   "total": 243
   },
   "hero": {
    "map": [
@@ -403,34 +403,34 @@
  },
  "integrada_B_ruta_valle_talud_mesetaN_encuadre_heroe.png": {
   "terH": 4,
-  "terraces": 6,
+  "terraces": 4,
   "subs": 3,
   "zone": 1,
-  "dir": "Z",
-  "yaw": 270,
+  "dir": "Hub",
+  "yaw": 0,
   "planes": {
-   "wall": 18,
-   "cols": 3,
-   "front": 44,
+   "wall": 69,
+   "cols": 1,
+   "front": 19,
    "voidTiles": 0
   },
   "props": {
-   "torches": 21,
-   "pillars": 1,
+   "torches": 7,
+   "pillars": 0,
    "goal": false
   },
   "dropped": {
    "window": [
     1,
-    3,
+    4,
     6
    ],
    "discarded": {
     "1": 12,
-    "3": 60,
-    "6": 256
+    "4": 30,
+    "6": 201
    },
-   "total": 328
+   "total": 243
   },
   "hero": {
    "map": [
@@ -445,7 +445,7 @@
  },
  "integrada_B_mesetaN_torre_encuadre_sala.png": {
   "terH": 4,
-  "terraces": 6,
+  "terraces": 4,
   "subs": 3,
   "zone": 6,
   "dir": "Hub",
@@ -457,7 +457,7 @@
    "voidTiles": 0
   },
   "props": {
-   "torches": 10,
+   "torches": 8,
    "pillars": 0,
    "goal": true
   },
@@ -466,9 +466,9 @@
     6
    ],
    "discarded": {
-    "6": 210
+    "6": 201
    },
-   "total": 210
+   "total": 201
   },
   "hero": {
    "map": [
@@ -476,7 +476,7 @@
     7
    ],
    "zoneRaw": 4,
-   "h": 4.88,
+   "h": 4,
    "onTower": false
   },
   "goal": {
@@ -485,13 +485,13 @@
     11
    ],
    "zoneRaw": 4,
-   "h": 6.44,
+   "h": 4.88,
    "onTower": false
   }
  },
  "integrada_B_mesetaN_torre_encuadre_heroe.png": {
   "terH": 4,
-  "terraces": 6,
+  "terraces": 4,
   "subs": 3,
   "zone": 6,
   "dir": "Hub",
@@ -503,7 +503,7 @@
    "voidTiles": 0
   },
   "props": {
-   "torches": 10,
+   "torches": 8,
    "pillars": 0,
    "goal": true
   },
@@ -512,9 +512,9 @@
     6
    ],
    "discarded": {
-    "6": 210
+    "6": 201
    },
-   "total": 210
+   "total": 201
   },
   "hero": {
    "map": [
@@ -522,7 +522,7 @@
     7
    ],
    "zoneRaw": 4,
-   "h": 4.88,
+   "h": 4,
    "onTower": false
   },
   "goal": {
@@ -531,7 +531,7 @@
     11
    ],
    "zoneRaw": 4,
-   "h": 6.44,
+   "h": 4.88,
    "onTower": false
   }
  }

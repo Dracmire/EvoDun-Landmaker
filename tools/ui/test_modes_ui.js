@@ -144,9 +144,21 @@ const PNG = path.join(__dirname, '../../data/samples/skeleton_heightmap_256.png'
     const needPrep = { 't-pocket': 'rooms', 't-backdrop': 'floors' };
     /* NAMED EXEMPTION (S2a): `stageUnits` ("Measures in H") changes WHICH controls are shown (terH and subH leave the plan), not the picture or the info line of the default example, so the "changes the canvas or the info line" rule does not apply to it. What it does is checked here (the plan changes, terH enters / leaves) and by tools/ui/test_stage_ui.js (the units switch). No other control is exempt. */
     const EXEMPT = { stageUnits: async () => { const p0 = await ev(() => window.__terrainIds().includes('terH')); await page.click('#t-stageUnits'); await a.idle(); const p1 = await ev(() => window.__terrainIds().includes('terH')); await page.click('#t-stageUnits'); await a.idle(); return p0 !== p1; } };
+    /* NAMED EXEMPTION (M4c-0): `exag` ("Height exaggeration") multiplies only what the rules put ABOVE the ground (planes wall and columns, volume roofs, objects, props, landmark). At the default example of this harness planes, props, volumes and objects are off, so there is nothing above the ground to exaggerate and the picture rule does not apply. What it does is checked here: with "Planes by room" on, moving exag 1.00 -> 1.50 changes the canvas; the switch and the slider are put back as they were. */
+    const csigE = () => ev(() => [...document.querySelectorAll('#stage canvas')].filter((c) => !c.closest('figure').hidden).map((c) => c.toDataURL('image/png')).join('|'));
+    EXEMPT.exag = async () => {
+      const sl = (v) => ev((v) => { const i = document.querySelector('#s-exag'); i.value = String(v); i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true })); }, v);
+      const on0 = await ev(() => document.querySelector('#t-stagePlanes').checked), v0 = await ev(() => +document.querySelector('#s-exag').value);
+      if (!on0) { await page.click('#t-stagePlanes'); await a.idle(); await page.waitForTimeout(250); }
+      await sl(1); await a.idle(); await page.waitForTimeout(250); const c0 = await csigE();
+      await sl(1.5); await a.idle(); await page.waitForTimeout(250); const c1 = await csigE();
+      await sl(v0); await a.idle(); if (!on0) { await page.click('#t-stagePlanes'); await a.idle(); } await page.waitForTimeout(150);
+      return c0 !== c1;
+    };
+    const EXEMPT_WHY = { stageUnits: "switching it changes the plan's terrain controls (terH enters / leaves)", exag: 'with Planes by room on, moving it 1.00 -> 1.50 changes the canvas (nothing above the ground to exaggerate at the default example)' };
     const exempt = [];
     for (const id of m.main) {
-      if (m.id === 'stage' && EXEMPT[id] && !startDisabled[id]) { ok(`${tag}: ${id} is exempt from the picture rule: switching it changes the plan's terrain controls (terH enters / leaves)`, await EXEMPT[id]()); exempt.push(id); continue; }
+      if (m.id === 'stage' && EXEMPT[id] && !startDisabled[id]) { ok(`${tag}: ${id} is exempt from the picture rule: ${EXEMPT_WHY[id]}`, await EXEMPT[id]()); exempt.push(id); continue; }
       if (m.id === 'stage' && id === 'stageWindow' && !startDisabled[id] && !(await ev(() => document.querySelectorAll('#stageWindow .wrow').length > 1))) { ok(`${tag}: stageWindow (M2c) has no list at the default example: exempt from the picture rule`, true); exempt.push(id); continue; } // M2c commit 1: the list is of zones (PNG, Forest); the rooms of DAC come with commit 2
       if (startDisabled[id]) { skipped.push(id); continue; }
       if (m.id === 'rooms' && (id === 'pocketFraming' || id === 'pocketHeight')) await PREP.rooms(); // the Pocket sliders change nothing until a Diorama room is chosen (with Framing by room type on, Whole map has no pocket drawn): choose room 31 first, as for the Pocket switch

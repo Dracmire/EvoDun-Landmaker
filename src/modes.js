@@ -77,7 +77,7 @@
         { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, tech: 'B', terraces: 3, contract: true }
       ],
       camera: 'stage', cameras: CAMS, tech: 'box', techs: ['box', 'B'], compare: false, compareDefault: false,
-      main: ['contract', 'tilesPerH', 'heroFrac', 'stageUnits', 'stageBorder', 'stageObjects', 'stageVolumes', 'stageOrient', 'stagePlanes', 'stageProps', 'stageFrame', 'stageReset', 'stageFollow', 'stageWindow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
+      main: ['contract', 'tilesPerH', 'heroFrac', 'vScale', 'exag', 'stageUnits', 'stageBorder', 'stageObjects', 'stageVolumes', 'stageOrient', 'stagePlanes', 'stageProps', 'stageFrame', 'stageReset', 'stageFollow', 'stageWindow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {
@@ -223,7 +223,7 @@
     const stg = MODES.find((m) => m.id === 'stage'), base = stg.examples.find((e) => e.id === 'dac_stage');
     stg.examples.push({ id: 'images', label: 'Your images (PNG + roles)', images: true, stageHero: true, stageZones: true, tech: 'box', orient: true, planes: true, props: true, stairs: { style: 0, tread: 1, preferFill: true }, display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }); // M2b: the window of the Stage on the ZONES of a PNG (role `zone`), the levels from the role `elevation`; the loader of the images appears with this example
     const forest = (v, label, terraces, subs) => ({ id: 'forest_' + v.toLowerCase(), label, src: 'forest_' + v.toLowerCase(), stageHero: true, stageZones: true, tech: 'box', orient: true, planes: true, props: true, terraces, subs, stairs: { style: 0, tread: 1, preferFill: true }, display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }); // M3a: Forest, the old map of the game with the zones of v53 (a built-in source: PNGs of docs/crystallizers/03-stage/refs/dq3/forest_plains/annotated/), terraces and sub-terraces per variant
-    stg.examples.push(forest('A', 'Forest A (v53)', 2, 6), forest('B', 'Forest B (amplified relief)', 6, 3));
+    stg.examples.push(forest('A', 'Forest A (v53)', 2, 6), forest('B', 'Forest B (amplified relief)', 4, 3));
     stg.examples.push({ id: 'aurhea', label: "Aurhea's Fountain (old map, water)", src: 'aurhea', stageHero: true, stageZones: true, tech: 'box', orient: true, planes: true, props: true, terraces: 1, subs: 5, stairs: { style: 0, tread: 1, preferFill: true }, display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }); // M3b: the old map with a LAKE (water = pack data, blocked), five zones, the peninsula as the last zone; terraces 1 and sub-terraces 5 (heights measured in tools/test_aurhea_roles.js)
     stg.examples.push(Object.assign({}, base, { id: 'mockt_z14', label: 'Room 14 · orientation (mock T Z)', roomSet: [14], objects: [], volumes: [] }), Object.assign({}, base, { id: 'mockt_x44', label: 'Room 44 · orientation (mock T X)', roomSet: [44], objects: [], volumes: [] }));
   }

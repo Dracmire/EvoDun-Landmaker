@@ -7,7 +7,7 @@
 const fs = require('fs'), path = require('path');
 const { open } = require('./common');
 const BUILTIN = process.argv.includes('--builtin'), ARGS = process.argv.slice(2).filter((x) => !x.startsWith('--')), SRC = process.env.M3A_SRC || path.join(__dirname, '../../docs/crystallizers/03-stage/refs/dq3/forest_plains/annotated'), out = ARGS[0] || path.join(__dirname, '../../docs/crystallizers/03-stage/shots/m3a');
-const VARIANT = { A: { terraces: 2, subs: 6 }, B: { terraces: 6, subs: 3 } };
+const VARIANT = { A: { terraces: 2, subs: 6 }, B: { terraces: 4, subs: 3 } };
 (async () => {
   fs.mkdirSync(out, { recursive: true });
   const a = await open({ w: 1500, h: 900, modes: true, orient: true }), page = a.page, ev = (f, x) => page.evaluate(f, x), idle = () => a.idle(), table = {};

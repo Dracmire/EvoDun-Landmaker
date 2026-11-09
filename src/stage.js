@@ -6,7 +6,9 @@
    HERO: a camera-facing billboard, 1 H tall and 0.4 H wide, drawn from its projected feet upward with the depth scale of its feet, ALWAYS on top (no visibility test: hero occlusion is Unity's). Nothing is exported (README D15). */
 (function (E) {
   const FOV = 30 * Math.PI / 180, TAN = Math.tan(FOV / 2); // the vertical field of view of Cam 6 (src/render.js PERSP_FOV)
-  const DEF = { tilesPerH: 2, heroFrac: 0.14 }, RANGE = { tilesPerH: [1.5, 4, 0.25], heroFrac: [0.08, 0.25, 0.01] };
+  const DEF = { tilesPerH: 2, heroFrac: 0.14, vScale: 1, exag: 1 }, RANGE = { tilesPerH: [1.5, 4, 0.25], heroFrac: [0.08, 0.25, 0.01], vScale: [0.8, 1.6, 0.01], exag: [1, 2, 0.01] };
+  /* M4c-0, HEIGHT EXAGGERATION of the pieces the rules add above the local ground (planes: wall, columns; volumes; objects, props, landmark): a height hH in H becomes hH <= 1 ? hH : hH ** e (e = 1: the identity, continuous at 1 H, monotonic, 3 H -> 3 ** e). Pure. Never applied to terrain, border, the hero or a drop below the ground. */
+  const exag = (hH, e) => (e === undefined || e === 1 || hH <= 1 ? hH : Math.pow(hH, e));
   const HERO_W = 0.4, STEP_H = 0.25; // in H
   /* MEASURES IN H (S2a): with the switch on, the height unit of the shape follows the hero: terH = TERRACE_H x tilesPerH and subH = SUB_RATIO x terH (the proportion of the shape today). TERRACE_H = 2 H is a HYPOTHESIS (the user: a terrace goes from 3 to 6 tiles = 1.5-3 H; the reference has back walls of 2.4 H); S6 calibrates it. A constant, no slider, no manifest key. */
   const TERRACE_H = 2, SUB_RATIO = 0.22;
@@ -131,5 +133,5 @@
   const WIN_MAX = 12;
   function zoneList(pack) { const tb = zoneTable(pack); if (!tb) return null; return tb.order.map((raw, i) => ({ k: i + 1, raw, tiles: tb.cnt.get(raw) || 0, elev: tb.mean[i], adj: [...(tb.adj.get(raw) || [])].map((r) => tb.toK.get(r)).sort((a, b) => a - b) })); }
   function windowCheck(ks, list) { const bad = []; for (let q = 1; q < ks.length; q++) { const a = list[ks[q - 1] - 1]; if (!a || !a.adj.includes(ks[q])) bad.push([ks[q - 1], ks[q]]); } return bad; }
-  E.stage = { zoneTable, buildZones, zoneMap, poiGoal, POI_MIN, zoneList, windowCheck, WIN_MAX, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+  E.stage = { exag, zoneTable, buildZones, zoneMap, poiGoal, POI_MIN, zoneList, windowCheck, WIN_MAX, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
 })(window.EVO = window.EVO || {});

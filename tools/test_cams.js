@@ -57,6 +57,23 @@ for (const persH of [400, 700]) for (const zoom of [1, 2, 5]) {
 }
 { const o = E.makeCam(S, P, Object.assign({ zoom: 1, panX: 0, panY: 0, fitSc: 0 }, BANK.oblique), 1000, 700);
   ok('orthographic cameras ignore the face position (the original culling)', o.nrm(1, 0, 3, 4)[1] === o.nrm(1, 0)[1] && o.nrm(0, 1, 3, 4)[1] === o.nrm(0, 1)[1]); }
+{ // M4c-0: the optional vertical scale of Cam 6: the inverse stays exact, the pivot does not move, vScale 1 / absent is the camera of today, the screen height of a point above the pivot grows with it
+  const base = Object.assign({ zoom: 2, panX: 7, panY: -3, fitSc: 6, persH: 700 }, BANK.stage), c0 = E.makeCam(S, P, base, 1000, 700);
+  const hF = c0.pivot[2]; let worst = 0, n = 0, same = 0, m = 0;
+  for (const vs of [0.8, 1.15, 1.6]) {
+    const cam = E.makeCam(S, P, Object.assign({}, base, { vScale: vs }), 1000, 700);
+    for (let i = 0; i < 300; i++) { const x = rnd() * S.W, y = rnd() * S.H, h = rnd() * 6; if (cam.D - cam.depth(x, y, h) < 0.2 * cam.D) continue; const [px, py] = cam.p(x, y, h), [gx, gy] = cam.unp(px, py, h); worst = Math.max(worst, Math.hypot(gx - x, gy - y)); n++; }
+    const pv = cam.p(cam.pivot[0], cam.pivot[1], hF), pc = c0.p(c0.pivot[0], c0.pivot[1], hF); ok(`Cam 6 vScale ${vs}: the pivot does not move (${Math.hypot(pv[0] - pc[0], pv[1] - pc[1]).toExponential(1)} px)`, Math.hypot(pv[0] - pc[0], pv[1] - pc[1]) < 1e-9);
+    ok(`Cam 6 vScale ${vs}: cam.vScale is exposed`, cam.vScale === vs);
+    const x = cam.pivot[0] + 3, y = cam.pivot[1] + 2, a = cam.p(x, y, hF + 1.7), b = c0.p(x, y, hF + 1.7 * vs); ok(`Cam 6 vScale ${vs}: a point ${1.7} above the pivot height projects where the camera of today puts the point ${(1.7 * vs).toFixed(3)} above it (exact: heights about the pivot are multiplied)`, Math.abs(a[0] - b[0]) < 1e-9 && Math.abs(a[1] - b[1]) < 1e-9);
+    const pf = cam.panFor(x + 5, y + 4, hF + 2); const cm = E.makeCam(S, P, Object.assign({}, base, { vScale: vs, panX: pf[0], panY: pf[1] }), 1000, 700), q = cm.p(x + 5, y + 4, hF + 2); ok(`Cam 6 vScale ${vs}: panFor still brings a raised point to the centre (${Math.hypot(q[0] - 500, q[1] - 350).toExponential(1)} px)`, Math.hypot(q[0] - 500, q[1] - 350) < 1e-6);
+  }
+  ok(`Cam 6 vScale: unp(p(x, y, h), h) = (x, y) for 0.8 / 1.15 / 1.6 (${n} points, worst ${worst.toExponential(1)})`, n > 300 && worst < 1e-9, worst);
+  const c1 = E.makeCam(S, P, Object.assign({}, base, { vScale: 1 }), 1000, 700), cu = E.makeCam(S, P, Object.assign({}, base, { vScale: undefined }), 1000, 700);
+  for (let i = 0; i < 200; i++) { const x = rnd() * S.W, y = rnd() * S.H, h = rnd() * 6, A = c0.p(x, y, h), B = c1.p(x, y, h), C = cu.p(x, y, h); if (A[0] === B[0] && A[1] === B[1] && A[0] === C[0] && A[1] === C[1]) same++; m++; }
+  ok(`Cam 6: vScale 1 and undefined are the camera of today, bit for bit (${same} of ${m} points)`, same === m);
+  ok('E.fitScale ignores vScale', E.fitScale(S, P, Object.assign({}, base, { vScale: 1.5 }), 1000, 700) === E.fitScale(S, P, base, 1000, 700));
+}
 { const V = { camera: 'stage', terraces: 4 }, m = E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: V });
   ok('manifest viewer.camera takes the bank ids', m.viewer.camera === 'stage' && ['isoE', 'isoW', 'oblique', 'low', 'top', 'stage', 'classic'].every((id) => E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { camera: id } }).viewer.camera === id));
   let bad = 0; for (const c of ['iso', 'Cam 6', 6, 'A']) { try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { camera: c } }); } catch (e) { bad++; } }

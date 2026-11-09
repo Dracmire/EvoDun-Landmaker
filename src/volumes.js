@@ -23,7 +23,7 @@
     list.forEach((v, k) => {
       const x0 = Math.floor(v.x - S.ox), y0 = Math.floor(v.y - S.oy), w = Math.max(1, Math.floor(v.w)), d = Math.max(1, Math.floor(v.d));
       const cx = Math.min(W - 1, Math.max(0, x0 + (w >> 1))), cy = Math.min(H - 1, Math.max(0, y0 + (d >> 1))), src = near[cy * W + cx];
-      const datum = S.levelH[S.fine[src]], hg = tm.noGrid ? v.hH : Math.floor(v.hH / GRID + 1e-9) * GRID, roof = datum + hg * (tm.tilesNotH ? 1 : tph);
+      const datum = S.levelH[S.fine[src]], hx = opts.exag > 1 ? E.stage.exag(v.hH, opts.exag) : v.hH, /* M4c-0: no exaggeration = no dependency on stage.js */ hg = tm.noGrid ? hx : Math.floor(hx / GRID + 1e-9) * GRID, roof = datum + hg * (tm.tilesNotH ? 1 : tph);
       const info = { k, datum, roof, hGrid: hg, tiles: 0, skipped: 0 }; vols.push(info);
       const meta = { ter: S.levelMeta[S.fine[src]].ter, sub: 0, bridge: false, deco: true, vol: true };
       for (let y = y0; y < y0 + d; y++) for (let x = x0; x < x0 + w; x++) {
@@ -41,7 +41,7 @@
     });
     if (tm.touchFootprint) for (const i of fp) if (i % 7 === 0) moves.set(i, { h: S.levelH[S.fine[i]] + 0.5, meta: { ter: S.ter[i], sub: 0, bridge: false, deco: true } }); // (MUTATION touchFootprint: a footprint tile moved)
     const before = S.levelH.length, added = moves.size ? E.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
-    return (S.stageVolumes = { list: list.map((v) => Object.assign({}, v)), tilesPerH: tph, grid: GRID, volumes: vols, tiles, skipped, levelsBefore: before, levelsAdded: added });
+    return (S.stageVolumes = { list: list.map((v) => Object.assign({}, v)), tilesPerH: tph, exag: opts.exag === undefined ? 1 : opts.exag, grid: GRID, volumes: vols, tiles, skipped, levelsBefore: before, levelsAdded: added });
   }
   E.volumes = { GRID, MARGIN, apply };
 })(window.EVO = window.EVO || {});
