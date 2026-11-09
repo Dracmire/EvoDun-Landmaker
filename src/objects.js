@@ -5,6 +5,7 @@
    (A segment that is vertical in the 3D projection is about 8 % shorter than the hero sprite at pitch 25 degrees: the volumes of S4b are real geometry and follow that projection; the billboards do not.) The pack's `h` is NOT read: in data/shrine_pier_x4.json it is the terrain elevation of the landmark platform (tools/derive_shrine_pier_x4.py), not an object height.
    BASE = the ground of the tile under (x, y) (E.stage.feetH). VISIBILITY = the Box pick render, like the contract (`ownGround`): an object whose base is not on its own tile in the image (a higher terrain in front, or outside the panel) is not drawn.
    ORDER = ONE depth-sorted list with the hero (cam.ry, larger = nearer the camera): an object nearer than the hero is painted over it; the hero no longer comes last when the objects are on. Tall objects may leave the panel at the top: expected (a cut silhouette).
+   M4c-1 (golden shot 1), two OPTIONAL fields of an entry, absent = the behaviour of before byte for byte: `wH` (the width in H that replaces the one of the kind: a wide `shrub` = a mass of foliage, a narrow `pillar` = a trunk, a `landmark` of 6-7 H = a facade) and `always: true` (the piece is drawn although its base is not on its own tile in the image or is OUTSIDE the panel: the foreground occluders have their base under the bottom edge; the tile of the base must exist in the window). `E.objects.groundTest` is the visibility test (the pick render) shared with src/frame.js.
    Test hooks (`E.objectsTest`, tests only, undefined in normal use): constSize, constStroke, tilesNotH, ignoreHidden, heroAlwaysTop; S4c: noDistance, hardStep, detailAlways, detailNever, pieceIgnoreHidden. */
 (function (E) {
   'use strict';
@@ -51,12 +52,17 @@
   }
 
   /* draw the objects and the hero in one depth order. Returns nothing; the per-object figures go to o.objects.stats (tests and the readout). */
+  /* groundTest(S, P, view, w, h, o) -> { code, ownGround }: the visibility test of S4a (the Box pick render), ONE render per frame (cached on `o` by the view object of the frame, shared by src/frame.js and draw). ownGround(p, i): a cap (kind 4) or a ramp (kind 3) of tile i at the point p or one pixel around it. */
+  function groundTest(S, P, view, w, h, o) {
+    const c = o.__pickD, D = (c && c.S === S && c.view === view && c.w === w && c.h === h) ? c.data : (o.__pickD = { S, view, w, h, data: E.pickBuffer(S, P, view, w, h).data }).data; // one render per frame: the cache is keyed by the view OBJECT of the frame (a new one every frame)
+    const code = (px, py) => { const x = Math.round(px), y = Math.round(py); if (!D || x < 0 || y < 0 || x >= w || y >= h) return -1; const q = (y * w + x) * 4; return D[q + 3] === 255 ? (D[q] << 16) | (D[q + 1] << 8) | D[q + 2] : -1; };
+    const ownGround = (p, i) => { for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = code(p[0] + dx, p[1] + dy); if (k === ((4 << 20) | i) || k === ((3 << 20) | i)) return true; } return false; };
+    return { code, ownGround };
+  }
   function draw(ctx, cam, S, P, tech, view, o, w, h) {
     const list = (o.objects && o.objects.list) || [], tp = o.objects.tilesPerH, t = T(), stats = [], items = [];
-    const wantPick = list.length > 0 && !t.ignoreHidden; let D = null;
-    const code = (px, py) => { const x = Math.round(px), y = Math.round(py); if (!D || x < 0 || y < 0 || x >= w || y >= h) return -1; const q = (y * w + x) * 4; return D[q + 3] === 255 ? (D[q] << 16) | (D[q + 1] << 8) | D[q + 2] : -1; };
-    const ownGround = (p, i) => { for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = code(p[0] + dx, p[1] + dy); if (k === ((4 << 20) | i) || k === ((3 << 20) | i)) return true; } return false; }; // a cap (kind 4) or a ramp (kind 3) of the tile at the point or one pixel around it
-    if (wantPick) D = E.pickBuffer(S, P, view, w, h).data;
+    const wantPick = list.length > 0 && !t.ignoreHidden; let ownGround = () => false;
+    if (wantPick) ownGround = groundTest(S, P, view, w, h, o).ownGround;
     for (const ob of list) {
       const kd = KINDS[ob.kind]; if (!kd) continue;
       const x = ob.x - S.ox, y = ob.y - S.oy, i = E.stage.cellOf(S, x, y), st = { kind: ob.kind, hH: ob.hH, x: ob.x, y: ob.y, tile: i, drawn: false, visible: false };
@@ -68,8 +74,8 @@
         Object.assign(st, { hH, d, lm: lp });
       }
       if (ex !== undefined && ex !== 1) { hH = E.stage.exag(hH, ex); st.hH = hH; }
-      const feet = E.stage.feetH(S, i), b = cam.p(x, y, feet), sz = sizeAt(cam, tp, hH, kd.wH, x, y, feet); sz.hH = hH;
-      st.visible = t.ignoreHidden ? true : ownGround(b, i); Object.assign(st, { hpx: sz.hpx, wpx: sz.wpx, k: sz.k, lw: sz.lw, font: sz.font, base: b, ry: cam.ry(x, y) });
+      const feet = E.stage.feetH(S, i), b = cam.p(x, y, feet), sz = sizeAt(cam, tp, hH, ob.wH > 0 ? ob.wH : kd.wH, x, y, feet); sz.hH = hH;
+      st.visible = t.ignoreHidden || ob.always === true ? true : ownGround(b, i); Object.assign(st, { hpx: sz.hpx, wpx: sz.wpx, k: sz.k, lw: sz.lw, font: sz.font, base: b, ry: cam.ry(x, y) });
       if (!st.visible) continue;
       items.push({ ry: st.ry, st, paint: () => { shape(ctx, ob.kind, b, sz); st.drawn = true; } });
       if (lp) { // the base detail: alpha from the distance, the three pieces drawn with the hero's convention at the depth of their own feet
@@ -88,5 +94,5 @@
     o.objects.stats = stats;
   }
 
-  E.objects = { KINDS, KIND_NAMES, LW0, FONT0, LANDMARK, DETAIL, landmarkH, baseAlpha, landmarkParams, sizeAt, draw };
+  E.objects = { KINDS, KIND_NAMES, LW0, FONT0, LANDMARK, DETAIL, landmarkH, baseAlpha, landmarkParams, sizeAt, groundTest, draw };
 })(window.EVO = window.EVO || {});

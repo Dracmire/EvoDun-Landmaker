@@ -50,5 +50,24 @@ const orderCheck = (opts) => { const w = 1220, h = 767, tp = 2, hi = Math.floor(
   return { hero, near, far, stats: o.objects.stats, nearerOverHero: near.length > 0 && hero.length > 0 && Math.min(...near) > Math.max(...hero), fartherUnderHero: far.length > 0 && Math.max(...far) < Math.min(...hero) }; };
 { const r = orderCheck(); ok('ONE depth order with the hero: the object nearer than the hero (pillar) is painted AFTER it, the farther one (shrub) BEFORE it', r.nearerOverHero && r.fartherUnderHero, { hero: r.hero, near: r.near, far: r.far }); }
 { const r = orderCheck({ heroAlwaysTop: true }); ok('MUTATION heroAlwaysTop (the hero last, as before S4a): the nearer-object check FAILS', !r.nearerOverHero); }
+// 4. M4c-1: the optional `wH` (width in H that replaces the kind's) and `always` (drawn although the base is not on its own tile in the image, also outside the panel); absent = as before
+{ const w = 1220, h = 767, tp = 2, hi = Math.floor(hy) * W + Math.floor(hx), feet = SG.feetH(S0, hi), cam = camFor(w, h, tp, 0.14, hx, hy, feet), view = { kind: 'persp', yaw: 0, pitch: 25, zoom: 1, panX: 0, panY: 0, fitSc: 1, persH: h, focus: [hx, hy, feet + tp / 2] };
+  const run = (list, opts) => { const ctx = mkctx(); E.objectsTest = opts || null; const o = { objects: { list, tilesPerH: tp } }; OB.draw(ctx, cam, S0, P, 'box', view, o, w, h); E.objectsTest = null; return { st: o.objects.stats, log: ctx.log }; };
+  const base = { kind: 'shrub', x: hx + S0.ox, y: hy + 1 + S0.oy, hH: 2 };
+  const a = run([base], { ignoreHidden: true }), b = run([Object.assign({}, base, { wH: 3 })], { ignoreHidden: true }), c = run([Object.assign({}, base, { wH: undefined, always: false })], { ignoreHidden: true });
+  const k = a.st[0].k, unit = tp * cam.sc * k;
+  ok(`wH replaces the width of the kind: a shrub of wH 3 is ${(b.st[0].wpx / unit).toFixed(3)} H wide (3), the kind's own is ${(a.st[0].wpx / unit).toFixed(3)} H (0.9); the height is untouched`, Math.abs(b.st[0].wpx / unit - 3) < 1e-9 && Math.abs(a.st[0].wpx / unit - 0.9) < 1e-9 && b.st[0].hpx === a.st[0].hpx, [a.st[0], b.st[0]]);
+  ok('absent fields (wH undefined, always false) = the entry of before, byte for byte (same figures and same paint calls)', JSON.stringify(c.st) === JSON.stringify(a.st) && JSON.stringify(c.log) === JSON.stringify(a.log));
+  // the visibility test with an EMPTY pick render (nothing is a tile of its own in the image): without `always` the piece is dropped, with it drawn; a base under the bottom edge too; a tile outside the window is still skipped
+  const pb = E.pickBuffer; E.pickBuffer = () => ({ data: new Uint8ClampedArray(w * h * 4) });
+  const nope = run([base]), yes = run([Object.assign({}, base, { always: true })]);
+  const outside = run([{ kind: 'shrub', x: -50, y: -50, hH: 2, always: true }]);
+  E.pickBuffer = pb;
+  ok('without `always` a piece whose base is not on its own tile in the image is not drawn; with `always: true` it is drawn', !nope.st[0].visible && !nope.st[0].drawn && yes.st[0].visible && yes.st[0].drawn, [nope.st[0], yes.st[0]]);
+  { const e = { kind: 'banner', x: hx + S0.ox, y: S0.H - 1 + S0.oy, hH: 2, always: true };
+    E.pickBuffer = () => ({ data: new Uint8ClampedArray(w * h * 4) }); const r = run([e]); E.pickBuffer = pb;
+    ok(`an always-piece with its base at y = ${r.st[0].base[1].toFixed(0)} px (panel height ${h}) is drawn (a foreground occluder with the base outside the panel)`, r.st[0].base[1] > h && r.st[0].drawn, r.st[0]); }
+  ok('a tile outside the window is skipped even with `always` (cellOf < 0)', !outside.st[0].drawn && outside.st[0].tile < 0);
+}
 // (the visibility test = the Box pick render needs a canvas: it is checked in tools/ui/test_stage_objects_ui.js, with its mutation ignoreHidden)
 console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);

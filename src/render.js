@@ -824,6 +824,7 @@
     if (o.markers) drawMarkers(ctx, cam, S, P);
     if (o.incursion) drawIncursion(ctx, cam, S, o.incursion);
     if (o.contract && E.contract) S.contractInfo = Object.assign(S.contractInfo || {}, { [tech]: E.contract.draw(ctx, cam, S, P, tech, view, o, w, h) }); // art contract placeholders (switch off = nothing here)
+    if (o.frame && E.frame) E.frame.draw(ctx, cam, S, P, tech, view, o, w, h); // M4c-1: the declared ribbon (G layer of a golden shot), before the billboards (absent = nothing)
     if (o.objects && E.objects) E.objects.draw(ctx, cam, S, P, tech, view, o, w, h); // S4a: the declared billboards and the hero in ONE depth order (switch off = o.objects absent = the line below, as before)
     else if (o.hero && E.stage) E.stage.drawHero(ctx, cam, o.hero); // the Stage hero (mode 3, src/stage.js): the last thing drawn, always on top (no visibility test: hero occlusion is Unity's)
   }
