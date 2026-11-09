@@ -59,6 +59,16 @@ Nota v165 (división de M3, [U] 04:18): [U] aceptó la opción A («hagámoslo p
 
 Nota v166: #76 (signo canónico del eje degenerado, `stage-m3-canon`) entregado y revisado: el corte del signo se mueve de 0° a −11,5°, no desaparece (documentado como fragilidad). Paso 0 de M2c revisado; pedido de construcción M2c = lista propia «Window» (zonas de PNG y Forest en el commit 1, salas de DAC en el 2), `WIN_MAX` 12, aviso de no vecinas, ventana de M5 con ids crudos. M3b (Aurhea) es lo siguiente del núcleo.
 
+Nota v167: M2c entregado como #78 (lista «Window», dos commits) y revisado; #76 y #77 ya mergeados. Sigue el Paso 0 de M3b (Aurhea: el agua como dato del pack y un clasificador de color genérico, que es la semilla de M6); M2d (retirar las listas a mano, y la excepción muerta de `test_modes_ui`) y la pasada completa de cierre de M2 quedan después de M3b [R, orden propuesto: el núcleo antes que la comodidad; [U] puede vetarlo].
+
+Nota v168: #78 (M2c) mergeado. Paso 0 de M3b revisado: el agua entra como dato del pack (`masks.water`) sin tocar «Your images»; el clasificador de color de Aurhea APRENDE la rejilla del mapa (23 × 21 tiles enteros) y es la semilla de M6; pedido de construcción M3b en dos commits (datos + script; fuente integrada + ejemplo) con una parada para medir `planes` con agua antes de escribir ninguna regla. La regla del agua (si hace falta) sería un commit 3 pedido aparte.
+
+Nota v170: M3b entregado como #79 (datos y script, fuente integrada y ejemplo, capturas) y revisado: 22 hashes con 0 diferencias, `src/` +12 líneas, `stage.js` y las reglas intactos. Alturas aceptadas como hipótesis (0 / 0,31 / 0,92 H; 1,5 H exactos piden `pre` / `subH` / `terH` como claves del ejemplo, se decide en M4). Hallazgo: con el agua elegible, `planes` levanta muros y pilares de 3 H dentro del lago; commit 3 pedido: el agua nunca se clasifica en `planes` (probado en copia: lago limpio, hashes iguales). #79 se mergea tras el commit 3. M6: el pre-suavizado se come una península de 2 px, a tener en cuenta en el relieve automático.
+
+Nota v171: commit 3 de M3b revisado (el agua nunca se clasifica en `planes`; 22 hashes con 0 diferencias; capturas iguales a las de mi prototipo) y #79 MERGEADO por [U] (main 94b673b): M3 cerrado. Sigue M4 (toma emparejada): Paso 0 de solo informe con las lecturas M1 / M3a / M4 / M5a / M5b / M8b de v85 y v89, tres pares (Aurhea ↔ `pond_peninsula`; Forest A / B contra sus capturas, donde se elige A o B; dos salas de DAC contra bandas) y una herramienta mínima (función pura de lecturas + script de captura, sin panel). M2d y la pasada completa de cierre de M2 quedan después de M4.
+
+Nota v172: Paso 0 de M4 revisado. Hallazgo: la foto del estanque está ≈ 3,3 veces a mayor escala en héroes que el mapa viejo a ×2 (M5b 1,1 H contra 3,6 H; M8b 0,5 H contra 1,7 H): lectura M5d (K). M4 se parte: M4a (herramienta de lecturas `tools/stage_readings.js` + `tools/ui/m4_pair.js`, sin tocar `src/`; tres pares: Aurhea con dos tomas y salas de DAC 14, 44 y 31 contra bandas; Forest fuera hasta que [U] ubique las capturas) y M4b (escala K del script de datos, solo si la tabla la sostiene; podría arreglar M5b, M8b y quizá M3a). Las composiciones con la foto no se suben al repo.
+
 Datos: ya están en el repo (v151). M2 no los necesita y puede ir en paralelo a M0.
 
 ## 3b. Material de referencia en el repo [U] 14:29
