@@ -67,6 +67,8 @@ Nota v170: M3b entregado como #79 (datos y script, fuente integrada y ejemplo, c
 
 Nota v171: commit 3 de M3b revisado (el agua nunca se clasifica en `planes`; 22 hashes con 0 diferencias; capturas iguales a las de mi prototipo) y #79 MERGEADO por [U] (main 94b673b): M3 cerrado. Sigue M4 (toma emparejada): Paso 0 de solo informe con las lecturas M1 / M3a / M4 / M5a / M5b / M8b de v85 y v89, tres pares (Aurhea ↔ `pond_peninsula`; Forest A / B contra sus capturas, donde se elige A o B; dos salas de DAC contra bandas) y una herramienta mínima (función pura de lecturas + script de captura, sin panel). M2d y la pasada completa de cierre de M2 quedan después de M4.
 
+Nota v172: Paso 0 de M4 revisado. Hallazgo: la foto del estanque está ≈ 3,3 veces a mayor escala en héroes que el mapa viejo a ×2 (M5b 1,1 H contra 3,6 H; M8b 0,5 H contra 1,7 H): lectura M5d (K). M4 se parte: M4a (herramienta de lecturas `tools/stage_readings.js` + `tools/ui/m4_pair.js`, sin tocar `src/`; tres pares: Aurhea con dos tomas y salas de DAC 14, 44 y 31 contra bandas; Forest fuera hasta que [U] ubique las capturas) y M4b (escala K del script de datos, solo si la tabla la sostiene; podría arreglar M5b, M8b y quizá M3a). Las composiciones con la foto no se suben al repo.
+
 Datos: ya están en el repo (v151). M2 no los necesita y puede ir en paralelo a M0.
 
 ## 3b. Material de referencia en el repo [U] 14:29
