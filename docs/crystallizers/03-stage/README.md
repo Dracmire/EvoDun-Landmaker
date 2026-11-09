@@ -361,6 +361,8 @@ Second of three PRs of the CORE of the "mock T" plan: features 2 (planes), 3 (cl
 - A crossing between rooms rebuilds the shape each time (a cut); caching one shape per room would remove the wait.
 - The classification ring (R 8) and the bands are Chebyshev squares around the footprint; a diagonal room (14) gets a stepped wall.
 
+- **M3b: the water is never classified.** A tile of `S.water` (pack data) is left out of BACK, SIDE and FRONT (no wall, no column, no lowering; `counts.water`); no water in the pack = nothing changes. Hook `E.planesTest.waterEligible` = the behaviour of before.
+
 ### C3 as built: props by room (`src/props.js`; switch "Props by room" in mode 3 with a window; `node tools/test_props.js`, `tools/ui/test_stage_props_ui.js`, `tools/ui/c3_shots.js`)
 Third PR of the CORE of the "mock T" plan: features 4 (torches along the axis) and 5 (the goal at the back). BILLBOARDS ONLY (the objects of S4a / S4c): the shape `S` is never rebuilt for them, no terrain height changes. Generated for the current room (the hero's) with the yaw of C1, redone when the hero crosses.
 - **Path:** the walkable route (BFS over the room's tiles of the walking graph, in the largest connected piece of the room) from a START to an END. Room with an entry AND an exit gate: from the room tile nearest the entry gate to the one nearest the exit gate. First / last room and a window of one room: from the end nearest the camera (smallest view depth, nearest the middle across) to the goal tile.
@@ -442,6 +444,18 @@ Judge: by FEATURES (orientation, planes, closing wall, frame, goal), not by an i
 - The hero starts on the walkable tile nearest the centroid of the zone, which in the plateau N window is the foot of a ramp up to the mass of the tower (a ledge at 1.33 H in A, 4.88 H in B, outside the tower box).
 - A PNG zone whose neighbours are all walkable terrain gets no closing planes (C2 classifies only non-walkable tiles): the route window shows wall 0 / columns 0; and no goal unless the zone is the LAST of the window (C3, `o.last`).
 - Trees as volumes or billboards; a role for blocked terrain (after M4, if needed).
+
+### M3b as built: Aurhea's Fountain, an old map with a lake (example "Aurhea's Fountain (old map, water)" of mode 3; `refs/dq3/aurheas_fountain/derived/` (`derive_roles.py`, README there), `node tools/test_aurhea_roles.js`, `tools/ui/test_aurhea_ui.js`; step M3b of `MVP.md`)
+
+- **Data.** The script reads only the map crop (384 x 352 px) of `old/aurheas_fountain.png`; the 16 px grid is LEARNED (distinct blocks: (0, 0) 0.161 against a median of 0.478; (8, 14) from the lake contour alone is wrong), 24 x 22 tiles; water 75 old tiles (300 px at x2); five zones (south meadow 768 px, west 256, east 292, north 480, peninsula 16); POI at the tip of the peninsula (viewer tile (22, 20)).
+- **Water.** It is pack data: `aurheaPack` sets `pack.masks.water`; `S.water` and `S.block` hold all 300 tiles, none is void (elevation 20 grey > 0). Nothing in the window rules was changed for it (R7).
+- **Heights.** Measured, one variant (terraces 1, sub-terraces 5): water 0 H, all land 0.308 H, peninsula 0.923 H. The plan 0 / 1 / 1.5 H cannot be reached (README of the derived folder).
+- **Order of the table** (hypothesis [R], BFS from the lowest mean): k = 1 south, 2 west, 3 east, 4 peninsula, 5 north. Footprint: no tile of any zone is dropped in any window. Planes and the water: the water is NEVER classified in `planes` (commit 3). Measured before the rule (water eligible): [peninsula] with the hero on it (yaw 0) a 4-tile wall at 3.92 H in the lake at the tip plus 6 columns of 3.31-3.92 H in the water, 3 levels added; with the rule: wall 0, columns 2 (on the shores), 1 level added, 0 water tiles moved (`tools/test_aurhea_planes.js`, `tools/ui/m3b_shots.js`).
+- **Heights, why not 0 / 1 / 1.5 H.** The pre-smoothing eats shapes of 1 old tile (the peninsula is 2 px at x2): a variant with land grey 40 and no `elevRange` gives 0 / 0.92 / 1.23 H but lowers the 2 px of the tip to the water level (the footprint drops 2 of 16 tiles and the POI falls outside), so it was discarded. 1.5 H exactly is not reachable in one terrace with `terH` 4, `subH` 0.88 and `climb` 2 (the step is 0.267 to 0.44 H). The levers (`pre` 0, `subH`, `terH` as example keys) are additive shared code, decided in M4 if the photo asks. Lesson for M6: shapes of one old tile do not survive the pre-smoothing.
+
+#### Para polish (found in M3b, not fixed here)
+- Touching the terraces slider in this example jumps to 2 or more (its minimum) and changes the calibrated heights (the example sets `terraces` 1 through `P`, the slider cannot show it).
+- The dark band at the top of the view is the wedge outside the cut of the window (framing and background, M4).
 
 ## 9. Known limits and open questions
 

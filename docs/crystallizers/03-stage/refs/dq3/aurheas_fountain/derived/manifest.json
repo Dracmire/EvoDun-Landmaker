@@ -1,0 +1,30 @@
+{
+ "format": "evodun-pack/0.2",
+ "name": "Aurhea's Fountain (old map)",
+ "flipY": false,
+ "maxnode": 5,
+ "roles": {
+  "elevation": {
+   "image": "height.png",
+   "channel": "V"
+  },
+  "zone": {
+   "image": "zones.png",
+   "channel": "H"
+  },
+  "path": {
+   "image": "path.png",
+   "channel": "V"
+  },
+  "poi": {
+   "image": "poi.png",
+   "channel": "V"
+  }
+ },
+ "water": {
+  "image": "water.png",
+  "channel": "V",
+  "note": "not a role: the built-in source sets pack.masks.water from it"
+ },
+ "markers": []
+}

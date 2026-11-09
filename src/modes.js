@@ -7,7 +7,7 @@
 (function (E) {
   const CAMS = ['isoE', 'isoW', 'oblique', 'low', 'top', 'stage', 'classic'];
   /* the built-in sources an example may name (the ids of the source selector; 'image' = the user's images) */
-  const SOURCES = ['snake_surface', 'snake', 'shrine_pier', 'shrine_pier_x4', 'noise', 'real_map', 'snake_floors', 'snake_macroform', 'forest_a', 'forest_b', 'image'];
+  const SOURCES = ['snake_surface', 'snake', 'shrine_pier', 'shrine_pier_x4', 'noise', 'real_map', 'snake_floors', 'snake_macroform', 'forest_a', 'forest_b', 'aurhea', 'image'];
   const TERRAIN_MAIN = ['terraces', 'subs', 'terH', 'spread', 'stairW', 'stairStyle', 'rampDepth', 'smooth', 'radius'];
   const SHARED = ['outlines', 'gradient', 'rampLines', 'dress', 'sliced'], OVERLAYS = ['features', 'markers', 'zones', 'edges', 'masks', 'veil', 'border'], DIAGNOSTICS = ['regions', 'passes', 'edgeWarn'];
   /* controls that are not tied to a mode */
@@ -224,6 +224,7 @@
     stg.examples.push({ id: 'images', label: 'Your images (PNG + roles)', images: true, stageHero: true, stageZones: true, tech: 'box', orient: true, planes: true, props: true, stairs: { style: 0, tread: 1, preferFill: true }, display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }); // M2b: the window of the Stage on the ZONES of a PNG (role `zone`), the levels from the role `elevation`; the loader of the images appears with this example
     const forest = (v, label, terraces, subs) => ({ id: 'forest_' + v.toLowerCase(), label, src: 'forest_' + v.toLowerCase(), stageHero: true, stageZones: true, tech: 'box', orient: true, planes: true, props: true, terraces, subs, stairs: { style: 0, tread: 1, preferFill: true }, display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }); // M3a: Forest, the old map of the game with the zones of v53 (a built-in source: PNGs of docs/crystallizers/03-stage/refs/dq3/forest_plains/annotated/), terraces and sub-terraces per variant
     stg.examples.push(forest('A', 'Forest A (v53)', 2, 6), forest('B', 'Forest B (amplified relief)', 6, 3));
+    stg.examples.push({ id: 'aurhea', label: "Aurhea's Fountain (old map, water)", src: 'aurhea', stageHero: true, stageZones: true, tech: 'box', orient: true, planes: true, props: true, terraces: 1, subs: 5, stairs: { style: 0, tread: 1, preferFill: true }, display: { roomBorders: false, nowalk: false, gateMarks: false, rampLines: false, veil: false, border: false, markers: false, edgeWarn: false } }); // M3b: the old map with a LAKE (water = pack data, blocked), five zones, the peninsula as the last zone; terraces 1 and sub-terraces 5 (heights measured in tools/test_aurhea_roles.js)
     stg.examples.push(Object.assign({}, base, { id: 'mockt_z14', label: 'Room 14 · orientation (mock T Z)', roomSet: [14], objects: [], volumes: [] }), Object.assign({}, base, { id: 'mockt_x44', label: 'Room 44 · orientation (mock T X)', roomSet: [44], objects: [], volumes: [] }));
   }
   E.modes = { PROTOS, MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };
