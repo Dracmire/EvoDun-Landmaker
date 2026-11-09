@@ -1,0 +1,14 @@
+{
+ "_about": "Readings of the remake photo refs/dq3/remake/r_20261030_050039_pond_peninsula.png (pond and peninsula, the pair of Aurhea's Fountain). NUMBERS ONLY: no image, no crop of the photo is stored anywhere. Measured by script on luminance and colour thresholds and by eye on an 8x enlargement; the photo is a PICTURE OF A SCREEN (blurred, tilted, cropped on the right), so every number has a tolerance. Panel = the game area of the photo (rows 50-319, columns 7-461, 270 rows). The hero is the leader of the party (the head of the column, the farthest one).",
+ "photo": "r_20261030_050039_pond_peninsula.png (462 x 327)",
+ "gameArea": { "rows": [50, 319], "cols": [7, 461], "note": "cropped on the right: DQ3 is 16:9 (480 x 270 would be the full width), so fractions of the width use fx 0.50 [R]" },
+ "heroPx": { "height": 36.5, "tol": 3, "how": "leader: head top at row ~190, robe ends at row ~227, feet hidden by the next character (0 to +3 px); 8x enlargement" },
+ "M5a": { "value": 0.14, "tol": 0.01, "how": "36.5 / 270 = 0.135, + up to 3 px of hidden feet: 0.135-0.146" },
+ "fx": { "value": 0.50, "tol": 0.03, "how": "leader centre at column 245.6: (245.6 - 7) / 454 = 0.526 of the cropped width, 0.497 of a 480 px (16:9) width; 0.50 taken [R]" },
+ "fy": { "value": 0.59, "tol": 0.02, "how": "centre of the leader (head 190 to feet ~229): row ~210; (210 - 50) / 270. Head 0.52, feet ~0.66" },
+ "M5b": { "value": 3.6, "tol": 0.4, "how": "width of the peninsula in H at the leader's feet row (228): water edges at columns 175 and 306 = 131 px; / 36.5 px of hero height. 3.0 H at the middle of the hero, 3.9 H at row 240" },
+ "M8b": { "value": 1.7, "tol": 0.3, "feet": 2.7, "how": "far edge of the water (first water row at the hero's column = row 128) above the hero's head (row 190): (190 - 128) / 36.5. The rock border of the far shore is at row ~112: 2.2 H (head) / 3.2 H (feet)" },
+ "M1": { "walkable": 1, "distinctHeights": 3, "how": "by eye: water, the mound, the far bank; one walkable level in the frame" },
+ "M3a": { "closed": true, "how": "grass up to the top of the frame, no sky and no void" },
+ "M4": { "inFrame": null, "how": "N/A: no landmark in the photo; the goal of the place is where the party stands" }
+}
