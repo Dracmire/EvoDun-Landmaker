@@ -6,8 +6,9 @@
      M8b  the row of the FAR EDGE of the ground beyond the hero: going away from the camera along the hero's column, the first non-walkable tile and then the first GROUND tile (not water, not void; the tiles outside the slice count as ground) after it = the far shore; its near edge projected at its own height. In H above the hero's head (head) and above his feet (feet), measured with the hero's px height. With no gap: the last walkable point (gap = 0).
      M3a  the BACKGROUND IS CLOSED: the far edge of the window grid (where the hero's column leaves the grid, at the ground height there) projects at or above the top of the panel (row <= 0); otherwise `bandFrac` = row / h is the share of the panel above the edge that shows nothing.
      M4   the goal / landmark ({ x, y, h }, window coordinates) projects inside the panel.
-     M1   the number of distinct walkable levels among the walkable tiles whose centre projects inside the panel (heights in H).
-     K    (M5d, INFO) the scale of the remake against the viewer: K by width = M5b(photo) / M5b(viewer), K by depth = M8b(photo) / M8b(viewer), each with its tolerance.
+     M1   the number of PLATFORMS: distinct heights that have at least one 3 x 3 block of walkable tiles of the same height whose centre projects inside the panel (a step or a ramp tile never makes a level: v85 counts plateaus by eye). `M1.all` keeps the count of every distinct walkable height in frame (nothing is hidden).
+     lakeW  the widest contiguous run of S.water along the screen-horizontal direction (rows at yaw 0 / 180, columns at 90 / 270, null otherwise), in H: the scale of the LAKE.
+     scaleReading  (INFO) the lake of the photo against the lake of the viewer (the scale of the map) and the route (M5b) of the photo against the viewer (NOT a scale: the remake draws the route wider). M8b is not a scale: it depends on the pitch.
    BANDS = ONE table of hypotheses [R] (like HYP in src/planes.js) with the source of every number; `verdict` applies it. The photo is read separately (docs/crystallizers/03-stage/shots/m4/photo_readings.json: numbers only).
      node tools/test_stage_readings.js */
 'use strict';
@@ -17,7 +18,8 @@ const BANDS = {
   fy: { abs: 0.05, src: 'photo fy (hero centre); tolerance +-0.05 of the frame (decision of 2026-11-09, [R])' },
   M5b: { band: [3.5, 4], rel: 0.25, src: 'Octopath band 3.5-4 H (n not declared, v85) OR +-25 % of the photo value (decision of 2026-11-09, [R])' },
   M8b: { abs: 0.5, src: 'photo M8b (head); tolerance +-0.5 H (decision of 2026-11-09, [R])' },
-  M1: { band: [1, 3], src: 'DQ3 band 1-3 walkable levels visible (v85)' },
+  M1: { band: [1, 3], src: 'DQ3 band 1-3 walkable levels visible (v85); counted as PLATFORMS (a 3 x 3 block of walkable tiles of one height), decision of 2026-11-09 [R]' },
+  lakeW: { rel: 0.25, src: 'photo lake width in H (a lower bound: the lake touches the cropped edge of the photo); +-25 % (decision of 2026-11-09, [R])' },
   M3a: { want: true, src: 'closed background expected (DQ3, v85)' },
   M4: { src: 'goal inside the frame at the entry shot; N/A against the photo (the goal of the place is where the party stands)' },
   // references of other games for the rooms (INFO: nothing reads them in a shot of one room): back wall 2.4 H, verticals M10 3-6 H, clearing M5c 7-16 H [Ref]
@@ -46,14 +48,20 @@ function compute(S, cam, w, h, o) {
   let t2 = 0; while (hx + far[0] * (t2 + STEP) >= 0 && hy + far[1] * (t2 + STEP) >= 0 && hx + far[0] * (t2 + STEP) <= S.W && hy + far[1] * (t2 + STEP) <= S.H && t2 < 1000) t2 += STEP;
   const gx = hx + far[0] * t2, gy = hy + far[1] * t2, pg = cam.p(gx, gy, feetAt(S, gx, gy)), M3a = { closed: pg[1] <= 0, bandFrac: Math.max(0, pg[1]) / h, row: pg[1] / h };
   const M4 = o.goal ? (() => { const p = cam.p(o.goal.x, o.goal.y, o.goal.h); return { inFrame: p[0] >= 0 && p[0] <= w && p[1] >= 0 && p[1] <= h, fx: p[0] / w, fy: p[1] / h }; })() : null;
-  const lv = new Set(); for (let y = 0; y < S.H; y++) for (let x = 0; x < S.W; x++) { if (!walkableAt(S, x + 0.5, y + 0.5)) continue; const hh = feetAt(S, x + 0.5, y + 0.5), p = cam.p(x + 0.5, y + 0.5, hh); if (p[0] >= 0 && p[0] <= w && p[1] >= 0 && p[1] <= h) lv.add(Math.round(hh / tp * 1000) / 1000); }
-  return { M5a: hpx / h, M5aPivot: hpxPivot / h, fx: pC[0] / w, fy: pC[1] / h, fyFeet: pF[1] / h, M5b, M8b, M3a, M4, M1: { n: lv.size, heights: [...lv].sort((p, q) => p - q) }, hpx };
+  // M1: platforms = heights with a 3 x 3 block of walkable tiles of the same height (centre in frame); all = every distinct walkable height in frame
+  const lv = new Set(), pl = new Set(), inFrame = (x, y, hh) => { const p = cam.p(x, y, hh); return p[0] >= 0 && p[0] <= w && p[1] >= 0 && p[1] <= h; }, wk = (x, y) => walkableAt(S, x + 0.5, y + 0.5), fh = (x, y) => S.levelH[S.fine[y * S.W + x]];
+  for (let y = 0; y < S.H; y++) for (let x = 0; x < S.W; x++) { if (!wk(x, y)) continue; const hh = fh(x, y); if (inFrame(x + 0.5, y + 0.5, hh)) lv.add(Math.round(hh / tp * 1000) / 1000);
+    if (x >= 1 && y >= 1 && x < S.W - 1 && y < S.H - 1 && inFrame(x + 0.5, y + 0.5, hh)) { let all = true; for (let dy = -1; dy <= 1 && all; dy++) for (let dx = -1; dx <= 1; dx++) if (!wk(x + dx, y + dy) || Math.abs(fh(x + dx, y + dy) - hh) > 1e-9) { all = false; break; } if (all) pl.add(Math.round(hh / tp * 1000) / 1000); } }
+  // lakeW: the widest contiguous run of water along the screen-horizontal direction, in H
+  let lakeW = null; { const yw = ((o.yaw % 360) + 360) % 360, rowsMode = yw === 0 || yw === 180, colsMode = yw === 90 || yw === 270;
+    if ((rowsMode || colsMode) && S.water) { let best = 0; const A = rowsMode ? S.H : S.W, B = rowsMode ? S.W : S.H; for (let u = 0; u < A; u++) { let run = 0; for (let v = 0; v < B; v++) { const i = rowsMode ? u * S.W + v : v * S.W + u; if (S.water[i]) { run++; if (run > best) best = run; } else run = 0; } } lakeW = best / tp; } }
+  return { M5a: hpx / h, M5aPivot: hpxPivot / h, fx: pC[0] / w, fy: pC[1] / h, fyFeet: pF[1] / h, M5b, M8b, M3a, M4, M1: { n: pl.size, all: lv.size, heights: [...pl].sort((p, q) => p - q), allHeights: [...lv].sort((p, q) => p - q) }, lakeW, hpx };
 }
 
-/* K (M5d): the scale of the remake against the viewer. photo = { M5b: { value, tol }, M8b: { value, tol } } (head); view = the readings of the viewer */
-function kReading(photo, view) {
+/* SCALE CHECKS (INFO): photo = { lakeW: { value, tol }, M5b: { value, tol } }; view = the readings of the viewer. lake = the scale of the MAP (lake of the photo / lake of the viewer); route = M5b photo / M5b viewer, NOT a scale (the remake draws the route wider). M8b is not a scale: it depends on the pitch. */
+function scaleReading(photo, view) {
   const q = (p, v) => (v > 1e-9 ? { k: p.value / v, tol: p.tol / v } : { k: null, tol: null });
-  return { width: q(photo.M5b, view.M5b), depth: q(photo.M8b, view.M8b.head) };
+  return { lake: view.lakeW === null || view.lakeW === undefined ? { k: null, tol: null } : q(photo.lakeW, view.lakeW), route: Object.assign(q(photo.M5b, view.M5b), { note: 'NOT a scale: the remake draws the route wider' }) };
 }
 
 /* verdict: 'PASA' | 'FALLA' | 'INFO' | 'N-A'. photo = the entry of photo_readings.json for that reading (or null for rooms); judge = false makes every row INFO. */
@@ -66,9 +74,10 @@ function verdict(name, v, photo, judge) {
     case 'M5b': return photo ? (near(v, photo.value, B.rel) || inBand(v, B.band) ? 'PASA' : 'FALLA') : (inBand(v, B.band) ? 'PASA' : 'FALLA');
     case 'M8b': return photo ? (near(v, photo.value, undefined, B.abs) ? 'PASA' : 'FALLA') : 'INFO';
     case 'M1': return inBand(v, B.band) ? 'PASA' : 'FALLA';
+    case 'lakeW': return photo ? (near(v, photo.value, B.rel) ? 'PASA' : 'FALLA') : 'INFO';
     case 'M3a': return v === B.want ? 'PASA' : 'FALLA';
     case 'M4': return photo === 'na' ? 'N-A' : (v ? 'PASA' : 'FALLA');
     default: return 'INFO';
   }
 }
-module.exports = { BANDS, compute, kReading, verdict, walkableAt, groundAt };
+module.exports = { BANDS, compute, scaleReading, verdict, walkableAt, groundAt };

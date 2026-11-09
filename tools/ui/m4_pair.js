@@ -1,5 +1,5 @@
 /* THE PAIRED SHOT (M4a commit 2): the viewer next to the remake, read in the same units. Aurhea's Fountain with TWO shots (the judge: window [south meadow, peninsula], the hero on the tip of the peninsula at (fx, fy) of the photo, yaw 0; the entry: the hero in the south meadow, yaw 90, INFO only)
-   and the DAC rooms 14, 44 and 31 as windows of ONE room with the hero at the entrance of the route (the lowest part of the room), read against the bands. The state is set through window.__evo (ui.js: st.hero, st.follow, st.focus, st.panX / panY) and the panel is fixed at 1280 x 720 (16:9);
+   a pitch sweep of the judge shot (INFO) and the DAC rooms 14, 44 and 31 as windows of ONE room with the hero at the entrance of the route (the lowest part of the room), read against the bands. The state is set through window.__evo (ui.js: st.hero, st.follow, st.focus, st.panX / panY) and the panel is fixed at 1280 x 720 (16:9);
    the readings are computed IN THE PAGE by tools/stage_readings.js from S and the Cam 6 projection (not from pixels).
    Writes: docs/crystallizers/03-stage/shots/m4/<shot>.png (the viewer only) and readings.md (the table); the side-by-side with the PHOTO goes to tools/ui/out/m4/ (ignored by git: the photo is third-party material and is never written into the repo).
    FAILS LOUDLY if the internals of ui.js it uses are missing.   NODE_PATH=$(npm root -g) node tools/ui/m4_pair.js [--no-compose] */
@@ -12,7 +12,7 @@ const fail = (m) => { console.error('M4 PAIR FAILED: ' + m); process.exit(2); };
   if (!fs.existsSync(PHOTO_PNG)) fail('the photo is not in refs/: ' + PHOTO_PNG);
   fs.mkdirSync(OUT, { recursive: true }); fs.mkdirSync(IGN, { recursive: true });
   const a = await open({ w: 1800, h: 1000, modes: true, orient: true }), page = a.page, ev = (f, x) => page.evaluate(f, x), idle = async () => { await a.idle(); await a.idle(); };
-  const need = await ev(() => { const e = window.__evo || {}, st = e.st || {}, miss = []; for (const k of ['st', 'S', 'P', 'view', 'set', 'redraw', 'stageSetWindow', 'stageSetRooms']) if (!e[k]) miss.push('__evo.' + k); for (const k of ['follow', 'focus', 'hero', 'panX', 'panY', 'persH', 'zoom', 'stage', 'stageRooms', 'stageIdx']) if (!(k in st)) miss.push('st.' + k); if (!window.EVO.makeCam || !window.EVO.stage || !window.EVO.stage.feetH) miss.push('EVO.makeCam / EVO.stage'); if (!document.querySelector('#stage')) miss.push('#stage'); return miss; });
+  const need = await ev(() => { const e = window.__evo || {}, st = e.st || {}, miss = []; for (const k of ['st', 'S', 'P', 'view', 'set', 'redraw', 'stageSetWindow', 'stageSetRooms']) if (!e[k]) miss.push('__evo.' + k); for (const k of ['follow', 'focus', 'hero', 'panX', 'panY', 'persH', 'zoom', 'stage', 'stageRooms', 'stageIdx', 'pitchOff']) if (!(k in st)) miss.push('st.' + k); if (!window.EVO.makeCam || !window.EVO.stage || !window.EVO.stage.feetH) miss.push('EVO.makeCam / EVO.stage'); if (!document.querySelector('#stage')) miss.push('#stage'); return miss; });
   if (need.length) fail('internals of ui.js missing: ' + need.join(', '));
   await page.addScriptTag({ content: 'var module = { exports: {} };' + fs.readFileSync(path.join(__dirname, '../stage_readings.js'), 'utf8') + '\nwindow.SR = module.exports;' });
   const rawK = (raws) => ev((raws) => { const e = window.__evo, tb = window.EVO.stage.zoneTable(e.packs[e.st.pack].pack); return raws.map((r) => tb.toK.get(r)); }, raws);
@@ -33,6 +33,13 @@ const fail = (m) => { console.error('M4 PAIR FAILED: ' + m); process.exit(2); };
     const m = await measure(); const buf = await save('aurhea_entry'); shots.push({ pair: 'Aurhea', name: 'aurhea_entry', title: 'entry (hero in the south meadow, yaw ' + m.yaw + ')', judge: false, photo: PHOTO, m, buf }); }
   await page.click('#stageNext'); await idle(); await ev((t) => window.__evo.set({ hero: { x: t.x, y: t.y } }), TIP); await idle();
   { const res = await placeHero(PHOTO.fx.value, PHOTO.fy.value); await ev(() => window.__evo.redraw()); await idle(); const m = await measure(); const buf = await save('aurhea_judge'); shots.push({ pair: 'Aurhea', name: 'aurhea_judge', title: `judge (hero on the tip of the peninsula at fx ${PHOTO.fx.value}, fy ${PHOTO.fy.value}, yaw ${m.yaw})`, judge: true, photo: PHOTO, m, buf, residual: res.map((x) => +x.toFixed(2)) }); }
+  // ---- pitch sweep of the judge shot (INFO) ----
+  const sweep = [];
+  for (const off of [0, 5, 10, 15, 20]) {
+    await ev((off) => { const st = window.__evo.st; st.pitchOff = off; st.panX = st.panY = 0; st.follow = true; window.__evo.redraw(); }, off); await idle();
+    await placeHero(PHOTO.fx.value, PHOTO.fy.value); await ev(() => window.__evo.redraw()); await idle(); const m = await measure(); sweep.push({ pitch: 25 + off, r: m.r });
+  }
+  await ev(() => { const st = window.__evo.st; st.pitchOff = 0; st.panX = st.panY = 0; st.follow = true; window.__evo.redraw(); }); await idle();   // restored
   // ---- DAC rooms ----
   await page.click('#examples button[data-id="dac_stage"]'); await idle();
   for (const id of [14, 44, 31]) {
@@ -58,14 +65,18 @@ const fail = (m) => { console.error('M4 PAIR FAILED: ' + m); process.exit(2); };
     row('M5b width at the hero, H' + (p ? '' : ' (the width of the ROOM, not of a route)'), p ? `${PHOTO.M5b.value} (+-25 % or band 3.5-4)` : 'band 3.5-4 (route width)', f2(r.M5b), p ? V('M5b', r.M5b, PHOTO.M5b) : 'INFO');
     row('M8b far edge above the head, H (gap ' + f2(r.M8b.gapH, 1) + ' H)', p ? `${PHOTO.M8b.value} (+-0.5)` : '-', f2(r.M8b.head), V('M8b', r.M8b.head, p ? PHOTO.M8b : null));
     row('M8b far edge above the feet, H', p ? `${PHOTO.M8b.feet}` : '-', f2(r.M8b.feet), 'INFO');
-    row('M1 walkable levels in frame', p ? `${PHOTO.M1.walkable} walkable (${PHOTO.M1.distinctHeights} heights), band 1-3` : 'band 1-3', `${r.M1.n} (${r.M1.heights.join(', ')} H)`, V('M1', r.M1.n));
+    row('M1 platforms in frame (3 x 3 blocks of one height)', p ? `${PHOTO.M1.walkable} walkable (${PHOTO.M1.distinctHeights} heights), band 1-3` : 'band 1-3', `${r.M1.n} (${r.M1.heights.join(', ')} H)`, V('M1', r.M1.n));
+    row('M1 all walkable heights in frame (steps and ramps included)', '-', `${r.M1.all} (${r.M1.allHeights.join(', ')} H)`, 'INFO');
+    if (r.lakeW !== null && r.lakeW !== undefined && r.lakeW > 0) row('lakeW widest lake run, H', p ? `${PHOTO.lakeW.value} +- ${PHOTO.lakeW.tol} (lower bound: the lake touches the cropped edge; +-25 %)` : '-', f2(r.lakeW), p ? V('lakeW', r.lakeW, PHOTO.lakeW) : 'INFO');
     row('M3a closed background', p ? 'closed' : 'closed', r.M3a.closed ? 'closed' : `OPEN: ${f2(100 * r.M3a.bandFrac, 1)} % of the frame empty above the far edge`, V('M3a', r.M3a.closed));
     row('M4 goal in frame', p ? 'N/A (no landmark in the photo)' : 'in frame', r.M4 ? (r.M4.inFrame ? `in frame (${f2(r.M4.fx, 2)}, ${f2(r.M4.fy, 2)})` : 'out of frame') : 'no goal', p ? 'N-A' : (J ? V('M4', !!(r.M4 && r.M4.inFrame)) : 'INFO'));
     if (!p) { row('planes: back wall H over the highest ground', `${SR.BANDS.wall.H} [Ref]`, s.m.hyp ? f2(s.m.hyp.wallH, 1) : '-', 'INFO'); row('planes: columns H', `${SR.BANDS.vertical.band.join('-')} [Ref M10]`, s.m.hyp ? f2(s.m.hyp.colH, 1) : '-', 'INFO'); row('room extent L x W, H (clearing)', `${SR.BANDS.clearing.band.join('-')} [Ref M5c]`, s.m.L ? `${f2(s.m.L / s.m.tp, 1)} x ${f2(s.m.W / s.m.tp, 1)}` : '-', 'INFO'); }
     md.push(`## ${s.pair}: ${s.title}`, '', `Image: \`${s.name}.png\`${s.residual ? `; hero placed at the target within ${s.residual} px` : ''}. Hero (map) ${s.m.hero}, heroFrac ${s.m.heroFrac}, tilesPerH ${s.m.tp}.`, '', '| reading | photo / band | viewer | verdict |', '|---|---|---|---|', ...rows, '');
-    if (s.name === 'aurhea_judge') kRead = SR.kReading(PHOTO, r);
+    if (s.name === 'aurhea_judge') kRead = SR.scaleReading(PHOTO, r);
   }
-  if (kRead) md.push('## K (M5d, INFO): the scale of the remake against the viewer', '', `- K by width = M5b photo / M5b viewer = ${f2(PHOTO.M5b.value)} / ${f2(shots.find((s) => s.name === 'aurhea_judge').m.r.M5b)} = **${f2(kRead.width.k, 2)} +- ${f2(kRead.width.tol, 2)}** (photo tolerance only)`, `- K by depth = M8b photo / M8b viewer = ${f2(PHOTO.M8b.value)} / ${f2(shots.find((s) => s.name === 'aurhea_judge').m.r.M8b.head)} = **${f2(kRead.depth.k, 2)} +- ${f2(kRead.depth.tol, 2)}** (depends on the pitch of the photo, which is unknown)`, '');
+  if (kRead) { const jm = shots.find((q) => q.name === 'aurhea_judge').m.r; md.push('## Scale checks (INFO)', '', `- **Lake = the scale of the map**: lakeW photo / lakeW viewer = ${f2(PHOTO.lakeW.value, 1)} / ${f2(jm.lakeW, 1)} = **${f2(kRead.lake.k, 2)} +- ${f2(kRead.lake.tol, 2)}** (the photo value is a lower bound: the lake touches the cropped edge): the lake is already at the scale of the viewer (1 old tile = 1 H at x2).`, `- **Route (M5b)**: photo / viewer = ${f2(PHOTO.M5b.value, 1)} / ${f2(jm.M5b)} = **${f2(kRead.route.k, 2)} +- ${f2(kRead.route.tol, 2)}**. ${kRead.route.note}.`, '- M8b is NOT a scale: it depends on the pitch of the camera and on the height of the tip (see the pitch sweep).', ''); }
+  if (sweep) { md.push('## Pitch sweep of the judge shot (INFO; `st.pitchOff` 0-20, the hero re-placed at fx / fy each time; no image kept)', '', '| pitch | M5a | M8b head, H | M8b feet, H | M3a | M5b, H |', '|---|---|---|---|---|---|', ...sweep.map((q) => `| ${q.pitch} deg | ${f2(q.r.M5a, 3)} | ${f2(q.r.M8b.head, 3)} | ${f2(q.r.M8b.feet, 2)} | ${q.r.M3a.closed ? 'closed' : f2(100 * q.r.M3a.bandFrac, 1) + ' % open'} | ${f2(q.r.M5b)} |`), '');
+    const ok8 = sweep.find((q) => SR.verdict('M8b', q.r.M8b.head, PHOTO.M8b) === 'PASA'); md.push(ok8 ? `Smallest pitch of the sweep where M8b (head) is inside the band of the photo (${PHOTO.M8b.value} +- ${SR.BANDS.M8b.abs}): **${ok8.pitch} deg**.` : 'No pitch of the sweep puts M8b (head) inside the band of the photo.', ''); }
   fs.writeFileSync(path.join(OUT, 'readings.md'), md.join('\n')); console.log(md.join('\n'));
   // ---- the side-by-side with the photo: ONLY in the ignored folder ----
   if (!process.argv.includes('--no-compose')) {

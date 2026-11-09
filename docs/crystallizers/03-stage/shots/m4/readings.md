@@ -16,7 +16,9 @@ Image: `aurhea_entry.png`. Hero (map) 23.5,35.5, heroFrac 0.14, tilesPerH 2.
 | M5b width at the hero, H | 3.6 (+-25 % or band 3.5-4) | 11.98 | INFO |
 | M8b far edge above the head, H (gap 0.0 H) | 1.7 (+-0.5) | 2.05 | INFO |
 | M8b far edge above the feet, H | 2.7 | 2.98 | INFO |
-| M1 walkable levels in frame | 1 walkable (3 heights), band 1-3 | 3 (0, 0.308, 0.923 H) | INFO |
+| M1 platforms in frame (3 x 3 blocks of one height) | 1 walkable (3 heights), band 1-3 | 1 (0.308 H) | INFO |
+| M1 all walkable heights in frame (steps and ramps included) | - | 3 (0, 0.308, 0.923 H) | INFO |
+| lakeW widest lake run, H | 12 +- 0.5 (lower bound: the lake touches the cropped edge; +-25 %) | 9.00 | INFO |
 | M3a closed background | closed | OPEN: 15.2 % of the frame empty above the far edge | INFO |
 | M4 goal in frame | N/A (no landmark in the photo) | no goal | N-A |
 
@@ -32,7 +34,9 @@ Image: `aurhea_judge.png`; hero placed at the target within 0,0 px. Hero (map) 2
 | M5b width at the hero, H | 3.6 (+-25 % or band 3.5-4) | 0.98 | FALLA |
 | M8b far edge above the head, H (gap 5.0 H) | 1.7 (+-0.5) | 0.38 | FALLA |
 | M8b far edge above the feet, H | 2.7 | 1.28 | INFO |
-| M1 walkable levels in frame | 1 walkable (3 heights), band 1-3 | 1 (0.923 H) | PASA |
+| M1 platforms in frame (3 x 3 blocks of one height) | 1 walkable (3 heights), band 1-3 | 0 ( H) | FALLA |
+| M1 all walkable heights in frame (steps and ramps included) | - | 1 (0.923 H) | INFO |
+| lakeW widest lake run, H | 12 +- 0.5 (lower bound: the lake touches the cropped edge; +-25 %) | 11.00 | PASA |
 | M3a closed background | closed | OPEN: 26.7 % of the frame empty above the far edge | FALLA |
 | M4 goal in frame | N/A (no landmark in the photo) | in frame (0.48, 0.66) | N-A |
 
@@ -48,7 +52,8 @@ Image: `dac_room_14.png`. Hero (map) 55.5,195.5, heroFrac 0.14, tilesPerH 2.
 | M5b width at the hero, H (the width of the ROOM, not of a route) | band 3.5-4 (route width) | 6.98 | INFO |
 | M8b far edge above the head, H (gap 0.5 H) | - | -0.40 | INFO |
 | M8b far edge above the feet, H | - | 0.52 | INFO |
-| M1 walkable levels in frame | band 1-3 | 8 (4, 4.44, 4.88, 5.253, 5.627, 6, 6.44, 6.88 H) | FALLA |
+| M1 platforms in frame (3 x 3 blocks of one height) | band 1-3 | 4 (4.44, 4.88, 6, 6.44 H) | FALLA |
+| M1 all walkable heights in frame (steps and ramps included) | - | 8 (4, 4.44, 4.88, 5.253, 5.627, 6, 6.44, 6.88 H) | INFO |
 | M3a closed background | closed | closed | PASA |
 | M4 goal in frame | in frame | out of frame | FALLA |
 | planes: back wall H over the highest ground | 2.4 [Ref] | 3.0 | INFO |
@@ -67,7 +72,8 @@ Image: `dac_room_44.png`. Hero (map) 87.5,24.5, heroFrac 0.14, tilesPerH 2.
 | M5b width at the hero, H (the width of the ROOM, not of a route) | band 3.5-4 (route width) | 13.98 | INFO |
 | M8b far edge above the head, H (gap -0.0 H) | - | 5.74 | INFO |
 | M8b far edge above the feet, H | - | 6.66 | INFO |
-| M1 walkable levels in frame | band 1-3 | 11 (4, 4.44, 4.88, 6, 6.44, 6.88, 7.253, 7.627, 8, 8.44, 8.88 H) | FALLA |
+| M1 platforms in frame (3 x 3 blocks of one height) | band 1-3 | 7 (4.44, 4.88, 6, 6.44, 6.88, 8, 8.44 H) | FALLA |
+| M1 all walkable heights in frame (steps and ramps included) | - | 11 (4, 4.44, 4.88, 6, 6.44, 6.88, 7.253, 7.627, 8, 8.44, 8.88 H) | INFO |
 | M3a closed background | closed | closed | PASA |
 | M4 goal in frame | in frame | in frame (0.94, 0.18) | PASA |
 | planes: back wall H over the highest ground | 2.4 [Ref] | 3.0 | INFO |
@@ -86,14 +92,28 @@ Image: `dac_room_31.png`. Hero (map) 95.5,79.5, heroFrac 0.14, tilesPerH 2.
 | M5b width at the hero, H (the width of the ROOM, not of a route) | band 3.5-4 (route width) | 8.48 | INFO |
 | M8b far edge above the head, H (gap 0.0 H) | - | 4.07 | INFO |
 | M8b far edge above the feet, H | - | 4.99 | INFO |
-| M1 walkable levels in frame | band 1-3 | 10 (2.44, 2.88, 4, 4.44, 4.88, 6, 6.44, 6.88, 8, 8.44 H) | FALLA |
+| M1 platforms in frame (3 x 3 blocks of one height) | band 1-3 | 5 (2.88, 4.44, 6, 6.44, 8 H) | FALLA |
+| M1 all walkable heights in frame (steps and ramps included) | - | 10 (2.44, 2.88, 4, 4.44, 4.88, 6, 6.44, 6.88, 8, 8.44 H) | INFO |
 | M3a closed background | closed | closed | PASA |
 | M4 goal in frame | in frame | in frame (0.41, 0.19) | PASA |
 | planes: back wall H over the highest ground | 2.4 [Ref] | 3.0 | INFO |
 | planes: columns H | 3-6 [Ref M10] | 3.0 | INFO |
 | room extent L x W, H (clearing) | 7-16 [Ref M5c] | 10.3 x 6.8 | INFO |
 
-## K (M5d, INFO): the scale of the remake against the viewer
+## Scale checks (INFO)
 
-- K by width = M5b photo / M5b viewer = 3.60 / 0.98 = **3.69 +- 0.41** (photo tolerance only)
-- K by depth = M8b photo / M8b viewer = 1.70 / 0.38 = **4.50 +- 0.79** (depends on the pitch of the photo, which is unknown)
+- **Lake = the scale of the map**: lakeW photo / lakeW viewer = 12.0 / 11.0 = **1.09 +- 0.05** (the photo value is a lower bound: the lake touches the cropped edge): the lake is already at the scale of the viewer (1 old tile = 1 H at x2).
+- **Route (M5b)**: photo / viewer = 3.6 / 0.98 = **3.69 +- 0.41**. NOT a scale: the remake draws the route wider.
+- M8b is NOT a scale: it depends on the pitch of the camera and on the height of the tip (see the pitch sweep).
+
+## Pitch sweep of the judge shot (INFO; `st.pitchOff` 0-20, the hero re-placed at fx / fy each time; no image kept)
+
+| pitch | M5a | M8b head, H | M8b feet, H | M3a | M5b, H |
+|---|---|---|---|---|---|
+| 25 deg | 0.152 | 0.378 | 1.28 | 26.7 % open | 0.98 |
+| 30 deg | 0.149 | 0.738 | 1.60 | 19.5 % open | 0.98 |
+| 35 deg | 0.146 | 1.103 | 1.91 | 12.2 % open | 0.98 |
+| 40 deg | 0.144 | 1.472 | 2.23 | 4.9 % open | 0.98 |
+| 45 deg | 0.143 | 1.843 | 2.54 | closed | 0.98 |
+
+Smallest pitch of the sweep where M8b (head) is inside the band of the photo (1.7 +- 0.5): **40 deg**.
