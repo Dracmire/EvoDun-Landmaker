@@ -75,8 +75,9 @@
     const base = S.baseH !== undefined ? S.baseH : S.levelH[0] - P.terH, top = S.levelH[S.maxFine];
     const fb = S.sliceBox ? [S.sliceBox.x0 - 2, S.sliceBox.y0 - 2, S.sliceBox.x1 + 2, S.sliceBox.y1 + 2] : [0, 0, S.W, S.H], hs = S.fitH || [base, top + 1.5];
     const hF = view.focus ? view.focus[2] : (Math.min(...hs) + Math.max(...hs)) / 2 + (E.stageTest && E.stageTest.focusLeak ? 0.01 : 0), tanH = Math.tan(PERSP_FOV / 2); // view.focus = [x, y, h] (optional, the Stage hero tracking, src/stage.js): the pivot is that point; absent = the camera of today
-    const relTo = (X0, Y0) => (x, y, hh) => { const X = x - X0, Y = y - Y0, hp = hh - hF, u = sy * X + cy * Y; return [cy * X - sy * Y, u * sp - hp * cp, u * cp + hp * sp]; }; // [a, v, n] around the pivot
-    const cornersAt = (X0, Y0) => { const rel = relTo(X0, Y0), c = []; for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of hs) c.push(rel(x, y, hh)); return c; };
+    const vS = view.vScale === undefined ? 1 : view.vScale; // M4c-0: optional VERTICAL SCALE of the world about the pivot height (heights above or below hF are multiplied; the pivot does not move); absent / 1 = the camera of today, byte for byte
+    const relTo = (X0, Y0, vv) => (x, y, hh) => { const X = x - X0, Y = y - Y0, hp = (hh - hF) * (vv === undefined ? vS : vv), u = sy * X + cy * Y; return [cy * X - sy * Y, u * sp - hp * cp, u * cp + hp * sp]; }; // [a, v, n] around the pivot
+    /* (the fit ignores the vertical scale: the pivot, the scale and D do not move) */ const cornersAt = (X0, Y0) => { const rel = relTo(X0, Y0, 1), c = []; for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of hs) c.push(rel(x, y, hh)); return c; };
     const extentOf = (corners, D) => { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const [a, v, n] of corners) { const k = D / Math.max(D - n, 0.05 * D), px = a * k, py = v * k; x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py); } return [x0, x1, y0, y1]; };
     const f = ((view.persH || h) / 2) / tanH, avail = [w - 20, h - 20], sc1 = view.fitSc || 0;
     // THE PIVOT is the ground point under the screen centre (at the focus height hF, the middle of the fit heights): at zoom 1 it is chosen so that the box is centred. Alternate between the
@@ -92,10 +93,10 @@
     }
     const fit = sc0, sc = (sc1 || sc0) * view.zoom, D = f / sc, ox = w / 2, oy = h / 2, zMin = 0.05 * D, Xb = X0, Yb = Y0;
     const mk = (X0, Y0) => { const rel = relTo(X0, Y0), proj = (x, y, hh) => { const [a, v, n] = rel(x, y, hh), k = D / Math.max(D - n, zMin); return [a * k * sc + ox, v * k * sc + oy]; }; return {
-      sc, base, fit, D, persp: true, pivot: [X0, Y0, hF],
+      sc, base, fit, D, persp: true, pivot: [X0, Y0, hF], vScale: vS,
       p: proj,
       unp: (px, py, hh) => { // exact: the ray of the pixel meets the plane at height hh (u is linear in the pixel row)
-        const xs = (px - ox) / sc, vs = (py - oy) / sc, hp = hh - hF, u = (vs * (D - hp * sp) + D * hp * cp) / (D * sp + vs * cp), z = D - u * cp - hp * sp, a = xs * z / D;
+        const xs = (px - ox) / sc, vs = (py - oy) / sc, hp = (hh - hF) * vS, u = (vs * (D - hp * sp) + D * hp * cp) / (D * sp + vs * cp), z = D - u * cp - hp * sp, a = xs * z / D;
         return [cy * a + sy * u + X0, -sy * a + cy * u + Y0];
       },
       depth: (x, y, hh) => rel(x, y, hh)[2], // toward the camera: larger = nearer (the z-buffer tests use 1 / (D - depth))
@@ -113,7 +114,7 @@
     // under the screen centre and the dolly distance D is measured to what is on screen (an image shift would leave the camera over the map centre and put a far-away focus point behind the camera at play scale).
     const c0 = mk(Xb, Yb), rel0 = relTo(Xb, Yb);
     // panFor: the pan (px) that brings the point (x, y, hh) to the screen centre, in closed form (the point must be at u' = hp * cp / sp and a' = 0 from the new pivot)
-    c0.panFor = (x, y, hh) => { const [aT] = rel0(x, y, hh), hp = hh - hF, uT = sy * (x - Xb) + cy * (y - Yb), u1 = hp * cp / sp; return [-aT * sc, -(uT - u1) * sc * sp]; };
+    c0.panFor = (x, y, hh) => { const [aT] = rel0(x, y, hh), hp = (hh - hF) * vS, uT = sy * (x - Xb) + cy * (y - Yb), u1 = hp * cp / sp; return [-aT * sc, -(uT - u1) * sc * sp]; };
     if (!view.panX && !view.panY) return c0;
     const sa = -view.panX / sc, su = -view.panY / (sc * sp);
     const c1 = mk(Xb + cy * sa + sy * su, Yb - sy * sa + cy * su); c1.panFor = c0.panFor; return c1;
@@ -794,7 +795,7 @@
 
   E.levelColor = levelColor; // exposed for the tests
     E.makeCam = makeCam;
-  E.fitScale = (S, P, view, w, h) => makeCam(S, P, Object.assign({}, view, { fitSc: 0, zoom: 1, panX: 0, panY: 0, focus: null }), w, h).fit; // px per tile at zoom 1 for a panel of w x h // exposed for the UI tests (screen position of a tile)
+  E.fitScale = (S, P, view, w, h) => makeCam(S, P, Object.assign({}, view, { fitSc: 0, zoom: 1, panX: 0, panY: 0, focus: null, vScale: undefined }), w, h).fit; // px per tile at zoom 1 for a panel of w x h // exposed for the UI tests (screen position of a tile)
 
   function* drawSceneG(ctx, w, h, S, P, tech, view, o) {
     DBG = !!o.debug; PICK = !!o.pick;

@@ -1,0 +1,178 @@
+{
+ "neutral": {
+  "tag": "neutral",
+  "vScale": 1,
+  "hero": [
+   46,
+   28
+  ],
+  "heroPx": 78.2,
+  "yaw": 0,
+  "goalH_H": 2,
+  "towerTop_H": 6.88,
+  "doorGround_H": 4,
+  "goalInFrame": true,
+  "goalAt": [
+   0.574,
+   0.472
+  ],
+  "doorInFrame": true,
+  "doorAt": [
+   0.587,
+   0.243
+  ],
+  "towerTopInFrame": false,
+  "wallOverGoal_px": 358.4,
+  "wallOverGoal_heroH": 4.58,
+  "M4": {
+   "inFrame": true,
+   "fx": 0.574455116244257,
+   "fy": 0.47151133106757165
+  },
+  "M3a": {
+   "closed": false,
+   "bandFrac": 0.03242186769765251,
+   "row": 0.03242186769765251
+  },
+  "M5a": 0.10864665120153821,
+  "M5b": 10.975000000000039,
+  "M8b": {
+   "head": 3.8390732984012876,
+   "feet": 4.756812838652269,
+   "row": 0.03242186769765251,
+   "gapH": 0
+  }
+ },
+ "vScale115": {
+  "tag": "vScale 1.15",
+  "vScale": 1.15,
+  "hero": [
+   46,
+   28
+  ],
+  "heroPx": 78.1,
+  "yaw": 0,
+  "goalH_H": 2,
+  "towerTop_H": 6.88,
+  "doorGround_H": 4,
+  "goalInFrame": true,
+  "goalAt": [
+   0.574,
+   0.478
+  ],
+  "doorInFrame": true,
+  "doorAt": [
+   0.588,
+   0.221
+  ],
+  "towerTopInFrame": false,
+  "wallOverGoal_px": 418.4,
+  "wallOverGoal_heroH": 5.36,
+  "M4": {
+   "inFrame": true,
+   "fx": 0.5743295392737312,
+   "fy": 0.4783087072693545
+  },
+  "M3a": {
+   "closed": false,
+   "bandFrac": 0.017716929674702994,
+   "row": 0.017716929674702994
+  },
+  "M5a": 0.1084465157990101,
+  "M5b": 10.975000000000039,
+  "M8b": {
+   "head": 3.9109233365581972,
+   "feet": 4.968324444167673,
+   "row": 0.017716929674702994,
+   "gapH": 0
+  }
+ },
+ "exag13": {
+  "tag": "exag 1.3",
+  "vScale": 1,
+  "hero": [
+   46,
+   28
+  ],
+  "heroPx": 78.2,
+  "yaw": 0,
+  "goalH_H": 2,
+  "towerTop_H": 6.88,
+  "doorGround_H": 4,
+  "goalInFrame": true,
+  "goalAt": [
+   0.574,
+   0.472
+  ],
+  "doorInFrame": true,
+  "doorAt": [
+   0.587,
+   0.243
+  ],
+  "towerTopInFrame": false,
+  "wallOverGoal_px": 358.4,
+  "wallOverGoal_heroH": 4.58,
+  "M4": {
+   "inFrame": true,
+   "fx": 0.574455116244257,
+   "fy": 0.47151133106757165
+  },
+  "M3a": {
+   "closed": false,
+   "bandFrac": 0.03242186769765251,
+   "row": 0.03242186769765251
+  },
+  "M5a": 0.10864665120153821,
+  "M5b": 10.975000000000039,
+  "M8b": {
+   "head": 3.8390732984012876,
+   "feet": 4.756812838652269,
+   "row": 0.03242186769765251,
+   "gapH": 0
+  }
+ },
+ "both": {
+  "tag": "vScale 1.15 + exag 1.3",
+  "vScale": 1.15,
+  "hero": [
+   46,
+   28
+  ],
+  "heroPx": 78.1,
+  "yaw": 0,
+  "goalH_H": 2,
+  "towerTop_H": 6.88,
+  "doorGround_H": 4,
+  "goalInFrame": true,
+  "goalAt": [
+   0.574,
+   0.478
+  ],
+  "doorInFrame": true,
+  "doorAt": [
+   0.588,
+   0.221
+  ],
+  "towerTopInFrame": false,
+  "wallOverGoal_px": 418.4,
+  "wallOverGoal_heroH": 5.36,
+  "M4": {
+   "inFrame": true,
+   "fx": 0.5743295392737312,
+   "fy": 0.4783087072693545
+  },
+  "M3a": {
+   "closed": false,
+   "bandFrac": 0.017716929674702994,
+   "row": 0.017716929674702994
+  },
+  "M5a": 0.1084465157990101,
+  "M5b": 10.975000000000039,
+  "M8b": {
+   "head": 3.9109233365581972,
+   "feet": 4.968324444167673,
+   "row": 0.017716929674702994,
+   "gapH": 0
+  }
+ }
+}

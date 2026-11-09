@@ -32,7 +32,7 @@
   /* the size on screen of an object of hH hero heights standing on the ground point (x, y, feet) (window coordinates): the hero's convention */
   function sizeAt(cam, tilesPerH, hH, wH, x, y, feet) {
     const t = T(), k = t.constSize ? 1 : E.stage.depthScale(cam, x, y, feet), tp = t.tilesNotH ? 1 : tilesPerH;
-    return { k, hpx: hH * tp * cam.sc * k, wpx: wH * tp * cam.sc * k, lw: t.constStroke ? LW0 : LW0 * k, font: FONT0 * k };
+    return { k, hpx: hH * (cam.vScale || 1) * tp * cam.sc * k, wpx: wH * tp * cam.sc * k, lw: t.constStroke ? LW0 : LW0 * k, font: FONT0 * k };
   }
 
   function shape(ctx, kind, b, sz, label) { // b = the base point on screen; the placeholder, a contact shade, a label
@@ -61,12 +61,13 @@
       const kd = KINDS[ob.kind]; if (!kd) continue;
       const x = ob.x - S.ox, y = ob.y - S.oy, i = E.stage.cellOf(S, x, y), st = { kind: ob.kind, hH: ob.hH, x: ob.x, y: ob.y, tile: i, drawn: false, visible: false };
       stats.push(st); if (i < 0) continue;
-      let hH = ob.hH, lp = null, d = Infinity;
+      let hH = ob.hH, lp = null, d = Infinity; const ex = o.objects.exag; // M4c-0: the exaggeration of heights above the ground (one place for the declared list, the props and the landmark)
       if (ob.kind === 'landmark') { // S4c: the apparent height from the ground distance (in H) to the hero's feet
         lp = landmarkParams(ob); if (o.hero) d = Math.hypot(o.hero.x - x, o.hero.y - y) / (t.tilesNotH ? 1 : tp); // (MUTATION tilesNotH: the distance in tiles)
         hH = t.noDistance ? (lp.hFar + lp.hNear) / 2 : t.hardStep ? (d < (lp.dFar + lp.dNear) / 2 ? lp.hNear : lp.hFar) : landmarkH(d, lp); // (MUTATIONS noDistance: a constant height; hardStep: a jump instead of the smoothstep)
         Object.assign(st, { hH, d, lm: lp });
       }
+      if (ex !== undefined && ex !== 1) { hH = E.stage.exag(hH, ex); st.hH = hH; }
       const feet = E.stage.feetH(S, i), b = cam.p(x, y, feet), sz = sizeAt(cam, tp, hH, kd.wH, x, y, feet); sz.hH = hH;
       st.visible = t.ignoreHidden ? true : ownGround(b, i); Object.assign(st, { hpx: sz.hpx, wpx: sz.wpx, k: sz.k, lw: sz.lw, font: sz.font, base: b, ry: cam.ry(x, y) });
       if (!st.visible) continue;
@@ -75,7 +76,7 @@
         const al = t.detailAlways ? 1 : t.detailNever ? 0 : baseAlpha(d, lp), ya = (o.objects.yaw || 0) * Math.PI / 180, cx = Math.sin(ya), cy = Math.cos(ya); st.alpha = al; st.detail = [];
         if (al > 0) for (const pc of DETAIL.pieces) {
           const x2 = x + (pc.side * cy + pc.front * cx) * tp, y2 = y + (-pc.side * cx + pc.front * cy) * tp, i2 = E.stage.cellOf(S, x2, y2); if (i2 < 0) continue;
-          const f2 = E.stage.feetH(S, i2), b2 = cam.p(x2, y2, f2), s2 = sizeAt(cam, tp, pc.hH, KINDS[pc.kind].wH, x2, y2, f2); s2.hH = pc.hH;
+          const f2 = E.stage.feetH(S, i2), b2 = cam.p(x2, y2, f2), s2 = sizeAt(cam, tp, E.stage.exag(pc.hH, ex), KINDS[pc.kind].wH, x2, y2, f2); s2.hH = E.stage.exag(pc.hH, ex);
           const vis2 = t.ignoreHidden || t.pieceIgnoreHidden ? true : ownGround(b2, i2), ds = { kind: pc.kind, visible: vis2, drawn: false }; st.detail.push(ds); if (!vis2) continue; // the rule of S4a for every piece: a base that is not on its own tile in the image is not drawn (MUTATION pieceIgnoreHidden: drawn anyway)
           items.push({ ry: cam.ry(x2, y2), paint: () => { ctx.save(); ctx.globalAlpha = al; shape(ctx, pc.kind, b2, s2, false); ctx.restore(); ds.drawn = true; } });
         }

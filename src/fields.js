@@ -281,6 +281,8 @@
         if (!g || typeof g !== 'object' || Array.isArray(g)) throw new Error('Manifest: viewer.stage must be an object.');
         if (g.tilesPerH !== undefined && !(typeof g.tilesPerH === 'number' && g.tilesPerH >= 1.5 && g.tilesPerH <= 4)) bad('tilesPerH (a number from 1.5 to 4)');
         if (g.heroFrac !== undefined && !(typeof g.heroFrac === 'number' && g.heroFrac >= 0.08 && g.heroFrac <= 0.25)) bad('heroFrac (a number from 0.08 to 0.25)');
+        if (g.vScale !== undefined && !(typeof g.vScale === 'number' && g.vScale >= 0.8 && g.vScale <= 1.6)) bad('vScale (a number from 0.8 to 1.6)');
+        if (g.exag !== undefined && !(typeof g.exag === 'number' && g.exag >= 1 && g.exag <= 2)) bad('exag (a number from 1 to 2)');
         if (g.follow !== undefined && typeof g.follow !== 'boolean') bad('follow (true or false)');
         if (g.units !== undefined && typeof g.units !== 'boolean') bad('units (true or false: Measures in H)');
         if (g.border !== undefined && !['off', 'island', 'quebrada'].includes(g.border)) bad('border ("off", "island" or "quebrada")');
