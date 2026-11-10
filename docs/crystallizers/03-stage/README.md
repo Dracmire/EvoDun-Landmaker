@@ -511,7 +511,7 @@ A capability test, not a rule: the frame of the remake capture "Shrine of Plains
 
 > **DEGENERATION D1 — do not imitate** (user's decision 2026-11-10; the example stays as evidence, only its label and the rules changed).
 > - A scene of cards: 28 billboards cover about 81 % of the screen (pixels that change when they are removed, panel 1280 x 644); no source map of the room, generator off (`orient`, `planes`, `props` false, `volumes` empty); it only fits at one hero position, so it is no evidence of any rule.
-> - Rule 9: billboards covering more than 30 % of the screen are strictly forbidden. Rule 10: the floor is 3D terrain of blocks painted by role, never floor billboards; ribbons are decals that paint the blocks and do not count as billboards. (CLAUDE.md "Composition rules (mode 3)".)
+> - Composition rule (a): billboards covering more than 30 % of the screen are strictly forbidden. Composition rule (b): the floor is 3D terrain of blocks painted by role, never floor billboards; ribbons are decals that paint the blocks and do not count as billboards. (CLAUDE.md "Composition rules (mode 3)".)
 > - The text below is kept unchanged.
 
 What it proves: the mechanism of golden shot 1 was not made to measure for a door. The frame of the remake capture of the throne room (orange carpet, columns, banners, chandeliers) comes out of the SAME fields: `objects` (`wH`, `always` also outside the window, `color`, `shadow`, `label`), `ribbon`, `heroScreen`. What the user asks of this shot is the CONTRAST between the foreground and the rest: two huge dark stone masses at the edges against a lighter carpet and the lightest floor.
