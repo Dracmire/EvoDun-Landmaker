@@ -1,0 +1,11 @@
+{
+ "_what": "NUMBERS read by a person on the remake capture 'Shrine of Plains - 17.17' (third-party material: only these numbers are in the repo, never pixels). Valid area = the capture without the player bar: 1242 x 625 px (the bar starts at y 626). Units: H = the height of the hero in px at its own feet (about 75 px); fractions of the valid area (fx of the width, fy of the height). Eye + ruler on 2-3x crops: about +-5 px (+-0.07 H); a reading, not a measurement of the game.",
+ "valid_px": [1242, 625],
+ "hero": { "px": 75, "frac": 0.12, "fx_feet": 0.592, "fy_feet": 0.768, "note": "four heroes in a row; the red-armoured one in the middle foreground; 74-77 px each" },
+ "door": { "fx": 0.303, "fy_base": 0.40, "h_H": 1.79, "w_H": 1.49, "px": { "x0": 320, "x1": 432, "y0": 116, "y1": 250 } },
+ "facade": { "left": 0.109, "right": 0.487, "w_H": 6.3, "visibleH_H": 3.4, "topCut": true, "base_fy": 0.40 },
+ "torch": { "fx": 0.213, "fy_base": 0.43, "h_H": 0.6 },
+ "route": { "nearHero": { "w_H": 2.4, "row": 0.72 }, "nearDoor": { "w_H": 1.5, "row": 0.46 }, "note": "dirt path: x 150-330 at y 450; x 300-410 at y 285" },
+ "P": { "pieces": 1, "cutEdge": 1, "frameShare": 0.0055, "fx": [0.809, 0.914], "fy_top": 0.947, "visiblePx": 33, "px": { "x0": 1005, "x1": 1135, "y0": 592, "y1": 703 }, "note": "the rock at the bottom right: x 1005-1135 of 1242, y 592-703; only its top (33 px of 625) is inside the valid area, its base is below the bottom edge" },
+ "F": { "voidShare": { "total": 0, "quarters": [0, 0, 0, 0] }, "M3a_closed": true, "note": "no empty background anywhere: canopy mass on the right up to the top edge (x 565-1240, y 0-430), the roof of the shrine and dark vegetation on the left, grass and a dirt strip to the right edge" }
+}

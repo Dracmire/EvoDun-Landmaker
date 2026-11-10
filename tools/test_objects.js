@@ -50,5 +50,34 @@ const orderCheck = (opts) => { const w = 1220, h = 767, tp = 2, hi = Math.floor(
   return { hero, near, far, stats: o.objects.stats, nearerOverHero: near.length > 0 && hero.length > 0 && Math.min(...near) > Math.max(...hero), fartherUnderHero: far.length > 0 && Math.max(...far) < Math.min(...hero) }; };
 { const r = orderCheck(); ok('ONE depth order with the hero: the object nearer than the hero (pillar) is painted AFTER it, the farther one (shrub) BEFORE it', r.nearerOverHero && r.fartherUnderHero, { hero: r.hero, near: r.near, far: r.far }); }
 { const r = orderCheck({ heroAlwaysTop: true }); ok('MUTATION heroAlwaysTop (the hero last, as before S4a): the nearer-object check FAILS', !r.nearerOverHero); }
+// 4. M4c-1: the optional `wH` (width in H that replaces the kind's) and `always` (drawn although the base is not on its own tile in the image, also outside the panel); absent = as before
+{ const w = 1220, h = 767, tp = 2, hi = Math.floor(hy) * W + Math.floor(hx), feet = SG.feetH(S0, hi), cam = camFor(w, h, tp, 0.14, hx, hy, feet), view = { kind: 'persp', yaw: 0, pitch: 25, zoom: 1, panX: 0, panY: 0, fitSc: 1, persH: h, focus: [hx, hy, feet + tp / 2] };
+  const run = (list, opts) => { const ctx = mkctx(); E.objectsTest = opts || null; const o = { objects: { list, tilesPerH: tp } }; OB.draw(ctx, cam, S0, P, 'box', view, o, w, h); E.objectsTest = null; return { st: o.objects.stats, log: ctx.log }; };
+  const base = { kind: 'shrub', x: hx + S0.ox, y: hy + 1 + S0.oy, hH: 2 };
+  const a = run([base], { ignoreHidden: true }), b = run([Object.assign({}, base, { wH: 3 })], { ignoreHidden: true }), c = run([Object.assign({}, base, { wH: undefined, always: false })], { ignoreHidden: true });
+  const k = a.st[0].k, unit = tp * cam.sc * k;
+  ok(`wH replaces the width of the kind: a shrub of wH 3 is ${(b.st[0].wpx / unit).toFixed(3)} H wide (3), the kind's own is ${(a.st[0].wpx / unit).toFixed(3)} H (0.9); the height is untouched`, Math.abs(b.st[0].wpx / unit - 3) < 1e-9 && Math.abs(a.st[0].wpx / unit - 0.9) < 1e-9 && b.st[0].hpx === a.st[0].hpx, [a.st[0], b.st[0]]);
+  ok('absent fields (wH undefined, always false) = the entry of before, byte for byte (same figures and same paint calls)', JSON.stringify(c.st) === JSON.stringify(a.st) && JSON.stringify(c.log) === JSON.stringify(a.log));
+  // the visibility test with an EMPTY pick render (nothing is a tile of its own in the image): without `always` the piece is dropped, with it drawn; a base under the bottom edge too; a tile outside the window is still skipped
+  const pb = E.pickBuffer; E.pickBuffer = () => ({ data: new Uint8ClampedArray(w * h * 4) });
+  const nope = run([base]), yes = run([Object.assign({}, base, { always: true })]);
+  const outPos = { x: S0.ox + S0.W + 6.5, y: S0.oy + hy + 1 }, outside = run([{ kind: 'shrub', x: outPos.x, y: outPos.y, hH: 2, always: true }]), outsideNo = run([{ kind: 'shrub', x: outPos.x, y: outPos.y, hH: 2 }]);
+  E.pickBuffer = pb;
+  ok('without `always` a piece whose base is not on its own tile in the image is not drawn; with `always: true` it is drawn', !nope.st[0].visible && !nope.st[0].drawn && yes.st[0].visible && yes.st[0].drawn, [nope.st[0], yes.st[0]]);
+  { const e = { kind: 'banner', x: hx + S0.ox, y: S0.H - 1 + S0.oy, hH: 2, always: true };
+    E.pickBuffer = () => ({ data: new Uint8ClampedArray(w * h * 4) }); const r = run([e]); E.pickBuffer = pb;
+    ok(`an always-piece with its base at y = ${r.st[0].base[1].toFixed(0)} px (panel height ${h}) is drawn (a foreground occluder with the base outside the panel)`, r.st[0].base[1] > h && r.st[0].drawn, r.st[0]); }
+  // M4c-1b (D2): an `always` piece may stand OUTSIDE the window: the ground height is the one of the nearest window tile, the position is the declared one; without `always` it is skipped as before
+  { const o = outside.st[0], near = E.stage.cellOf(S0, S0.W - 0.5, outPos.y - S0.oy), expB = cam.p(outPos.x - S0.ox, outPos.y - S0.oy, SG.feetH(S0, near));
+    ok(`an always-piece OUTSIDE the window (x = W + 6.5) is drawn at its declared position with the ground height of the nearest window tile (tile ${near}, base ${o.base && o.base.map((v) => v.toFixed(1))})`, o.tile < 0 && o.drawn && o.outside === true && o.groundTile === near && Math.abs(o.base[0] - expB[0]) < 1e-9 && Math.abs(o.base[1] - expB[1]) < 1e-9 && Math.abs(o.ry - cam.ry(outPos.x - S0.ox, outPos.y - S0.oy)) < 1e-12, o);
+    ok('without `always` a piece outside the window is skipped (as before)', outsideNo.st[0].tile < 0 && !outsideNo.st[0].drawn && !outsideNo.st[0].visible); }
+  // M4c-1b (D3): the placeholder style fields: color, shadow: false, label: false; absent or invalid = as before
+  { const plain = run([base], { ignoreHidden: true }), fills = (r) => r.log.filter((e) => e[0] === 'fill').map((e) => e[1]), texts = (r) => r.log.filter((e) => e[0] === 'fillText').length;
+    const col = run([Object.assign({}, base, { color: '#224422' })], { ignoreHidden: true }), bad = run([Object.assign({}, base, { color: 'red; drop' })], { ignoreHidden: true }), nosh = run([Object.assign({}, base, { shadow: false })], { ignoreHidden: true }), nolab = run([Object.assign({}, base, { label: false })], { ignoreHidden: true });
+    ok('color replaces the fill of the kind (the shrub is painted #224422), an invalid colour is ignored (the paint calls of before)', fills(col).includes('#224422') && !fills(col).includes('#3f8a4a') && JSON.stringify(bad.log) === JSON.stringify(plain.log), [fills(col), fills(plain)]);
+    ok(`shadow: false drops the contact shade (${fills(plain).length} fills -> ${fills(nosh).length}) and nothing else`, fills(nosh).length === fills(plain).length - 1 && !fills(nosh).includes('rgba(14,12,22,0.35)') && fills(plain).includes('rgba(14,12,22,0.35)') && texts(nosh) === texts(plain));
+    ok(`label: false drops the text label (${texts(plain)} -> ${texts(nolab)}) and nothing else`, texts(plain) === 1 && texts(nolab) === 0 && JSON.stringify(fills(nolab).slice(0, fills(plain).length - 1)) === JSON.stringify(fills(plain).slice(0, fills(plain).length - 1)));
+    const pil = run([{ kind: 'pillar', x: base.x, y: base.y, hH: 2, color: '#333' }], { ignoreHidden: true }); ok('a coloured pillar takes the colour on its body and its cap (#333)', fills(pil).filter((c) => c === '#333').length === 2, fills(pil)); }
+}
 // (the visibility test = the Box pick render needs a canvas: it is checked in tools/ui/test_stage_objects_ui.js, with its mutation ignoreHidden)
 console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
