@@ -8,26 +8,20 @@
 const fs = require('fs'), path = require('path');
 const { open } = require('./common'), G = require('../stage_golden.js'), SR = path.join(__dirname, '../stage_readings.js');
 const ROOT = path.resolve(__dirname, '../..'), SHOTS = path.join(ROOT, 'docs/crystallizers/03-stage/shots/m4c'), IGN = path.join(__dirname, 'out/m4c');
-/* ONE tool, parametrized by shot (M4c-2, D3): --shot door (default: golden shot 1, the capture 17.17) | path (golden shot 2, the capture 17.01). Per shot: the example, the capture, its valid area (without the player bar), the minimap circle (fractions of the valid area: cx of the width, cy and r of the height), the panel of the viewer (the aspect of the valid area). What depends on the door / facade (R) is read only in `door`; the readings of the winding path only in `path`. */
-const SHOT_TABLE = {
-  door: { example: 'golden_door', capture: 'Shrine of Plains - 17.17.png', valid: [1242, 625], panel: [1280, 644], minimap: { circle: [1122 / 1242, 121 / 625, 84 / 625] } },
-  path: { example: 'golden_path', capture: 'Shrine of Plains - 17.01.png', valid: [1235, 622], panel: [1280, 645], minimap: { circle: [1118 / 1235, 117 / 622, 85 / 622] } }
-};
-const SHOT_ID = (() => { const k = process.argv.indexOf('--shot'); return k >= 0 ? process.argv[k + 1] : 'door'; })(), SHOT = SHOT_TABLE[SHOT_ID]; if (!SHOT) { console.error('unknown --shot ' + SHOT_ID + ' (door | path)'); process.exit(2); }
-const PHOTO = path.join(ROOT, 'docs/crystallizers/03-stage/refs/dq3/remake', SHOT.capture), [W, H] = SHOT.panel, VALID = SHOT.valid, EX = SHOT.example;
-const COLS = 40, ROWS = 22, MINIMAP = SHOT.minimap;
+const PHOTO = path.join(ROOT, 'docs/crystallizers/03-stage/refs/dq3/remake/Shrine of Plains - 17.17.png'), W = 1280, H = 644, VALID = [1242, 625];
+const COLS = 40, ROWS = 22, MINIMAP = { circle: [1122 / 1242, 121 / 625, 84 / 625] };
 (async () => {
   const T0 = Date.now();
   fs.mkdirSync(SHOTS, { recursive: true }); fs.mkdirSync(IGN, { recursive: true });
-  const pr = JSON.parse(fs.readFileSync(path.join(SHOTS, EX + '_photo_readings.json'), 'utf8'));
+  const pr = JSON.parse(fs.readFileSync(path.join(SHOTS, 'golden_door_photo_readings.json'), 'utf8'));
   const a = await open({ w: 1800, h: 1000, modes: true, orient: true }), page = a.page, ev = (f, x) => page.evaluate(f, x), idle = async () => { await a.idle(); await a.idle(); };
   await page.addScriptTag({ content: 'var module = { exports: {} };' + fs.readFileSync(SR, 'utf8') + '\nwindow.SR = module.exports;' });
-  await ev(() => window.__evo.setMode('stage')); await idle(); await page.click(`#examples button[data-id="${EX}"]`); await idle(); await idle();
+  await ev(() => window.__evo.setMode('stage')); await idle(); await page.click('#examples button[data-id="golden_door"]'); await idle(); await idle();
   await ev(([W, H]) => { const s = document.querySelector('#stage'); s.style.cssText = `width:${W}px;height:${H}px;flex:none;`; window.dispatchEvent(new Event('resize')); }, [W, H]); await idle(); await ev(() => window.__evo.redraw()); await idle(); await idle();
-  // the state of the example at the start (M4c-2: the golden examples declare `objectsOn`, the layers are on from the click); the tool turns the switch on only if it is off
+  // the controls of the example: Stage objects OFF at the start (no ribbon, no pieces), then ON
   const off = await ev(() => { const e = window.__evo; return { objectsOn: document.querySelector('#t-stageObjects').checked, frame: !!e.O.frame, objects: !!e.O.objects, ribbons: e.st.stage.ribbonList.length, objectList: e.st.stage.objectList.length }; });
-  if (!off.objectsOn) { await page.click('#t-stageObjects'); await idle(); }
-  const png = await a.canvas(); fs.writeFileSync(path.join(SHOTS, EX + '_viewer.png'), png);
+  await page.click('#t-stageObjects'); await idle();
+  const png = await a.canvas(); fs.writeFileSync(path.join(SHOTS, 'golden_door_viewer.png'), png);
   // ---- (ii) the readings of the viewer ----
   const R = await ev(() => {
     const e = window.__evo, st = e.st, E = window.EVO, S = e.S(), P = e.P, O = e.O, w = document.querySelector('#stage canvas').clientWidth, h = st.persH, tp = st.stage.tilesPerH, v = e.view(), cam = E.makeCam(S, P, v, w, h);
@@ -72,7 +66,7 @@ const COLS = 40, ROWS = 22, MINIMAP = SHOT.minimap;
   const lp = G.cellLum(Uint8ClampedArray.from(grids.photo), VALID[0], VALID[1], COLS, ROWS), lv = G.cellLum(Uint8ClampedArray.from(grids.viewer), grids.vw, grids.vh, COLS, ROWS);
   const dp = G.darkMask(lp, ex), dv = G.darkMask(lv, ex), cmp = G.compare(dv.dark, dp.dark, ex), bp = G.blobs(dp.dark, COLS, ROWS), bv = G.blobs(dv.dark, COLS, ROWS);
   const res = { viewer: R, photo: pr, ribbonCostMs: cost, off, blobs: { grid: [COLS, ROWS], excluded: ex.reduce((s, v) => s + v, 0), agreement: +cmp.agreement.toFixed(3), iouDark: +cmp.iou.toFixed(3), darkCells: { viewer: cmp.nDarkA, photo: cmp.nDarkB }, photoBlobs: bp.slice(0, 5), viewerBlobs: bv.slice(0, 5) } };
-  fs.writeFileSync(path.join(IGN, EX + '_readings.json'), JSON.stringify(res, null, 1) + '\n');
+  fs.writeFileSync(path.join(IGN, 'golden_door_readings.json'), JSON.stringify(res, null, 1) + '\n');
   console.log(JSON.stringify({ off, viewer: R, cost, blobs: res.blobs }, null, 1));
   console.log('PHOTO blobs (# dark)\n' + G.ascii(dp.dark, ex, COLS, ROWS) + '\nVIEWER blobs\n' + G.ascii(dv.dark, ex, COLS, ROWS));
   // ---- (v) the side-by-side, ONLY in tools/ui/out/m4c/ ----
@@ -82,7 +76,7 @@ const COLS = 40, ROWS = 22, MINIMAP = SHOT.minimap;
       x.drawImage(pi, 0, 0, valid[0], valid[1], 0, 0, cw, ch); x.drawImage(vi, 0, 0, vi.width, vi.height, cw + 10, 0, cw, ch);
       const grid = (A, ox, oy) => { for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) { const k = j * cols + i; x.fillStyle = ex[k] ? '#444' : A[k] ? '#000' : '#fff'; x.fillRect(ox + i * cw / cols, oy + j * ch / rows, cw / cols + 0.5, ch / rows + 0.5); } };
       grid(dpA, 0, ch + 10); grid(dvA, cw + 10, ch + 10); return c.toDataURL('image/png').split(',')[1]; }, [fs.readFileSync(PHOTO).toString('base64'), png.toString('base64'), VALID, Array.from(dp.dark), Array.from(dv.dark), COLS, ROWS, Array.from(ex)]);
-    fs.writeFileSync(path.join(IGN, EX + '_side_by_side.png'), Buffer.from(side, 'base64')); console.log('side-by-side: ' + path.join(IGN, EX + '_side_by_side.png') + ' (ignored by git)');
+    fs.writeFileSync(path.join(IGN, 'golden_door_side_by_side.png'), Buffer.from(side, 'base64')); console.log('side-by-side: ' + path.join(IGN, 'golden_door_side_by_side.png') + ' (ignored by git)');
   }
   console.log('page errors', a.errs.length, '| seconds', ((Date.now() - T0) / 1000).toFixed(0)); await a.browser.close();
 })().catch((e) => { console.error(e); process.exit(1); });
