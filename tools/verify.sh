@@ -135,6 +135,9 @@ blk_sel() { # group pos -> 0 if the block runs: always without --sample; with it
   { [ "$1" = g6 ] && [ "$2" = 0 ]; } && return 0
   [ $(( $2 % 4 )) -eq "$SAMPLE_K" ]
 }
+regress_planned() { # images the chosen blocks must compare: 365 in a full pass, the sum of the `images` field of the chosen blocks in a sample (the guard of part_regress and the plan line use it)
+  local e g p rest im sum=0; for e in "${REGRESS_BLOCKS[@]}"; do g="${e%%|*}"; rest="${e#*|}"; p="${rest%%|*}"; rest="${rest#*|}"; im="${rest%%|*}"; blk_sel "$g" "$p" && sum=$((sum+im)); done; echo "$sum"
+}
 grp_any() { # group -> 0 if any block of the group at position >= 1 runs (its `old_*` render is then needed)
   local e g p; for e in "${REGRESS_BLOCKS[@]}"; do g="${e%%|*}"; p="${e#*|}"; p="${p%%|*}"; [ "$g" = "$1" ] && [ "$p" -ge 1 ] && blk_sel "$g" "$p" && return 0; done; return 1
 }
@@ -147,8 +150,8 @@ regress_plan() { # prints the plan: one `regress-block` line per block (n, group
   if [ -n "$SAMPLE" ]; then
     blk_sel g2 0 || { grp_any g2 && printf 'regress-dep\tg2\told_rooms (render only, no compare of its own)\n'; }
     blk_sel g3 0 || { grp_any g3 && printf 'regress-dep\tg3\told_floors (render only, no compare of its own)\n'; }
-    printf '# regress --sample 1/4:%s: %d de %d bloques, %d de %d imágenes (sentinel: g6 0; the 3 (b) blocks are skipped in a sample)\n' "$SAMPLE_K" "$run" "${#REGRESS_BLOCKS[@]}" "$img" "$REGRESS_TOTAL_IMG"
-  else printf '# regress: %d bloques, %d imágenes (full pass)\n' "${#REGRESS_BLOCKS[@]}" "$REGRESS_TOTAL_IMG"; fi
+    printf '# regress --sample 1/4:%s: %d de %d bloques, %d de %d imágenes (sentinel: g6 0; the 3 (b) blocks are skipped in a sample)\n' "$SAMPLE_K" "$run" "${#REGRESS_BLOCKS[@]}" "$(regress_planned)" "$REGRESS_TOTAL_IMG"
+  else printf '# regress: %d bloques, %d imágenes (full pass)\n' "${#REGRESS_BLOCKS[@]}" "$(regress_planned)"; fi
 }
 if [ $LIST -eq 1 ]; then # nothing runs, nothing is written
   for p in "${PARTS[@]}"; do
@@ -218,6 +221,11 @@ part_regress() {
   # The info line has a native FIXED height (limitation 18) that origin/main may not have yet: EVO_INFO_H forces the same rule (tools/ui/common.js) in BOTH runs, so the comparison stays pixel for pixel.
   # Check (b) below proves that the forced rule equals the native one: the NEW tree without EVO_INFO_H against the OLD tree with it.
   export EVO_INFO_H="${EVO_INFO_H:-80.2}"
+  # Guard (a): the render scripts need the synthetic maps of tools/ui/.cache (not committed). Without them regress.js dies half way in BOTH trees, `| tail -1` hides it and compare.js only sees the files that exist.
+  if [ ! -f tools/ui/.cache/maps/height.png ]; then
+    echo "== tools/ui/.cache/maps/height.png is missing: running python3 tools/ui/gen_maps.py" >> "$log"
+    python3 tools/ui/gen_maps.py >> "$log" 2>&1 && [ -f tools/ui/.cache/maps/height.png ] || { S=FAIL; FIG="the maps cache tools/ui/.cache/maps is missing and python3 tools/ui/gen_maps.py failed (it needs Pillow and numpy): nothing was compared"; return; }
+  fi
   git fetch -q origin main >> "$log" 2>&1 || echo "WARNING: git fetch failed, comparing with the local origin/main" >> "$log"
   WT="$(mktemp -d)/main"; git worktree add -f --detach "$WT" origin/main >> "$log" 2>&1 || { S=FAIL; FIG="could not create the worktree of origin/main"; return; }
   r="$D/regress-img"; rm -rf "$r"; mkdir -p "$r"; BLK0=$(date +%s)
@@ -287,6 +295,9 @@ part_regress() {
   git worktree remove --force "$WT" >/dev/null 2>&1; rm -rf "$(dirname "$WT")"; WT=""; git worktree prune
   [ $UNEXP -eq 0 ] && S=PASS || S=FAIL
   FIG="$TOTAL images compared, $UNEXP unexpected differences, $EXPD expected differences"
+  # Guard (b): a render script that died leaves fewer images and compare.js does not notice; the count must be the planned one (a correct run prints exactly what it printed before).
+  local planned; planned=$(regress_planned)
+  [ "$TOTAL" -eq "$planned" ] || { S=FAIL; FIG="$TOTAL de $planned imágenes: un script de render se cayó (¿caché de mapas?); $FIG"; }
   rm -f "$D/regress.sample"
   if [ -n "$SAMPLE" ]; then # a sample is never a full pass: the marker, and what ran / what did not for the summary
     FIG="SUBSET (regress --sample 1/4:$SAMPLE_K, $RUNB de ${#REGRESS_BLOCKS[@]} bloques, $TOTAL de $REGRESS_TOTAL_IMG imágenes): $FIG"
