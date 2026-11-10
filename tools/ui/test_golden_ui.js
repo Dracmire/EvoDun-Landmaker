@@ -1,5 +1,5 @@
 /* GOLDEN SHOT 1 (PR M4c-1) in the viewer: the example `golden_door` of mode 3 (hand-placed layers: objects with wH / always, the ribbon).
-   (1) it loads without page errors, declares its window / hero / heroFrac; (2) with "Stage objects" OFF there is no ribbon and no piece (O.frame, O.objects absent); ON: the ribbon is painted (visible tiles) and the pieces are drawn, the `always` piece is drawn with its base under the bottom edge;
+   (1) it loads without page errors, declares its window / hero / heroFrac; (2) it opens with "Stage objects" ON (`objectsOn`, M4c-2); switched OFF there is no ribbon and no piece (O.frame, O.objects absent); ON: the ribbon is painted (visible tiles) and the pieces are drawn, the `always` piece is drawn with its base under the bottom edge;
    (3) the window session restores EVERYTHING on leaving: ribbonList, objectList, volumeList, hero, heroFrac; (4) a mode 1 example after the golden shot has the canvas of a fresh session (nothing leaks).
      NODE_PATH=$(npm root -g) node tools/ui/test_golden_ui.js */
 const crypto = require('crypto'), { open } = require('./common');
@@ -19,7 +19,10 @@ const sha = (b) => crypto.createHash('sha1').update(b).digest('hex').slice(0, 12
     await ev(() => { const s = document.querySelector('#stage'); s.style.cssText = 'width:1280px;height:644px;flex:none;'; window.dispatchEvent(new Event('resize')); }); await idle(); await ev(() => window.__evo.redraw()); await idle();
     const f2 = await feetAt(); ok(`after a resize to ${f2.w} x ${f2.h} the feet are still at heroScreen (${f2.fx.toFixed(4)}, ${f2.fy.toFixed(4)})`, f2.w === 1280 && Math.abs(f2.fx - 0.592) < 1e-6 && Math.abs(f2.fy - 0.768) < 1e-6, f2);
     await ev(() => { document.querySelector('#stage').style.cssText = ''; window.dispatchEvent(new Event('resize')); }); await idle(); await ev(() => window.__evo.redraw()); await idle(); }
-  ok('with "Stage objects" OFF there is no ribbon and no piece (O.frame and O.objects absent)', !s0.on && !s0.frame && !s0.objects, s0);
+  ok('M4c-2 (D2): the example declares `objectsOn`: it opens with "Stage objects" ON, the ribbon and the pieces in place', s0.on && s0.frame && s0.objects, s0);
+  await page.click('#t-stageObjects'); await idle(); // switched OFF by hand
+  { const sOff = await ev(() => { const e = window.__evo; return { on: document.querySelector('#t-stageObjects').checked, frame: !!e.O.frame, objects: !!e.O.objects }; });
+    ok('with "Stage objects" switched OFF there is no ribbon and no piece (O.frame and O.objects absent)', !sOff.on && !sOff.frame && !sOff.objects, sOff); }
   const h0 = sha(await a.canvas());
   await page.click('#t-stageObjects'); await idle();
   const s1 = await ev(() => { const e = window.__evo, O = e.O; return { frame: !!O.frame, stats: O.frame && O.frame.stats, drawn: O.objects && O.objects.stats.filter((q) => q.drawn).length, total: O.objects && O.objects.stats.length, always: O.objects && O.objects.stats.filter((q) => q.always || (e.st.stage.objectList.find((o) => o.x === q.x && o.y === q.y && o.always))).map((q) => ({ drawn: q.drawn, baseY: q.base[1], h: document.querySelector('#stage canvas').clientHeight })) }; });
