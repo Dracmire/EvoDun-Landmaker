@@ -6,6 +6,6 @@
  "facade": { "left": 0.109, "right": 0.487, "w_H": 6.3, "visibleH_H": 3.4, "topCut": true, "base_fy": 0.40 },
  "torch": { "fx": 0.213, "fy_base": 0.43, "h_H": 0.6 },
  "route": { "nearHero": { "w_H": 2.4, "row": 0.72 }, "nearDoor": { "w_H": 1.5, "row": 0.46 }, "note": "dirt path: x 150-330 at y 450; x 300-410 at y 285" },
- "P": { "pieces": 1, "cutEdge": 1, "frameShare": 0.0055, "note": "the rock at the bottom right: x 1005-1135, y 592-703; only its top (33 px) is inside the valid area" },
- "F": { "topEmptyShare": 0, "M3a_closed": true, "note": "no empty background at the top: canopy mass on the right up to the top edge (x 565-1240, y 0-430), the roof of the shrine and dark vegetation on the left" }
+ "P": { "pieces": 1, "cutEdge": 1, "frameShare": 0.0055, "fx": [0.809, 0.914], "fy_top": 0.947, "visiblePx": 33, "px": { "x0": 1005, "x1": 1135, "y0": 592, "y1": 703 }, "note": "the rock at the bottom right: x 1005-1135 of 1242, y 592-703; only its top (33 px of 625) is inside the valid area, its base is below the bottom edge" },
+ "F": { "voidShare": { "total": 0, "quarters": [0, 0, 0, 0] }, "M3a_closed": true, "note": "no empty background anywhere: canopy mass on the right up to the top edge (x 565-1240, y 0-430), the roof of the shrine and dark vegetation on the left, grass and a dirt strip to the right edge" }
 }
