@@ -1,0 +1,26 @@
+{
+ "_what": "NUMBERS read by a person on the remake capture 'Shrine of Plains - 17.01' (third-party material: only these numbers are in the repo, never pixels). Valid area = the capture without the player bar: 1235 x 622 px (the bar starts at y 623). Units: H = the height of the leader in px at its own feet (about 72 px; its feet are hidden by the hero behind it, +-4 px); fractions of the valid area. Eye + a 100 px grid on 1.8-4x crops: about +-5 px, the dirt edges in shadow +-30 px. A reading, not a measurement of the game.",
+ "valid_px": [1235, 622],
+ "minimap_circle_px": { "cx": 1118, "cy": 117, "r": 85 },
+ "hero": { "px": 72, "frac": 0.116, "fx_feet": 0.475, "fy_feet": 0.759, "note": "the leader = the top one of the column (blue pack); the other two walk behind it, nearer the camera (80 and 88 px)" },
+ "path": {
+  "route": [
+   { "row": 0.90, "w_H": 2.6, "centre_fx": 0.40, "span_fx": [0.32, 0.47] },
+   { "row": 0.76, "w_H": 3.5, "centre_fx": 0.38, "span_fx": [0.28, 0.485], "note": "the left edge is in the shadow of the bush (x 330-345 +-30 px); 2.5 H if the shadowed part is not counted" },
+   { "row": 0.60, "w_H": 2.4, "centre_fx": 0.30, "span_fx": [0.18, 0.485], "note": "two branches around the island of grass: left x 225-340 (1.6 H), right x 545-600 (0.8 H)" },
+   { "row": 0.45, "w_H": 3.5, "centre_fx": 0.15, "span_fx": [0.05, 0.25], "note": "the path runs almost horizontally here (x 60-310, y 250-300): the row cuts it lengthwise; its thickness on screen is about 50 px (0.7 H)" }
+  ],
+  "rightMass_leftEdge_fx": [ { "row": 0.40, "fx": 0.44 }, { "row": 0.60, "fx": 0.485 }, { "row": 0.80, "fx": 0.485 } ],
+  "leftMass_rightEdge_fx": [ { "row": 0.40, "fx": 0.07 }, { "row": 0.60, "fx": 0.16 }, { "row": 0.80, "fx": 0.32 } ],
+  "topBand_reach_fy": [ { "fx": 0.2, "fy": 0.32 }, { "fx": 0.5, "fy": 0.87, "note": "continuous with the right mass" }, { "fx": 0.8, "fy": 0.77, "note": "continuous with the right mass" } ],
+  "boulder": { "fx": [0.69, 0.806], "fy": [0.777, 0.894] },
+  "jar": { "fx": [0.642, 0.68], "fy": [0.88, 0.96] },
+  "isleRock": { "fx": [0.308, 0.389], "fy": [0.611, 0.662] },
+  "isle": { "fx": [0.275, 0.44], "fy": [0.54, 0.73] },
+  "bank": { "fx": [0.19, 0.34], "fy": [0.14, 0.30] },
+  "trunkR": { "fx": [0.627, 0.685], "fy": [0.09, 0.535] },
+  "trunkL": { "fx": [0.325, 0.355], "fy": [0.16, 0.48] }
+ },
+ "P": { "pieces": 2, "cutEdge": 0, "note": "the boulder and the jar on the grass at the bottom right; nothing cuts an edge" },
+ "F": { "voidShare": { "total": 0, "quarters": [0, 0, 0, 0] }, "blockedShare": { "total": 0, "quarters": [0, 0, 0, 0], "note": "no cliff or plateau in sight; the only wall is the dark earth bank (about 2.4 % of the frame)" } }
+}
