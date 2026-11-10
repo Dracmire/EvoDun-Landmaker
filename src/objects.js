@@ -6,6 +6,7 @@
    BASE = the ground of the tile under (x, y) (E.stage.feetH). VISIBILITY = the Box pick render, like the contract (`ownGround`): an object whose base is not on its own tile in the image (a higher terrain in front, or outside the panel) is not drawn.
    ORDER = ONE depth-sorted list with the hero (cam.ry, larger = nearer the camera): an object nearer than the hero is painted over it; the hero no longer comes last when the objects are on. Tall objects may leave the panel at the top: expected (a cut silhouette).
    M4c-1 (golden shot 1), two OPTIONAL fields of an entry, absent = the behaviour of before byte for byte: `wH` (the width in H that replaces the one of the kind: a wide `shrub` = a mass of foliage, a narrow `pillar` = a trunk, a `landmark` of 6-7 H = a facade) and `always: true` (the piece is drawn although its base is not on its own tile in the image or is OUTSIDE the panel: the foreground occluders have their base under the bottom edge; the tile of the base must exist in the window). `E.objects.groundTest` is the visibility test (the pick render) shared with src/frame.js.
+   M4c-1b, more OPTIONAL fields (absent = as before): an `always` piece may stand OUTSIDE the window (cellOf < 0: beyond the edge of the filler map): its ground height is the one of the NEAREST window tile (x, y clamped to the window box for the height only; it is drawn at its declared position, same depth order by cam.ry); without `always` such an entry is still skipped. Placeholder STYLE per entry: `color` ('#rgb' / '#rrggbb', anything else is ignored), `shadow: false` (no contact shade), `label: false` (no text label): the value structure of a frame (which masses are dark) is composition, and a shot to compare must not carry labels.
    Test hooks (`E.objectsTest`, tests only, undefined in normal use): constSize, constStroke, tilesNotH, ignoreHidden, heroAlwaysTop; S4c: noDistance, hardStep, detailAlways, detailNever, pieceIgnoreHidden. */
 (function (E) {
   'use strict';
@@ -36,12 +37,13 @@
     return { k, hpx: hH * (cam.vScale || 1) * tp * cam.sc * k, wpx: wH * tp * cam.sc * k, lw: t.constStroke ? LW0 : LW0 * k, font: FONT0 * k };
   }
 
-  function shape(ctx, kind, b, sz, label) { // b = the base point on screen; the placeholder, a contact shade, a label
-    const { hpx, wpx, lw, font } = sz, col = KINDS[kind].color;
+  const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i, styleOf = (ob) => (ob.color !== undefined || ob.shadow === false ? { color: typeof ob.color === 'string' && HEX.test(ob.color) ? ob.color : undefined, shadow: ob.shadow } : undefined);
+  function shape(ctx, kind, b, sz, label, style) { // b = the base point on screen; the placeholder, a contact shade, a label; style (M4c-1b, optional): { color, shadow }
+    const { hpx, wpx, lw, font } = sz, own = style && style.color, col = own || KINDS[kind].color;
     ctx.save(); ctx.lineJoin = 'round'; ctx.lineWidth = lw; ctx.strokeStyle = 'rgba(24,20,34,0.95)';
-    ctx.fillStyle = 'rgba(14,12,22,0.35)'; ctx.beginPath(); ctx.ellipse(b[0], b[1], wpx * 0.7, wpx * 0.22, 0, 0, 7); ctx.fill();
+    if (!(style && style.shadow === false)) { ctx.fillStyle = 'rgba(14,12,22,0.35)'; ctx.beginPath(); ctx.ellipse(b[0], b[1], wpx * 0.7, wpx * 0.22, 0, 0, 7); ctx.fill(); }
     if (kind === 'shrub') { ctx.beginPath(); ctx.ellipse(b[0], b[1] - hpx / 2, wpx / 2, hpx / 2, 0, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
-    else if (kind === 'pillar' || kind === 'landmark') { ctx.beginPath(); ctx.rect(b[0] - wpx / 2, b[1] - hpx, wpx, hpx); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.rect(b[0] - wpx * 0.62, b[1] - hpx, wpx * 1.24, Math.min(hpx * 0.06, wpx * 0.3)); ctx.fillStyle = '#d8d2c6'; ctx.fill(); ctx.stroke(); }
+    else if (kind === 'pillar' || kind === 'landmark') { ctx.beginPath(); ctx.rect(b[0] - wpx / 2, b[1] - hpx, wpx, hpx); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.rect(b[0] - wpx * 0.62, b[1] - hpx, wpx * 1.24, Math.min(hpx * 0.06, wpx * 0.3)); ctx.fillStyle = own || '#d8d2c6'; ctx.fill(); ctx.stroke(); }
     else { // banner and lamp: a pole and a head
       ctx.beginPath(); ctx.rect(b[0] - wpx * 0.06, b[1] - hpx, wpx * 0.12, hpx); ctx.fillStyle = '#5b3f2a'; ctx.fill(); ctx.stroke();
       if (kind === 'banner') { ctx.beginPath(); ctx.rect(b[0] + wpx * 0.06, b[1] - hpx, wpx * 0.9, hpx * 0.28); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
@@ -66,7 +68,8 @@
     for (const ob of list) {
       const kd = KINDS[ob.kind]; if (!kd) continue;
       const x = ob.x - S.ox, y = ob.y - S.oy, i = E.stage.cellOf(S, x, y), st = { kind: ob.kind, hH: ob.hH, x: ob.x, y: ob.y, tile: i, drawn: false, visible: false };
-      stats.push(st); if (i < 0) continue;
+      stats.push(st); let gi = i; // the tile that gives the ground height
+      if (i < 0) { if (ob.always !== true) continue; gi = E.stage.cellOf(S, Math.min(S.W - 0.5, Math.max(0.5, x)), Math.min(S.H - 0.5, Math.max(0.5, y))); if (gi < 0) continue; st.outside = true; st.groundTile = gi; } // M4c-1b: an `always` piece outside the window stands at the height of the nearest window tile
       let hH = ob.hH, lp = null, d = Infinity; const ex = o.objects.exag; // M4c-0: the exaggeration of heights above the ground (one place for the declared list, the props and the landmark)
       if (ob.kind === 'landmark') { // S4c: the apparent height from the ground distance (in H) to the hero's feet
         lp = landmarkParams(ob); if (o.hero) d = Math.hypot(o.hero.x - x, o.hero.y - y) / (t.tilesNotH ? 1 : tp); // (MUTATION tilesNotH: the distance in tiles)
@@ -74,10 +77,10 @@
         Object.assign(st, { hH, d, lm: lp });
       }
       if (ex !== undefined && ex !== 1) { hH = E.stage.exag(hH, ex); st.hH = hH; }
-      const feet = E.stage.feetH(S, i), b = cam.p(x, y, feet), sz = sizeAt(cam, tp, hH, ob.wH > 0 ? ob.wH : kd.wH, x, y, feet); sz.hH = hH;
+      const feet = E.stage.feetH(S, gi), b = cam.p(x, y, feet), sz = sizeAt(cam, tp, hH, ob.wH > 0 ? ob.wH : kd.wH, x, y, feet); sz.hH = hH;
       st.visible = t.ignoreHidden || ob.always === true ? true : ownGround(b, i); Object.assign(st, { hpx: sz.hpx, wpx: sz.wpx, k: sz.k, lw: sz.lw, font: sz.font, base: b, ry: cam.ry(x, y) });
       if (!st.visible) continue;
-      items.push({ ry: st.ry, st, paint: () => { shape(ctx, ob.kind, b, sz); st.drawn = true; } });
+      items.push({ ry: st.ry, st, paint: () => { shape(ctx, ob.kind, b, sz, ob.label === false ? false : undefined, styleOf(ob)); st.drawn = true; } });
       if (lp) { // the base detail: alpha from the distance, the three pieces drawn with the hero's convention at the depth of their own feet
         const al = t.detailAlways ? 1 : t.detailNever ? 0 : baseAlpha(d, lp), ya = (o.objects.yaw || 0) * Math.PI / 180, cx = Math.sin(ya), cy = Math.cos(ya); st.alpha = al; st.detail = [];
         if (al > 0) for (const pc of DETAIL.pieces) {

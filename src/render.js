@@ -837,6 +837,7 @@
     return { data: ctx.getImageData(0, 0, w, h).data, w, h };
   };
 
+  E.BG_COLORS = ['#2a2540', '#171424']; // the vertical gradient of the empty background, top to bottom (read by tools/ui/m4c_golden.js: voidShare)
   const BG = (ctx, w, h) => { const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#2a2540'); bg.addColorStop(1, '#171424'); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); }; // the background of the panel: a vertical gradient over the VIEWPORT (never part of a cached layer)
   const sizeCv = (cv, w, h) => { const dpr = window.devicePixelRatio || 1; if (cv.width !== (w * dpr | 0) || cv.height !== (h * dpr | 0)) { cv.width = w * dpr; cv.height = h * dpr; } const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); return ctx; };
   /* TIME-SLICED EXACT FRAME (PR F1', display option `O.sliced`; src/ui.js `slicedStart`). `E.sliceStart` starts a frame that is drawn into the PRIVATE canvas `opts.off` (the same device size and the same operations as `E.render`: background, terrain, overlays) a few milliseconds at a time:
