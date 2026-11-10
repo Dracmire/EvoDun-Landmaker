@@ -1,0 +1,32 @@
+/* tools/verify.sh regress --sample 1/4[:K] (verify-sample): the LIGHT pass that runs a quarter of the comparison blocks of the pixel regression, rotating. No browser: every check reads `verify.sh regress --list [--sample ...]` (nothing runs).
+   (a) without the flag the list is the full pass: 22 blocks, all `run`, and the old `regress (whole part)` line; (b) for K = 0..3 the chosen blocks cover the 19 sampleable ones, each in exactly one K (the sentinel, the first block of g6, in all four);
+   (c) when a toggle block of g2 / g3 runs and the first block of its group does not, the `old_*` render it compares against is listed as a render-only dependency (and never otherwise); (d) a bad K or another fraction exits 2 with a clear message, and --sample on a part other than regress too;
+   (e) the default K is a function of the hash of HEAD (two calls agree, and it equals 0x<first byte> mod 4); (f) the 3 "(b)" blocks never run in a sample; the SUBSET marker is in the plan line. (No named mutations: the script is shell, the repo's mutation pattern is for the JS modules.)
+     node tools/test_verify_sample.js */
+const { spawnSync } = require('child_process'), path = require('path');
+const SH = path.join(__dirname, 'verify.sh'); let pass = 0, fail = 0;
+const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : JSON.stringify(extra).slice(0, 400)); } };
+const run = (args) => { const r = spawnSync('bash', [SH, ...args], { encoding: 'utf8' }); return { rc: r.status, out: r.stdout || '', err: r.stderr || '' }; };
+const plan = (args) => { const r = run(['regress', '--list', ...args]); const blocks = r.out.split('\n').filter((l) => l.startsWith('regress-block\t')).map((l) => { const c = l.split('\t'); return { n: +c[1], g: c[2], pos: +c[3], st: c[4], img: +c[5], label: c[6] }; }); return { rc: r.rc, out: r.out, blocks, deps: r.out.split('\n').filter((l) => l.startsWith('regress-dep\t')).map((l) => l.split('\t')[1]) }; };
+// (a)
+const full = plan([]);
+ok(`(a) without --sample the list is the full pass: ${full.blocks.length} blocks, all run, ${full.blocks.reduce((s, b) => s + b.img, 0)} images, and the line "regress (whole part)" of before`, full.rc === 0 && full.blocks.length === 22 && full.blocks.every((b) => b.st === 'run') && full.blocks.reduce((s, b) => s + b.img, 0) === 365 && /^regress\t\(whole part\)$/m.test(full.out) && full.deps.length === 0, full.blocks.length);
+const groups = {}; for (const b of full.blocks) (groups[b.g] = groups[b.g] || []).push(b);
+ok('the groups are g1 (2), g2 (6), g3 (6), g4 (2), g5 (1), g6 (2) and b (3), positions from 0 in order', ['g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'b'].map((g) => groups[g].length).join() === '2,6,6,2,1,2,3' && Object.values(groups).every((a) => a.every((b, i) => b.pos === i)));
+// (b), (c), (f)
+const S = [0, 1, 2, 3].map((k) => plan(['--sample', '1/4:' + k])), sentinel = full.blocks.find((b) => b.g === 'g6' && b.pos === 0).n, sampleable = full.blocks.filter((b) => b.g !== 'b').map((b) => b.n);
+{ const count = {}; S.forEach((p) => p.blocks.filter((b) => b.st === 'run').forEach((b) => { count[b.n] = (count[b.n] || 0) + 1; }));
+  ok(`(b) K = 0..3 together cover the 19 sampleable blocks, each in exactly one K, the sentinel (block ${sentinel}) in all four (blocks per K: ${S.map((p) => p.blocks.filter((b) => b.st === 'run').length).join(' / ')})`, S.every((p) => p.rc === 0) && sampleable.every((n) => count[n] === (n === sentinel ? 4 : 1)) && Object.keys(count).length === 19, count);
+  ok('(b) the rule: a block runs when its position in its group has pos mod 4 == K (or it is the sentinel)', S.every((p, k) => p.blocks.every((b) => (b.st === 'run') === (b.g !== 'b' && (b.n === sentinel || b.pos % 4 === k)))));
+  ok('(f) the 3 "(b) native info height vs forced" blocks never run in a sample', S.every((p) => p.blocks.filter((b) => b.g === 'b').length === 3 && p.blocks.filter((b) => b.g === 'b').every((b) => b.st === 'skip'))); }
+{ const good = S.every((p) => ['g2', 'g3'].every((g) => { const bs = p.blocks.filter((b) => b.g === g), first = bs[0].st === 'run', toggles = bs.slice(1).some((b) => b.st === 'run'); return p.deps.includes(g) === (!first && toggles); }));
+  ok(`(c) a toggle block that runs without the first block of its group has its old_* render as a render-only dependency, and only then (deps per K: ${S.map((p) => p.deps.join('+') || '-').join(' / ')})`, good, S.map((p) => p.deps)); }
+ok('the plan line of a sample carries the count (blocks and images) and says it is a sample', S.every((p, k) => new RegExp(`^# regress --sample 1/4:${k}: \\d+ de 22 bloques, \\d+ de 365 imágenes`, 'm').test(p.out) && /^regress\t\(sample 1\/4:\d\)$/m.test(p.out) && !/whole part/.test(p.out)));
+// (d)
+{ const bad = [['regress', '--list', '--sample', '1/4:4'], ['regress', '--list', '--sample', '1/4:-1'], ['regress', '--list', '--sample', '1/4:a'], ['regress', '--list', '--sample', '1/3'], ['regress', '--list', '--sample', '2/4:0'], ['regress', '--list', '--sample'], ['ui', '--list', '--sample', '1/4:0'], ['node', 'zbuf', '--list', '--sample', '1/4']].map((a) => run(a));
+  ok('(d) a bad K (4, -1, a), another fraction (1/3, 2/4), --sample without a value and --sample without the part regress exit 2 with a message that names --sample', bad.every((r) => r.rc === 2 && /--sample/.test(r.err)), bad.map((r) => [r.rc, r.err.trim()])); }
+// (e)
+{ const a1 = plan(['--sample', '1/4']), a2 = plan(['--sample', '1/4']), head = spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', cwd: path.join(__dirname, '..') }).stdout.trim(), k = parseInt(head.slice(0, 2), 16) % 4, m = /--sample 1\/4:(\d)/.exec(a1.out);
+  ok(`(e) the default K is a function of the hash of HEAD: 0x${head.slice(0, 2)} mod 4 = ${k}, twice the same plan`, a1.rc === 0 && a1.out === a2.out && m && +m[1] === k && a1.out === plan(['--sample', '1/4:' + k]).out, [m && m[1], k]); }
+ok('--sample alone (no part named) means the part regress, not the default parts', (() => { const r = run(['--list', '--sample', '1/4:1']); return r.rc === 0 && /^regress\t\(sample 1\/4:1\)$/m.test(r.out) && !/^node\t|^ui\t|^zbuf\t/m.test(r.out); })());
+console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
