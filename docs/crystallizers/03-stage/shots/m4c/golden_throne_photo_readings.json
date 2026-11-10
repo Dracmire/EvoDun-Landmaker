@@ -1,0 +1,18 @@
+{
+ "_what": "NUMBERS read by a person on the remake capture 'r_20261029_054537_throne_room_orange' (third-party material: only these numbers are in the repo, never pixels). Valid area = the whole capture, 1278 x 643 px (no player bar, no minimap; a channel icon in the bottom right corner, x > 0.985 and y > 0.90, left out). Units: H = the height of the leader in px at its own feet (about 67.5 px; its feet are hidden by the hero behind it, +-4 px); fractions of the valid area. Eye + ruler on 4x crops: about +-5 px. The luma boxes are computed (BT.601 mean over the box / 255), not read by eye. A reading, not a measurement of the game.",
+ "valid_px": [1278, 643],
+ "hero": { "px": 67.5, "frac": 0.105, "fx_feet": 0.50, "fy_feet": 0.636, "note": "the leader = the top one of the column of five (dark spiky hair), walking to the throne" },
+ "camera": { "tile_h_over_w": { "near_the_group": 0.57, "upper_rows": 0.52 }, "pitch_deg": "about 33-35 (asin of the ratio, square tiles assumed; +-5)", "cam6_pitch_deg": 25 },
+ "throne": {
+  "carpet": { "rows": [ { "row": 0.85, "w_H": 9.5, "w_frame": 0.504, "centre_fx": 0.50 }, { "row": 0.64, "w_H": 7.4, "w_frame": 0.393, "centre_fx": 0.50 }, { "row": 0.45, "w_H": 5.9, "w_frame": 0.313, "centre_fx": 0.50 }, { "row": 0.32, "w_H": 4.9, "w_frame": 0.26, "centre_fx": 0.50 } ], "topEdge_fy": 0.295 },
+  "P": { "left_innerEdge_fx": [ { "row": 0.40, "fx": 0.12 }, { "row": 0.60, "fx": 0.15 }, { "row": 0.80, "fx": 0.12 } ], "right_innerEdge_fx": [ { "row": 0.40, "fx": 0.88 }, { "row": 0.60, "fx": 0.85 }, { "row": 0.80, "fx": 0.88 } ], "top_fy": [0.29, 0.29] },
+  "midColumns": { "left": { "fx": [0.188, 0.262], "fy": [0.20, 0.672] }, "right": { "fx": [0.745, 0.82], "fy": [0.20, 0.672] } },
+  "farColumns": { "left": { "fx": [0.26, 0.31], "fy": [0.0, 0.38] }, "right": { "fx": [0.69, 0.73], "fy": [0.0, 0.38] } },
+  "dais": { "fx": [0.411, 0.587], "fy": [0.32, 0.45] },
+  "throneTop_fy": 0.148,
+  "wallBase_fy": 0.20,
+  "contrast": { "luma": { "P_left": 0.315, "P_right": 0.307, "carpet": 0.506, "floor_side": 0.637, "top": 0.337, "all": 0.418 }, "P_over_carpet": 0.61, "floor_over_carpet": 1.26, "top_over_carpet": 0.67 }
+ },
+ "P": { "pieces": 2, "cutEdge": 2, "note": "the two grey stone masses: they leave the frame at the bottom and at the sides" },
+ "F": { "voidShare": { "total": 0, "quarters": [0, 0, 0, 0] }, "blockedShare": { "total": 0, "quarters": [0, 0, 0, 0] } }
+}

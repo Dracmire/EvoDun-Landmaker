@@ -6776,6 +6776,40 @@ window.EVO_AUREA_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAADAAAAAsCAYAAAAjFjtnAAAAnE
         { pts: [[33.2, 40.5], [35.3, 36.5], [37.4, 32.4], [38.3, 30.6], [38.5, 29.7]], wH: 3.0 },
         { part: 'cross', pts: [[39.0, 36.5], [44.5, 35.5], [50.0, 36.5], [51.9, 36.3]], wH: 1.3 }
       ] }));
+    /* GOLDEN SHOT 2 (M4c-2): an INTERIOR. The frame of the remake capture "throne room, orange carpet" with the SAME fields as golden shot 1 (it proves the mechanism was not made to measure for a door). No verified old map for this room: the flat valley of Forest B' (0 H) is the filler floor; what is seen of floor, walls and background is put by the pieces and the ribbons. */
+    stg.examples.push(Object.assign({}, forest('B', 'Golden shot 2 · Throne room (hand-placed layers)', 4, 3), { id: 'golden_throne', window: [1], heroAt: { x: 37.5, y: 41.5 }, heroScreen: [0.50, 0.636], heroFrac: 0.0965, yaw: 0, orient: false, planes: false, props: false, objectsOn: true,
+      /* ---- golden shot 2: hand-placed, a hypothesis, not a rule. The layers of the frame of the remake capture "throne room, orange carpet": P = the two huge grey stone masses at the left and right edges, G = the orange carpet on the light floor, R = the dais and the throne (guards, candelabra), F = the columns with banners and chandeliers and the red back wall. Coordinates are MAP tiles; the filler floor is the flat valley (0 H, x 24-51, y 30-46 around the hero): where the frame needs floor beyond it (north of y 30 and south of the map edge y 46) the floor and the carpet are flat-coloured BILLBOARDS (two bands south of the map, so the two women who stand on the near floor are ordered right). Every piece: label false; the wide ones shadow false. `layer` / `mass` / `part` are notes for the readings of the tool, not read by the viewer. Colours are VALUE (luma), not look. ---- */
+      objects: [
+        // F: the red back wall (far, behind everything), the far floor up to its base and the far end of the carpet (billboards north of the valley)
+        { layer: 'F', mass: 'wall', kind: 'pillar', x: 37.5, y: 24.0, hH: 8, wH: 60, color: '#8a2f28', shadow: false, label: false, always: true },
+        { layer: 'F', mass: 'chandC', kind: 'shrub', x: 37.5, y: 24.6, hH: 1.6, wH: 5.6, color: '#d9b44a', shadow: false, label: false }, // the central chandelier (a ring of candles): an ellipse standing in front of the wall, since a piece cannot hang
+        { layer: 'G', mass: 'farFloor', kind: 'pillar', x: 37.5, y: 30.05, hH: 2.8, wH: 34, color: '#b8a47c', shadow: false, label: false, always: true },
+        { layer: 'G', mass: 'farCarpet', kind: 'pillar', x: 37.5, y: 30.07, hH: 1.45, wH: 6.9, color: '#d9682a', shadow: false, label: false },
+        // F: the far columns (at the north end of the valley) and the middle columns with their banner and chandelier (a lamp behind the shaft: its head is the ring of candles)
+        { layer: 'F', mass: 'colFarL', kind: 'pillar', x: 26.9, y: 30.1, hH: 4.6, wH: 1.1, color: '#6f6258', shadow: false, label: false }, { layer: 'F', mass: 'colFarR', kind: 'pillar', x: 48.1, y: 30.1, hH: 4.6, wH: 1.1, color: '#6f6258', shadow: false, label: false },
+        { layer: 'F', mass: 'chandL', kind: 'lamp', x: 27.4, y: 41.3, hH: 4.2, wH: 2.3, color: '#d9b44a', shadow: false, label: false }, { layer: 'F', mass: 'chandR', kind: 'lamp', x: 47.6, y: 41.3, hH: 4.2, wH: 2.3, color: '#d9b44a', shadow: false, label: false },
+        { layer: 'F', mass: 'colMidL', kind: 'pillar', x: 27.4, y: 41.5, hH: 4.3, wH: 1.5, color: '#7d6f62', shadow: false, label: false }, { layer: 'F', mass: 'colMidR', kind: 'pillar', x: 47.6, y: 41.5, hH: 4.3, wH: 1.5, color: '#7d6f62', shadow: false, label: false },
+        { layer: 'F', mass: 'bannerL', kind: 'banner', x: 26.2, y: 41.6, hH: 3.9, wH: 1.3, color: '#d9682a', shadow: false, label: false }, { layer: 'F', mass: 'bannerR', kind: 'banner', x: 46.4, y: 41.6, hH: 3.9, wH: 1.3, color: '#d9682a', shadow: false, label: false },
+        // R: the dais and the throne at the end of the carpet, the two guards, the two candelabra
+        { layer: 'R', mass: 'dais', kind: 'pillar', x: 37.5, y: 32.0, hH: 1.2, wH: 4.0, color: '#cdbb9c', shadow: false, label: false },
+        { layer: 'R', mass: 'throne', kind: 'pillar', x: 37.5, y: 32.2, hH: 3.5, wH: 2.1, color: '#7a2a24', shadow: false, label: false },
+        { layer: 'R', mass: 'guardL', kind: 'pillar', x: 32.3, y: 33.0, hH: 1.05, wH: 0.45, color: '#5b6fa8', label: false }, { layer: 'R', mass: 'guardR', kind: 'pillar', x: 42.7, y: 33.0, hH: 1.05, wH: 0.45, color: '#5b6fa8', label: false },
+        { layer: 'R', mass: 'candleL', kind: 'lamp', x: 32.8, y: 31.2, hH: 1.3, label: false }, { layer: 'R', mass: 'candleR', kind: 'lamp', x: 42.2, y: 31.2, hH: 1.3, label: false },
+        // G: the near floor and the near end of the carpet, south of the map edge (two bands in depth), and the two women who stand on them
+        { layer: 'G', mass: 'nearFloor', kind: 'pillar', x: 37.5, y: 49.0, hH: 0.95, wH: 30, color: '#b8a47c', shadow: false, label: false, always: true }, { layer: 'G', mass: 'nearCarpet', kind: 'pillar', x: 37.5, y: 49.01, hH: 0.95, wH: 7.0, color: '#d9682a', shadow: false, label: false, always: true },
+        { layer: 'R', mass: 'womanL', kind: 'pillar', x: 31.1, y: 49.05, hH: 0.9, wH: 0.4, color: '#c77fb8', label: false, always: true }, { layer: 'R', mass: 'womanR', kind: 'pillar', x: 43.9, y: 49.05, hH: 0.9, wH: 0.4, color: '#c77fb8', label: false, always: true },
+        { layer: 'G', mass: 'nearFloor', kind: 'pillar', x: 37.5, y: 52.8, hH: 1.15, wH: 30, color: '#b8a47c', shadow: false, label: false, always: true }, { layer: 'G', mass: 'nearCarpet', kind: 'pillar', x: 37.5, y: 52.81, hH: 1.15, wH: 6.4, color: '#d9682a', shadow: false, label: false, always: true },
+        // F: the dark bases that close the sides between the stone masses and the floor (the plateau of the filler on the left, the edge of the map on the right)
+        { layer: 'F', mass: 'sideL', kind: 'pillar', x: 22.6, y: 36.0, hH: 2.2, wH: 1.7, color: '#3d3a3a', shadow: false, label: false }, { layer: 'F', mass: 'sideR', kind: 'pillar', x: 52.9, y: 36.0, hH: 2.7, wH: 2.4, color: '#3d3a3a', shadow: false, label: false, always: true },
+        // P: the two huge grey stone masses that frame the shot (dark; they leave the frame at the bottom)
+        { layer: 'P', mass: 'stoneL', kind: 'pillar', x: 26.2, y: 53.5, hH: 5.2, wH: 1.9, color: '#4f4f4f', shadow: false, label: false, always: true }, { layer: 'P', mass: 'stoneR', kind: 'pillar', x: 48.8, y: 53.5, hH: 5.2, wH: 1.9, color: '#4f4f4f', shadow: false, label: false, always: true }
+      ],
+      volumes: [],
+      ribbon: [ // G: the light tiled floor (rows of the valley), the orange carpet from the map edge to the dais, the dark inlay strips beside the columns
+        ...[31, 33].map((y) => ({ part: 'floor', pts: [[24.5, y], [51.5, y]], wH: 1.0, color: '#b8a47c' })), ...[35, 37, 39, 41, 43, 45].map((y) => ({ part: 'floor', pts: [[11.5, y], [51.5, y]], wH: 1.0, color: '#b8a47c' })),
+        { part: 'inlay', pts: [[24.4, 30.6], [24.4, 39.0]], wH: 0.5, color: '#3d3a3a' }, { part: 'inlay', pts: [[50.6, 30.6], [50.6, 39.0]], wH: 0.5, color: '#3d3a3a' },
+        { part: 'carpet', pts: [[37.5, 32.6], [37.5, 45.6]], wH: 7.0, color: '#d9682a' }
+      ] }));
     stg.examples.push(Object.assign({}, base, { id: 'mockt_z14', label: 'Room 14 · orientation (mock T Z)', roomSet: [14], objects: [], volumes: [] }), Object.assign({}, base, { id: 'mockt_x44', label: 'Room 44 · orientation (mock T X)', roomSet: [44], objects: [], volumes: [] }));
   }
   E.modes = { PROTOS, MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };
