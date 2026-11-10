@@ -9,8 +9,8 @@
 #   0-5 floor of the nave        zone NAVE (walkable), grey = the digit as a sub-level (0.21 H each with subs 8; see derive_roles.py: grey(level))
 #   a-f carpet of the nave       zone NAVE, the sub-level is the letter (a = 0 ... f = 5); the role `path` is 255 here
 #   T  the throne                zone NAVE, carpet at sub-level 5, the role `poi` is 255 here
-#   G  carpet of the entrance    zone ENT (walkable), sub-level 0, the role `path` is 255 here
-#   E  floor of the entrance     zone ENT (walkable), sub-level 0
+#   G  carpet of the entrance    zone NAVE (walkable), sub-level 0, the role `path` is 255 here
+#   E  floor of the entrance     zone NAVE (walkable), sub-level 0   (the entrance is part of the ONE walkable zone: no hole for `orient`)
 WWWWWWWWWWWWWWWWW
 WWWWWWWWWWWWWWWWW
 W55Q5fffffff5Q55W

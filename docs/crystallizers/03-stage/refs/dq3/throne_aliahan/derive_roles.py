@@ -6,11 +6,11 @@ Deterministic (no random numbers). Needs numpy and Pillow.
 
 Input: map1.txt (next to this script): the ONE source of truth, a grid of old tiles with a legend (read by hand from the SFC half of refs/dq3/pairs/p_20261029_192049_throne_room_orig_remake.png).
 Output (each old tile = SC x SC px, SC = 2, like Forest: 1 px = 1 viewer tile at tilesPerH 2 and 1 H = 0.75 old tile at tilesPerH 1.5, the hero of the remake measures 0.72 old tiles):
-  zones.png   role `zone`      hue ids (h = id / 5, maxnode 4): 1 NAVE (walkable: the dais, the carpet and the side floor), 2 ENT (walkable: the entrance passage and its landing), 3 PILLAR (six loose blocked cells), 4 WALL (walls and the parapet)
+  zones.png   role `zone`      hue ids (h = id / 4, maxnode 3): 1 NAVE (walkable: the dais, the carpet, the side floor, the entrance passage and its landing: ONE zone), 2 PILLAR (six loose blocked cells), 3 WALL (walls and the parapet)
   height.png  role `elevation` grey V: 20 for sub-level 0 and 20 + 2 x level + 1 for the others (the middle of the 2-grey band), 52 for the walls (the top of the map), the parapet at level 4 (29); the viewer (terraces 2, subs 8, pre 0) turns grey g into sub-level floor((g - 20) / 2) of the floor terrace
   path.png    role `path`      graded: 255 on the carpet (nave and entrance passage), 0 elsewhere
   poi.png     role `poi`       graded: 255 on the throne tile
-  manifest.json                evodun-pack/0.2 with the roles, flipY false, maxnode 4
+  manifest.json                evodun-pack/0.2 with the roles, flipY false, maxnode 3
 """
 import sys, os, json, colorsys, argparse
 import numpy as np
@@ -18,8 +18,8 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SC = 2
-NAVE, ENT, PILLAR, WALL = 1, 2, 3, 4
-MAXNODE = 4
+NAVE, PILLAR, WALL = 1, 2, 3          # no hole in the walkable footprint: the entrance passage and its landing are NAVE too (ONE zone, ONE room for `orient`)
+MAXNODE = 3
 BASE, WALL_GREY = 20, 52
 STEP = 2                                      # grey values per sub-level: terraces 2 over the range 20..52 = 16 grey each, subs 8 -> 2 grey per sub-level; a value in the MIDDLE of its band (never on a boundary: float32 would floor it one level down)
 def grey(level): return BASE if level == 0 else BASE + STEP * level + 1
@@ -45,8 +45,8 @@ def classify(grid):
             elif c in '012345': z[y, x], g[y, x] = NAVE, grey(int(c))
             elif c in 'abcdef': z[y, x], g[y, x], p[y, x] = NAVE, grey('abcdef'.index(c)), 255
             elif c == 'T': z[y, x], g[y, x], p[y, x], q[y, x] = NAVE, grey(5), 255, 255
-            elif c == 'G': z[y, x], g[y, x], p[y, x] = ENT, BASE, 255
-            elif c == 'E': z[y, x], g[y, x] = ENT, BASE
+            elif c == 'G': z[y, x], g[y, x], p[y, x] = NAVE, BASE, 255
+            elif c == 'E': z[y, x], g[y, x] = NAVE, BASE
             else: sys.exit('map1.txt: unknown character %r at row %d, column %d' % (c, y, x))
     return z, g, p, q
 
@@ -66,7 +66,7 @@ def build(grid):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--out', default=HERE); ap.add_argument('--check', action='store_true'); a = ap.parse_args()
     grid = read_grid(os.path.join(HERE, 'map1.txt')); imgs, manifest, z = build(grid)
-    names = {1: 'NAVE', 2: 'ENT', 3: 'PILLAR', 4: 'WALL'}
+    names = {1: 'NAVE', 2: 'PILLAR', 3: 'WALL'}
     print('grid %d x %d old tiles -> %d x %d px; tiles per zone: %s' % (len(grid[0]), len(grid), len(grid[0]) * SC, len(grid) * SC, ', '.join('%s %d' % (names[k], int((z == k).sum())) for k in names)))
     bad = 0
     for n, arr in imgs.items():

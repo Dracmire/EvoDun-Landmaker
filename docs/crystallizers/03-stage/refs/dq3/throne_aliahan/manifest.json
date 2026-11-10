@@ -2,7 +2,7 @@
  "format": "evodun-pack/0.2",
  "name": "Throne room of Aliahan (MAPA 1)",
  "flipY": false,
- "maxnode": 4,
+ "maxnode": 3,
  "roles": {
   "elevation": {
    "image": "height.png",

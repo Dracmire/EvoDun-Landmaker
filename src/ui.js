@@ -1235,8 +1235,7 @@
     setPack('noise', 'Value noise 48×48 (base stand-in)', E.noisePack(48, 48, 7));
     setPack('real_map', 'Real map 256 (height only)', null); // decoded on the first selection (realMapPack)
     setPack('forest_a', 'Forest (old map, v53 zones) · heights A', null); setPack('forest_b', 'Forest (old map, v53 zones) · heights B', null); // M3a: decoded on the first selection (forestPack)
-    setPack('aurhea', "Aurhea's Fountain (old map, water)", null); setPack('throne', 'Throne room of Aliahan (MAPA 1)', null); // the throne world: decoded on the first selection (thronePack)
-     // M3b: decoded on the first selection (aurheaPack)
+    setPack('aurhea', "Aurhea's Fountain (old map, water)", null); setPack('throne', 'Throne room of Aliahan (MAPA 1)', null); // M3b: decoded on the first selection (aurheaPack); the throne world: decoded on the first selection (thronePack)
     build(); E.controls.layout(document); E.controls.badges(document);
     if (!NO_MODES) buildModeUi(); else $('#modeBox').remove(); // without modes the panel is exactly the old one (the mode box is not even in the DOM)
     invalidate(true);

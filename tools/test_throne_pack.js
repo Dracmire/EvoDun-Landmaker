@@ -1,8 +1,8 @@
 /* THE THRONE WORLD, COMMIT 1 (no browser): the role PNGs of docs/crystallizers/03-stage/refs/dq3/throne_aliahan/ ("MAPA 1", the throne room of Aliahan read by hand from the SFC half of the paired shot) read by the SAME path as a loaded file
    (E.decodePng -> E.imageChannels -> E.packFromRoles with the manifest.json roles), and what map1.txt says:
    - derive_roles.py is deterministic: `--check` finds the committed PNGs and manifest.json equal to what it generates (SKIP, not a failure, when python, numpy or Pillow is missing);
-   - the image is 34 x 34 px (17 x 17 old tiles at x2), FOUR zones by hue (maxnode 4), no unreliable hue; the tiles per zone are the ones of map1.txt x 4 (NAVE 576, ENT 48, PILLAR 24, WALL 508);
-   - every zone but PILLAR is ONE 4-connected piece; PILLAR is SIX loose pieces of 2 x 2 px (the six pillars), none touching the edge of the room's footprint rows 12-16 (the parapet);
+   - the image is 34 x 34 px (17 x 17 old tiles at x2), THREE zones by hue (maxnode 3), no unreliable hue; the tiles per zone are the ones of map1.txt x 4 (NAVE 624 = the dais, the carpet, the side floor, the entrance passage and its landing: ONE walkable zone, PILLAR 24, WALL 508);
+   - NAVE and WALL are ONE 4-connected piece each; PILLAR is SIX loose pieces of 2 x 2 px (the six pillars);
    - the heights: the greys of map1.txt (the sub-levels 0..5 of the nave at 20 / 23 / 25 / 27 / 29 / 31, the walls 52), and the viewer's shape with the declared parameters (terraces 2, subs 8, pre 0, tilesPerH 1.5) gives the six sub-levels 0, 0.21 ... 1.05 H on the walkable zones (5 sub-levels = 1.05 H against 0.94 H of the remake) and the walls at 4.05 H;
    - the path mask is 255 on the carpet (nave + entrance passage) and the poi mask on the throne tile only.
      node tools/test_throne_pack.js */
@@ -27,16 +27,16 @@ const P0 = JSON.parse('{"ascCut":0.15,"ascGate":0,"ascRouteKey":"","chainExtra":
   const names = [...new Set(Object.values(man.roles).map((r) => r.image))], imgs = [], roles = {};
   for (const n of names) imgs.push(await load(n)); for (const [role, r] of Object.entries(man.roles)) roles[role] = { image: names.indexOf(r.image), channel: r.channel };
   const pk = E.packFromRoles(imgs, roles, { name: man.name, maxnode: man.maxnode, markers: [] }), W = pk.width, H = pk.height;
-  ok(`34 x 34 px (17 x 17 old tiles at x2); four zones by hue (maxnode ${man.maxnode}), no unreliable hue (${pk.warnings.length} warnings)`, W === 34 && H === 34 && pk.fields.zone.info.classes.length === 4 && pk.warnings.length === 0, pk.warnings);
+  ok(`34 x 34 px (17 x 17 old tiles at x2); three zones by hue (maxnode ${man.maxnode}), no unreliable hue (${pk.warnings.length} warnings)`, W === 34 && H === 34 && pk.fields.zone.info.classes.length === 3 && pk.warnings.length === 0, pk.warnings);
   const z = pk.fields.zone.ids, cnt = {}; for (const v of z) cnt[v] = (cnt[v] || 0) + 1;
-  const want = { 1: 0, 2: 0, 3: 0, 4: 0 }; for (const r of GRID) for (const c of r) { const k = /[0-5a-fT]/.test(c) ? 1 : /[GE]/.test(c) ? 2 : /[PQ]/.test(c) ? 3 : 4; want[k] += 4; }
-  ok(`tiles per zone = the grid x 4: NAVE ${cnt[1]}, ENT ${cnt[2]}, PILLAR ${cnt[3]}, WALL ${cnt[4]}`, JSON.stringify(cnt) === JSON.stringify(want) && cnt[1] === 576 && cnt[2] === 48 && cnt[3] === 24 && cnt[4] === 508, [cnt, want]);
+  const want = { 1: 0, 2: 0, 3: 0 }; for (const r of GRID) for (const c of r) { const k = /[0-5a-fTGE]/.test(c) ? 1 : /[PQ]/.test(c) ? 2 : 3; want[k] += 4; }
+  ok(`tiles per zone = the grid x 4: NAVE ${cnt[1]} (ONE walkable zone, the entrance included), PILLAR ${cnt[2]}, WALL ${cnt[3]}`, JSON.stringify(cnt) === JSON.stringify(want) && cnt[1] === 624 && cnt[2] === 24 && cnt[3] === 508, [cnt, want]);
   const pieces = (id) => { const seen = new Uint8Array(z.length), out = []; for (let i = 0; i < z.length; i++) { if (seen[i] || z[i] !== id) continue; const q = [i]; seen[i] = 1; for (let h = 0; h < q.length; h++) { const j = q[h], x = j % W, y = (j / W) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue; const k = yy * W + xx; if (!seen[k] && z[k] === id) { seen[k] = 1; q.push(k); } } } out.push(q); } return out; };
-  const pc = { 1: pieces(1), 2: pieces(2), 3: pieces(3), 4: pieces(4) };
-  ok(`NAVE, ENT and WALL are ONE 4-connected piece each (${pc[1].length}, ${pc[2].length}, ${pc[4].length}); PILLAR is ${pc[3].length} loose pieces of ${[...new Set(pc[3].map((q) => q.length))]} tiles (2 x 2 px: the six pillars)`, pc[1].length === 1 && pc[2].length === 1 && pc[4].length === 1 && pc[3].length === 6 && pc[3].every((q) => q.length === 4), Object.fromEntries(Object.entries(pc).map(([k, v]) => [k, v.map((q) => q.length)])));
+  const pc = { 1: pieces(1), 2: pieces(2), 3: pieces(3) };
+  ok(`NAVE and WALL are ONE 4-connected piece each (${pc[1].length}, ${pc[3].length}); PILLAR is ${pc[2].length} loose pieces of ${[...new Set(pc[2].map((q) => q.length))]} tiles (2 x 2 px: the six pillars)`, pc[1].length === 1 && pc[3].length === 1 && pc[2].length === 6 && pc[2].every((q) => q.length === 4), Object.fromEntries(Object.entries(pc).map(([k, v]) => [k, v.map((q) => q.length)])));
   // pillars: inside the footprint of the nave (every pillar tile has nave tiles on its four sides) and 2.1 old tiles from the wall (column 3 / 14 of 17)
-  { const nav = (x, y) => z[y * W + x] === 1; const inside = pc[3].every((q) => q.every((i) => { const x = i % W, y = (i / W) | 0; return [[x - 2, y], [x + 2, y], [x, y - 2], [x, y + 2]].some(([a, b]) => a >= 0 && b >= 0 && a < W && b < H && nav(a, b)); }));
-    const cols = [...new Set(pc[3].map((q) => Math.min(...q.map((i) => i % W)) >> 1))].sort((a, b) => a - b), rows = [...new Set(pc[3].map((q) => Math.min(...q.map((i) => (i / W) | 0)) >> 1))].sort((a, b) => a - b);
+  { const nav = (x, y) => z[y * W + x] === 1; const inside = pc[2].every((q) => q.every((i) => { const x = i % W, y = (i / W) | 0; return [[x - 2, y], [x + 2, y], [x, y - 2], [x, y + 2]].some(([a, b]) => a >= 0 && b >= 0 && a < W && b < H && nav(a, b)); }));
+    const cols = [...new Set(pc[2].map((q) => Math.min(...q.map((i) => i % W)) >> 1))].sort((a, b) => a - b), rows = [...new Set(pc[2].map((q) => Math.min(...q.map((i) => (i / W) | 0)) >> 1))].sort((a, b) => a - b);
     ok(`the six pillars stand at the old columns ${cols} (the axis of the carpet is x = 8.5: +-5, the measured +-5.5 rounded to the tile) and rows ${rows} (every ~4 old tiles), each touching nave tiles`, inside && cols.join() === '3,13' && rows.join() === '2,6,10', { inside, cols, rows }); }
   // 3. the heights and the masks
   const greys = [...new Set(Array.from(pk.elevation, (v) => Math.round(v / 1000 * 255)))].sort((a, b) => a - b);

@@ -10,15 +10,16 @@ It is NOT the room of `../old/castle_scenario.png` (that rip is the "Dragon Ques
 ## Why 2 x 2 px per old tile (and not 1)
 The hero of the remake measures 0.72 old tiles (43.5 px against a carpet of 7 tiles = 424 px at its feet), so 1 H = 1.44 viewer tiles when an old tile is 2 viewer tiles: `tilesPerH` 1.5 (the minimum of the control) gives 0.75 old tile per H. With 1 px per old tile the same hero would need `tilesPerH` 0.72, which the control does not allow.
 
-## Zones (hue ids, maxnode 4) and the footprint
+## Zones (hue ids, maxnode 3) and the footprint
 | id | zone | old tiles | viewer tiles | where |
 |---|---|---|---|---|
-| 1 | NAVE | 144 | 576 | walkable: the dais, the carpet and the side floor, ONE zone (with the dais apart, `orient` gave X yaw 270) |
-| 2 | ENT | 12 | 48 | walkable: the 2-wide passage through the parapet (3 rows) and its landing |
-| 3 | PILLAR | 6 | 24 | six loose BLOCKED cells (outside the window), inside the footprint of the nave |
-| 4 | WALL | 127 | 508 | walls and the parapet: terrain of another zone (outside the window) |
+| 1 | NAVE | 156 | 624 | walkable: the dais, the carpet, the side floor, the entrance passage through the parapet and its landing: ONE zone, ONE room for `orient` |
+| 2 | PILLAR | 6 | 24 | six loose BLOCKED cells (outside the window), inside the footprint of the nave |
+| 3 | WALL | 127 | 508 | walls and the parapet: terrain of another zone (outside the window) |
 
-The window of the example is `[ENT, NAVE]` (raw ids 2, 1): 624 walkable tiles in ONE walking region, nothing dropped by the footprint rule, no stairs. (The Paso 0b mock-up lost tiles because its zones touched a 4 H wall with the default pre-smoothing 1: the example declares `pre` 0, and the entrance zone is a straight 2-wide passage + a landing, one 4-connected piece.)
+The ids are 1, 2, 3 with no gap (hue = id / 4, `maxnode` 3): there was no reason to keep an id free.
+
+The window of the example is `[NAVE]` (raw id 1): 624 walkable tiles in ONE zone and ONE walking region, nothing dropped by the footprint rule, no stairs. WHY ONE ZONE: with the entrance passage as a zone of its own (commit 1) `orient` gave it Hub yaw 180 (exit gate -> highest part), so with the hero in the passage the camera looked at the south wall and the room was not in the frame; with the dais as a zone of its own it gave X yaw 270. In ONE zone `orient` gives Hub yaw 0 ("lowest part -> POI goal": the throne) at every position, entrance included. (The Paso 0b mock-up lost tiles because its zones touched a 4 H wall with the default pre-smoothing 1: the example declares `pre` 0.)
 
 ## Heights (sub-levels of the floor terrace; `terraces` 2, `subs` 8 -> 0.21 H each)
 The viewer quantizes the grey of `height.png` over the land range (20 .. 52): 2 terraces of 16 grey, 8 sub-levels of 2 grey; a value in the MIDDLE of a band (a value on a boundary is floored one level down by float32). Level 0 = 20, level k = 20 + 2k + 1; the walls are 52 (the top of the map = 3.47 H; `planes` adds its back wall on top).
@@ -48,4 +49,9 @@ The five sub-levels climbed add up to 1.05 H against 0.94 H of the remake (3 x 0
 | heights of the walls | 3.47 H | SUPUESTO |
 
 ## What the viewer does with it (example `throne_aliahan`, `node tools/ui/test_throne_world_ui.js`)
-Cam 6 untouched; `tilesPerH` 1.5, `heroFrac` 0.12 (the control moves in 0.01 steps), `heroScreen` (0.52, 0.62), yaw the one `orient` gives: NAVE = Hub yaw 0 (entry gate -> POI goal, the throne), ENT = Hub yaw 180 (exit gate -> highest part: with the hero in the passage the camera looks south). `orient`, `planes` and `props` are ON; volumes (the pillars, commit 2), billboards and ribbons (commit 3) and the emblem are NOT in this commit. Screenshots: `../../shots/throne1/` (`tools/ui/throne_world_shots.js`).
+Cam 6 untouched; `tilesPerH` 1.5, `heroFrac` 0.11 (the control moves in 0.01 steps: the viewer then draws the hero at 11.7 % of the panel height, the remake 11.6 %; with 0.12 it was 12.7 %, with 0.10 10.7 %), `heroScreen` (0.52, 0.62), yaw the one `orient` gives: ONE room, Hub yaw 0, L 28.8 x W 30.7, "lowest part -> POI goal" (the throne). `orient`, `planes` and `props` are ON (`planes`: back wall 64 tiles, 8 columns, front 96; `props`: 12 torches and the goal); volumes (the pillars, commit 2), billboards and ribbons (commit 3) and the emblem are NOT in this commit. Screenshots: `../../shots/throne1/` (`tools/ui/throne_world_shots.js`).
+
+## Known, kept as it is (the user's decisions)
+- The north band (rows 2-3 beside the carpet) is at 1.05 H (5 sub-levels). From the side the arrow keys climb that 1.05 H front without a stair: `E.stage.move` only checks `walkable` (the previous behaviour of the viewer); the climb limit of 2 sub-levels applies to the walking graph (the route), not to the hero's keys. The carpet itself is climbed in single steps of 1 sub-level.
+- The walls are 3.47 H: the top of the map with `terraces` 2 (`planes` adds its back wall on top).
+- 2 x 2 px per old tile (see above).
