@@ -253,35 +253,6 @@
         { pts: [[33.2, 40.5], [35.3, 36.5], [37.4, 32.4], [38.3, 30.6], [38.5, 29.7]], wH: 3.0 },
         { part: 'cross', pts: [[39.0, 36.5], [44.5, 35.5], [50.0, 36.5], [51.9, 36.3]], wH: 1.3 }
       ] }));
-    /* GOLDEN SHOT 2 (M4c-2): the frame of the remake capture "Shrine of Plains 17.01" (a path that winds between trees, NO goal) with the SAME fields as golden shot 1: it proves the mechanism was not made to measure for a door. Window [valley] alone, the hero on the flat valley floor. */
-    stg.examples.push(Object.assign({}, forest('B', 'Golden shot 2 · Winding path (hand-placed layers)', 4, 3), { id: 'golden_path', window: [1], heroAt: { x: 32.5, y: 39.5 }, heroScreen: [0.475, 0.759], heroFrac: 0.0945, yaw: 0, orient: false, planes: false, props: false, objectsOn: true,
-      /* ---- golden shot 2: hand-placed, a hypothesis, not a rule. The layers of the frame of "Shrine of Plains 17.01" (remake): no goal, no facade; a dirt path that winds between masses of foliage. Coordinates are MAP tiles; the terrain is filler (Forest B'): the blocked plateaus and the tower to the north are covered by the canopies, as in the capture. Every piece: label / outline false; the wide ones shadow false. `layer` / `mass` / `part` are notes for the readings of the tool, not read by the viewer. Colours are VALUE, not look. ---- */
-      objects: [
-        // F, the band of canopies across the top (far, on the plateaus and beyond the map), the dark earth bank behind and its trunk
-        ...[[-2, 24.5], [6, 23.5], [14, 24.5], [22, 23.5], [30, 24.5], [38, 23.5], [46, 24.5], [54, 23.5], [62, 24.5], [70, 23.5], [-8, 26], [78, 26]].map(([x, y], k) => ({ layer: 'F', mass: 'top', kind: 'shrub', x, y, hH: 7.5, wH: 11, color: k % 2 ? '#24542f' : '#1f4a2c', shadow: false, label: false, outline: false, always: true })),
-        { layer: 'F', mass: 'bank', kind: 'shrub', x: 23.5, y: 26.8, hH: 2.0, wH: 4.2, color: '#2a1c14', shadow: false, label: false, outline: false, always: true }, // the dark earth bank (the only wall of the capture)
-        { layer: 'F', mass: 'trunkL', kind: 'pillar', x: 26.3, y: 29.6, hH: 3.2, wH: 0.6, color: '#4a3324', shadow: false, label: false, outline: false }, // the trunk at the bank
-        // F, the grass bank that turns the cliff of the filler plateau (north of the valley) into a slope, in the colour of the plateau
-        ...[[8, 31.3], [13, 31.3], [18.5, 31.3], [24, 30.4], [29, 29.6]].map(([x, y]) => ({ layer: 'F', mass: 'slope', kind: 'shrub', x, y, hH: 2.3, wH: 7, color: '#8a9d57', shadow: false, label: false, outline: false, always: true })),
-        // F, the dense mass of foliage on the right (its left edge touches the path beside the group) and its dark trunk; the far pieces go behind the trunk, the near ones in front
-        ...[[39, 29.5, 6, 8], [45, 29.0, 6.5, 9], [52, 29.5, 6.5, 9], [59, 29.0, 6.5, 9], [66, 29.5, 6, 9]].map(([x, y, hH, wH], k) => ({ layer: 'F', mass: 'right', kind: 'shrub', x, y, hH, wH, color: k % 2 ? '#1f4a2c' : '#24542f', shadow: false, label: false, outline: false, always: true })),
-        { layer: 'F', mass: 'trunkR', kind: 'pillar', x: 40.2, y: 30.2, hH: 4.8, wH: 1.0, color: '#3a2a1e', shadow: false, label: false, outline: false }, // the dark trunk over the right mass
-        ...[[37.2, 35.5, 3.6, 5.5], [42, 36.5, 3.8, 7], [48, 36.0, 4.0, 8], [54, 36.5, 4.0, 8], [37.6, 39.3, 2.8, 5.0], [42.5, 39.8, 2.6, 6.5], [49, 39.2, 3.0, 8], [56, 39.5, 3.0, 8], [36.6, 41.4, 2.0, 3.0], [39, 41.6, 2.4, 5], [46, 41.8, 2.6, 7], [53, 41.5, 2.8, 8]].map(([x, y, hH, wH], k) => ({ layer: 'F', mass: 'right', kind: 'shrub', x, y, hH, wH, color: k % 2 ? '#24542f' : '#1f4a2c', shadow: false, label: false, outline: false, always: true })),
-        // F, the dark mass at the bottom left
-        ...[[13.5, 39.5, 1.5, 4.5], [17.5, 42.5, 2.2, 9], [19, 46.5, 2.6, 9.5]].map(([x, y, hH, wH], k) => ({ layer: 'F', mass: 'left', kind: 'shrub', x, y, hH, wH, color: k % 2 ? '#24542f' : '#1f4a2c', shadow: false, label: false, outline: false, always: true })),
-        // G, the rock on the island of grass between the two branches of the path
-        { layer: 'G', mass: 'isleRock', kind: 'shrub', x: 28.2, y: 35.8, hH: 0.45, wH: 1.3, color: '#77736d', label: false, outline: false },
-        // P, the boulder and the jar on the grass at the bottom right
-        { layer: 'P', mass: 'boulder', kind: 'shrub', x: 41.1, y: 43.3, hH: 0.95, wH: 1.8, color: '#8d8b86', shadow: false, label: false, outline: false },
-        { layer: 'P', mass: 'jar', kind: 'pillar', x: 37.9, y: 45.0, hH: 0.6, wH: 0.5, color: '#b9ab7c', label: false, outline: false }
-      ],
-      volumes: [],
-      ribbon: [ // G, the dirt path: wide at the bottom (the row of the leader), two branches around the island of grass, one path to the left edge of the frame (on the flat valley floor, rows 33-34: the filler terrain has no flat ground higher up)
-        { part: 'main', pts: [[30.0, 46.5], [29.6, 43.0], [29.2, 39.6]], wH: 3.0 },
-        { part: 'branchL', pts: [[27.4, 39.0], [24.2, 36.2], [22.4, 34.0], [21.4, 33.5]], wH: 1.6 },
-        { part: 'branchR', pts: [[31.8, 39.0], [31.9, 34.6], [30.6, 32.7], [26.0, 32.3], [22.0, 33.2]], wH: 0.9 },
-        { part: 'upper', pts: [[22.0, 33.4], [16.0, 33.7], [9.5, 33.7]], wH: 1.3 }
-      ] }));
     stg.examples.push(Object.assign({}, base, { id: 'mockt_z14', label: 'Room 14 · orientation (mock T Z)', roomSet: [14], objects: [], volumes: [] }), Object.assign({}, base, { id: 'mockt_x44', label: 'Room 44 · orientation (mock T X)', roomSet: [44], objects: [], volumes: [] }));
   }
   E.modes = { PROTOS, MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };
