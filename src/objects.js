@@ -6,7 +6,7 @@
    BASE = the ground of the tile under (x, y) (E.stage.feetH). VISIBILITY = the Box pick render, like the contract (`ownGround`): an object whose base is not on its own tile in the image (a higher terrain in front, or outside the panel) is not drawn.
    ORDER = ONE depth-sorted list with the hero (cam.ry, larger = nearer the camera): an object nearer than the hero is painted over it; the hero no longer comes last when the objects are on. Tall objects may leave the panel at the top: expected (a cut silhouette).
    M4c-1 (golden shot 1), two OPTIONAL fields of an entry, absent = the behaviour of before byte for byte: `wH` (the width in H that replaces the one of the kind: a wide `shrub` = a mass of foliage, a narrow `pillar` = a trunk, a `landmark` of 6-7 H = a facade) and `always: true` (the piece is drawn although its base is not on its own tile in the image or is OUTSIDE the panel: the foreground occluders have their base under the bottom edge; the tile of the base must exist in the window). `E.objects.groundTest` is the visibility test (the pick render) shared with src/frame.js.
-   M4c-1b, more OPTIONAL fields (absent = as before): an `always` piece may stand OUTSIDE the window (cellOf < 0: beyond the edge of the filler map): its ground height is the one of the NEAREST window tile (x, y clamped to the window box for the height only; it is drawn at its declared position, same depth order by cam.ry); without `always` such an entry is still skipped. Placeholder STYLE per entry: `color` ('#rgb' / '#rrggbb', anything else is ignored), `shadow: false` (no contact shade), `label: false` (no text label): the value structure of a frame (which masses are dark) is composition, and a shot to compare must not carry labels.
+   M4c-1b, more OPTIONAL fields (absent = as before): an `always` piece may stand OUTSIDE the window (cellOf < 0: beyond the edge of the filler map): its ground height is the one of the NEAREST window tile (x, y clamped to the window box for the height only; it is drawn at its declared position, same depth order by cam.ry); without `always` such an entry is still skipped. Placeholder STYLE per entry: `color` ('#rgb' / '#rrggbb', anything else is ignored), `shadow: false` (no contact shade), `label: false` (no text label), `outline: false` (M4c-2: no stroke of the piece, so stacked masses merge): the value structure of a frame (which masses are dark) is composition, and a shot to compare must not carry labels.
    Test hooks (`E.objectsTest`, tests only, undefined in normal use): constSize, constStroke, tilesNotH, ignoreHidden, heroAlwaysTop; S4c: noDistance, hardStep, detailAlways, detailNever, pieceIgnoreHidden. */
 (function (E) {
   'use strict';
@@ -37,17 +37,17 @@
     return { k, hpx: hH * (cam.vScale || 1) * tp * cam.sc * k, wpx: wH * tp * cam.sc * k, lw: t.constStroke ? LW0 : LW0 * k, font: FONT0 * k };
   }
 
-  const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i, styleOf = (ob) => (ob.color !== undefined || ob.shadow === false ? { color: typeof ob.color === 'string' && HEX.test(ob.color) ? ob.color : undefined, shadow: ob.shadow } : undefined);
+  const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i, styleOf = (ob) => (ob.color !== undefined || ob.shadow === false || ob.outline === false ? { color: typeof ob.color === 'string' && HEX.test(ob.color) ? ob.color : undefined, shadow: ob.shadow, outline: ob.outline } : undefined);
   function shape(ctx, kind, b, sz, label, style) { // b = the base point on screen; the placeholder, a contact shade, a label; style (M4c-1b, optional): { color, shadow }
-    const { hpx, wpx, lw, font } = sz, own = style && style.color, col = own || KINDS[kind].color;
+    const { hpx, wpx, lw, font } = sz, own = style && style.color, col = own || KINDS[kind].color, sk = style && style.outline === false ? () => {} : () => ctx.stroke(); // M4c-2: `outline: false` = no stroke of the piece (masses of foliage must merge)
     ctx.save(); ctx.lineJoin = 'round'; ctx.lineWidth = lw; ctx.strokeStyle = 'rgba(24,20,34,0.95)';
     if (!(style && style.shadow === false)) { ctx.fillStyle = 'rgba(14,12,22,0.35)'; ctx.beginPath(); ctx.ellipse(b[0], b[1], wpx * 0.7, wpx * 0.22, 0, 0, 7); ctx.fill(); }
-    if (kind === 'shrub') { ctx.beginPath(); ctx.ellipse(b[0], b[1] - hpx / 2, wpx / 2, hpx / 2, 0, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
-    else if (kind === 'pillar' || kind === 'landmark') { ctx.beginPath(); ctx.rect(b[0] - wpx / 2, b[1] - hpx, wpx, hpx); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.rect(b[0] - wpx * 0.62, b[1] - hpx, wpx * 1.24, Math.min(hpx * 0.06, wpx * 0.3)); ctx.fillStyle = own || '#d8d2c6'; ctx.fill(); ctx.stroke(); }
+    if (kind === 'shrub') { ctx.beginPath(); ctx.ellipse(b[0], b[1] - hpx / 2, wpx / 2, hpx / 2, 0, 0, 7); ctx.fillStyle = col; ctx.fill(); sk(); }
+    else if (kind === 'pillar' || kind === 'landmark') { ctx.beginPath(); ctx.rect(b[0] - wpx / 2, b[1] - hpx, wpx, hpx); ctx.fillStyle = col; ctx.fill(); sk(); ctx.beginPath(); ctx.rect(b[0] - wpx * 0.62, b[1] - hpx, wpx * 1.24, Math.min(hpx * 0.06, wpx * 0.3)); ctx.fillStyle = own || '#d8d2c6'; ctx.fill(); sk(); }
     else { // banner and lamp: a pole and a head
-      ctx.beginPath(); ctx.rect(b[0] - wpx * 0.06, b[1] - hpx, wpx * 0.12, hpx); ctx.fillStyle = '#5b3f2a'; ctx.fill(); ctx.stroke();
-      if (kind === 'banner') { ctx.beginPath(); ctx.rect(b[0] + wpx * 0.06, b[1] - hpx, wpx * 0.9, hpx * 0.28); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
-      else { ctx.beginPath(); ctx.arc(b[0], b[1] - hpx, wpx * 0.45, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.stroke(); }
+      ctx.beginPath(); ctx.rect(b[0] - wpx * 0.06, b[1] - hpx, wpx * 0.12, hpx); ctx.fillStyle = '#5b3f2a'; ctx.fill(); sk();
+      if (kind === 'banner') { ctx.beginPath(); ctx.rect(b[0] + wpx * 0.06, b[1] - hpx, wpx * 0.9, hpx * 0.28); ctx.fillStyle = col; ctx.fill(); sk(); }
+      else { ctx.beginPath(); ctx.arc(b[0], b[1] - hpx, wpx * 0.45, 0, 7); ctx.fillStyle = col; ctx.fill(); sk(); }
     }
     if (label !== false) { ctx.fillStyle = '#1a1624'; ctx.font = `700 ${font.toFixed(1)}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.fillText(`${kind} ${+(+sz.hH).toFixed(2)} H`, b[0], b[1] + font * 1.35); }
     ctx.restore();
