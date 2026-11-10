@@ -1,0 +1,30 @@
+# MAPA 1 - the throne room of Aliahan Castle, read BY HAND from the SFC half (left) of
+# refs/dq3/pairs/p_20261029_192049_throne_room_orig_remake.png. ONE source of truth: derive_roles.py turns this grid into the role PNGs.
+# 17 columns x 17 rows of OLD tiles (1 old tile = 16 px of the SFC; 2 x 2 viewer tiles at tilesPerH 1.5-2). Row 0 is the NORTH (the throne), the camera looks north (yaw 0).
+# LEGEND (one character per old tile):
+#   W  wall                      zone WALL (blocked scenery, outside the window), grey 52 = the top of the map = about 3.5 H
+#   p  parapet of the entrance   zone WALL, sub-level 4 (grey 29) = about 0.84 H
+#   P  pillar, floor level       zone PILLAR (a loose blocked cell, outside the window), grey 20
+#   Q  pillar on the north band  zone PILLAR, sub-level 5
+#   0-5 floor of the nave        zone NAVE (walkable), grey = the digit as a sub-level (0.21 H each with subs 8; see derive_roles.py: grey(level))
+#   a-f carpet of the nave       zone NAVE, the sub-level is the letter (a = 0 ... f = 5); the role `path` is 255 here
+#   T  the throne                zone NAVE, carpet at sub-level 5, the role `poi` is 255 here
+#   G  carpet of the entrance    zone ENT (walkable), sub-level 0, the role `path` is 255 here
+#   E  floor of the entrance     zone ENT (walkable), sub-level 0
+WWWWWWWWWWWWWWWWW
+WWWWWWWWWWWWWWWWW
+W55Q5fffffff5Q55W
+W5555fffTfff5555W
+W0000fffffff0000W
+W0000eeeeeee0000W
+W00P0ddddddd0P00W
+W0000ccccccc0000W
+W0000bbbbbbb0000W
+W0000aaaaaaa0000W
+W00P0aaaaaaa0P00W
+W0000aaaaaaa0000W
+WpppppppGGppppppW
+WpppppppGGppppppW
+WpppppppGGppppppW
+WWWWWEEEEEEWWWWWW
+WWWWWWWWWWWWWWWWW
