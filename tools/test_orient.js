@@ -50,7 +50,15 @@ const WIN6 = [17, 10, 20, 27, 6, 5], EXP6 = [[17, 'Hub', 0, 1.2], [10, 'Hub', 27
     // a window of two rooms: the POI of the FIRST room does not matter, the one of the LAST one is walked to from the entry gate
     const S2 = table([17, 10]).S, f17 = foot(S2, 17), f10 = foot(S2, 10), b2 = E.orient.compute(S2, P, [17, 10], 2);
     withPoi(S2, [[f17[Math.floor(f17.length / 2)], 1]]); const a2 = E.orient.compute(S2, P, [17, 10], 2);
-    ok('M3c: a POI in the first room of a window of two changes nothing (only the last zone reads it)', JSON.stringify(a2.rooms.map((r) => [r.axis, r.why, r.yaw])) === JSON.stringify(b2.rooms.map((r) => [r.axis, r.why, r.yaw])));
+    // POI FIRST (user, 2026-11-11; this check REPLACES "a POI in the first room of a window of two changes nothing", which held the old rule): any zone with a POI walks to it; the other zones are as before
+    ok(`POI FIRST: a POI in the FIRST room of a window of two (it has an exit gate): its axis goes from its lowest part to the POI ("${a2.byId.get(17).why}", was "${b2.byId.get(17).why}"), the last room is as before`, a2.byId.get(17).why === 'lowest part -> POI goal' && b2.byId.get(17).why !== a2.byId.get(17).why && JSON.stringify(a2.byId.get(10)) === JSON.stringify(b2.byId.get(10)), [a2.byId.get(17).why, b2.byId.get(17).why]);
+    { // a MIDDLE room (entry and exit gates) with a POI: entry gate -> POI; the same room without a POI and the other rooms: as before (byte for byte); the mutation "the POI only in the last zone" FAILS
+      const S6 = table(WIN6).S, b6 = E.orient.compute(S6, P, WIN6, 2), f20 = foot(S6, 20), tp = f20[Math.floor(f20.length * 0.3)];
+      withPoi(S6, [[tp, 1]]); const c6 = E.orient.compute(S6, P, WIN6, 2), r20 = c6.byId.get(20), ax = r20.axis, ent = b6.byId.get(20);
+      const others = WIN6.filter((id) => id !== 20).every((id) => JSON.stringify(c6.byId.get(id)) === JSON.stringify(b6.byId.get(id)));
+      ok(`POI FIRST: the middle room 20 of the window of six (entry and exit gates, "${ent.why}") with a POI inside: "${r20.why}"; the five other rooms are byte for byte as before (${others})`, ent.why === 'entry gate -> exit gate' && r20.why === 'entry gate -> POI goal' && others, [ent.why, r20.why]);
+      withPoi(S6, []); ok('POI FIRST: the same middle room without a POI = the record of before, byte for byte', JSON.stringify(E.orient.compute(S6, P, WIN6, 2).rooms) === JSON.stringify(b6.rooms));
+    }
     const t10 = f10[Math.floor(f10.length * 0.7)]; withPoi(S2, [[t10, 1]]); const c2 = E.orient.compute(S2, P, [17, 10], 2), r10b = c2.byId.get(10);
     ok(`M3c: a POI in the last room of a window of two: the axis goes from its entry gate to the POI ("${r10b.why}"), the first room is as before`, r10b.why === 'entry gate -> POI goal' && JSON.stringify(c2.byId.get(17).axis) === JSON.stringify(b2.byId.get(17).axis), [r10b.why]);
     // the value decides, a tie goes to the tile nearest the centroid of the tied ones

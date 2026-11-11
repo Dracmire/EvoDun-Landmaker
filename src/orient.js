@@ -26,9 +26,9 @@
       const high = cen((h) => h >= hHi), low = cen((h) => h <= hLo);
       const entry = k > 0 ? gate(rooms[k - 1], id) || gate(id, rooms[k - 1]) : null, exit = k < rooms.length - 1 ? gate(id, rooms[k + 1]) || gate(rooms[k + 1], id) : null;
       let axis = null, why;
-      const pg = k === rooms.length - 1 && !T.noPoi ? E.stage.poiGoal(S, id) : null; // M3c: the LAST zone of the window (or the only one) with a POI inside its footprint walks to it
-      if (entry && exit) { axis = norm([exit[0] - entry[0], exit[1] - entry[1]]); why = 'entry gate -> exit gate'; }
-      else if (pg) { const o0 = entry || low; axis = norm([(pg.tile % W) + 0.5 - o0[0], ((pg.tile / W) | 0) + 0.5 - o0[1]]); why = (entry ? 'entry gate' : 'lowest part') + ' -> POI goal'; }
+      const pg = !T.noPoi ? E.stage.poiGoal(S, id) : null; // M3c + POI FIRST (user, 2026-11-11): ANY zone of the window with a POI inside its footprint walks to it, even when it has an exit gate (the flow goes to the POI); a zone without a POI is as before
+      if (pg) { const o0 = entry || low; axis = norm([(pg.tile % W) + 0.5 - o0[0], ((pg.tile / W) | 0) + 0.5 - o0[1]]); why = (entry ? 'entry gate' : 'lowest part') + ' -> POI goal'; }
+      else if (entry && exit) { axis = norm([exit[0] - entry[0], exit[1] - entry[1]]); why = 'entry gate -> exit gate'; }
       else if (exit) { axis = norm([high[0] - exit[0], high[1] - exit[1]]); why = 'exit gate -> highest part'; }
       else if (entry) { axis = norm([high[0] - entry[0], high[1] - entry[1]]); why = 'entry gate -> highest part'; }
       else { axis = norm([high[0] - low[0], high[1] - low[1]]); why = 'lowest part -> highest part'; }
