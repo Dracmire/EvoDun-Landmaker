@@ -6,9 +6,9 @@ Deterministic (no random numbers). Needs numpy and Pillow.
 
 Input: map1.txt (next to this script): the ONE source of truth, a grid of old tiles with a legend (read by hand from the SFC half of refs/dq3/pairs/p_20261029_192049_throne_room_orig_remake.png).
 Output (each old tile = SC x SC px, SC = 2, like Forest: 1 px = 1 viewer tile at tilesPerH 2 and 1 H = 0.75 old tile at tilesPerH 1.5, the hero of the remake measures 0.72 old tiles):
-  zones.png   role `zone`      hue ids (h = id / 4, maxnode 3): 1 NAVE (walkable: the dais, the carpet, the side floor, the entrance passage and its landing: ONE zone), 2 PILLAR (six loose blocked cells), 3 WALL (walls and the parapet)
-  height.png  role `elevation` grey V: 20 for sub-level 0 and 20 + 2 x level + 1 for the others (the middle of the 2-grey band), 52 for the walls (the top of the map), the parapet at level 4 (29); the viewer (terraces 2, subs 8, pre 0) turns grey g into sub-level floor((g - 20) / 2) of the floor terrace
-  path.png    role `path`      graded: 255 on the carpet (nave and entrance passage), 0 elsewhere
+  zones.png   role `zone`      hue ids (h = id / 4, maxnode 3): 1 NAVE (walkable: the dais, the carpet, the side floor: ONE zone; MAP 1 v2: the grid is 17 x 12 old tiles and ends at the south edge of the nave, the door of the original is behind the camera), 2 PILLAR (six loose blocked cells), 3 WALL (walls and the parapet)
+  height.png  role `elevation` grey V: 20 for sub-level 0 and 20 + 2 x level + 1 for the others (the middle of the 2-grey band), 52 for the walls (the top of the map); the viewer (terraces 2, subs 8, pre 0) turns grey g into sub-level floor((g - 20) / 2) of the floor terrace
+  path.png    role `path`      graded: 255 on the carpet of the nave, 0 elsewhere
   poi.png     role `poi`       graded: 255 on the throne tile
   manifest.json                evodun-pack/0.2 with the roles, flipY false, maxnode 3
 """
@@ -18,12 +18,11 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SC = 2
-NAVE, PILLAR, WALL = 1, 2, 3          # no hole in the walkable footprint: the entrance passage and its landing are NAVE too (ONE zone, ONE room for `orient`)
+NAVE, PILLAR, WALL = 1, 2, 3          # ONE walkable zone, ONE room for `orient`
 MAXNODE = 3
 BASE, WALL_GREY = 20, 52
 STEP = 2                                      # grey values per sub-level: terraces 2 over the range 20..52 = 16 grey each, subs 8 -> 2 grey per sub-level; a value in the MIDDLE of its band (never on a boundary: float32 would floor it one level down)
 def grey(level): return BASE if level == 0 else BASE + STEP * level + 1
-PARAPET_GREY = grey(4)
 
 def read_grid(path):
     rows = [l.rstrip('\n') for l in open(path, encoding='utf8') if l.strip() and not l.startswith('#')]
@@ -39,14 +38,11 @@ def classify(grid):
         for x in range(W):
             c = grid[y][x]
             if c == 'W': z[y, x], g[y, x] = WALL, WALL_GREY
-            elif c == 'p': z[y, x], g[y, x] = WALL, PARAPET_GREY
             elif c == 'P': z[y, x], g[y, x] = PILLAR, BASE
             elif c == 'Q': z[y, x], g[y, x] = PILLAR, grey(5)
             elif c in '012345': z[y, x], g[y, x] = NAVE, grey(int(c))
             elif c in 'abcdef': z[y, x], g[y, x], p[y, x] = NAVE, grey('abcdef'.index(c)), 255
             elif c == 'T': z[y, x], g[y, x], p[y, x], q[y, x] = NAVE, grey(5), 255, 255
-            elif c == 'G': z[y, x], g[y, x], p[y, x] = NAVE, BASE, 255
-            elif c == 'E': z[y, x], g[y, x] = NAVE, BASE
             else: sys.exit('map1.txt: unknown character %r at row %d, column %d' % (c, y, x))
     return z, g, p, q
 
