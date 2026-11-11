@@ -5761,9 +5761,9 @@ window.EVO_THRONE_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAACIAAAAaCAYAAADSbo4CAAAAd
       const high = cen((h) => h >= hHi), low = cen((h) => h <= hLo);
       const entry = k > 0 ? gate(rooms[k - 1], id) || gate(id, rooms[k - 1]) : null, exit = k < rooms.length - 1 ? gate(id, rooms[k + 1]) || gate(rooms[k + 1], id) : null;
       let axis = null, why;
-      const pg = k === rooms.length - 1 && !T.noPoi ? E.stage.poiGoal(S, id) : null; // M3c: the LAST zone of the window (or the only one) with a POI inside its footprint walks to it
-      if (entry && exit) { axis = norm([exit[0] - entry[0], exit[1] - entry[1]]); why = 'entry gate -> exit gate'; }
-      else if (pg) { const o0 = entry || low; axis = norm([(pg.tile % W) + 0.5 - o0[0], ((pg.tile / W) | 0) + 0.5 - o0[1]]); why = (entry ? 'entry gate' : 'lowest part') + ' -> POI goal'; }
+      const pg = !T.noPoi ? E.stage.poiGoal(S, id) : null; // M3c + POI FIRST (user, 2026-11-11): ANY zone of the window with a POI inside its footprint walks to it, even when it has an exit gate (the flow goes to the POI); a zone without a POI is as before
+      if (pg) { const o0 = entry || low; axis = norm([(pg.tile % W) + 0.5 - o0[0], ((pg.tile / W) | 0) + 0.5 - o0[1]]); why = (entry ? 'entry gate' : 'lowest part') + ' -> POI goal'; }
+      else if (entry && exit) { axis = norm([exit[0] - entry[0], exit[1] - entry[1]]); why = 'entry gate -> exit gate'; }
       else if (exit) { axis = norm([high[0] - exit[0], high[1] - exit[1]]); why = 'exit gate -> highest part'; }
       else if (entry) { axis = norm([high[0] - entry[0], high[1] - entry[1]]); why = 'entry gate -> highest part'; }
       else { axis = norm([high[0] - low[0], high[1] - low[1]]); why = 'lowest part -> highest part'; }
@@ -5897,9 +5897,9 @@ window.EVO_THRONE_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAACIAAAAaCAYAAADSbo4CAAAAd
     for (let h = 0; h < q.length; h++) { const i = q[h]; for (const j of nb(i)) if (inRoom[j] && par[j] === -2) { par[j] = i; q.push(j); } }
     // END
     let end = -1;
-    const pg = !both && o.last && !T.noPoi ? E.stage.poiGoal(S, rec.id) : null; // M3c: a POI inside the footprint of the LAST zone is its goal (and the end of the path) when the walk from the start reaches it
-    if (both) { end = nearest(rec.exit, (i) => !ex1[i] && par[i] !== -2); }
-    else if (pg && par[pg.tile] !== -2) { end = pg.tile; out.goal = { x: (end % W) + 0.5, y: ((end / W) | 0) + 0.5, tile: end, ter: S.ter[end], h: hOf(end) }; }
+    const pg = !T.noPoi ? E.stage.poiGoal(S, rec.id) : null; // M3c + POI FIRST (user, 2026-11-11): a POI inside the footprint of ANY zone is the end of its path when the walk from the start reaches it, even with an exit gate (the start stays the entry gate when there is one); only the LAST zone makes it the goal (the landmark); a zone without a POI is as before
+    if (pg && par[pg.tile] !== -2) { end = pg.tile; if (o.last) out.goal = { x: (end % W) + 0.5, y: ((end / W) | 0) + 0.5, tile: end, ter: S.ter[end], h: hOf(end) }; }
+    else if (both) { end = nearest(rec.exit, (i) => !ex1[i] && par[i] !== -2); }
     else { // the goal: the highest terrace of the BACK half (the NEAR half with the mutation metaFront), nearest the start's column
       const pAxis = Pc(start); let best = null;
       for (const i of q) { if (ex2[i]) continue; const a = A(i); if (T.metaFront ? a >= aMid : a < aMid) continue; const k = [S.ter[i], hOf(i), -Math.abs(Pc(i) - pAxis), T.metaFront ? -a : a]; if (!best || cmp(k, best.k) > 0) best = { i, k }; }
