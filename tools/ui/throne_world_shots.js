@@ -1,7 +1,8 @@
 /* Screenshots of the throne world on MAP 1 v2 (example `throne_aliahan`, Cam 6, the yaw `orient` gives), our own render, the eight positions of the tests (the hero on the axis 3 old tiles from the dais, at the centre of the nave, one old tile from the south edge of the carpet and on it, 4 old tiles off the axis to the west and to the east, on the dais, on the throne):
    docs/crystallizers/03-stage/shots/throne1/ = the world (volumes and objects OFF), throne2/ = + the pillars and the closing walls (volumes ON, objects OFF), throne3/ = + the dress (all ON) and two sheets WITHOUT | WITH the billboards (objects and props; the ribbons stay) at the south edge and on the dais.
    With `--pair` it ALSO writes, to tools/ui/out/throne_v2/ (git-ignored: third-party material), one sheet per position with the REMAKE half of the paired shot on the left and the viewer on the right, both at the same hero size.
-     NODE_PATH=$(npm root -g) node tools/ui/throne_world_shots.js [--pair] */
+   With `--walk` it writes the walk from the door to the king (33 frames of 0.5 tile on the axis) as shots/throne3/throne3_walk.gif and a contact sheet of 8 frames.
+     NODE_PATH=$(npm root -g) node tools/ui/throne_world_shots.js [--pair] [--walk] */
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const { open } = require('./common');
 const SH = path.join(__dirname, '../../docs/crystallizers/03-stage/shots'), PAIR = process.argv.includes('--pair');
@@ -25,6 +26,10 @@ const py = (code) => execFileSync('python3', ['-c', code]);
     await sw('#t-stageProps', true); await ev(() => { window.__evo.st.stage.objectList = window.__keepList; window.__evo.redraw(); }); await a.idle(); await a.idle();
     py(`from PIL import Image; a=Image.open(r'${tmpN}').convert('RGB'); b=Image.open(r'${tmpW}').convert('RGB'); s=Image.new('RGB',(a.width*2+12,a.height),(40,40,40)); s.paste(a,(0,0)); s.paste(b,(a.width+12,0)); s=s.resize((s.width//2,s.height//2),Image.LANCZOS); s.save(r'${path.join(out3, `throne3_sheet_${name}_without_with_billboards.png`)}')`); fs.unlinkSync(tmpN);
   }
+  if (process.argv.includes('--walk')) { // the walk from the door to the king: 33 frames of 0.5 tile on the axis -> a contact sheet of 8 frames and a GIF (our own render) in shots/throne3/
+    const tmp = path.join(out3, '_walk'); fs.mkdirSync(tmp, { recursive: true }); let k = 0; for (let y = 23; y >= 7 - 1e-9; y -= 0.5) { await at(17, y); fs.writeFileSync(path.join(tmp, `f${String(k++).padStart(2, '0')}.png`), await a.canvas()); }
+    py(`import glob; from PIL import Image; fs=sorted(glob.glob(r'${tmp}/f*.png')); ims=[Image.open(f).convert('RGB').resize((488,307),Image.LANCZOS) for f in fs]; pal=ims[0].quantize(64); gi=[i.quantize(64) for i in ims]; gi[0].save(r'${path.join(out3, 'throne3_walk.gif')}',save_all=True,append_images=gi[1:],duration=180,loop=0,optimize=True); pick=[ims[round(j*(len(ims)-1)/7)] for j in range(8)]; s=Image.new('RGB',(488*4+18,307*2+6),(40,40,40)); [s.paste(im,((j%4)*494,(j//4)*313)) for j,im in enumerate(pick)]; s.save(r'${path.join(out3, 'throne3_walk_contact_sheet.png')}')`);
+    fs.rmSync(tmp, { recursive: true }); console.log('walk', k, 'frames'); }
   if (PAIR) { const outP = path.join(__dirname, 'out/throne_v2'); fs.mkdirSync(outP, { recursive: true }); const pair = path.join(__dirname, '../../docs/crystallizers/03-stage/refs/dq3/pairs/p_20261029_192049_throne_room_orig_remake.png');
     for (const [name] of POS) py(`from PIL import Image; p=Image.open(r'${pair}').convert('RGB'); r=p.crop((p.width//2,0,p.width,p.height)); v=Image.open(r'${path.join(out3, `throne3_${name}.png`)}').convert('RGB'); r=r.resize((round(r.width*v.height/r.height),v.height),Image.LANCZOS); s=Image.new('RGB',(r.width+v.width+12,v.height),(40,40,40)); s.paste(r,(0,0)); s.paste(v,(r.width+12,0)); s.save(r'${path.join(outP, `pair_${name}.png`)}')`);
     console.log('pair sheets', POS.length, '->', outP); }
