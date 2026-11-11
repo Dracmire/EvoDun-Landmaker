@@ -7,10 +7,13 @@
    - FRONT: the tiles of the first HYP.frontDepth tiles of the front band that are ABOVE the lowest walkable ground of the room are lowered to that ground - HYP.frontDrop H, so they do not hide the room.
    Lowering uses the same insertLevels (a move to a lower height): no new mechanism in the shared code.
    HYP = ONE table of hypotheses for S6 (tiles or H; H are multiplied by tilesPerH). Test hooks (`E.planesTest`, tests only): noBack, noFront, noCols, colEvery (a number), wallOnWalkable, noVoidWall (void is not classified: the C2 behaviour), chebyshev (the C2 square ring and per-column wall depth), waterEligible (M3b: the water is classified like any blocked ground, the behaviour before the rule).
-   M3b: a tile of `S.water` (pack data, `masks.water`) is NEVER classified: no wall, no column, no lowering; `counts.water` = the water tiles of the ring that were left out. No water in the pack (`S.water` all zeros) = nothing changes. */
+   M3b: a tile of `S.water` (pack data, `masks.water`) is NEVER classified: no wall, no column, no lowering; `counts.water` = the water tiles of the ring that were left out. No water in the pack (`S.water` all zeros) = nothing changes.
+   THRONE WORLD, COMMIT 2 (ONE-TIME exception authorised by the user, 2026-11-10: this file was unlocked for THIS change and only in that commit; afterwards it is off limits again and it is no precedent): `o.avoidPath` (OPT-IN by the example, `planesAvoidPath` in src/modes.js; absent = byte for byte the behaviour of before) OMITS a SIDE column when a tile of the role `path` (`S.fields.path.values > 0.5`) lies in its SHADOW: the tiles behind it on the view axis (A larger than the column's) up to L = (the column's height in tiles) / tan(AVOID.camPitch) and at most 1 tile to the side. The carpet is the route and the goal of the room: a column of 3 H beside the entrance hid it (10-38 carpet tiles with more than 25 % lost). The omitted ones are counted in `skipped.path` (only when the option is on). Test hook `E.planesTest.noAvoidPath` = the option off (named mutation). */
 (function (E) {
   'use strict';
   const HYP = { R: 8, wallDepth: 2, wallH: 3, colH: 3, colEvery: 3, frontDepth: 4, frontDrop: 0.5 };
+  /* AVOID: the hypothesis of the path shadow, in a table of its own (NOT in HYP: tools/test_planes.js pins the content of HYP and this commit may not change a test expectation; fold it into HYP when that test is updated, with the user's approval). camPitch = the pitch of Cam 6 in degrees (25): a column of height h tiles hides the ground behind it up to h / tan(pitch) tiles along the view axis (3 H = 4.5 tiles at tilesPerH 1.5 -> 9.65 tiles = 6.4 H). Nominal: a dragged pitch changes the real shadow. */
+  const AVOID = { camPitch: 25 };
   const BACK = 1, SIDE = 2, FRONT = 3;
   /* classify(S, room, yaw, opts?) -> { cls (Uint8Array, 0 none), A, Pc (the view coordinates of every tile), near, far (Map column -> extent), f, r (the view frame), counts { back, side, front }, footprint (tile list) }.
      room = { id } (a record of E.orient); yaw a multiple of 90. opts.all: classify the walkable tiles too (a test mutation). */
@@ -34,9 +37,12 @@
     const T = o.test || E.planesTest || {}, tp = o.tilesPerH, W = S.W, vd = S.void, C = classify(S, o.room, o.yaw, { all: !!T.wallOnWalkable, noVoid: !!T.noVoidWall, chebyshev: !!T.chebyshev, waterOk: !!T.waterEligible });
     if (!C.footprint.length) return (S.stagePlanes = null);
     let high = -1e9, low = 1e9; for (const i of C.footprint) if (C.walk(i)) { const h = S.levelH[S.fine[i]]; high = Math.max(high, h); low = Math.min(low, h); } if (high < -1e8) { high = low = S.levelH[S.fine[C.footprint[0]]]; }
-    const moves = new Map(), voidMoved = new Set(), skipped = { higher: 0, void: 0 }, hOf = (i) => S.levelH[S.fine[i]], at = (a, p) => { const x = a * C.f[0] + p * C.r[0], y = a * C.f[1] + p * C.r[1]; return x < 0 || y < 0 || x >= W || y >= S.H ? -1 : y * W + x; };
+    const avoid = !!o.avoidPath && !T.noAvoidPath, pathV = avoid && S.fields && S.fields.path && S.fields.path.values, moves = new Map(), voidMoved = new Set(), skipped = { higher: 0, void: 0 }, hOf = (i) => S.levelH[S.fine[i]], at = (a, p) => { const x = a * C.f[0] + p * C.r[0], y = a * C.f[1] + p * C.r[1]; return x < 0 || y < 0 || x >= W || y >= S.H ? -1 : y * W + x; };
     const meta = (kind) => ({ ter: 0, sub: 0, bridge: false, deco: true, plane: kind });
     let wall = 0, cols = 0, front = 0; const colRows = { '-1': [], '1': [] };
+    if (avoid) skipped.path = 0; // only with the option on: the shape of `skipped` is the one of before otherwise
+    // the SHADOW of a column of `hT` tiles at (a0, p): any tile of the role `path` behind it (A larger) within hT / tan(pitch) tiles along the view axis and 1 tile to each side
+    const tanP = Math.tan(AVOID.camPitch * Math.PI / 180), shadowHitsPath = (a0, p, hT) => { if (!pathV) return false; const L = hT / tanP; for (let da = 1; da <= L + 1e-9; da++) for (let dp = -1; dp <= 1; dp++) { const t = at(a0 + da, p + dp); if (t >= 0 && pathV[t] > 0.5) return true; } return false; };
     // BACK: the closing wall
     if (!T.noBack) { const roof = high + E.stage.exag(HYP.wallH, o.exag) * tp; for (let i = 0; i < S.n; i++) { if (C.cls[i] !== BACK) continue; const isV = !!(vd && vd[i]), d = T.chebyshev ? C.A[i] - C.far.get(C.Pc[i]) : C.dist[i]; if (T.chebyshev ? (d < 1 || d > HYP.wallDepth) : d > HYP.wallDepth + 1e-9) continue; if (!isV && hOf(i) >= roof - 1e-9) { skipped.higher++; continue; } moves.set(i, { h: roof, meta: meta('wall') }); if (isV) voidMoved.add(i); wall++; } }
     // SIDE: columns every colEvery rows along the axis, beside the room, on both sides
@@ -45,7 +51,7 @@
       for (let a0 = aMin; a0 <= aMax; a0 += every) { const ts = rowTiles.get(a0); if (!ts) continue; let pMin = 1e9, pMax = -1e9, iMin = -1, iMax = -1; for (const i of ts) { if (C.Pc[i] < pMin) { pMin = C.Pc[i]; iMin = i; } if (C.Pc[i] > pMax) { pMax = C.Pc[i]; iMax = i; } }
         for (const s of [-1, 1]) { const p0 = s > 0 ? pMax : pMin, edge = s > 0 ? iMax : iMin; let placed = false;
           for (let k = 1; k <= HYP.R && !placed; k++) { const j = at(a0, p0 + s * k); if (j < 0) break; const isV = !!(vd && vd[j]); if (isV && T.noVoidWall) { skipped.void++; break; } if (C.walk(j)) continue; if (C.cls[j] !== SIDE) continue;
-            const roof = hOf(edge) + E.stage.exag(HYP.colH, o.exag) * tp; if (!isV && hOf(j) >= roof - 1e-9) { skipped.higher++; placed = true; break; } if (moves.has(j)) { placed = true; break; } moves.set(j, { h: roof, meta: meta('col') }); if (isV) voidMoved.add(j); cols++; colRows[s].push(a0); placed = true; } } } }
+            const roof = hOf(edge) + E.stage.exag(HYP.colH, o.exag) * tp; if (!isV && hOf(j) >= roof - 1e-9) { skipped.higher++; placed = true; break; } if (moves.has(j)) { placed = true; break; } if (avoid && shadowHitsPath(a0, p0 + s * k, E.stage.exag(HYP.colH, o.exag) * tp)) { skipped.path++; placed = true; break; } moves.set(j, { h: roof, meta: meta('col') }); if (isV) voidMoved.add(j); cols++; colRows[s].push(a0); placed = true; } } } }
     // FRONT: the tiles above the lowest ground of the room are lowered below it
     if (!T.noFront) { const target = low - HYP.frontDrop * tp; for (let i = 0; i < S.n; i++) { if (C.cls[i] !== FRONT) continue; const d = C.near.get(C.Pc[i]) - C.A[i]; if (d < 1 || d > HYP.frontDepth) continue; if (hOf(i) <= low + 1e-9 || moves.has(i)) continue; moves.set(i, { h: target, meta: meta('front') }); front++; } }
     // P1: a void tile that gets a wall / column becomes a drawn, blocked tile (own copies: `S.void` and `S.block` are shared with the quantization cached on the pack, the same care as src/backdrop.js)
@@ -53,5 +59,5 @@
     const before = S.levelH.length, added = moves.size ? E.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
     return (S.stagePlanes = { voidTiles: voidMoved.size, room: o.room.id, yaw: o.yaw, tilesPerH: tp, exag: o.exag === undefined ? 1 : o.exag, counts: C.counts, wall, cols, front, colRows, skipped, levelsBefore: before, levelsAdded: added, floorLow: low, floorHigh: high });
   }
-  E.planes = { HYP, BACK, SIDE, FRONT, classify, apply };
+  E.planes = { HYP, AVOID, BACK, SIDE, FRONT, classify, apply };
 })(window.EVO = window.EVO || {});
