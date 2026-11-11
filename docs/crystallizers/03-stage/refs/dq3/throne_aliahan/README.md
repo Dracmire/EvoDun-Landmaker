@@ -3,9 +3,39 @@
 The ROOM of the paired shot `../pairs/p_20261029_192049_throne_room_orig_remake.png` (left half = the SFC original, right half = the remake), read BY HAND from the left half and turned into the role images of mode 3 (zones, elevation, path, poi) like Forest and Aurhea.
 It is NOT the room of `../old/castle_scenario.png` (that rip is the "Dragon Quest 3 Remix" hack: blue floor, a 4-5 tile carpet, hedged gardens, a curtain: another room).
 
-- `map1.txt`: the ONE source of truth, a 17 x 17 grid of old tiles with a legend. Row 0 is the north (the throne); the camera of Cam 6 looks north (yaw 0).
+- `map1.txt`: the ONE source of truth, a 17 x 13 grid of old tiles with a legend (MAP 1 v2, see the next section; v1 was 17 x 17). Row 0 is the north (the throne); the camera of Cam 6 looks north (yaw 0).
 - `derive_roles.py`: deterministic (`--check` compares with the committed files): writes `zones.png`, `height.png`, `path.png`, `poi.png` and `manifest.json` (`evodun-pack/0.2`). 2 x 2 px per old tile (like Forest: 1 px = 1 viewer tile at tilesPerH 2). `node tools/test_throne_pack.js`.
 - The viewer embeds the four PNGs (`data/packs.js`, `EVO_THRONE_PNG`, `tools/build.py`) and `src/ui.js` `thronePack` decodes them on the first selection of the example `throne_aliahan` (mode 3).
+
+## MAPA 1 v2: a SQUARE, SYMMETRIC room, no parapet, no passage (user, 2026-11-11)
+The order is to REPRODUCE the throne room of Aliahan: the old map is a rectangular room with a red carpet, SYMMETRIC, and the hero walks from the door to the king with nothing in the way. Anything that is not in the original, or breaks it, is a defect even if an earlier commit put it there. Sections below that mention the passage, the landing or the parapet describe v1 and are kept as history.
+
+- **What was wrong in v1 (commit 1):** rows 12-16 of the grid (a 3-row parapet `p` of 0.84 H, an entrance passage `G` at the old columns 8-9, a landing `E`, a south wall) are NOT in the original. Measured on the SFC half of the pair (671 px wide): the room spans x 90-550 (axis 320), the carpet of the nave is centred at 320.5 and the carpet of the door at 320.0: the door is CENTRED, v1 had it one viewer tile off. With the camera south of the hero the parapet was an OCCLUDER of the carpet.
+- **v2:** the grid is 17 x 13 old tiles (34 x 26): rows 0-11 as they were (nave, dais, throne, six pillars, north / west / east walls: nothing moved) and ONE south row of `W`, which `planes` lowers below the floor as its FRONT (60 tiles). The door is the south end of the carpet (in the original it is in the wall behind the camera). With the grid cut at row 11 (12 rows) everything measures the same, but at the hero (17, 23) the frame shows a strip of void under the slab (about 14 % of the panel); with the row it is 0 %: the row stays. (Not usable, tried by the reviewer: a flat or lowered WALL zone south of the nave turns the camera of `orient`; flat PILLAR-zone floor leaves a far wall band.)
+- **What changed with it:** 576 walkable tiles (624 - 48); the role `path` is 280 tiles (304 - 24) and the ribbon of the passage is gone (5 ribbons); the west and east wall volumes are 20 tiles deep (y 4-23; 236 volume tiles, none omitted); `props` gives 8 torches (12); NAVE is now the place 2 of the zone table (the zones are numbered from the lowest mean elevation and the six pillar cells are lower on average; the window is declared by the RAW id 1, nothing else depends on it); `planes`: no column candidate is left (the four that `planesAvoidPath` omitted stood on the parapet), so that option has no effect on this map (its rule is tested in `tools/test_planes.js`). No object or volume stood at y >= 24.
+- **Positions of the tests:** "passage" (17, 27) and "landing" (17, 31) no longer exist, and "axis 6" (17, 24) is now the south row: the eight are (17, 18), (17, 13), (17, 21), (17, 23), (9, 18), (25, 18), the dais (17, 8) and the throne (17, 6.5).
+
+**Symmetry** (`test_throne_world_ui.js`, the FINAL shape after volumes and planes, tile (x, y) against (33 - x, y): zone, path, poi, block, height; and every declared volume has its mirror; objects and ribbons are excluded, the king and the chancellor are not symmetric in the original): v1 (#90) 56 asymmetric tiles (zone 32, path 24, block 32, height 56) -> v2 **0**. Mutations: a 0.84 H block on the west half of the south row (56 asymmetric tiles) and a pillar moved one tile (4 tiles, 2 volumes without a mirror) both fail.
+
+**Line of sight** (every `path` tile with at least 200 px of its projected top quadrilateral in the panel; lost = the pixels of that quadrilateral that are not its cap in the pick buffer: ANY occluder, terrain included; billboards do not count; asserted at most 30 % on the axis):
+
+| hero | v1 (#90): tiles > 30 % / > 25 % / worst / carpet visible | v2: tiles > 30 % / > 25 % / worst / carpet visible |
+|---|---|---|
+| (17, 23) | 27 / 33 / 100 % / 77.6 % | 0 / 6 / 25.5 % at (10, 4) / 87.1 % |
+| (17, 21) | 18 / 25 / 100 % / 78.1 % | 0 / 0 / 23.7 % / 88.4 % |
+| (17, 18) | 18 / 18 / 100 % / 78.3 % | 0 / 0 / 21.7 % / 90.1 % |
+| (17, 13) | 0 / 0 / 15.3 % / 91.2 % | 0 / 0 / 15.3 % / 91.2 % |
+| (17, 8) | 0 / 0 / 12.4 % / 92.6 % | 0 / 0 / 12.4 % / 92.6 % |
+| lateral, REPORTED: (5, 18) / (29, 18) | 16 / 12 tiles > 30 % | 9 / 4 |
+| lateral, REPORTED: (5, 10) / (29, 10) | 28 / 17 | 28 / 17 (the side pillars hide the far edge of the carpet, as in the original) |
+
+Mutation: a 0.84 H block along the south row (the parapet again) makes 28 path tiles lose more than 30 % at (17, 18): the test fails. The pair x = 5 / x = 29 is not a mirror (130 / 146 tiles in the panel, 10 / 4 over 25 %) because the example frames the hero at 52 % of the width (`heroScreen` (0.52, 0.62), a composition parameter of commit 1): with the hero at 50 % the pair gives 137 / 137 tiles, 87.3 / 87.3 % visible and 7 / 6 tiles over 25 % (one tile of rasterisation).
+
+**NOT met, reported:** (1) the 25 % criterion of commit 2 (loss attributed to a pillar, S4b base) at the NEW position (17, 23): one carpet tile loses 26.3 %; it holds at the other seven (worst 18.2 %); the 30 % criterion of v2 holds there (25.5 %). The STRICT base of commit 2 (planes off) is dropped: without `planes` the south row stands 3.47 H in front of the camera in the base itself. (2) With the hero hugging a side wall (x = 5 / x = 29) the lower corner of the frame shows void south of the grid: 14.8 % / 8.6 % of the panel (0 % in v1, whose grid went on 5 old tiles south); 0 % at the eight positions.
+
+**Ribbons and frame.js:** a ribbon paints a tile only when the CENTRE of its top face is visible (the rule of `frame.js`, untouched): a carpet tile half hidden by a pillar keeps the terrain colour on the part that shows (a green fringe at the edge of the occluder). The test asserts that every path tile with a visible centre is painted, and reports the share of the pixels of the path caps that change when the ribbons are removed (99.4 % at (17, 18)).
+
+**Composition against the remake** (`tools/ui/throne_world_shots.js --pair` writes one sheet per position, remake half | viewer at the same hero size, to `tools/ui/out/throne_v2/`, not versioned). SAME: a symmetric room on the axis, the carpet centred with a gold trim on both edges and a medallion under the hero, steps across the whole carpet, the king on the axis at the top, pillars in pairs flanking the nave, armours and banners on the back wall, the pots beside the near pillars, nothing between the hero and the king. NOT the same (listed, not hidden): the dais of the remake is a NARROW raised platform (about 3 tiles, with a stone border) inside wider carpet wings, here the carpet runs 14 tiles wide up to the north wall (the map follows the SFC); the remake has 3 risers under the hero and 2 at the dais, here 5 evenly spaced risers of the terrain colour; the remake camera pitches about 33-35 degrees (more floor, less wall), Cam 6 pitches 25; its 6 candelabra stand at the EDGES of the carpet, the 8 lamps of `props` stand 1.5 tiles from the axis and carry labels; its banners HANG (on the wall and on the pillars) and the crest is high on the wall, here they stand on the ground (no `z`); the chancellor stands ON the carpet beside the hero, here on the band at its edge (the free corridor); the throne is a grey `landmark` tower of `props`; the side floor of the remake has stone ledges (an L), here a flat band; colours are values only (the floor is the terrain green, not purple tiles); the medallions are blocky discs.
 
 ## Why 2 x 2 px per old tile (and not 1)
 The hero of the remake measures 0.72 old tiles (43.5 px against a carpet of 7 tiles = 424 px at its feet), so 1 H = 1.44 viewer tiles when an old tile is 2 viewer tiles: `tilesPerH` 1.5 (the minimum of the control) gives 0.75 old tile per H. With 1 px per old tile the same hero would need `tilesPerH` 0.72, which the control does not allow.
@@ -13,9 +43,9 @@ The hero of the remake measures 0.72 old tiles (43.5 px against a carpet of 7 ti
 ## Zones (hue ids, maxnode 3) and the footprint
 | id | zone | old tiles | viewer tiles | where |
 |---|---|---|---|---|
-| 1 | NAVE | 156 | 624 | walkable: the dais, the carpet, the side floor, the entrance passage through the parapet and its landing: ONE zone, ONE room for `orient` |
+| 1 | NAVE | 144 | 576 | walkable: the dais, the carpet, the side floor: ONE zone, ONE room for `orient` (v1: 156 / 624 with the passage and the landing) |
 | 2 | PILLAR | 6 | 24 | six loose BLOCKED cells (outside the window), inside the footprint of the nave |
-| 3 | WALL | 127 | 508 | walls and the parapet: terrain of another zone (outside the window) |
+| 3 | WALL | 71 | 284 | the north, west and east walls and ONE south row that `planes` lowers: terrain of another zone (outside the window) |
 
 The ids are 1, 2, 3 with no gap (hue = id / 4, `maxnode` 3): there was no reason to keep an id free.
 
