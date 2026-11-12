@@ -44,6 +44,7 @@ Procedencia: `old/` = rips 16-bit del remix de Paco (la etiqueta con su contacto
 | 37 | `other/o_20261030_013320_dq11_3d_vs_2d_b.png` | `Captura de pantalla 2026-10-30 013320.png` | Dragon Quest XI (no es DQ3): izquierda 3D: primer plano del héroe y una compañera; derecha modo 2D: el mismo claro de bosque | modo 2D, bosque o camino |
 | 38 | `other/o_20261030_013400_dq11_3d_vs_2d_c.png` | `Captura de pantalla 2026-10-30 013400.png` | Dragon Quest XI (no es DQ3): izquierda 3D: camino de tierra con minimapa y rótulo «Cobblestone Tor - Base»; derecha modo 2D: claro con camino y vallado | modo 2D, bosque o camino |
 | 39 | `other/o_20261030_013506_dq11_3d_vs_2d_d.png` | `Captura de pantalla 2026-10-30 013506.png` | Dragon Quest XI (no es DQ3): izquierda 3D: escalera de piedra y antorchas, mismo rótulo; derecha modo 2D: escalera a un santuario | modo 2D, bosque o camino |
+| 40 | `old/najimi_tower_floor2.png` | (recorte de [R] de la hoja «Najimi Tower» del mismo hack de Paco, 2026-11-11; sin la etiqueta) | Torre de Najimi (Torre del Soñador), **segundo piso**, 683 × 933 px (tile viejo = 16 px, medido por autocorrelación): cielo arriba y vacío a los lados, salas separadas por bandas de muro gruesas con cara frontal, antorchas, pilastras, losetas cuadradas, tres pares de columnas doradas al este, plaza y fachada al sur. **Mapa ciego del Paso 2 de M6** (no abrir el remake de ese piso antes de congelar) |
 
 ## Script de renombres (CC lo adapta si cambia la clasificación)
 
