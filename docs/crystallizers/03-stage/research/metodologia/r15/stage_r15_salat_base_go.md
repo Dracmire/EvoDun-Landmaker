@@ -118,3 +118,47 @@ La corrida con la Enmienda 1 cerró el cielo a 8 H (vacío ≤ 0,85 % en SUELO).
    - los planos de Cam 5 se renderizan dos veces, para tener sus hashes ×2;
    - la puerta de cada truco se mide en TODAS sus posiciones propias (no en una muestra).
 4. Si con 1 y 2 algún control de TECHO sigue fallando, se informa con su cifra y se sigue (no es PARADA); el veredicto V1.4 lo usa.
+
+## Enmienda 3 ([R], 2026-11-17, tras V1.5 = 0 de 7)
+La Verificación 1 FALLÓ (V1.5: ningún truco entra), así que no se corren pruebas y se vuelve a Base. [R] revisó los renders: las piezas están en el mundo, pero la medida las juzgó en posiciones y encuadres que no son los de su toma. Hay tres errores de diseño de [R]:
+- las posiciones propias se definieron como «el candidato se ve en el cuadro»;
+- el encuadre por grupo no es el de su toma;
+- las piezas se construyeron con tamaños fijos en vez de buscar su objetivo en pantalla.
+
+Cambian SOLO estos puntos. Los rangos de las puertas no cambian, y las predicciones tampoco.
+
+1. **Posiciones propias declaradas por la toma que muestra el truco** (reemplaza la definición de la Enmienda de la §3 del protocolo para esta sala):
+
+   | Truco | Grupos |
+   |---|---|
+   | A6 | s (pretil del borde L0/L1, como 0202) y n (baranda norte, como 0137) |
+   | A3a | m, n |
+   | A3b | s, n |
+   | A4 | m, n |
+   | C3 | s, m, n |
+   | C2 | s |
+   | B3 | s |
+
+   Un truco ENTRA si da PRESENTE en ≥ 2/3 de sus posiciones declaradas, que son ≥ 3.
+2. **Encuadre por grupo** (Paso 0, A374), el mismo en todos los estados:
+
+   | Grupo | `heroFrac` | `heroScreen` |
+   |---|---|---|
+   | s | 0,108 | [0,50; 0,47] |
+   | m | 0,128 | por defecto |
+   | n | 0,128 | fx 0,63; fy por la regla (f) de A6 |
+3. **Pretil sur (A6 en s).** Se agrega a la SALA, en todos los estados, una franja bloqueada de 1 tile en z 17, en x 8–16 y 24–32, a la altura de L0. La escalera queda libre. Con eso la máscara cambia igual en todos los estados. En TECHO, el pretil de A6 va sobre esa franja: 0,8 H por encima de L1, con postes de 1,4 H cada 4 tiles.
+4. **TECHO por objetivo (prueba de capacidad).** Cada pieza se ajusta hasta que su puerta pase en la mayor cantidad posible de sus posiciones declaradas. Se ajustan, dentro de los candidatos de la ficha:
+   - la posición;
+   - el tamaño en tiles;
+   - la altura en H;
+   - el tamaño de la calcomanía;
+   - el tamaño y la luminancia del vano.
+
+   Hay UNA sola colocación en el mundo, no una por posición. Máximo 6 iteraciones por truco. Nunca se cambian la máscara, el camino, la meta ni los rangos de las puertas. Se informan los parámetros finales y las iteraciones.
+5. **A4b sin `always`.** El vano es la primera de estas opciones que pase su puerta:
+   - (a) un panel claro de 1 tile de fondo pegado al muro norte, sin pasar del tope del muro;
+   - (b) un billboard sin `always` con la base visible.
+
+   Pintar encima de piezas más cercanas no se permite.
+6. Los controles siguen igual. Si billboards + rojo pasa de 30 % por una pieza, esa pieza se ajusta (punto 4). Si no se puede, se informa.
