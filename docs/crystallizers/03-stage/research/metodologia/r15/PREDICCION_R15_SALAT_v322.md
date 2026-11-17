@@ -64,3 +64,26 @@ Motivo: en V1 el voto de par premió al señuelo (3/3) con la nota idéntica a S
 Predicción nueva (firma de [R]):
 - Q11: Haiku calibra: 60 %.
 - Las Q4–Q10 se mantienen, ahora leídas con la regla del punto 2.
+
+## Enmienda 2 ([R], 2026-11-17, decisión de [U] tras fallar la calibración Haiku)
+1. **Una imagen por prueba.** R, 1 y 2 van lado a lado en un solo PNG, con su rótulo grande encima.
+2. **Juez con preguntas medibles (rúbrica comparativa).** Cada ítem recibe un número del 1 al 5 por maqueta, siempre comparado con R:
+   - 1 = no está;
+   - 3 = está, pero en otro lugar o tamaño;
+   - 5 = está como en R.
+
+   Ítems:
+   - P1 línea media: una línea horizontal continua (baranda, pretil o borde) que cruza la franja media;
+   - P2 marco lateral: masas altas en los bordes, o un par que enmarca al personaje;
+   - P3 esquinas bajas: masas bajas que cortan las esquinas inferiores;
+   - P4 fondo: el centro abierto hasta un fondo lejano;
+   - P5 marca: una figura en el suelo junto al personaje;
+   - P6 personaje: el mismo lugar y tamaño en el cuadro.
+
+   Salida: solo JSON. La nota de una maqueta = la media de P1–P6.
+3. Los criterios de calibración (Enmienda 1, punto 4) se aplican a esa nota sin cambios.
+4. **Orden.** Primero Haiku. Si no calibra, Sonnet con la misma rúbrica. Si tampoco calibra, la rama R1.5 se cierra (decisión de [U]).
+
+Firmas:
+- Q12: Haiku calibra con la rúbrica: 50 %.
+- Q13: Sonnet calibra (si llega a correr): 65 %.
