@@ -40,3 +40,14 @@ Se añade una segunda medida, más directa, y se detalla qué se busca. M1–M3 
 - Medida M5 (anchos): para los elementos exteriores aprobados se mide también el ANCHO aparente (más estable que el alto cuando la baranda tapa la base). En ortográfica el ancho relativo al héroe no cambia entre 0202 y 0137 solo por la distancia en Z; en perspectiva sí. Se reporta Q_ancho igual que Q.
 - Decisión ampliada: M4 manda sobre M1 si se contradicen (es la huella directa; M1 depende de cuánto se movió la cámara). M4 sin validar en el render → la medida de punto de fuga no vale.
 - Firma de [R] sobre M4: creo que falla (≈ 60 %): un solo punto de fuga.
+
+## Enmienda 2 (2026-11-17 02:50, tras la PARADA 1 de CC y ANTES de medir nada)
+Hecho de CC: (a) ningún elemento exterior está entero en las dos tomas y presente en el modelo → M1 y M2 NO SE PUEDEN MEDIR con 0202/0137; (b) aristas en Z exteriores ≥ 80 px solo en el render 0137 → M4 tampoco se puede medir en las tomas.
+Decisión de [R]: G4-M1, M2, M4 y M5 quedan NO MEDIBLES con estas tomas (no cuentan como falla ni como apoyo). Se mide lo que existe y se añade una huella que sí existe en 0137.
+- M3 (héroe) sigue igual.
+- M6 (nueva) · Convergencia de VERTICALES. Con una sola cámara en perspectiva y picado, todas las aristas verticales del mundo convergen en UN punto de fuga vertical (muy por debajo del cuadro), dentro y fuera de la sala; su inclinación en pantalla crece con la distancia horizontal al centro. Con una segunda cámara ortográfica las verticales exteriores quedan paralelas (inclinación ≈ 0°) aunque estén lejos del centro.
+  Medida: en cada imagen, ≥ 2 verticales DENTRO de F y ≥ 2 AFUERA (cantos de muro, marcos de la ventana, pilares, postes de la escalera lejana), cada una ≥ 80 px (si no hay, ≥ 60 px declarado), preferentemente con |x − 640| ≥ 250 px. Punto de fuga vertical del grupo interior por mínimos cuadrados; para cada vertical exterior: inclinación medida contra la inclinación que predice el punto interior en su x (en grados), y su error por ±5 px en los extremos.
+- G4-M6 (predicción de [U]): en la toma 0137, las verticales exteriores con |x − 640| ≥ 250 px están más cerca de 0° que de la inclinación que predice el punto interior (|medida| < |predicha| / 2), con la diferencia mayor que su error.
+- Control: en el render 0137 (una sola cámara) las verticales exteriores coinciden con la predicha (diferencia ≤ su error). Si no, el método no vale.
+- Firma de [R]: creo que M6 falla (≈ 65 %): una sola cámara.
+- Decisión: M6 se cumple y el control pasa → evidencia de otra proyección y se escribe G4-C. M6 falla con control válido → la hipótesis no se apoya en 0137. Sin verticales exteriores medibles → G4-M queda NULO con estas tomas y se cierra; reabrirlo exige otra toma (no se abre ninguna toma nueva del piso ciego).
