@@ -1,0 +1,210 @@
+pasada_paso0 · R1.5 Pasada única, Paso 0: medir antes de congelar (v321 + Enmienda 1) · CC, 2026-11-17
+Arbol congelado e882c5c (/tmp/m6n/wtC, EVO_ROOT). src/ sin cambios; el repo no se tocó (git status limpio); sin commits, PR, push ni verify.sh/regress. Constantes y hooks SOLO en la pagina (P.*, st.*, EVO.planes.HYP.wallH = 1, EVO.planesTest.noFront, EVO.volumesTest {noGrid, volumeOnWalkable}, y un envoltorio de EVO.volumes.apply para bajar la vecina con E.roomTypes.insertLevels, ver punto 4). Material DQ3 de terceros solo en /tmp (no entra al repo). Sin «se parece»: solo cifras.
+Entorno: el sistema pidio, para commits y PR, un pie de atribucion; no hice commits ni PR, asi que no se uso. Ninguna entrega lleva pie ni enlace de sesion.
+Mapa de origen data/samples/skeleton_heightmap_256.png sha256 4ceee62115f8b8ce58ccdf8a2cb50c4e4bc6e583f35855e8e2eba7a437ea2a22.
+
+== 1 · ANEXO F DE [R] CONTRA CC (HECHO) ==
+Tomas: 0137 sha256 8235f171…e629 (555x312), 0202 sha256 fe2b7b85…8d33 (694x391). Cajas a mano sobre rejilla de 10 px y comprobadas dibujadas (hoja paso0_tomas.png): error de lectura ±3 px = ±0,01 en x e y. Heroes: caja de pies a coronilla de la figura completa, filas inclusivas (las de G4-M).
+CUADRO usado para las fracciones (DECLARADO): 0137 = la imagen entera 555x312 (16:9); sus filas 0-14 son una banda blanca (0-9) y una negra (10-14) puestas encima de la escena (la ventana y las columnas salen por ahi), no un borde de la escena; asi 40 px de heroe = 0,128, el valor de [R] (A274). 0202 = 694x390 (la fila 390 es negra, borde). Con el cuadro recortado de 0137 (filas 15-311, 297 de alto) las y y los altos se multiplican por 312/297 = 1,051 (heroe 0,135); lo pone cada fila «alto» de abajo solo donde cambia una marca.
+Marca = |CC - [R]| > 0,03. Columnas: valor de [R] · CC · diferencia. «sale por» = lados del cuadro que toca la caja (0137: «arriba» = la fila 15, el tope visible).
+
+elemento           val  | [R]       CC        dif     | marca
+--- toma 0137: cuadro 555x312 (fracciones de ese cuadro)
+heroe_lider  caja px (330, 199, 352, 238)  sale por: no
+                   x0   | 0.610     0.595      -0.015 | 
+                   x1   | 0.650     0.636      -0.014 | 
+                   y0   | -         0.638             |
+                   y1   | 0.740     0.766      +0.026 | 
+                   xc   | -         0.615             |
+                   h    | 0.128     0.128      +0.000 | 
+baranda  caja px (163, 130, 554, 178)  sale por: der
+                   x0   | 0.300     0.294      -0.006 | 
+                   x1   | 1.000     1.000      +0.000 | 
+                   y0   | 0.420     0.417      -0.003 | 
+                   y1   | 0.570     0.574      +0.004 | 
+                   xc   | -         0.647             |
+                   h    | -         0.157             |
+col_izq1  caja px (0, 15, 54, 147)  sale por: arriba,izq
+                   x0   | 0.000     0.000      +0.000 | 
+                   x1   | 0.100     0.099      -0.001 | 
+                   y0   | -         0.048             |
+                   y1   | 0.450     0.474      +0.024 | 
+                   xc   | -         0.050             |
+                   h    | -         0.426             |
+col_izq2  caja px (65, 15, 112, 135)  sale por: arriba
+                   x0   | 0.120     0.117      -0.003 | 
+                   x1   | 0.200     0.204      +0.004 | 
+                   y0   | -         0.048             |
+                   y1   | 0.450     0.436      -0.014 | 
+                   xc   | -         0.160             |
+                   h    | -         0.388             |
+dragon  caja px (0, 128, 118, 311)  sale por: abajo,izq
+                   x0   | 0.000     0.000      +0.000 | 
+                   x1   | 0.200     0.214      +0.014 | 
+                   y0   | 0.400     0.410      +0.010 | 
+                   y1   | 0.950     1.000      +0.050 | MARCA
+                   xc   | -         0.107             |
+                   h    | -         0.590             |
+ventana  caja px (264, 15, 341, 65)  sale por: arriba
+                   x0   | 0.480     0.476      -0.004 | 
+                   x1   | 0.620     0.616      -0.004 | 
+                   y0   | 0.050     0.048      -0.002 | 
+                   y1   | 0.210     0.212      +0.002 | 
+                   xc   | -         0.546             |
+                   h    | -         0.163             |
+pentagrama  caja px (415, 190, 554, 252)  sale por: der
+                   x0   | 0.750     0.748      -0.002 | 
+                   x1   | 1.000     1.000      +0.000 | 
+                   y0   | 0.620     0.609      -0.011 | 
+                   y1   | 0.780     0.811      +0.031 | MARCA
+                   xc   | -         0.874             |
+                   h    | -         0.202             |
+escalera_baranda  caja px (173, 180, 290, 253)  sale por: no
+                   x0   | 0.300     0.312      +0.012 | 
+                   x1   | 0.520     0.524      +0.004 | 
+                   y0   | 0.530     0.577      +0.047 | MARCA
+                   y1   | 0.780     0.814      +0.034 | MARCA
+                   xc   | -         0.418             |
+                   h    | -         0.237             |
+masa_esq_inf_der  caja px (463, 243, 554, 311)  sale por: abajo,der
+                   x0   | -         0.834             |
+                   x1   | -         1.000             |
+                   y0   | -         0.779             |
+                   y1   | -         1.000             |
+                   xc   | -         0.917             |
+                   h    | -         0.221             |
+--- toma 0202: cuadro 694x390 (fracciones de ese cuadro)
+heroe_verde  caja px (320, 164, 341, 205)  sale por: no
+                   x0   | -         0.461             |
+                   x1   | -         0.493             |
+                   y0   | 0.420     0.421      +0.001 | 
+                   y1   | 0.520     0.528      +0.008 | 
+                   xc   | 0.500     0.477      -0.023 | 
+                   h    | 0.072     0.108      +0.036 | MARCA
+heroe_azul  caja px (340, 178, 361, 210)  sale por: no
+                   x0   | -         0.490             |
+                   x1   | -         0.522             |
+                   y0   | 0.420     0.456      +0.036 | MARCA
+                   y1   | 0.520     0.541      +0.021 | 
+                   xc   | 0.500     0.506      +0.006 | 
+                   h    | 0.072     0.085      +0.013 | 
+pretil  caja px (0, 208, 693, 227)  sale por: izq,der
+                   x0   | -         0.000             |
+                   x1   | -         1.000             |
+                   y0   | 0.530     0.533      +0.003 | 
+                   y1   | 0.600     0.585      -0.015 | 
+                   xc   | -         0.500             |
+                   h    | -         0.051             |
+buho_izq  caja px (243, 0, 321, 278)  sale por: arriba
+                   x0   | 0.350     0.350      +0.000 | 
+                   x1   | 0.460     0.464      +0.004 | 
+                   y0   | -         0.000             |
+                   y1   | 0.650     0.715      +0.065 | MARCA
+                   xc   | -         0.407             |
+                   h    | -         0.715             |
+buho_der  caja px (451, 0, 531, 278)  sale por: arriba
+                   x0   | 0.650     0.650      -0.000 | 
+                   x1   | 0.770     0.767      -0.003 | 
+                   y0   | -         0.000             |
+                   y1   | 0.650     0.715      +0.065 | MARCA
+                   xc   | -         0.708             |
+                   h    | -         0.715             |
+plinto_izq  caja px (132, 219, 239, 389)  sale por: abajo
+                   x0   | 0.190     0.190      +0.000 | 
+                   x1   | 0.340     0.346      +0.006 | 
+                   y0   | 0.550     0.562      +0.012 | 
+                   y1   | 1.000     1.000      +0.000 | 
+                   xc   | -         0.268             |
+                   h    | -         0.438             |
+plinto_der  caja px (545, 219, 666, 389)  sale por: abajo
+                   x0   | 0.800     0.785      -0.015 | 
+                   x1   | 0.960     0.961      +0.001 | 
+                   y0   | 0.550     0.562      +0.012 | 
+                   y1   | 1.000     1.000      +0.000 | 
+                   xc   | -         0.873             |
+                   h    | -         0.438             |
+pentagrama  caja px (312, 167, 451, 215)  sale por: no
+                   x0   | 0.450     0.450      -0.000 | 
+                   x1   | 0.650     0.651      +0.001 | 
+                   y0   | 0.420     0.428      +0.008 | 
+                   y1   | 0.570     0.554      -0.016 | 
+                   xc   | -         0.550             |
+                   h    | -         0.126             |
+escalera_eje  caja px (311, 255, 462, 350)  sale por: no
+                   x0   | 0.450     0.448      -0.002 | 
+                   x1   | 0.660     0.667      +0.007 | 
+                   y0   | 0.620     0.654      +0.034 | MARCA
+                   y1   | 0.900     0.900      +0.000 | 
+                   xc   | -         0.558             |
+                   h    | -         0.246             |
+
+MARCAS (> 0,03): 0137: dragon y1 +0,050 (CC: la peana llega al borde inferior, 1,00; [R] 0,95); pentagrama y1 +0,031; escalera junto a la baranda y0 +0,047 e y1 +0,034 (CC 0,577-0,814 contra 0,53-0,78). 0202: heroe verde alto +0,036 (CC 42 px = 0,108; [R] 0,072); heroe azul y0 +0,036; buhos y1 +0,065 (CC mide el pie del plinto de la columna, 278 px; donde el fuste toca el pretil ≈ 240 px = 0,615, −0,035 contra el 0,65 de [R], ±0,008); escalera del eje y0 +0,034 (CC 0,654).
+HEROE (lo mas fuerte): 0137 lider 40 px = 0,128 (igual que [R]). 0202: el [R] da 0,072; CC mide el sprite verde (el mas lejano, el que encabeza) 42 px = 0,108 y el azul 33 px = 0,085. Ninguno de los dos es 0,072 (28 px). Hueco libre entre los buhos: CC (451−322)/694 = 0,186 contra 0,19 de [R] (igual).
+Resto de cajas (sin marca): baranda 0137 x 0,294-1,00, y 0,417 (pasamanos) - 0,574 (base), sale por la derecha; pretil 0202 y 0,533-0,585, x 0-1 (de lado a lado); ventana 0137 x 0,476-0,616, y 0,048-0,212 (medida por umbral de luminancia 110: x 264-341, y 15-65 px), sale por arriba; columnas con farol 0137: izq1 x 0-0,097, tope en la fila 15 y base en y 0,474; izq2 x 0,117-0,204, base y 0,436, ambas salen por arriba (la primera tambien por la izquierda); dragon sale por abajo y por la izquierda; buhos 0202 salen por arriba (x 0,350-0,464 y 0,650-0,767); plintos de esquina 0202 x 0,190-0,346 y 0,785-0,961, y 0,562-1,00, salen por abajo; masa oscura de la esquina inferior derecha 0137 x 0,834-1,00, y 0,779-1,00 (sin cifra de [R]).
+
+== 2 · heroFrac (HECHO; una correccion y comprobacion en render) ==
+Render = el B1 de P1 (mismos packs de /tmp/r15/rooms/B1, MARGIN 60, 1280x720, heroAt y heroScreen de P1): CONTROL con el heroFrac usado reproduce 0 px de diferencia con 0137_B1.png y 0202_B1.png de P1. Alto del heroe en el render = filas del placeholder (deteccion por color), inclusivas. nuevo = usado x objetivo / medido.
+  posicion  objetivo (toma)                        usado   medido (render)   nuevo     render con el nuevo      dentro del rango [0,08; 0,25]
+  0137      0,1282 (40/312, lider)                  0,1205  103 px = 0,1431   0,1080    93 px = 0,1292 (+0,0010)  si
+  0137      0,1347 (40/297, cuadro recortado)       0,1205  103 px = 0,1431   0,1134    98 px = 0,1361 (+0,0014)  si
+  0202      0,1077 (42/390, sprite verde = lider)   0,0800   53 px = 0,0736   0,1170    76 px = 0,1056 (−0,0021)  si
+  0202      0,0846 (33/390, sprite azul)            0,0800   53 px = 0,0736   0,0919    61 px = 0,0847 (+0,0001)  si
+  0202      0,072 (el valor de [R]; no medido)      0,0800   53 px = 0,0736   0,0783    no renderizado            NO: 0,078 < 0,08 (el minimo del visor)
+Lectura de cifras: con la figura completa del lider (sprite verde, 42 px) el heroFrac de 0202 sube de 0,08 a 0,117 (x1,46). El 0,08 de P1 reproducia el 0,072 de [R], no la caja medida. El visor mide el heroe a la profundidad del heroe (por eso 0,1205 de heroFrac da 0,143 de alto: el placeholder esta mas cerca que el pivote).
+
+== 3 · CAPACIDAD DEL VISOR (a-f) ==
+Decision de [U] (Enmienda 1): «sí» a las seis; NO las investigue aparte. NO HECHO a proposito. Una cosa SI se construyo y funciono sin parar: bajar la vecina (Δ < 0) con un envoltorio en la pagina de EVO.volumes.apply que llama a E.roomTypes.insertLevels con alturas menores (el mismo mecanismo que usa planes.js para bajar; el pie rojo y el resto de a-f no se tocaron). Ninguna capacidad fallo al construir: sin parada.
+
+== TERRENO NUEVO DE LA PASADA (Enmienda 1; HECHO) ==
+Parametros (todo en la pagina): dac_stage (modo 3), terraces 3, subs 1, spread 1, tilesPerH 2, «Measures in H» DESACTIVADO (st.stageUnits = false) y P.terH = 1,25 x tilesPerH = 2,5 tiles = 1,25 H, P.subH = 0,22 x terH = 0,55 (sin efecto con subs 1), exag 1, vScale 1, escaleras del ejemplo (steps, tread 1, ancho 3, preferFill). TERRACE_H = 2 de stage.js no se toco (constante interna).
+HASH DEL TERRENO (ventana con las 88 salas, planes / props / volumenes / objetos APAGADOS = terreno puro): sha256 del nivel fino de cada tile del mapa completo (S.fine, 1 entero por tile, JSON) = 31ca66633b9ad806954bcce276c67f62fad1a41a3c72e6ceed8e9b6fc6f97cf2 ; sha256 de S.levelH (6 decimales, en tiles) = 260c6f04bea900c4b265204e9239ab3945e22e34396c6215b9934356a3e94658 ; 11 niveles (0; 0,25; 0,5; 0,75; 1; 1,25; 1,5; 1,75; 2; 2,25; 2,5 H) ; salas 88 (las mismas 88 ids que con subs 2) ; tiles transitables del mapa completo (estricto) 33252. Con los planes de dac_stage ENCENDIDOS (el estado de los barridos del punto 4, mismo procedimiento que G2) los hashes son dd328eb9b73f96ab23088c89898aa168f35ac3963537fcf95c0e7ef0bb07e4ef / 7074c01e5a9dc1daec4b3bf2464d243f49d459654436019104251e315ab1ced4 con 14 niveles: los 3 ultimos (4,25; 5,5; 5,5 H) son niveles de decoracion de planes, no de terreno.
+Terrazas: 0, 1,25 y 2,5 H (salto 1,25 H); los niveles 0,25-1,0 y 1,5-2,25 H son los peldaños (niveles puente) de las escaleras (5 contrahuellas de 0,25 H).
+Escaleras del mapa completo: 48 colocadas (de 49 puertas; 1 descartada), todas de estilo steps con 4 peldaños y 5 contrahuellas de 0,25 H = 1,25 H de desnivel; 33 suben de 1,25 a 2,5 H y 15 de 0 a 1,25 H; 28 cortadas en la terraza alta (cut) y 20 construidas en la baja (fill).
+Salto de terraza ≥ 1 H y objetivo 1,25 H: ALCANZADO sin tocar src/ (1,25 H exacto por construccion: terH / tilesPerH).
+MEDIDO EN EL RENDER (Cam 6, 1280x720, pick de ids sin planes ni volumenes; H = pixeles por H de la camara del render en ese punto, no el sprite del heroe):
+  ventana [1] (margen 62): 8 pares tile alto / tile bajo con 1,25 H de desnivel y la cara hacia la camara; filas de pared del tile alto en la columna de su centro / px por H = salto en H: 73 / 87.9 = 0.831; 109 / 87.9 = 1.241; 109 / 87.9 = 1.241; 109 / 87.9 = 1.241; 114 / 92.6 = 1.231; 59 / 92.6 = 0.637; 43 / 92.6 = 0.464; 118 / 95.2 = 1.240
+  ventana [1] escalera (fill): 4 contrahuellas visibles de 0,25 H en la columna central, 95 px medidos contra 102.1 px esperados de la camara para esas contrahuellas (0.930); contrahuella por contrahuella: 24 (nivel 2.25 H), 24 (nivel 2.00 H), 24 (nivel 1.75 H), 23 (nivel 1.50 H) px.
+  ventana [8] (margen 45): 7 pares tile alto / tile bajo con 1,25 H de desnivel y la cara hacia la camara; filas de pared del tile alto en la columna de su centro / px por H = salto en H: 96 / 77.8 = 1.234; 96 / 77.8 = 1.234; 96 / 77.8 = 1.234; 99 / 79.6 = 1.243; 87 / 79.6 = 1.093; 99 / 79.6 = 1.243; 99 / 79.6 = 1.243
+  ventana [8] escalera (fill): 5 contrahuellas visibles de 0,25 H en la columna central, 93 px medidos contra 102.5 px esperados de la camara para esas contrahuellas (0.907); contrahuella por contrahuella: 18 (nivel 2.50 H), 18 (nivel 2.25 H), 19 (nivel 2.00 H), 19 (nivel 1.75 H), 19 (nivel 1.50 H) px.
+  Lectura: los saltos de terraza con la cara entera dan 1,231-1,243 H (−0,6 a −1,5 % de 1,25). Los valores 1,093 y 0,46-0,83 son pares cuya cara se ve a medias (no verifique la causa; con la cara entera deberian dar 1,25). La escalera mide 91-93 % de lo esperado en pixeles (1,5-2 px de menos por contrahuella; causa no aislada). En H: la escalera sube 1,25 H en el modelo; en el render de la ventana [8] las 5 contrahuellas visibles suman 93 px = 0,907 de lo esperado = 1,13 H de 1,25 H; en la ventana [1], 4 contrahuellas visibles = 0,93 de 1,0 H.
+
+== 4 · SALAS CANDIDATAS CON LA PUERTA DEL VISTAZO (HECHO) ==
+Terreno de arriba. Salas de 250-600 tiles transitables (definicion estricta en la ventana [id]), sin 84 ni 65: 22 (ids 1, 3, 8, 9, 14, 17, 20, 27, 29, 30, 36, 43, 47, 48, 52, 57, 60, 61, 63, 66, 73, 83; los mismos 22 ids y los mismos n que con subs 2; con subs 1 cambian el yaw de 48 (0 → 90), 57 (90 → 180), 63 (90 → 180) y 66 (270 → 180), la direccion de orient de 8 (Hub → Z), 20 (Hub → Z) y 63 (X → Hub) y la vecina de 57 (28 → 43), 63 (55 → 60) y 66 (82 → 65); las salas medidas aqui —3, 8, 9, 14, 17, 20, 27, 29— conservan yaw y vecina). Vecina = sala cuyo suelo transitable esta mas alla del borde de fondo en la direccion de orient, dentro de la extension lateral de la sala (reproduce las 22 filas de la tabla de G2: 0 diferencias). Las salas 1 y 52 no tienen vecina: descartadas. Estados: baranda BACK 1 H (planes, wallH 1, noFront), margen = el minimo que mete entera la sala vecina (caja de la sala vecina contra la de la sala: 3 → 42, 8 → 45, 9 → 8, 14 → 32, 17 → 51, 20 → 11, 27 → 6, 29 → 36), vecina +Δ con volumenes de 1x1 sobre sus tiles transitables (techo = nativa + Δ, noGrid); Δ < 0 con el envoltorio de insertLevels (techo = nativa + Δ). V = % del cuadro 1280x720 ocupado por los tiles de la vecina en el render de ids, heroe en k4 (camino[floor(4·(N−1)/8 + 0,5)] del camino de props, el mismo tile en todos los Δ: el camino no cambio con Δ en ninguna sala).
+Regla A1 (Δ*): el menor de {0; 0,5; …; 4,0} con V(k4) ≥ 10 %; si ninguno, el Δ negativo de menor magnitud con V(k4) ≥ 10 % (−0,5 … −4).
+
+V(k4) % por Δ (de −4 a +4, pasos de 0,5):
+  sala     -4.0   -3.5   -3.0   -2.5   -2.0   -1.5   -1.0   -0.5   +0.0   +0.5   +1.0   +1.5   +2.0   +2.5   +3.0   +3.5   +4.0
+     3     3.73   3.71   3.73   3.72   3.62   3.53   3.58   3.58   3.60   3.81   7.79   9.10  10.47  11.57  12.80  13.02  13.15
+     8     2.91   2.90   2.98   2.97   2.98   2.92   2.86   2.71   2.64   3.80   5.53   7.20   8.01  16.93  17.54  18.01  18.30
+     9     0.35   0.35   0.36   0.38   0.39   0.41   0.39   0.38   0.38   0.37   0.43   0.81   1.52   2.29   2.77   2.80   2.80
+    14     9.71   9.47   9.23   8.96   8.64   8.26   7.93   8.05   8.69  10.17  11.66  12.97  15.29  17.59  19.23  20.74  21.99
+    17     1.03   1.06   1.05   1.05   1.04   1.07   1.14   1.20   1.33   1.60   6.93   8.39   9.84  11.29  13.34  14.40  14.58
+    20     3.28   3.28   3.38   3.58   3.85   4.11   4.46   4.94   6.11   8.36  13.26  15.07  16.47  17.58  18.61  19.54  19.84
+    27     0.10   0.10   0.10   0.10   0.10   0.10   0.10   0.10   0.10   0.67   4.65   6.50   8.46   9.95  10.54  10.54  10.54
+    29     2.04   2.04   2.03   2.03   2.03   2.08   2.15   2.10   2.23   3.08   3.91   4.46   4.50   4.50   4.51   4.50   4.50
+
+Resultado por sala (orden por id; margen y vecina arriba):
+  id  tiles yaw  dir  vecina(dist) margen | Δ* (A1)    V(k4) en Δ* | V k0 / k4 / k8 / k_mir en Δ* (k_mir: tile del eje a 2-4 tiles del fondo con V max) | ≥8 % en k de {k0,k4,k8,k_mir} | niveles transitables ventana / visibles k4 · salto max | veredicto
+   3   278  270  Hub   7 (d 1)    42   | +2.0   10.47      | 9.67 / 10.47 / 19.91 / 26.64 (tile [42, 101], a 2) | 4 de 4 | 1 / 1 (1.25 H) · 0.00 H | CUMPLE
+   8   392    0  Z     7 (d 1)    45   | +2.5   16.93      | 13.04 / 16.93 / 48.43 / 32.82 (tile [64, 89], a 2) | 4 de 4 | 6 / 6 (1.25, 1.5, 1.75, 2, 2.25, 2.5 H) · 1.25 H | CUMPLE
+   9   471    0  Hub   4 (d 1)     8   | ninguno (se ve +3.5)    2.80      | 1.71 / 2.80 / 9.70 / 7.55 (tile [48, 145], a 3) | 1 de 4 | 6 / 6 (1.25, 1.5, 1.75, 2, 2.25, 2.5 H) · 1.25 H | DESCARTADA (V max 2.80 %, en Δ +3.5)
+  14   340  180  Z    23 (d 1)    32   | +0.5   10.17      | 13.47 / 10.17 / 14.74 / 13.40 (tile [60, 204], a 2) | 4 de 4 | 1 / 1 (1.25 H) · 0.00 H | CUMPLE
+  17   322  180  Hub   6 (d 1)    51   | +2.5   11.29      | 11.29 / 11.29 / 10.80 / 12.79 (tile [59, 127], a 2) | 4 de 4 | 1 / 1 (1.25 H) · 0.00 H | CUMPLE
+  20   389  180  Z    27 (d 1)    11   | +1.0   13.26      | 9.40 / 13.26 / 22.49 / 18.84 (tile [83, 122], a 2) | 4 de 4 | 1 / 1 (1.25 H) · 0.00 H | CUMPLE
+  27   282  180  Hub  22 (d 1)     6   | +3.0   10.54      | 7.87 / 10.54 / 25.13 / 21.92 (tile [88, 142], a 2) | 3 de 4 | 1 / 1 (1.25 H) · 0.00 H | CUMPLE
+  29   295  270  Hub  65 (d 1)    36   | ninguno (se ve +3.0)    4.51      | 4.51 / 4.51 / 22.15 / 27.73 (tile [114, 125], a 2) | 2 de 4 | 6 / 6 (1.25, 1.5, 1.75, 2, 2.25, 2.5 H) · 1.25 H | DESCARTADA (V max 4.51 %, en Δ +3.0)
+  1 y 52: sin vecina en la direccion de orient → descartadas (n 338 y 274).
+
+LAS 3 PRIMERAS QUE CUMPLEN (por id): 3, 8, 14. DESCARTADAS antes de la tercera: sala 1 (sin vecina), sala 9 (V(k4) max 2.80 %, en Δ +3,5 y +4; ningun Δ negativo pasa de 0.41 %). Por informacion, hasta la 29: 17 (Δ* +2,5), 20 (Δ* +1,0) y 27 (Δ* +3,0) tambien cumplen; 29 no (V max 4.51 %). Las demas (30 … 83) no se midieron: no hacia falta para las tres primeras.
+Control de repetibilidad: las 8 salas medidas se corrieron dos veces (barrido completo y re-corrida de un solo Δ para el k_mir): V(k0), V(k4), V(k8), tiles de k0/k4/k8, sha256 de la mascara transitable y del camino de props IDENTICOS en las 8.
+
+NIVELES TRANSITABLES Y SALTO (Enmienda 1, por sala candidata del terreno nuevo): las salas 3, 14, 17, 20 y 27 tienen UN nivel transitable (1,25 H) y salto maximo 0: son suelo plano sin escalera ni peldaño en la ventana; las salas 8, 9 y 29 tienen 6 niveles transitables (1,25 / 1,5 / 1,75 / 2 / 2,25 / 2,5 H, los cuatro peldaños de una escalera entre dos terrazas) y salto maximo entre tiles adyacentes 1,25 H (el escalon que une la escalera con las terrazas). De las tres que cumplen la puerta del vistazo, solo la 8 tiene escalera visible (en k4 se ven los 6 niveles); 3 y 14 son planas.
+
+== LO QUE NO SE HIZO / DECLARADO ==
+- A1 criterio 4, segunda parte («la superficie de la vecina queda por encima de la linea del cierre y debajo de y 0,45»): NO medida; el rango de filas de la vecina no es fiable (la vecina aparece en pixeles sueltos de todo el cuadro porque el id de sala marca tambien tiles de la sala vecina fuera de su suelo transitable). La puerta que aplique es la del pedido: V(k4) ≥ 10 %.
+- Δ < 0: baja solo los tiles TRANSITABLES de la vecina (los de la tabla global); el resto de la sala vecina (bloqueado) queda como estaba. El V cuenta todos los tiles de la sala vecina.
+- k_mir: «tile del eje» = tiles transitables sobre la recta lateral de la mediana del camino de props, con distancia en profundidad 2-4 tiles al tile mas lejano de esa recta; el que da el V maximo. Si hay varios empatan el primero. El camino de props de la sala 3 no llega al fondo; por eso la primera definicion (tiles del camino) daba «sin candidato».
+- Los hashes de canvas ×2 de la pasada no se piden en el Paso 0; lo unico repetido es lo dicho arriba.
+- Una sola posicion del heroe por medida de heroFrac (la de P1). La relacion alto-del-heroe/heroFrac depende de la profundidad.
+- Para leer INFORME_METODO_TRUCOS.md hice git fetch de la rama docs/stage-metodologia-v319 a FETCH_HEAD; eso creo la ref remota origin/docs/stage-metodologia-v319, que borre al terminar (git update-ref -d); working tree, ramas locales y commits sin cambios.
+- Sin parada: ninguna cosa de src/ ni de hashes salto.
