@@ -1,0 +1,50 @@
+{
+ "v0222": {
+  "pos": "s2",
+  "kind": "Q:A3b",
+  "1": "TECHO",
+  "2": "TECHO-A3b"
+ },
+ "v711f": {
+  "pos": "n3",
+  "kind": "Q:A3a",
+  "1": "TECHO",
+  "2": "TECHO-A3a"
+ },
+ "va323": {
+  "pos": "m1",
+  "kind": "Q:C3",
+  "1": "TECHO-C3",
+  "2": "TECHO"
+ },
+ "vbebe": {
+  "pos": "s2",
+  "kind": "Q:C2",
+  "1": "TECHO",
+  "2": "TECHO-C2"
+ },
+ "v2b8a": {
+  "pos": "n1",
+  "kind": "Q:A6",
+  "1": "TECHO",
+  "2": "TECHO-A6"
+ },
+ "v8643": {
+  "pos": "s1",
+  "kind": "CTL:techo",
+  "1": "SUELO",
+  "2": "TECHO"
+ },
+ "v615f": {
+  "pos": "s1",
+  "kind": "CTL:senuelo",
+  "1": "SENUELO2",
+  "2": "SUELO"
+ },
+ "v52e2": {
+  "pos": "m1",
+  "kind": "REP:C3",
+  "1": "TECHO",
+  "2": "TECHO-C3"
+ }
+}
