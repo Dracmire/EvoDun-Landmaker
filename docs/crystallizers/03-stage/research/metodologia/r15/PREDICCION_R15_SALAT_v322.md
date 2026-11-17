@@ -129,3 +129,14 @@ Firmas:
 - Q17, A3b aporta: 45 %.
 - Q18, A4 aporta: 50 %.
 - Q19, B3 aporta: 35 %.
+
+## Enmienda 6 ([R], 2026-11-17, decisiones del supervisor sobre la entrega del grupo B de CC, antes de juzgar)
+1. **Medida de unión (M1 de CC), aceptada como corrección de un defecto de medida.** En el render de ids cada cara de tile queda separada por su contorno, y «la componente conexa mayor» mide una sola cara. Por eso A3a y A3b se miden con la unión de componentes ≥ 300 px, con las mismas puertas y rangos. Con eso, A3a = 4/6 (CONSTRUIDO) y A3b = 3/6 (NO CONSTRUIBLE, techo por la sala). La corrección es posterior a ver los datos; se declara.
+2. **Filtro de borde de A4 (M2 de CC), aceptado.** Es el mismo filtro que ya usa `maskTiles`. A4 = 6/6.
+3. **Control de rojo en m1.** TECHO′ m1 (32,0 %) y TECHO′ − A4 m1 (31,1 %) superan el 30 %, así que m1 queda fuera del juicio para A3a y para A4.
+4. **Se juzga:**
+   - A4 en m2, m3, n1, n2 y n3 (5 posiciones);
+   - A3a en m2, m3 y n1 (3 posiciones).
+
+   Dos tandas, con 3 controles cada una: TECHO′ contra SUELO, SEÑUELO2 contra SUELO y un par repetido con los lados invertidos.
+5. **No se juzgan** B3 ni A3b (NO CONSTRUIBLES).
