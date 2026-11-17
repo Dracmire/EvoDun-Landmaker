@@ -27,3 +27,8 @@ Terreno `dac_stage`, terraces 3, subs 2. Salas de 250–600 tiles con vecina a �
 `pasada_paso0.txt` (tablas 1–4), hojas `paso0_tomas.png` (cajas) y `paso0_salas.png` (V por sala), SHA256SUMS.
 ## Paradas
 Solo las de siempre (`src/`, hashes). Un «no» en el punto 3 NO es parada: se informa y [R] ajusta las fichas. Sin «se parece».
+
+## Enmienda 1 (2026-11-17 04:10, decisión de [U] antes de correr)
+- Punto 3: [U] responde «sí» a las seis capacidades (a–f). No las investigues aparte; si al construir alguna falla, PARA y dilo.
+- Terreno nuevo de la pasada (reemplaza a terraces 3, subs 2): `terraces` 3, **`subs` 1** (DQ3 es piso plano con estructuras, nunca terreno irregular) y **salto de terraza ≥ 1 H, objetivo 1,25 H** (en 0202 la escalera entre los búhos baja al menos la altura del héroe). Fíjalo con `terH` («Measures in H» como haga falta) y MIDE en el render el salto real entre terrazas en H y el alto de la escalera; si no se puede llegar a 1–1,25 H sin tocar `src/`, PARA.
+- Punto 4 se hace sobre ESTE terreno: informa el hash del terreno, cuántas salas hay y, por sala candidata, niveles transitables visibles y salto máximo.
