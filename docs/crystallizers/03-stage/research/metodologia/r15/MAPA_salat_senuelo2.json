@@ -1,0 +1,47 @@
+{
+ "ua47d": {
+  "pos": "s1",
+  "1": "SENUELO2",
+  "2": "SUELO"
+ },
+ "uf363": {
+  "pos": "s2",
+  "1": "SUELO",
+  "2": "SENUELO2"
+ },
+ "u007d": {
+  "pos": "s3",
+  "1": "SUELO",
+  "2": "SENUELO2"
+ },
+ "u2926": {
+  "pos": "m1",
+  "1": "SENUELO2",
+  "2": "SUELO"
+ },
+ "u667d": {
+  "pos": "m2",
+  "1": "SUELO",
+  "2": "SENUELO2"
+ },
+ "u073b": {
+  "pos": "m3",
+  "1": "SUELO",
+  "2": "SENUELO2"
+ },
+ "u278a": {
+  "pos": "n1",
+  "1": "SUELO",
+  "2": "SENUELO2"
+ },
+ "u0690": {
+  "pos": "n2",
+  "1": "SUELO",
+  "2": "SENUELO2"
+ },
+ "ub84a": {
+  "pos": "n3",
+  "1": "SENUELO2",
+  "2": "SUELO"
+ }
+}

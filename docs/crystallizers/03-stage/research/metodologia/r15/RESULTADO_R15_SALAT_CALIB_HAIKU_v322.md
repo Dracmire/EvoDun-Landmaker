@@ -28,3 +28,13 @@ La falla puede ser del instrumento (tres archivos por prueba que Haiku confunde)
 - Votos: `VOTOS_salat_haiku_rubrica.json`, `VOTOS_salat_sonnet_rubrica.json`.
 - Observación de [R]: el señuelo suma en P3 y P5 porque es, literalmente, una masa y una figura en el suelo. La rúbrica mide presencia de piezas y el señuelo es una pieza; la función del señuelo y la del ítem chocan. Se registra; no cambia la regla congelada.
 - Por la regla de la Enmienda 2, punto 4, corresponde cerrar la rama R1.5 (decisión de [U]).
+
+## Tercera ronda: SEÑUELO2 con Sonnet (Enmienda 3 de la predicción)
+- SEÑUELO2: bloque de 2×2 tiles y 0,5 H en x 10–11, z 35–36, visible en las 9 posiciones (out4 del preparador; hashes ×2 iguales).
+- 3 jueces Sonnet × 9 pares. Mapa `MAPA_salat_senuelo2.json` (f28a65b0…).
+- Resultado: los 3 jueces dan exactamente la misma nota a SEÑUELO2 y a SUELO en las 27 comparaciones. SEÑUELO2 − SUELO = +0,00 (regla ≤ +0,3): CUMPLE.
+- Q14 (cumple, 60 %): ACIERTO. Sonnet queda ADOPTADO como juez, con la rúbrica P1–P6 y la imagen compuesta.
+
+Límites:
+- El bloque ocupa 0,3–0,5 % del cuadro. El control prueba que una pieza pequeña sin función no suma; no prueba que una pieza grande sin función no sume.
+- La nota absoluta varía mucho entre jueces (entre 1 y 4 en un mismo cuadro). Se decide por la diferencia dentro de cada juez, nunca por el nivel.
