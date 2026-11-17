@@ -45,3 +45,22 @@ Razones breves de la firma:
 - Jueces del mismo modelo.
 - La nota absoluta es nueva.
 - Las referencias son de otro juego.
+
+## Enmienda 1 ([R], 2026-11-17, decisión de [U] tras la Verificación 1)
+Motivo: en V1 el voto de par premió al señuelo (3/3) con la nota idéntica a SUELO (2,33 contra 2,33), y las puertas de pantalla excluyeron piezas que los jueces sí nombran (RESULTADO_R15_SALAT_V1_v322).
+
+1. **Juez por nota, con empate.** Texto nuevo, exacto:
+   «La imagen R es una referencia. Las imágenes 1 y 2 son maquetas sin texturas. Da a cada maqueta una nota de 1 a 5 de parecido con R en COMPOSICIÓN: qué se ve en cada franja de profundidad, qué tapa a qué, qué tan lejos se ve y dónde queda el personaje (1 = nada, 5 = casi igual). Ignora color, luz, texturas y detalle. Después responde 1, 2 o 0 (0 = empate) y una línea con la razón.»
+2. **Decisión.** Un truco APORTA si la nota media de TECHO, menos la de TECHO − X, es ≥ 0,5 sobre sus posiciones declaradas. Es NEUTRO entre −0,5 y +0,5, y ESTORBA si es ≤ −0,5. El voto 1/2/0 se informa, pero no decide.
+3. **La puerta es descriptiva.** Se prueban los 7 trucos en sus posiciones declaradas (Enmienda 3 del pedido). Sus cifras de puerta se guardan junto al resultado.
+4. **Jueces Haiku, con calibración previa.** Se calibran sobre los 12 pares de V1 (`MAPA_salat_v1.json`). Cumplen si:
+   - TECHO gana a SUELO en ≥ 8/9 posiciones, con nota ≥ +1,0;
+   - en los 3 pares del señuelo, la nota del señuelo menos la de SUELO es ≤ +0,3.
+
+   Si cumplen, Haiku queda adoptado. Si no, se informa y decide [U].
+5. **Control del señuelo en las pruebas.** Un señuelo visible en las 9 posiciones; su nota debe quedar ≤ +0,3 sobre SUELO.
+6. Tandas de ≤ 9 pares por juez. 3 jueces nuevos sin contexto por tanda.
+
+Predicción nueva (firma de [R]):
+- Q11: Haiku calibra: 60 %.
+- Las Q4–Q10 se mantienen, ahora leídas con la regla del punto 2.

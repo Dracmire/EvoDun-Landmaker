@@ -32,3 +32,13 @@ TU PAPEL: verificador independiente. Reproduces y vuelves a medir con tu propia 
 Paras y avisas si pasa cualquiera de estas cosas:
 - el arnés no corre sin tocar `src/`;
 - más de la mitad de los hashes salen DISTINTOS. En ese caso, antes de seguir, di qué parte del render difiere: fuentes, antialiasing o geometría.
+
+## Enmienda 1 ([R], 2026-11-17)
+El arnés y la entrega del preparador ya están en la rama `docs/stage-metodologia-v319` (commit `b4ad7bb`), en `docs/crystallizers/03-stage/research/metodologia/harness_salat/`. Su README dice las rutas fijas y el orden de ejecución: `run3.js` y después `write3.js`.
+
+No hay zip adjunto. La referencia está en el repo:
+- `harness_salat/entrega_out3/SHA256SUMS`: los 68 PNG;
+- `presencia.txt` y `medidas_v1.txt`;
+- `harness_salat/scratch/results3.json`.
+
+Se verifica la entrega de la Enmienda 3 del preparador. Tu `salaT_v1.zip` anterior NO se usa: es anterior a la Enmienda 3 y no sería independiente.
