@@ -87,3 +87,16 @@ Predicción nueva (firma de [R]):
 Firmas:
 - Q12: Haiku calibra con la rúbrica: 50 %.
 - Q13: Sonnet calibra (si llega a correr): 65 %.
+
+## Enmienda 3 ([R], 2026-11-17, última calibración, decisión de [U])
+El señuelo anterior (una mancha en el suelo y un panel) coincidía con los ítems P5 y P3 de la rúbrica. El señuelo nuevo (SEÑUELO2) no lo cuenta ningún ítem:
+- un bloque bajo de 2×2 tiles y 0,5 H, sobre suelo transitable no tocado por el camino;
+- lejos de los bordes laterales y de las esquinas inferiores del cuadro;
+- a ≥ 4 tiles del personaje y fuera del eje;
+- visible en las 9 posiciones.
+
+Calibración: solo Sonnet, con la misma rúbrica y la misma imagen compuesta, sobre 9 pares SEÑUELO2 contra SUELO. Cumple si la nota de SEÑUELO2 menos la de SUELO es ≤ +0,3. TECHO contra SUELO ya cumplió con Sonnet (9/9, +1,32), y no se repite.
+- Si cumple: Sonnet queda adoptado como juez y se pasa al quita-uno.
+- Si no: se cierra R1.5.
+
+Firma Q14 (cumple): 60 %.
