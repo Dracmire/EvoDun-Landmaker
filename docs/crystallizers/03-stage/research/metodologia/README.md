@@ -17,6 +17,6 @@ Por qué hay dos informes y no uno: el informe integrado explica y registra; las
 ## Reglas de uso
 - Nada de esta carpeta es material del remake: no hay capturas ni mapas de terceros (esos viven en `../../refs/dq3/` y en el Proyecto).
 - Los archivos de `r15/` son copias exactas de lo congelado; no se editan. Comprobación: `cd r15 && sha256sum -c HASHES_v31x.sha256`.
-  - `HASHES_v317.sha256` tiene dos líneas para `PREDICCION_R15_G4M_v317.md`: la primera es la versión anterior a su Enmienda 1 (falla a propósito); la segunda es la vigente.
+  - `HASHES_v317.sha256` tiene una línea por versión de `PREDICCION_R15_G4M_v317.md` (original, Enmienda 1, Enmienda 2): las anteriores fallan a propósito; la última es la vigente.
 - Las cifras usadas como compuerta de un pase nuevo se re-miden en la sesión nueva (informe integrado, §0.2).
 - No se toca `src/` desde esta carpeta; el estado del repo de referencia es `e882c5c`.
