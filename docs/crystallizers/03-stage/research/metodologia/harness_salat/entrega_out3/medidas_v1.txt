@@ -1,0 +1,128 @@
+MEDIDAS V1 · cierre 8 H · Enmienda 1 y 2
+
+Sala: niveles 0 / 5 / 10 tiles (0 / 1,25 / 2,5 H); terraces 3, subs 1, pre 0, minPlateau 1; escalera = registro de peldaños del visor (5 peldaños, 7 tiles); regiones transitables [325, 802]; camino (20,1) -> (20,31) 31 tiles, meta (20,31) transitable.
+Camara: Cam 6, FOV 30, pitch 25, heroFrac 0,10, exag 1, vScale 1, yaw 0, planes apagado, noFront.
+
+V1.1 hashes x2 (dos pasadas independientes de render, todos los PNG):
+  68 de 68 IGUAL; distintos: ninguno
+  Planos Cam 5: SUELO_plano_cam5.png, TECHO_plano_cam5.png (cada uno x2, iguales).
+
+Corte del lado de camara (extension de A7, Enmienda 2), por posicion en TECHO (pieza cortada si esta mas cerca que el heroe y lo tapa > 25 %; la misma pieza se corta en todos los estados de esa posicion):
+  s1: nada cortado
+  s2: nada cortado
+  s3: nada cortado
+  m1: nada cortado
+  m2: nada cortado
+  m3: nada cortado
+  n1: nada cortado
+  n2: nada cortado
+  n3: nada cortado
+  PLACEBO (billboard 1,5 H en el anillo este): s1 0.0 %, s2 0.0 %, s3 0.0 %, m1 0.0 %, m2 0.0 %, m3 0.0 %, n1 0.0 %, n2 0.0 %, n3 0.0 % del heroe cubierto; ninguno > 25 %, nada cortado.
+
+Controles por estado y posicion (mascara / camino / meta iguales a SUELO; volumen sobre el camino; billboards + rojo; heroe tapado; fondo vacio):
+  SUELO_s1     mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.11 %
+  SUELO_s2     mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.11 %
+  SUELO_s3     mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.11 %
+  SUELO_m1     mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.17 %
+  SUELO_m2     mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.20 %
+  SUELO_m3     mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.20 %
+  SUELO_n1     mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.27 %
+  SUELO_n2     mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.27 %
+  SUELO_n3     mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.38 %
+  TECHO_s1     mask igual camino igual meta igual | vol camino 0 | bill+rojo 27.67 % (bill 0.00 %, rojo 27.67 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO_s2     mask igual camino igual meta igual | vol camino 0 | bill+rojo 26.53 % (bill 0.00 %, rojo 26.53 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO_s3     mask igual camino igual meta igual | vol camino 0 | bill+rojo 26.25 % (bill 0.00 %, rojo 26.25 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO_m1     mask igual camino igual meta igual | vol camino 0 | bill+rojo 28.66 % (bill 0.00 %, rojo 28.66 %) | heroe 0.00 % | vacio 0.17 %
+  TECHO_m2     mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.98 % (bill 0.00 %, rojo 23.98 %) | heroe 0.00 % | vacio 0.20 %
+  TECHO_m3     mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.98 % (bill 0.00 %, rojo 23.98 %) | heroe 0.00 % | vacio 0.20 %
+  TECHO_n1     mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.01 % (bill 0.00 %, rojo 13.01 %) | heroe 0.00 % | vacio 0.26 %
+  TECHO_n2     mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.43 % (bill 0.00 %, rojo 13.43 %) | heroe 0.00 % | vacio 0.26 %
+  TECHO_n3     mask igual camino igual meta igual | vol camino 0 | bill+rojo 17.69 % (bill 0.00 %, rojo 17.69 %) | heroe 0.00 % | vacio 0.37 %
+  PLACEBO_s1   mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.11 %
+  PLACEBO_s2   mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.11 %
+  PLACEBO_s3   mask igual camino igual meta igual | vol camino 0 | bill+rojo 1.88 % (bill 1.88 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.11 %
+  PLACEBO_m1   mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.17 %
+  PLACEBO_m2   mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.20 %
+  PLACEBO_m3   mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.20 %
+  PLACEBO_n1   mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.27 %
+  PLACEBO_n2   mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.27 %
+  PLACEBO_n3   mask igual camino igual meta igual | vol camino 0 | bill+rojo 0.00 % (bill 0.00 %, rojo 0.00 %) | heroe 0.00 % | vacio 0.38 %
+  TECHO-A6_s1  mask igual camino igual meta igual | vol camino 0 | bill+rojo 14.63 % (bill 0.00 %, rojo 14.63 %) | heroe 0.00 % | vacio 0.11 %
+  TECHO-A6_s2  mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.35 % (bill 0.00 %, rojo 13.35 %) | heroe 0.00 % | vacio 0.11 %
+  TECHO-A6_s3  mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.19 % (bill 0.00 %, rojo 13.19 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-A6_n1  mask igual camino igual meta igual | vol camino 0 | bill+rojo 4.27 % (bill 2.53 %, rojo 1.74 %) | heroe 0.00 % | vacio 0.27 %
+  TECHO-A6_n2  mask igual camino igual meta igual | vol camino 0 | bill+rojo 3.85 % (bill 2.54 %, rojo 1.31 %) | heroe 0.00 % | vacio 0.27 %
+  TECHO-A6_n3  mask igual camino igual meta igual | vol camino 0 | bill+rojo 10.51 % (bill 2.53 %, rojo 7.98 %) | heroe 0.00 % | vacio 0.38 %
+  TECHO-A3a_m1 mask igual camino igual meta igual | vol camino 0 | bill+rojo 28.65 % (bill 0.00 %, rojo 28.65 %) | heroe 0.00 % | vacio 0.17 %
+  TECHO-A3a_m2 mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.96 % (bill 0.00 %, rojo 23.96 %) | heroe 0.00 % | vacio 0.20 %
+  TECHO-A3a_m3 mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.96 % (bill 0.00 %, rojo 23.96 %) | heroe 0.00 % | vacio 0.20 %
+  TECHO-A3a_n1 mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.01 % (bill 0.00 %, rojo 13.01 %) | heroe 0.00 % | vacio 0.26 %
+  TECHO-A3a_n2 mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.43 % (bill 0.00 %, rojo 13.43 %) | heroe 0.00 % | vacio 0.26 %
+  TECHO-A3a_n3 mask igual camino igual meta igual | vol camino 0 | bill+rojo 11.47 % (bill 0.00 %, rojo 11.47 %) | heroe 0.00 % | vacio 0.37 %
+  TECHO-A3b_s1 mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.54 % (bill 0.00 %, rojo 23.54 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-A3b_s2 mask igual camino igual meta igual | vol camino 0 | bill+rojo 24.68 % (bill 0.00 %, rojo 24.68 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-A3b_s3 mask igual camino igual meta igual | vol camino 0 | bill+rojo 21.92 % (bill 0.00 %, rojo 21.92 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-A3b_n1 mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.01 % (bill 0.00 %, rojo 13.01 %) | heroe 0.00 % | vacio 0.26 %
+  TECHO-A3b_n2 mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.43 % (bill 0.00 %, rojo 13.43 %) | heroe 0.00 % | vacio 0.26 %
+  TECHO-A3b_n3 mask igual camino igual meta igual | vol camino 0 | bill+rojo 17.69 % (bill 0.00 %, rojo 17.69 %) | heroe 0.00 % | vacio 0.37 %
+  TECHO-A4_m1  mask igual camino igual meta igual | vol camino 0 | bill+rojo 28.66 % (bill 0.00 %, rojo 28.66 %) | heroe 0.00 % | vacio 0.17 %
+  TECHO-A4_m2  mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.98 % (bill 0.00 %, rojo 23.98 %) | heroe 0.00 % | vacio 0.20 %
+  TECHO-A4_m3  mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.98 % (bill 0.00 %, rojo 23.98 %) | heroe 0.00 % | vacio 0.20 %
+  TECHO-A4_n1  mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.01 % (bill 0.00 %, rojo 13.01 %) | heroe 0.00 % | vacio 0.26 %
+  TECHO-A4_n2  mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.43 % (bill 0.00 %, rojo 13.43 %) | heroe 0.00 % | vacio 0.26 %
+  TECHO-A4_n3  mask igual camino igual meta igual | vol camino 0 | bill+rojo 17.69 % (bill 0.00 %, rojo 17.69 %) | heroe 0.00 % | vacio 0.37 %
+  TECHO-C3_s1  mask igual camino igual meta igual | vol camino 0 | bill+rojo 27.67 % (bill 0.00 %, rojo 27.67 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-C3_s2  mask igual camino igual meta igual | vol camino 0 | bill+rojo 26.53 % (bill 0.00 %, rojo 26.53 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-C3_s3  mask igual camino igual meta igual | vol camino 0 | bill+rojo 26.25 % (bill 0.00 %, rojo 26.25 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-C3_m1  mask igual camino igual meta igual | vol camino 0 | bill+rojo 28.66 % (bill 0.00 %, rojo 28.66 %) | heroe 0.00 % | vacio 0.17 %
+  TECHO-C3_m2  mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.98 % (bill 0.00 %, rojo 23.98 %) | heroe 0.00 % | vacio 0.20 %
+  TECHO-C3_m3  mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.98 % (bill 0.00 %, rojo 23.98 %) | heroe 0.00 % | vacio 0.20 %
+  TECHO-C3_n1  mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.01 % (bill 0.00 %, rojo 13.01 %) | heroe 0.00 % | vacio 0.26 %
+  TECHO-C3_n2  mask igual camino igual meta igual | vol camino 0 | bill+rojo 13.43 % (bill 0.00 %, rojo 13.43 %) | heroe 0.00 % | vacio 0.26 %
+  TECHO-C3_n3  mask igual camino igual meta igual | vol camino 0 | bill+rojo 17.69 % (bill 0.00 %, rojo 17.69 %) | heroe 0.00 % | vacio 0.37 %
+  TECHO-C2_s1  mask igual camino igual meta igual | vol camino 0 | bill+rojo 26.48 % (bill 0.00 %, rojo 26.48 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-C2_s2  mask igual camino igual meta igual | vol camino 0 | bill+rojo 25.31 % (bill 0.00 %, rojo 25.31 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-C2_s3  mask igual camino igual meta igual | vol camino 0 | bill+rojo 24.92 % (bill 0.00 %, rojo 24.92 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-B3_s1  mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.40 % (bill 0.00 %, rojo 23.40 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-B3_s2  mask igual camino igual meta igual | vol camino 0 | bill+rojo 21.07 % (bill 0.00 %, rojo 21.07 %) | heroe 0.00 % | vacio 0.12 %
+  TECHO-B3_s3  mask igual camino igual meta igual | vol camino 0 | bill+rojo 23.80 % (bill 0.00 %, rojo 23.80 %) | heroe 0.00 % | vacio 0.12 %
+
+Controles que fallan (se informan, no son PARADA):
+  ninguno
+SUELO: vacio maximo 0.38 % (limite 2 %).
+
+V1.5: entran 2 de 7.
+
+V1.6 guiones de medida, corridos en seco sobre TECHO:
+  measure.js A6: si
+  measure.js A3a: si
+  measure.js A3b: si
+  measure.js A4: si
+  measure.js C3: si
+  measure.js C2: si
+  measure.js B3: si
+  controls.js (fondo vacio, billboards + rojo, heroe tapado) y el hash de mascara / camino / meta: si (corridos en los 83 PNG)
+  aislamiento (diff TECHO vs TECHO-X con caja + 0,02): si
+  (los guiones estan en /home/claude/salat/harness; 'si' = corrio sin error sobre los 9 TECHO y devolvio cifras)
+
+Parametros finales por truco e iteraciones usadas (tope Enmienda 3: 6 por truco, sondas incluidas; el supervisor ordeno no afinar mas):
+  A6: baranda 0.8 H, postes 1.4 H, norte x 8-32 z 38 y pretil sur x 8-16 y 24-32 z 17; iteraciones 6 de 6 (elegida 1, pasa 0/6 en la herramienta de afinado)
+  A3a: {"x":5,"z":23,"w":2,"d":2,"h":6}; iteraciones 6 de 6 (elegida 1, pasa 0/6 en la herramienta de afinado)
+  A3b: {"x":31,"z":8,"w":3,"d":2,"h":2.5}; iteraciones 6 de 6 (elegida 1, pasa 0/6 en la herramienta de afinado)
+  A4: {"x":20.5,"y":4.1,"hH":2.163,"wH":3.076} sin always; tono #fff3c4; iteraciones 6 de 6 (elegida 1, pasa 0/6 en la herramienta de afinado)
+  C3: {"cx":20,"cz":28,"size":6}; iteraciones 6 de 6 (elegida 4, pasa 6/9 en la herramienta de afinado)
+  C2: {"h":5,"cols":[[15,17,1,1],[25,17,1,1]]}; iteraciones 6 de 6 (elegida 2, pasa 2/3 en la herramienta de afinado)
+  B3: {"x":2,"z":15,"w":6,"d":8,"h":1}; iteraciones 2 de 6 (elegida 2, pasa 3/3 en la herramienta de afinado)
+  heroFrac s 0,108 / m 0,128 / n 0,128; heroScreen s [0,50; 0,47], m por defecto, n fx 0,63 con fy 0.58/0.58/0.58 recalculado en TECHO.
+  Pretil sur (blocked, 1 tile, z 17, x 8-16 y 24-32, altura L0) presente en todos los estados.
+  PLACEBO billboard 1,5 x 1,5 H en (35,5; 45,5) + calcomania 5x5; mismo tono.
+
+Aproximaciones y desviaciones declaradas:
+  1. Cierre 8 H (Enmienda 1). 2. Afinado: A6, A3a, A3b y A4b agotaron el tope de 6 iteraciones sin pasar su puerta; por orden del supervisor no se afino mas y su resultado es NO ENTRA con la cifra. La extension de la baranda norte a x 2-38 se probo en una sonda y NO se uso (no se verifico que esos tiles fueran bloqueados; el supervisor la acepta solo sobre bloqueados en z 38). 3. A4b: no se implemento el panel (a) pegado al muro; solo billboard sin always (b); en todas las configuraciones su base queda oculta en el render de ids (billboard_drawn = false), asi que A4 no puede pasar. 4. Pixeles del render de ids: solo cuentan los que tienen >= 3 vecinos con el mismo id y las masas se miden con su componente conexa mayor. 5. Fondo vacio = pixeles sin superficie en ids y color a <= 12 del degradado de fondo. 6. Heroe tapado = fraccion de su rectangulo donde el render de ids muestra muro o suelo mas cercano. 7. Separacion de A3a: masas dentro de +-2 tiles de profundidad. 8. Corte de camara (Enmienda 2) por pieza; las calcomanias no se cortan. 9. Altura aparente de la baranda con la escala de cada render. 10. Planos Cam 5 con camara top a zoom 1.
+
+A4b opcion (a) (panel claro 1 tile de fondo pegado a la cara del muro norte, z 51, volumen, tope bajo el muro de 16 tiles; Enmienda 3 punto 5; prueba pedida por el supervisor tras run3, 3 iteraciones; no incluida en los PNG porque no paso):
+  Textura: el panel usa el color 'anchor' del visor (gris claro) porque el visor no permite el tono crema en caras de volumen; la tapa si podria; no se probo.
+  IT1 panel x 18-22 (5 tiles), 2 H: 0/6. m1 height 0.044, lum 1.352, tapado por piezas mas cercanas 2180 px; m2/m3 height 0.054, lum 1.33; n1-n3 centre_y 0.347, lum 1.14-1.26, tapado 3045-4048 px (n3 centre_x 0.657).
+  IT2 panel x 18-23 (6 tiles), 2 H: 0/6. Mismas fallas (height 0.044-0.054, lum 1.18-1.35, centre_y 0.347 en n).
+  IT3 panel x 18-22, 1,5 H: 0/6. m1 height 0.007; m2/m3 height 0.019, centre_y 0.261; n width 0.046-0.066, height 0.06, centre_y 0.367; lum 1.07-1.45.
+  Resultado: (a) no pasa en ninguna posicion; se deja (b) como esta (A4 NO ENTRA, 0/6). Detalle en A4b_opcion_a_panel_sondas.txt.

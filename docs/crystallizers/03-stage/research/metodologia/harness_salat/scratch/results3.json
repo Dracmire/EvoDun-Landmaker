@@ -1,0 +1,2431 @@
+{
+ "P": {
+  "A6": {
+   "rail": 0.8,
+   "post": 1.4,
+   "north": true,
+   "south": true,
+   "nx0": 8,
+   "nx1": 32
+  },
+  "A3a": {
+   "x": 5,
+   "z": 23,
+   "w": 2,
+   "d": 2,
+   "h": 6
+  },
+  "A3b": {
+   "x": 31,
+   "z": 8,
+   "w": 3,
+   "d": 2,
+   "h": 2.5
+  },
+  "C2": {
+   "h": 5,
+   "cols": [
+    [
+     15,
+     17,
+     1,
+     1
+    ],
+    [
+     25,
+     17,
+     1,
+     1
+    ]
+   ]
+  },
+  "B3": {
+   "x": 2,
+   "z": 15,
+   "w": 6,
+   "d": 8,
+   "h": 1
+  },
+  "C3": {
+   "cx": 20,
+   "cz": 28,
+   "size": 6
+  },
+  "A4": {
+   "cut": false,
+   "bill": {
+    "x": 20.5,
+    "y": 4.1,
+    "hH": 2.163,
+    "wH": 3.076
+   }
+  },
+  "tone": "#fff3c4"
+ },
+ "hashes": {
+  "SUELO_s1": [
+   "3f5c39d8c5953eeba052b47a619d43ee4810b6248e2ffb9e22a857d748a8d194",
+   "3f5c39d8c5953eeba052b47a619d43ee4810b6248e2ffb9e22a857d748a8d194"
+  ],
+  "SUELO_s2": [
+   "f1b06d009ea0179b9a14ae268b6e7d0dfe8c932ab3c267439063361867ad5418",
+   "f1b06d009ea0179b9a14ae268b6e7d0dfe8c932ab3c267439063361867ad5418"
+  ],
+  "SUELO_s3": [
+   "aab7797015653cbb3f36e71a15dcc7d84dbf6dc926525238bddb084b59f5010f",
+   "aab7797015653cbb3f36e71a15dcc7d84dbf6dc926525238bddb084b59f5010f"
+  ],
+  "SUELO_m1": [
+   "fe35e2af5b7d80811546da1a4d1d39a3dd320e96666cbb2f0da84a1edb31c6ab",
+   "fe35e2af5b7d80811546da1a4d1d39a3dd320e96666cbb2f0da84a1edb31c6ab"
+  ],
+  "SUELO_m2": [
+   "b68321873afc158ba87069a3c5253c8c95fb61664133cbed66fc6edd83a4a86e",
+   "b68321873afc158ba87069a3c5253c8c95fb61664133cbed66fc6edd83a4a86e"
+  ],
+  "SUELO_m3": [
+   "51ee32739e00f1cc83a089b698cc6cbad9a5a18c1178ba64790b1a83a0441847",
+   "51ee32739e00f1cc83a089b698cc6cbad9a5a18c1178ba64790b1a83a0441847"
+  ],
+  "SUELO_n1": [
+   "75ffd6bca7b92c837ed973b4115bbbc4c6a164561ecb5be342bb7c7fc0e0ad80",
+   "75ffd6bca7b92c837ed973b4115bbbc4c6a164561ecb5be342bb7c7fc0e0ad80"
+  ],
+  "SUELO_n2": [
+   "a49a7a334b31bc942cb4b9826d78d62ec2391b32237f44b9885fe4c8dd36508c",
+   "a49a7a334b31bc942cb4b9826d78d62ec2391b32237f44b9885fe4c8dd36508c"
+  ],
+  "SUELO_n3": [
+   "2d50972ed4f1e07d08d425a09a797e21bcb9f8cd9394ff8cdaee316857a72df6",
+   "2d50972ed4f1e07d08d425a09a797e21bcb9f8cd9394ff8cdaee316857a72df6"
+  ],
+  "TECHO_s1": [
+   "ce0d3079b0843d72e603e236c6d6950f7094bf4938a630ecaeec8acee84708d8",
+   "ce0d3079b0843d72e603e236c6d6950f7094bf4938a630ecaeec8acee84708d8"
+  ],
+  "TECHO_s2": [
+   "4c29d2133940cfe8dd0d7874b631a0b037e71ff30a285b46794bebab03afc3b9",
+   "4c29d2133940cfe8dd0d7874b631a0b037e71ff30a285b46794bebab03afc3b9"
+  ],
+  "TECHO_s3": [
+   "0a66259eb710a7897bdc8a692a1d4497ecc10301a0d38d6be39d0e2433d323fc",
+   "0a66259eb710a7897bdc8a692a1d4497ecc10301a0d38d6be39d0e2433d323fc"
+  ],
+  "TECHO_m1": [
+   "dfffeb46fecf2af1b0d0061b8ba1da0147abcef23221bae083f6156524bd74fc",
+   "dfffeb46fecf2af1b0d0061b8ba1da0147abcef23221bae083f6156524bd74fc"
+  ],
+  "TECHO_m2": [
+   "aad631892990dd60cf47c3c486d51b1dc66ef033d4dd0c682e8479c916fa347c",
+   "aad631892990dd60cf47c3c486d51b1dc66ef033d4dd0c682e8479c916fa347c"
+  ],
+  "TECHO_m3": [
+   "c03e3648b7a4011f0c07fc5a798f0b6513236046c6b2adb9cb54cce67c5f6496",
+   "c03e3648b7a4011f0c07fc5a798f0b6513236046c6b2adb9cb54cce67c5f6496"
+  ],
+  "TECHO_n1": [
+   "30b87d4175ccba9ad132f5c356d4799bdf6391c70b3299fd2794729881a583b3",
+   "30b87d4175ccba9ad132f5c356d4799bdf6391c70b3299fd2794729881a583b3"
+  ],
+  "TECHO_n2": [
+   "f10c78a39607e0e33d126ebb3d19ef2a33d5d3ffd5e222d26058dcbf8db708c3",
+   "f10c78a39607e0e33d126ebb3d19ef2a33d5d3ffd5e222d26058dcbf8db708c3"
+  ],
+  "TECHO_n3": [
+   "4c86aace1cee4a9ac89d670198190379be99e8f4c34b53aa8e5b2be68c4b340c",
+   "4c86aace1cee4a9ac89d670198190379be99e8f4c34b53aa8e5b2be68c4b340c"
+  ],
+  "PLACEBO_s1": [
+   "73bfe2bb222ec7f1788794bd69719dddefde78806c9bdec3e133c5a50665866f",
+   "73bfe2bb222ec7f1788794bd69719dddefde78806c9bdec3e133c5a50665866f"
+  ],
+  "PLACEBO_s2": [
+   "d31069b323f3d9a5af98feda62c22e6b749c4127e656bf5afeb6660b91474bc2",
+   "d31069b323f3d9a5af98feda62c22e6b749c4127e656bf5afeb6660b91474bc2"
+  ],
+  "PLACEBO_s3": [
+   "e04e47b02931f2a3d9fb0c5ed6a8b7c74ac31f271920f2fd3fcf298cd295d6f8",
+   "e04e47b02931f2a3d9fb0c5ed6a8b7c74ac31f271920f2fd3fcf298cd295d6f8"
+  ],
+  "PLACEBO_m1": [
+   "fe35e2af5b7d80811546da1a4d1d39a3dd320e96666cbb2f0da84a1edb31c6ab",
+   "fe35e2af5b7d80811546da1a4d1d39a3dd320e96666cbb2f0da84a1edb31c6ab"
+  ],
+  "PLACEBO_m2": [
+   "b68321873afc158ba87069a3c5253c8c95fb61664133cbed66fc6edd83a4a86e",
+   "b68321873afc158ba87069a3c5253c8c95fb61664133cbed66fc6edd83a4a86e"
+  ],
+  "PLACEBO_m3": [
+   "51ee32739e00f1cc83a089b698cc6cbad9a5a18c1178ba64790b1a83a0441847",
+   "51ee32739e00f1cc83a089b698cc6cbad9a5a18c1178ba64790b1a83a0441847"
+  ],
+  "PLACEBO_n1": [
+   "75ffd6bca7b92c837ed973b4115bbbc4c6a164561ecb5be342bb7c7fc0e0ad80",
+   "75ffd6bca7b92c837ed973b4115bbbc4c6a164561ecb5be342bb7c7fc0e0ad80"
+  ],
+  "PLACEBO_n2": [
+   "a49a7a334b31bc942cb4b9826d78d62ec2391b32237f44b9885fe4c8dd36508c",
+   "a49a7a334b31bc942cb4b9826d78d62ec2391b32237f44b9885fe4c8dd36508c"
+  ],
+  "PLACEBO_n3": [
+   "2d50972ed4f1e07d08d425a09a797e21bcb9f8cd9394ff8cdaee316857a72df6",
+   "2d50972ed4f1e07d08d425a09a797e21bcb9f8cd9394ff8cdaee316857a72df6"
+  ],
+  "TECHO-A6_s1": [
+   "44213c330feffe47bc7d27a08ed1056f3253fc9295c4ac0794bf88608bc80b3e",
+   "44213c330feffe47bc7d27a08ed1056f3253fc9295c4ac0794bf88608bc80b3e"
+  ],
+  "TECHO-A6_s2": [
+   "3459aca08be44e3255fe95d98252fa65e21033e7fb4a9382171b010ffcd16daf",
+   "3459aca08be44e3255fe95d98252fa65e21033e7fb4a9382171b010ffcd16daf"
+  ],
+  "TECHO-A6_s3": [
+   "c5d3d03caf0161d5f90bee63c3f181a98fb4376680e007bffd3920fd68d61234",
+   "c5d3d03caf0161d5f90bee63c3f181a98fb4376680e007bffd3920fd68d61234"
+  ],
+  "TECHO-A6_n1": [
+   "9ab0c1ffc44b9f7e7d83018c3d688ee6a2f8f8130f826ed887d82b4a6275914e",
+   "9ab0c1ffc44b9f7e7d83018c3d688ee6a2f8f8130f826ed887d82b4a6275914e"
+  ],
+  "TECHO-A6_n2": [
+   "4693374794f3551ded88e1d480e39ce6fb045465f8eef280f99142a079eaab8f",
+   "4693374794f3551ded88e1d480e39ce6fb045465f8eef280f99142a079eaab8f"
+  ],
+  "TECHO-A6_n3": [
+   "4844d232976b043ec01ccc0643ad5c9c3e5eab136a702b7bb25bcbca6cd7a656",
+   "4844d232976b043ec01ccc0643ad5c9c3e5eab136a702b7bb25bcbca6cd7a656"
+  ],
+  "TECHO-A3a_m1": [
+   "dfffeb46fecf2af1b0d0061b8ba1da0147abcef23221bae083f6156524bd74fc",
+   "dfffeb46fecf2af1b0d0061b8ba1da0147abcef23221bae083f6156524bd74fc"
+  ],
+  "TECHO-A3a_m2": [
+   "aad631892990dd60cf47c3c486d51b1dc66ef033d4dd0c682e8479c916fa347c",
+   "aad631892990dd60cf47c3c486d51b1dc66ef033d4dd0c682e8479c916fa347c"
+  ],
+  "TECHO-A3a_m3": [
+   "c03e3648b7a4011f0c07fc5a798f0b6513236046c6b2adb9cb54cce67c5f6496",
+   "c03e3648b7a4011f0c07fc5a798f0b6513236046c6b2adb9cb54cce67c5f6496"
+  ],
+  "TECHO-A3a_n1": [
+   "30b87d4175ccba9ad132f5c356d4799bdf6391c70b3299fd2794729881a583b3",
+   "30b87d4175ccba9ad132f5c356d4799bdf6391c70b3299fd2794729881a583b3"
+  ],
+  "TECHO-A3a_n2": [
+   "f10c78a39607e0e33d126ebb3d19ef2a33d5d3ffd5e222d26058dcbf8db708c3",
+   "f10c78a39607e0e33d126ebb3d19ef2a33d5d3ffd5e222d26058dcbf8db708c3"
+  ],
+  "TECHO-A3a_n3": [
+   "1d09e50e79a781bc7478ffcba564bf318bd49d176d81909b72b2b2a5711766ca",
+   "1d09e50e79a781bc7478ffcba564bf318bd49d176d81909b72b2b2a5711766ca"
+  ],
+  "TECHO-A3b_s1": [
+   "e1ec0998520f5b7de26f26a4366c9e631ae5cffcf2ae5924f83b03b2f0d9917a",
+   "e1ec0998520f5b7de26f26a4366c9e631ae5cffcf2ae5924f83b03b2f0d9917a"
+  ],
+  "TECHO-A3b_s2": [
+   "d5a5e878f8aed9e9aa35053f9e8157a165627ad7d4f1e30ad8fea4325deab697",
+   "d5a5e878f8aed9e9aa35053f9e8157a165627ad7d4f1e30ad8fea4325deab697"
+  ],
+  "TECHO-A3b_s3": [
+   "fddaa1e6a0231bb4bf1831cb6e7f1bd5785a519108c7fccc6d8a328e3941ddaf",
+   "fddaa1e6a0231bb4bf1831cb6e7f1bd5785a519108c7fccc6d8a328e3941ddaf"
+  ],
+  "TECHO-A3b_n1": [
+   "30b87d4175ccba9ad132f5c356d4799bdf6391c70b3299fd2794729881a583b3",
+   "30b87d4175ccba9ad132f5c356d4799bdf6391c70b3299fd2794729881a583b3"
+  ],
+  "TECHO-A3b_n2": [
+   "f10c78a39607e0e33d126ebb3d19ef2a33d5d3ffd5e222d26058dcbf8db708c3",
+   "f10c78a39607e0e33d126ebb3d19ef2a33d5d3ffd5e222d26058dcbf8db708c3"
+  ],
+  "TECHO-A3b_n3": [
+   "4c86aace1cee4a9ac89d670198190379be99e8f4c34b53aa8e5b2be68c4b340c",
+   "4c86aace1cee4a9ac89d670198190379be99e8f4c34b53aa8e5b2be68c4b340c"
+  ],
+  "TECHO-A4_m1": [
+   "dfffeb46fecf2af1b0d0061b8ba1da0147abcef23221bae083f6156524bd74fc",
+   "dfffeb46fecf2af1b0d0061b8ba1da0147abcef23221bae083f6156524bd74fc"
+  ],
+  "TECHO-A4_m2": [
+   "aad631892990dd60cf47c3c486d51b1dc66ef033d4dd0c682e8479c916fa347c",
+   "aad631892990dd60cf47c3c486d51b1dc66ef033d4dd0c682e8479c916fa347c"
+  ],
+  "TECHO-A4_m3": [
+   "c03e3648b7a4011f0c07fc5a798f0b6513236046c6b2adb9cb54cce67c5f6496",
+   "c03e3648b7a4011f0c07fc5a798f0b6513236046c6b2adb9cb54cce67c5f6496"
+  ],
+  "TECHO-A4_n1": [
+   "30b87d4175ccba9ad132f5c356d4799bdf6391c70b3299fd2794729881a583b3",
+   "30b87d4175ccba9ad132f5c356d4799bdf6391c70b3299fd2794729881a583b3"
+  ],
+  "TECHO-A4_n2": [
+   "f10c78a39607e0e33d126ebb3d19ef2a33d5d3ffd5e222d26058dcbf8db708c3",
+   "f10c78a39607e0e33d126ebb3d19ef2a33d5d3ffd5e222d26058dcbf8db708c3"
+  ],
+  "TECHO-A4_n3": [
+   "4c86aace1cee4a9ac89d670198190379be99e8f4c34b53aa8e5b2be68c4b340c",
+   "4c86aace1cee4a9ac89d670198190379be99e8f4c34b53aa8e5b2be68c4b340c"
+  ],
+  "TECHO-C3_s1": [
+   "dea7fd62fa2424f9dfc24e7e3b770fd8203bf2804bccc61a439cf7277a15e677",
+   "dea7fd62fa2424f9dfc24e7e3b770fd8203bf2804bccc61a439cf7277a15e677"
+  ],
+  "TECHO-C3_s2": [
+   "cc05630fa20848fff36c4ef2d73df8e18934b6984e61b67052594c0fddefe46c",
+   "cc05630fa20848fff36c4ef2d73df8e18934b6984e61b67052594c0fddefe46c"
+  ],
+  "TECHO-C3_s3": [
+   "4de36de86f9d8c2e5dd40f5c6241c6cebf509182ccaa327f2c643f4f7f250110",
+   "4de36de86f9d8c2e5dd40f5c6241c6cebf509182ccaa327f2c643f4f7f250110"
+  ],
+  "TECHO-C3_m1": [
+   "c1e36826e84869822e4e9e913733c04d6198b0ddc9eb18676aa2905cab60be2e",
+   "c1e36826e84869822e4e9e913733c04d6198b0ddc9eb18676aa2905cab60be2e"
+  ],
+  "TECHO-C3_m2": [
+   "29923faf21ba8312181769c4af4a02ac36ea7751e1419901870d0c2001935d0e",
+   "29923faf21ba8312181769c4af4a02ac36ea7751e1419901870d0c2001935d0e"
+  ],
+  "TECHO-C3_m3": [
+   "9c21cb13741d82fd49af76f99ad283d214fef1b2030e27022e55b5fa4b6dc64e",
+   "9c21cb13741d82fd49af76f99ad283d214fef1b2030e27022e55b5fa4b6dc64e"
+  ],
+  "TECHO-C3_n1": [
+   "f87d15e85a2da156cd7ca7563803f82866f04ac8a7a4b93bef076d8a4db8fd6d",
+   "f87d15e85a2da156cd7ca7563803f82866f04ac8a7a4b93bef076d8a4db8fd6d"
+  ],
+  "TECHO-C3_n2": [
+   "4778b9434e6d493675c4a2033dc4ba13f9cf3d2c26cde648f405fa593b1e0e54",
+   "4778b9434e6d493675c4a2033dc4ba13f9cf3d2c26cde648f405fa593b1e0e54"
+  ],
+  "TECHO-C3_n3": [
+   "ed532b13acc7391df36317b10c215a0995efcb809850038eeaa8fe8824212f25",
+   "ed532b13acc7391df36317b10c215a0995efcb809850038eeaa8fe8824212f25"
+  ],
+  "TECHO-C2_s1": [
+   "010ffc12fb53a5925d521784caab951d7c2ba7803c3eb68374d7e9d3606f04d4",
+   "010ffc12fb53a5925d521784caab951d7c2ba7803c3eb68374d7e9d3606f04d4"
+  ],
+  "TECHO-C2_s2": [
+   "5047767ee1b5dedb37870f3e06492cb4bccddea9a27329c09e20ade21d80759c",
+   "5047767ee1b5dedb37870f3e06492cb4bccddea9a27329c09e20ade21d80759c"
+  ],
+  "TECHO-C2_s3": [
+   "5e356698fc0f4b8156e4dfce450f5514884810457ad22dfc6cd5b4cce367ad6c",
+   "5e356698fc0f4b8156e4dfce450f5514884810457ad22dfc6cd5b4cce367ad6c"
+  ],
+  "TECHO-B3_s1": [
+   "54eea0d5376f903a3798f66eed7ba8d51122ca5254e6ba70db2273dd1fc5792a",
+   "54eea0d5376f903a3798f66eed7ba8d51122ca5254e6ba70db2273dd1fc5792a"
+  ],
+  "TECHO-B3_s2": [
+   "17463c7afbba3b44c34b7dc9a70d09af6a8e67b93a9abb86875354d4fed7b115",
+   "17463c7afbba3b44c34b7dc9a70d09af6a8e67b93a9abb86875354d4fed7b115"
+  ],
+  "TECHO-B3_s3": [
+   "b78b7fbb2e066507e3d190479d241bc0201bd12bbbf8b09ebb6a6cb2527292c9",
+   "b78b7fbb2e066507e3d190479d241bc0201bd12bbbf8b09ebb6a6cb2527292c9"
+  ],
+  "SUELO_plano_cam5": [
+   "de3229718bfb3a1dec6269619caca205786848fe1a1b7a9279c5b9232a2bb468",
+   "de3229718bfb3a1dec6269619caca205786848fe1a1b7a9279c5b9232a2bb468"
+  ],
+  "TECHO_plano_cam5": [
+   "bbe29973d213b88e864b5159b7d1d28b91d72a82f29d7c19165a7a0c9071f996",
+   "bbe29973d213b88e864b5159b7d1d28b91d72a82f29d7c19165a7a0c9071f996"
+  ]
+ },
+ "cuts": {
+  "s1": [],
+  "s2": [],
+  "s3": [],
+  "m1": [],
+  "m2": [],
+  "m3": [],
+  "n1": [],
+  "n2": [],
+  "n3": []
+ },
+ "cutLog": {
+  "s1": [
+   [
+    0,
+    "A6",
+    0
+   ],
+   [
+    0,
+    "A3a",
+    0
+   ],
+   [
+    0,
+    "A3b",
+    0
+   ],
+   [
+    0,
+    "C2w",
+    0
+   ],
+   [
+    0,
+    "C2e",
+    0
+   ],
+   [
+    0,
+    "B3",
+    0
+   ]
+  ],
+  "s2": [
+   [
+    0,
+    "A6",
+    0
+   ],
+   [
+    0,
+    "A3a",
+    0
+   ],
+   [
+    0,
+    "A3b",
+    0
+   ],
+   [
+    0,
+    "C2w",
+    0
+   ],
+   [
+    0,
+    "C2e",
+    0
+   ],
+   [
+    0,
+    "B3",
+    0
+   ]
+  ],
+  "s3": [
+   [
+    0,
+    "A6",
+    0
+   ],
+   [
+    0,
+    "A3a",
+    0
+   ],
+   [
+    0,
+    "A3b",
+    0
+   ],
+   [
+    0,
+    "C2w",
+    0
+   ],
+   [
+    0,
+    "C2e",
+    0
+   ],
+   [
+    0,
+    "B3",
+    0
+   ]
+  ],
+  "m1": [
+   [
+    0,
+    "A6",
+    0
+   ],
+   [
+    0,
+    "A3a",
+    0
+   ],
+   [
+    0,
+    "A3b",
+    0
+   ],
+   [
+    0,
+    "C2w",
+    0
+   ],
+   [
+    0,
+    "C2e",
+    0
+   ],
+   [
+    0,
+    "B3",
+    0
+   ]
+  ],
+  "m2": [
+   [
+    0,
+    "A6",
+    0
+   ],
+   [
+    0,
+    "A3a",
+    0
+   ],
+   [
+    0,
+    "A3b",
+    0
+   ],
+   [
+    0,
+    "C2w",
+    0
+   ],
+   [
+    0,
+    "C2e",
+    0
+   ],
+   [
+    0,
+    "B3",
+    0
+   ]
+  ],
+  "m3": [
+   [
+    0,
+    "A6",
+    0
+   ],
+   [
+    0,
+    "A3a",
+    0
+   ],
+   [
+    0,
+    "A3b",
+    0
+   ],
+   [
+    0,
+    "C2w",
+    0
+   ],
+   [
+    0,
+    "C2e",
+    0
+   ],
+   [
+    0,
+    "B3",
+    0
+   ]
+  ],
+  "n1": [
+   [
+    0,
+    "A6",
+    0
+   ],
+   [
+    0,
+    "A3a",
+    0
+   ],
+   [
+    0,
+    "A3b",
+    0
+   ],
+   [
+    0,
+    "C2w",
+    0
+   ],
+   [
+    0,
+    "C2e",
+    0
+   ],
+   [
+    0,
+    "B3",
+    0
+   ]
+  ],
+  "n2": [
+   [
+    0,
+    "A6",
+    0
+   ],
+   [
+    0,
+    "A3a",
+    0
+   ],
+   [
+    0,
+    "A3b",
+    0
+   ],
+   [
+    0,
+    "C2w",
+    0
+   ],
+   [
+    0,
+    "C2e",
+    0
+   ],
+   [
+    0,
+    "B3",
+    0
+   ]
+  ],
+  "n3": [
+   [
+    0,
+    "A6",
+    0
+   ],
+   [
+    0,
+    "A3a",
+    0
+   ],
+   [
+    0,
+    "A3b",
+    0
+   ],
+   [
+    0,
+    "C2w",
+    0
+   ],
+   [
+    0,
+    "C2e",
+    0
+   ],
+   [
+    0,
+    "B3",
+    0
+   ]
+  ],
+  "PB_s1": 0,
+  "PB_s2": 0,
+  "PB_s3": 0,
+  "PB_m1": 0,
+  "PB_m2": 0,
+  "PB_m3": 0,
+  "PB_n1": 0,
+  "PB_n2": 0,
+  "PB_n3": 0
+ },
+ "fy": {
+  "n1": 0.58,
+  "n2": 0.58,
+  "n3": 0.58
+ },
+ "own": {
+  "A6": [
+   "s1",
+   "s2",
+   "s3",
+   "n1",
+   "n2",
+   "n3"
+  ],
+  "A3a": [
+   "m1",
+   "m2",
+   "m3",
+   "n1",
+   "n2",
+   "n3"
+  ],
+  "A3b": [
+   "s1",
+   "s2",
+   "s3",
+   "n1",
+   "n2",
+   "n3"
+  ],
+  "A4": [
+   "m1",
+   "m2",
+   "m3",
+   "n1",
+   "n2",
+   "n3"
+  ],
+  "C3": [
+   "s1",
+   "s2",
+   "s3",
+   "m1",
+   "m2",
+   "m3",
+   "n1",
+   "n2",
+   "n3"
+  ],
+  "C2": [
+   "s1",
+   "s2",
+   "s3"
+  ],
+  "B3": [
+   "s1",
+   "s2",
+   "s3"
+  ]
+ },
+ "closure": 8,
+ "HS": {
+  "s1": [
+   0.5,
+   0.47
+  ],
+  "s2": [
+   0.5,
+   0.47
+  ],
+  "s3": [
+   0.5,
+   0.47
+  ],
+  "m1": null,
+  "m2": null,
+  "m3": null,
+  "n1": [
+   0.63,
+   0.58
+  ],
+  "n2": [
+   0.63,
+   0.58
+  ],
+  "n3": [
+   0.63,
+   0.58
+  ]
+ },
+ "out": {
+  "controls": {
+   "SUELO_s1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.0011197916666666667
+   },
+   "SUELO_s2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.001134982638888889
+   },
+   "SUELO_s3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.001134982638888889
+   },
+   "SUELO_m1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.001689453125
+   },
+   "SUELO_m2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.0020149739583333335
+   },
+   "SUELO_m3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.0020149739583333335
+   },
+   "SUELO_n1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.002685546875
+   },
+   "SUELO_n2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.0026692708333333334
+   },
+   "SUELO_n3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.0037803819444444443
+   },
+   "TECHO_s1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2766569010416667,
+    "total": 0.2766569010416667,
+    "hero": 0,
+    "empty": 0.0011957465277777778
+   },
+   "TECHO_s2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2652766927083333,
+    "total": 0.2652766927083333,
+    "hero": 0,
+    "empty": 0.0011762152777777778
+   },
+   "TECHO_s3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2625325520833333,
+    "total": 0.2625325520833333,
+    "hero": 0,
+    "empty": 0.001203342013888889
+   },
+   "TECHO_m1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.28659505208333336,
+    "total": 0.28659505208333336,
+    "hero": 0,
+    "empty": 0.0017317708333333334
+   },
+   "TECHO_m2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2398003472222222,
+    "total": 0.2398003472222222,
+    "hero": 0,
+    "empty": 0.0020084635416666666
+   },
+   "TECHO_m3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2398003472222222,
+    "total": 0.2398003472222222,
+    "hero": 0,
+    "empty": 0.0020084635416666666
+   },
+   "TECHO_n1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.13010308159722223,
+    "total": 0.13010308159722223,
+    "hero": 0,
+    "empty": 0.0026410590277777778
+   },
+   "TECHO_n2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.134287109375,
+    "total": 0.134287109375,
+    "hero": 0,
+    "empty": 0.002626953125
+   },
+   "TECHO_n3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.17687608506944444,
+    "total": 0.17687608506944444,
+    "hero": 0,
+    "empty": 0.0037315538194444445
+   },
+   "PLACEBO_s1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.0011197916666666667
+   },
+   "PLACEBO_s2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.001134982638888889
+   },
+   "PLACEBO_s3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0.018763020833333335,
+    "red": 0,
+    "total": 0.018763020833333335,
+    "hero": 0,
+    "empty": 0.001144748263888889
+   },
+   "PLACEBO_m1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.001689453125
+   },
+   "PLACEBO_m2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.0020149739583333335
+   },
+   "PLACEBO_m3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.0020149739583333335
+   },
+   "PLACEBO_n1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.002685546875
+   },
+   "PLACEBO_n2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.0026692708333333334
+   },
+   "PLACEBO_n3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0,
+    "total": 0,
+    "hero": 0,
+    "empty": 0.0037803819444444443
+   },
+   "TECHO-A6_s1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.14631618923611112,
+    "total": 0.14631618923611112,
+    "hero": 0,
+    "empty": 0.0011317274305555555
+   },
+   "TECHO-A6_s2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.1335427517361111,
+    "total": 0.1335427517361111,
+    "hero": 0,
+    "empty": 0.001144748263888889
+   },
+   "TECHO-A6_s3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.13185438368055555,
+    "total": 0.13185438368055555,
+    "hero": 0,
+    "empty": 0.0011512586805555555
+   },
+   "TECHO-A6_n1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0.025277777777777777,
+    "red": 0.017447916666666667,
+    "total": 0.04272569444444444,
+    "hero": 0,
+    "empty": 0.002687717013888889
+   },
+   "TECHO-A6_n2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0.025416666666666667,
+    "red": 0.013087022569444445,
+    "total": 0.03850368923611111,
+    "hero": 0,
+    "empty": 0.0026703559027777776
+   },
+   "TECHO-A6_n3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0.025277777777777777,
+    "red": 0.07982964409722222,
+    "total": 0.105107421875,
+    "hero": 0,
+    "empty": 0.0037803819444444443
+   },
+   "TECHO-A3a_m1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.28653645833333335,
+    "total": 0.28653645833333335,
+    "hero": 0,
+    "empty": 0.0017317708333333334
+   },
+   "TECHO-A3a_m2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.23964192708333334,
+    "total": 0.23964192708333334,
+    "hero": 0,
+    "empty": 0.0020084635416666666
+   },
+   "TECHO-A3a_m3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.23964192708333334,
+    "total": 0.23964192708333334,
+    "hero": 0,
+    "empty": 0.0020084635416666666
+   },
+   "TECHO-A3a_n1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.13008897569444444,
+    "total": 0.13008897569444444,
+    "hero": 0,
+    "empty": 0.0026410590277777778
+   },
+   "TECHO-A3a_n2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.134287109375,
+    "total": 0.134287109375,
+    "hero": 0,
+    "empty": 0.002626953125
+   },
+   "TECHO-A3a_n3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.11466362847222222,
+    "total": 0.11466362847222222,
+    "hero": 0,
+    "empty": 0.0037315538194444445
+   },
+   "TECHO-A3b_s1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.23538736979166666,
+    "total": 0.23538736979166666,
+    "hero": 0,
+    "empty": 0.00119140625
+   },
+   "TECHO-A3b_s2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.24684678819444444,
+    "total": 0.24684678819444444,
+    "hero": 0,
+    "empty": 0.0011751302083333334
+   },
+   "TECHO-A3b_s3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.21919162326388889,
+    "total": 0.21919162326388889,
+    "hero": 0,
+    "empty": 0.0011979166666666666
+   },
+   "TECHO-A3b_n1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.13010308159722223,
+    "total": 0.13010308159722223,
+    "hero": 0,
+    "empty": 0.0026410590277777778
+   },
+   "TECHO-A3b_n2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.134287109375,
+    "total": 0.134287109375,
+    "hero": 0,
+    "empty": 0.002626953125
+   },
+   "TECHO-A3b_n3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.17687608506944444,
+    "total": 0.17687608506944444,
+    "hero": 0,
+    "empty": 0.0037315538194444445
+   },
+   "TECHO-A4_m1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.28659505208333336,
+    "total": 0.28659505208333336,
+    "hero": 0,
+    "empty": 0.0017317708333333334
+   },
+   "TECHO-A4_m2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2398003472222222,
+    "total": 0.2398003472222222,
+    "hero": 0,
+    "empty": 0.0020084635416666666
+   },
+   "TECHO-A4_m3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2398003472222222,
+    "total": 0.2398003472222222,
+    "hero": 0,
+    "empty": 0.0020084635416666666
+   },
+   "TECHO-A4_n1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.13010308159722223,
+    "total": 0.13010308159722223,
+    "hero": 0,
+    "empty": 0.0026410590277777778
+   },
+   "TECHO-A4_n2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.134287109375,
+    "total": 0.134287109375,
+    "hero": 0,
+    "empty": 0.002626953125
+   },
+   "TECHO-A4_n3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.17687608506944444,
+    "total": 0.17687608506944444,
+    "hero": 0,
+    "empty": 0.0037315538194444445
+   },
+   "TECHO-C3_s1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2766569010416667,
+    "total": 0.2766569010416667,
+    "hero": 0,
+    "empty": 0.001193576388888889
+   },
+   "TECHO-C3_s2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2652766927083333,
+    "total": 0.2652766927083333,
+    "hero": 0,
+    "empty": 0.001174045138888889
+   },
+   "TECHO-C3_s3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2625325520833333,
+    "total": 0.2625325520833333,
+    "hero": 0,
+    "empty": 0.001203342013888889
+   },
+   "TECHO-C3_m1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.28659505208333336,
+    "total": 0.28659505208333336,
+    "hero": 0,
+    "empty": 0.0017317708333333334
+   },
+   "TECHO-C3_m2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2398003472222222,
+    "total": 0.2398003472222222,
+    "hero": 0,
+    "empty": 0.0020084635416666666
+   },
+   "TECHO-C3_m3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2398003472222222,
+    "total": 0.2398003472222222,
+    "hero": 0,
+    "empty": 0.0020084635416666666
+   },
+   "TECHO-C3_n1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.13010308159722223,
+    "total": 0.13010308159722223,
+    "hero": 0,
+    "empty": 0.0026410590277777778
+   },
+   "TECHO-C3_n2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.134287109375,
+    "total": 0.134287109375,
+    "hero": 0,
+    "empty": 0.002626953125
+   },
+   "TECHO-C3_n3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.17687608506944444,
+    "total": 0.17687608506944444,
+    "hero": 0,
+    "empty": 0.003732638888888889
+   },
+   "TECHO-C2_s1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.26478190104166666,
+    "total": 0.26478190104166666,
+    "hero": 0,
+    "empty": 0.001201171875
+   },
+   "TECHO-C2_s2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.2530653211805556,
+    "total": 0.2530653211805556,
+    "hero": 0,
+    "empty": 0.001174045138888889
+   },
+   "TECHO-C2_s3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.24921006944444443,
+    "total": 0.24921006944444443,
+    "hero": 0,
+    "empty": 0.0011968315972222222
+   },
+   "TECHO-B3_s1": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.233984375,
+    "total": 0.233984375,
+    "hero": 0,
+    "empty": 0.001171875
+   },
+   "TECHO-B3_s2": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.21071723090277777,
+    "total": 0.21071723090277777,
+    "hero": 0,
+    "empty": 0.0011762152777777778
+   },
+   "TECHO-B3_s3": {
+    "mask": true,
+    "path": true,
+    "goal": true,
+    "volOnPath": 0,
+    "bill": 0,
+    "red": 0.238037109375,
+    "total": 0.238037109375,
+    "hero": 0,
+    "empty": 0.001183810763888889
+   }
+  },
+  "presence": {
+   "A6": {
+    "s1": {
+     "present": false,
+     "figs": {
+      "rail_visible_px": 3352,
+      "line_top_y": 0.428,
+      "continuous_length": 0.752,
+      "rail_apparent_H": 0.14,
+      "posts_apparent_H": 2.467,
+      "hero_not_cut_at_waist": "top 0.428 waist [0.407, 0.436]"
+     },
+     "fails": [
+      "rail_apparent_H = 0.14",
+      "posts_apparent_H = 2.467",
+      "hero_not_cut_at_waist = top 0.428 waist [0.407, 0.436]"
+     ]
+    },
+    "s2": {
+     "present": false,
+     "figs": {
+      "rail_visible_px": 3348,
+      "line_top_y": 0.428,
+      "continuous_length": 0.752,
+      "rail_apparent_H": 0.447,
+      "posts_apparent_H": 2.467,
+      "hero_not_cut_at_waist": "top 0.428 waist [0.407, 0.436]"
+     },
+     "fails": [
+      "rail_apparent_H = 0.447",
+      "posts_apparent_H = 2.467",
+      "hero_not_cut_at_waist = top 0.428 waist [0.407, 0.436]"
+     ]
+    },
+    "s3": {
+     "present": false,
+     "figs": {
+      "rail_visible_px": 3350,
+      "line_top_y": 0.428,
+      "continuous_length": 0.752,
+      "rail_apparent_H": 0.286,
+      "posts_apparent_H": 2.467,
+      "hero_not_cut_at_waist": "top 0.428 waist [0.407, 0.436]"
+     },
+     "fails": [
+      "rail_apparent_H = 0.286",
+      "posts_apparent_H = 2.467",
+      "hero_not_cut_at_waist = top 0.428 waist [0.407, 0.436]"
+     ]
+    },
+    "n1": {
+     "present": false,
+     "figs": {
+      "rail_visible_px": 6070,
+      "line_top_y": 0.401,
+      "continuous_length": 0.497,
+      "rail_apparent_H": 0.713,
+      "posts_apparent_H": 1.279,
+      "hero_not_cut_at_waist": "top 0.401 waist [0.496, 0.535]"
+     },
+     "fails": [
+      "continuous_length = 0.497"
+     ]
+    },
+    "n2": {
+     "present": false,
+     "figs": {
+      "rail_visible_px": 6119,
+      "line_top_y": 0.401,
+      "continuous_length": 0.454,
+      "rail_apparent_H": 0.713,
+      "posts_apparent_H": 1.267,
+      "hero_not_cut_at_waist": "top 0.401 waist [0.496, 0.535]"
+     },
+     "fails": [
+      "continuous_length = 0.454"
+     ]
+    },
+    "n3": {
+     "present": false,
+     "figs": {
+      "rail_visible_px": 5570,
+      "line_top_y": 0.401,
+      "continuous_length": 0.497,
+      "rail_apparent_H": 0.713,
+      "posts_apparent_H": 1.279,
+      "hero_not_cut_at_waist": "top 0.401 waist [0.496, 0.535]"
+     },
+     "fails": [
+      "continuous_length = 0.497"
+     ]
+    }
+   },
+   "A3a": {
+    "m1": {
+     "present": false,
+     "figs": {
+      "px": 0
+     },
+     "fails": [
+      "column_visible_px = 0"
+     ]
+    },
+    "m2": {
+     "present": false,
+     "figs": {
+      "px": 0
+     },
+     "fails": [
+      "column_visible_px = 0"
+     ]
+    },
+    "m3": {
+     "present": false,
+     "figs": {
+      "px": 0
+     },
+     "fails": [
+      "column_visible_px = 0"
+     ]
+    },
+    "n1": {
+     "present": false,
+     "figs": {
+      "px": 0
+     },
+     "fails": [
+      "column_visible_px = 0"
+     ]
+    },
+    "n2": {
+     "present": false,
+     "figs": {
+      "px": 0
+     },
+     "fails": [
+      "column_visible_px = 0"
+     ]
+    },
+    "n3": {
+     "present": false,
+     "figs": {
+      "box_in_side_strip": "x [0, 0.118]",
+      "width": 0.119,
+      "top_leaves_frame": "y_min 0",
+      "base_below_0.40": 1.194,
+      "px_in_centre_0.22_0.78": 0,
+      "separation_fused_rows": "6/720 rows"
+     },
+     "fails": [
+      "width = 0.119"
+     ]
+    }
+   },
+   "A3b": {
+    "s1": {
+     "present": false,
+     "figs": {
+      "touches_bottom_or_side_lower_half": "y1 661, x [1115, 1215]",
+      "width": 0.079,
+      "box_x_in_0_0.35_or_0.65_1": "x [0.871, 0.949]",
+      "apparent_height": 0.31,
+      "top_below_0.40": 0.61,
+      "hero_covered_le_25pct": 0,
+      "px_in_centre_below_0.60": 0
+     },
+     "fails": [
+      "touches_bottom_or_side_lower_half = y1 661, x [1115, 1215]",
+      "width = 0.079"
+     ]
+    },
+    "s2": {
+     "present": false,
+     "figs": {
+      "touches_bottom_or_side_lower_half": "y1 661, x [1223, 1279]",
+      "width": 0.045,
+      "box_x_in_0_0.35_or_0.65_1": "x [0.955, 0.999]",
+      "apparent_height": 0.281,
+      "top_below_0.40": 0.639,
+      "hero_covered_le_25pct": 0,
+      "px_in_centre_below_0.60": 0
+     },
+     "fails": [
+      "width = 0.045"
+     ]
+    },
+    "s3": {
+     "present": false,
+     "figs": {
+      "touches_bottom_or_side_lower_half": "y1 661, x [1037, 1215]",
+      "width": 0.14,
+      "box_x_in_0_0.35_or_0.65_1": "x [0.81, 0.949]",
+      "apparent_height": 0.281,
+      "top_below_0.40": 0.639,
+      "hero_covered_le_25pct": 0,
+      "px_in_centre_below_0.60": 0
+     },
+     "fails": [
+      "touches_bottom_or_side_lower_half = y1 661, x [1037, 1215]"
+     ]
+    },
+    "n1": {
+     "present": false,
+     "figs": {
+      "px": 0
+     },
+     "fails": [
+      "mass_visible_px = 0"
+     ]
+    },
+    "n2": {
+     "present": false,
+     "figs": {
+      "px": 0
+     },
+     "fails": [
+      "mass_visible_px = 0"
+     ]
+    },
+    "n3": {
+     "present": false,
+     "figs": {
+      "px": 0
+     },
+     "fails": [
+      "mass_visible_px = 0"
+     ]
+    }
+   },
+   "A4": {
+    "m1": {
+     "present": false,
+     "figs": {
+      "visible": false,
+      "drawn": false,
+      "base": [
+       640,
+       238.296
+      ]
+     },
+     "fails": [
+      "billboard_drawn = false (base 640, 238.296: its tile cap is not visible in the pick render)"
+     ]
+    },
+    "m2": {
+     "present": false,
+     "figs": {
+      "visible": false,
+      "drawn": false,
+      "base": [
+       640,
+       255.894
+      ]
+     },
+     "fails": [
+      "billboard_drawn = false (base 640, 255.894: its tile cap is not visible in the pick render)"
+     ]
+    },
+    "m3": {
+     "present": false,
+     "figs": {
+      "visible": false,
+      "drawn": false,
+      "base": [
+       640,
+       255.894
+      ]
+     },
+     "fails": [
+      "billboard_drawn = false (base 640, 255.894: its tile cap is not visible in the pick render)"
+     ]
+    },
+    "n1": {
+     "present": false,
+     "figs": {
+      "visible": false,
+      "drawn": false,
+      "base": [
+       744.782,
+       325.954
+      ]
+     },
+     "fails": [
+      "billboard_drawn = false (base 744.782, 325.954: its tile cap is not visible in the pick render)"
+     ]
+    },
+    "n2": {
+     "present": false,
+     "figs": {
+      "visible": false,
+      "drawn": false,
+      "base": [
+       656.864,
+       325.954
+      ]
+     },
+     "fails": [
+      "billboard_drawn = false (base 656.864, 325.954: its tile cap is not visible in the pick render)"
+     ]
+    },
+    "n3": {
+     "present": false,
+     "figs": {
+      "visible": false,
+      "drawn": false,
+      "base": [
+       832.7,
+       325.954
+      ]
+     },
+     "fails": [
+      "billboard_drawn = false (base 832.7, 325.954: its tile cap is not visible in the pick render)"
+     ]
+    }
+   },
+   "C3": {
+    "s1": {
+     "present": false,
+     "figs": {
+      "painted_share": "0.859 %",
+      "figure_size_tiles_4_to_6": "6x6",
+      "figure_share_of_frame_3_to_8pct": "0.859 %",
+      "band_B2_B3": "B4",
+      "centred_on_hotspot": "centre (20, 31)",
+      "luminance_contrast_ge_0.15": 0.33
+     },
+     "fails": [
+      "figure_share_of_frame_3_to_8pct = 0.859 %",
+      "band_B2_B3 = B4"
+     ]
+    },
+    "s2": {
+     "present": false,
+     "figs": {
+      "painted_share": "0.859 %",
+      "figure_size_tiles_4_to_6": "6x6",
+      "figure_share_of_frame_3_to_8pct": "0.859 %",
+      "band_B2_B3": "B4",
+      "centred_on_hotspot": "centre (20, 31)",
+      "luminance_contrast_ge_0.15": 0.324
+     },
+     "fails": [
+      "figure_share_of_frame_3_to_8pct = 0.859 %",
+      "band_B2_B3 = B4"
+     ]
+    },
+    "s3": {
+     "present": false,
+     "figs": {
+      "painted_share": "0.858 %",
+      "figure_size_tiles_4_to_6": "6x6",
+      "figure_share_of_frame_3_to_8pct": "0.858 %",
+      "band_B2_B3": "B4",
+      "centred_on_hotspot": "centre (20, 31)",
+      "luminance_contrast_ge_0.15": 0.34
+     },
+     "fails": [
+      "figure_share_of_frame_3_to_8pct = 0.858 %",
+      "band_B2_B3 = B4"
+     ]
+    },
+    "m1": {
+     "present": true,
+     "figs": {
+      "painted_share": "3.067 %",
+      "figure_size_tiles_4_to_6": "6x6",
+      "figure_share_of_frame_3_to_8pct": "3.067 %",
+      "band_B2_B3": "B3",
+      "centred_on_hotspot": "centre (20, 31)",
+      "luminance_contrast_ge_0.15": 0.381
+     },
+     "fails": []
+    },
+    "m2": {
+     "present": true,
+     "figs": {
+      "painted_share": "3.729 %",
+      "figure_size_tiles_4_to_6": "6x6",
+      "figure_share_of_frame_3_to_8pct": "3.729 %",
+      "band_B2_B3": "B3",
+      "centred_on_hotspot": "centre (20, 31)",
+      "luminance_contrast_ge_0.15": 0.382
+     },
+     "fails": []
+    },
+    "m3": {
+     "present": true,
+     "figs": {
+      "painted_share": "3.729 %",
+      "figure_size_tiles_4_to_6": "6x6",
+      "figure_share_of_frame_3_to_8pct": "3.729 %",
+      "band_B2_B3": "B3",
+      "centred_on_hotspot": "centre (20, 31)",
+      "luminance_contrast_ge_0.15": 0.384
+     },
+     "fails": []
+    },
+    "n1": {
+     "present": true,
+     "figs": {
+      "painted_share": "6.846 %",
+      "figure_size_tiles_4_to_6": "6x6",
+      "figure_share_of_frame_3_to_8pct": "6.846 %",
+      "band_B2_B3": "B2",
+      "centred_on_hotspot": "centre (20, 31)",
+      "luminance_contrast_ge_0.15": 0.342
+     },
+     "fails": []
+    },
+    "n2": {
+     "present": true,
+     "figs": {
+      "painted_share": "6.847 %",
+      "figure_size_tiles_4_to_6": "6x6",
+      "figure_share_of_frame_3_to_8pct": "6.847 %",
+      "band_B2_B3": "B2",
+      "centred_on_hotspot": "centre (20, 31)",
+      "luminance_contrast_ge_0.15": 0.343
+     },
+     "fails": []
+    },
+    "n3": {
+     "present": true,
+     "figs": {
+      "painted_share": "5.679 %",
+      "figure_size_tiles_4_to_6": "6x6",
+      "figure_share_of_frame_3_to_8pct": "5.679 %",
+      "band_B2_B3": "B2",
+      "centred_on_hotspot": "centre (20, 31)",
+      "luminance_contrast_ge_0.15": 0.337
+     },
+     "fails": []
+    }
+   },
+   "C2": {
+    "s1": {
+     "present": true,
+     "figs": {
+      "hero_within_3_tiles_of_transition": 2,
+      "west_x_in_0.30_0.48": "[0.325, 0.371]",
+      "east_x_in_0.60_0.80": "[0.628, 0.674]",
+      "free_gap_ge_0.17": 0.257,
+      "tops_exit_or_y_le_0.15": "west 0.14 east 0.14",
+      "hero_covered_le_10pct": 0
+     },
+     "fails": []
+    },
+    "s2": {
+     "present": true,
+     "figs": {
+      "hero_within_3_tiles_of_transition": 2,
+      "west_x_in_0.30_0.48": "[0.389, 0.427]",
+      "east_x_in_0.60_0.80": "[0.685, 0.738]",
+      "free_gap_ge_0.17": 0.258,
+      "tops_exit_or_y_le_0.15": "west 0.14 east 0.14",
+      "hero_covered_le_10pct": 0
+     },
+     "fails": []
+    },
+    "s3": {
+     "present": false,
+     "figs": {
+      "hero_within_3_tiles_of_transition": 2,
+      "west_x_in_0.30_0.48": "[0.261, 0.314]",
+      "east_x_in_0.60_0.80": "[0.572, 0.61]",
+      "free_gap_ge_0.17": 0.258,
+      "tops_exit_or_y_le_0.15": "west 0.14 east 0.14",
+      "hero_covered_le_10pct": 0
+     },
+     "fails": [
+      "west_x_in_0.30_0.48 = [0.261, 0.314]",
+      "east_x_in_0.60_0.80 = [0.572, 0.61]"
+     ]
+    }
+   },
+   "B3": {
+    "s1": {
+     "present": true,
+     "figs": {
+      "raised_H_1.0_2.0": 1,
+      "top_face_ge_1pct_of_frame": "1.748 %",
+      "band_B2_B4": "B3",
+      "off_axis_x_lt_0.35_or_gt_0.65": 0.07
+     },
+     "fails": []
+    },
+    "s2": {
+     "present": true,
+     "figs": {
+      "raised_H_1.0_2.0": 1,
+      "top_face_ge_1pct_of_frame": "2.117 %",
+      "band_B2_B4": "B3",
+      "off_axis_x_lt_0.35_or_gt_0.65": 0.108
+     },
+     "fails": []
+    },
+    "s3": {
+     "present": true,
+     "figs": {
+      "raised_H_1.0_2.0": 1,
+      "top_face_ge_1pct_of_frame": "1.034 %",
+      "band_B2_B4": "B3",
+      "off_axis_x_lt_0.35_or_gt_0.65": 0.042
+     },
+     "fails": []
+    }
+   }
+  },
+  "iso": {
+   "A6": {
+    "s1": {
+     "diff": 145313,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      132,
+      66,
+      1148,
+      473
+     ]
+    },
+    "s2": {
+     "diff": 145180,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      209,
+      66,
+      1226,
+      473
+     ]
+    },
+    "s3": {
+     "diff": 146286,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      54,
+      66,
+      1071,
+      473
+     ]
+    },
+    "n1": {
+     "diff": 125930,
+     "outside": 5352,
+     "pct": 4.249980147701104,
+     "box": [
+      -484,
+      225,
+      2644,
+      1530
+     ]
+    },
+    "n2": {
+     "diff": 138490,
+     "outside": 5351,
+     "pct": 3.863816882085349,
+     "box": [
+      -853,
+      225,
+      2275,
+      1530
+     ]
+    },
+    "n3": {
+     "diff": 110341,
+     "outside": 5344,
+     "pct": 4.8431679973899096,
+     "box": [
+      -115,
+      225,
+      3013,
+      1530
+     ]
+    }
+   },
+   "A3a": {
+    "m1": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      -405,
+      -193,
+      26,
+      631
+     ]
+    },
+    "m2": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      -504,
+      -185,
+      -17,
+      696
+     ]
+    },
+    "m3": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      -504,
+      -185,
+      -17,
+      696
+     ]
+    },
+    "n1": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      -671,
+      -144,
+      12,
+      1009
+     ]
+    },
+    "n2": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      -994,
+      -144,
+      -185,
+      1009
+     ]
+    },
+    "n3": {
+     "diff": 60519,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      -347,
+      -144,
+      210,
+      1009
+     ]
+    }
+   },
+   "A3b": {
+    "s1": {
+     "diff": 41105,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      1074,
+      290,
+      1371,
+      677
+     ]
+    },
+    "s2": {
+     "diff": 18591,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      1162,
+      290,
+      1476,
+      677
+     ]
+    },
+    "s3": {
+     "diff": 43495,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      987,
+      290,
+      1267,
+      677
+     ]
+    },
+    "n1": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      3390,
+      3104,
+      13187,
+      6482
+     ]
+    },
+    "n2": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      2798,
+      3104,
+      10987,
+      6482
+     ]
+    },
+    "n3": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      3981,
+      3104,
+      15387,
+      6482
+     ]
+    }
+   },
+   "A4": {
+    "m1": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      538,
+      116,
+      742,
+      253
+     ]
+    },
+    "m2": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      535,
+      130,
+      745,
+      270
+     ]
+    },
+    "m3": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      535,
+      130,
+      745,
+      270
+     ]
+    },
+    "n1": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      629,
+      185,
+      861,
+      340
+     ]
+    },
+    "n2": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      541,
+      185,
+      773,
+      340
+     ]
+    },
+    "n3": {
+     "diff": 0,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      717,
+      185,
+      948,
+      340
+     ]
+    }
+   },
+   "C3": {
+    "s1": {
+     "diff": 7458,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      506,
+      194,
+      743,
+      283
+     ]
+    },
+    "s2": {
+     "diff": 7452,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      568,
+      194,
+      805,
+      283
+     ]
+    },
+    "s3": {
+     "diff": 7462,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      443,
+      194,
+      681,
+      283
+     ]
+    },
+    "m1": {
+     "diff": 19812,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      442,
+      322,
+      789,
+      471
+     ]
+    },
+    "m2": {
+     "diff": 24832,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      430,
+      357,
+      797,
+      522
+     ]
+    },
+    "m3": {
+     "diff": 25192,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      430,
+      357,
+      797,
+      522
+     ]
+    },
+    "n1": {
+     "diff": 39784,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      618,
+      516,
+      1087,
+      768
+     ]
+    },
+    "n2": {
+     "diff": 39785,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      411,
+      516,
+      879,
+      768
+     ]
+    },
+    "n3": {
+     "diff": 34534,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      781,
+      516,
+      1296,
+      768
+     ]
+    }
+   },
+   "C2": {
+    "s1": {
+     "diff": 31986,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      382,
+      -26,
+      898,
+      473
+     ]
+    },
+    "s2": {
+     "diff": 31979,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      466,
+      -26,
+      983,
+      473
+     ]
+    },
+    "s3": {
+     "diff": 31983,
+     "outside": 0,
+     "pct": 0,
+     "box": [
+      297,
+      -26,
+      814,
+      473
+     ]
+    }
+   },
+   "B3": {
+    "s1": {
+     "diff": 66467,
+     "outside": 29517,
+     "pct": 44.40850346788632,
+     "box": [
+      -132,
+      216,
+      260,
+      425
+     ]
+    },
+    "s2": {
+     "diff": 101036,
+     "outside": 48530,
+     "pct": 48.032384496615066,
+     "box": [
+      -51,
+      216,
+      325,
+      425
+     ]
+    },
+    "s3": {
+     "diff": 44980,
+     "outside": 22768,
+     "pct": 50.618052467763455,
+     "box": [
+      -212,
+      216,
+      195,
+      425
+     ]
+    }
+   }
+  },
+  "dry": {
+   "A6": "si",
+   "A3a": "si",
+   "A3b": "si",
+   "A4": "si",
+   "C3": "si",
+   "C2": "si",
+   "B3": "si"
+  }
+ }
+}

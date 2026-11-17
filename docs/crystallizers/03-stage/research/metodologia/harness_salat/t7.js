@@ -1,0 +1,13 @@
+const L = require('./lib.js'), C = require('./common.js'), M = C.M; const fs=require('fs'); (async()=>{ const a = await L.open({closure:8});
+const SEL=JSON.parse(fs.readFileSync('/home/claude/salat/scratch/sel3.json'));
+await a.eval((s) => { const P = window.SALAT.params; P.A3a = { x: s.A3a.x, z: s.A3a.z, w: 2, d: 2, h: s.A3a.h }; P.A3b = { x: s.A3b.x, z: s.A3b.z, w: 3, d: 2, h: s.A3b.h }; P.A4 = { bill: Object.assign({}, s.A4) }; P.C2 = { h: s.C2.h, cols: s.C2.cols }; P.B3 = { h: 4 }; }, SEL);
+const TR=['A6','A3a','A3b','A4','C3','C2','B3'];
+await a.put({tricks:TR,pos:'m1',hs:null}); const t=await a.grab(false);
+await a.put({tricks:TR.filter(x=>x!=='A6'),pos:'m1',hs:null}); const u=await a.grab(false);
+const info=await a.eval(()=>({view:window.__evo.view(), hs:window.__evo.st.stage.heroScreen}));
+const d=[]; for(let p=0;p<1280*720;p++) if(t.rgba[p*4]!==u.rgba[p*4]||t.rgba[p*4+1]!==u.rgba[p*4+1]||t.rgba[p*4+2]!==u.rgba[p*4+2]) d.push(p);
+const rows={}; for(const p of d){const y=Math.floor((p/1280)/40)*40; rows[y]=(rows[y]||0)+1;} console.log(d.length, JSON.stringify(rows)); const cols={}; for(const p of d){const x=Math.floor((p%1280)/80)*80; cols[x]=(cols[x]||0)+1;} console.log(JSON.stringify(cols));
+console.log(JSON.stringify(t.meta.hero), JSON.stringify(u.meta.hero), t.meta.sc,u.meta.sc,t.meta.D,u.meta.D);
+const bb=await a.eval(()=>{const S0=window.SALAT; const pts=[]; let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for(const cx of [8,33])for(const cy of [17,18])for(const h of [5,7.8]){const q=S0.proj([[cx,cy,h]])[0]; x0=Math.min(x0,q[0]);x1=Math.max(x1,q[0]);y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1]);} return [x0,y0,x1,y1];}); console.log('box',JSON.stringify(bb)); let mnx=1e9,mxx=-1,mny=1e9,mxy=-1; for(const p of d){const x=p%1280,y=Math.floor(p/1280); mnx=Math.min(mnx,x);mxx=Math.max(mxx,x);mny=Math.min(mny,y);mxy=Math.max(mxy,y);} console.log('diff bbox',mnx,mny,mxx,mxy);
+fs.writeFileSync('/home/claude/salat/scratch/diff.raw', Buffer.from(Uint8Array.from({length:1280*720},(_, p)=> (t.rgba[p*4]!==u.rgba[p*4]||t.rgba[p*4+1]!==u.rgba[p*4+1]||t.rgba[p*4+2]!==u.rgba[p*4+2])?255:0))); fs.writeFileSync('/home/claude/salat/scratch/m1_t.png',t.png);
+await a.close();})();

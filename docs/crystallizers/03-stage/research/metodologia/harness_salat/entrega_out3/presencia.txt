@@ -1,0 +1,89 @@
+PRESENCIA · V1.4 (a)(b)(c)(d) · V1.5 · Enmienda 1, 2 y 3 (posiciones propias declaradas)
+
+Cierre usado: 8 H (muros exteriores y muro norte, altura absoluta 16 tiles).
+fy del grupo n (regla (f) de A6, calculada en TECHO con el corte de camara aplicado): n1 0.58, n2 0.58, n3 0.58 (referencia de SUELO + A6: 0,54).
+
+V1.4 (a) posiciones propias (medidas en SUELO):
+  A6: s1, s2, s3, n1, n2, n3 (6)
+  A3a: m1, m2, m3, n1, n2, n3 (6)
+  A3b: s1, s2, s3, n1, n2, n3 (6)
+  A4: m1, m2, m3, n1, n2, n3 (6)
+  C3: s1, s2, s3, m1, m2, m3, n1, n2, n3 (9)
+  C2: s1, s2, s3 (3)
+  B3: s1, s2, s3 (3)
+  Posiciones propias DECLARADAS por el supervisor (Enmienda 3), no medidas: A6 s,n; A3a m,n; A3b s,n; A4 m,n; C3 s,m,n; C2 s; B3 s. Un truco ENTRA con PRESENTE en >= 2/3 de ellas y >= 3 propias (C2 y B3 declaran 3: s1-s3).
+
+V1.4 (b) puerta de presencia en TECHO, en TODAS las posiciones propias de cada truco:
+
+[A6]
+  s1: AUSENTE  rail_apparent_H = 0.14; posts_apparent_H = 2.467; hero_not_cut_at_waist = top 0.428 waist [0.407, 0.436]
+  s2: AUSENTE  rail_apparent_H = 0.447; posts_apparent_H = 2.467; hero_not_cut_at_waist = top 0.428 waist [0.407, 0.436]
+  s3: AUSENTE  rail_apparent_H = 0.286; posts_apparent_H = 2.467; hero_not_cut_at_waist = top 0.428 waist [0.407, 0.436]
+  n1: AUSENTE  continuous_length = 0.497
+  n2: AUSENTE  continuous_length = 0.454
+  n3: AUSENTE  continuous_length = 0.497
+
+[A3a]
+  m1: AUSENTE  column_visible_px = 0
+  m2: AUSENTE  column_visible_px = 0
+  m3: AUSENTE  column_visible_px = 0
+  n1: AUSENTE  column_visible_px = 0
+  n2: AUSENTE  column_visible_px = 0
+  n3: AUSENTE  width = 0.119
+
+[A3b]
+  s1: AUSENTE  touches_bottom_or_side_lower_half = y1 661, x [1115, 1215]; width = 0.079
+  s2: AUSENTE  width = 0.045
+  s3: AUSENTE  touches_bottom_or_side_lower_half = y1 661, x [1037, 1215]
+  n1: AUSENTE  mass_visible_px = 0
+  n2: AUSENTE  mass_visible_px = 0
+  n3: AUSENTE  mass_visible_px = 0
+
+[A4]
+  m1: AUSENTE  billboard_drawn = false (base 640, 238.296: its tile cap is not visible in the pick render)
+  m2: AUSENTE  billboard_drawn = false (base 640, 255.894: its tile cap is not visible in the pick render)
+  m3: AUSENTE  billboard_drawn = false (base 640, 255.894: its tile cap is not visible in the pick render)
+  n1: AUSENTE  billboard_drawn = false (base 744.782, 325.954: its tile cap is not visible in the pick render)
+  n2: AUSENTE  billboard_drawn = false (base 656.864, 325.954: its tile cap is not visible in the pick render)
+  n3: AUSENTE  billboard_drawn = false (base 832.7, 325.954: its tile cap is not visible in the pick render)
+
+[C3]
+  s1: AUSENTE  figure_share_of_frame_3_to_8pct = 0.859 %; band_B2_B3 = B4
+  s2: AUSENTE  figure_share_of_frame_3_to_8pct = 0.859 %; band_B2_B3 = B4
+  s3: AUSENTE  figure_share_of_frame_3_to_8pct = 0.858 %; band_B2_B3 = B4
+  m1: PRESENTE  painted_share=3.067 %; figure_size_tiles_4_to_6=6x6; figure_share_of_frame_3_to_8pct=3.067 %; band_B2_B3=B3; centred_on_hotspot=centre (20, 31); luminance_contrast_ge_0.15=0.381
+  m2: PRESENTE  painted_share=3.729 %; figure_size_tiles_4_to_6=6x6; figure_share_of_frame_3_to_8pct=3.729 %; band_B2_B3=B3; centred_on_hotspot=centre (20, 31); luminance_contrast_ge_0.15=0.382
+  m3: PRESENTE  painted_share=3.729 %; figure_size_tiles_4_to_6=6x6; figure_share_of_frame_3_to_8pct=3.729 %; band_B2_B3=B3; centred_on_hotspot=centre (20, 31); luminance_contrast_ge_0.15=0.384
+  n1: PRESENTE  painted_share=6.846 %; figure_size_tiles_4_to_6=6x6; figure_share_of_frame_3_to_8pct=6.846 %; band_B2_B3=B2; centred_on_hotspot=centre (20, 31); luminance_contrast_ge_0.15=0.342
+  n2: PRESENTE  painted_share=6.847 %; figure_size_tiles_4_to_6=6x6; figure_share_of_frame_3_to_8pct=6.847 %; band_B2_B3=B2; centred_on_hotspot=centre (20, 31); luminance_contrast_ge_0.15=0.343
+  n3: PRESENTE  painted_share=5.679 %; figure_size_tiles_4_to_6=6x6; figure_share_of_frame_3_to_8pct=5.679 %; band_B2_B3=B2; centred_on_hotspot=centre (20, 31); luminance_contrast_ge_0.15=0.337
+
+[C2]
+  s1: PRESENTE  hero_within_3_tiles_of_transition=2; west_x_in_0.30_0.48=[0.325, 0.371]; east_x_in_0.60_0.80=[0.628, 0.674]; free_gap_ge_0.17=0.257; tops_exit_or_y_le_0.15=west 0.14 east 0.14; hero_covered_le_10pct=0
+  s2: PRESENTE  hero_within_3_tiles_of_transition=2; west_x_in_0.30_0.48=[0.389, 0.427]; east_x_in_0.60_0.80=[0.685, 0.738]; free_gap_ge_0.17=0.258; tops_exit_or_y_le_0.15=west 0.14 east 0.14; hero_covered_le_10pct=0
+  s3: AUSENTE  west_x_in_0.30_0.48 = [0.261, 0.314]; east_x_in_0.60_0.80 = [0.572, 0.61]
+
+[B3]
+  s1: PRESENTE  raised_H_1.0_2.0=1; top_face_ge_1pct_of_frame=1.748 %; band_B2_B4=B3; off_axis_x_lt_0.35_or_gt_0.65=0.07
+  s2: PRESENTE  raised_H_1.0_2.0=1; top_face_ge_1pct_of_frame=2.117 %; band_B2_B4=B3; off_axis_x_lt_0.35_or_gt_0.65=0.108
+  s3: PRESENTE  raised_H_1.0_2.0=1; top_face_ge_1pct_of_frame=1.034 %; band_B2_B4=B3; off_axis_x_lt_0.35_or_gt_0.65=0.042
+
+V1.4 (c) aislamiento (% de pixeles del diff TECHO vs TECHO-X fuera de la caja de X + margen 0,02 del cuadro; diff = pixeles que cambian):
+  A6: s1 0.00 % (0/145313), s2 0.00 % (0/145180), s3 0.00 % (0/146286), n1 4.25 % (5352/125930), n2 3.86 % (5351/138490), n3 4.84 % (5344/110341)
+  A3a: m1 0.00 % (0/0), m2 0.00 % (0/0), m3 0.00 % (0/0), n1 0.00 % (0/0), n2 0.00 % (0/0), n3 0.00 % (0/60519)
+  A3b: s1 0.00 % (0/41105), s2 0.00 % (0/18591), s3 0.00 % (0/43495), n1 0.00 % (0/0), n2 0.00 % (0/0), n3 0.00 % (0/0)
+  A4: m1 0.00 % (0/0), m2 0.00 % (0/0), m3 0.00 % (0/0), n1 0.00 % (0/0), n2 0.00 % (0/0), n3 0.00 % (0/0)
+  C3: s1 0.00 % (0/7458), s2 0.00 % (0/7452), s3 0.00 % (0/7462), m1 0.00 % (0/19812), m2 0.00 % (0/24832), m3 0.00 % (0/25192), n1 0.00 % (0/39784), n2 0.00 % (0/39785), n3 0.00 % (0/34534)
+  C2: s1 0.00 % (0/31986), s2 0.00 % (0/31979), s3 0.00 % (0/31983)
+  B3: s1 44.41 % (29517/66467), s2 48.03 % (48530/101036), s3 50.62 % (22768/44980)
+
+V1.4 (d) veredicto:
+  A6: NO ENTRA  (propias 6, PRESENTE 0/6, aislamiento falla) motivo: PRESENTE en 0/6 (< 2/3) | aislamiento: % fuera > 0 en n1, n2, n3
+  A3a: NO ENTRA  (propias 6, PRESENTE 0/6, aislamiento 0 % fuera) motivo: PRESENTE en 0/6 (< 2/3)
+  A3b: NO ENTRA  (propias 6, PRESENTE 0/6, aislamiento 0 % fuera) motivo: PRESENTE en 0/6 (< 2/3)
+  A4: NO ENTRA  (propias 6, PRESENTE 0/6, aislamiento 0 % fuera) motivo: PRESENTE en 0/6 (< 2/3)
+  C3: ENTRA  (propias 9, PRESENTE 6/9, aislamiento 0 % fuera)
+  C2: ENTRA  (propias 3, PRESENTE 2/3, aislamiento 0 % fuera)
+  B3: NO ENTRA  (propias 3, PRESENTE 3/3, aislamiento falla) motivo: aislamiento: % fuera > 0 en s1, s2, s3
+
+V1.5: entran 2 de 7 (C3, C2).
