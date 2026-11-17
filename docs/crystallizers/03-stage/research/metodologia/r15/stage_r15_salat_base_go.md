@@ -96,3 +96,13 @@ Paras y avisas si pasa cualquiera de estas cosas:
 - los controles fallan en SUELO.
 
 En cada parada dices qué pasó, con la cifra.
+
+---
+
+## Enmienda 1 ([R], 2026-11-17, tras la PARADA del fondo vacío)
+La PARADA fue correcta: el control de fondo vacío falló en SUELO (3,7–16,9 % del cuadro). La causa es de diseño, no del arnés: la tabla de la §1 no cierra el cielo por encima de los muros. Cambia SOLO esto; las predicciones no cambian.
+
+1. **Cierre alto.** Los muros exteriores (x 0–1 y 39–40) y el muro norte del salón (x 4–36, z 52–55) suben juntos, a la misma altura absoluta, de 1 H en 1 H desde 8 H hasta que el fondo vacío sea ≤ 2 % en las 9 posiciones de SUELO. Tope: 14 H. Si a 14 H todavía falla, PARADA con la tabla de vacío por posición. Se informa la altura usada. Nada más de la sala cambia.
+2. **Separación de A3a (aclaración de la ficha, campo 4).** «Otra masa vertical a su lado» = una masa cuya distancia a la cámara está a ± 2 tiles de la columna. Un muro que queda DETRÁS de la columna (más lejos que eso) cuenta como fondo, no como masa al lado. La medida usa el render de ids con la profundidad de cada pieza.
+3. **fy del grupo n.** Se recalcula en TECHO, como dice la §2. El valor de SUELO + A6 (0,54) queda solo como referencia.
+4. Después de la enmienda sigue el pedido desde la §3: TECHO, PLACEBO, TECHO − X y la §4 completa. Los PNG de SUELO se vuelven a renderizar con el cierre nuevo.
