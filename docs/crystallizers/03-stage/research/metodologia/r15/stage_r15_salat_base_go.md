@@ -106,3 +106,15 @@ La PARADA fue correcta: el control de fondo vacío falló en SUELO (3,7–16,9 %
 2. **Separación de A3a (aclaración de la ficha, campo 4).** «Otra masa vertical a su lado» = una masa cuya distancia a la cámara está a ± 2 tiles de la columna. Un muro que queda DETRÁS de la columna (más lejos que eso) cuenta como fondo, no como masa al lado. La medida usa el render de ids con la profundidad de cada pieza.
 3. **fy del grupo n.** Se recalcula en TECHO, como dice la §2. El valor de SUELO + A6 (0,54) queda solo como referencia.
 4. Después de la enmienda sigue el pedido desde la §3: TECHO, PLACEBO, TECHO − X y la §4 completa. Los PNG de SUELO se vuelven a renderizar con el cierre nuevo.
+
+## Enmienda 2 ([R], 2026-11-17, tras la primera corrida completa)
+La corrida con la Enmienda 1 cerró el cielo a 8 H (vacío ≤ 0,85 % en SUELO). TECHO falló tres controles por dos causas de diseño. Cambian SOLO estos puntos; las predicciones no cambian.
+
+1. **A4 pasa a A4b (fondo falso, ficha A4, receta 6 (b), segunda opción).** No se recorta el muro norte. El billboard claro va pegado a la cara del muro norte que mira a la sala, centrado en x 20,5, con su tamaño de la ficha (ancho 0,08–0,16 y alto 0,10–0,20 del cuadro en m1). Motivo: el recorte abría el muro al vacío (2,5–3,1 %) y la base del billboard quedaba oculta por la baranda A6, que lo hacía desaparecer (la falla de aislamiento de A6 en m1–m3).
+2. **Corte del lado de cámara para las piezas de truco (extensión de A7).** En cada posición, una pieza de truco (volumen o billboard) que esté más cerca de la cámara que el héroe y le tape más del 25 % NO se dibuja en esa posición, en todos los estados donde exista. Es una regla de cámara, como `noFront`; la pieza sigue existiendo en el mundo. Se informa, por posición, qué piezas se cortaron. Motivo: las columnas de C2 (7 H) quedan entre la cámara y el héroe en el grupo n (héroe tapado 99,8 % en n3; billboards + rojo 31–33 % en n1 y n2).
+3. **Medidas (correcciones del arnés, sin cambio de criterio):**
+   - la altura aparente de A6 se mide con la escala de cada render, no con la cámara de la página;
+   - las posiciones propias de A4 = las posiciones donde la cara del muro norte en x 18–22 es visible en SUELO;
+   - los planos de Cam 5 se renderizan dos veces, para tener sus hashes ×2;
+   - la puerta de cada truco se mide en TODAS sus posiciones propias (no en una muestra).
+4. Si con 1 y 2 algún control de TECHO sigue fallando, se informa con su cifra y se sigue (no es PARADA); el veredicto V1.4 lo usa.
