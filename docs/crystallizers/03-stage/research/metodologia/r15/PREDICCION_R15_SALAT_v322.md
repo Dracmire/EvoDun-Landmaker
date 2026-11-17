@@ -116,3 +116,16 @@ Se juzgan 5 trucos al azar con quita-uno, en una posición al azar cada uno. Jue
 - **Cierre:** si ninguno de los 5 aporta, se cierra R1.5.
 - **Firma Q15** (al menos 1 de 5 aporta): 65 %.
 - **Nota de V2** (CC): con píxeles pintados en vez de huella, C3 bajaría a 3/9 PRESENTE. La puerta es descriptiva, así que no excluye; se registra.
+
+## Enmienda 5 ([R], 2026-11-17, grupo B, decisión de [U])
+- **Probados, aparte.** A1, A6 (como línea), C3 y C2 quedan fuera de la investigación automática. Los juzga [U].
+- **Grupo B:** A3a, A3b, A4 y B3. Los construye solo CC (`stage_r15_salat_grupoB_go.md`).
+- **Juicio:** Sonnet calibrado (rúbrica P1–P6, imagen compuesta), 3 jueces de solo lectura. Se juzga TECHO′ contra TECHO′ − X en TODAS las posiciones donde X está PRESENTE.
+- **Controles en cada tanda:** TECHO′ contra SUELO (≥ +0,5); SEÑUELO2 contra SUELO (≤ +0,3); un par repetido con los lados invertidos.
+- **Decisión:** APORTA si la media de la diferencia es ≥ +0,5. Un truco NO CONSTRUIBLE no se juzga.
+
+Firmas:
+- Q16, A3a aporta: 55 %.
+- Q17, A3b aporta: 45 %.
+- Q18, A4 aporta: 50 %.
+- Q19, B3 aporta: 35 %.
