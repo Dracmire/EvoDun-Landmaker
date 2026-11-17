@@ -100,3 +100,19 @@ Calibración: solo Sonnet, con la misma rúbrica y la misma imagen compuesta, so
 - Si no: se cierra R1.5.
 
 Firma Q14 (cumple): 60 %.
+
+## Enmienda 4 ([R], 2026-11-17, último intento, decisión de [U])
+Se juzgan 5 trucos al azar con quita-uno, en una posición al azar cada uno. Juez: Sonnet calibrado (rúbrica P1–P6, imagen compuesta), 3 jueces.
+
+- **Sorteo** (semilla 20261117): primero 5 trucos entre los 6 con algún TECHO − X distinto de TECHO; A4b queda fuera porque su TECHO − X es idéntico en todas las posiciones. Después, una posición al azar entre las propias no idénticas de cada truco.
+- **Imágenes:** los PNG de `out3`. La Verificación 2 de CC los reprodujo con hash IGUAL.
+- **Controles en la misma tanda:**
+  - TECHO contra SUELO: TECHO debe quedar ≥ +0,5;
+  - SEÑUELO2 contra SUELO: ≤ +0,3;
+  - un par de prueba repetido con los lados invertidos: misma dirección en ≥ 2 de 3 jueces.
+
+  Si un control falla, la tanda es inválida.
+- **Decisión por truco:** APORTA si la nota de TECHO menos la de TECHO − X es ≥ +0,5.
+- **Cierre:** si ninguno de los 5 aporta, se cierra R1.5.
+- **Firma Q15** (al menos 1 de 5 aporta): 65 %.
+- **Nota de V2** (CC): con píxeles pintados en vez de huella, C3 bajaría a 3/9 PRESENTE. La puerta es descriptiva, así que no excluye; se registra.
