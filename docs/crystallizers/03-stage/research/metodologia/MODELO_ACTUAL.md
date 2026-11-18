@@ -61,6 +61,10 @@ Etiquetas: **[U]** usuario · **[R]** revisor (Claude) · **CC** Claude Code · 
 | Pies del héroe (`heroScreen`) | interior (0,47; 0,51) como 0202; exterior (0,50; 0,65) como el desierto | A429, A453 · VALIDADO (lectura) |
 | Lo que NO cierra un fondo | subir el pitch (15,7 → 10,1 % de vacío); el cierre es geometría | T11 · VALIDADO |
 | Instrumento | Cam 5 cenital (ortográfica, ~89°) con el mapa superpuesto, como control de colocación; no es cámara de juego | A204, A208 · VALIDADO |
+| Salas hub o de trono | a ojo se ven más picadas (trono ≈ 33–35°) | T05, PLANTILLA · HIPÓTESIS (no medido como el dungeon y el desierto) |
+| Paralaje | cercano / lejano ≈ 2,2 al caminar (clip de Aliahan); el fondo también tiene paralaje de perspectiva (no es una capa plana) | A042, A370 · VALIDADO a ojo |
+| Medir el héroe | `heroFrac` es la caja de 1 H en el pivote, no la figura; la figura completa = cabeza + cuerpo + punto (medir solo el cuerpo falseó la escala) | A150, A153 · VALIDADO |
+| Tomas | las de YouTube son recortes ≈ pantalla completa (±1–2 %); el render cubre al menos la pantalla completa 16:9 | A148, A151 · VALIDADO |
 
 ## 5. Escala y alturas
 | Parámetro | Valor | Fuente · estado |
@@ -111,6 +115,8 @@ Etiquetas: **[U]** usuario · **[R]** revisor (Claude) · **CC** Claude Code · 
 - **Escena, no toma** (regla 2): un ejemplo es un mundo que sobrevive a mover al héroe; se juzga con caminata (regla 4).
 - **Un ejemplo declara su mapa de origen y sus reglas encendidas** (`orient`, `planes`, `props`, `volumes`); apagarlas para igualar una foto es la degeneración D1 (reglas 5 y 3; A036).
 - **El rojo puede tapar al héroe un momento** (A102), nunca en el hotspot.
+- **Varias tomas a lo largo de un recorrido** (regla 11): sirven para la tabla de movimiento (cuánto se desplaza y cambia de tamaño cada objeto por tile, qué lo tapa, cuándo entra el muro del fondo). Un solo fotograma no da un veredicto.
+- **Simetría:** si la sala de origen es simétrica, se prueba por espejo y se contrasta con la imagen ORIGINAL, no con un derivado (A061, A064).
 - **Alarmas A1–A14** y pre-vuelo: informe integrado v319 §3.6 y PLANTILLA §5.
 
 ## 8. Bandas, horizonte, vistazo y proporciones
