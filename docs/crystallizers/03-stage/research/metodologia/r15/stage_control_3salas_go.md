@@ -1,4 +1,4 @@
-# Pedido a CC · Punto de control: la vista 2D-HD con TODO lo acumulado (3 salas) — v327
+# Pedido a CC · Punto de control: la vista 2D-HD con TODO lo acumulado (3 salas) — v328
 
 **Para qué.** R1.5 (trucos) quedó cerrada. [U] quiere ver **la mejor vista 2D-HD que hoy sabemos construir**, con todo el conocimiento acumulado aplicado a la vez sobre salas que no vienen de DQ3. **No quiere una sala DAC común con la cámara cambiada:** una celda TODO que se vea como la DAC por defecto es un fallo de este pedido; se informa como tal, no se entrega como resultado.
 
@@ -54,14 +54,13 @@ Si una no carga o no tiene caminata, PARADA para esa sala sola, y sigues con las
 | Cámara | Cam 6, perspectiva normal, FOV 30, **K 1** (sin Cam 8) | A425, A449, A451 |
 | Pitch | **25 en DAC 44 y DAC 14** (interior, medido 24–28); **38 en Forest A** (exterior abierto, medido 37–40) | A450, A454 |
 | Distancia al héroe | `heroFrac` **0,10** (coronilla al centro del punto de los pies) → D ≈ 19,5 H; el pivote queda a media altura del héroe (k ≈ 0,95) | A443, A450 |
-| Escala | `tilesPerH` **1,5**; una sola escala de héroe (≈ 0,030 de ancho en todos los cuadros de DQ3) | A159, A440 |
+| Escala | `tilesPerH`: **[DECISIÓN DE [U] PENDIENTE: 1,5 (DQ3, A159) o 2 (base de la pasada, A373)]**. Héroe: ancho ≈ 0,030 en todos los cuadros (A440); alto 0,107 en 0202 y 0,128 en 0137 (A366; diferencia sin explicar, se informa, no se corrige) | A159, A373, A366, A440 |
 | Alturas | `exag` **1**, `vScale` **1**; toda altura va por pieza, en el dato (§3.6) | A345, B4/B7 |
 | Pies del héroe (`heroScreen`) | interior (0,47; 0,51) como 0202; exterior (0,50; 0,65); el ajuste de A6 (§3.5) puede moverlo con fy ∈ [0,45; 0,80] | A6, C7 |
 | Perspectiva que hay que ver | con la cámara normal, un suelo a 10,5 H detrás del héroe se ve a 0,60 y uno a 12,9 H a 0,55; al sur crece 7 % por H | t5, A444, A445 |
 
 ### 3.2 Terreno
-- **`terraces` 3, `subs` 2.** `subs` 2 deja el bordillo continuo en la franja media que premian todos los juicios; `subs` 1 lo borra.
-- **Peldaño ≤ 0,5 H** («Measures in H» OFF + `terH`).
+- **[DECISIÓN DE [U] PENDIENTE]** Opción a (G2, A343–A345): `terraces` 3, `subs` 2, peldaño ≤ 0,5 H; `subs` 2 deja el bordillo de franja media que premiaron los juicios y `subs` 1 lo borraba. Opción b (base de la pasada, A373, posterior): `terraces` 3, `subs` 1, salto de terraza 1,25 H (`terH` 2,5 tiles con `tilesPerH` 2). CC usa la que [U] indique en el prompt.
 - **DQ3 es «súper plano»:** suelo plano por zonas y el cambio de altura concentrado en escaleras de micro-terrazas. Si una zona transitable tiene relieve repartido, se aplana a su mediana (declarado).
 - **Escaleras:** ≥ 4 peldaños visibles, ensanchadas a **≥ 3 H** (5 integrantes lado a lado), alineadas con el flujo. Referencia: la escalera del remake mide ≈ 4,5 H donde el mapa viejo tenía ≈ 1,4 H.
 - **No elevar el POI:** la tarima es baja, ≈ 1 subnivel. Elevarlo no funcionó (A083).
@@ -88,7 +87,7 @@ Si una no carga o no tiene caminata, PARADA para esa sala sola, y sigues con las
   - cada banda tiene una función dominante: primer plano, guía, meta, fondo o vistazo;
   - **plano** = banda + lo que tiene altura y tapa lo de atrás.
 - **Héroe en la banda 2:** con el héroe en el hotspot, B1 queda delante, como la escalera de 0202, y el héroe en B2. Si no cae así, se ajusta `heroScreen` dentro de su rango y se informa.
-- **Ver adelante:** **25–40 % del cuadro** se dedica a ver más allá del héroe (A247). Se mide como la fracción del cuadro por encima de la línea de nivel (A6) que muestra suelo lejano, vistazo o fondo construido. El borde del fondo cae entre **y 0,10 y 0,25**.
+- **Ver adelante:** **25–40 % del cuadro** se dedica a ver más allá del héroe (A247). Se mide como la fracción del cuadro por encima de la línea de nivel (A6) que muestra suelo lejano, vistazo o fondo construido. Bandas leídas por [U] (A429): en 0202 la franja lejana va de y 0 a 0,18 y el héroe está en y 0,45–0,56, detrás de lo alto de la escalera sur; en 0137 lo lejano baja hasta y 0,51, junto al héroe. Objetivo en interior tipo 0202: borde del fondo entre **y 0,10 y 0,25**.
 - **Proporciones:** la profundidad útil detrás del hotspot debería dar s ≈ 0,55 en el fondo, unos 17 H con `heroFrac` 0,10. **Se mide, no se fuerza:** no se alarga ni se corta ninguna sala.
 - **Vistazo (A1) y cierre en dos planos (A2):** ganó 9–0 en una sala DAC no usada.
   1. Cierre BACK de `planes` → baranda de 1,0–1,4 H.
@@ -103,11 +102,11 @@ Si una no carga o no tiene caminata, PARADA para esa sala sola, y sigues con las
 |---|---|---|
 | **A7 · corte del lado de cámara** | ningún muro de cierre en y > 0,85 | `planesTest.noFront` |
 | **C1 · eje y hotspot** | el eje cruza el cuadro en x ∈ [0,40; 0,65] de B1 a B4; el héroe sobre él; el hotspot es transitable, central salvo POI, sobre el flujo | `orient` con POI primero |
-| **A6 · línea de nivel** | borde superior entre **y 0,40 y 0,60**, continua en **≥ 70 % del ancho**; baranda de 1,0–1,4 H con postes de ~1,6 H cada 3–4 tiles; el héroe por encima o por debajo, **nunca cortado en la cintura** | sobre el BACK del vistazo o sobre el borde de terraza más largo en X; luego **encuadre:** ajustar `heroScreen` fy en [0,45; 0,80] hasta que la línea entre en la franja; si no entra, usar k_mir y declararlo |
+| **A6 · línea de nivel** | borde superior entre **y 0,40 y 0,60**, continua en **≥ 70 % del ancho**; una **baranda calada** (pasamanos + postes; se ve a través), **no un muro almenado** (falla de la sala T, A408); 1,0–1,4 H con postes de ~1,6 H cada 3–4 tiles; el héroe por encima o por debajo, **nunca cortado en la cintura**. En el quita-uno aportó +0,67 (A405) | sobre el BACK del vistazo o sobre el borde de terraza más largo en X; luego **encuadre:** ajustar `heroScreen` fy en [0,45; 0,80] hasta que la línea entre en la franja; si no entra, usar k_mir y declararlo |
 | **A3 en secuencia · pilares que dan la perspectiva** | 3 o más pares a los lados del eje, alejándose; tercio central abierto (nada en x 0,22–0,78 salvo el par de C2); los cercanos salen por arriba; separados de cualquier muro (≥ 0,02 del ancho de aire) | pilares de **≈ 5 H** cada **≈ 7,3 H** a lo largo del eje, a ≥ 3 H del camino, sobre azul o como rojo; nunca pegados al muro (pegados pierden 3–0) |
-| **C2 · par en la transición** | con el héroe a ≤ 3 tiles de la escalera principal: las dos columnas en x [0,30; 0,48] y [0,60; 0,80]; hueco ≥ 0,17 del ancho; tapan ≤ 10 % del héroe | **un solo par por sala**, 2 × 2 tiles, simétrico al eje |
-| **C3 · calcomanía en el hotspot** | figura de 4 × 4 a 6 × 6 tiles, 3–8 % del cuadro, en B2–B3; contraste ≥ 0,15; **sutil, con el tinte del suelo** | cinta con anillo + estrella en los tiles del hotspot (no una cinta de camino: las tomas no la tienen) |
-| **A4/A5 · vano focal** | rectángulo claro de 0,08–0,16 × 0,10–0,20 del cuadro, centro en x [0,40; 0,62], y [0,05; 0,25]; luminancia ≥ 2× la del cierre; el elemento más contrastado del cuadro | hueco de 2–3 tiles en el cierre lejano o billboard plano pegado a su cara; **nunca un volumen que sobresalga** |
+| **C2 · par en la transición** | con el héroe a ≤ 3 tiles de la escalera principal: las dos columnas en x [0,30; 0,48] y [0,60; 0,80]; hueco ≥ 0,17 del ancho; tapan ≤ 10 % del héroe | **un solo par por sala**, 2 × 2 tiles, simétrico al eje, **en la misma banda que la escalera que flanquean** y con cimas esbeltas. [U] lo dio por mal aplicado en la sala T (A413): escalera en la banda 1 y búhos en la banda 5 hasta el borde, con cimas anchas |
+| **C3 · calcomanía en el hotspot** | figura de 4 × 4 a 6 × 6 tiles, 3–8 % del cuadro, en B2–B3; **tenue, con el color del piso, fuera de los pies del héroe** (A413); en el quita-uno aportó +0,50 (A405) | cinta con anillo + estrella junto al hotspot, a 1–4 tiles del héroe (no una cinta de camino: las tomas no la tienen, A360) |
+| **A4/A5 · vano focal** | rectángulo claro de 0,08–0,16 × 0,10–0,20 del cuadro, centro en x [0,40; 0,62], y [0,05; 0,25]; luminancia ≥ 2× la del cierre; el elemento más contrastado del cuadro. [U] (A413): válido, pero necesita luz real con contraste; en el visor, el máximo contraste posible, y se anota que la luz va en Unity | hueco de 2–3 tiles en el cierre lejano o billboard plano pegado a su cara; **nunca un volumen que sobresalga** |
 | **Landmark (S4c)** | si la sala tiene POI o meta alta, el landmark se lee completo de lejos y como fragmento de cerca | `kind: 'landmark'` del visor, sobre la meta |
 
 **Líneas de fuga:** la perspectiva solo se lee si hay cosas de tamaño conocido repartidas en profundidad (v66: H8 depende de H10). Por eso los pares de pilares, las losas de C3, la escalera y el borde de A6 deben estar en bandas distintas. Una sala con un solo plano vertical se ve casi ortográfica aunque la cámara tenga perspectiva.
@@ -134,7 +133,7 @@ Si una no carga o no tiene caminata, PARADA para esa sala sola, y sigues con las
 | Ancho del pasillo de pilares | ≈ 4,9 H; espaciado ≈ 7,3 H (30:55) |
 
 ### 3.7 Lo que NO va (nunca probado o descartado; para pulido)
-- **Nunca probados:** A3b (masa baja de esquina), A8 (paso por detrás), A416 (cámara adelantada), B1 como truco, B3 (altura fingida), B5 (cara de caída), N1, C5, C7 más allá del ajuste de A6, y el bloqueo suave.
+- **Nunca probados:** A3b (masa baja de esquina; en la sala T las esquinas dieron +1,9 en TECHO, A402, pero nunca con puerta válida), A8 (paso por detrás), A416 (cámara adelantada hacia el avance), el modelo de cámara de [U] (A428: prioridad en Z, trabada en X cerca de los bordes, hub recentrado), B1 como truco, B3 (altura fingida), B5 (cara de caída), N1, C5, C7 más allá del ajuste de A6, y el bloqueo suave (A434).
 - **Descartados:** `exag` o `vScale` globales, `subs` 1, Cam 8, `stageBorder` como cierre (solo visual), cinta de camino como guía.
 
 Si alguno aparece por una regla del visor, se declara.
@@ -196,7 +195,14 @@ Si alguno aparece por una regla del visor, se declara.
 - v325 (dff2de1): primera versión. Delegaba en la receta y usaba T3.
 - v325b (e3a3cda): T3 fuera (ajustada a 0202; [U] no admite salas copiadas de DQ3).
 - v326 (ffa6b57): plantilla de pantalla con cifras.
-- v327: esta versión. [U] preguntó si estaba todo y [R] reconoció que el compilado salía de una sola nota. Se revisaron el informe integrado v319, las fichas v318, la BRÚJULA, la PLANTILLA, las DEFINICIONES de T26 y la v66. Se agregaron:
+- v327 (daf2679): todo lo de los documentos consolidados.
+- v328: esta versión. Los consolidados (v318, v319) son del 17 nov y llegan hasta A357; se cruzó con el Registro A358–A460 y se actualizaron:
+  - C3 fuera de los pies del héroe, C2 en la banda de su escalera, A6 calada y no almenada, A4 con su nota de luz;
+  - las bandas y el horizonte leídos por [U] (A429);
+  - el alto del héroe por toma (A366);
+  - el modelo de cámara de [U] y A416 en nunca probados;
+  - el conflicto de terreno y escala (A373 contra G2), que decide [U].
+- (v327, texto anterior): [U] preguntó si estaba todo y [R] reconoció que el compilado salía de una sola nota. Se revisaron el informe integrado v319, las fichas v318, la BRÚJULA, la PLANTILLA, las DEFINICIONES de T26 y la v66. Se agregaron:
   - las bandas con su numeración y el héroe en B2;
   - «ver adelante» 25–40 % y la franja del borde del fondo;
   - las capas P/G/R/F;
