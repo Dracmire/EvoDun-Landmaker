@@ -1,10 +1,10 @@
-# Pedido a CC · Punto de control: la vista 2D-HD con TODO lo acumulado (3 salas) — v328
+# Pedido a CC · Punto de control: la vista 2D-HD con TODO lo acumulado (3 salas) — v329
 
 **Para qué.** R1.5 (trucos) quedó cerrada. [U] quiere ver **la mejor vista 2D-HD que hoy sabemos construir**, con todo el conocimiento acumulado aplicado a la vez sobre salas que no vienen de DQ3. **No quiere una sala DAC común con la cámara cambiada:** una celda TODO que se vea como la DAC por defecto es un fallo de este pedido; se informa como tal, no se entrega como resultado.
 
 **Tu papel.** Construyes, renderizas, mides y armas las hojas. No juzgas composición: juzga [U] mirando. Sin agentes y sin jueces.
 
-**Fuentes** (todas en el proyecto `claude/` o en esta carpeta; ábrelas si una regla no te queda clara):
+**Fuente de verdad: `../MODELO_ACTUAL.md` (v1).** Si este pedido y el modelo difieren, PARA y dilo. Fuentes de detalle (todas en el proyecto `claude/` o en esta carpeta; ábrelas si una regla no te queda clara):
 - `INFORME_metodologia_HD2D_DQ3.md` (integrado v319): §3 (vocabulario, modelo verde/azul/rojo, capas P/G/R/F, bandas, reglas 1–11, alarmas) y los anexos E y F.
 - `INFORME_METODO_TRUCOS_v318.md`: fichas con cifras de pantalla (A1, A2, A3a, A4, A6, A7, C1, C2, C3, C4).
 - `DEFINICIONES_T26_v311.md`: banda, plano, función de banda, vistazo y mirador.
@@ -54,13 +54,13 @@ Si una no carga o no tiene caminata, PARADA para esa sala sola, y sigues con las
 | Cámara | Cam 6, perspectiva normal, FOV 30, **K 1** (sin Cam 8) | A425, A449, A451 |
 | Pitch | **25 en DAC 44 y DAC 14** (interior, medido 24–28); **38 en Forest A** (exterior abierto, medido 37–40) | A450, A454 |
 | Distancia al héroe | `heroFrac` **0,10** (coronilla al centro del punto de los pies) → D ≈ 19,5 H; el pivote queda a media altura del héroe (k ≈ 0,95) | A443, A450 |
-| Escala | `tilesPerH`: **[DECISIÓN DE [U] PENDIENTE: 1,5 (DQ3, A159) o 2 (base de la pasada, A373)]**. Héroe: ancho ≈ 0,030 en todos los cuadros (A440); alto 0,107 en 0202 y 0,128 en 0137 (A366; diferencia sin explicar, se informa, no se corrige) | A159, A373, A366, A440 |
+| Escala | `tilesPerH` **1,5** (decidido, A463). Héroe: ancho ≈ 0,030 en todos los cuadros (A440); alto 0,107 en 0202 y 0,128 en 0137 (A366; diferencia sin explicar, se informa, no se corrige) | A159, A373, A366, A440 |
 | Alturas | `exag` **1**, `vScale` **1**; toda altura va por pieza, en el dato (§3.6) | A345, B4/B7 |
 | Pies del héroe (`heroScreen`) | interior (0,47; 0,51) como 0202; exterior (0,50; 0,65); el ajuste de A6 (§3.5) puede moverlo con fy ∈ [0,45; 0,80] | A6, C7 |
 | Perspectiva que hay que ver | con la cámara normal, un suelo a 10,5 H detrás del héroe se ve a 0,60 y uno a 12,9 H a 0,55; al sur crece 7 % por H | t5, A444, A445 |
 
 ### 3.2 Terreno
-- **[DECISIÓN DE [U] PENDIENTE]** Opción a (G2, A343–A345): `terraces` 3, `subs` 2, peldaño ≤ 0,5 H; `subs` 2 deja el bordillo de franja media que premiaron los juicios y `subs` 1 lo borraba. Opción b (base de la pasada, A373, posterior): `terraces` 3, `subs` 1, salto de terraza 1,25 H (`terH` 2,5 tiles con `tilesPerH` 2). CC usa la que [U] indique en el prompt.
+- **Terreno (decidido, A463):** `terraces` 3; altura de terraza **1,25 H** («Measures in H» OFF, `terH` = 1,875 tiles con `tilesPerH` 1,5); **`subs` 2** (peldaño ≈ 0,275 H, calculado: confírmalo en el visor e infórmalo).
 - **DQ3 es «súper plano»:** suelo plano por zonas y el cambio de altura concentrado en escaleras de micro-terrazas. Si una zona transitable tiene relieve repartido, se aplana a su mediana (declarado).
 - **Escaleras:** ≥ 4 peldaños visibles, ensanchadas a **≥ 3 H** (5 integrantes lado a lado), alineadas con el flujo. Referencia: la escalera del remake mide ≈ 4,5 H donde el mapa viejo tenía ≈ 1,4 H.
 - **No elevar el POI:** la tarima es baja, ≈ 1 subnivel. Elevarlo no funcionó (A083).
@@ -196,7 +196,8 @@ Si alguno aparece por una regla del visor, se declara.
 - v325b (e3a3cda): T3 fuera (ajustada a 0202; [U] no admite salas copiadas de DQ3).
 - v326 (ffa6b57): plantilla de pantalla con cifras.
 - v327 (daf2679): todo lo de los documentos consolidados.
-- v328: esta versión. Los consolidados (v318, v319) son del 17 nov y llegan hasta A357; se cruzó con el Registro A358–A460 y se actualizaron:
+- v329: decisión de [U] (A463): `tilesPerH` 1,5, terraza 1,25 H, `subs` 2; la fuente de verdad pasa a `MODELO_ACTUAL.md`.
+- v328 (3f2a15f): Los consolidados (v318, v319) son del 17 nov y llegan hasta A357; se cruzó con el Registro A358–A460 y se actualizaron:
   - C3 fuera de los pies del héroe, C2 en la banda de su escalera, A6 calada y no almenada, A4 con su nota de luz;
   - las bandas y el horizonte leídos por [U] (A429);
   - el alto del héroe por toma (A366);
