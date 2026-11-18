@@ -1,0 +1,5786 @@
+{
+ "heroFrac": 0.1,
+ "runs": [
+  {
+   "ex": "mockt_z14",
+   "room": 14,
+   "prof": "off",
+   "hf0": 0.1,
+   "axis": {
+    "room": 14,
+    "dir": "Z",
+    "yaw": 180,
+    "ratio": 2.09,
+    "L": 39.4,
+    "W": 18.8,
+    "centre": [
+     36.5,
+     45.5
+    ],
+    "d": [
+     1.2246467991473532e-16,
+     -1
+    ],
+    "south": 19.5,
+    "north": -17.25,
+    "tp": 2,
+    "box": {
+     "x0": 24,
+     "y0": 24,
+     "x1": 48,
+     "y1": 67
+    },
+    "ox": 22,
+    "oy": 157
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      45
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 202) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "k1",
+     "t": 2.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      43
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 200) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "k2",
+     "t": 4.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      40
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 197) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "k3",
+     "t": 7.31,
+     "hf": 0.10091490719697337,
+     "fy": 0.5636346313448746,
+     "fx": 0.4828060742357331,
+     "near": true,
+     "far": false,
+     "du": 0.41981911468867494,
+     "distH": 18.279768705055208,
+     "predExact": 0.10091490719697337,
+     "predModel": 0.10093842695976983,
+     "tile": [
+      36,
+      38
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 10.1 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 195) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · props: 15 torches, 0 pill"
+    },
+    {
+     "step": "k4",
+     "t": 9.75,
+     "hf": 0.1073260156001231,
+     "fy": 0.6229573118533394,
+     "fx": 0.481713746798566,
+     "near": true,
+     "far": false,
+     "du": 1.638569114688675,
+     "distH": 17.17520608960429,
+     "predExact": 0.10732601560012307,
+     "predModel": 0.10742992477938951,
+     "tile": [
+      36,
+      35
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 10.7 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 192) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · props: 15 torches, 0 pill"
+    },
+    {
+     "step": "k5",
+     "t": 12.19,
+     "hf": 0.11460697921505342,
+     "fy": 0.6903288568595145,
+     "fx": 0.48047321305221785,
+     "near": true,
+     "far": false,
+     "du": 2.857319114688675,
+     "distH": 16.07064347415337,
+     "predExact": 0.11460697921505342,
+     "predModel": 0.11481376593564846,
+     "tile": [
+      36,
+      33
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.5 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 190) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · props: 15 torches, 0 pill"
+    },
+    {
+     "step": "k6",
+     "t": 14.63,
+     "hf": 0.12294771400526956,
+     "fy": 0.7675065793454954,
+     "fx": 0.47905211503225437,
+     "near": true,
+     "far": false,
+     "du": 4.076069114688673,
+     "distH": 14.966080858702455,
+     "predExact": 0.12294771400526956,
+     "predModel": 0.12328752702173175,
+     "tile": [
+      36,
+      30
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 12.3 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 187) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · props: 15 torches, 0 pill"
+    },
+    {
+     "step": "k7",
+     "t": 17.06,
+     "hf": 0.13259776121576097,
+     "fy": 0.8567995114815884,
+     "fx": 0.4774079357928582,
+     "near": true,
+     "far": false,
+     "du": 5.294819114688673,
+     "distH": 13.861518243251538,
+     "predExact": 0.13259776121576097,
+     "predModel": 0.13311176062369653,
+     "tile": [
+      36,
+      28
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.3 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 185) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · props: 15 torches, 0 pill"
+    },
+    {
+     "step": "k8",
+     "t": 19.5,
+     "hf": 0.14389168007514327,
+     "fy": 0.9613033660497787,
+     "fx": 0.4754836729871971,
+     "near": true,
+     "far": false,
+     "du": 6.513569114688673,
+     "distH": 12.756955627800622,
+     "predExact": 0.14389168007514327,
+     "predModel": 0.14463725924198526,
+     "tile": [
+      36,
+      26
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 14.4 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 183) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · props: 15 torches, 0 pill"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      45
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 202) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "n1",
+     "t": -2.16,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      47
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 204) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "n2",
+     "t": -4.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      49
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 206) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "n3",
+     "t": -6.47,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      51
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 208) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "n4",
+     "t": -8.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      54
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 211) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "n5",
+     "t": -10.78,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      56
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 213) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "n6",
+     "t": -12.94,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      58
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 215) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "n7",
+     "t": -15.09,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      60
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 217) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    },
+    {
+     "step": "n8",
+     "t": -17.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      62
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 219) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · props: 15 torches, 0 pillars, goa"
+    }
+   ]
+  },
+  {
+   "ex": "mockt_z14",
+   "room": 14,
+   "prof": "auto",
+   "hf0": 0.1,
+   "axis": {
+    "room": 14,
+    "dir": "Z",
+    "yaw": 180,
+    "ratio": 2.09,
+    "L": 39.4,
+    "W": 18.8,
+    "centre": [
+     36.5,
+     45.5
+    ],
+    "d": [
+     1.2246467991473532e-16,
+     -1
+    ],
+    "south": 19.5,
+    "north": -17.25,
+    "tp": 2,
+    "box": {
+     "x0": 24,
+     "y0": 24,
+     "x1": 48,
+     "y1": 67
+    },
+    "ox": 22,
+    "oy": 157
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      45
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 202) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15 "
+    },
+    {
+     "step": "k1",
+     "t": 2.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      43
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 200) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15 "
+    },
+    {
+     "step": "k2",
+     "t": 4.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      40
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 197) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15 "
+    },
+    {
+     "step": "k3",
+     "t": 7.31,
+     "hf": 0.10091490719697337,
+     "fy": 0.5636346313448746,
+     "fx": 0.4828060742357331,
+     "near": true,
+     "far": false,
+     "du": 0.41981911468867494,
+     "distH": 18.279768705055208,
+     "predExact": 0.10091490719697337,
+     "predModel": 0.10093842695976983,
+     "tile": [
+      36,
+      38
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 10.1 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 195) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "k4",
+     "t": 9.75,
+     "hf": 0.1073260156001231,
+     "fy": 0.6229573118533394,
+     "fx": 0.481713746798566,
+     "near": true,
+     "far": false,
+     "du": 1.638569114688675,
+     "distH": 17.17520608960429,
+     "predExact": 0.10732601560012307,
+     "predModel": 0.10742992477938951,
+     "tile": [
+      36,
+      35
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 10.7 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 192) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "k5",
+     "t": 12.19,
+     "hf": 0.11460697921505342,
+     "fy": 0.6903288568595145,
+     "fx": 0.48047321305221785,
+     "near": true,
+     "far": false,
+     "du": 2.857319114688675,
+     "distH": 16.07064347415337,
+     "predExact": 0.11460697921505342,
+     "predModel": 0.11481376593564846,
+     "tile": [
+      36,
+      33
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.5 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 190) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "k6",
+     "t": 14.63,
+     "hf": 0.12294771400526956,
+     "fy": 0.7675065793454954,
+     "fx": 0.47905211503225437,
+     "near": true,
+     "far": false,
+     "du": 4.076069114688673,
+     "distH": 14.966080858702455,
+     "predExact": 0.12294771400526956,
+     "predModel": 0.12328752702173175,
+     "tile": [
+      36,
+      30
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 12.3 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 187) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "k7",
+     "t": 17.06,
+     "hf": 0.13259776121576097,
+     "fy": 0.8567995114815884,
+     "fx": 0.4774079357928582,
+     "near": true,
+     "far": false,
+     "du": 5.294819114688673,
+     "distH": 13.861518243251538,
+     "predExact": 0.13259776121576097,
+     "predModel": 0.13311176062369653,
+     "tile": [
+      36,
+      28
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.3 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 185) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "k8",
+     "t": 19.5,
+     "hf": 0.14389168007514327,
+     "fy": 0.9613033660497787,
+     "fx": 0.4754836729871971,
+     "near": true,
+     "far": false,
+     "du": 6.513569114688673,
+     "distH": 12.756955627800622,
+     "predExact": 0.14389168007514327,
+     "predModel": 0.14463725924198526,
+     "tile": [
+      36,
+      26
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 14.4 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 183) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      45
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 202) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15 "
+    },
+    {
+     "step": "n1",
+     "t": -2.16,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      47
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 204) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15 "
+    },
+    {
+     "step": "n2",
+     "t": -4.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      49
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 206) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15 "
+    },
+    {
+     "step": "n3",
+     "t": -6.47,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      51
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 208) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15 "
+    },
+    {
+     "step": "n4",
+     "t": -8.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      54
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 211) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15 "
+    },
+    {
+     "step": "n5",
+     "t": -10.78,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      56
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 213) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15 "
+    },
+    {
+     "step": "n6",
+     "t": -12.94,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      58
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 215) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15 "
+    },
+    {
+     "step": "n7",
+     "t": -15.09,
+     "hf": 0.09523561414535267,
+     "fy": 0.5110835175546731,
+     "fx": 0.48377371465512603,
+     "near": false,
+     "far": true,
+     "du": -0.7968749999999964,
+     "distH": 19.38246805563921,
+     "predExact": 0.09523561414535267,
+     "predModel": 0.09519587974968295,
+     "tile": [
+      36,
+      60
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.5 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 217) · room 14 · CLAMP (narrow window + far) · room 14: Z yaw 180 · camera space: narrow · prop"
+    },
+    {
+     "step": "n8",
+     "t": -17.25,
+     "hf": 0.09071194194057111,
+     "fy": 0.46922548863763924,
+     "fx": 0.48454445989219075,
+     "near": false,
+     "far": true,
+     "du": -1.8749999999999964,
+     "distH": 20.3595811385381,
+     "predExact": 0.09071194194057111,
+     "predModel": 0.09062716397362924,
+     "tile": [
+      36,
+      62
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.1 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 219) · room 14 · CLAMP (narrow window + far) · room 14: Z yaw 180 · camera space: narrow · prop"
+    }
+   ]
+  },
+  {
+   "ex": "mockt_z14",
+   "room": 14,
+   "prof": "wide",
+   "hf0": 0.1,
+   "axis": {
+    "room": 14,
+    "dir": "Z",
+    "yaw": 180,
+    "ratio": 2.09,
+    "L": 39.4,
+    "W": 18.8,
+    "centre": [
+     36.5,
+     45.5
+    ],
+    "d": [
+     1.2246467991473532e-16,
+     -1
+    ],
+    "south": 19.5,
+    "north": -17.25,
+    "tp": 2,
+    "box": {
+     "x0": 24,
+     "y0": 24,
+     "x1": 48,
+     "y1": 67
+    },
+    "ox": 22,
+    "oy": 157
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      45
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 202) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "k1",
+     "t": 2.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      43
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 200) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "k2",
+     "t": 4.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      40
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 197) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "k3",
+     "t": 7.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      38
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 195) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "k4",
+     "t": 9.75,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      35
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 192) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "k5",
+     "t": 12.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      33
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 190) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "k6",
+     "t": 14.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      30
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 187) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "k7",
+     "t": 17.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208741,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      28
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 185) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "k8",
+     "t": 19.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208741,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      26
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 183) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      45
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 202) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "n1",
+     "t": -2.16,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      47
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 204) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "n2",
+     "t": -4.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      49
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 206) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "n3",
+     "t": -6.47,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      51
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 208) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "n4",
+     "t": -8.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      54
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 211) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "n5",
+     "t": -10.78,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      56
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 213) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "n6",
+     "t": -12.94,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      58
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 215) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "n7",
+     "t": -15.09,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      60
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 217) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    },
+    {
+     "step": "n8",
+     "t": -17.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.4831527353208739,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      62
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 219) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: wide · props: 15 to"
+    }
+   ]
+  },
+  {
+   "ex": "mockt_x44",
+   "room": 44,
+   "prof": "off",
+   "hf0": 0.1,
+   "axis": {
+    "room": 44,
+    "dir": "Hub",
+    "yaw": 90,
+    "ratio": 1.37,
+    "L": 96.4,
+    "W": 70.3,
+    "centre": [
+     77.5,
+     16.5
+    ],
+    "d": [
+     1,
+     6.123233995736766e-17
+    ],
+    "south": 52.25,
+    "north": -51.5,
+    "tp": 2,
+    "box": {
+     "x0": 24,
+     "y0": 0,
+     "x1": 138,
+     "y1": 42
+    },
+    "ox": 0,
+    "oy": 0
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "k1",
+     "t": 6.53,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      84,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (84, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "k2",
+     "t": 13.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      90,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (90, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "k3",
+     "t": 19.59,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      97,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (97, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "k4",
+     "t": 26.13,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      103,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (103, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes:"
+    },
+    {
+     "step": "k5",
+     "t": 32.66,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      110,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (110, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes:"
+    },
+    {
+     "step": "k6",
+     "t": 39.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      116,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (116, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes:"
+    },
+    {
+     "step": "k7",
+     "t": 45.72,
+     "hf": 0.09946757362568669,
+     "fy": 0.5502422970339412,
+     "fx": 0.5,
+     "near": true,
+     "far": false,
+     "du": 0.12294411468867139,
+     "distH": 18.548828829331715,
+     "predExact": 0.09946757362568669,
+     "predModel": 0.0994742641303019,
+     "tile": [
+      123,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (123, 16) · room 44 · CLAMP (near) · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · plan"
+    },
+    {
+     "step": "k8",
+     "t": 52.25,
+     "hf": 0.11809931129496298,
+     "fy": 0.7226437838858856,
+     "fx": 0.5,
+     "near": true,
+     "far": false,
+     "du": 3.3885691146886714,
+     "distH": 15.589167462290156,
+     "predExact": 0.11809931129496298,
+     "predModel": 0.11835982278976938,
+     "tile": [
+      129,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (129, 16) · room 44 · CLAMP (near) · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · pla"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "n1",
+     "t": -6.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      71,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (71, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "n2",
+     "t": -12.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      64,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (64, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "n3",
+     "t": -19.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      58,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "n4",
+     "t": -25.75,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      51,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (51, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "n5",
+     "t": -32.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "n6",
+     "t": -38.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      38,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (38, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "n7",
+     "t": -45.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      32,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (32, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    },
+    {
+     "step": "n8",
+     "t": -51.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      26,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (26, 16) · room 44 · following · room 44: Hub yaw 90 · props: 27 torches, 0 pillars, goal · planes: "
+    }
+   ]
+  },
+  {
+   "ex": "mockt_x44",
+   "room": 44,
+   "prof": "auto",
+   "hf0": 0.1,
+   "axis": {
+    "room": 44,
+    "dir": "Hub",
+    "yaw": 90,
+    "ratio": 1.37,
+    "L": 96.4,
+    "W": 70.3,
+    "centre": [
+     77.5,
+     16.5
+    ],
+    "d": [
+     1,
+     6.123233995736766e-17
+    ],
+    "south": 52.25,
+    "north": -51.5,
+    "tp": 2,
+    "box": {
+     "x0": 24,
+     "y0": 0,
+     "x1": 138,
+     "y1": 42
+    },
+    "ox": 0,
+    "oy": 0
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k1",
+     "t": 6.53,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      84,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (84, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k2",
+     "t": 13.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      90,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (90, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k3",
+     "t": 19.59,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      97,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (97, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k4",
+     "t": 26.13,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      103,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (103, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k5",
+     "t": 32.66,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      110,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (110, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k6",
+     "t": 39.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      116,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (116, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k7",
+     "t": 45.72,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      123,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (123, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k8",
+     "t": 52.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      129,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (129, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n1",
+     "t": -6.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      71,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (71, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n2",
+     "t": -12.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      64,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (64, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n3",
+     "t": -19.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      58,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n4",
+     "t": -25.75,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      51,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (51, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n5",
+     "t": -32.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n6",
+     "t": -38.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      38,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (38, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n7",
+     "t": -45.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      32,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (32, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n8",
+     "t": -51.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      26,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (26, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    }
+   ]
+  },
+  {
+   "ex": "mockt_x44",
+   "room": 44,
+   "prof": "long",
+   "hf0": 0.1,
+   "axis": {
+    "room": 44,
+    "dir": "Hub",
+    "yaw": 90,
+    "ratio": 1.37,
+    "L": 96.4,
+    "W": 70.3,
+    "centre": [
+     77.5,
+     16.5
+    ],
+    "d": [
+     1,
+     6.123233995736766e-17
+    ],
+    "south": 52.25,
+    "north": -51.5,
+    "tp": 2,
+    "box": {
+     "x0": 24,
+     "y0": 0,
+     "x1": 138,
+     "y1": 42
+    },
+    "ox": 0,
+    "oy": 0
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k1",
+     "t": 6.53,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      84,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (84, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k2",
+     "t": 13.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      90,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (90, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k3",
+     "t": 19.59,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      97,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (97, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k4",
+     "t": 26.13,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      103,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (103, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k5",
+     "t": 32.66,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      110,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (110, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k6",
+     "t": 39.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      116,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (116, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k7",
+     "t": 45.72,
+     "hf": 0.09946757362568669,
+     "fy": 0.5502422970339412,
+     "fx": 0.5,
+     "near": true,
+     "far": false,
+     "du": 0.12294411468867139,
+     "distH": 18.548828829331715,
+     "predExact": 0.09946757362568669,
+     "predModel": 0.0994742641303019,
+     "tile": [
+      123,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (123, 16) · room 44 · CLAMP (near) · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0"
+    },
+    {
+     "step": "k8",
+     "t": 52.25,
+     "hf": 0.11809931129496298,
+     "fy": 0.7226437838858856,
+     "fx": 0.5,
+     "near": true,
+     "far": false,
+     "du": 3.3885691146886714,
+     "distH": 15.589167462290156,
+     "predExact": 0.11809931129496298,
+     "predModel": 0.11835982278976938,
+     "tile": [
+      129,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (129, 16) · room 44 · CLAMP (near) · room 44: Hub yaw 90 · camera space: long · props: 27 torches, "
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n1",
+     "t": -6.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      71,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (71, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n2",
+     "t": -12.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      64,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (64, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n3",
+     "t": -19.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      58,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n4",
+     "t": -25.75,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      51,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (51, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n5",
+     "t": -32.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n6",
+     "t": -38.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      38,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (38, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n7",
+     "t": -45.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      32,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (32, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n8",
+     "t": -51.5,
+     "hf": 0.08642813126081003,
+     "fy": 0.4295869243935273,
+     "fx": 0.5000000000000001,
+     "near": false,
+     "far": true,
+     "du": -3,
+     "distH": 21.379177398954337,
+     "predExact": 0.08642813126081002,
+     "predModel": 0.08630505579540902,
+     "tile": [
+      26,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 8.6 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (26, 16) · room 44 · CLAMP (far) · room 44: Hub yaw 90 · camera space: long · props: 27 torches, 0 p"
+    }
+   ]
+  },
+  {
+   "ex": "mockt_x44",
+   "room": 44,
+   "prof": "wide",
+   "hf0": 0.1,
+   "axis": {
+    "room": 44,
+    "dir": "Hub",
+    "yaw": 90,
+    "ratio": 1.37,
+    "L": 96.4,
+    "W": 70.3,
+    "centre": [
+     77.5,
+     16.5
+    ],
+    "d": [
+     1,
+     6.123233995736766e-17
+    ],
+    "south": 52.25,
+    "north": -51.5,
+    "tp": 2,
+    "box": {
+     "x0": 24,
+     "y0": 0,
+     "x1": 138,
+     "y1": 42
+    },
+    "ox": 0,
+    "oy": 0
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k1",
+     "t": 6.53,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      84,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (84, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k2",
+     "t": 13.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      90,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (90, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k3",
+     "t": 19.59,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      97,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (97, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "k4",
+     "t": 26.13,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      103,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (103, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k5",
+     "t": 32.66,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      110,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (110, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k6",
+     "t": 39.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      116,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (116, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k7",
+     "t": 45.72,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      123,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (123, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "k8",
+     "t": 52.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      129,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (129, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pi"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n1",
+     "t": -6.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      71,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (71, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n2",
+     "t": -12.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      64,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (64, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n3",
+     "t": -19.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      58,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (58, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n4",
+     "t": -25.75,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      51,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (51, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n5",
+     "t": -32.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n6",
+     "t": -38.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      38,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (38, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n7",
+     "t": -45.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      32,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (32, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    },
+    {
+     "step": "n8",
+     "t": -51.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      26,
+      16
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (26, 16) · room 44 · following · room 44: Hub yaw 90 · camera space: wide · props: 27 torches, 0 pil"
+    }
+   ]
+  },
+  {
+   "ex": "dac_stage",
+   "room": 20,
+   "prof": "off",
+   "hf0": 0.1,
+   "axis": {
+    "room": 20,
+    "dir": "Hub",
+    "yaw": 270,
+    "ratio": 0.97,
+    "L": 30.4,
+    "W": 31.5,
+    "centre": [
+     80.5,
+     42.5
+    ],
+    "d": [
+     -1,
+     -1.8369701987210297e-16
+    ],
+    "south": 10.5,
+    "north": -4.25,
+    "tp": 2,
+    "box": {
+     "x0": 0,
+     "y0": 24,
+     "x1": 109,
+     "y1": 77
+    },
+    "ox": 0,
+    "oy": 79
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      80,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (80, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "k1",
+     "t": 1.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      79,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (79, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "k2",
+     "t": 2.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "k3",
+     "t": 3.94,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      76,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (76, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "k4",
+     "t": 5.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      75,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (75, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "k5",
+     "t": 6.56,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      73,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (73, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "k6",
+     "t": 7.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      72,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (72, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "k7",
+     "t": 9.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      71,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (71, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "k8",
+     "t": 10.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      70,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (70, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      80,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (80, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "n1",
+     "t": -0.53,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      81,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (81, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "n2",
+     "t": -1.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      81,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (81, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "n3",
+     "t": -1.59,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      82,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (82, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "n4",
+     "t": -2.13,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      82,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (82, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "n5",
+     "t": -2.66,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      83,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (83, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "n6",
+     "t": -3.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      83,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (83, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "n7",
+     "t": -3.72,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      84,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (84, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    },
+    {
+     "step": "n8",
+     "t": -4.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      84,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (84, 121) · room 20 · following · room 20: Hub yaw 270 · props: 3 torches, 1 pillars · planes: wall "
+    }
+   ]
+  },
+  {
+   "ex": "dac_stage",
+   "room": 20,
+   "prof": "auto",
+   "hf0": 0.1,
+   "axis": {
+    "room": 20,
+    "dir": "Hub",
+    "yaw": 270,
+    "ratio": 0.97,
+    "L": 30.4,
+    "W": 31.5,
+    "centre": [
+     80.5,
+     42.5
+    ],
+    "d": [
+     -1,
+     -1.8369701987210297e-16
+    ],
+    "south": 10.5,
+    "north": -4.25,
+    "tp": 2,
+    "box": {
+     "x0": 0,
+     "y0": 24,
+     "x1": 109,
+     "y1": 77
+    },
+    "ox": 0,
+    "oy": 79
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      80,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (80, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k1",
+     "t": 1.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      79,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (79, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k2",
+     "t": 2.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k3",
+     "t": 3.94,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      76,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (76, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k4",
+     "t": 5.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      75,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (75, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k5",
+     "t": 6.56,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      73,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (73, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k6",
+     "t": 7.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      72,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (72, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k7",
+     "t": 9.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      71,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (71, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k8",
+     "t": 10.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      70,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (70, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      80,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (80, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n1",
+     "t": -0.53,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      81,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (81, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n2",
+     "t": -1.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      81,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (81, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n3",
+     "t": -1.59,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      82,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (82, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n4",
+     "t": -2.13,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      82,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (82, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n5",
+     "t": -2.66,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      83,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (83, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n6",
+     "t": -3.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      83,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (83, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n7",
+     "t": -3.72,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      84,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (84, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n8",
+     "t": -4.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      84,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (84, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    }
+   ]
+  },
+  {
+   "ex": "dac_stage",
+   "room": 20,
+   "prof": "wide",
+   "hf0": 0.1,
+   "axis": {
+    "room": 20,
+    "dir": "Hub",
+    "yaw": 270,
+    "ratio": 0.97,
+    "L": 30.4,
+    "W": 31.5,
+    "centre": [
+     80.5,
+     42.5
+    ],
+    "d": [
+     -1,
+     -1.8369701987210297e-16
+    ],
+    "south": 10.5,
+    "north": -4.25,
+    "tp": 2,
+    "box": {
+     "x0": 0,
+     "y0": 24,
+     "x1": 109,
+     "y1": 77
+    },
+    "ox": 0,
+    "oy": 79
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      80,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (80, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k1",
+     "t": 1.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      79,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (79, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k2",
+     "t": 2.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      77,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (77, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k3",
+     "t": 3.94,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      76,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (76, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k4",
+     "t": 5.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      75,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (75, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k5",
+     "t": 6.56,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      73,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (73, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k6",
+     "t": 7.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      72,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (72, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k7",
+     "t": 9.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      71,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (71, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "k8",
+     "t": 10.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      70,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (70, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      80,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (80, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n1",
+     "t": -0.53,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      81,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (81, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n2",
+     "t": -1.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      81,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (81, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n3",
+     "t": -1.59,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      82,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (82, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n4",
+     "t": -2.13,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      82,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (82, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n5",
+     "t": -2.66,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      83,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (83, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n6",
+     "t": -3.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      83,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (83, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n7",
+     "t": -3.72,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      84,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (84, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    },
+    {
+     "step": "n8",
+     "t": -4.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      84,
+      42
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (84, 121) · room 20 · following · room 20: Hub yaw 270 · camera space: wide · props: 3 torches, 1 pi"
+    }
+   ]
+  },
+  {
+   "ex": "dac_stage",
+   "room": 5,
+   "prof": "off",
+   "hf0": 0.1,
+   "axis": {
+    "room": 5,
+    "dir": "X",
+    "yaw": 90,
+    "ratio": 0.63,
+    "L": 14.3,
+    "W": 22.8,
+    "centre": [
+     45.5,
+     53.5
+    ],
+    "d": [
+     1,
+     6.123233995736766e-17
+    ],
+    "south": 11.25,
+    "north": -11.5,
+    "tp": 2,
+    "box": {
+     "x0": 0,
+     "y0": 24,
+     "x1": 109,
+     "y1": 77
+    },
+    "ox": 0,
+    "oy": 79
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "k1",
+     "t": 1.41,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      46,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (46, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "k2",
+     "t": 2.81,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      48,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (48, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "k3",
+     "t": 4.22,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      49,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (49, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "k4",
+     "t": 5.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      51,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (51, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "k5",
+     "t": 7.03,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      52,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (52, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "k6",
+     "t": 8.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      53,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (53, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "k7",
+     "t": 9.84,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      55,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (55, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "k8",
+     "t": 11.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      56,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (56, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "n1",
+     "t": -1.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      44,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (44, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "n2",
+     "t": -2.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      42,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (42, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "n3",
+     "t": -4.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      41,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (41, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "n4",
+     "t": -5.75,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      39,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (39, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "n5",
+     "t": -7.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      38,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (38, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "n6",
+     "t": -8.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (36, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "n7",
+     "t": -10.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      35,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (35, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    },
+    {
+     "step": "n8",
+     "t": -11.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      34,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (34, 132) · room 5 · following · room 5: X yaw 90 · props: 8 torches, 0 pillars, goal · planes: wall"
+    }
+   ]
+  },
+  {
+   "ex": "dac_stage",
+   "room": 5,
+   "prof": "auto",
+   "hf0": 0.1,
+   "axis": {
+    "room": 5,
+    "dir": "X",
+    "yaw": 90,
+    "ratio": 0.63,
+    "L": 14.3,
+    "W": 22.8,
+    "centre": [
+     45.5,
+     53.5
+    ],
+    "d": [
+     1,
+     6.123233995736766e-17
+    ],
+    "south": 11.25,
+    "north": -11.5,
+    "tp": 2,
+    "box": {
+     "x0": 0,
+     "y0": 24,
+     "x1": 109,
+     "y1": 77
+    },
+    "ox": 0,
+    "oy": 79
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k1",
+     "t": 1.41,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      46,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (46, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k2",
+     "t": 2.81,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      48,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (48, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k3",
+     "t": 4.22,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      49,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (49, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k4",
+     "t": 5.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      51,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (51, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k5",
+     "t": 7.03,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      52,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (52, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k6",
+     "t": 8.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      53,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (53, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k7",
+     "t": 9.84,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      55,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (55, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k8",
+     "t": 11.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      56,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (56, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n1",
+     "t": -1.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      44,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (44, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n2",
+     "t": -2.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      42,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (42, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n3",
+     "t": -4.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      41,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (41, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n4",
+     "t": -5.75,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      39,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (39, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n5",
+     "t": -7.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      38,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (38, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n6",
+     "t": -8.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (36, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n7",
+     "t": -10.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      35,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (35, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n8",
+     "t": -11.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      34,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (34, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    }
+   ]
+  },
+  {
+   "ex": "dac_stage",
+   "room": 5,
+   "prof": "long",
+   "hf0": 0.1,
+   "axis": {
+    "room": 5,
+    "dir": "X",
+    "yaw": 90,
+    "ratio": 0.63,
+    "L": 14.3,
+    "W": 22.8,
+    "centre": [
+     45.5,
+     53.5
+    ],
+    "d": [
+     1,
+     6.123233995736766e-17
+    ],
+    "south": 11.25,
+    "north": -11.5,
+    "tp": 2,
+    "box": {
+     "x0": 0,
+     "y0": 24,
+     "x1": 109,
+     "y1": 77
+    },
+    "ox": 0,
+    "oy": 79
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k1",
+     "t": 1.41,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      46,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (46, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k2",
+     "t": 2.81,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      48,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (48, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k3",
+     "t": 4.22,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      49,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (49, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k4",
+     "t": 5.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      51,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (51, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k5",
+     "t": 7.03,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      52,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (52, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k6",
+     "t": 8.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      53,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (53, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k7",
+     "t": 9.84,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      55,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (55, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k8",
+     "t": 11.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      56,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (56, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n1",
+     "t": -1.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      44,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (44, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n2",
+     "t": -2.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      42,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (42, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n3",
+     "t": -4.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      41,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (41, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n4",
+     "t": -5.75,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      39,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (39, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n5",
+     "t": -7.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      38,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (38, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n6",
+     "t": -8.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (36, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n7",
+     "t": -10.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      35,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (35, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n8",
+     "t": -11.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      34,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (34, 132) · room 5 · following · room 5: X yaw 90 · camera space: long · props: 8 torches, 0 pillars"
+    }
+   ]
+  },
+  {
+   "ex": "dac_stage",
+   "room": 5,
+   "prof": "wide",
+   "hf0": 0.1,
+   "axis": {
+    "room": 5,
+    "dir": "X",
+    "yaw": 90,
+    "ratio": 0.63,
+    "L": 14.3,
+    "W": 22.8,
+    "centre": [
+     45.5,
+     53.5
+    ],
+    "d": [
+     1,
+     6.123233995736766e-17
+    ],
+    "south": 11.25,
+    "north": -11.5,
+    "tp": 2,
+    "box": {
+     "x0": 0,
+     "y0": 24,
+     "x1": 109,
+     "y1": 77
+    },
+    "ox": 0,
+    "oy": 79
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k1",
+     "t": 1.41,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      46,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (46, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k2",
+     "t": 2.81,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      48,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (48, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k3",
+     "t": 4.22,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      49,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (49, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k4",
+     "t": 5.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      51,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (51, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k5",
+     "t": 7.03,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      52,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (52, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k6",
+     "t": 8.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      53,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (53, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k7",
+     "t": 9.84,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      55,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (55, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "k8",
+     "t": 11.25,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      56,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (56, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      45,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (45, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n1",
+     "t": -1.44,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      44,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (44, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n2",
+     "t": -2.88,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      42,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (42, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n3",
+     "t": -4.31,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      41,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (41, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n4",
+     "t": -5.75,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      39,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (39, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n5",
+     "t": -7.19,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      38,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (38, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n6",
+     "t": -8.63,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      36,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (36, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n7",
+     "t": -10.06,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      35,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (35, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    },
+    {
+     "step": "n8",
+     "t": -11.5,
+     "hf": 0.09888027754255854,
+     "fy": 0.544807982760583,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 18.660254037844386,
+     "predExact": 0.09888027754255854,
+     "predModel": 0.09888027754255854,
+     "tile": [
+      34,
+      53
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (34, 132) · room 5 · following · room 5: X yaw 90 · camera space: wide · props: 8 torches, 0 pillars"
+    }
+   ]
+  },
+  {
+   "ex": "mockt_z14",
+   "room": 14,
+   "prof": "auto",
+   "hf0": 0.14,
+   "axis": {
+    "room": 14,
+    "dir": "Z",
+    "yaw": 180,
+    "ratio": 2.09,
+    "L": 39.4,
+    "W": 18.8,
+    "centre": [
+     36.5,
+     45.5
+    ],
+    "d": [
+     1.2246467991473532e-16,
+     -1
+    ],
+    "south": 19.5,
+    "north": -17.25,
+    "tp": 2,
+    "box": {
+     "x0": 24,
+     "y0": 24,
+     "x1": 48,
+     "y1": 67
+    },
+    "ox": 22,
+    "oy": 157
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      45
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 202) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "k1",
+     "t": 2.44,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      43
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 200) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "k2",
+     "t": 4.88,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      40
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 197) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "k3",
+     "t": 7.31,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      38
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 195) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "k4",
+     "t": 9.75,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      35
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 192) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "k5",
+     "t": 12.19,
+     "hf": 0.14469740250517704,
+     "fy": 0.6090237230739993,
+     "fx": 0.5,
+     "near": true,
+     "far": false,
+     "du": 0.7105850819204811,
+     "distH": 12.684744091077953,
+     "predExact": 0.14469740250517707,
+     "predModel": 0.14481205101982428,
+     "tile": [
+      36,
+      33
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 14.5 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 190) · room 14 · CLAMP (near) · room 14: Z yaw 180 · camera space: narrow · props: 15 torches,"
+    },
+    {
+     "step": "k6",
+     "t": 14.63,
+     "hf": 0.158251867050313,
+     "fy": 0.7007466288156264,
+     "fx": 0.5,
+     "near": true,
+     "far": false,
+     "du": 1.9293350819204793,
+     "distH": 11.580181475627036,
+     "predExact": 0.15825186705031297,
+     "predModel": 0.15862478600674357,
+     "tile": [
+      36,
+      30
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 15.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 187) · room 14 · CLAMP (near) · room 14: Z yaw 180 · camera space: narrow · props: 15 torches,"
+    },
+    {
+     "step": "k7",
+     "t": 17.06,
+     "hf": 0.17460821344990804,
+     "fy": 0.8114298368532192,
+     "fx": 0.4999999999999996,
+     "near": true,
+     "far": false,
+     "du": 3.1480850819204793,
+     "distH": 10.47561886017612,
+     "predExact": 0.17460821344990804,
+     "predModel": 0.17535038578710874,
+     "tile": [
+      36,
+      28
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 17.5 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 185) · room 14 · CLAMP (near) · room 14: Z yaw 180 · camera space: narrow · props: 15 torches,"
+    },
+    {
+     "step": "k8",
+     "t": 19.5,
+     "hf": 0.19473536341422007,
+     "fy": 0.9476300292604263,
+     "fx": 0.4999999999999996,
+     "near": true,
+     "far": false,
+     "du": 4.366835081920479,
+     "distH": 9.371056244725201,
+     "predExact": 0.19473536341422001,
+     "predModel": 0.1960188649518089,
+     "tile": [
+      36,
+      26
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 19.5 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 183) · room 14 · CLAMP (near) · room 14: Z yaw 180 · camera space: narrow · props: 15 torches,"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      45
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 202) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "n1",
+     "t": -2.16,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      47
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 204) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "n2",
+     "t": -4.31,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      49
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 206) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "n3",
+     "t": -6.47,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      51
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 208) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "n4",
+     "t": -8.63,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      54
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 211) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "n5",
+     "t": -10.78,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      56
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 213) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "n6",
+     "t": -12.94,
+     "hf": 0.13781512977643845,
+     "fy": 0.5624514626439263,
+     "fx": 0.5,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 13.32875288417456,
+     "predExact": 0.13781512977643842,
+     "predModel": 0.13781512977643842,
+     "tile": [
+      36,
+      58
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 215) · room 14 · following · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, 0 "
+    },
+    {
+     "step": "n7",
+     "t": -15.09,
+     "hf": 0.13083643869238012,
+     "fy": 0.5152267403119242,
+     "fx": 0.5,
+     "near": false,
+     "far": true,
+     "du": -0.7968749999999964,
+     "distH": 14.050966901969389,
+     "predExact": 0.13083643869238012,
+     "predModel": 0.13073148782616048,
+     "tile": [
+      36,
+      60
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.1 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 217) · room 14 · CLAMP (far) · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, "
+    },
+    {
+     "step": "n8",
+     "t": -17.25,
+     "hf": 0.12244752001622448,
+     "fy": 0.4584590240775473,
+     "fx": 0.5,
+     "near": false,
+     "far": true,
+     "du": -1.8749999999999964,
+     "distH": 15.028079984868276,
+     "predExact": 0.12244752001622447,
+     "predModel": 0.1222314367730387,
+     "tile": [
+      36,
+      62
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 12.2 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (58, 219) · room 14 · CLAMP (far) · room 14: Z yaw 180 · camera space: narrow · props: 15 torches, "
+    }
+   ]
+  },
+  {
+   "ex": "mockt_z14",
+   "room": 14,
+   "prof": "auto",
+   "hf0": 0.12,
+   "axis": {
+    "room": 14,
+    "dir": "Z",
+    "yaw": 180,
+    "ratio": 2.09,
+    "L": 39.4,
+    "W": 18.8,
+    "centre": [
+     36.5,
+     45.5
+    ],
+    "d": [
+     1.2246467991473532e-16,
+     -1
+    ],
+    "south": 19.5,
+    "north": -17.25,
+    "tp": 2,
+    "box": {
+     "x0": 24,
+     "y0": 24,
+     "x1": 48,
+     "y1": 67
+    },
+    "ox": 22,
+    "oy": 157
+   },
+   "rows": [
+    {
+     "step": "k0",
+     "t": 0,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      45
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 202) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "k1",
+     "t": 2.44,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      43
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 200) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "k2",
+     "t": 4.88,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      40
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 197) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "k3",
+     "t": 7.31,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      38
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 195) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "k4",
+     "t": 9.75,
+     "hf": 0.12108079255033563,
+     "fy": 0.5746359608074899,
+     "fx": 0.47937020192145097,
+     "near": true,
+     "far": false,
+     "du": 0.3863075955738964,
+     "distH": 15.20009811614363,
+     "predExact": 0.12108079255033563,
+     "predModel": 0.1211181827656443,
+     "tile": [
+      36,
+      35
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 12.1 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 192) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "k5",
+     "t": 12.19,
+     "hf": 0.1304288577837565,
+     "fy": 0.6475777150306521,
+     "fx": 0.47777747450260455,
+     "near": true,
+     "far": false,
+     "du": 1.6050575955738964,
+     "distH": 14.095535500692714,
+     "predExact": 0.13042885778375649,
+     "predModel": 0.13060931680079377,
+     "tile": [
+      36,
+      33
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.0 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 190) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "k6",
+     "t": 14.63,
+     "hf": 0.14134112583772487,
+     "fy": 0.7327247432696227,
+     "fx": 0.47591823752710505,
+     "near": true,
+     "far": false,
+     "du": 2.8238075955738946,
+     "distH": 12.990972885241796,
+     "predExact": 0.14134112583772487,
+     "predModel": 0.1417144256977289,
+     "tile": [
+      36,
+      30
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 14.1 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 187) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "k7",
+     "t": 17.06,
+     "hf": 0.1542460477040364,
+     "fy": 0.8334201936689503,
+     "fx": 0.4737194913286873,
+     "near": true,
+     "far": false,
+     "du": 4.042557595573895,
+     "distH": 11.88641026979088,
+     "predExact": 0.1542460477040364,
+     "predModel": 0.15488345260685663,
+     "tile": [
+      36,
+      28
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 15.4 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 185) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "k8",
+     "t": 19.5,
+     "hf": 0.16974427275474718,
+     "fy": 0.9543508562516837,
+     "fx": 0.47107889700618855,
+     "near": true,
+     "far": false,
+     "du": 5.261307595573895,
+     "distH": 10.781847654339963,
+     "predExact": 0.16974427275474718,
+     "predModel": 0.17075072109238698,
+     "tile": [
+      36,
+      26
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 17.0 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 183) · room 14 · CLAMP (narrow window + near) · room 14: Z yaw 180 · camera space: narrow · pr"
+    },
+    {
+     "step": "n0",
+     "t": 0,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      45
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 202) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "n1",
+     "t": -2.16,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      47
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 204) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "n2",
+     "t": -4.31,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      49
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 206) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "n3",
+     "t": -6.47,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      51
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 208) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "n4",
+     "t": -8.63,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      54
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 211) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "n5",
+     "t": -10.78,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      56
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 213) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "n6",
+     "t": -12.94,
+     "hf": 0.11839120247472135,
+     "fy": 0.5536494343597363,
+     "fx": 0.47982845544792113,
+     "near": false,
+     "far": false,
+     "du": 0,
+     "distH": 15.550211698203658,
+     "predExact": 0.11839120247472136,
+     "predModel": 0.11839120247472136,
+     "tile": [
+      36,
+      58
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.8 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 215) · room 14 · CLAMP (narrow window) · room 14: Z yaw 180 · camera space: narrow · props: 15"
+    },
+    {
+     "step": "n7",
+     "t": -15.09,
+     "hf": 0.11320404150633977,
+     "fy": 0.5131746825234988,
+     "fx": 0.4807122461890013,
+     "near": false,
+     "far": true,
+     "du": -0.7968749999999964,
+     "distH": 16.272425715998484,
+     "predExact": 0.11320404150633978,
+     "predModel": 0.1131366824969921,
+     "tile": [
+      36,
+      60
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 11.3 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 217) · room 14 · CLAMP (narrow window + far) · room 14: Z yaw 180 · camera space: narrow · pro"
+    },
+    {
+     "step": "n8",
+     "t": -17.25,
+     "hf": 0.10686911719809371,
+     "fy": 0.46374408053514227,
+     "fx": 0.4817915933469552,
+     "near": false,
+     "far": true,
+     "du": -1.8749999999999964,
+     "distH": 17.249538798897373,
+     "predExact": 0.10686911719809372,
+     "predModel": 0.10672797013010522,
+     "tile": [
+      36,
+      62
+     ],
+     "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 10.7 % of the panel · near/hero 1.41 · far/hero 0.61 · cell (58, 219) · room 14 · CLAMP (narrow window + far) · room 14: Z yaw 180 · camera space: narrow · pro"
+    }
+   ]
+  }
+ ],
+ "sweep": [
+  {
+   "mN": 0,
+   "hf": 0.14389168007514327,
+   "fy": 0.9613033660497787
+  },
+  {
+   "mN": -0.5,
+   "hf": 0.14910178774206798,
+   "fy": 1.0095130566530182
+  },
+  {
+   "mN": -1,
+   "hf": 0.15470337095155492,
+   "fy": 1.0613451128563918
+  },
+  {
+   "mN": -2,
+   "hf": 0.16727178964724113,
+   "fy": 1.1776420524642923
+  },
+  {
+   "mN": -3,
+   "hf": 0.18206295716020215,
+   "fy": 1.3145063276475797
+  },
+  {
+   "mN": -4,
+   "hf": 0.1997237173247961,
+   "fy": 1.477923254471982
+  },
+  {
+   "mN": -6,
+   "hf": 0.24779838180987063,
+   "fy": 1.922763332421466
+  }
+ ]
+}
