@@ -67,3 +67,35 @@ Objetivo: obtener los parámetros con números reales y comprobar que nuestra es
 - El pitch u otro parámetro exige `src/`.
 - Ninguna combinación baja el error de la de partida (pitch 25, K 1).
 - El mismo fallo se repite dos veces.
+
+## Enmienda 1 ([R], 2026-11-18): secuencia de los pilares búho
+[U] adjunta dos cuadros más de la toma Lord Fenton (30:55 y 30:56, pasillo de pilares oscuros hacia los pilares búho), que se suman a 0202. Son de terceros: van solo a `out/`, nunca al repo.
+
+**Medida de [R], a mano, como punto de partida (±3 px por borde):**
+- **Héroe:** ancho ≈ 0,030 del ancho de cuadro en los tres cuadros y también en la sala de la escalera. La cámara mantiene la escala del héroe.
+- **Fuste del pilar búho**, ancho a media altura del panel luminoso:
+
+| Cuadro | Ancho del fuste (del cuadro) | Relación con el héroe | s relativa a 0202 |
+|---|---|---|---|
+| 30:55 | 0,039 | 1,30 | 0,57 |
+| 30:56 | 0,044 | 1,47 | 0,65 |
+| 0202 | 0,068 | 2,27 | 1 |
+
+  Supuesto: en 0202 el héroe está entre los búhos, a la misma profundidad, así que s = 1 ahí.
+- **Tapa de los pilares oscuros**, promedio de izquierda y derecha, relación con el héroe:
+
+| Cuadro | Par cercano | Par medio | Par lejano |
+|---|---|---|---|
+| 30:55 | 4,2 (al sur del héroe) | 2,75 (≈ profundidad del héroe) | 2,2 |
+| 30:56 | — | 3,6 | 2,4 |
+
+**Lectura provisional:**
+- Por espaciado de pilares: al norte ×0,80 y al sur ×1,53.
+- Es compatible con una perspectiva normal con D ≈ 4 espaciados. Ni confirma ni descarta el piso de ~50 %, porque no hay nada medido más allá de s ≈ 0,57.
+- El ×1,53 del sur está inflado: las tapas están altas y quedan más cerca de la cámara. Hay que medir a nivel del suelo (losas del pasillo, ancho de la escalera sur).
+- En un segundo de video, el ruido (±0,08) es del orden del cambio. Hacen falta cuadros más separados.
+
+**Qué agrega esta enmienda al §2 y a la hoja 2:**
+1. Mide la secuencia 30:55, 30:56 y 0202 con tu propio marcado. Usa el grosor del fuste búho a media altura y las tapas, y añade a la tabla la profundidad de cada pilar en espaciados.
+2. **Prueba del sur sin altura:** el ancho de losas o de la escalera a nivel del suelo, al sur del héroe, contra el mismo ancho a la altura del héroe. ¿Crece (perspectiva normal) o se queda en ~1 (telescópica)?
+3. En la hoja 2, pinta s(d) de estas referencias junto a la curva de la perspectiva normal que mejor ajuste. El piso de ~50 % se acepta solo si los puntos lejanos se separan de esa curva.
