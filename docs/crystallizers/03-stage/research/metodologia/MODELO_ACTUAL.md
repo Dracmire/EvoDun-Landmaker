@@ -1,6 +1,6 @@
 # MODELO ACTUAL — nuestra teoría de la vista 2D-HD (modo 3)
 
-**v2.2 · 2026-11-18** · cubre el Registro A001–A485 (los dos chats). **DQ3 cerrado** (A472); segundo juego: **Octopath Traveler 2** (A473), referencias en `refs/oct2/`, medidas en `research/octopath2/medidas_paso1.md`.
+**v2.3 · 2026-11-18** · cubre el Registro A001–A492 (los dos chats). **DQ3 cerrado** (A472); segundo juego: **Octopath Traveler 2** (A473), referencias en `refs/oct2/`, medidas en `research/octopath2/medidas_paso1.md`.
 **Qué es:** lo mejor que hoy sabemos de cómo se ve y cómo se construye una vista 2D-HD. Es el **resultado incompleto de la metodología**: cada cierre le añade cosas, y **terminamos cuando este modelo genere 2D-HD**. No lleva justificaciones; entre paréntesis va solo el ID del Registro que le da origen, para rastrearlo.
 **Tres partes:**
 1. **Modelo acumulado:** el conocimiento.
@@ -49,7 +49,11 @@
   - Octopath Traveler 2 (3 capturas fiables): pitch 14–25, héroe 0,11–0,18 del alto, pies fy 0,61–0,71; el pitch NO es más alto que en DQ3; lo empinado viene de la deformación (09 da 5–16° según qué se mida) (A478, A479). [V medido] / deformación [H]
 - **Tres espacios** (modelo de [U], A483): caminable ⊂ escenario ⊂ cámara. La cámara (rotación fija) se mueve dentro de su espacio y solo transmite lo que pasa en el escenario. En el **cuadro central** sigue al héroe 1:1 y su tamaño no cambia; cuando la cámara llega al borde de su espacio se detiene, el héroe la «alcanza» y crece (al sur) o encoge (al norte), con tope. DQ3 usa espacios de cámara amplios (el héroe no crece); Octopath los usa finitos y lo aprovecha (A480). [H, se prueba en el visor]
   - Si la cámara detenida es perspectiva normal, el crecimiento es hiperbólico (la fórmula de escala de abajo con g < 0); una curva distinta indicaría un índice ajustado (A484). [H]
-  - **Perfiles de cámara por rol de sala** (teoría de [U], A482 y v2.2): **narrow** (sala Z: escenario estrecho en X, espacio de cámara corto en Z), **long** (sala X: largo en X, estrecho en Z), **wide** (Hub: amplio en todas direcciones, como DQ3). El eje lateral queda fijo en el visor (en Unity puede ser otra cosa). [H]
+  - **Perfiles de cámara** (teoría de [U], A482, A490): **narrow** (espacio de cámara corto en Z: el héroe crece al sur) y **wide** (amplio en todas direcciones, como DQ3: el héroe no cambia de tamaño); puede haber uno o dos más. **long no existe** como perfil de bloqueo suave: moverse de lado no cambia el tamaño del héroe, solo el eje Z lo cambia (A490). Asignación en el visor ([R], A490): salas Z y X → narrow (lo que cuenta es el eje Z), Hub → wide. El eje lateral queda fijo en el visor (en Unity puede ser otra cosa). [H]
+  - **Por qué hay perfiles y no una cámara libre** ([U], A491): una cámara libre marea y hace que el jugador desconozca el escenario; el trabajo de este tipo de juego es generar familiaridad lo antes posible. [D]
+  - **Sub-cámara «deep» del perfil wide** ([U], A491): para los objetos del fondo (casas, puntos de referencia a los que se llega en exteriores). [H, sin probar]
+  - **El bloqueo suave va con una banda de primer plano no caminable** (A488): entre el borde sur de lo caminable y el borde del escenario; la cámara se detiene antes, el héroe crece hasta ~0,18 y sus pies quedan a fy ~0,75 sobre la banda (barandas bajas, objetos desenfocados de primer plano en Octopath). Sin la banda el héroe se sale por abajo (visor: 0,144 con fy 0,96). [V medido el problema, H la solución]
+  - Que el visor siga la curva hiperbólica exacta solo verifica el instrumento; si Octopath usa un índice ajustado sigue sin medirse (A487). [V]
 - **Casas del fondo > 50 % más chicas** aunque sean visitables (A481): perspectiva o fachada como escenografía; se separa con la fórmula de escala. [H]
 
 ## 3. Escala y alturas
@@ -223,7 +227,7 @@
 | B7 | Modelo de escena | verde / azul / rojo; estructural = geometría; billboards + rojo ≤ 30 %; cintas y calcomanías no cuentan |
 | B8 | Orientación | `orient` con POI primero; eje X / Z / Hub; hotspot transitable, central salvo POI, sobre el eje; el eje cruza el cuadro en x ∈ [0,40; 0,65] |
 | B9 | Bandas | B1–B5 desde abajo; el héroe en B2 cuando hay B1 delante; ver adelante 25–40 %; horizonte local |
-| B10 | Corte del lado de cámara | `planesTest.noFront` (A7): ningún muro en y > 0,85 |
+| B10 | Corte del lado de cámara | `planesTest.noFront` (A7): ningún muro alto en y > 0,85; una baranda baja (≤ 1,4 H) en la banda de primer plano sí (A476, A488) |
 | B11 | Fondo | nunca vacío (≤ 2 %); se cierra con geometría (vecina, muro, masa o fondo construido); nunca bajando muros ni con `stageBorder`; en exteriores el fondo se construye más allá del borde del mapa (A471) |
 | B12 | Alturas | por pieza, en el dato, según la tabla de §3 |
 | B13 | Profundidad útil | por perfil de cámara, no un número fijo: ~17–21 H en corredor (DQ3, puente de Octopath); en interior o plaza la profundidad corta medida (3,5–5 H) es en parte efecto del bloqueo suave (A479, A480) |
@@ -322,7 +326,10 @@ A3b, A8 (paso por detrás), A416 (encuadre hacia el avance), el modelo de cámar
 3. **Fondo construido fuera del mapa** en exteriores.
 4. **Prueba de Generación en ciego:** piso 3 de la Torre del Soñador (A466) [X] (A472: DQ3 cerrado; la prueba en ciego se hará en otro juego).
 5. **Otro juego 2D-HD u otra perspectiva** (siguiente frente, A472): Octopath Traveler 2 en curso (A473–A485).
-8. **Prueba del bloqueo suave en el visor** (A483, A484): espacio de cámara con margen por perfil (narrow / long / wide), caminata al sur y al norte, curva del alto del héroe contra la hiperbólica y contra Octopath; brief `research/octopath2/stage_softlock_go.md`.
+8. **Prueba del bloqueo suave en el visor** (A483, A484): hecha (A487, PR #99); el visor la reproduce.
+9. **Banda de primer plano con el perfil narrow** (A488): brief `research/octopath2/stage_softlock_band_go.md`.
+10. **Espacio de cámara por sala** en ventanas de varias salas (A489): diseño pendiente.
+11. **Sub-cámara deep** del perfil wide (A491): sin probar.
 6. **Diferencia del alto del héroe** entre 0202 y 0137 (A366).
 7. **Ancla v1 sin aprobar.**
 
@@ -333,3 +340,4 @@ A3b, A8 (paso por detrás), A416 (encuadre hacia el avance), el modelo de cámar
 | v2 | 2026-11-18 | Tres partes (modelo acumulado, base principal, features por tipo de escena); el modelo acumulado cubre el Registro completo A001–A466; el modelo pasa a ser el resultado incompleto de la metodología y su criterio de fin es generar 2D-HD | A467–A469 |
 | v2.1 | 2026-11-18 | Ajustes del control de 3 salas (v329): C3 ≈ 6 H; A6 por colocación, sin mover `heroScreen`; antorchas fuera de la Base y del tercio central; fondo construido fuera del mapa obligatorio en exteriores; la forma de sala (B18) entra en la Base. DQ3 cerrado: se retira la prueba del piso 3 de la Torre del Soñador | A470–A472 |
 | v2.2 | 2026-11-18 | Octopath Traveler 2: medidas de cámara (pitch 14–25, héroe 0,11–0,18, pies 0,61–0,71); los tres espacios y el bloqueo suave de [U] pasan de nunca probados a hipótesis con prueba; perfiles narrow / long / wide; B2, B4 y B13 por perfil | A473–A485 |
+| v2.3 | 2026-11-18 | Prueba del bloqueo suave en el visor (PR #99); long eliminado (solo Z cambia el tamaño); perfiles por familiaridad; sub-cámara deep (hipótesis); banda de primer plano no caminable con baranda baja (B10 precisado) | A487–A492 |
