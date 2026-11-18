@@ -1,271 +1,316 @@
-# MODELO ACTUAL — vista 2D-HD del modo 3 (Stage)
+# MODELO ACTUAL — nuestra teoría de la vista 2D-HD (modo 3)
 
-**Versión:** v1 · 2026-11-18 · [R] con decisiones de [U] · cubre el Registro hasta A464.
-**Qué es:** la ÚNICA fuente de verdad de cómo se construye hoy una vista 2D-HD en el visor. Todo pedido a CC la cita; donde un documento anterior diga otra cosa, vale este. Reemplaza como referencia a `METODOLOGIA_GENERACION_DQ3_v318`, `v325` y al §9 del informe integrado v319 (que siguen como historia).
-**Cómo se actualiza:** cada cambio sube la versión, se anota en §17 con el ID del Registro que lo causa, y nunca se borra una regla: se marca SUPERADA con el ID que la reemplaza. Cada línea lleva su fuente (ID del Registro, nota o documento) y su estado.
+**v2 · 2026-11-18** · cubre el Registro A001–A469 (los dos chats).
+**Qué es:** lo mejor que hoy sabemos de cómo se ve y cómo se construye una vista 2D-HD. Es el **resultado incompleto de la metodología**: cada cierre le añade cosas, y **terminamos cuando este modelo genere 2D-HD**. No lleva justificaciones; entre paréntesis va solo el ID del Registro que le da origen, para rastrearlo.
+**Tres partes:**
+1. **Modelo acumulado:** el conocimiento.
+2. **Base principal:** lo que usan todas las escenas.
+3. **Features:** grupos por tipo de escena; no todos se mezclan.
 
-Etiquetas: **[U]** usuario · **[R]** revisor (Claude) · **CC** Claude Code · **H** = altura del héroe. Estados: **DECIDIDO** ([U]) · **VALIDADO** (medido) · **HIPÓTESIS** · **NUNCA PROBADO** · **DESCARTADO**. Coordenadas de pantalla en fracción del cuadro: x de 0 (izquierda) a 1; y de 0 (arriba) a 1.
+**Marcas:** [V] validado o medido · [D] decidido por [U] · [H] hipótesis · [NP] nunca probado · [X] descartado. H = altura del héroe. Pantalla en fracción: x de 0 a 1 (izquierda a derecha), y de 0 a 1 (arriba a abajo).
+**Cómo se actualiza:** sube la versión y se anota en el historial (§17) con el ID. Nunca se borra una línea: se marca [X] con el ID que la reemplaza.
 
 ---
 
-## 1. Norte y alcance
-- **Meta:** una maqueta 2D-HD **general** en el modo 3 del visor. Un mapa (DAC, mapa viejo o mapa nuevo sin assets) se convierte por reglas en una escena 3D simple: cubos, volúmenes, billboards y calcomanías. Vista con la cámara, **se parece en composición** a un juego 2D-HD. DQ3 es la primera prueba; Octopath Traveler, Triangle Strategy y Wandering Sword vienen después (BRÚJULA; A008). DECIDIDO.
-- **«Parecerse» es composición, no look:** capas, cierre del fondo, ancho de ruta, escala del héroe y planos. Luz, desenfoque, texturas y color se juzgan en Unity (L01, T03, T15). Con cubos apilados basta. DECIDIDO.
-- **Dos pruebas** (Ancla v1, propuesta sin aprobar):
-  - **Capacidad:** reproducir a mano una escena de referencia. Hecha: Forest, trono y desierto ≈ 9,5 (A384).
-  - **Generación:** las reglas solas, sobre un mapa no usado y en ciego. **Pendiente: es lo que falta.**
-- **Solo salas generadas (DAC o aleatorias) o mapas viejos.** Nunca una sala copiada ni ajustada a una toma de DQ3 (A459). DECIDIDO.
+# PARTE I · MODELO ACUMULADO
 
-## 2. Roles y método
-- **[U]** decide y juzga mirando; es el único con la perspectiva completa (A398).
-- **[R]** diseña, mide simple contra las tomas, escribe los pedidos y no hace maquetas (A419).
-- **CC** construye todo (trucos incluidos), renderiza y mide; no juzga composición (A407).
-- **Sin agentes ni jueces automáticos**, salvo permiso explícito de [U] (A417, A419). DECIDIDO.
-- **Pausa tras cada etapa;** respuestas concisas; el Registro se nombra por ID (A398).
-- **Lo que rinde** (A456):
-  - mediciones simples contra las tomas;
-  - el juicio directo de [U];
+## 1. Qué es una vista 2D-HD
+- Es **composición**, no look: capas del encuadre, cierre del fondo, ancho de ruta, escala del héroe y planos. Luz, desenfoque, texturas y color van en Unity (A003, T15). [D]
+- Es **un 3D con altura real al que se le aplican técnicas de 16 bits:** planos, primer plano obstructivo, fondos construidos, horizonte local. Un 3D «perfecto» solo no basta (T26, A296, L04). [D]
+- **«Esa profundidad es lo que nos hace 2D-HD y no 3D incompleto»:** planos que se tapan (A175). [D]
+- **25–40 % de la vista se dedica a ver más adelante;** el horizonte es **local**, dentro de la misma sala (A247). [D]
+- **El 2D-HD busca más deformación, no menos** (A427). [D]
+- **Con cubos apilados basta;** el visor es la casa y 1 de cada ~100 modelos va a Unity (BRÚJULA). [D]
+- **El objetivo es general:** DQ3 es la primera prueba; Octopath, Triangle Strategy y Wandering Sword vienen después. No se copia DQ3 (A008). [D]
+- **Cuanto más cerca se está de algo consistente, más obvios son los errores** (A248). [D]
+
+## 2. Cámara
+- **Perspectiva normal:** no hay vista telescópica (A449) ni profundidad comprimida (A451). La sensación de profundidad sale de cuatro cosas: la cámara sigue al héroe, la distancia, el largo de las salas y que la cámara se detiene en los bordes. [V]
+- **FOV 30** (A425). [V] La cámara casi ortográfica y el FOV bajo, descartados (A347). [X]
+- **Pitch:** dungeon 24–28 (A450); campo abierto 37–40 (A454); trono ≈ 33–35 a ojo (T05). [V] / [H] para el trono.
+  - Subir el pitch no cierra un fondo (T11). [V]
+  - `vScale` con cámara fija equivale a un pitch más plano (A157). [H]
+- **Distancia:** el héroe mide ≈ 0,10 del alto del cuadro (heroFrac), D ≈ 19,5 H (A450). [V]
+  - El pivote está a media altura del héroe, así que la distancia efectiva es D/k (A443). [V]
+- **Escala por profundidad:** s = (D/k) / (D/k + g · cos pitch); el visor la cumple con 0,000 (A445). [V]
+  - Con heroFrac 0,10, s 0,60 a ≈ 14 H y s 0,55 a ≈ 17 H detrás del héroe; el sur crece ~5–7 % por H (t5). [V]
+- **Una sola escala de héroe:** ancho ≈ 0,030 del cuadro en todas las tomas (A440). El alto mide 0,107 en 0202 y 0,128 en 0137, una diferencia sin explicar (A366). [V] / abierto
+- **Paralaje** cercano / lejano ≈ 2,2 al caminar; el fondo también tiene paralaje de perspectiva, no es una capa plana (A042, A370). [V a ojo]
+- **Una capa plana precompuesta es indistinguible del 3D en una foto quieta:** solo el movimiento la delata (A369). [V]
+- **Lo que lleva [U] sobre la cámara** (A428, A416, A434; [H] sin probar):
+  - prioridad en Z;
+  - trabada en X cerca de los bordes;
+  - en hub se recentra; en salas con dirección se descentra hacia el avance;
+  - se detiene ~1 H antes de un obstáculo y el héroe sube por la pantalla (bloqueo suave).
+- **Otros juegos:**
+  - Luminati: cámara 28° / 32°, héroe ≈ 1/10, camino oculto ≤ 3 %, primer plano escaso, ningún borde «fin del mundo» (A053). [V lectura]
+  - Cobra Code: teleobjetivo y geometría por bloques (A048). [H]
+
+## 3. Escala y alturas
+- **`tilesPerH` 1,5** (A159, A463). [D]
+- **Altura aparente ≈ dato^exag × vScale;** por eso las alturas van por pieza y en el dato, con exag 1 (A170, A174). [V]
+- **Ninguna palanca global sirve a todas las piezas:**
+  - `exag` sube muros, volúmenes y objetos (y también el cierre: tapa el vistazo);
+  - `vScale` sube todo, peldaños incluidos (A162, A345). [V]
+- **El visor cuantiza con el rango global:** la cima del dato cae en la última terraza; bajar una pieza sola exige cambiar terrazas (A018). [V]
+- **La altura del muro sola no distingue una escena buena de una mala** (A268). [V]
+- **Bajar los muros expone el vacío** y deja la sala como diorama flotante (A280, A284). [V]
+- **Alturas por pieza medidas en DQ3** (en H):
+
+| Pieza | H |
+|---|---|
+| Balaustrada / baranda | 1,0–1,4 (0202: 1,34–1,42; 0149: 0,70) |
+| Postes de baranda | ~1,6 |
+| Parapetos / bordes de isla | 0,7–1,6 |
+| Muro bajo / pared del fondo | 1,2–1,3 |
+| Pilares de escalera o pasillo | 3,7–5 |
+| Pilares cercanos que salen del cuadro | ≈ 5 |
+| Estatua | ≈ 3,9 |
+| Muros de cierre del trono / pilares | 8 / 5 |
+| Fachada del bosque | ≈ 3,3 |
+
+  Los bordes de isla fallan sobre todo por altura (A210, A433, A450, A284, A013). [V]
+- **Pasillo de pilares:** pilar cada ≈ 7,3 H; losas de ≈ 4,9 H de ancho (t6). [V]
+- **Paso:** ≥ 5 integrantes del grupo lado a lado (≈ 3 H) (A182, A194). [D]
+
+## 4. Terreno y relieve
+- **DQ3 es «súper plano»:** suelo plano por zonas y cambios de altura en escaleras de micro-terrazas. Primero el terreno plano; después, los bordes disimulan que la altura es isométrica (A090). [D]
+- **Terrazas:** máximo 3; subterrazas 1–2 (A343). Base: terraza **1,25 H**, `subs` **2** (A463). [D]
+  - `subs` 2 deja el bordillo de la franja media; `subs` 1 lo borra (A345). [V]
+- **Los escalones grandes delatan un mundo cúbico 3D;** casi ninguna escalera de DQ3 es alta (A247). [D]
+- **«Ver por encima»** sale de la perspectiva (muros más altos que los suelos), no de subir suelos (A215, A222). [V]
+- **`terraces` y `subs` cambian máscara, camino, orientación y meta** (A258, A303). [V]
+- **`terraces` 3 aplana;** los anillos de Cake agregan escalones de contorno; los muros de Ascension enmarcan poco (A263, A270). [V]
+- **`pre` (promedio 3 × 3)** vuelve rampa de 2 tiles un muro alto pegado al suelo: `pre` 0 (A046). [V]
+- **El POI no se eleva:** la tarima del rey es baja (~1 subnivel) (A083, A080). [V]
+- **El remake conserva las zonas relativas y cambia terrazas y pasillos** (A117, A230):
+  - un paso de 1 × 5 tiles viejos (≈ 1,4 H) pasa a una escalera de ≈ 4,5 H (×3,2);
+  - un paso de 1 × 2 pasa a dos escaleras;
+  - 6 columnas pasan a 4 pilares;
+  - 9 salas viejas pasan a 10 espacios (A141). [V para el piso 2]
+- **Un paso de ≈ 1 tile entre dos pilastras** sería una escalera hacia el flujo, ensanchada a ≈ 4 H, con las pilastras como rojo (A114). [H]
+
+## 5. El mapa viejo y el generador
+- **El mapa viejo no trae en píxeles** niveles, plinto, escaleras laterales ni parapetos; ninguna regla los deduce. El relieve hay que suponerlo por reglas (A073, A229). [V]
+- **Mapa viejo como fuente:**
+  - es una rejilla de 16 px que se aprende por repetición de bloques;
+  - el agua se clasifica por color;
+  - **la sombra de las columnas es suelo** (A093, A094, M3b). [V]
+- **El remake pinta un fondo de color** (pasto, cielo) detrás de ventanas y bordes lejanos (A085). [V]
+- **El rojo del remake ocupa 22–35 % de la pantalla;** sale de la lectura de la escena, no de reglas de borde (A099, A105). [V]
+- **El piso 2 de Najimi no es un juez fiel** del «conservar la disposición» (A230). [V] El piso 3 está reservado para la prueba en ciego (A110). [D]
+- **El zoom del mapa del remake es constante** salvo que el jugador lo cambie (A218). [V parcial]
+- **El pack del generador de EvoDun ya trae** elevación, zonas, bordes, camino, POI y agua (A233). [V lectura]
+- **Las salas DAC:**
+  - son 4–15 veces más anchas que un pasillo de DQ;
+  - la ruta pasa lejos de los muros;
+  - el bloqueado está a 3–12 tiles y de un solo lado (v32, A288);
+  - no traen las precondiciones de los trucos (A378).
+
+  La diferencia dominante es **sala cerrada contra terreno abierto** (A382). [V]
+- **En DAC, la profundidad útil por encuadre** sale de 8 a 61 H contra ~17 H, y los trucos no lo compensan: **falta una regla de forma de sala** (A465). [V]
+- **Las salas Ascension pequeñas** miden menos que un cuadro; solo las Cake alcanzan «dos tomas» (A257). [V]
+
+## 6. Modelo de escena
+- **Verde** = transitable y continuo; **azul** = no transitable; **rojo** = overlay decorativo y obstructivo con un pie en azul; apagado, queda el mapa completo (A089, A107, A112). [D]
+- **El rojo es metodología, no Ancla;** se define después de resolver verde y azul, deduciendo qué hay detrás (A109, A111). [D]
+- **El rojo estructural se deduce** de las perspectivas obstruibles: de las proyecciones posibles, 1–2 sirven para la cámara (A193). [D]
+- **El rojo puede tapar al héroe** (A102). [D]
+- **Capas del encuadre P / G / R / F** (primer plano, guía, ruta y meta, fondo), presentes en todas las tomas del bosque (A004). [V]
+- **Lo estructural es geometría; lo decorativo es ranura;** billboards más rojo ≤ 30 %; el suelo son bloques pintados; las cintas no cuentan (reglas 1, 9, 10; A036). [D]
+- **Escena, no toma:** se juzga con caminata y con varias tomas a lo largo de un recorrido (tabla de movimiento) (reglas 2, 4, 11). [D]
+- **Islas:** los bordes son sólidos y visibles; lo de más allá «se ve pero no se alcanza» (A203, A217). [D]
+- **Hotspot:** transitable, central salvo POI, sobre el eje de flujo (A202, A206). [D]
+- **Eje de la sala** X / Z / Hub; función de banda: primer plano, guía, meta, fondo o vistazo (A312). [D]
+- **Bandas B1–B5** en Z, contadas desde abajo; plano = banda + lo que tapa (A311). [D]
+  - Lectura de [U] (A429): en 0202, banda 1 = escalera sur, banda 2 = héroe (y 0,45–0,56), lejos en y 0–0,18; en 0137, lo lejano baja hasta y 0,51. [D]
+- **El vistazo se deduce del mapa y la cámara** (A313). En la Torre del Soñador las salas se ven entre sí porque las diferencias de altura las vuelven miradores (A296). [D]
+- **Fondo abierto ≠ vistazo** (DEFINICIONES_T26 §7). [D]
+
+## 7. Composición: lo que pesa
+- **Ganó en juicio ciego:**
+  - el vistazo y el cierre en dos planos (barrera baja cerca + masa alta lejos), 3/3 en DQ3 y 9–0 en DAC no usada; tapar el cielo solo pierde 9–0 (A332, A336, A337). [V]
+- **Premiado por los jueces:**
+  - centro del cuadro abierto y masas en los bordes;
+  - un bordillo continuo en la franja media;
+  - ver lejos;
+  - una columna suelta de borde que sale por arriba; pegada al muro, pierde (A342, A346, A352). [V juicios]
+- **Ganancia por ítem en TECHO** (juez calibrado): marca +3,0 · línea media +2,4 · esquinas +1,9 · marco +1,0 · fondo −0,5 (A402). En el quita-uno: A6 +0,67 y C3 +0,50 (A405). [V]
+- **Veredictos de [U]** (A413): A6 funciona; C3 aprobado (tenue, color del piso, fuera de los pies del héroe); C2 buen truco mal aplicado; A4 válido pero necesita luz real; A3a suelto falla (necesita secuencia). [D]
+- **Tipos de truco:**
+  - señales (C3, A4/A5);
+  - estructuras de encuadre: el truco es la relación de banda, secuencia y posición, no el objeto;
+  - reglas de cámara (A1, A7, A416) (A415).
+
+  Un truco se evalúa por su efecto, no por su visibilidad (A414). [D]
+- **Los obstructores se definen por posición en pantalla,** no por coordenadas de mapa (A342, A350). [V]
+- **Las tomas marcan el hotspot con una calcomanía,** no el camino con una cinta (A360). [V]
+- **La perspectiva solo se lee con cosas de tamaño conocido repartidas en profundidad** (desaplanadores; v66 H8 ← H10). [H]
+- **Patrones comunes de 0137 y 0202:**
+  1. línea de nivel en y 0,42–0,60 con ≥ 70 % del ancho;
+  2. masas altas en los bordes o en un par que enmarca;
+  3. masas bajas en las esquinas inferiores;
+  4. centro abierto hasta un fondo luminoso o escalonado;
+  5. calcomanía junto al héroe (v318 §2). [V a ojo]
+
+## 8. Lo que no funciona
+- **Billboards como suelo, muros o pilares** (D1, 81 %) (A034–A036). [X]
+- **Apagar las reglas para igualar una foto;** juzgar con un fotograma (A035, A037). [X]
+- **Reglas ciegas con las tomas a la vista** (contaminación) (A106). [X]
+- **Pulir datos a mano como si fuera la prueba del Ancla** (A226). [X]
+- **CC percibiendo el mapa** (la percepción va a [R]) (A216). [X]
+- **Depender de las lecturas de [U] en cada vuelta** (A232). [X]
+- **Rúbricas y métricas propias de [R] como juez;** jueces automáticos (A321, A417). [X]
+- **`stageBorder` como cierre** (solo visual) (A259, A289). [X]
+- **`exag` y `vScale` globales; `subs` 1 como relieve concentrado** (A345). [X]
+- **Reglas en coordenadas de mapa para efectos de pantalla** (A342). [X]
+- **Clasificadores DARK y HZ_glimpse como discriminadores** (A266, A271). [X]
+- **Elevar el POI** (A083). [X]
+- **Cinta de camino como guía** (A360). [X]
+- **Cam 8, `zScale`** (A451). [X]
+- **Volúmenes S4b fuera de tiles bloqueados** (A285). [X]
+
+## 9. Método e instrumentos
+- **Roles** (A407, A419, A467):
+  - [U] decide y juzga mirando;
+  - [R] diseña o supervisa y no hace maquetas;
+  - CC construye todo;
+  - sin agentes ni jueces automáticos salvo permiso de [U].
+- **Pausa tras cada etapa;** [U] es el único con la perspectiva completa (A398). [D]
+- **El Registro** es el dispositivo para entender los cambios graduales y no salirse de línea (A468). [D]
+- **Lo que rinde:**
+  - medir simple contra las tomas;
   - predicciones y paradas antes de correr;
   - hashes ×2;
-  - una variable por pase o atribución por quita-uno.
-- **Evaluar un truco es medir su efecto** (horizonte, verticalidad, elevar la vista), no su visibilidad (A414). DECIDIDO.
-- **Un criterio sacado de las mismas tomas que se juzgan es circular** (A321). VALIDADO.
-- **Todo pedido de truco lleva su ficha de 11 campos con puerta de presencia** (A357; `INFORME_METODO_TRUCOS_v318` para el formato). DECIDIDO.
-
-## 3. Vocabulario
-| Término | Definición | Fuente |
-|---|---|---|
-| Verde / azul / rojo | Verde = suelo transitable y continuo (las escaleras son micro-terrazas). Azul = no transitable. Rojo = overlay decorativo y obstructivo, con al menos un pie en azul; apagado, queda el mapa completo | A089, A107, A112 · DECIDIDO |
-| Capas P / G / R / F | P = primer plano · G = guía (el eje o camino que lleva el ojo) · R = ruta y meta · F = fondo que cierra | Bosque, A023 · VALIDADO |
-| Banda B1–B5 | franjas de igual profundidad en Z, desde la fila que toca el borde inferior hasta el último tile de la sala; **se cuentan de abajo hacia arriba**: B1 = primer plano, B5 = fondo | DEFINICIONES_T26 §1; A429 · DECIDIDO |
-| Función de banda | primer plano · guía · meta · fondo · vistazo (la dominante) | A312 |
-| Plano | banda + lo que tiene altura y tapa lo de atrás. «Esa profundidad es lo que nos hace HD-2D y no 3D incompleto» | A175, A311 · DECIDIDO |
-| Eje de la sala | X (cruce lateral), Z (hacia el fondo), Hub (equidistante) | A312 · DECIDIDO |
-| Hotspot | siempre transitable; central salvo POI (que lo contiene); **sobre la línea de flujo** | A202, A206 · DECIDIDO |
-| Vistazo / mirador | terreno de otra sala visible por encima del cierre; se deduce del mapa y la cámara. V(p) = % del cuadro con terreno de otra sala. Mirador = posición transitable con V máximo | A313, DEFINICIONES_T26 §6 |
-| Fondo abierto ≠ vistazo | fondo abierto = píxeles vacíos en B4–B5; vistazo = terreno de otra sala ahí | DEFINICIONES_T26 §7 |
-| Isla | cada sala puede ser isla; sus bordes (muros, parapetos, barandas) son sólidos y visibles; lo de más allá «se ve pero no se alcanza» | A203, A217 · DECIDIDO |
-| Horizonte local | el horizonte está DENTRO de la misma sala (no lejano) | A247 · DECIDIDO |
-| k0…k8, k_mir | posiciones del camino de props `camino[floor(i·(N−1)/8 + 0,5)]`; k_mir = mirador sobre el eje a ≤ 4 tiles del borde de fondo | INFORME_METODO_TRUCOS |
-
-## 4. Cámara (medida en DQ3)
-| Parámetro | Valor | Fuente · estado |
-|---|---|---|
-| Tipo | Cam 6: perspectiva **normal** (no hay vista telescópica ni compresión de profundidad) | A449, A451 · VALIDADO |
-| FOV | 30° | A425 · VALIDADO |
-| Pitch | **interior 25** (medido 24–28); **exterior abierto ~38** (desierto 37–40). Hasta que exista un parámetro por zona, va por gancho del arnés (T55) | A450, A454 · VALIDADO |
-| Distancia | `heroFrac` **0,10** → D ≈ 19,5 H del héroe. El pivote está a media altura del héroe (k ≈ 0,89–0,96), así que la distancia efectiva es D/k | A443, A450 · VALIDADO |
-| Compresión K | **1** (la Cam 8 `zScale` no se usa; PR #94 sin justificación) | A451 · VALIDADO |
-| Fórmula de escala | s = (D/k) / (D/k + g · cos pitch), con g = suelo detrás del héroe; el visor la cumple con 0,000 | A445 · VALIDADO |
-| Cifras de referencia (heroFrac 0,10) | s 0,60 a ≈ 14 H y s 0,55 a ≈ 17 H detrás del héroe, en y ≈ 0,16 y 0,12 de pantalla; con heroFrac 0,14 las cifras son 10,5 y 12,9 H. Al sur crece ~5–7 % por H | t5, A444 · VALIDADO |
-| Pies del héroe (`heroScreen`) | interior (0,47; 0,51) como 0202; exterior (0,50; 0,65) como el desierto | A429, A453 · VALIDADO (lectura) |
-| Lo que NO cierra un fondo | subir el pitch (15,7 → 10,1 % de vacío); el cierre es geometría | T11 · VALIDADO |
-| Instrumento | Cam 5 cenital (ortográfica, ~89°) con el mapa superpuesto, como control de colocación; no es cámara de juego | A204, A208 · VALIDADO |
-| Salas hub o de trono | a ojo se ven más picadas (trono ≈ 33–35°) | T05, PLANTILLA · HIPÓTESIS (no medido como el dungeon y el desierto) |
-| Paralaje | cercano / lejano ≈ 2,2 al caminar (clip de Aliahan); el fondo también tiene paralaje de perspectiva (no es una capa plana) | A042, A370 · VALIDADO a ojo |
-| Medir el héroe | `heroFrac` es la caja de 1 H en el pivote, no la figura; la figura completa = cabeza + cuerpo + punto (medir solo el cuerpo falseó la escala) | A150, A153 · VALIDADO |
-| Tomas | las de YouTube son recortes ≈ pantalla completa (±1–2 %); el render cubre al menos la pantalla completa 16:9 | A148, A151 · VALIDADO |
-
-## 5. Escala y alturas
-| Parámetro | Valor | Fuente · estado |
-|---|---|---|
-| `tilesPerH` | **1,5** | A159, **A463** · DECIDIDO |
-| Altura de terraza | **1,25 H** | A373, **A463** · DECIDIDO |
-| Subterrazas | **`subs` 2** (dejan el bordillo continuo en la franja media; `subs` 1 lo borraba) | A345, **A463** · DECIDIDO |
-| Terrazas | `terraces` 3 como máximo | A343 · DECIDIDO |
-| Peldaño resultante | ≈ 0,275 H (subnivel = 0,22 × terraza): **calculado**, CC lo confirma en el visor | cálculo de [R] |
-| Configuración en el visor | «Measures in H» OFF; `terH` = 1,25 × 1,5 = 1,875 tiles | cálculo de [R] |
-| `exag` / `vScale` | **1 / 1**; las alturas van por pieza en el dato (dato = aparente con exag 1). Globales: descartados | A345, A162 · DECIDIDO |
-| Héroe en pantalla | ancho ≈ 0,030 en todos los cuadros medidos (A440); alto 0,107 en 0202 y 0,128 en 0137 (A366): **diferencia sin explicar**, se informa | VALIDADO / abierto |
-
-**Alturas por pieza (en H, medidas en DQ3):**
-| Pieza | Altura | Fuente |
-|---|---|---|
-| Baranda o balaustrada | 1,0–1,4 (0202: 1,34–1,42; 0149: 0,70) | A450, A210 |
-| Postes de baranda | ~1,6 | A210 |
-| Parapeto / borde de isla | 0,7–1,6 (los bordes fallan sobre todo por altura) | A210 |
-| Muro bajo / pared del fondo | 1,2–1,3 | A210 |
-| Pilares de escalera o pasillo | 3,7–5 | A152 |
-| Pilares cercanos que salen del cuadro | ≈ 5 (no 7–11) | A433 |
-| Estatua sobre plinto | ≈ 3,9 | A212 |
-| Muros de cierre altos (sin vecina) | 5 (`planes`) a 8 (trono); con pilares de 5 | A300, A284 |
-| Escalera del remake | ≈ 4,5 H de largo donde el mapa viejo tenía ≈ 1,4 | A141 |
-| Pasillo de pilares (30:55) | ancho ≈ 4,9 H; pilar cada ≈ 7,3 H | t6 · VALIDADO |
-
-## 6. Terreno
-- **DQ3 es «súper plano»:** suelo plano por zonas y el cambio de altura concentrado en escaleras de micro-terrazas. Primero plano; después, los bordes disimulan (A090). DECIDIDO.
-- **Escaleras:**
-  - ≥ 4 peldaños visibles;
-  - ensanchadas a **≥ 5 integrantes (≈ 3 H)** lado a lado;
-  - alineadas con el flujo;
-  - una por paso entre niveles.
-
-  (A182, A194, B1). DECIDIDO como escala; la escalera como truco: NUNCA PROBADO.
-- **No elevar el POI;** la tarima es baja (~1 subnivel) (A083). VALIDADO.
-- **`pre` 0** donde un muro alto toca el suelo; si no, se vuelve una rampa de 2 tiles (A046). VALIDADO.
-- **`terraces` y `subs` cambian máscara, camino, orientación y meta:** se declaran los hashes (A258, A303). VALIDADO.
-- **Lo que el mapa viejo no trae:** niveles, plinto, escaleras laterales ni parapetos; ninguna regla de `src/` los deduce. Se suponen por reglas y se juzgan por composición (A073, A229). VALIDADO.
-- **DAC no trae las precondiciones de los trucos:** borde de fondo largo, borde lateral libre, escaleras en cuadro, recinto (A378, A382). Sus salas son 4–15 veces más anchas que un pasillo de DQ; la ruta pasa lejos de los muros; el bloqueado está a 3–12 tiles y de un solo lado (v32, A288). Por eso **el recinto se construye** (rojo o volumen con pie en azul, también fuera de la sala). VALIDADO.
-
-## 7. Modelo de escena y reglas del modo 3
-- **Orden de trabajo** (A107): topología plana (≈ 60 %) → leer y definir el rojo → deducir qué hay detrás → anclarlo.
-- **Lo estructural es geometría;** el billboard es solo para personajes, vegetación suelta y atrezo (regla 1).
-- **Billboards más rojo ≤ 30 % de la pantalla** (regla 9; A111).
-- **El suelo son bloques pintados;** las cintas y calcomanías no cuentan como billboard (regla 10).
-- **Escena, no toma** (regla 2): un ejemplo es un mundo que sobrevive a mover al héroe; se juzga con caminata (regla 4).
-- **Un ejemplo declara su mapa de origen y sus reglas encendidas** (`orient`, `planes`, `props`, `volumes`); apagarlas para igualar una foto es la degeneración D1 (reglas 5 y 3; A036).
-- **El rojo puede tapar al héroe un momento** (A102), nunca en el hotspot.
-- **Varias tomas a lo largo de un recorrido** (regla 11): sirven para la tabla de movimiento (cuánto se desplaza y cambia de tamaño cada objeto por tile, qué lo tapa, cuándo entra el muro del fondo). Un solo fotograma no da un veredicto.
-- **Simetría:** si la sala de origen es simétrica, se prueba por espejo y se contrasta con la imagen ORIGINAL, no con un derivado (A061, A064).
-- **Alarmas A1–A14** y pre-vuelo: informe integrado v319 §3.6 y PLANTILLA §5.
-
-## 8. Bandas, horizonte, vistazo y proporciones
-- **Lectura de [U] de las bandas** (A429):
-  - **0202:** banda 1 = escalera sur; banda 2 = héroe (y 0,45–0,56, detrás de lo alto de la escalera); lo lejano en y 0–0,18.
-  - **0137:** lo lejano baja hasta y 0,51, junto al héroe.
-- **Héroe en B2** en interiores tipo 0202, con B1 delante (escalera o borde). DECIDIDO como objetivo.
-- **Ver adelante:** **25–40 % del cuadro** se dedica a ver más allá del héroe; el horizonte es local, dentro de la sala (A247). DECIDIDO.
-  - En interior, el borde del fondo cae entre **y 0,10 y 0,25**.
-- **Proporciones:** el fondo útil de la sala cae hacia **s ≈ 0,55** (≈ 17 H detrás del héroe con heroFrac 0,10) (A452). HIPÓTESIS de diseño: **se mide, no se fuerza**.
-  - T3 reprodujo 0202 con la cámara sola cuando la sala tenía las proporciones correctas (A430): las proporciones son la palanca.
-- **Vistazo (A1) y cierre en dos planos (A2):** ganó 9–0 en una sala DAC no usada (A336). VALIDADO.
-  1. BACK de `planes` → baranda de 1,0–1,4 H.
-  2. Ventana mínima que incluya **entera** la vecina.
-  3. Vecina ±Δ, el menor de {0; ±0,5; …; ±4} H con **V(k4) ≥ 10 %**. Δ negativo = la sala actual como mirador alto (0137).
-  4. Sin vecina: cierre ≥ 3 H + fondo construido (A4).
-  - **Cifras:** barrera ≤ 0,08 del cuadro; masa lejana visible sobre ella en ≥ 30 % de su ancho.
-- **Fondo:** nunca píxeles vacíos (**vacío ≤ 2 %**). El remake pinta un fondo de color. Bajar muros expone el vacío y deja la sala como diorama flotante (A084, A280). VALIDADO.
-
-## 9. Héroe y encuadre
-- **Pies** en (0,47; 0,51) en interior y (0,50; 0,65) en exterior.
-- **Encuadre de A6:** fy se ajusta en [0,45; 0,80] para que la línea de nivel caiga en y 0,40–0,60. Si no alcanza, se usa k_mir y se declara.
-- **El héroe nunca queda cortado en la cintura por una línea;** va por encima (0202) o por debajo (0137).
-- **Eje:** cruza el cuadro en x ∈ [0,40; 0,65] de B1 a B4, con el héroe sobre él (C1). REGLA.
-- **Centro del cuadro abierto hasta el fondo;** masas en los bordes laterales (L37, A342). VALIDADO (juicios).
-- **Obstructores por posición en pantalla,** no por coordenadas de mapa (A342, A350). VALIDADO.
-
-## 10. Estructuras de encuadre y señales (aprobadas por [U], A413)
-| Pieza | Cifras en pantalla | Receta | Estado |
-|---|---|---|---|
-| **A7 · corte del lado de cámara** | ningún muro de cierre en y > 0,85 | `planesTest.noFront` | REGLA |
-| **C1 · eje y hotspot** | §9 | `orient` con POI primero | REGLA |
-| **A6 · línea de nivel** | borde superior en y 0,40–0,60, continua en ≥ 70 % del ancho; **baranda calada** (pasamanos + postes), **no muro almenado** (A408) | sobre el BACK del vistazo o el borde de terraza más largo en X; postes de ~1,6 H cada 3–4 tiles; encuadre de §9 | **funciona** ([U]); quita-uno +0,67 (A405) |
-| **Secuencia de pilares** (A3 corregido) | pares a los lados del eje que se alejan; tercio central abierto; los cercanos salen por arriba; nunca pegados al muro (≥ 0,02 del ancho de aire) | pilares de ≈ 5 H cada ≈ 7,3 H, a ≥ 3 H del camino; por ejemplo 2 por banda de B2 a B5 con B1 vacía (0156, A215) | A3a suelto **falla**; necesita secuencia ([U]) |
-| **C2 · par en la transición** | columnas en x [0,30; 0,48] y [0,60; 0,80]; hueco ≥ 0,17 del ancho; tapan ≤ 10 % del héroe | **un solo par por sala**, 2 × 2 tiles, **en la misma banda que su escalera**, cimas esbeltas | buen truco, mal aplicado en la sala T (escalera en B1, búhos en B5 hasta el borde, cimas anchas) |
-| **C3 · calcomanía** | 4 × 4 a 6 × 6 tiles, 3–8 % del cuadro, B2–B3; **tenue, color del piso, fuera de los pies del héroe** | anillo + estrella junto al hotspot, a 1–4 tiles del héroe | **aprobado**; quita-uno +0,50 (A405) |
-| **A4/A5 · vano focal** | rectángulo claro 0,08–0,16 × 0,10–0,20 del cuadro, centro en x [0,40; 0,62], y [0,05; 0,25]; el más contrastado del cuadro | hueco de 2–3 tiles en el cierre lejano o billboard plano pegado a su cara; nunca un volumen | **válido**, pero la prueba necesita luz real (Unity) |
-| **Landmark** (S4c) | completo de lejos, fragmento de cerca (dos lecturas, H10) | `kind: 'landmark'` sobre la meta alta | mecanismo existente; regla de colocación de C3 (props) |
-
-**Líneas de fuga.** La perspectiva solo se lee si hay cosas de tamaño conocido repartidas en profundidad: «H8 depende de H10», los desaplanadores de v66. La secuencia de pilares, las losas de la calcomanía, la escalera y la baranda van en **bandas distintas**. Una sala con un solo plano vertical se ve casi ortográfica aunque la cámara tenga perspectiva. VALIDADO como razonamiento (v66); [U]: «el 2D-HD busca más deformación, no menos» (A427).
-
-## 11. Exterior
-- **Pitch** ~38 y **pies** en (0,50; 0,65) (A454).
-- **Línea de nivel:** borde de terraza, muro bajo o fila de árboles.
-- **Recinto:** vegetación y taludes; una fila de árboles con ritmo hace de secuencia de pilares (v37).
-- **Árboles** como volumen; el follaje suelto como billboard. Sin columnas de `planes` en orillas de agua (v176).
-- **P:** oclusores en las esquinas inferiores (rocas, follaje), solo si existen como azul cerca de la cámara.
-- **F:** fondo poblado hasta el borde (torre o masa).
-- **Camino:** 1,2–2,4 H. El agua nunca se clasifica en `planes`.
-- **Héroe** 0,09–0,13 en las tomas del bosque (A004).
-
-## 12. Patrones de las tomas (lectura a ojo ±0,02; ver informe integrado, anexo F)
-- **Comunes a 0137 y 0202:**
-  1. Línea de nivel continua entre y 0,42 y 0,60, de ≥ 70 % del ancho.
-  2. Masas altas en los bordes o en un par que enmarca al héroe.
-  3. Masas bajas en las esquinas inferiores.
-  4. Centro abierto hasta un fondo con algo luminoso o escalonado.
-  5. Calcomanía junto al héroe, no en el camino.
-- **0202:**
-  - búhos en x 0,35–0,46 y 0,65–0,77 (hueco ≈ 0,19);
-  - escalera sobre el eje en x 0,45–0,66, y 0,62–0,90;
-  - pretil en y 0,53–0,60;
-  - plintos de esquina;
-  - balaustrada lejana en y 0,10–0,17.
-- **0137:**
-  - héroe x 0,61–0,65, pies y 0,74;
-  - balaustrada x 0,30–1,00, y 0,42–0,57;
-  - dragón en primer plano a la izquierda;
-  - columnas con farol a la izquierda;
-  - ventana luminosa x 0,48–0,62, y 0,05–0,21.
-- **Pasillo de pilares (30:55):** pares de pilares oscuros cada ≈ 7,3 H, losas de ≈ 4,9 H, búhos al fondo sobre un descansillo.
-- **Desierto:** camino centrado, esfinges en fila a los lados (secuencia), arcos de primer plano en las esquinas, pitch alto.
-- **TECHO de la sala T** (A402, juez calibrado), ganancia por ítem: marca +3,0, línea media +2,4, esquinas +1,9, marco +1,0, fondo −0,5.
-
-## 13. Mecanismos del visor que se usan (árbol `e882c5c`; detalle en CLAUDE.md del repo)
-| Mecanismo | Uso en el modelo |
-|---|---|
-| `orient` (C1) | eje por sala, POI primero; yaw en múltiplos de 90 |
-| `planes` (C2) | BACK = cierre (o baranda + vistazo); SIDE = columnas; FRONT bajado (A7); 3 H por defecto, 5 H sube el marco (A300) |
-| `props` (C3) | camino central, antorchas, par en la salida, landmark en la mitad trasera de la última sala |
-| `volumes` (S4b) | volúmenes solo sobre tiles bloqueados (S4b no levanta sobre verde; margen ≥ 2 tiles a un escalón) |
-| `objects` / landmark (S4a / S4c) | billboards y landmark de dos lecturas |
-| Cintas (`ribbon`) | calcomanías (C3); no cuentan como billboard |
-| `heroScreen`, `heroFrac`, `heroAt` | encuadre (§9) |
-| Ventana de salas | incluye la vecina entera para el vistazo |
-| `stageBorder` | solo visual: no cierra el fondo (A259, A289) |
-| Arnés (`harness_salat`, t5/t6) | inyecta packs y ganchos de cámara sin tocar `src/` |
-
-## 14. Controles y caminata
-- **Por posición:**
-  - héroe ± 5 % entre estados;
-  - vacío ≤ 2 % (el trono llegó a ≤ 0,05 %);
-  - billboards más rojo ≤ 30 %;
-  - ninguna baldosa del camino con > 25 % perdido por un volumen (35 % en contrahuellas, declarado);
-  - héroe tapado > 25 % solo por rojo y nunca en el hotspot;
-  - hashes ×2;
-  - máscara, camino y meta iguales entre estados o el diff declarado.
-- **Caminata:** k0…k8 + k_mir; yaw constante dentro de una sala; ningún salto > 2,5 veces la mediana; sin vacío, sin terreno ajeno, sin losas a media sala; meta en cuadro (regla 4; A253).
-- **Medidas estándar:**
-  - fila de los pies;
-  - fila de la línea de nivel;
-  - borde del fondo;
-  - % ver adelante;
+  - una variable por pase o quita-uno;
+  - medir la causa en vez de opinar;
+  - cambiar el objeto de la prueba cuando el síntoma persiste (A123, M1–M10). [V]
+- **Ficha de truco de 11 campos** con puerta de presencia (A357). [D]
+- **Instrumentos:**
+  - Cam 5 cenital con el mapa superpuesto para controlar la colocación (A204, A208);
+  - render de ids;
   - V(p);
-  - s del fondo;
-  - profundidad útil detrás del hotspot;
-  - banda del héroe;
-  - % billboards más rojo;
-  - % vacío;
-  - render de ids por pieza.
+  - caminata k0…k8 + k_mir;
+  - capa neutra ANTES / DESPUÉS con el héroe emparejado (A286);
+  - misma definición de transitable que las reglas (A242). [V]
+- **Medir al héroe:** `heroFrac` es la caja de 1 H en el pivote; la figura completa es cabeza + cuerpo + punto (A150, A153). Las tomas de YouTube son ≈ pantalla completa (A148, A151). [V]
+- **Contrastar con la imagen original,** no con un derivado (A061). [V]
 
-  Se mide con la misma definición de transitable que las reglas (A242).
+---
 
-## 15. Nunca probados, descartados e hipótesis
-- **NUNCA PROBADOS (pulido o más adelante):**
-  - A3b, masa baja de esquina (en TECHO aportó +1,9; nunca con puerta válida);
-  - A8, paso por detrás (puede pedir `src/`);
-  - A416, centro del encuadre corrido hacia el avance;
-  - el modelo de cámara de [U] (A428: prioridad en Z, trabada en X cerca de los bordes, barandas como espacio negativo, hub recentrado);
-  - el bloqueo suave (A434);
-  - B1 como truco, B3 altura fingida, B5 cara de caída, N1 escalera–estatua–escalera (A214, A217);
-  - C5, C7 más allá del ajuste de A6;
-  - pitch por zona como parámetro del visor (T55).
-- **DESCARTADOS:**
-  - cámara casi ortográfica C6 / FOV bajo (A347, A425);
-  - profundidad comprimida B6 / Cam 8 (A451);
-  - vista telescópica (A449);
-  - `exag` y `vScale` globales; `subs` 1 como relieve concentrado (A345);
-  - cinta de camino como guía (A360);
-  - `stageBorder` como cierre;
-  - bajar los muros;
-  - billboards como suelo, muros o pilares (D1);
-  - rúbrica J1–J3 como juez (A321);
-  - jueces automáticos (A417);
-  - elevar el POI.
-- **HIPÓTESIS abiertas:**
-  - masa lejana real contra fondo construido (A337);
-  - ¿la columna suelta gana por separación o por posición? (T46);
-  - la diferencia de alto del héroe entre 0202 y 0137 (A366);
-  - la regla de proporciones s ≈ 0,55 (A452).
+# PARTE II · BASE PRINCIPAL (todas las escenas)
 
-## 16. Abierto (lo que falta contra la meta)
-1. **Punto de control con todo este modelo** sobre DAC 44, DAC 14 y Forest A (`r15/stage_control_3salas_go.md`, A458–A463).
-2. **Prueba de Generación ciega** (R1.3/R2) sobre un mapa no usado.
-3. **Generalidad de la cámara** en otro juego 2D-HD (Octopath o Triangle Strategy).
-4. **Ancla v1 sin aprobar.**
-5. **Decisiones pendientes de [U]:** PR #93 y #94; T02/T48 sobre #92; tests de #91.
+| # | Elemento | Valor |
+|---|---|---|
+| B1 | Cámara | Cam 6 perspectiva, FOV 30, K 1, `exag` 1, `vScale` 1 |
+| B2 | Distancia | heroFrac 0,10 (alto del héroe en el cuadro) |
+| B3 | Pitch | por tipo de escena (Parte III); por defecto 25 |
+| B4 | Pies del héroe (`heroScreen`) | por tipo de escena; por defecto (0,47; 0,51) |
+| B5 | Escala | `tilesPerH` 1,5; paso ≥ 3 H (5 integrantes) |
+| B6 | Terreno | `terraces` ≤ 3, terraza 1,25 H, `subs` 2 (peldaño ≈ 0,275 H), «Measures in H» OFF, `pre` 0 junto a muros altos; plano por zonas; escaleras de micro-terrazas hacia el flujo; POI sin elevar |
+| B7 | Modelo de escena | verde / azul / rojo; estructural = geometría; billboards + rojo ≤ 30 %; cintas y calcomanías no cuentan |
+| B8 | Orientación | `orient` con POI primero; eje X / Z / Hub; hotspot transitable, central salvo POI, sobre el eje; el eje cruza el cuadro en x ∈ [0,40; 0,65] |
+| B9 | Bandas | B1–B5 desde abajo; el héroe en B2 cuando hay B1 delante; ver adelante 25–40 %; horizonte local |
+| B10 | Corte del lado de cámara | `planesTest.noFront` (A7): ningún muro en y > 0,85 |
+| B11 | Fondo | nunca vacío (≤ 2 %); se cierra con geometría (vecina, muro, masa o fondo construido); nunca bajando muros ni con `stageBorder` |
+| B12 | Alturas | por pieza, en el dato, según la tabla de §3 |
+| B13 | Profundidad útil | el fondo del encuadre hacia s ≈ 0,55 (≈ 17 H detrás del héroe); se mide; hoy es la regla que falta en la generación |
+| B14 | Billboards | solo personajes, vegetación suelta y atrezo |
+| B15 | Controles | héroe ± 5 % · vacío ≤ 2 % · camino sin baldosas > 25 % perdidas por volúmenes (35 % en contrahuellas) · hashes ×2 · máscara, camino y meta iguales o el diff declarado |
+| B16 | Caminata | k0…k8 + k_mir; yaw constante en la sala; salto ≤ 2,5 veces la mediana; sin vacío ni terreno ajeno; meta en cuadro |
+| B17 | Reglas encendidas | `orient`, `planes`, `props`, `volumes` (apagar una exige razón escrita) |
+
+---
+
+# PARTE III · FEATURES (grupos por tipo de escena)
+
+Cada escena usa la Base y **un solo grupo** como principal. Los features de otro grupo solo entran si la tabla de compatibilidad lo permite. Estado del grupo: **[V] probado en su escena · [H] visto en tomas · [NP] nunca probado**.
+
+## F-D · Dungeon (Torre del Soñador)
+Laberíntico, oscuro y encerrado; primer plano que estorba a propósito; galerías en X para las vistas y corredores en Z (A087, A088).
+| Feature | Cifras / receta | Estado |
+|---|---|---|
+| Pitch / pies | 25 (24–28) / (0,47; 0,51) | [V] |
+| A1 + A2 · vistazo y cierre en dos planos | BACK = baranda 1,0–1,4 H; ventana con la vecina entera; vecina ±Δ (≤ 4 H) hasta V(k4) ≥ 10 %; barrera ≤ 0,08 del cuadro; masa lejana visible en ≥ 30 % del ancho | [V] (9–0) |
+| A6 · línea de nivel | **baranda calada** en y 0,40–0,60, ≥ 70 % del ancho; postes ~1,6 H cada 3–4 tiles; encuadre con fy ∈ [0,45; 0,80]; el héroe nunca cortado en la cintura | [V] (+0,67) |
+| Secuencia de pilares | pilares de ≈ 5 H cada ≈ 7,3 H a los lados del eje (p. ej. 2 por banda de B2 a B5, B1 vacía); tercio central abierto; nunca pegados al muro | [D] (A3a suelto falla) |
+| C2 · par en la transición | un solo par, en la misma banda que su escalera; cimas esbeltas; hueco ≥ 0,17 del ancho | [D] (mal aplicado en la sala T) |
+| C3 · calcomanía | pentagrama o hexagrama de 4–6 tiles, tenue, color del piso, junto al héroe | [V] (+0,50) |
+| A4 · vano focal | ventana o luz en x [0,40; 0,62], y [0,05; 0,25]; el elemento más contrastado | [D] (necesita luz real) |
+| Escalera sobre el eje (B1) | escalinata hacia el destino, ≥ 4 peldaños, ancho ≥ 3 H | [H] |
+| Escalera – estatua – escalera (N1) | plinto azul con estatua de ≈ 3,9 H entre dos escaleras, a lo largo de un muro | [NP] |
+| Rojo de primer plano | masas obstructivas en B1 con pie en azul (dragón, plintos) | [H] |
+| Masa baja de esquina (A3b) | ancho 0,10–0,20 del cuadro, en las esquinas inferiores | [NP] (+1,9 en TECHO) |
+
+## F-T · Sala del trono (interior hub)
+POI seguro, amplio e iluminado; sala axial y simétrica (A088, A068).
+| Feature | Cifras / receta | Estado |
+|---|---|---|
+| Pitch / pies | ≈ 33–35 (a ojo) / héroe centrado, x ≈ 0,50, y 0,47–0,59 | [H] |
+| Simetría | espejo exacto; puerta y alfombra centradas, contrastadas con el original | [V] |
+| Nave ancha caminable | pilares a ≈ 2,1 tiles del muro, en filas | [V] |
+| Pilares y muros de cierre | pilares de 5 H; muros de 8 H; vacío ≤ 0,05 % | [V] |
+| Alfombra | cinta sobre el camino hacia el POI (es piso pintado; aquí sí corresponde), con ribete y medallones | [V] |
+| Estrado | bajo, 2 tramos de micro-terrazas | [V] |
+| Emblema | fondo de la alcoba, sin `z`; asoma al acercarse | [V] |
+| Orientación | una sola zona (la entrada incluida) → yaw 0 | [V] |
+| Columnas de `planes` | se omiten si su sombra cae sobre el camino (`avoidPath`) | [V] |
+| Billboards | rey, cortesanos, armaduras, estandartes ≤ 9 % | [V] |
+| Paralaje | cercano / lejano ≈ 2,2; capiteles cortados por el borde | [V a ojo] |
+
+## F-B · Bosque (exterior con recinto)
+Poco contraste entre primer plano y fondo; el recinto lo dan la vegetación y los taludes (A028, v37).
+| Feature | Cifras / receta | Estado |
+|---|---|---|
+| Pitch / pies | 25–38 (sin medir en el bosque) / (0,50; 0,60–0,65) | [H] |
+| Héroe | heroFrac 0,09–0,13 | [V] |
+| Capas P / G / R / F | P = oclusores de esquina (roca, follaje); G = camino de 1,2–2,4 H por cambio de material; R = puerta o fachada; F = torre o copa | [V] (toma dorada 1) |
+| Ritmo de árboles | fila de árboles como secuencia de pilares; los troncos como volumen, el follaje suelto como billboard | [H] |
+| Landmark al fondo | torre u orbe sobre el eje; dos lecturas (completo de lejos, fragmento de cerca) | [H] |
+| Fondo poblado | hasta el borde; fuera del mapa hace falta geometría construida | [V] (35 % de vacío si no) |
+| Sin columnas en orillas de agua | el agua nunca se clasifica en `planes` | [V] |
+
+## F-E · Exterior abierto (desierto)
+| Feature | Cifras / receta | Estado |
+|---|---|---|
+| Pitch / pies | **~38** (37–40) / (0,50; 0,65–0,69) | [V] |
+| Camino central | recto, centrado; el ancho cae lineal con la fila | [V] |
+| Filas de estatuas | esfinges o pilares a los lados, en secuencia | [H] |
+| Arcos de primer plano | marcos en las esquinas inferiores | [H] |
+| Fondo | borde superior en s ≈ 0,59 | [V] |
+| Escalones | ninguno visible (peldaño 0) | [V] |
+
+## F-C · Cueva (candidata, solo vista)
+Cornisa de 2–3 H; masas de roca > 4 H como muros; oscuridad; agua al fondo; sala de tumba axial con dos estatuas flanqueando el eje y escalera al fondo; roca de primer plano (v37). [H]
+
+## Compatibilidad entre grupos
+| Feature | F-D | F-T | F-B | F-E |
+|---|---|---|---|---|
+| Vistazo a la sala vecina | sí | no (sala cerrada) | no | no |
+| Baranda calada (A6) | sí | no | como borde de terraza | no |
+| Muros de cierre altos | solo sin vecina | sí (8 H) | no (vegetación) | no |
+| Cinta de camino o alfombra | no | sí (alfombra) | como material del camino | camino de piedra |
+| Calcomanía en el hotspot | sí | emblema o medallón | no | no |
+| Simetría exacta | no | sí | no | sí (camino central) |
+| Secuencia de pilares | pilares | filas de pilares | árboles | estatuas |
+| Pitch | 25 | ≈ 33–35 | sin medir | ~38 |
+
+---
+
+## 15. Nunca probados, para pulido
+A3b, A8 (paso por detrás), A416 (encuadre hacia el avance), el modelo de cámara de [U] (A428), el bloqueo suave (A434), B1 como truco, B3 (altura fingida), B5 (cara de caída), N1, C5, C7, el pitch por zona como parámetro del visor (T55) y la luz y sombra estática (v66 H9, Unity).
+
+## 16. Abierto (lo que falta para que el modelo genere 2D-HD)
+1. **Regla de forma de sala** en la generación: ancho de pasillo, profundidad útil ~17 H y recinto cerca del camino (A465).
+2. **Relieve desde el mapa viejo:** escaleras y niveles (A229).
+3. **Fondo construido fuera del mapa** en exteriores.
+4. **Prueba de Generación en ciego:** piso 3 de la Torre del Soñador (A466).
+5. **Cámara de otro juego 2D-HD,** medida.
+6. **Diferencia del alto del héroe** entre 0202 y 0137 (A366).
+7. **Ancla v1 sin aprobar.**
 
 ## 17. Historial
 | Versión | Fecha | Cambio | IDs |
 |---|---|---|---|
-| v1 | 2026-11-18 | Creación: compila el informe integrado v319, las fichas v318, la BRÚJULA, la PLANTILLA, las DEFINICIONES de T26, la v66 y el Registro A358–A462; aplica las decisiones de [U] de escala (`tilesPerH` 1,5), terraza (1,25 H) y subterrazas (2) | A463, A464 |
+| v1 | 2026-11-18 | Compilado único con escala, terraza y subterrazas decididas | A463, A464 |
+| v2 | 2026-11-18 | Tres partes (modelo acumulado, base principal, features por tipo de escena); el modelo acumulado cubre el Registro completo A001–A466; el modelo pasa a ser el resultado incompleto de la metodología y su criterio de fin es generar 2D-HD | A467–A469 |
