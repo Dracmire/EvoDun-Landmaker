@@ -1,0 +1,90 @@
+{
+ "A": {
+  "a0ea7": {
+   "pos": "m2",
+   "kind": "Q:A4:m2",
+   "1": "TECHOp-A4",
+   "2": "TECHOp"
+  },
+  "a15c3": {
+   "pos": "m3",
+   "kind": "Q:A4:m3",
+   "1": "TECHOp-A4",
+   "2": "TECHOp"
+  },
+  "aabcb": {
+   "pos": "n1",
+   "kind": "Q:A4:n1",
+   "1": "TECHOp-A4",
+   "2": "TECHOp"
+  },
+  "ae464": {
+   "pos": "n2",
+   "kind": "Q:A4:n2",
+   "1": "TECHOp-A4",
+   "2": "TECHOp"
+  },
+  "ad47a": {
+   "pos": "n3",
+   "kind": "Q:A4:n3",
+   "1": "TECHOp",
+   "2": "TECHOp-A4"
+  },
+  "a68ac": {
+   "pos": "m3",
+   "kind": "CTL:techo",
+   "1": "TECHOp",
+   "2": "SUELO"
+  },
+  "a938a": {
+   "pos": "m3",
+   "kind": "CTL:senuelo",
+   "1": "SUELO",
+   "2": "SENUELO2"
+  },
+  "ab0f9": {
+   "pos": "n3",
+   "kind": "REP:A4:n3",
+   "1": "TECHOp-A4",
+   "2": "TECHOp"
+  }
+ },
+ "B": {
+  "b144e": {
+   "pos": "m2",
+   "kind": "Q:A3a:m2",
+   "1": "TECHOp",
+   "2": "TECHOp-A3a"
+  },
+  "b828e": {
+   "pos": "m3",
+   "kind": "Q:A3a:m3",
+   "1": "TECHOp-A3a",
+   "2": "TECHOp"
+  },
+  "b4c60": {
+   "pos": "n1",
+   "kind": "Q:A3a:n1",
+   "1": "TECHOp",
+   "2": "TECHOp-A3a"
+  },
+  "bf820": {
+   "pos": "n1",
+   "kind": "CTL:techo",
+   "1": "TECHOp",
+   "2": "SUELO"
+  },
+  "ba8e5": {
+   "pos": "n1",
+   "kind": "CTL:senuelo",
+   "1": "SENUELO2",
+   "2": "SUELO"
+  },
+  "ba51c": {
+   "pos": "m3",
+   "kind": "REP:A3a:m3",
+   "1": "TECHOp",
+   "2": "TECHOp-A3a"
+  }
+ }
+}

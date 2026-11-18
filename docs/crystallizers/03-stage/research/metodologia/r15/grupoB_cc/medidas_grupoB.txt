@@ -1,0 +1,72 @@
+medidas_grupoB.txt · R1.5 Sala T · grupo B · v322
+
+PARAMETROS FINALES (todo lo demas = scratch/tuned.json)
+  A3a: columna 2x2, x4 z33 (tiles 4-5 x 33-34), h 8 H sobre el anillo (suelo 2,5 H); lado izquierdo; blocked (anillo azul).
+  A4 : muesca-repisa: tiles x15-19 z52 bajados a 5 tiles (2,5 H), pared z53-55 intacta (sin fondo vacio); billboard 'pillar' tono claro #fff3c4, x17,5 y3,9, hH 1,5, wH 2,0, sin etiqueta ni sombra.
+  B3 (no construido): isla x10 z22 4x5, +1,5 H. A3b (no construido): x27 z3 w2-3 d1 h4 H.
+  Altura/encuadre: hf s 0,108 m 0,128 n 0,128; hs n [0,63; 0,58]; s [0,5; 0,47]; m sin hs. Camara: ninguna pieza cortada por la regla (cuts: todas vacias).
+
+CAMBIOS AL ARNES (ver arnes_cambios/): world.js (rama notch de A4), gates.js (caja A4 = columna del tile 0..16 tiles), measure.js (filtro de borde en A4, M2), measureU.js (medida de union, M1). src/ intacto.
+
+ITERACIONES (una colocacion final por truco)
+  A3a (1 no-op, 5 contadas; medida original):
+    it1 x4 z32 h6      1/6 (n1). m1-m3: top_leaves_frame y_min 19; n3: separacion 421/501 filas.
+    it2 x4 z33 h8      3/6 (m1-m3). n1 top_leaves_frame y_min 41; n3 box_in_side_strip x1 0,185; n2 0 px.
+    it3 x4 z33 h7      3/6, cifras identicas a it2 (no-op: la altura extra sale del cuadro; el supervisor no la cuenta).
+    it4 x4 z33 h6,5    3/6, identica (no-op igual; contada por mi).
+    it5 x4 z32 h6,5    1/6, identica a it1.
+    it6 x5 z33 h8      3/6 (m1-m3); n1 width 0,107; n2 width 0,022 y top y_min 302; n3 x1 0,185.
+    Medida de union (re-medicion de lo ya renderizado): it2 4/6 (m1-m3, n1); it6 m1 width 0,109 fallo, 3 de 6 con n1 width 0,133; it1 2/6.
+    Elegida: it2 (x4 z33 h8).
+  A4 (2 iteraciones): it1 x17,5 y3,9 hH1,5 wH2,0 hT5: puerta con la medida de arnes 2/6 (m2, m3), el resto falla solo px_covering_nearer_pieces (204-243 px de borde); it2 misma escena con el filtro M2: 6/6.
+  B3: 1 iteracion, 0/3.   A3b: 2 iteraciones, 0/6 (medida original) / 2/6 (union).
+
+CONTROLES (todos los estados; mascara = hash de S.block y regiones, camino, meta; nada sobre el camino = volOnPath; billboards+rojo <= 30 %; heroe tapado <= 25 %; fondo vacio <= 2 %)
+  SUELO_m1         masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=0.00 % total=0.00 % heroe=0.00 % vacio=0.169 %  OK
+  SUELO_m2         masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=0.00 % total=0.00 % heroe=0.00 % vacio=0.201 %  OK
+  SUELO_m3         masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=0.00 % total=0.00 % heroe=0.00 % vacio=0.201 %  OK
+  SUELO_n1         masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=0.00 % total=0.00 % heroe=0.00 % vacio=0.269 %  OK
+  SUELO_n2         masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=0.00 % total=0.00 % heroe=0.00 % vacio=0.267 %  OK
+  SUELO_n3         masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=0.00 % total=0.00 % heroe=0.00 % vacio=0.378 %  OK
+  SUELO_s1         masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=0.00 % total=0.00 % heroe=0.00 % vacio=0.112 %  OK
+  SUELO_s2         masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=0.00 % total=0.00 % heroe=0.00 % vacio=0.113 %  OK
+  SUELO_s3         masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=0.00 % total=0.00 % heroe=0.00 % vacio=0.113 %  OK
+  TECHOp-A3a_m1    masc=ok camino=ok meta=ok sobreCamino=0 bill=0.92 % rojo=28.65 % total=29.57 % heroe=0.00 % vacio=0.176 %  OK
+  TECHOp-A3a_m2    masc=ok camino=ok meta=ok sobreCamino=0 bill=0.98 % rojo=23.96 % total=24.94 % heroe=0.00 % vacio=0.215 %  OK
+  TECHOp-A3a_m3    masc=ok camino=ok meta=ok sobreCamino=0 bill=0.98 % rojo=23.96 % total=24.94 % heroe=0.00 % vacio=0.215 %  OK
+  TECHOp-A3a_n1    masc=ok camino=ok meta=ok sobreCamino=0 bill=1.26 % rojo=13.01 % total=14.27 % heroe=0.00 % vacio=0.265 %  OK
+  TECHOp-A3a_n2    masc=ok camino=ok meta=ok sobreCamino=0 bill=1.27 % rojo=13.43 % total=14.70 % heroe=0.00 % vacio=0.263 %  OK
+  TECHOp-A3a_n3    masc=ok camino=ok meta=ok sobreCamino=0 bill=1.26 % rojo=11.47 % total=12.73 % heroe=0.00 % vacio=0.374 %  OK
+  TECHOp-A4_m1     masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=31.12 % total=31.12 % heroe=0.00 % vacio=0.173 %  FALLA
+  TECHOp-A4_m2     masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=25.60 % total=25.60 % heroe=0.00 % vacio=0.201 %  OK
+  TECHOp-A4_m3     masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=25.60 % total=25.60 % heroe=0.00 % vacio=0.201 %  OK
+  TECHOp-A4_n1     masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=17.19 % total=17.19 % heroe=0.00 % vacio=0.264 %  OK
+  TECHOp-A4_n2     masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=13.44 % total=13.44 % heroe=0.00 % vacio=0.263 %  OK
+  TECHOp-A4_n3     masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=18.43 % total=18.43 % heroe=0.00 % vacio=0.372 %  OK
+  TECHOp_m1        masc=ok camino=ok meta=ok sobreCamino=0 bill=0.92 % rojo=31.12 % total=32.04 % heroe=0.00 % vacio=0.176 %  FALLA
+  TECHOp_m2        masc=ok camino=ok meta=ok sobreCamino=0 bill=0.98 % rojo=25.60 % total=26.58 % heroe=0.00 % vacio=0.215 %  OK
+  TECHOp_m3        masc=ok camino=ok meta=ok sobreCamino=0 bill=0.98 % rojo=25.60 % total=26.58 % heroe=0.00 % vacio=0.215 %  OK
+  TECHOp_n1        masc=ok camino=ok meta=ok sobreCamino=0 bill=1.26 % rojo=17.19 % total=18.45 % heroe=0.00 % vacio=0.264 %  OK
+  TECHOp_n2        masc=ok camino=ok meta=ok sobreCamino=0 bill=1.27 % rojo=13.44 % total=14.71 % heroe=0.00 % vacio=0.263 %  OK
+  TECHOp_n3        masc=ok camino=ok meta=ok sobreCamino=0 bill=1.26 % rojo=18.43 % total=19.70 % heroe=0.00 % vacio=0.373 %  OK
+  TECHOp_s1        masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=18.09 % total=18.09 % heroe=0.00 % vacio=0.127 %  OK
+  TECHOp_s2        masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=18.07 % total=18.07 % heroe=0.00 % vacio=0.128 %  OK
+  TECHOp_s3        masc=ok camino=ok meta=ok sobreCamino=0 bill=0.00 % rojo=18.27 % total=18.27 % heroe=0.00 % vacio=0.128 %  OK
+  Estados que fallan algun control: TECHOp-A4_m1, TECHOp_m1
+  (SUELO es identico al de la V2/preparador: hashes de los 9 SUELO_<pos> iguales.)
+
+AISLAMIENTO (diff de TECHO' contra TECHO'-X fuera de la caja de X + 0,02; pixeles distintos / fuera / %)
+  A3a m1: 24855 / 0 / 0.00 %  caja [-183, -424, 145, 406]
+  A3a m2: 16628 / 0 / 0.00 %  caja [-239, -434, 119, 442]
+  A3a m3: 16628 / 0 / 0.00 %  caja [-239, -434, 119, 442]
+  A3a n1: 41527 / 0 / 0.00 %  caja [-261, -481, 168, 596]
+  A3a n2: 0 / 0 / 0.00 %  caja [-464, -481, 31, 596]
+  A3a n3: 68832 / 0 / 0.00 %  caja [-58, -481, 304, 596]
+  A4 m1: 20899 / 0 / 0.00 %  caja [458, -209, 653, 252]
+  A4 m2: 24508 / 0 / 0.00 %  caja [451, -206, 653, 269]
+  A4 m3: 24508 / 0 / 0.00 %  caja [451, -206, 653, 269]
+  A4 n1: 40748 / 0 / 0.00 %  caja [548, -195, 771, 339]
+  A4 n2: 41926 / 0 / 0.00 %  caja [446, -195, 668, 339]
+  A4 n3: 40648 / 0 / 0.00 %  caja [645, -195, 874, 339]
+  A3a n2: columna fuera de cuadro (0 px), TECHO' = TECHO'-A3a en esa posicion.
+  A4: la caja es la columna del tile 0..16 tiles (la cara baja cambia de degradado al bajar el tile) union el rectangulo del billboard.

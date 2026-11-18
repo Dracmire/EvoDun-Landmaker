@@ -51,3 +51,18 @@ Decisión de [R]: G4-M1, M2, M4 y M5 quedan NO MEDIBLES con estas tomas (no cuen
 - Control: en el render 0137 (una sola cámara) las verticales exteriores coinciden con la predicha (diferencia ≤ su error). Si no, el método no vale.
 - Firma de [R]: creo que M6 falla (≈ 65 %): una sola cámara.
 - Decisión: M6 se cumple y el control pasa → evidencia de otra proyección y se escribe G4-C. M6 falla con control válido → la hipótesis no se apoya en 0137. Sin verticales exteriores medibles → G4-M queda NULO con estas tomas y se cierra; reabrirlo exige otra toma (no se abre ninguna toma nueva del piso ciego).
+
+## Enmienda 3 (2026-11-17 02:55, PARADA 2 de CC, antes de cualquier medida)
+- M6 solo se evalúa en la toma 0137. La 0202 no tiene verticales exteriores (lo de afuera mide ≈ 43 px): M6 no medible en 0202.
+- Vo1–Vo3 de la toma 0137 se aceptan como EXTERIORES (nacen detrás del balaustre izquierdo; su base no se ve). Se informan por separado, con la nota «base no visible».
+- Las interiores Vi1–Vi4 de la 0137 miden ≈ 65 px (≥ 60, declarado); Vi3 y Vi4 son las únicas lejanas del centro.
+- Control: en el render 0137 hay una sola vertical exterior (Vo1, 66 px). El control se hace con ella y se declara DÉBIL (n = 1). Si esa vertical no coincide con la predicha por el punto interior del render, el método no vale y M6 queda nulo.
+- La regla de decisión de la Enmienda 2 no cambia.
+
+## Enmienda 3 (2026-11-17 03:00, tras la PARADA 2 de CC y ANTES de medir)
+- 0202 (toma y render) sin verticales exteriores ≥ 60 px: M6 se mide SOLO en la toma 0137.
+- [R] acepta Vo1–Vo3 de la toma 0137 como exteriores (pilares que nacen detrás del balaustre izquierdo, en el salón de abajo; lectura de CC confirmada a vista por [R], declarada como lectura). Verticales interiores de 60–80 px aceptadas (la regla lo permitía, declarado).
+- Control del método en el render 0137: con una sola Vo (66 px), se compara contra el punto de fuga vertical ANALÍTICO de la cámara (640, 3241), no contra el grupo interior.
+- Precisión: cada recta se ajusta por mínimos cuadrados a los puntos de borde a lo largo de toda su longitud (no por dos extremos a mano); se informa σ del ángulo.
+- Tercer resultado posible: si para una Vo el error (2σ) es ≥ la mitad de su inclinación predicha, esa Vo es NO CONCLUYENTE. Si todas las Vo son no concluyentes, G4-M queda NULO y G4 se cierra sin construir.
+- Cálculo previo de [R] (para fijar expectativas, no es dato): con pitch ≈ 23–25° y FOV 30°, una vertical a 220–256 px del centro debe inclinarse ≈ 4° en perspectiva; ortográfica, 0°. Con ±5 px en 91 px el error sería ≈ 4°: probablemente NO CONCLUYENTE salvo que el ajuste por borde baje σ a ≲ 1°.

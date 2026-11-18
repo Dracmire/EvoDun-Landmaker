@@ -1,0 +1,58 @@
+presencia_grupoB.txt · R1.5 Sala T · grupo B (A3a, A3b, A4, B3) · v322
+
+Entorno: arbol e882c5c sin cambios en src/; arnes del preparador (rama docs/stage-metodologia-v319, e05225d) con scratch/tuned.json; cierre 8 H; A6, C3 y C2 como en tuned.json.
+Sin juicio de composicion: solo cifras de las puertas de la ficha.
+
+RESUMEN
+  A4   PRESENTE en 6/6 posiciones (m1-m3, n1-n3). CONSTRUIDO.
+  A3a  PRESENTE en 3/6 con la medida ORIGINAL del arnes (m1-m3), 4/6 con la medida corregida de union (m1-m3 + n1). Ver nota M1: la decision es del supervisor.
+  B3   NO CONSTRUIBLE sobre la isla real: cara superior 0,433-0,533 % del cuadro (puerta >= 1 %) en s1-s3 (0/3).
+  A3b  NO CONSTRUIBLE: techo 3/6 (en n1-n3 no hay masa visible: 0 px; en s1-s3 sale como maximo 2/3 por render). Puerta no pasada en >= 2/3.
+
+TECHO' = A6 + A3a + A4 + C3 + C2 (B3 y A3b NO entran: no construibles).
+
+
+== A4 vano (muesca-repisa + billboard claro) ==
+  m1: PRESENTE  width=0.081 · height=0.108 · centre_x=0.439 · centre_y=0.105 · luminance_ratio_ge_2=0.914 / 0.33 = 2.767 · px_covering_nearer_pieces=0 (sin filtro de borde: 204)
+  m2: PRESENTE  width=0.084 · height=0.112 · centre_x=0.437 · centre_y=0.122 · luminance_ratio_ge_2=0.92 / 0.331 = 2.785 · px_covering_nearer_pieces=0
+  m3: PRESENTE  width=0.084 · height=0.112 · centre_x=0.437 · centre_y=0.122 · luminance_ratio_ge_2=0.92 / 0.331 = 2.785 · px_covering_nearer_pieces=0
+  n1: PRESENTE  width=0.096 · height=0.127 · centre_x=0.514 · centre_y=0.191 · luminance_ratio_ge_2=0.917 / 0.337 = 2.723 · px_covering_nearer_pieces=0 (sin filtro de borde: 241)
+  n2: PRESENTE  width=0.096 · height=0.127 · centre_x=0.442 · centre_y=0.191 · luminance_ratio_ge_2=0.912 / 0.334 = 2.73 · px_covering_nearer_pieces=0 (sin filtro de borde: 243)
+  n3: PRESENTE  width=0.096 · height=0.127 · centre_x=0.585 · centre_y=0.191 · luminance_ratio_ge_2=0.916 / 0.341 = 2.683 · px_covering_nearer_pieces=0 (sin filtro de borde: 240)
+
+== A3a columna suelta (medida original: componente conexa mayor) ==
+  m1: PRESENTE  box_in_side_strip=x [0, 0.058] · width=0.059 · top_leaves_frame=y_min 0 · base_below_0.40=0.423 · px_in_centre_0.22_0.78=0 · separation_fused_rows=0/304 rows
+  m2: PRESENTE  box_in_side_strip=x [0, 0.058] · width=0.059 · top_leaves_frame=y_min 0 · base_below_0.40=0.467 · px_in_centre_0.22_0.78=0 · separation_fused_rows=0/318 rows
+  m3: PRESENTE  box_in_side_strip=x [0, 0.058] · width=0.059 · top_leaves_frame=y_min 0 · base_below_0.40=0.467 · px_in_centre_0.22_0.78=0 · separation_fused_rows=0/318 rows
+  n1: AUSENTE  box_in_side_strip=x [0, 0.067] · width=0.068 · top_leaves_frame=y_min 41 · base_below_0.40=0.661 · px_in_centre_0.22_0.78=0 · separation_fused_rows=2/434 rows  | FALLA: top_leaves_frame = y_min 41
+  n2: AUSENTE  px=0  | FALLA: column_visible_px = 0
+  n3: AUSENTE  box_in_side_strip=x [0.088, 0.185] · width=0.098 · top_leaves_frame=y_min 0 · base_below_0.40=0.661 · px_in_centre_0.22_0.78=0 · separation_fused_rows=0/475 rows  | FALLA: box_in_side_strip = x [0.088, 0.185]
+
+== A3a columna suelta (medida corregida: union de componentes >= 300 px; ver M1) ==
+  m1: PRESENTE  box_in_side_strip=x [0, 0.08] · width=0.08 · top_leaves_frame=y_min 0 · base_below_0.40=0.423 · px_in_centre_0.22_0.78=0 · separation_fused_rows=0/304 rows
+  m2: PRESENTE  box_in_side_strip=x [0, 0.058] · width=0.059 · top_leaves_frame=y_min 0 · base_below_0.40=0.467 · px_in_centre_0.22_0.78=0 · separation_fused_rows=0/336 rows
+  m3: PRESENTE  box_in_side_strip=x [0, 0.058] · width=0.059 · top_leaves_frame=y_min 0 · base_below_0.40=0.467 · px_in_centre_0.22_0.78=0 · separation_fused_rows=0/336 rows
+  n1: PRESENTE  box_in_side_strip=x [0, 0.095] · width=0.095 · top_leaves_frame=y_min 0 · base_below_0.40=0.661 · px_in_centre_0.22_0.78=0 · separation_fused_rows=0/475 rows
+  n2: AUSENTE  px=0  | FALLA: column_visible_px = 0
+  n3: AUSENTE  box_in_side_strip=x [0.042, 0.205] · width=0.164 · top_leaves_frame=y_min 0 · base_below_0.40=0.661 · px_in_centre_0.22_0.78=0 · separation_fused_rows=397/475 rows  | FALLA: box_in_side_strip = x [0.042, 0.205]; width = 0.164; separation_fused_rows = 397/475 rows
+
+== B3 altura fingida (NO CONSTRUIBLE) ==
+  Isla real x10-13, z22-26 (4x5), sube 1,5 H, cara superior en otro tono (#c9785a). 1 iteracion, composicion A6+C3+C2+B3:
+  s1: AUSENTE  top_face_ge_1pct_of_frame = 0,495 %  (raised 1,5 H, banda B4, centroide x 0,278: esas tres puertas pasan)
+  s2: AUSENTE  top_face_ge_1pct_of_frame = 0,533 %  (banda B4, centroide x 0,331)
+  s3: AUSENTE  top_face_ge_1pct_of_frame = 0,433 %  (banda B4, centroide x 0,222)
+  Cifra: 0/3 posiciones. La cara superior de la isla (4x5 tiles) no llega al 1 % del cuadro; ademas la columna de C2 tapa parte de ella (en s1 la columna de C2 se interpone en la imagen). No se probo otra altura ni otro tamano (instruccion: isla real, 1,5 H).
+
+== A3b masa de esquina (NO CONSTRUIBLE) ==
+  Candidata: x27 z3, d1, h4 H, lado derecho (opuesto a A3a). Elegida con un barrido de proyeccion de 80 candidatas que pasan s1-s3; ninguna pasa una posicion s y una n a la vez.
+  Render, medida ORIGINAL (componente conexa mayor), w=2 y w=3 (2 iteraciones, mismas cifras):
+    s1 AUSENTE width = 0,080 | s2 AUSENTE width = 0,089 | s3 AUSENTE width = 0,070 (w=3: s3 0,080)  [cada cara de tile es una componente aparte: el contorno entre tiles las separa]
+    n1, n2, n3 AUSENTE mass_visible_px = 0 (ningun tile bloqueado llega al borde inferior en las posiciones n)
+  Misma escena, medida de UNION (M1): w=2: s1 PRESENTE (ancho 0,145, alto 0,418), s2 PRESENTE (0,135, 0,418), s3 AUSENTE px_in_centre_below_0.60 = 426; n1-n3 mass_visible_px = 0.  w=3: s1 0,195 PRESENTE, s2 0,135 PRESENTE, s3 AUSENTE (426).
+  Techo confirmado: 3/6 como maximo (n = 0/3 por render) < 2/3. No se fuerza.
+
+CONTROL ROJO EN m1: TECHO'_m1 = 32,04 % (billboards+rojo > 30 %). Con A3a fuera (TECHO'-A3a_m1) = 29,57 %; A3a anade 2,5 puntos de rojo (su columna sale por arriba). TECHO'-A4_m1 tambien 31,12 %. El resto de estados cumple todos los controles. Decision del supervisor: quitar A3a o aceptar.
+
+NOTAS DE MEDIDA (declaradas)
+  M1. Componente conexa mayor (`largest` de measure.js): en el render de ids cada cara de tile queda separada por el contorno, asi que una masa de varios tiles se mide como UNA cara. Medida corregida (solo para A3a y A3b, mismas puertas y rangos): union de componentes >= 300 px. Se dan las dos columnas. El veredicto A3a 3/6 o 4/6 depende de cual se adopte.
+  M2. A4, puerta 'px_covering_nearer_pieces': el render de ids mezcla codigos en los bordes (pixeles de borde con un id falso). Se aplica el mismo filtro ya declarado en maskTiles (>= 3 de 8 vecinos con el mismo id). Sin filtro: m1 204, n1 241, n2 243, n3 240, m2 0, m3 0.
