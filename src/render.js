@@ -75,8 +75,9 @@
     const base = S.baseH !== undefined ? S.baseH : S.levelH[0] - P.terH, top = S.levelH[S.maxFine];
     const fb = S.sliceBox ? [S.sliceBox.x0 - 2, S.sliceBox.y0 - 2, S.sliceBox.x1 + 2, S.sliceBox.y1 + 2] : [0, 0, S.W, S.H], hs = S.fitH || [base, top + 1.5];
     const hF = view.focus ? view.focus[2] : (Math.min(...hs) + Math.max(...hs)) / 2 + (E.stageTest && E.stageTest.focusLeak ? 0.01 : 0), tanH = Math.tan(PERSP_FOV / 2); // view.focus = [x, y, h] (optional, the Stage hero tracking, src/stage.js): the pivot is that point; absent = the camera of today
+    const zS = view.zScale === undefined ? 1 : view.zScale; // Cam 8 (B6): optional DEPTH SCALE of the ground along the view axis: the view-space depth u of every point is multiplied by zS before the projection (the width, the heights and the pitch do not change); absent / 1 = the camera of today, byte for byte (x * 1 and x / 1 are exact)
     const vS = view.vScale === undefined ? 1 : view.vScale; // M4c-0: optional VERTICAL SCALE of the world about the pivot height (heights above or below hF are multiplied; the pivot does not move); absent / 1 = the camera of today, byte for byte
-    const relTo = (X0, Y0, vv) => (x, y, hh) => { const X = x - X0, Y = y - Y0, hp = (hh - hF) * (vv === undefined ? vS : vv), u = sy * X + cy * Y; return [cy * X - sy * Y, u * sp - hp * cp, u * cp + hp * sp]; }; // [a, v, n] around the pivot
+    const relTo = (X0, Y0, vv) => (x, y, hh) => { const X = x - X0, Y = y - Y0, hp = (hh - hF) * (vv === undefined ? vS : vv), u = (sy * X + cy * Y) * zS; return [cy * X - sy * Y, u * sp - hp * cp, u * cp + hp * sp]; }; // [a, v, n] around the pivot (u: the view-space depth, scaled by zS)
     /* (the fit ignores the vertical scale: the pivot, the scale and D do not move) */ const cornersAt = (X0, Y0) => { const rel = relTo(X0, Y0, 1), c = []; for (const [x, y] of [[fb[0], fb[1]], [fb[2], fb[1]], [fb[0], fb[3]], [fb[2], fb[3]]]) for (const hh of hs) c.push(rel(x, y, hh)); return c; };
     const extentOf = (corners, D) => { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const [a, v, n] of corners) { const k = D / Math.max(D - n, 0.05 * D), px = a * k, py = v * k; x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py); } return [x0, x1, y0, y1]; };
     const f = ((view.persH || h) / 2) / tanH, avail = [w - 20, h - 20], sc1 = view.fitSc || 0;
@@ -86,25 +87,25 @@
     { const e = extentOf(cornersAt(X0, Y0), 1e9); sc0 = Math.min(avail[0] / (e[1] - e[0]), avail[1] / (e[3] - e[2])); }
     for (let it = 0; it < 14 && !view.focus; it++) { // (with a focus the pivot is given: no fit loop)
       const corners = cornersAt(X0, Y0), dMin = Math.max(...corners.map((c) => c[2])) + 1, D = Math.max(f / (sc1 || sc0), dMin), e = extentOf(corners, D);
-      const ecx = (e[0] + e[1]) / 2, ecy = (e[2] + e[3]) / 2, hp = 0, u1 = (ecy * D) / (D * sp + ecy * cp), n1 = u1 * cp, a1 = ecx * (D - n1) / D; // the ground point (on the plane hF) that the centre of the box has on screen, relative to the pivot
-      X0 += cy * a1 + sy * u1; Y0 += -sy * a1 + cy * u1;
+      const ecx = (e[0] + e[1]) / 2, ecy = (e[2] + e[3]) / 2, hp = 0, u1 = (ecy * D) / (D * sp + ecy * cp), n1 = u1 * cp, a1 = ecx * (D - n1) / D, u1m = u1 / zS; // the ground point (on the plane hF) that the centre of the box has on screen, relative to the pivot (u1 in view units, u1m in map units)
+      X0 += cy * a1 + sy * u1m; Y0 += -sy * a1 + cy * u1m;
       if (!sc1) sc0 = Math.min(avail[0] / (e[1] - e[0]), avail[1] / (e[3] - e[2]));
       if (Math.abs(a1) + Math.abs(u1) < 1e-9) break;
     }
     const fit = sc0, sc = (sc1 || sc0) * view.zoom, D = f / sc, ox = w / 2, oy = h / 2, zMin = 0.05 * D, Xb = X0, Yb = Y0;
     const mk = (X0, Y0) => { const rel = relTo(X0, Y0), proj = (x, y, hh) => { const [a, v, n] = rel(x, y, hh), k = D / Math.max(D - n, zMin); return [a * k * sc + ox, v * k * sc + oy]; }; return {
-      sc, base, fit, D, persp: true, pivot: [X0, Y0, hF], vScale: vS,
+      sc, base, fit, D, persp: true, pivot: [X0, Y0, hF], vScale: vS, zScale: zS,
       p: proj,
       unp: (px, py, hh) => { // exact: the ray of the pixel meets the plane at height hh (u is linear in the pixel row)
-        const xs = (px - ox) / sc, vs = (py - oy) / sc, hp = (hh - hF) * vS, u = (vs * (D - hp * sp) + D * hp * cp) / (D * sp + vs * cp), z = D - u * cp - hp * sp, a = xs * z / D;
-        return [cy * a + sy * u + X0, -sy * a + cy * u + Y0];
+        const xs = (px - ox) / sc, vs = (py - oy) / sc, hp = (hh - hF) * vS, u = (vs * (D - hp * sp) + D * hp * cp) / (D * sp + vs * cp), z = D - u * cp - hp * sp, a = xs * z / D, um = u / zS; // um: the depth back in map units
+        return [cy * a + sy * um + X0, -sy * a + cy * um + Y0];
       },
       depth: (x, y, hh) => rel(x, y, hh)[2], // toward the camera: larger = nearer (the z-buffer tests use 1 / (D - depth))
       ry: (x, y) => sy * (x - S.W / 2) + cy * (y - S.H / 2),
       nrm: (nx, ny, px, py) => { // [shading component, facing]; with a position the facing is the face normal against the vector from the face to the camera
         const rnx = cy * nx - sy * ny;
         if (px === undefined || E.camConstFacing) return [rnx, sy * nx + cy * ny]; // E.camConstFacing (diagnostic, off): the constant-normal culling of the orthographic cameras, to show what the facing test changes
-        const cu = D * cp, cx = X0 + sy * cu, cyy = Y0 + cy * cu, dx = cx - px, dy = cyy - py, len = Math.hypot(dx, dy) || 1;
+        const cu = D * cp / zS, cx = X0 + sy * cu, cyy = Y0 + cy * cu, dx = cx - px, dy = cyy - py, len = Math.hypot(dx, dy) || 1;
         const r = (nx * dx + ny * dy) / len, cst = E.camStats; // E.camStats (a test sets it): how many face tests the position changes compared with the constant normal
         if (cst) { const flip = (r > 0.001) !== ((sy * nx + cy * ny) > 0.001), q = proj(px, py, hF), on = q[0] >= 0 && q[0] <= w && q[1] >= 0 && q[1] <= h; cst.faces++; if (flip) cst.flipped++; if (on) { cst.onscreen = (cst.onscreen || 0) + 1; if (flip) cst.flippedOnscreen = (cst.flippedOnscreen || 0) + 1; } }
         return [rnx, r];
@@ -114,9 +115,9 @@
     // under the screen centre and the dolly distance D is measured to what is on screen (an image shift would leave the camera over the map centre and put a far-away focus point behind the camera at play scale).
     const c0 = mk(Xb, Yb), rel0 = relTo(Xb, Yb);
     // panFor: the pan (px) that brings the point (x, y, hh) to the screen centre, in closed form (the point must be at u' = hp * cp / sp and a' = 0 from the new pivot)
-    c0.panFor = (x, y, hh) => { const [aT] = rel0(x, y, hh), hp = (hh - hF) * vS, uT = sy * (x - Xb) + cy * (y - Yb), u1 = hp * cp / sp; return [-aT * sc, -(uT - u1) * sc * sp]; };
+    c0.panFor = (x, y, hh) => { const [aT] = rel0(x, y, hh), hp = (hh - hF) * vS, uT = (sy * (x - Xb) + cy * (y - Yb)) * zS, u1 = hp * cp / sp; return [-aT * sc, -(uT - u1) * sc * sp]; };
     if (!view.panX && !view.panY) return c0;
-    const sa = -view.panX / sc, su = -view.panY / (sc * sp);
+    const sa = -view.panX / sc, su = -view.panY / (sc * sp) / zS;
     const c1 = mk(Xb + cy * sa + sy * su, Yb - sy * sa + cy * su); c1.panFor = c0.panFor; return c1;
   }
 
@@ -795,6 +796,8 @@
 
   E.levelColor = levelColor; // exposed for the tests
     E.makeCam = makeCam;
+    /* CAM 8 (Stage compressed, B6): Cam 6 with the ground depth scaled by this factor (view.zScale of makePersp). A HYPOTHESIS: the remake shows 0.31-0.67 of the map's depth (A223); one value, one place. */
+    E.CAM8_ZSCALE = 0.5;
   E.fitScale = (S, P, view, w, h) => makeCam(S, P, Object.assign({}, view, { fitSc: 0, zoom: 1, panX: 0, panY: 0, focus: null, vScale: undefined }), w, h).fit; // px per tile at zoom 1 for a panel of w x h // exposed for the UI tests (screen position of a tile)
 
   function* drawSceneG(ctx, w, h, S, P, tech, view, o) {

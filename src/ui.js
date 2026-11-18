@@ -7,7 +7,7 @@
   const DISPLAY_KEYS = ['roomBorders', 'nowalk', 'gateMarks', 'rampLines', 'veil', 'border', 'markers', 'edgeWarn', 'typeTint', 'dioOutline']; // the Display toggles that an example (the 2D-HD window) may set, S1b + S2a
   for (const k of DISPLAY_KEYS) O0[k] = O[k];
   /* CAMERA BANK (a fixed, discrete set: nothing custom; every crystallizer uses it). The ids are the old preset ids (tests and the manifest use them); `cam` is the number shown. kind: ortho (yaw / pitch),
-     persp (Cam 6 Stage, FOV 30, true division by depth) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
+     persp (Cam 6 Stage, FOV 30, true division by depth; Cam 8 Stage compressed = Cam 6 with the optional `zScale` of the preset) or oblique (Cam 7 Classic 3/4: ground scale 1, height scale 1, no pitch). */
   const PRESETS = [
     { id: 'isoE', cam: 1, label: 'Cam 1', title: 'Cam 1 · Iso 45° (orthographic, yaw 45, pitch 35)', yaw: 45, pitch: 35, kind: 'ortho' },
     { id: 'isoW', cam: 2, label: 'Cam 2', title: 'Cam 2 · Iso −45° (orthographic, yaw −45, pitch 35)', yaw: -45, pitch: 35, kind: 'ortho' },
@@ -15,7 +15,8 @@
     { id: 'low', cam: 4, label: 'Cam 4', title: 'Cam 4 · Low 28° (orthographic, yaw 0)', yaw: 0, pitch: 28, kind: 'ortho' },
     { id: 'top', cam: 5, label: 'Cam 5', title: 'Cam 5 · Top 80° (orthographic, yaw 0)', yaw: 0, pitch: 80, kind: 'ortho' },
     { id: 'stage', cam: 6, label: 'Cam 6', title: 'Cam 6 · Stage (perspective, FOV 30, pitch 25, yaw 0)', yaw: 0, pitch: 25, kind: 'persp' },
-    { id: 'classic', cam: 7, label: 'Cam 7', title: 'Cam 7 · Classic 3/4 (oblique projection, ground scale 1, height scale 1)', yaw: 0, pitch: 0, kind: 'oblique' }
+    { id: 'classic', cam: 7, label: 'Cam 7', title: 'Cam 7 · Classic 3/4 (oblique projection, ground scale 1, height scale 1)', yaw: 0, pitch: 0, kind: 'oblique' },
+    { id: 'stagez', cam: 8, label: 'Cam 8', title: 'Cam 8 · Stage compressed (Cam 6 with the ground depth x ' + E.CAM8_ZSCALE + ': perspective, FOV 30, pitch 25, yaw 0)', yaw: 0, pitch: 25, kind: 'persp', zScale: E.CAM8_ZSCALE }
   ];
   const MACRO_NAMES = { exterior: 'Exterior', quad: 'Quadrant removed', interior: 'Interior only', cut: 'Horizontal cut' };
   const SLIDERS = [
@@ -746,6 +747,7 @@
     if (p.kind === 'oblique') return { kind: 'oblique', yaw: 0, pitch: 0, zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc }; // Cam 7 has no angle: the drag variation does not apply
     const sy0 = baseYaw(); // the camera's own yaw (a pack may declare stageYaw: the yaw of Cam 6, no UI)
     const v = { kind: p.kind, yaw: sy0 + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: st.zoom, panX: st.panX, panY: st.panY, fitSc: st.fitSc, persH: st.persH };
+    if (p.kind === 'persp' && p.zScale !== undefined) v.zScale = p.zScale; // Cam 8: the depth scale of the preset (absent in every other camera)
     if (p.kind === 'persp' && stageOn() && S && st.hero) v.focus = stageFocus(v); // Cam 6 hero tracking (mode 3 with a window only); absent = the camera of today
     if (p.kind === 'persp' && stageOn() && st.stage.vScale !== 1) v.vScale = st.stage.vScale; // M4c-0: the vertical scale of the world (optional; absent / 1 = the camera of today)
     if (v.focus && st.follow && st.stage.heroScreen && !frameRoom()) { const hs = heroScreenPan(v); if (hs) { v.panX = hs[0]; v.panY = hs[1]; } } // M4c-1b: the example says where the hero's feet fall on the panel; computed every frame (a resize keeps the framing); a manual pan / drag / follow off = as before
@@ -817,7 +819,7 @@
     for (const x of [b[0], b[2]]) for (const y of [b[1], b[3]]) for (const z of [r.hMin, r.hMax]) pts.push([x, y, z]);
     let sc = 0.5 * h / Math.max(8, Math.hypot(b[2] - b[0], b[3] - b[1]));
     for (let it = 0; it < 10; it++) {
-      const v = { kind: p.kind, yaw: baseYaw() + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: sc / st.fitSc, panX: 0, panY: 0, fitSc: st.fitSc, persH: st.persH, focus: [cx, cy, hm], vScale: st.stage.vScale !== 1 ? st.stage.vScale : undefined }, cam = E.makeCam(S, P, v, w, h); let mdx = 1e-6, mdy = 1e-6;
+      const v = { kind: p.kind, yaw: baseYaw() + st.yawOff, pitch: Math.max(15, Math.min(89, p.pitch + st.pitchOff)), zoom: sc / st.fitSc, panX: 0, panY: 0, fitSc: st.fitSc, persH: st.persH, focus: [cx, cy, hm], vScale: st.stage.vScale !== 1 ? st.stage.vScale : undefined, zScale: p.zScale }, cam = E.makeCam(S, P, v, w, h); let mdx = 1e-6, mdy = 1e-6;
       for (const q of pts) { const c = cam.p(q[0], q[1], q[2]); mdx = Math.max(mdx, Math.abs(c[0] - w / 2)); mdy = Math.max(mdy, Math.abs(c[1] - h / 2)); }
       const f = Math.min((w / 2 * FRAME_MARGIN) / mdx, (h / 2 * FRAME_MARGIN) / mdy); sc *= f; if (Math.abs(f - 1) < 0.004) break;
     }
@@ -832,15 +834,16 @@
     if (!st.follow && st.focus) return [st.focus[0] - S.ox, st.focus[1] - S.oy, st.focus[2]];
     if (frameRoom()) { const rf = roomFit(orientRoom()); if (rf) { st.stageClamp = null; st.focus = [rf.focus[0] + S.ox, rf.focus[1] + S.oy, rf.focus[2]]; return rf.focus; } } // C1: the room framing: the room's box centre, no hero clamp
     const [w, h] = stageDims(), hw = heroWin(), box = S.sliceBox || { x0: 0, y0: 0, x1: S.W, y1: S.H };
-    const c = w > 0 && h > 0 ? sg.clamp(hw.x, hw.y, box, v.yaw, v.pitch, sg.dist(st.stage.heroFrac, tp), w, h) : { x: hw.x, y: hw.y, clamped: false };
+    const c = w > 0 && h > 0 ? sg.clamp(hw.x, hw.y, box, v.yaw, v.pitch, sg.dist(st.stage.heroFrac, tp), w, h, v.zScale) : { x: hw.x, y: hw.y, clamped: false };
     st.stageClamp = c.clamped ? c : null; st.focus = [c.x + S.ox, c.y + S.oy, hc]; return [c.x, c.y, hc];
   }
   /* M4c-1b: the pan that puts the hero's feet at st.stage.heroScreen = [fx, fy] of the panel (E.stage.screenPan, closed form), from the camera target v.focus (which may be clamped: the pivot it needs is expressed from that target). null when the panel has no size yet. */
   function heroScreenPan(v) {
     const [w, h] = stageDims(), hs = st.stage.heroScreen, sc = st.fitSc * v.zoom; if (!(w > 0 && h > 0 && sc > 0) || !hs) return null;
     const D = ((st.persH || h) / 2) / E.stage.TAN / sc, hw = heroWin(), feet = heroFeet(), q = E.stage.screenPan((hs[0] - 0.5) * w, (hs[1] - 0.5) * h, { sc, D, pitch: v.pitch, feet, hF: v.focus[2], vScale: v.vScale });
+    const zS = v.zScale === undefined ? 1 : v.zScale; // Cam 8: the hero's offset from the target along the view axis is scaled before it enters the view-space pan
     const ya = v.yaw * Math.PI / 180, cy = Math.cos(ya), sy = Math.sin(ya), sp = Math.sin(v.pitch * Math.PI / 180), dx = hw.x - v.focus[0], dy = hw.y - v.focus[1]; // the hero from the target, in (right, toward the camera)
-    return [q[0] - (cy * dx - sy * dy) * sc, q[1] - (sy * dx + cy * dy) * sc * sp];
+    return [q[0] - (cy * dx - sy * dy) * sc, q[1] - (sy * dx + cy * dy) * zS * sc * sp];
   }
   function setHero(x, y) { st.hero = { x, y }; invalidate(false); }
   function stageBeforeDraw() { // in draw(), after the fit: the hero exists, the tracking sets the zoom, O.hero is what the renderer draws

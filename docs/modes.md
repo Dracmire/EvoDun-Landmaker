@@ -14,7 +14,7 @@ Terraces, ramps and the techniques Box, A, B and C on any heightmap: the same da
 | id | `terrain` |
 | examples (first = default) | Snake Mountain surface (`snake_surface`); Real map 256 (`real_map`); Shrine-Pier (`shrine_pier`); Shrine-Pier x4 (`shrine_pier_x4`); Snake Mountain (caves subtracted) (`snake`); Value noise (`noise`); Your images (PNG + roles) |
 | camera (default) | `oblique` |
-| cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic` |
+| cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic`, `stagez` |
 | technique (default) | `A` |
 | techniques offered | `box`, `A`, `B`, `C` |
 | compare | yes (on at entry) |
@@ -37,7 +37,7 @@ Room types (Diorama, Ascension, Cake) on a map with rooms: Cake rings, Ascension
 | id | `rooms` |
 | examples (first = default) | Real map · Balanced (3 types, connected) (`real_map`); Real map · Default (`real_map`); Chain (5 terraces) (`real_map`); Cake · bowl (room 60) (`real_map`); Cake · bowl + pyramid (room 85) (`real_map`); Ascension · walls (room 88) (`real_map`); Pocket · Diorama 31 (`real_map`); Your images (PNG + roles) |
 | camera (default) | `isoE` |
-| cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic` |
+| cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic`, `stagez` |
 | technique (default) | `A` |
 | techniques offered | `box`, `A`, `B`, `C` |
 | compare | no |
@@ -62,7 +62,7 @@ Banner: **2D-HD crystallizer: in construction (S1)**
 | id | `stage` |
 | examples (first = default) | DAC window (2D-HD, S1) (`real_map`); Shrine-Pier x4 · Stage (legacy contract) (`shrine_pier_x4`); Diorama 31 · Stage (legacy contract) (`real_map`); Your images (PNG + roles); Forest A (v53) (`forest_a`); Forest B (amplified relief) (`forest_b`); Aurhea's Fountain (old map, water) (`aurhea`); Throne room of Aliahan (MAPA 1, the world) (`throne`); Golden shot 1 · Shrine door (hand-placed layers) (`forest_b`); DEGENERATION D1 · Throne room (billboards) — do not imitate (`forest_b`); Room 14 · orientation (mock T Z) (`real_map`); Room 44 · orientation (mock T X) (`real_map`) |
 | camera (default) | `stage` |
-| cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic` |
+| cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic`, `stagez` |
 | technique (default) | `box` |
 | techniques offered | `box`, `B` |
 | compare | no |
@@ -85,7 +85,7 @@ Tiles to curves (technique C, Unexplored 2 style): displaced Voronoi contours an
 | id | `curves` |
 | examples (first = default) | Snake Mountain surface (`snake_surface`); Real map · Default (`real_map`); Real map · Balanced types (`real_map`); Shrine-Pier x4 (`shrine_pier_x4`); Your images (PNG + roles) |
 | camera (default) | `oblique` |
-| cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic` |
+| cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic`, `stagez` |
 | technique (default) | `C` |
 | techniques offered | `C` |
 | compare | yes (off at entry) |

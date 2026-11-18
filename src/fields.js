@@ -266,7 +266,7 @@
       const v = json.viewer, num = (k, lo, hi) => { if (v[k] !== undefined && !(Number.isInteger(v[k]) && v[k] >= lo && v[k] <= hi)) throw new Error(`Manifest: viewer.${k} must be an integer from ${lo} to ${hi}.`); };
       if (typeof v !== 'object') throw new Error('Manifest: viewer must be an object.');
       if (v.preset !== undefined && !['default', 'balanced', 'custom'].includes(v.preset)) throw new Error('Manifest: viewer.preset must be "default", "balanced" or "custom".');
-      if (v.camera !== undefined && !['isoE', 'isoW', 'oblique', 'low', 'top', 'stage', 'classic'].includes(v.camera)) throw new Error('Manifest: viewer.camera must be one of the camera bank ids (isoE, isoW, oblique, low, top, stage, classic).');
+      if (v.camera !== undefined && !['isoE', 'isoW', 'oblique', 'low', 'top', 'stage', 'classic', 'stagez'].includes(v.camera)) throw new Error('Manifest: viewer.camera must be one of the camera bank ids (isoE, isoW, oblique, low, top, stage, classic, stagez).');
       if (v.wallPass !== undefined && !['t3', 't2', 'off'].includes(v.wallPass)) throw new Error('Manifest: viewer.wallPass must be "t3", "t2" or "off".');
       for (const [k, lo, hi] of [['wallExtrude', 0.1, 0.4], ['wallStrata', 2, 4], ['wallColumn', 0.8, 2], ['t2Spacing', 0.6, 1.5], ['t2Rows', 5, 10], ['t2Group', 0.6, 2], ['t2Jitter', 0, 0.6]]) if (v[k] !== undefined && !(typeof v[k] === 'number' && v[k] >= lo && v[k] <= hi)) throw new Error(`Manifest: viewer.${k} must be a number from ${lo} to ${hi}.`);
       if (v.mode !== undefined && !E.VIEWER_MODES.includes(v.mode)) throw new Error('Manifest: viewer.mode must be one of ' + E.VIEWER_MODES.join(', ') + '.');

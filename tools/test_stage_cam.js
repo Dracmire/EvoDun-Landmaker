@@ -52,6 +52,9 @@ for (const [w, h] of [[1220, 767], [1000, 600]]) for (const tp of [2, 3]) for (c
   const box = { x0: 0, y0: 24, x1: 109, y1: 77 }, w = 1220, h = 767, tp = 2, hf = 0.14, d = SG.dist(hf, tp), hw = d * SG.TAN * w / h, near = d * Math.cos(25 * Math.PI / 180) - d * Math.sin(25 * Math.PI / 180) / Math.tan((25 + 15) * Math.PI / 180);
   const cl = (x, y, b) => SG.clamp(x, y, b || box, 0, 25, d, w, h);
   let c = cl(50, 40); ok('inside the window: no clamp, the target is the hero', !c.clamped && c.x === 50 && c.y === 40, c);
+  { const zs = 0.5, c2 = SG.clamp(50, box.y1 - 0.5, box, 0, 25, d, w, h, zs), c1 = SG.clamp(50, box.y1 - 0.5, box, 0, 25, d, w, h, 1), c0 = SG.clamp(50, box.y1 - 0.5, box, 0, 25, d, w, h);
+    ok(`Cam 8 clamp: zS 1 / absent are the same answer as before; with zS 0.5 the near distance in map units is ${(near / zs).toFixed(2)} (near / zS)`, c1.y === c0.y && c1.near === c0.near && c2.near && Math.abs(c2.y - (box.y1 - near / zs)) < 1e-9, [c0, c1, c2]);
+    const q = SG.clamp(box.x0 + 1, 40, box, 0, 25, d, w, h, zs); ok('Cam 8 clamp: the sideways clamp does not depend on zS (the width is not scaled)', Math.abs(q.x - (box.x0 + hw)) < 1e-9 && q.side === 'L', q); }
   c = cl(box.x0 + 1, 40); ok(`left edge: clamped to x0 + hw = ${(box.x0 + hw).toFixed(2)}, side L`, c.side === 'L' && Math.abs(c.x - (box.x0 + hw)) < 1e-9 && c.y === 40 && !c.near, c);
   c = cl(box.x1 - 1, 40); ok(`right edge: clamped to x1 - hw = ${(box.x1 - hw).toFixed(2)}, side R`, c.side === 'R' && Math.abs(c.x - (box.x1 - hw)) < 1e-9 && c.y === 40, c);
   c = cl(50, box.y1 - 0.5); ok(`near edge: clamped to y1 - near = ${(box.y1 - near).toFixed(2)} (near ${near.toFixed(2)} tiles), the hero is nearer than the target`, c.near && Math.abs(c.y - (box.y1 - near)) < 1e-9 && c.y < box.y1 - 0.5 && c.side === null, c);
