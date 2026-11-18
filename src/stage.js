@@ -31,8 +31,8 @@
   /* CLAMP of the camera target (window coordinates) at the window box. Sideways: half-width hw = dist * tan(FOV / 2) * panelW / panelH, the target stays in [aMin + hw, aMax - hw] (the window centre if it is narrower than 2 hw).
      Near side: near = dist * cos(pitch) - dist * sin(pitch) / tan(pitch + FOV / 2) is the ground distance from the target to the ground point at the bottom screen edge; the target may come no closer than that to the near edge.
      The far side is NOT clamped. Returns { x, y, side: 'L' | 'R' | 'C' | null, near: bool, clamped: bool }. */
-  function clamp(tx, ty, box, yawDeg, pitchDeg, dst, w, h) {
-    const e = extent(box, yawDeg), p = pitchDeg * Math.PI / 180, hw = dst * TAN * w / h, near = dst * Math.cos(p) - dst * Math.sin(p) / Math.tan(p + FOV / 2);
+  function clamp(tx, ty, box, yawDeg, pitchDeg, dst, w, h, zS) { // zS (optional, Cam 8): the depth scale of the camera; the near distance below is in view units, in map units it is near / zS (absent = 1: the same numbers as before)
+    const e = extent(box, yawDeg), p = pitchDeg * Math.PI / 180, hw = dst * TAN * w / h, near = (dst * Math.cos(p) - dst * Math.sin(p) / Math.tan(p + FOV / 2)) / (zS === undefined ? 1 : zS);
     let a = e.cy * tx - e.sy * ty, u = e.sy * tx + e.cy * ty, side = null, nr = false;
     const lo = e.aMin + hw, hi = e.aMax - hw;
     if (lo > hi) { a = (e.aMin + e.aMax) / 2; side = 'C'; } else if (a < lo) { a = lo; side = 'L'; } else if (a > hi) { a = hi; side = 'R'; }

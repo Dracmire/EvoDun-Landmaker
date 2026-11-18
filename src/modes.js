@@ -5,7 +5,7 @@
    RULES: a control that does not belong to the current mode (nor to the common area) is HIDDEN (class `mh`), not greyed; inside a mode the requirements of src/controls.js still apply (greyed + "Requires: ...").
    ADVANCED controls (and the terrain controls in the modes that fold them) are folded behind a toggle of their group. The test-only flag `window.EVO_NO_MODES` (set by tools/ui/common.js) skips this layer: the whole panel as before. */
 (function (E) {
-  const CAMS = ['isoE', 'isoW', 'oblique', 'low', 'top', 'stage', 'classic'];
+  const CAMS = ['isoE', 'isoW', 'oblique', 'low', 'top', 'stage', 'classic', 'stagez'];
   /* the built-in sources an example may name (the ids of the source selector; 'image' = the user's images) */
   const SOURCES = ['snake_surface', 'snake', 'shrine_pier', 'shrine_pier_x4', 'noise', 'real_map', 'snake_floors', 'snake_macroform', 'forest_a', 'forest_b', 'aurhea', 'throne', 'image'];
   const TERRAIN_MAIN = ['terraces', 'subs', 'terH', 'spread', 'stairW', 'stairStyle', 'rampDepth', 'smooth', 'radius'];
