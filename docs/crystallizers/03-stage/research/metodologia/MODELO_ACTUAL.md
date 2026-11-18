@@ -1,6 +1,6 @@
 # MODELO ACTUAL — nuestra teoría de la vista 2D-HD (modo 3)
 
-**v2.3 · 2026-11-18** · cubre el Registro A001–A492 (los dos chats). **DQ3 cerrado** (A472); segundo juego: **Octopath Traveler 2** (A473), referencias en `refs/oct2/`, medidas en `research/octopath2/medidas_paso1.md`.
+**v2.4 · 2026-11-18** · cubre el Registro A001–A499 (los dos chats). **DQ3 cerrado** (A472); segundo juego: **Octopath Traveler 2** (A473), referencias en `refs/oct2/`, medidas en `research/octopath2/medidas_paso1.md`.
 **Qué es:** lo mejor que hoy sabemos de cómo se ve y cómo se construye una vista 2D-HD. Es el **resultado incompleto de la metodología**: cada cierre le añade cosas, y **terminamos cuando este modelo genere 2D-HD**. No lleva justificaciones; entre paréntesis va solo el ID del Registro que le da origen, para rastrearlo.
 **Tres partes:**
 1. **Modelo acumulado:** el conocimiento.
@@ -20,6 +20,8 @@
 - **«Esa profundidad es lo que nos hace 2D-HD y no 3D incompleto»:** planos que se tapan (A175). [D]
 - **25–40 % de la vista se dedica a ver más adelante;** el horizonte es **local**, dentro de la misma sala (A247). [D]
 - **El 2D-HD busca más deformación, no menos** (A427). [D]
+- **HD-2D = mundo 3D + personajes y objetos 2D + efectos y luces + un pase de composición especializado** que extrae las cualidades 2D sobre la base 3D; sin ese pase sale una maqueta con texturas y efectos (teoría de [U], A497; no va con el Ancla). [H]
+- **La hoja de composición depende del origen del juego** (A497): DQ3 viene del RPG top-down (pisos planos; el remake eleva y diferencia pisos para dar marcas de perspectiva); Octopath, del 2.5D oblicuo de 16 bits (FF6; verticalidad arquitectónica). El modelo = Base + **hoja de origen** + grupo de features. Lo que había hasta v2.3 es la hoja top-down. EvoDun genera mapas top-down, así que su hoja natural es la top-down (A498). [H]
 - **Con cubos apilados basta;** el visor es la casa y 1 de cada ~100 modelos va a Unity (BRÚJULA). [D]
 - **El objetivo es general:** DQ3 es la primera prueba; Octopath, Triangle Strategy y Wandering Sword vienen después. No se copia DQ3 (A008). [D]
 - **DQ3 está cerrado:** es lo máximo que se saca de ese juego; no se vuelve a la Torre del Soñador (A472). [D]
@@ -87,7 +89,7 @@
 - **DQ3 es «súper plano»:** suelo plano por zonas y cambios de altura en escaleras de micro-terrazas. Primero el terreno plano; después, los bordes disimulan que la altura es isométrica (A090). [D]
 - **Terrazas:** máximo 3; subterrazas 1–2 (A343). Base: terraza **1,25 H**, `subs` **2** (A463). [D]
   - `subs` 2 deja el bordillo de la franja media; `subs` 1 lo borra (A345). [V]
-- **Los escalones grandes delatan un mundo cúbico 3D;** casi ninguna escalera de DQ3 es alta (A247). [D]
+- **Los escalones grandes delatan un mundo cúbico 3D;** casi ninguna escalera de DQ3 es alta (A247). [D] Vale para la hoja top-down; en la hoja 2.5D (Octopath) los saltos grandes se permiten vestidos de arquitectura: escalinatas dobles, muros de contención (A495, A498). [H]
 - **«Ver por encima»** sale de la perspectiva (muros más altos que los suelos), no de subir suelos (A215, A222). [V]
 - **`terraces` y `subs` cambian máscara, camino, orientación y meta** (A258, A303). [V]
 - **`terraces` 3 aplana;** los anillos de Cake agregan escalones de contorno; los muros de Ascension enmarcan poco (A263, A270). [V]
@@ -241,6 +243,8 @@
 
 # PARTE III · FEATURES (grupos por tipo de escena)
 
+**Perfiles de forma** (A496, `research/octopath2/perfiles_forma.md`): P1 pasillo angosto, P2 corredor ancho, P3 Hub normal, P4 Hub deep, P5 interior de una toma, P6 interior deep. Son un segundo eje, independiente del tipo DAC (matriz perfil × tipo en ese documento). El cristalizador clasifica y encuadra; una sala que no entra en ningún perfil es un pedido al generador. [H, tesis T1 y T2 en prueba]
+
 Cada escena usa la Base y **un solo grupo** como principal. Los features de otro grupo solo entran si la tabla de compatibilidad lo permite. Estado del grupo: **[V] probado en su escena · [H] visto en tomas · [NP] nunca probado**.
 
 ## F-D · Dungeon (Torre del Soñador)
@@ -327,7 +331,10 @@ A3b, A8 (paso por detrás), A416 (encuadre hacia el avance), el modelo de cámar
 4. **Prueba de Generación en ciego:** piso 3 de la Torre del Soñador (A466) [X] (A472: DQ3 cerrado; la prueba en ciego se hará en otro juego).
 5. **Otro juego 2D-HD u otra perspectiva** (siguiente frente, A472): Octopath Traveler 2 en curso (A473–A485).
 8. **Prueba del bloqueo suave en el visor** (A483, A484): hecha (A487, PR #99); el visor la reproduce.
-9. **Banda de primer plano con el perfil narrow** (A488): brief `research/octopath2/stage_softlock_band_go.md`.
+9. **Banda de primer plano** (A488): pasa a ser una pieza de los perfiles; no tiene pase propio (brief retirado).
+12. **Perfiles de forma, tesis T1 y T2** (A499): brief `research/octopath2/stage_perfiles_mockup_go.md`.
+13. **Fondo de fachada de Octopath** (T58): pase propio.
+14. **Hoja 2.5D de Octopath completa:** después de T1 y T2.
 10. **Espacio de cámara por sala** en ventanas de varias salas (A489): diseño pendiente.
 11. **Sub-cámara deep** del perfil wide (A491): sin probar.
 6. **Diferencia del alto del héroe** entre 0202 y 0137 (A366).
@@ -341,3 +348,4 @@ A3b, A8 (paso por detrás), A416 (encuadre hacia el avance), el modelo de cámar
 | v2.1 | 2026-11-18 | Ajustes del control de 3 salas (v329): C3 ≈ 6 H; A6 por colocación, sin mover `heroScreen`; antorchas fuera de la Base y del tercio central; fondo construido fuera del mapa obligatorio en exteriores; la forma de sala (B18) entra en la Base. DQ3 cerrado: se retira la prueba del piso 3 de la Torre del Soñador | A470–A472 |
 | v2.2 | 2026-11-18 | Octopath Traveler 2: medidas de cámara (pitch 14–25, héroe 0,11–0,18, pies 0,61–0,71); los tres espacios y el bloqueo suave de [U] pasan de nunca probados a hipótesis con prueba; perfiles narrow / long / wide; B2, B4 y B13 por perfil | A473–A485 |
 | v2.3 | 2026-11-18 | Prueba del bloqueo suave en el visor (PR #99); long eliminado (solo Z cambia el tamaño); perfiles por familiaridad; sub-cámara deep (hipótesis); banda de primer plano no caminable con baranda baja (B10 precisado) | A487–A492 |
+| v2.4 | 2026-11-18 | Cámaras en espera; HD-2D = Base + hoja de composición por origen (top-down de DQ3, 2.5D de Octopath); A247 limitado a la hoja top-down; perfiles de forma P1–P6 como segundo eje junto al tipo DAC; tesis T1 y T2 | A493–A499 |
