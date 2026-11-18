@@ -7,20 +7,24 @@ Rama R2. **Lee antes de empezar:**
 
 **Roles:** [R] diseñó; tú construyes los mockups y mides; [U] juzga mirando. Sin jueces ni rúbricas.
 
-## Parte A · Clasificación (T2): solo mide, sin tocar `src/`
+## Parte A · Clasificación por partes (T2): solo mide, sin tocar `src/`
+
+Corrección de [U] (A500): una sala no tiene un solo perfil. Se recorre como una **secuencia** y cada parte se clasifica por separado.
 
 Toma las 88 salas de «Balanced types» (mapa real, 3 terrazas). Para cada una:
-- dirección (`E.orient`: X, Z o Hub);
-- ancho y largo de lo caminable en H (`tilesPerH` 1,5), medidos a lo largo de su eje y de través;
-- tipo DAC;
-- el perfil P1–P4 que le corresponde según la tabla de `perfiles_forma.md` §2, o **«ninguno»**. P5 y P6 son interiores y no se aplican a estas salas.
+1. **Secuencia:** una línea desde la puerta de entrada hasta el núcleo de la sala (`rooms.js`) y del núcleo a cada salida distinta (puertas usadas; sin salida, hasta la parte más alta). La entrada es la puerta por la que llega la cadena; si no hay, la puerta más baja.
+2. **Partes:** a lo largo de esa línea, corta donde cambian el ancho caminable de través o la dirección. **Codo:** giro ≥ 45° en ≤ 2 H. **Pasillo:** tramo de ancho casi constante. **Área central:** ensanche alrededor del núcleo. Umbrales de corte: hipótesis tuyas, en un solo lugar y declaradas.
+3. **Perfil de cada parte:** P1–P4 según la tabla de `perfiles_forma.md` §2, con ancho y largo en H (`tilesPerH` 1,5), o «ninguno».
+4. **La sala completa:** tipo DAC, rol (leaf si tiene una sola puerta, hub o corredor) y la lista de sus partes con su perfil. Si todas las partes tienen el mismo perfil, es **unitipo** (p. ej. puro pasillo).
+
+Ejemplo de [U]: un Diorama con un puente angosto que lleva a una isla = Diorama tipo Isla, sala leaf, partes [P1 pasillo, P3 Hub].
 
 **Entrega:**
-- tabla completa en `research/octopath2/perfiles_clasificacion.md`;
-- conteo perfil × tipo DAC (la matriz de §3 con números);
-- cuántas salas quedan en «ninguno» y su ancho típico.
-
-Si los umbrales de la tabla dejan casos en el límite, cuéntalos aparte. No muevas los umbrales.
+- tabla por sala en `research/octopath2/perfiles_clasificacion.md`;
+- conteo de partes por perfil × tipo DAC;
+- cuántas salas tienen al menos una parte «ninguno», y qué ancho tiene esa parte;
+- cuántas son unitipo;
+- una figura cenital (Cam 5) con la secuencia y las partes coloreadas de 4 salas: la 14, la 44, un Diorama y un Cake.
 
 ## Parte B · Mockups de tres celdas ✓ + un control (T1)
 

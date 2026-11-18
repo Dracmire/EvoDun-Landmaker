@@ -55,7 +55,18 @@ Leyenda: ✓ natural · ~ posible · ✗ improbable.
 
 Si T2 se cumple, el cuello de botella es del generador (forma de sala) y no del cristalizador.
 
-## 5. Lo que queda fuera de este pase
+## 5. Correcciones de [U] (A500–A503)
+
+- **Por partes (A500):** una sala se recorre entrada → núcleo → cada salida y se parte en codos, pasillos y áreas centrales; cada parte lleva su perfil. Una sala uniforme es unitipo. T2 se mide por parte, no por sala.
+- **Los dos problemas reales (A501):** la **verticalidad** (buena topológicamente, terrible en composición) y el **encuadre** (cómo una sala obtiene su horizonte y su profundidad). DQ3 levantó salas artificialmente; DAC se basa en distorsión natural. Octopath puede resolver la verticalidad.
+- **Hipótesis de [R] sobre la verticalidad (A502):** en el 2.5D de 16 bits, lo alto queda al fondo: las bandas suben al alejarse de la cámara, así que cada nivel se ve como una franja. El `orient` actual (sala X: el lado alto al fondo) y `planes` (frente bajado, fondo alzado) son su embrión. Octopath daría la forma completa: terrazas en bandas, muros de contención, escalinatas.
+- **Linaje (teoría de [U], A503; no va con el Ancla):**
+  - DQ3 8 bits → DQ3 16 bits → hoja → remake: cada capa respeta a las anteriores; se puede añadir, pero no ignorar lo anterior.
+  - FF6 → hoja → Octopath: más libertad, porque FF6 ya tenía profundidad.
+  - La hoja sería en la práctica un **juego 2.5D**: componer primero la escena en 2.5D y después dar el paso a HD-2D, porque el 3D debe comportarse como un juego 2D. El punto medio hace más sólida la regresión.
+  - [R]: el visor ya tiene esa proyección, **Cam 7 Classic 3/4** (oblicua de 16 bits).
+
+## 6. Lo que queda fuera de este pase
 
 - Cámaras (bloqueo suave, sub-cámara deep): en espera (A493).
 - Fondo de fachada: tiene pase propio (T58).
