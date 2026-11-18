@@ -1,6 +1,6 @@
 # MODELO ACTUAL — nuestra teoría de la vista 2D-HD (modo 3)
 
-**v2 · 2026-11-18** · cubre el Registro A001–A469 (los dos chats).
+**v2.1 · 2026-11-18** · cubre el Registro A001–A472 (los dos chats). **DQ3 cerrado** (A472): lo que sigue es otro juego u otra perspectiva.
 **Qué es:** lo mejor que hoy sabemos de cómo se ve y cómo se construye una vista 2D-HD. Es el **resultado incompleto de la metodología**: cada cierre le añade cosas, y **terminamos cuando este modelo genere 2D-HD**. No lleva justificaciones; entre paréntesis va solo el ID del Registro que le da origen, para rastrearlo.
 **Tres partes:**
 1. **Modelo acumulado:** el conocimiento.
@@ -22,6 +22,7 @@
 - **El 2D-HD busca más deformación, no menos** (A427). [D]
 - **Con cubos apilados basta;** el visor es la casa y 1 de cada ~100 modelos va a Unity (BRÚJULA). [D]
 - **El objetivo es general:** DQ3 es la primera prueba; Octopath, Triangle Strategy y Wandering Sword vienen después. No se copia DQ3 (A008). [D]
+- **DQ3 está cerrado:** es lo máximo que se saca de ese juego; no se vuelve a la Torre del Soñador (A472). [D]
 - **Cuanto más cerca se está de algo consistente, más obvios son los errores** (A248). [D]
 
 ## 2. Cámara
@@ -98,7 +99,7 @@
   - **la sombra de las columnas es suelo** (A093, A094, M3b). [V]
 - **El remake pinta un fondo de color** (pasto, cielo) detrás de ventanas y bordes lejanos (A085). [V]
 - **El rojo del remake ocupa 22–35 % de la pantalla;** sale de la lectura de la escena, no de reglas de borde (A099, A105). [V]
-- **El piso 2 de Najimi no es un juez fiel** del «conservar la disposición» (A230). [V] El piso 3 está reservado para la prueba en ciego (A110). [D]
+- **El piso 2 de Najimi no es un juez fiel** del «conservar la disposición» (A230). [V] El piso 3 reservado para la prueba en ciego (A110) [X] (A472: DQ3 cerrado).
 - **El zoom del mapa del remake es constante** salvo que el jugador lo cambie (A218). [V parcial]
 - **El pack del generador de EvoDun ya trae** elevación, zonas, bordes, camino, POI y agua (A233). [V lectura]
 - **Las salas DAC:**
@@ -109,6 +110,7 @@
 
   La diferencia dominante es **sala cerrada contra terreno abierto** (A382). [V]
 - **En DAC, la profundidad útil por encuadre** sale de 8 a 61 H contra ~17 H, y los trucos no lo compensan: **falta una regla de forma de sala** (A465). [V]
+- **La forma de la sala decide:** una sala estrecha y cerrada (tipo Ascension; DAC 14) se acerca a 2D-HD con 0 % de vacío; una ancha (DAC 44, 61 H de profundidad) y un exterior que llega al borde del mapa (Forest A, hasta 54 % de vacío) no, con los mismos trucos (A470, A471). [V]
 - **Las salas Ascension pequeñas** miden menos que un cuadro; solo las Cake alcanzan «dos tomas» (A257). [V]
 
 ## 6. Modelo de escena
@@ -137,6 +139,8 @@
   - una columna suelta de borde que sale por arriba; pegada al muro, pierde (A342, A346, A352). [V juicios]
 - **Ganancia por ítem en TECHO** (juez calibrado): marca +3,0 · línea media +2,4 · esquinas +1,9 · marco +1,0 · fondo −0,5 (A402). En el quita-uno: A6 +0,67 y C3 +0,50 (A405). [V]
 - **Veredictos de [U]** (A413): A6 funciona; C3 aprobado (tenue, color del piso, fuera de los pies del héroe); C2 buen truco mal aplicado; A4 válido pero necesita luz real; A3a suelto falla (necesita secuencia). [D]
+- **Tamaño de C3:** ≈ 6 H de ancho (~9–10 tiles); a 4–6 tiles ocupa 1,3–2,6 % de la pantalla y no se lee (A470, A471). [V]
+- **La línea de A6 se logra colocando la baranda en la sala,** no moviendo `heroScreen`: el control del héroe ± 5 % manda (A471). [D]
 - **Tipos de truco:**
   - señales (C3, A4/A5);
   - estructuras de encuadre: el truco es la relación de banda, secuencia y posición, no el objeto;
@@ -169,6 +173,9 @@
 - **Cinta de camino como guía** (A360). [X]
 - **Cam 8, `zScale`** (A451). [X]
 - **Volúmenes S4b fuera de tiles bloqueados** (A285). [X]
+- **C3 de 4–6 tiles** (A471). [X]
+- **Encuadrar A6 con `heroScreen` fuera de ± 5 %** (A471). [X]
+- **Antorchas de `props` en la Base y en el tercio central** del cuadro: llenan el centro que debe quedar abierto (A470, A471). [X]
 
 ## 9. Método e instrumentos
 - **Roles** (A407, A419, A467):
@@ -212,13 +219,14 @@
 | B8 | Orientación | `orient` con POI primero; eje X / Z / Hub; hotspot transitable, central salvo POI, sobre el eje; el eje cruza el cuadro en x ∈ [0,40; 0,65] |
 | B9 | Bandas | B1–B5 desde abajo; el héroe en B2 cuando hay B1 delante; ver adelante 25–40 %; horizonte local |
 | B10 | Corte del lado de cámara | `planesTest.noFront` (A7): ningún muro en y > 0,85 |
-| B11 | Fondo | nunca vacío (≤ 2 %); se cierra con geometría (vecina, muro, masa o fondo construido); nunca bajando muros ni con `stageBorder` |
+| B11 | Fondo | nunca vacío (≤ 2 %); se cierra con geometría (vecina, muro, masa o fondo construido); nunca bajando muros ni con `stageBorder`; en exteriores el fondo se construye más allá del borde del mapa (A471) |
 | B12 | Alturas | por pieza, en el dato, según la tabla de §3 |
 | B13 | Profundidad útil | el fondo del encuadre hacia s ≈ 0,55 (≈ 17 H detrás del héroe); se mide; hoy es la regla que falta en la generación |
 | B14 | Billboards | solo personajes, vegetación suelta y atrezo |
 | B15 | Controles | héroe ± 5 % · vacío ≤ 2 % · camino sin baldosas > 25 % perdidas por volúmenes (35 % en contrahuellas) · hashes ×2 · máscara, camino y meta iguales o el diff declarado |
 | B16 | Caminata | k0…k8 + k_mir; yaw constante en la sala; salto ≤ 2,5 veces la mediana; sin vacío ni terreno ajeno; meta en cuadro |
-| B17 | Reglas encendidas | `orient`, `planes`, `props`, `volumes` (apagar una exige razón escrita) |
+| B17 | Reglas encendidas | `orient`, `planes`, `props`, `volumes` (apagar una exige razón escrita); `props` sin antorchas: las antorchas son feature por escena (A471) |
+| B18 | Forma de sala | estrecha y cerrada, recinto cerca del camino, profundidad útil ~17 H; una sala ancha no se arregla con trucos (A465, A470) |
 
 ---
 
@@ -232,10 +240,11 @@ Laberíntico, oscuro y encerrado; primer plano que estorba a propósito; galerí
 |---|---|---|
 | Pitch / pies | 25 (24–28) / (0,47; 0,51) | [V] |
 | A1 + A2 · vistazo y cierre en dos planos | BACK = baranda 1,0–1,4 H; ventana con la vecina entera; vecina ±Δ (≤ 4 H) hasta V(k4) ≥ 10 %; barrera ≤ 0,08 del cuadro; masa lejana visible en ≥ 30 % del ancho | [V] (9–0) |
-| A6 · línea de nivel | **baranda calada** en y 0,40–0,60, ≥ 70 % del ancho; postes ~1,6 H cada 3–4 tiles; encuadre con fy ∈ [0,45; 0,80]; el héroe nunca cortado en la cintura | [V] (+0,67) |
+| A6 · línea de nivel | **baranda calada** en y 0,40–0,60, ≥ 70 % del ancho; postes ~1,6 H cada 3–4 tiles; la línea sale de dónde se coloca la baranda en la sala, con el héroe dentro de ± 5 % (A471; el encuadre con fy ∈ [0,45; 0,80] queda [X]); el héroe nunca cortado en la cintura | [V] (+0,67) |
 | Secuencia de pilares | pilares de ≈ 5 H cada ≈ 7,3 H a los lados del eje (p. ej. 2 por banda de B2 a B5, B1 vacía); tercio central abierto; nunca pegados al muro | [D] (A3a suelto falla) |
 | C2 · par en la transición | un solo par, en la misma banda que su escalera; cimas esbeltas; hueco ≥ 0,17 del ancho | [D] (mal aplicado en la sala T) |
-| C3 · calcomanía | pentagrama o hexagrama de 4–6 tiles, tenue, color del piso, junto al héroe | [V] (+0,50) |
+| C3 · calcomanía | pentagrama o hexagrama de **≈ 6 H de ancho (~9–10 tiles)**, tenue, color del piso, junto al héroe (A471; 4–6 tiles queda [X]) | [V] (+0,50) |
+| Antorchas | a los lados del camino, nunca en el tercio central x [0,33; 0,67] (A471) | [D] |
 | A4 · vano focal | ventana o luz en x [0,40; 0,62], y [0,05; 0,25]; el elemento más contrastado | [D] (necesita luz real) |
 | Escalera sobre el eje (B1) | escalinata hacia el destino, ≥ 4 peldaños, ancho ≥ 3 H | [H] |
 | Escalera – estatua – escalera (N1) | plinto azul con estatua de ≈ 3,9 H entre dos escaleras, a lo largo de un muro | [NP] |
@@ -267,7 +276,7 @@ Poco contraste entre primer plano y fondo; el recinto lo dan la vegetación y lo
 | Capas P / G / R / F | P = oclusores de esquina (roca, follaje); G = camino de 1,2–2,4 H por cambio de material; R = puerta o fachada; F = torre o copa | [V] (toma dorada 1) |
 | Ritmo de árboles | fila de árboles como secuencia de pilares; los troncos como volumen, el follaje suelto como billboard | [H] |
 | Landmark al fondo | torre u orbe sobre el eje; dos lecturas (completo de lejos, fragmento de cerca) | [H] |
-| Fondo poblado | hasta el borde; fuera del mapa hace falta geometría construida | [V] (35 % de vacío si no) |
+| Fondo poblado | hasta el borde; **obligatorio** construir geometría más allá del borde del mapa (A471) | [V] (35–54 % de vacío si no) |
 | Sin columnas en orillas de agua | el agua nunca se clasifica en `planes` | [V] |
 
 ## F-E · Exterior abierto (desierto)
@@ -277,7 +286,7 @@ Poco contraste entre primer plano y fondo; el recinto lo dan la vegetación y lo
 | Camino central | recto, centrado; el ancho cae lineal con la fila | [V] |
 | Filas de estatuas | esfinges o pilares a los lados, en secuencia | [H] |
 | Arcos de primer plano | marcos en las esquinas inferiores | [H] |
-| Fondo | borde superior en s ≈ 0,59 | [V] |
+| Fondo | borde superior en s ≈ 0,59; **obligatorio** construirlo más allá del borde del mapa (A471) | [V] / [D] |
 | Escalones | ninguno visible (peldaño 0) | [V] |
 
 ## F-C · Cueva (candidata, solo vista)
@@ -293,6 +302,8 @@ Cornisa de 2–3 H; masas de roca > 4 H como muros; oscuridad; agua al fondo; sa
 | Calcomanía en el hotspot | sí | emblema o medallón | no | no |
 | Simetría exacta | no | sí | no | sí (camino central) |
 | Secuencia de pilares | pilares | filas de pilares | árboles | estatuas |
+| Antorchas | a los lados | candelabros simétricos | no | no |
+| Fondo fuera del mapa | no (vecina o muro) | no (muros) | obligatorio | obligatorio |
 | Pitch | 25 | ≈ 33–35 | sin medir | ~38 |
 
 ---
@@ -304,8 +315,8 @@ A3b, A8 (paso por detrás), A416 (encuadre hacia el avance), el modelo de cámar
 1. **Regla de forma de sala** en la generación: ancho de pasillo, profundidad útil ~17 H y recinto cerca del camino (A465).
 2. **Relieve desde el mapa viejo:** escaleras y niveles (A229).
 3. **Fondo construido fuera del mapa** en exteriores.
-4. **Prueba de Generación en ciego:** piso 3 de la Torre del Soñador (A466).
-5. **Cámara de otro juego 2D-HD,** medida.
+4. **Prueba de Generación en ciego:** piso 3 de la Torre del Soñador (A466) [X] (A472: DQ3 cerrado; la prueba en ciego se hará en otro juego).
+5. **Otro juego 2D-HD u otra perspectiva** (siguiente frente, A472): medir su cámara y contrastar la Base y los grupos.
 6. **Diferencia del alto del héroe** entre 0202 y 0137 (A366).
 7. **Ancla v1 sin aprobar.**
 
@@ -314,3 +325,4 @@ A3b, A8 (paso por detrás), A416 (encuadre hacia el avance), el modelo de cámar
 |---|---|---|---|
 | v1 | 2026-11-18 | Compilado único con escala, terraza y subterrazas decididas | A463, A464 |
 | v2 | 2026-11-18 | Tres partes (modelo acumulado, base principal, features por tipo de escena); el modelo acumulado cubre el Registro completo A001–A466; el modelo pasa a ser el resultado incompleto de la metodología y su criterio de fin es generar 2D-HD | A467–A469 |
+| v2.1 | 2026-11-18 | Ajustes del control de 3 salas (v329): C3 ≈ 6 H; A6 por colocación, sin mover `heroScreen`; antorchas fuera de la Base y del tercio central; fondo construido fuera del mapa obligatorio en exteriores; la forma de sala (B18) entra en la Base. DQ3 cerrado: se retira la prueba del piso 3 de la Torre del Soñador | A470–A472 |
