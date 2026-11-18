@@ -1,0 +1,74 @@
+{
+ "t9433": {
+  "batch": "A",
+  "pos": "s1",
+  "1": "SUELO",
+  "2": "TECHO"
+ },
+ "t9c63": {
+  "batch": "A",
+  "pos": "s2",
+  "1": "SUELO",
+  "2": "TECHO"
+ },
+ "tede4": {
+  "batch": "A",
+  "pos": "s3",
+  "1": "SUELO",
+  "2": "TECHO"
+ },
+ "t97d6": {
+  "batch": "A",
+  "pos": "m1",
+  "1": "TECHO",
+  "2": "SUELO"
+ },
+ "t3adf": {
+  "batch": "A",
+  "pos": "m2",
+  "1": "SUELO",
+  "2": "TECHO"
+ },
+ "td68f": {
+  "batch": "A",
+  "pos": "m3",
+  "1": "SUELO",
+  "2": "TECHO"
+ },
+ "tf416": {
+  "batch": "A",
+  "pos": "n1",
+  "1": "SUELO",
+  "2": "TECHO"
+ },
+ "t98f1": {
+  "batch": "A",
+  "pos": "n2",
+  "1": "SUELO",
+  "2": "TECHO"
+ },
+ "t4b25": {
+  "batch": "A",
+  "pos": "n3",
+  "1": "SUELO",
+  "2": "TECHO"
+ },
+ "td090": {
+  "batch": "B",
+  "pos": "s1",
+  "1": "SUELO",
+  "2": "PLACEBO"
+ },
+ "t37c4": {
+  "batch": "B",
+  "pos": "s2",
+  "1": "SUELO",
+  "2": "PLACEBO"
+ },
+ "te2f3": {
+  "batch": "B",
+  "pos": "s3",
+  "1": "SUELO",
+  "2": "PLACEBO"
+ }
+}

@@ -1,0 +1,1 @@
+const L = require('./lib.js'), C = require('./common.js'); (async()=>{ const a = await L.open({closure:8}); await a.put({tricks:['A6'],pos:'m1',hs:null}); const g=await a.grab(false); console.log(JSON.stringify(g.meta.hero), g.meta.sc, g.meta.D); const k=await a.eval(()=>window.SALAT.kAt([[20.5,20,5],[20.5,10,5]])); console.log(k); await a.close();})();

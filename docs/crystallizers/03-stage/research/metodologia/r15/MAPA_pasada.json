@@ -1,0 +1,65 @@
+{
+ "t8c05": {
+  "sala": 3,
+  "k": "k0",
+  "1": "TODO",
+  "2": "BASE",
+  "identico": false
+ },
+ "t290e": {
+  "sala": 3,
+  "k": "k4",
+  "1": "TODO",
+  "2": "BASE",
+  "identico": false
+ },
+ "t9c39": {
+  "sala": 3,
+  "k": "k8",
+  "1": "TODO",
+  "2": "BASE",
+  "identico": false
+ },
+ "t7d0c": {
+  "sala": 8,
+  "k": "k0",
+  "1": "TODO",
+  "2": "BASE",
+  "identico": false
+ },
+ "t2430": {
+  "sala": 8,
+  "k": "k4",
+  "1": "TODO",
+  "2": "BASE",
+  "identico": false
+ },
+ "t3062": {
+  "sala": 8,
+  "k": "k8",
+  "1": "BASE",
+  "2": "TODO",
+  "identico": false
+ },
+ "t40a4": {
+  "sala": 14,
+  "k": "k0",
+  "1": "BASE",
+  "2": "TODO",
+  "identico": false
+ },
+ "tf6cd": {
+  "sala": 14,
+  "k": "k4",
+  "1": "TODO",
+  "2": "BASE",
+  "identico": false
+ },
+ "taf28": {
+  "sala": 14,
+  "k": "k8",
+  "1": "BASE",
+  "2": "TODO",
+  "identico": false
+ }
+}

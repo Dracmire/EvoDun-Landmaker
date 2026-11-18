@@ -1,0 +1,4 @@
+const T = require('./tunelib.js'), C = require('./cfg3.js'); (async()=>{ const x = await T.makeCtx(8);
+const cand=[]; for (let xx=2;xx<=6;xx++) for (let zz=0;zz<=37;zz++) cand.push({x:xx,z:zz,w:2,d:2,h:8});
+for (const pos of ['m1','n1']) { const sc = await x.scan(pos,cand); const cnt={all:0,strip:0,width:0,top:0,base:0}; sc.forEach((b)=>{ const w=(b.x1-b.x0)/1280; const s=b.x1/1280<=0.18, wd=w>=0.035&&w<=0.125, tp=b.y0<=0, bs=b.baseY/720>0.4; if(s)cnt.strip++; if(wd)cnt.width++; if(tp)cnt.top++; if(bs)cnt.base++; if(s&&wd&&tp&&bs)cnt.all++;}); console.log(pos,JSON.stringify(cnt)); const ex=sc.map((b,i)=>[cand[i].x,cand[i].z,(b.x0/1280).toFixed(2),(b.x1/1280).toFixed(2),(b.y0/720).toFixed(2),(b.baseY/720).toFixed(2)]).filter((r,i)=>cand[i].x===5&&cand[i].z%6===0); console.log(JSON.stringify(ex)); }
+await x.a.close();})();
