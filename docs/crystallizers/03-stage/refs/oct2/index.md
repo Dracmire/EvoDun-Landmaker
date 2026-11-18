@@ -25,4 +25,18 @@ Screenshots taken by the user from YouTube playthroughs on 2026-11-18. Third-par
 | 19 | `oct2_19_snow_town_blurred_fence_fg.png` | town (snow) | heavy blurred fence in the foreground |
 | 20 | `oct2_20_library_grand_stairs_carpet_symmetry.png` | interior hub | library, grand stairs, central carpet, symmetry, balustrades |
 
-Pending: dungeon frames from https://youtu.be/avZYrdtI_4c (0:52–1:19).
+Dungeon frames: see the section below.
+
+## Dungeon: Infernal Castle (https://youtu.be/avZYrdtI_4c, 0:52–1:19)
+
+Frames taken from the video at 779 x 438 (browser screenshots; the guide's text overlay is burned into the video). Fades at 1:01, 1:07 and 1:15 skipped.
+
+| Time | File | What it shows |
+|---|---|---|
+| 0:52 | `oct2_dun_0052_landing_side_stairs_floor_decal.jpg` | landing with a lit floor decal, stairs climbing to the right, arcade wall behind |
+| 0:55 | `oct2_dun_0055_bridge_head_twin_braziers.jpg` | head of the bridge seen from the front, a pair of braziers framing the hero |
+| 0:58 | `oct2_dun_0058_long_bridge_twin_pillars_fg_braziers.jpg` | long bridge on the axis, twin pillars at the sides, braziers in the foreground |
+| 1:04 | `oct2_dun_0064_fog_gate_twin_pillars_lit_hotspot.jpg` | fog, twin lit pillars framing the way, lit room ahead |
+| 1:09 | `oct2_dun_0069_bridge_top_braziers_side_arcades.jpg` | top of the bridge, braziers pair, arcades on both sides |
+| 1:12 | `oct2_dun_0072_broken_bridge_ladder_pillars_frame.jpg` | the bridge as a ladder down, pillars framing it, party in a line |
+| 1:18 | `oct2_dun_0078_castle_entry_corridor_pillar_pair.jpg` | castle entry corridor, pillar pair in front, lit hotspot ahead |
