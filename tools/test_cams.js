@@ -9,7 +9,7 @@ const E = window.EVO; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : extra); } };
 const P = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, climb: 2, gateThr: 0.05, gateMin: 3, passGap: 8, stairW: 3, stairStyle: 1, rampDepth: 2, spread: 1, smooth: 2, radius: 0.9, tread: 2, margin: 24 };
 const BANK = { isoE: { kind: 'ortho', yaw: 45, pitch: 35 }, isoW: { kind: 'ortho', yaw: -45, pitch: 35 }, oblique: { kind: 'ortho', yaw: 0, pitch: 50 }, low: { kind: 'ortho', yaw: 0, pitch: 28 }, top: { kind: 'ortho', yaw: 0, pitch: 80 },
-  stage: { kind: 'persp', yaw: 0, pitch: 25 }, classic: { kind: 'oblique', yaw: 0, pitch: 0 } };
+  stage: { kind: 'persp', yaw: 0, pitch: 25 }, classic: { kind: 'oblique', yaw: 0, pitch: 0 }, stagez: { kind: 'persp', yaw: 0, pitch: 25, zScale: 0.5 } }; // stagez = Cam 8
 let seed = 7; const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
 for (const file of ['snake_mountain_surface.json', 'shrine_pier.json']) {
   const S = E.shape(JSON.parse(fs.readFileSync(path.join(__dirname, '../data', file), 'utf8')), P, null);
@@ -75,8 +75,42 @@ for (const persH of [400, 700]) for (const zoom of [1, 2, 5]) {
   ok('E.fitScale ignores vScale', E.fitScale(S, P, Object.assign({}, base, { vScale: 1.5 }), 1000, 700) === E.fitScale(S, P, base, 1000, 700));
 }
 { const V = { camera: 'stage', terraces: 4 }, m = E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: V });
-  ok('manifest viewer.camera takes the bank ids', m.viewer.camera === 'stage' && ['isoE', 'isoW', 'oblique', 'low', 'top', 'stage', 'classic'].every((id) => E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { camera: id } }).viewer.camera === id));
+  ok('manifest viewer.camera takes the bank ids', m.viewer.camera === 'stage' && ['isoE', 'isoW', 'oblique', 'low', 'top', 'stage', 'classic', 'stagez'].every((id) => E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { camera: id } }).viewer.camera === id));
   let bad = 0; for (const c of ['iso', 'Cam 6', 6, 'A']) { try { E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { camera: c } }); } catch (e) { bad++; } }
   ok('manifest viewer.camera rejects ids that are not in the bank', bad === 4, bad);
   ok('a viewer block without camera is unchanged (absent = default camera)', E.parseManifest({ format: 'evodun-pack/0.3', roles: {}, viewer: { terraces: 3 } }).viewer.camera === undefined); }
+
+{ // CAM 8 (B6): the optional depth scale zScale of makePersp. Golden hash of Cam 6 (taken from main before the field existed): nothing changes without zScale.
+  const cam6Hash = require('./cam6_hash.js'), GOLD = '3fa419bb48209b80bd0cf229430e9e425e13e6e3212f3ea1e9e2ecddc9eda66e', r = cam6Hash(E, S, P);
+  ok(`Cam 6: golden hash of p / unp / depth / ry / nrm / panFor over 24 views, ${r.count} numbers, unchanged by zScale (taken from main before Cam 8)`, r.hash === GOLD && r.count === 8832, r.hash);
+  ok('Cam 8 constant: E.CAM8_ZSCALE is the one value of the hypothesis (0.5)', E.CAM8_ZSCALE === 0.5);
+  const base = { zoom: 2, panX: 9, panY: -6, fitSc: 6, persH: 700 };
+  // zScale 1 and undefined: the camera of today, bit for bit
+  { let same = 0, m = 0; for (const extra of [{}, { focus: [S.W * 0.4, S.H * 0.5, 3] }]) { const c0 = E.makeCam(S, P, Object.assign({}, base, BANK.stage, extra), 1000, 700), c1 = E.makeCam(S, P, Object.assign({}, base, BANK.stage, extra, { zScale: 1 }), 1000, 700);
+      for (let i = 0; i < 200; i++) { const x = rnd() * S.W, y = rnd() * S.H, h = rnd() * 6, A = c0.p(x, y, h), B = c1.p(x, y, h), U = c0.unp(A[0], A[1], h), V = c1.unp(B[0], B[1], h); if (A[0] === B[0] && A[1] === B[1] && U[0] === V[0] && U[1] === V[1] && c0.nrm(1, 0, x, y)[1] === c1.nrm(1, 0, x, y)[1]) same++; m++; } }
+    ok(`Cam 6: zScale 1 and absent give the same p / unp / nrm, bit for bit (${same} of ${m} points)`, same === m); }
+  for (const zs of [0.5, 0.67]) for (const yaw of [0, 30, 90, 180]) for (const withFocus of [false, true]) {
+    const v = Object.assign({}, base, BANK.stage, { yaw, zScale: zs }, withFocus ? { focus: [S.W * 0.45, S.H * 0.55, 2.5] } : {}), cam = E.makeCam(S, P, v, 1000, 700); let worst = 0, n = 0;
+    for (let i = 0; i < 300; i++) { const x = rnd() * S.W, y = rnd() * S.H, h = rnd() * 6; if (cam.D - cam.depth(x, y, h) < 0.2 * cam.D) continue; const [px, py] = cam.p(x, y, h), [gx, gy] = cam.unp(px, py, h); worst = Math.max(worst, Math.hypot(gx - x, gy - y)); n++; }
+    ok(`Cam 8 zScale ${zs}, yaw ${yaw}${withFocus ? ', focus' : ''}: unp(p(x, y, h), h) = (x, y) (${n} points, worst ${worst.toExponential(1)})`, n > 200 && worst < 1e-9, worst);
+    // pick / marks / focus: a tile centre picked from the pixel it is drawn at, and panFor centres any point
+    const pf = cam.panFor(S.W * 0.3, S.H * 0.7, 2), cm = E.makeCam(S, P, Object.assign({}, v, { panX: pf[0], panY: pf[1] }), 1000, 700), q = cm.p(S.W * 0.3, S.H * 0.7, 2);
+    ok(`Cam 8 zScale ${zs}, yaw ${yaw}${withFocus ? ', focus' : ''}: panFor brings a raised point to the screen centre (${Math.hypot(q[0] - 500, q[1] - 350).toExponential(1)} px)`, Math.hypot(q[0] - 500, q[1] - 350) < 1e-6);
+    const pv = cam.p(cam.pivot[0], cam.pivot[1], cam.pivot[2]); ok(`Cam 8 zScale ${zs}, yaw ${yaw}${withFocus ? ', focus' : ''}: the pivot is under the screen centre`, Math.hypot(pv[0] - 500, pv[1] - 350) < 1e-9, pv);
+  }
+  // the meaning of zScale: at yaw 0 with a focus, a ground point at depth u from the pivot projects where the camera of today puts the point at depth u * zS (width and heights unchanged); the pivot does not move
+  for (const zs of [0.5, 0.67]) { const f = { focus: [S.W * 0.4, S.H * 0.6, 2], panX: 0, panY: 0 }, c0 = E.makeCam(S, P, Object.assign({}, base, BANK.stage, f), 1000, 700), cz = E.makeCam(S, P, Object.assign({}, base, BANK.stage, f, { zScale: zs }), 1000, 700); let worst = 0; // (no pan: with a pan the pivot of the two cameras sits at different ground points, the same displacement in view units)
+    for (let i = 0; i < 200; i++) { const x = rnd() * S.W, y = rnd() * S.H, h = rnd() * 6, Yp = c0.pivot[1], A = cz.p(x, y, h), B = c0.p(x, Yp + (y - Yp) * zs, h); worst = Math.max(worst, Math.hypot(A[0] - B[0], A[1] - B[1])); }
+    ok(`Cam 8 zScale ${zs}: the projection equals Cam 6 of the depth-scaled ground (yaw 0, worst ${worst.toExponential(1)} px)`, worst < 1e-9, worst);
+    const pa = cz.p(c0.pivot[0], c0.pivot[1], c0.pivot[2]), pb = c0.p(c0.pivot[0], c0.pivot[1], c0.pivot[2]); ok(`Cam 8 zScale ${zs}: the pivot does not move`, Math.hypot(pa[0] - pb[0], pa[1] - pb[1]) < 1e-9);
+    ok(`Cam 8 zScale ${zs}: cam.zScale is exposed and sc * D = f is the dolly of Cam 6 (same D)`, cz.zScale === zs && Math.abs(cz.D - c0.D) < 1e-12 && Math.abs(cz.sc - c0.sc) < 1e-12);
+    // facing: a face is visible iff its normal faces the camera; in the compressed world the answer is the one of Cam 6 for the compressed position and the normal turned by the inverse transpose
+    let bad = 0, nn = 0; for (let i = 0; i < 300; i++) { const x = rnd() * S.W, y = rnd() * S.H, Yp = c0.pivot[1], yy = Yp + (y - Yp) * zs; for (const [nx, ny] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const a = Math.sign(cz.nrm(nx, ny, x, y)[1]), b = Math.sign(c0.nrm(nx, ny / zs, x, yy)[1]); nn++; if (a !== b && Math.abs(cz.nrm(nx, ny, x, y)[1]) > 1e-6) bad++; } }
+    ok(`Cam 8 zScale ${zs}: the facing test agrees with Cam 6 on the compressed ground (${nn} faces, ${bad} differ)`, bad === 0, bad);
+    // a tile edge along the view axis measures zs times its Cam 6 length on screen at the pivot (ortho-like check at the pivot)
+    const a = cz.p(c0.pivot[0], c0.pivot[1], 2), b = cz.p(c0.pivot[0], c0.pivot[1] - 1, 2), a0 = c0.p(c0.pivot[0], c0.pivot[1], 2), b0 = c0.p(c0.pivot[0], c0.pivot[1] - 1, 2);
+    ok(`Cam 8 zScale ${zs}: one tile along the view axis spans ${zs} of the Cam 6 screen length at the pivot, the width is unchanged`, Math.abs(Math.hypot(a[0] - b[0], a[1] - b[1]) / Math.hypot(a0[0] - b0[0], a0[1] - b0[1]) - zs) < 0.02 && Math.abs(cz.p(c0.pivot[0] + 1, c0.pivot[1], 2)[0] - a[0] - (c0.p(c0.pivot[0] + 1, c0.pivot[1], 2)[0] - a0[0])) < 1e-9); }
+  // no focus: the fit loop (box centred) keeps the box centre under the screen centre with zScale too
+  { const cz = E.makeCam(S, P, Object.assign({ zoom: 1, panX: 0, panY: 0, fitSc: 0, persH: 700 }, BANK.stagez), 1000, 700); ok('Cam 8 without a focus: the fitted pivot is under the screen centre', (() => { const q = cz.p(cz.pivot[0], cz.pivot[1], cz.pivot[2]); return Math.hypot(q[0] - 500, q[1] - 350) < 1e-9; })()); }
+}
 console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
