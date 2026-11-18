@@ -99,3 +99,32 @@ Objetivo: obtener los parámetros con números reales y comprobar que nuestra es
 1. Mide la secuencia 30:55, 30:56 y 0202 con tu propio marcado. Usa el grosor del fuste búho a media altura y las tapas, y añade a la tabla la profundidad de cada pilar en espaciados.
 2. **Prueba del sur sin altura:** el ancho de losas o de la escalera a nivel del suelo, al sur del héroe, contra el mismo ancho a la altura del héroe. ¿Crece (perspectiva normal) o se queda en ~1 (telescópica)?
 3. En la hoja 2, pinta s(d) de estas referencias junto a la curva de la perspectiva normal que mejor ajuste. El piso de ~50 % se acepta solo si los puntos lejanos se separan de esa curva.
+
+## Enmienda 2 ([R], 2026-11-18): prueba de distancia
+Pregunta de [U]: con nuestra cámara (Cam 6, FOV 30, pitch 25), ¿a qué distancia de un objeto se pierde el 40–45 % de su altura en pantalla, respecto del héroe?
+
+**Predicción analítica de [R]** (perspectiva normal, pivote en el héroe, héroe al centro):
+- Distancia de la cámara al pivote: D = 1 / (2 · tan 15° · heroFrac) H, que con heroFrac 0,14 da D = 13,3 H.
+- Escala del objeto: s = D / (D + z), con z la profundidad a lo largo del eje de la cámara.
+- Distancia sobre el suelo: g = z / cos 25°.
+
+| heroFrac | D | pérdida 40 % (s 0,60) | pérdida 45 % (s 0,55) |
+|---|---|---|---|
+| 0,14 | 13,3 H | 9,8 H de suelo más allá del héroe | 12,0 H |
+| 0,10 | 18,7 H | 13,7 H | 16,8 H |
+| 0,20 | 9,3 H | 6,9 H | 8,4 H |
+
+- La altura en pantalla de esos puntos no depende de heroFrac: y ≈ 0,15 (40 %) y 0,11 (45 %) desde arriba.
+- Referencia: en 30:55 el búho (s ≈ 0,57) está a y ≈ 0,07–0,13. Es cercano a la predicción, pero allí el héroe no está al centro.
+
+**Prueba (§5, nueva):**
+1. **Montaje:** en T3, una fila de billboards de 1 H × 0,4 H en el eje de la sala, cada 1 H de suelo desde el héroe hasta el muro norte, y 3 más al sur del héroe (−1, −2, −3 H). La cámara es la Cam 6 real del visor (`makePersp`), sin trucos.
+2. **Medición:** la altura en px de cada uno dividida por la del héroe. Con heroFrac 0,14, 0,10 y 0,20, y con el `heroScreen` de 0202.
+3. **Resultado:**
+   - la tabla s(g) medida contra la fórmula;
+   - la distancia exacta donde s cruza 0,60 y 0,55;
+   - su y en pantalla;
+   - cuánto crece el sur a −1, −2 y −3 H.
+4. **Hoja 4:** la curva medida, con los puntos de 0202, 30:55 y 30:56 marcados encima.
+
+Si la medición se aparta de la fórmula en más de 0,03, PARADA: informa antes de seguir.
