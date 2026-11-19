@@ -1,0 +1,43 @@
+{
+ "r21": {
+  "counts": {
+   "widenedTiles": 6126,
+   "subsegments": 85,
+   "pruned": 20,
+   "flowSeeds": 20,
+   "roomSeeds": 30,
+   "platforms": 143,
+   "roomPlat": 105,
+   "flowPlat": 38
+  },
+  "rooms": [
+   8,
+   12,
+   21,
+   24
+  ]
+ },
+ "r79": {
+  "counts": {
+   "widenedTiles": 6306,
+   "subsegments": 228,
+   "pruned": 27,
+   "flowSeeds": 27,
+   "roomSeeds": 35,
+   "platforms": 81,
+   "roomPlat": 70,
+   "flowPlat": 11
+  },
+  "rooms": [
+   65,
+   60,
+   63,
+   79,
+   86,
+   85,
+   81,
+   80
+  ]
+ },
+ "pageErrors": 0
+}
