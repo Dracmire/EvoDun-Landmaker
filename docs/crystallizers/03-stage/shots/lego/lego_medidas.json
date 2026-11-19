@@ -1,0 +1,1258 @@
+{
+ "perfil_m1": [
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    38,
+    25
+   ],
+   "lego": null,
+   "yaw": 180,
+   "rhoAll": 0.39826925263809965,
+   "rhoWalk": 0.030773776252459636,
+   "relAll": 0.37447698744769875,
+   "relWalk": 0.09477124183006536,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1434,
+   "visWalk": 306,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    39,
+    40
+   ],
+   "lego": null,
+   "yaw": 180,
+   "rhoAll": 0.3995726375471404,
+   "rhoWalk": 0.10415874692688955,
+   "relAll": 0.3338509316770186,
+   "relWalk": 0.09966777408637874,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1288,
+   "visWalk": 301,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    38,
+    49
+   ],
+   "lego": null,
+   "yaw": 180,
+   "rhoAll": 0.5146083973385822,
+   "rhoWalk": 0.41906087447167384,
+   "relAll": 0.2913553895410886,
+   "relWalk": 0.10204081632653061,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 937,
+   "visWalk": 196,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    38,
+    25
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 180,
+   "rhoAll": 0.39826925263809965,
+   "rhoWalk": 0.030773776252459636,
+   "relAll": 0.37447698744769875,
+   "relWalk": 0.09477124183006536,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1434,
+   "visWalk": 306,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    39,
+    40
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 180,
+   "rhoAll": 0.3995726375471404,
+   "rhoWalk": 0.10415874692688955,
+   "relAll": 0.3338509316770186,
+   "relWalk": 0.09966777408637874,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1288,
+   "visWalk": 301,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    38,
+    49
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 180,
+   "rhoAll": 0.5146083973385822,
+   "rhoWalk": 0.41906087447167384,
+   "relAll": 0.2913553895410886,
+   "relWalk": 0.10204081632653061,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 937,
+   "visWalk": 196,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    38,
+    25
+   ],
+   "lego": null,
+   "yaw": 180,
+   "rhoAll": 0.30972061168510734,
+   "rhoWalk": null,
+   "relAll": 0.49266247379454925,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 477,
+   "visWalk": 87,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    39,
+    40
+   ],
+   "lego": null,
+   "yaw": 180,
+   "rhoAll": 0.035090158582689976,
+   "rhoWalk": 0.1447843285754145,
+   "relAll": 0.28635346756152125,
+   "relWalk": 0.14893617021276595,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 447,
+   "visWalk": 188,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    38,
+    49
+   ],
+   "lego": null,
+   "yaw": 180,
+   "rhoAll": 0.15689304827023573,
+   "rhoWalk": 0.2657049282455863,
+   "relAll": 0.14640198511166252,
+   "relWalk": 0.03333333333333333,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 403,
+   "visWalk": 150,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    38,
+    25
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 180,
+   "rhoAll": 0.30972061168510734,
+   "rhoWalk": null,
+   "relAll": 0.49266247379454925,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 477,
+   "visWalk": 87,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    39,
+    40
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 180,
+   "rhoAll": 0.035090158582689976,
+   "rhoWalk": 0.1447843285754145,
+   "relAll": 0.28635346756152125,
+   "relWalk": 0.14893617021276595,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 447,
+   "visWalk": 188,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    38,
+    49
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 180,
+   "rhoAll": 0.15689304827023573,
+   "rhoWalk": 0.2657049282455863,
+   "relAll": 0.14640198511166252,
+   "relWalk": 0.03333333333333333,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 403,
+   "visWalk": 150,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  }
+ ],
+ "perfil_m3": [
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    30,
+    47
+   ],
+   "lego": null,
+   "yaw": 0,
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    31,
+    41
+   ],
+   "lego": null,
+   "yaw": 0,
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    30,
+    37
+   ],
+   "lego": null,
+   "yaw": 0,
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    30,
+    47
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 0,
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    31,
+    41
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 0,
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    30,
+    37
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 0,
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    30,
+    47
+   ],
+   "lego": null,
+   "yaw": 0,
+   "rhoAll": 0.3632223718590386,
+   "rhoWalk": 0.1928164799609902,
+   "relAll": 0.408675799086758,
+   "relWalk": 0.0761904761904762,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 438,
+   "visWalk": 105,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    31,
+    41
+   ],
+   "lego": null,
+   "yaw": 0,
+   "rhoAll": -0.04570733021138001,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.19742489270386265,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 466,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    30,
+    37
+   ],
+   "lego": null,
+   "yaw": 0,
+   "rhoAll": -0.167900631644497,
+   "rhoWalk": 0.24334890444177124,
+   "relAll": 0.13646055437100213,
+   "relWalk": 0.02666666666666667,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 469,
+   "visWalk": 75,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    30,
+    47
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 0,
+   "rhoAll": 0.3632223718590386,
+   "rhoWalk": 0.1928164799609902,
+   "relAll": 0.408675799086758,
+   "relWalk": 0.0761904761904762,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 438,
+   "visWalk": 105,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    31,
+    41
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 0,
+   "rhoAll": -0.04570733021138001,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.19742489270386265,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 466,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    30,
+    37
+   ],
+   "lego": {
+    "treatment": "up",
+    "m": 2,
+    "terraces": 1,
+    "single": true,
+    "moved": 0,
+    "jumps": [],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 0
+   },
+   "yaw": 0,
+   "rhoAll": -0.167900631644497,
+   "rhoWalk": 0.24334890444177124,
+   "relAll": 0.13646055437100213,
+   "relWalk": 0.02666666666666667,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 469,
+   "visWalk": 75,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  }
+ ],
+ "perfil_l1": [
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    26,
+    48
+   ],
+   "lego": null,
+   "yaw": 270,
+   "rhoAll": -0.2541122462043748,
+   "rhoWalk": 0.3199244690438339,
+   "relAll": 0.30931310577328275,
+   "relWalk": 0.3195067264573991,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2373,
+   "visWalk": 892,
+   "heroH": 1.5250000000000001,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    54,
+    51
+   ],
+   "lego": null,
+   "yaw": 270,
+   "rhoAll": 0.014618818703298668,
+   "rhoWalk": 0.6019861900605719,
+   "relAll": 0.005456349206349206,
+   "relWalk": 0,
+   "occluders": 264,
+   "occShare": 0.28356605800214824,
+   "visAll": 2016,
+   "visWalk": 931,
+   "heroH": 1.25,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    74,
+    47
+   ],
+   "lego": null,
+   "yaw": 270,
+   "rhoAll": -0.2413043518159121,
+   "rhoWalk": 0.6787226582248786,
+   "relAll": 0.8881491344873502,
+   "relWalk": 0.8894952251023193,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2253,
+   "visWalk": 733,
+   "heroH": 2.775,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    26,
+    48
+   ],
+   "lego": {
+    "treatment": "down",
+    "m": 2,
+    "terraces": 2,
+    "single": false,
+    "moved": 937,
+    "jumps": [
+     3.75
+    ],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 143
+   },
+   "yaw": 270,
+   "rhoAll": -0.14878732697329358,
+   "rhoWalk": 0.3734273584575262,
+   "relAll": 0.1170940170940171,
+   "relWalk": 0.31917631917631917,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2340,
+   "visWalk": 777,
+   "heroH": 0.2770000000000001,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    54,
+    51
+   ],
+   "lego": {
+    "treatment": "down",
+    "m": 2,
+    "terraces": 2,
+    "single": false,
+    "moved": 937,
+    "jumps": [
+     3.75
+    ],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 143
+   },
+   "yaw": 270,
+   "rhoAll": 0.12091663726113092,
+   "rhoWalk": 0.49379660127589603,
+   "relAll": 0.00761743546339399,
+   "relWalk": 0,
+   "occluders": 308,
+   "occShare": 0.3426028921023359,
+   "visAll": 2363,
+   "visWalk": 899,
+   "heroH": 0.002,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    74,
+    47
+   ],
+   "lego": {
+    "treatment": "down",
+    "m": 2,
+    "terraces": 2,
+    "single": false,
+    "moved": 937,
+    "jumps": [
+     3.75
+    ],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 143
+   },
+   "yaw": 270,
+   "rhoAll": 0.02458389312176875,
+   "rhoWalk": 0.6001733114304902,
+   "relAll": 0.9378220542768808,
+   "relWalk": 0.906789413118527,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2911,
+   "visWalk": 869,
+   "heroH": 2.775,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    26,
+    48
+   ],
+   "lego": null,
+   "yaw": 270,
+   "rhoAll": -0.44649662737121637,
+   "rhoWalk": 0.4625300941750193,
+   "relAll": 0.2601279317697228,
+   "relWalk": 0.23015873015873015,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 469,
+   "visWalk": 126,
+   "heroH": 1.5250000000000001,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    54,
+    51
+   ],
+   "lego": null,
+   "yaw": 270,
+   "rhoAll": -0.3587074871164596,
+   "rhoWalk": -0.03613610195197279,
+   "relAll": 0.0017953321364452424,
+   "relWalk": 0,
+   "occluders": 109,
+   "occShare": 0.3061797752808989,
+   "visAll": 557,
+   "visWalk": 356,
+   "heroH": 1.25,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    74,
+    47
+   ],
+   "lego": null,
+   "yaw": 270,
+   "rhoAll": 0.4230841422936842,
+   "rhoWalk": 0.794641801956765,
+   "relAll": 0.7460629921259843,
+   "relWalk": 0.7822878228782287,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 508,
+   "visWalk": 271,
+   "heroH": 2.775,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    26,
+    48
+   ],
+   "lego": {
+    "treatment": "down",
+    "m": 2,
+    "terraces": 2,
+    "single": false,
+    "moved": 937,
+    "jumps": [
+     3.75
+    ],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 143
+   },
+   "yaw": 270,
+   "rhoAll": -0.4606623171090069,
+   "rhoWalk": 0.48696232925961513,
+   "relAll": 0.05788423153692615,
+   "relWalk": 0.24509803921568626,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 501,
+   "visWalk": 102,
+   "heroH": 0.2770000000000001,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    54,
+    51
+   ],
+   "lego": {
+    "treatment": "down",
+    "m": 2,
+    "terraces": 2,
+    "single": false,
+    "moved": 937,
+    "jumps": [
+     3.75
+    ],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 143
+   },
+   "yaw": 270,
+   "rhoAll": -0.267110805334736,
+   "rhoWalk": -0.057145154559929565,
+   "relAll": 0.005145797598627788,
+   "relWalk": 0,
+   "occluders": 109,
+   "occShare": 0.3123209169054441,
+   "visAll": 583,
+   "visWalk": 349,
+   "heroH": 0.002,
+   "topo": "e5f92a7b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    74,
+    47
+   ],
+   "lego": {
+    "treatment": "down",
+    "m": 2,
+    "terraces": 2,
+    "single": false,
+    "moved": 937,
+    "jumps": [
+     3.75
+    ],
+    "conflict": null,
+    "yawFlip": false,
+    "sceneryLowered": 143
+   },
+   "yaw": 270,
+   "rhoAll": 0.45298712527633167,
+   "rhoWalk": 0.7860321519108989,
+   "relAll": 0.8034351145038168,
+   "relWalk": 0.7798507462686567,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 524,
+   "visWalk": 268,
+   "heroH": 2.775,
+   "topo": "e5f92a7b",
+   "vert": null
+  }
+ ],
+ "perfil_c0": [
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    131,
+    7
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.2973713175491361,
+   "rhoWalk": 0.2559719135538131,
+   "relAll": 0.06326723323890462,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2118,
+   "visWalk": 1181,
+   "heroH": 1.5250000000000001,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    88,
+    11
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.1975021213044683,
+   "rhoWalk": -0.003604208550901901,
+   "relAll": 0.8524788391777509,
+   "relWalk": 0.8259723137771918,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2481,
+   "visWalk": 1517,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    47,
+    16
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.3774247683782149,
+   "rhoWalk": 0.2143236009287332,
+   "relAll": 0.8543570993296771,
+   "relWalk": 0.8803652968036529,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1641,
+   "visWalk": 1095,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    131,
+    7
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.2973713175491361,
+   "rhoWalk": 0.2559719135538131,
+   "relAll": 0.06326723323890462,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2118,
+   "visWalk": 1181,
+   "heroH": 1.5250000000000001,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    88,
+    11
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.1975021213044683,
+   "rhoWalk": -0.003604208550901901,
+   "relAll": 0.8524788391777509,
+   "relWalk": 0.8259723137771918,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2481,
+   "visWalk": 1517,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    47,
+    16
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.3774247683782149,
+   "rhoWalk": 0.2143236009287332,
+   "relAll": 0.8543570993296771,
+   "relWalk": 0.8803652968036529,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1641,
+   "visWalk": 1095,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    131,
+    7
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.12032050345131028,
+   "rhoWalk": 0.5423729112957866,
+   "relAll": 0.07530120481927711,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 332,
+   "visWalk": 141,
+   "heroH": 1.5250000000000001,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    88,
+    11
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.21204525707199315,
+   "rhoWalk": -0.15856321040346838,
+   "relAll": 0.6140684410646388,
+   "relWalk": 0.5193798449612403,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 526,
+   "visWalk": 387,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    47,
+    16
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.14619950800598516,
+   "rhoWalk": 0.13216920350723613,
+   "relAll": 0.9022556390977443,
+   "relWalk": 0.9027777777777778,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 532,
+   "visWalk": 432,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    131,
+    7
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.12032050345131028,
+   "rhoWalk": 0.5423729112957866,
+   "relAll": 0.07530120481927711,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 332,
+   "visWalk": 141,
+   "heroH": 1.5250000000000001,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    88,
+    11
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.21204525707199315,
+   "rhoWalk": -0.15856321040346838,
+   "relAll": 0.6140684410646388,
+   "relWalk": 0.5193798449612403,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 526,
+   "visWalk": 387,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    47,
+    16
+   ],
+   "lego": null,
+   "yaw": 90,
+   "rhoAll": 0.14619950800598516,
+   "rhoWalk": 0.13216920350723613,
+   "relAll": 0.9022556390977443,
+   "relWalk": 0.9027777777777778,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 532,
+   "visWalk": 432,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": null
+  }
+ ]
+}

@@ -60,13 +60,13 @@ Banner: **2D-HD crystallizer: in construction (S1)**
 | field | value |
 |---|---|
 | id | `stage` |
-| examples (first = default) | DAC window (2D-HD, S1) (`real_map`); Shrine-Pier x4 · Stage (legacy contract) (`shrine_pier_x4`); Diorama 31 · Stage (legacy contract) (`real_map`); Your images (PNG + roles); Forest A (v53) (`forest_a`); Forest B (amplified relief) (`forest_b`); Aurhea's Fountain (old map, water) (`aurhea`); Throne room of Aliahan (MAPA 1, the world) (`throne`); Golden shot 1 · Shrine door (hand-placed layers) (`forest_b`); DEGENERATION D1 · Throne room (billboards) — do not imitate (`forest_b`); Room 14 · orientation (mock T Z) (`real_map`); Room 44 · orientation (mock T X) (`real_map`); M1 · Ascension x P1 narrow corridor · DAC 14 (profiles mockup) (`real_map`); M2 · Diorama x P1 narrow corridor · Diorama 30 narrowed by hand to about 4 H (profiles mockup) (`real_map`); M3 · Cake x P3 normal Hub · Cake 19 (profiles mockup) (`real_map`); C0 · control, no profile · DAC 44 (profiles mockup) (`real_map`) |
+| examples (first = default) | DAC window (2D-HD, S1) (`real_map`); Shrine-Pier x4 · Stage (legacy contract) (`shrine_pier_x4`); Diorama 31 · Stage (legacy contract) (`real_map`); Your images (PNG + roles); Forest A (v53) (`forest_a`); Forest B (amplified relief) (`forest_b`); Aurhea's Fountain (old map, water) (`aurhea`); Throne room of Aliahan (MAPA 1, the world) (`throne`); Golden shot 1 · Shrine door (hand-placed layers) (`forest_b`); DEGENERATION D1 · Throne room (billboards) — do not imitate (`forest_b`); Room 14 · orientation (mock T Z) (`real_map`); Room 44 · orientation (mock T X) (`real_map`); M1 · Ascension x P1 narrow corridor · DAC 14 (profiles mockup) (`real_map`); M2 · Diorama x P1 narrow corridor · Diorama 30 narrowed by hand to about 4 H (profiles mockup) (`real_map`); M3 · Cake x P3 normal Hub · Cake 19 (profiles mockup) (`real_map`); C0 · control, no profile · DAC 44 (profiles mockup) (`real_map`); L1 · Cima · Diorama 7, height treatment Down (lego) (`real_map`) |
 | camera (default) | `stage` |
 | cameras offered | `isoE`, `isoW`, `oblique`, `low`, `top`, `stage`, `classic`, `stagez` |
 | technique (default) | `box` |
 | techniques offered | `box`, `B` |
 | compare | no |
-| main controls | `contract`, `tilesPerH`, `heroFrac`, `vScale`, `exag`, `stageUnits`, `stageBorder`, `stageObjects`, `stageVolumes`, `stageOrient`, `stagePlanes`, `stageProps`, `stageFrame`, `stageCamSpace`, `stageCamProfile`, `stageVert`, `stageReset`, `stageFollow`, `stageWindow`, `stagePrev`, `stageNext` |
+| main controls | `contract`, `tilesPerH`, `heroFrac`, `vScale`, `exag`, `stageUnits`, `stageBorder`, `stageObjects`, `stageVolumes`, `stageOrient`, `stagePlanes`, `stageProps`, `stageFrame`, `stageCamSpace`, `stageCamProfile`, `stageVert`, `stageHeight`, `stageReset`, `stageFollow`, `stageWindow`, `stagePrev`, `stageNext` |
 | advanced controls (folded) | - |
 | slice controls | - |
 | terrain controls | folded: `terraces`, `subs`, `terH`, `spread`, `stairW`, `stairStyle`, `rampDepth`, `smooth`, `radius`, `curvesPreset`, `wallPass`, `wallExtrude` |
