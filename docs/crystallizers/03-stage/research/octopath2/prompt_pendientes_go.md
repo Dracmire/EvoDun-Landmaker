@@ -11,7 +11,7 @@
 
 **Sin firmas** en los commits ni en los PR. **No mergees.** Si un test falla dos veces seguidas, PARA y di si el problema está en el código o en el test.
 
-Son 7 partes; cada una es su propio PR con su ficha. Haz las partes en orden. **Presupuesto total: 60 minutos de reloj.** Al llegar al tope, para y entrega las fichas de lo hecho, diciendo qué faltó. No mezcles correcciones de un PR viejo con una parte nueva.
+Son 9 partes (P0–P8); cada una es su propio PR con su ficha. Haz las partes en orden. **Presupuesto total: 75 minutos de reloj.** Al llegar al tope, para y entrega las fichas de lo hecho, diciendo qué faltó. No mezcles correcciones de un PR viejo con una parte nueva.
 
 ## P0 · Ficha retroactiva y firma
 
@@ -41,16 +41,15 @@ Pedido:
 
 Si «una cara por acantilado» no se puede con el pase de paredes actual, dilo y propone otro camino; no lo fuerces.
 
-## P3 · Escenarios candidatos de 7–9 terrazas (solo capturas; [U] juzga)
+## P3 · La misma ventana con 3, 5, 7 y 9 terrazas (solo capturas; [U] juzga)
 
-Con P1 hecho, abre como ventana de una sala, en el modo 3, Cam 6, k0 / k4 / k8, Mid y Up:
-- **Default 9:** sala 21 (¿plaza?), sala 16 (¿garganta?) y sala 30 (valle grande; encuadre de la sala completa);
-- **Default 7:** el mayor valle;
-- **Balanced 9:** sala 79.
-
-Agrega u2 con Scale (la lámina actual, sin juzgar todavía).
-
-En la ficha, por sala: terrazas que pisa, m, tamaño en H y vecinas. **Sin veredicto tuyo.**
+Corrección de [U]: comparar salas distintas no prueba nada. Hay que ver **el mismo lugar** cambiando solo las terrazas.
+- **Ventanas fijas por recorte del mapa** (la misma caja de baldosas en los cuatro casos), no por id de sala, porque las salas pueden cambiar con las terrazas. En la ficha di si los ids se mantienen.
+- **Lugares:** la caja de la sala 21 de Default 9 (¿plaza?), la de la sala 16 (¿garganta?), la de la sala 79 de Balanced 9 (valle) y la de u2.
+- **Igual en los cuatro casos:** el preset (Default para las salas de Default, Balanced para la 79 y u2), la posición del héroe (k0, k4 y k8 en las mismas coordenadas del mapa), Cam 6, el zoom y el tratamiento (Mid y Up).
+- **Entrega:** una lámina por lugar, con 4 columnas (3, 5, 7 y 9 terrazas) por 3 filas (k0, k4, k8), Mid y Up por separado. En la ficha, por caso: terrazas que pisa la caja, m y salas que la cortan. **Sin veredicto tuyo.**
+- Agrega u2 con Scale (la lámina actual, sin juzgar todavía).
+- Depende de P1.
 
 ## P4 · Los vecinos como marco (T62, prueba mínima)
 
@@ -70,6 +69,29 @@ Cam 7 se ve casi en planta en la cima de L1. Solo mide y captura, sin cambiar la
 
 - **T2 por partes (A500):** recorre cada sala entrada → núcleo → salidas, córtala en codo, pasillo y área central, y clasifica cada parte con la tabla v2 (`verticalidad.md` §6). Hazlo con Balanced 3 y con Default 9. Solo mide. Agrégalo como sección v2 de `perfiles_clasificacion.md`, sin borrar la v1.
 - **Re-mide** el héroe fuera de cuadro y el vacío % en todos los `perfil_*` actuales (M1–M3, C0, L1, u1, u2, s1).
+
+## P7 · Escaleras de 2 peldaños por baldosa (decisión de [U] sobre F1)
+
+- En una escalera de lego, cada baldosa lleva **como máximo 2 peldaños** (medias baldosas).
+- Si el salto pide más peldaños, la escalera se **alarga**: más baldosas de profundidad (profundidad = ⌈peldaños / 2⌉), nunca más de 2 peldaños por baldosa. La altura de cada contrahuella es la de Mid o menos.
+- El dibujo de medio peldaño exige clonar el renderizador de peldaños de `render.js` a `src/s3/` (regla A522). La escalera más larga cambia su huella, que es topología permitida en DAC3. Verifica que la sala siga siendo una región.
+- Si una escalera más larga no cabe en la sala, márcalo y no la fuerces.
+- Láminas Mid | lego de u1 y u2 en Cam 6, k0/k4/k8.
+- Construible: sí, con el clon del dibujo de peldaños.
+
+## P8 · Cámara: el objeto del fondo crece al acercarse (decisión de [U] sobre F5)
+
+**Meta:** de k0 a k8, la terraza destino o el landmark crece en pantalla como en DQ3. **Lectura de [R] de la regla de [U]** («no más de 50 % de reducción»): el tamaño en k0 es al menos el 50 % del tamaño en k8, o sea, un crecimiento entre +33 % y +100 %. Hoy Cam 6 da +26–33 % y Cam 8 da 0.
+
+**Cómo, sin tocar Cam 1, 3, 5 ni 6:**
+- un perfil de cámara del modo 3 detrás de un interruptor, apagado por defecto;
+- dolly por progreso: la escala del pivote crece con el avance del héroe por el eje de `orient`, de la entrada a la meta. Se hace en el módulo del modo 3 (`stage.js`) escalando `heroFrac` con el progreso, sin cambiar `render.js`;
+- barrido de la ganancia g ∈ {0, 0,15, 0,30, 0,45} sobre Cam 6 y sobre Cam 8, midiendo el crecimiento del landmark y de la terraza destino (px por H, como en #114) y el tamaño del héroe en pantalla;
+- M1, u1 y u2, k0 a k8.
+
+**Entrega:** la tabla del barrido y láminas k0/k4/k8 del mejor caso de cada cámara. [U] elige. Si para el rango hace falta cambiar el FOV, solo dilo (eso tocaría `render.js`).
+
+Construible: sí, en `stage.js`.
 
 ## Carril (para todas las partes)
 
