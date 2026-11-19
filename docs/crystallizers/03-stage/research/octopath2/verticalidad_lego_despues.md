@@ -1,5 +1,6 @@
+# Verticalidad tipo lego: notas para después
 
-## 9. Para después (de [U], 2026-11-19)
+Ideas de [U] del 2026-11-19, sin construir. Complementa `verticalidad_lego.md`.
 
 - **El encuadre es lo que falta (A540).** En Octopath, una sala alta es parte de algo más: edificios alrededor de una plataforma de cambio de altura, una calle llena de terrazas (ciudad), o, en una colina, terrazas bajas pegadas a otras más altas (una plataforma de 1 piso y después una escalera que sube 2, total 3). En DAC una Ascensión queda sola, «como un dedo». Hace falta una composición embebida.
 - **Salas de una terraza (70 %).** Opciones de [U]:
