@@ -1,0 +1,1652 @@
+{
+ "perfil_m1": {
+  "Cam 6|follow on": [
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 77,
+     "px": 4200
+    },
+    "heroPxPerH": 90.2,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 77,
+     "px": 4200
+    },
+    "heroPxPerH": 76,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 77,
+     "px": 4200
+    },
+    "heroPxPerH": 65.7,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 293,
+    "areaPx": 179631,
+    "widthPx": 989,
+    "pxPerTile": 24.76,
+    "pxPerH": 37.14,
+    "propsBox": {
+     "w": 77,
+     "h": 81,
+     "px": 4592
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 278,
+    "areaPx": 184551,
+    "widthPx": 977,
+    "pxPerTile": 25.77,
+    "pxPerH": 38.65,
+    "propsBox": {
+     "w": 82,
+     "h": 104,
+     "px": 6465
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 229,
+    "areaPx": 171662,
+    "widthPx": 994,
+    "pxPerTile": 27.38,
+    "pxPerH": 41.07,
+    "propsBox": {
+     "w": 91,
+     "h": 167,
+     "px": 11336
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 207,
+    "areaPx": 161310,
+    "widthPx": 851,
+    "pxPerTile": 27.92,
+    "pxPerH": 41.87,
+    "propsBox": {
+     "w": 96,
+     "h": 188,
+     "px": 13366
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 193,
+    "areaPx": 156091,
+    "widthPx": 982,
+    "pxPerTile": 28.44,
+    "pxPerH": 42.66,
+    "propsBox": {
+     "w": 99,
+     "h": 194,
+     "px": 14346
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 181,
+    "areaPx": 158635,
+    "widthPx": 877,
+    "pxPerTile": 29.6,
+    "pxPerH": 44.41,
+    "propsBox": {
+     "w": 105,
+     "h": 209,
+     "px": 15216
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.8188
+   }
+  ],
+  "Cam 6|follow off": [
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 77,
+     "px": 4200
+    },
+    "heroPxPerH": 90.2,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 77,
+     "px": 4200
+    },
+    "heroPxPerH": 76,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 77,
+     "px": 4200
+    },
+    "heroPxPerH": 65.7,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 77,
+     "px": 4200
+    },
+    "heroPxPerH": 57.9,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 93,
+     "px": 5047
+    },
+    "heroPxPerH": 53.1,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 132,
+     "px": 7158
+    },
+    "heroPxPerH": 47.9,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 140,
+     "px": 7499
+    },
+    "heroPxPerH": 45.6,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 140,
+     "px": 7499
+    },
+    "heroPxPerH": 44.6,
+    "zoom": 1.8188
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 290,
+    "areaPx": 156047,
+    "widthPx": 898,
+    "pxPerTile": 23.2,
+    "pxPerH": 34.8,
+    "propsBox": {
+     "w": 72,
+     "h": 141,
+     "px": 7082
+    },
+    "heroPxPerH": 42.6,
+    "zoom": 1.8188
+   }
+  ],
+  "Cam 8|follow on": [
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 106,
+     "px": 7919
+    },
+    "heroPxPerH": 93.5,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 106,
+     "px": 7919
+    },
+    "heroPxPerH": 85.3,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 106,
+     "px": 7919
+    },
+    "heroPxPerH": 78.4,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 106,
+     "px": 7919
+    },
+    "heroPxPerH": 72.5,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 129,
+     "px": 9715
+    },
+    "heroPxPerH": 68.6,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 97,
+     "h": 183,
+     "px": 13687
+    },
+    "heroPxPerH": 64.1,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 194,
+     "px": 14639
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 259,
+    "areaPx": 115568,
+    "widthPx": 953,
+    "pxPerTile": 21.12,
+    "pxPerH": 31.69,
+    "propsBox": {
+     "w": 101,
+     "h": 196,
+     "px": 15091
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 265,
+    "areaPx": 117304,
+    "widthPx": 977,
+    "pxPerTile": 21.04,
+    "pxPerH": 31.56,
+    "propsBox": {
+     "w": 105,
+     "h": 204,
+     "px": 15181
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.5333
+   }
+  ],
+  "Cam 8|follow off": [
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 106,
+     "px": 7919
+    },
+    "heroPxPerH": 93.5,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 106,
+     "px": 7919
+    },
+    "heroPxPerH": 85.3,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 106,
+     "px": 7919
+    },
+    "heroPxPerH": 78.4,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 106,
+     "px": 7919
+    },
+    "heroPxPerH": 72.5,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 129,
+     "px": 9715
+    },
+    "heroPxPerH": 68.6,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 97,
+     "h": 183,
+     "px": 13687
+    },
+    "heroPxPerH": 64.1,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 194,
+     "px": 14639
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 194,
+     "px": 14639
+    },
+    "heroPxPerH": 61.1,
+    "zoom": 1.5333
+   },
+   {
+    "destTiles": 310,
+    "visTiles": 246,
+    "areaPx": 110599,
+    "widthPx": 945,
+    "pxPerTile": 21.2,
+    "pxPerH": 31.81,
+    "propsBox": {
+     "w": 100,
+     "h": 195,
+     "px": 13723
+    },
+    "heroPxPerH": 59.2,
+    "zoom": 1.5333
+   }
+  ]
+ },
+ "perfil_u1": {
+  "Cam 6|follow on": [
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 96,
+     "px": 6613
+    },
+    "heroPxPerH": 90.2,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 96,
+     "px": 6613
+    },
+    "heroPxPerH": 82.5,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 96,
+     "px": 6613
+    },
+    "heroPxPerH": 76,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 115,
+     "px": 7913
+    },
+    "heroPxPerH": 68,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 117,
+     "px": 8034
+    },
+    "heroPxPerH": 68,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118017,
+    "widthPx": 980,
+    "pxPerTile": 30.36,
+    "pxPerH": 45.55,
+    "propsBox": {
+     "w": 90,
+     "h": 106,
+     "px": 7297
+    },
+    "heroPxPerH": 70.5,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 119299,
+    "widthPx": 958,
+    "pxPerTile": 30.53,
+    "pxPerH": 45.79,
+    "propsBox": {
+     "w": 88,
+     "h": 138,
+     "px": 9128
+    },
+    "heroPxPerH": 63.6,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 152576,
+    "widthPx": 1000,
+    "pxPerTile": 34.53,
+    "pxPerH": 51.79,
+    "propsBox": {
+     "w": 96,
+     "h": 189,
+     "px": 12909
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 127,
+    "areaPx": 185115,
+    "widthPx": 967,
+    "pxPerTile": 38.18,
+    "pxPerH": 57.27,
+    "propsBox": {
+     "w": 105,
+     "h": 209,
+     "px": 15276
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.6582
+   }
+  ],
+  "Cam 6|follow off": [
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 96,
+     "px": 6613
+    },
+    "heroPxPerH": 90.2,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 96,
+     "px": 6613
+    },
+    "heroPxPerH": 82.5,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 96,
+     "px": 6613
+    },
+    "heroPxPerH": 76,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 115,
+     "px": 7913
+    },
+    "heroPxPerH": 68,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 117,
+     "px": 8034
+    },
+    "heroPxPerH": 68,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 107,
+     "px": 7372
+    },
+    "heroPxPerH": 71.5,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 144,
+     "px": 9863
+    },
+    "heroPxPerH": 67,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 149,
+     "px": 9266
+    },
+    "heroPxPerH": 58.8,
+    "zoom": 1.6582
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 128,
+    "areaPx": 118260,
+    "widthPx": 996,
+    "pxPerTile": 30.4,
+    "pxPerH": 45.59,
+    "propsBox": {
+     "w": 91,
+     "h": 149,
+     "px": 9253
+    },
+    "heroPxPerH": 53.9,
+    "zoom": 1.6582
+   }
+  ],
+  "Cam 8|follow on": [
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 128,
+     "px": 11727
+    },
+    "heroPxPerH": 93.5,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 128,
+     "px": 11727
+    },
+    "heroPxPerH": 89.2,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 128,
+     "px": 11727
+    },
+    "heroPxPerH": 85.3,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 152,
+     "px": 13889
+    },
+    "heroPxPerH": 80,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 154,
+     "px": 14066
+    },
+    "heroPxPerH": 80,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 124,
+    "areaPx": 139937,
+    "widthPx": 1000,
+    "pxPerTile": 33.59,
+    "pxPerH": 50.39,
+    "propsBox": {
+     "w": 119,
+     "h": 139,
+     "px": 12502
+    },
+    "heroPxPerH": 81.7,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 138776,
+    "widthPx": 1000,
+    "pxPerTile": 33.32,
+    "pxPerH": 49.98,
+    "propsBox": {
+     "w": 114,
+     "h": 179,
+     "px": 15275
+    },
+    "heroPxPerH": 76.8,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 138776,
+    "widthPx": 1000,
+    "pxPerTile": 33.32,
+    "pxPerH": 49.98,
+    "propsBox": {
+     "w": 114,
+     "h": 221,
+     "px": 17692
+    },
+    "heroPxPerH": 71.2,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 138776,
+    "widthPx": 1000,
+    "pxPerTile": 33.32,
+    "pxPerH": 49.98,
+    "propsBox": {
+     "w": 114,
+     "h": 221,
+     "px": 17828
+    },
+    "heroPxPerH": 67.4,
+    "zoom": 1.5542
+   }
+  ],
+  "Cam 8|follow off": [
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 128,
+     "px": 11727
+    },
+    "heroPxPerH": 93.5,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 128,
+     "px": 11727
+    },
+    "heroPxPerH": 89.2,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 128,
+     "px": 11727
+    },
+    "heroPxPerH": 85.3,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 152,
+     "px": 13889
+    },
+    "heroPxPerH": 80,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 154,
+     "px": 14066
+    },
+    "heroPxPerH": 80,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 141,
+     "px": 12917
+    },
+    "heroPxPerH": 83,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 190,
+     "px": 16756
+    },
+    "heroPxPerH": 81.9,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 235,
+     "px": 19653
+    },
+    "heroPxPerH": 75.5,
+    "zoom": 1.5542
+   },
+   {
+    "destTiles": 128,
+    "visTiles": 125,
+    "areaPx": 139660,
+    "widthPx": 1000,
+    "pxPerTile": 33.43,
+    "pxPerH": 50.14,
+    "propsBox": {
+     "w": 121,
+     "h": 235,
+     "px": 20050
+    },
+    "heroPxPerH": 71.3,
+    "zoom": 1.5542
+   }
+  ]
+ },
+ "perfil_u2": {
+  "Cam 6|follow on": [
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 95,
+     "px": 6284
+    },
+    "heroPxPerH": 94.6,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 95,
+     "px": 6284
+    },
+    "heroPxPerH": 86.2,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 95,
+     "px": 6284
+    },
+    "heroPxPerH": 79.2,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 95,
+     "px": 6284
+    },
+    "heroPxPerH": 68,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 71039,
+    "widthPx": 850,
+    "pxPerTile": 31.41,
+    "pxPerH": 47.12,
+    "propsBox": {
+     "w": 92,
+     "h": 125,
+     "px": 8597
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 84234,
+    "widthPx": 870,
+    "pxPerTile": 34.2,
+    "pxPerH": 51.31,
+    "propsBox": {
+     "w": 97,
+     "h": 159,
+     "px": 11562
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 77336,
+    "widthPx": 877,
+    "pxPerTile": 32.77,
+    "pxPerH": 49.16,
+    "propsBox": {
+     "w": 93,
+     "h": 137,
+     "px": 9648
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 116790,
+    "widthPx": 866,
+    "pxPerTile": 40.28,
+    "pxPerH": 60.41,
+    "propsBox": {
+     "w": 106,
+     "h": 181,
+     "px": 14315
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 114346,
+    "widthPx": 896,
+    "pxPerTile": 39.85,
+    "pxPerH": 59.78,
+    "propsBox": {
+     "w": 105,
+     "h": 224,
+     "px": 15569
+    },
+    "heroPxPerH": 62,
+    "zoom": 1.5095
+   }
+  ],
+  "Cam 6|follow off": [
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 95,
+     "px": 6284
+    },
+    "heroPxPerH": 94.6,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 95,
+     "px": 6284
+    },
+    "heroPxPerH": 86.2,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 95,
+     "px": 6284
+    },
+    "heroPxPerH": 79.2,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 95,
+     "px": 6284
+    },
+    "heroPxPerH": 68,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 111,
+     "px": 7256
+    },
+    "heroPxPerH": 60,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 111,
+     "px": 7269
+    },
+    "heroPxPerH": 56.5,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 111,
+     "px": 7249
+    },
+    "heroPxPerH": 58.9,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 111,
+     "px": 7258
+    },
+    "heroPxPerH": 52.7,
+    "zoom": 1.5095
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 64429,
+    "widthPx": 838,
+    "pxPerTile": 29.91,
+    "pxPerH": 44.87,
+    "propsBox": {
+     "w": 89,
+     "h": 124,
+     "px": 6932
+    },
+    "heroPxPerH": 53,
+    "zoom": 1.5095
+   }
+  ],
+  "Cam 8|follow on": [
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 127,
+     "px": 11244
+    },
+    "heroPxPerH": 95.8,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 127,
+     "px": 11244
+    },
+    "heroPxPerH": 91.3,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 127,
+     "px": 11244
+    },
+    "heroPxPerH": 87.2,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 127,
+     "px": 11244
+    },
+    "heroPxPerH": 80,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 85943,
+    "widthPx": 912,
+    "pxPerTile": 34.55,
+    "pxPerH": 51.82,
+    "propsBox": {
+     "w": 119,
+     "h": 162,
+     "px": 14307
+    },
+    "heroPxPerH": 73.9,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 85943,
+    "widthPx": 912,
+    "pxPerTile": 34.55,
+    "pxPerH": 51.82,
+    "propsBox": {
+     "w": 119,
+     "h": 198,
+     "px": 17494
+    },
+    "heroPxPerH": 71.2,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 84701,
+    "widthPx": 907,
+    "pxPerTile": 34.3,
+    "pxPerH": 51.45,
+    "propsBox": {
+     "w": 117,
+     "h": 171,
+     "px": 14799
+    },
+    "heroPxPerH": 72.5,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 81661,
+    "widthPx": 886,
+    "pxPerTile": 33.68,
+    "pxPerH": 50.52,
+    "propsBox": {
+     "w": 112,
+     "h": 193,
+     "px": 16148
+    },
+    "heroPxPerH": 66.3,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 81181,
+    "widthPx": 887,
+    "pxPerTile": 33.58,
+    "pxPerH": 50.37,
+    "propsBox": {
+     "w": 112,
+     "h": 232,
+     "px": 17581
+    },
+    "heroPxPerH": 66.3,
+    "zoom": 1.3845
+   }
+  ],
+  "Cam 8|follow off": [
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 127,
+     "px": 11244
+    },
+    "heroPxPerH": 95.8,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 127,
+     "px": 11244
+    },
+    "heroPxPerH": 91.3,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 127,
+     "px": 11244
+    },
+    "heroPxPerH": 87.2,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 127,
+     "px": 11244
+    },
+    "heroPxPerH": 80,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 163,
+     "px": 14465
+    },
+    "heroPxPerH": 74.4,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 200,
+     "px": 17743
+    },
+    "heroPxPerH": 71.7,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 175,
+     "px": 15516
+    },
+    "heroPxPerH": 74.1,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 206,
+     "px": 18261
+    },
+    "heroPxPerH": 70.5,
+    "zoom": 1.3845
+   },
+   {
+    "destTiles": 72,
+    "visTiles": 72,
+    "areaPx": 86513,
+    "widthPx": 920,
+    "pxPerTile": 34.66,
+    "pxPerH": 52,
+    "propsBox": {
+     "w": 119,
+     "h": 240,
+     "px": 19382
+    },
+    "heroPxPerH": 71,
+    "zoom": 1.3845
+   }
+  ]
+ }
+}

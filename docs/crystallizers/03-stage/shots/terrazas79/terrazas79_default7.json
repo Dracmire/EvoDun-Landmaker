@@ -1,0 +1,97 @@
+{
+ "preset": "Default",
+ "terraces": 7,
+ "rooms": 32,
+ "types": {
+  "Cake": 30,
+  "Diorama": 1,
+  "Ascension": 1
+ },
+ "ramps": 157,
+ "landTiles": 44582,
+ "mainTiles": 9103,
+ "walkableTiles": 29931,
+ "mainPctLand": 20.4,
+ "walkablePctLand": 67.1,
+ "isolatedRegions": 478,
+ "isolatedTiles": 3639,
+ "edgeProblems": 27,
+ "startGroups": [
+  229,
+  21,
+  3,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "wholeMapTerraces": {
+  "none": 1,
+  "one": 0,
+  "two": 1,
+  "three": 30
+ },
+ "clusters": {
+  "diffPairs": 17,
+  "groups": 4,
+  "sizes": [
+   7,
+   5,
+   3,
+   3
+  ],
+  "maxDiff": 2
+ },
+ "valleys": {
+  "n": 1,
+  "top": [
+   {
+    "id": 4,
+    "type": "Cake",
+    "ter": 3,
+    "tiles": 85,
+    "LH": 9.3,
+    "WH": 8,
+    "areaH2": 37.8,
+    "nbs": 2
+   }
+  ]
+ },
+ "peaks": {
+  "n": 0,
+  "top": []
+ },
+ "A2": {
+  "roomPairs": 0,
+  "faces": 0,
+  "groupsKept": 0,
+  "crossGroupsKept": 0
+ },
+ "A3": {
+  "roomPairs": 0,
+  "faces": 0,
+  "groupsKept": 0,
+  "crossGroupsKept": 0
+ },
+ "A1": {
+  "roomPairs": 65,
+  "faces": 159,
+  "groupsKept": 1006,
+  "crossGroupsKept": 50
+ },
+ "seconds": 45.022,
+ "windows": {
+  "one": 3,
+  "two": 7,
+  "three": 22,
+  "none": 0
+ },
+ "windowsPct": {
+  "one": 9.4,
+  "two": 21.9,
+  "threePlus": 68.8
+ }
+}
