@@ -3,7 +3,7 @@
      node tools/test_contract.js */
 const fs = require('fs'), path = require('path'), vm = require('vm');
 global.window = global;
-for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes', 's3/shape', 's3/rooms', 's3/roomtypes', 'pocket', 'render', 'contract']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
+for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes', 's3/ns', 's3/shape', 's3/rooms', 's3/roomtypes', 's3/pocket', 'pocket', 'render', 'contract']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
 const E = window.EVO; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : extra); } };
 const P = { terraces: 3, subs: 1, terH: 1, subH: 0.22, minPlateau: 1, minSub: 1, pre: 0, climb: 2, gateThr: 0.05, gateMin: 3, passGap: 8, stairW: 0, stairStyle: 1, rampDepth: 2, spread: 1, smooth: 0, radius: 0, tread: 2, margin: 2 };

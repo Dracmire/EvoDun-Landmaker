@@ -3,7 +3,7 @@
      node tools/test_stage_exag.js */
 const fs = require('fs'), path = require('path'), vm = require('vm');
 global.window = global;
-for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes', 's3/shape', 's3/rooms', 's3/roomtypes', 'pocket', 'render', 'stage', 'orient', 'planes', 'volumes']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
+for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes', 's3/ns', 's3/shape', 's3/rooms', 's3/roomtypes', 's3/pocket', 'pocket', 'render', 'stage', 'orient', 'planes', 'volumes']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
 const E = window.EVO, X = E.stage.exag; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : extra); } };
 const hs = []; for (let h = 0; h <= 12; h += 0.05) hs.push(h);
