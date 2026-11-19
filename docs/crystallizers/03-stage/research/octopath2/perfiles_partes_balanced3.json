@@ -1,0 +1,1808 @@
+{
+ "preset": "Balanced 3",
+ "tilesPerH": 1.5,
+ "rooms": 86,
+ "tally": {
+  "pasillo -> P1c": 52,
+  "codo -> P1c": 34,
+  "central -> P3/P4 Hub": 30,
+  "pasillo -> ninguno (< 2,5)": 21,
+  "codo -> P1": 22,
+  "codo -> ninguno (< 2,5)": 3,
+  "pasillo -> P1": 8
+ },
+ "rows": [
+  {
+   "id": 1,
+   "type": "Ascension",
+   "tiles": 338,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 338,
+     "L": 16.7,
+     "W": 4.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "type": "Cake",
+   "tiles": 284,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 284,
+     "L": 16.7,
+     "W": 5.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "type": "Ascension",
+   "tiles": 278,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 41,
+     "L": 6.7,
+     "W": 4.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 34,
+     "L": 4.7,
+     "W": 3.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "type": "Diorama",
+   "tiles": 162,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 145,
+     "L": 12,
+     "W": 5.5,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 17,
+     "L": 5.3,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "type": "Ascension",
+   "tiles": 184,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 184,
+     "L": 15.3,
+     "W": 4.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "type": "Cake",
+   "tiles": 924,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 143,
+     "L": 10,
+     "W": 9.3,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "central",
+     "tiles": 50,
+     "L": 7.3,
+     "W": 5.3,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 115,
+     "L": 11.3,
+     "W": 4,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 26,
+     "L": 6,
+     "W": 2.7,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 5,
+     "L": 2.7,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 36,
+     "L": 8,
+     "W": 3.8,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 4,
+     "L": 2,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 5,
+     "L": 2,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "type": "Diorama",
+   "tiles": 1181,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 101,
+     "L": 10,
+     "W": 6.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 373,
+     "L": 19.3,
+     "W": 5.3,
+     "prof": "P1"
+    },
+    {
+     "kind": "codo",
+     "tiles": 229,
+     "L": 16,
+     "W": 4.8,
+     "prof": "P1c"
+    },
+    {
+     "kind": "codo",
+     "tiles": 182,
+     "L": 14.7,
+     "W": 4.2,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "type": "Cake",
+   "tiles": 392,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 23,
+     "L": 4,
+     "W": 4,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 188,
+     "L": 14,
+     "W": 4,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 8,
+     "L": 3.3,
+     "W": 1.9,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "type": "Cake",
+   "tiles": 542,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 542,
+     "L": 29.3,
+     "W": 3.8,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "type": "Diorama",
+   "tiles": 138,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 138,
+     "L": 11.3,
+     "W": 3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "type": "Cake",
+   "tiles": 868,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 35,
+     "L": 5.3,
+     "W": 4.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "central",
+     "tiles": 27,
+     "L": 6,
+     "W": 4,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 84,
+     "L": 9.3,
+     "W": 3.8,
+     "prof": "P1c"
+    },
+    {
+     "kind": "codo",
+     "tiles": 237,
+     "L": 17.3,
+     "W": 4,
+     "prof": "P1"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 76,
+     "L": 7.3,
+     "W": 3.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "type": "Ascension",
+   "tiles": 75,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 19,
+     "L": 4.7,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "codo",
+     "tiles": 54,
+     "L": 9.3,
+     "W": 3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "type": "Ascension",
+   "tiles": 8,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 8,
+     "L": 5.3,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "type": "Ascension",
+   "tiles": 340,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 340,
+     "L": 27.3,
+     "W": 5.3,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "type": "Ascension",
+   "tiles": 6,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 6,
+     "L": 2.7,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "type": "Ascension",
+   "tiles": 57,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 57,
+     "L": 7.3,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "type": "Ascension",
+   "tiles": 322,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 44,
+     "L": 8.7,
+     "W": 4.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 14,
+     "L": 5.3,
+     "W": 1.9,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 3,
+     "L": 2,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 12,
+     "L": 4.7,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "type": "Ascension",
+   "tiles": 137,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 137,
+     "L": 12,
+     "W": 4,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "type": "Cake",
+   "tiles": 188,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 188,
+     "L": 16,
+     "W": 4,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "type": "Diorama",
+   "tiles": 403,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 43,
+     "L": 8,
+     "W": 4,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 138,
+     "L": 11.3,
+     "W": 5.5,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 12,
+     "L": 4,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 21,
+   "type": "Cake",
+   "tiles": 337,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 337,
+     "L": 22.7,
+     "W": 3.8,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 22,
+   "type": "Diorama",
+   "tiles": 126,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 126,
+     "L": 12,
+     "W": 4.2,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 23,
+   "type": "Cake",
+   "tiles": 1847,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 98,
+     "L": 10,
+     "W": 8,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 1438,
+     "L": 46,
+     "W": 4.2,
+     "prof": "P1"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 5,
+     "L": 2,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 10,
+     "L": 3.3,
+     "W": 1.9,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 4,
+     "L": 2,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 3,
+     "L": 2,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 24,
+   "type": "Ascension",
+   "tiles": 29,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 29,
+     "L": 6,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "type": "Diorama",
+   "tiles": 25,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 18,
+     "L": 4.7,
+     "W": 2.7,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 7,
+     "L": 3.3,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 26,
+   "type": "Ascension",
+   "tiles": 36,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 36,
+     "L": 6.7,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 27,
+   "type": "Ascension",
+   "tiles": 353,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 21,
+     "L": 5.3,
+     "W": 2.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 139,
+     "L": 19.3,
+     "W": 3,
+     "prof": "P1"
+    },
+    {
+     "kind": "codo",
+     "tiles": 15,
+     "L": 4,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 28,
+   "type": "Cake",
+   "tiles": 133,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 133,
+     "L": 10,
+     "W": 3.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 29,
+   "type": "Cake",
+   "tiles": 295,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 295,
+     "L": 16,
+     "W": 4.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 30,
+   "type": "Diorama",
+   "tiles": 260,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 260,
+     "L": 17.3,
+     "W": 4.8,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 31,
+   "type": "Diorama",
+   "tiles": 296,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 296,
+     "L": 18,
+     "W": 4.8,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 32,
+   "type": "Ascension",
+   "tiles": 73,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 73,
+     "L": 11.3,
+     "W": 3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 33,
+   "type": "Ascension",
+   "tiles": 48,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 48,
+     "L": 10.7,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 34,
+   "type": "Diorama",
+   "tiles": 117,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 117,
+     "L": 15.3,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 35,
+   "type": "Diorama",
+   "tiles": 190,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 190,
+     "L": 12.7,
+     "W": 4,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 36,
+   "type": "Cake",
+   "tiles": 512,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 512,
+     "L": 22,
+     "W": 4.8,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 37,
+   "type": "Ascension",
+   "tiles": 50,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 50,
+     "L": 9.3,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 38,
+   "type": "Diorama",
+   "tiles": 186,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 186,
+     "L": 19.3,
+     "W": 4,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 41,
+   "type": "Ascension",
+   "tiles": 95,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 95,
+     "L": 9.3,
+     "W": 4,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 42,
+   "type": "Ascension",
+   "tiles": 88,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 88,
+     "L": 9.3,
+     "W": 3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 43,
+   "type": "Cake",
+   "tiles": 360,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 29,
+     "L": 8,
+     "W": 4,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 4,
+     "L": 2.7,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 49,
+     "L": 6.7,
+     "W": 3,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 20,
+     "L": 4.7,
+     "W": 3,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 9,
+     "L": 2.7,
+     "W": 2.7,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 20,
+     "L": 4,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 44,
+   "type": "Cake",
+   "tiles": 1921,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 199,
+     "L": 18,
+     "W": 9.3,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "central",
+     "tiles": 112,
+     "L": 14,
+     "W": 14,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "central",
+     "tiles": 21,
+     "L": 4.7,
+     "W": 2.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 195,
+     "L": 28.7,
+     "W": 3.8,
+     "prof": "P1"
+    },
+    {
+     "kind": "codo",
+     "tiles": 181,
+     "L": 16,
+     "W": 4.2,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 7,
+     "L": 2.7,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "codo",
+     "tiles": 124,
+     "L": 17.3,
+     "W": 4,
+     "prof": "P1"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 3,
+     "L": 1.3,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 30,
+     "L": 6,
+     "W": 3.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 45,
+   "type": "Ascension",
+   "tiles": 27,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 27,
+     "L": 4.7,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 46,
+   "type": "Ascension",
+   "tiles": 227,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 191,
+     "L": 14,
+     "W": 4.8,
+     "prof": "P1c"
+    },
+    {
+     "kind": "codo",
+     "tiles": 36,
+     "L": 6.7,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 47,
+   "type": "Cake",
+   "tiles": 443,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 443,
+     "L": 22,
+     "W": 5.5,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 48,
+   "type": "Cake",
+   "tiles": 588,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 564,
+     "L": 29.3,
+     "W": 4,
+     "prof": "P1"
+    },
+    {
+     "kind": "codo",
+     "tiles": 24,
+     "L": 5.3,
+     "W": 1.9,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 49,
+   "type": "Diorama",
+   "tiles": 196,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 196,
+     "L": 14.7,
+     "W": 5.3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 50,
+   "type": "Ascension",
+   "tiles": 43,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 43,
+     "L": 12,
+     "W": 1.9,
+     "prof": "ninguno (< 2,5)"
+    }
+   ]
+  },
+  {
+   "id": 51,
+   "type": "Ascension",
+   "tiles": 29,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 29,
+     "L": 4.7,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 52,
+   "type": "Cake",
+   "tiles": 295,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 295,
+     "L": 16.7,
+     "W": 4.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 53,
+   "type": "Diorama",
+   "tiles": 170,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 170,
+     "L": 11.3,
+     "W": 6,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 54,
+   "type": "Ascension",
+   "tiles": 115,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 115,
+     "L": 12,
+     "W": 3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 55,
+   "type": "Cake",
+   "tiles": 133,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 29,
+     "L": 5.3,
+     "W": 2.7,
+     "prof": "P1c"
+    },
+    {
+     "kind": "codo",
+     "tiles": 104,
+     "L": 13.3,
+     "W": 3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 56,
+   "type": "Ascension",
+   "tiles": 61,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 61,
+     "L": 9.3,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 57,
+   "type": "Ascension",
+   "tiles": 477,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 33,
+     "L": 7.3,
+     "W": 5.3,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 186,
+     "L": 16.7,
+     "W": 4,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 32,
+     "L": 5.3,
+     "W": 3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 58,
+   "type": "Ascension",
+   "tiles": 171,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 171,
+     "L": 13.3,
+     "W": 4,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 59,
+   "type": "Cake",
+   "tiles": 1061,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 1061,
+     "L": 34,
+     "W": 4.2,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 60,
+   "type": "Cake",
+   "tiles": 369,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 369,
+     "L": 22,
+     "W": 4.8,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 61,
+   "type": "Ascension",
+   "tiles": 306,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 20,
+     "L": 6,
+     "W": 3.3,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 5,
+     "L": 2.7,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 87,
+     "L": 11.3,
+     "W": 4,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 62,
+   "type": "Ascension",
+   "tiles": 92,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 92,
+     "L": 9.3,
+     "W": 3.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 63,
+   "type": "Cake",
+   "tiles": 502,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 502,
+     "L": 24,
+     "W": 4,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 64,
+   "type": "Diorama",
+   "tiles": 1130,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 26,
+     "L": 5.3,
+     "W": 4.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "central",
+     "tiles": 42,
+     "L": 6,
+     "W": 6,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 53,
+     "L": 9.3,
+     "W": 3,
+     "prof": "P1c"
+    },
+    {
+     "kind": "codo",
+     "tiles": 26,
+     "L": 6.7,
+     "W": 4.2,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 6,
+     "L": 4,
+     "W": 3,
+     "prof": "P1c"
+    },
+    {
+     "kind": "codo",
+     "tiles": 526,
+     "L": 31.3,
+     "W": 4.8,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 65,
+   "type": "Cake",
+   "tiles": 775,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 65,
+     "L": 9.3,
+     "W": 8,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 353,
+     "L": 25.3,
+     "W": 4.2,
+     "prof": "P1"
+    },
+    {
+     "kind": "codo",
+     "tiles": 16,
+     "L": 4,
+     "W": 3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 66,
+   "type": "Diorama",
+   "tiles": 447,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 41,
+     "L": 6.7,
+     "W": 6.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 135,
+     "L": 12.7,
+     "W": 4.8,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 14,
+     "L": 3.3,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 67,
+   "type": "Ascension",
+   "tiles": 37,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 37,
+     "L": 6.7,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 68,
+   "type": "Diorama",
+   "tiles": 159,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 159,
+     "L": 11.3,
+     "W": 4.2,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 69,
+   "type": "Ascension",
+   "tiles": 153,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 153,
+     "L": 14,
+     "W": 3.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 70,
+   "type": "Ascension",
+   "tiles": 81,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 81,
+     "L": 10,
+     "W": 3.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 71,
+   "type": "Ascension",
+   "tiles": 74,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 74,
+     "L": 11.3,
+     "W": 3.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 72,
+   "type": "Cake",
+   "tiles": 838,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 838,
+     "L": 35.3,
+     "W": 4.8,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 73,
+   "type": "Cake",
+   "tiles": 480,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 34,
+     "L": 6.7,
+     "W": 6,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 139,
+     "L": 15.3,
+     "W": 4,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 55,
+     "L": 10,
+     "W": 4.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 74,
+   "type": "Diorama",
+   "tiles": 135,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 135,
+     "L": 12,
+     "W": 4.2,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 75,
+   "type": "Ascension",
+   "tiles": 64,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 64,
+     "L": 7.3,
+     "W": 3.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 76,
+   "type": "Ascension",
+   "tiles": 64,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 64,
+     "L": 10,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 77,
+   "type": "Ascension",
+   "tiles": 206,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 206,
+     "L": 16,
+     "W": 4.8,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 78,
+   "type": "Ascension",
+   "tiles": 225,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 225,
+     "L": 15.3,
+     "W": 5.5,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 79,
+   "type": "Cake",
+   "tiles": 1035,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 73,
+     "L": 10.7,
+     "W": 10,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 501,
+     "L": 34,
+     "W": 4.2,
+     "prof": "P1"
+    },
+    {
+     "kind": "codo",
+     "tiles": 139,
+     "L": 15.3,
+     "W": 4,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 80,
+   "type": "Diorama",
+   "tiles": 271,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 271,
+     "L": 22,
+     "W": 4,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 81,
+   "type": "Ascension",
+   "tiles": 93,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 93,
+     "L": 8,
+     "W": 5.3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 82,
+   "type": "Cake",
+   "tiles": 4404,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 64,
+     "L": 8.7,
+     "W": 8,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "central",
+     "tiles": 64,
+     "L": 10,
+     "W": 9.3,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "central",
+     "tiles": 30,
+     "L": 7.3,
+     "W": 4,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "central",
+     "tiles": 30,
+     "L": 5.3,
+     "W": 4,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "central",
+     "tiles": 94,
+     "L": 18.7,
+     "W": 8.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 820,
+     "L": 52.7,
+     "W": 4.8,
+     "prof": "P1"
+    },
+    {
+     "kind": "codo",
+     "tiles": 1139,
+     "L": 49.3,
+     "W": 5.3,
+     "prof": "P1"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 29,
+     "L": 7.3,
+     "W": 3,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 20,
+     "L": 5.3,
+     "W": 3,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 39,
+     "L": 6.7,
+     "W": 3,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 29,
+     "L": 5.3,
+     "W": 3,
+     "prof": "P1c"
+    },
+    {
+     "kind": "codo",
+     "tiles": 529,
+     "L": 23.3,
+     "W": 4.8,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 83,
+   "type": "Cake",
+   "tiles": 506,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 506,
+     "L": 22.7,
+     "W": 5.3,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 84,
+   "type": "Cake",
+   "tiles": 339,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 31,
+     "L": 6,
+     "W": 4.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "codo",
+     "tiles": 91,
+     "L": 10.7,
+     "W": 4,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 85,
+   "type": "Cake",
+   "tiles": 793,
+   "parts": [
+    {
+     "kind": "codo",
+     "tiles": 793,
+     "L": 28.7,
+     "W": 4.8,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 86,
+   "type": "Cake",
+   "tiles": 1284,
+   "parts": [
+    {
+     "kind": "central",
+     "tiles": 150,
+     "L": 14.7,
+     "W": 12.7,
+     "prof": "P3/P4 Hub"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 58,
+     "L": 7.3,
+     "W": 3,
+     "prof": "P1c"
+    },
+    {
+     "kind": "codo",
+     "tiles": 348,
+     "L": 22.7,
+     "W": 5.5,
+     "prof": "P1"
+    },
+    {
+     "kind": "codo",
+     "tiles": 25,
+     "L": 6.7,
+     "W": 2.7,
+     "prof": "P1c"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 5,
+     "L": 2,
+     "W": 1.3,
+     "prof": "ninguno (< 2,5)"
+    },
+    {
+     "kind": "pasillo",
+     "tiles": 28,
+     "L": 8,
+     "W": 3,
+     "prof": "P1c"
+    },
+    {
+     "kind": "codo",
+     "tiles": 29,
+     "L": 5.3,
+     "W": 2.7,
+     "prof": "P1c"
+    },
+    {
+     "kind": "codo",
+     "tiles": 194,
+     "L": 20.7,
+     "W": 3,
+     "prof": "P1"
+    }
+   ]
+  },
+  {
+   "id": 87,
+   "type": "Ascension",
+   "tiles": 57,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 57,
+     "L": 6.7,
+     "W": 3,
+     "prof": "P1c"
+    }
+   ]
+  },
+  {
+   "id": 88,
+   "type": "Ascension",
+   "tiles": 83,
+   "parts": [
+    {
+     "kind": "pasillo",
+     "tiles": 83,
+     "L": 16,
+     "W": 2.7,
+     "prof": "P1c"
+    }
+   ]
+  }
+ ]
+}

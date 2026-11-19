@@ -1,0 +1,915 @@
+{
+ "places": [
+  {
+   "id": "r21_default9",
+   "name": "Room 21 of Default 9 (plaza?)",
+   "preset": "Default",
+   "home": 9,
+   "room": 21,
+   "box": [
+    107,
+    185,
+    136,
+    222
+   ],
+   "cases": {
+    "3": {
+     "rooms": [
+      {
+       "id": 21,
+       "tilesInBox": 646
+      },
+      {
+       "id": 24,
+       "tilesInBox": 217
+      },
+      {
+       "id": 8,
+       "tilesInBox": 211
+      },
+      {
+       "id": 12,
+       "tilesInBox": 63
+      }
+     ],
+     "roomIds": [
+      8,
+      12,
+      21,
+      24
+     ],
+     "terraces": [
+      2,
+      3
+     ],
+     "m": 2,
+     "boxTiles": 1140,
+     "walkable": 875,
+     "void": 3,
+     "notWalkable": 262,
+     "homeRoomStillExists": true,
+     "roomsTotal": 32
+    },
+    "5": {
+     "rooms": [
+      {
+       "id": 21,
+       "tilesInBox": 646
+      },
+      {
+       "id": 24,
+       "tilesInBox": 217
+      },
+      {
+       "id": 8,
+       "tilesInBox": 211
+      },
+      {
+       "id": 12,
+       "tilesInBox": 63
+      }
+     ],
+     "roomIds": [
+      8,
+      12,
+      21,
+      24
+     ],
+     "terraces": [
+      2,
+      3,
+      4
+     ],
+     "m": 2,
+     "boxTiles": 1140,
+     "walkable": 856,
+     "void": 3,
+     "notWalkable": 281,
+     "homeRoomStillExists": true,
+     "roomsTotal": 32
+    },
+    "7": {
+     "rooms": [
+      {
+       "id": 21,
+       "tilesInBox": 646
+      },
+      {
+       "id": 24,
+       "tilesInBox": 217
+      },
+      {
+       "id": 8,
+       "tilesInBox": 211
+      },
+      {
+       "id": 12,
+       "tilesInBox": 63
+      }
+     ],
+     "roomIds": [
+      8,
+      12,
+      21,
+      24
+     ],
+     "terraces": [
+      3,
+      4,
+      5,
+      6
+     ],
+     "m": 3,
+     "boxTiles": 1140,
+     "walkable": 819,
+     "void": 3,
+     "notWalkable": 318,
+     "homeRoomStillExists": true,
+     "roomsTotal": 32
+    },
+    "9": {
+     "rooms": [
+      {
+       "id": 21,
+       "tilesInBox": 646
+      },
+      {
+       "id": 24,
+       "tilesInBox": 217
+      },
+      {
+       "id": 8,
+       "tilesInBox": 211
+      },
+      {
+       "id": 12,
+       "tilesInBox": 63
+      }
+     ],
+     "roomIds": [
+      8,
+      12,
+      21,
+      24
+     ],
+     "terraces": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "m": 3,
+     "boxTiles": 1140,
+     "walkable": 655,
+     "void": 3,
+     "notWalkable": 482,
+     "homeRoomStillExists": true,
+     "roomsTotal": 32
+    }
+   }
+  },
+  {
+   "id": "r16_default9",
+   "name": "Room 16 of Default 9 (gorge?)",
+   "preset": "Default",
+   "home": 9,
+   "room": 16,
+   "box": [
+    114,
+    30,
+    119,
+    47
+   ],
+   "cases": {
+    "3": {
+     "rooms": [
+      {
+       "id": 16,
+       "tilesInBox": 64
+      },
+      {
+       "id": 22,
+       "tilesInBox": 25
+      },
+      {
+       "id": 15,
+       "tilesInBox": 19
+      }
+     ],
+     "roomIds": [
+      15,
+      16,
+      22
+     ],
+     "terraces": [
+      1,
+      2,
+      3
+     ],
+     "m": 1,
+     "boxTiles": 108,
+     "walkable": 69,
+     "void": 0,
+     "notWalkable": 39,
+     "homeRoomStillExists": true,
+     "roomsTotal": 32
+    },
+    "5": {
+     "rooms": [
+      {
+       "id": 16,
+       "tilesInBox": 64
+      },
+      {
+       "id": 22,
+       "tilesInBox": 25
+      },
+      {
+       "id": 15,
+       "tilesInBox": 19
+      }
+     ],
+     "roomIds": [
+      15,
+      16,
+      22
+     ],
+     "terraces": [
+      2,
+      3,
+      4
+     ],
+     "m": 2,
+     "boxTiles": 108,
+     "walkable": 63,
+     "void": 0,
+     "notWalkable": 45,
+     "homeRoomStillExists": true,
+     "roomsTotal": 32
+    },
+    "7": {
+     "rooms": [
+      {
+       "id": 16,
+       "tilesInBox": 64
+      },
+      {
+       "id": 22,
+       "tilesInBox": 25
+      },
+      {
+       "id": 15,
+       "tilesInBox": 19
+      }
+     ],
+     "roomIds": [
+      15,
+      16,
+      22
+     ],
+     "terraces": [
+      4
+     ],
+     "m": 3,
+     "boxTiles": 108,
+     "walkable": 2,
+     "void": 0,
+     "notWalkable": 106,
+     "homeRoomStillExists": true,
+     "roomsTotal": 32
+    },
+    "9": {
+     "rooms": [
+      {
+       "id": 16,
+       "tilesInBox": 64
+      },
+      {
+       "id": 22,
+       "tilesInBox": 25
+      },
+      {
+       "id": 15,
+       "tilesInBox": 19
+      }
+     ],
+     "roomIds": [
+      15,
+      16,
+      22
+     ],
+     "terraces": [
+      3,
+      5,
+      7
+     ],
+     "m": 3,
+     "boxTiles": 108,
+     "walkable": 28,
+     "void": 0,
+     "notWalkable": 80,
+     "homeRoomStillExists": true,
+     "roomsTotal": 32
+    }
+   }
+  },
+  {
+   "id": "r79_balanced9",
+   "name": "Room 79 of Balanced 9 (valley)",
+   "preset": "Balanced",
+   "home": 9,
+   "room": 79,
+   "box": [
+    142,
+    116,
+    204,
+    172
+   ],
+   "cases": {
+    "3": {
+     "rooms": [
+      {
+       "id": 79,
+       "tilesInBox": 1296
+      },
+      {
+       "id": 83,
+       "tilesInBox": 594
+      },
+      {
+       "id": 85,
+       "tilesInBox": 538
+      },
+      {
+       "id": 63,
+       "tilesInBox": 440
+      },
+      {
+       "id": 80,
+       "tilesInBox": 162
+      },
+      {
+       "id": 60,
+       "tilesInBox": 131
+      },
+      {
+       "id": 65,
+       "tilesInBox": 125
+      },
+      {
+       "id": 81,
+       "tilesInBox": 100
+      },
+      {
+       "id": 75,
+       "tilesInBox": 82
+      },
+      {
+       "id": 67,
+       "tilesInBox": 53
+      },
+      {
+       "id": 86,
+       "tilesInBox": 49
+      },
+      {
+       "id": 87,
+       "tilesInBox": 13
+      },
+      {
+       "id": 70,
+       "tilesInBox": 7
+      },
+      {
+       "id": 73,
+       "tilesInBox": 1
+      }
+     ],
+     "roomIds": [
+      60,
+      63,
+      65,
+      67,
+      70,
+      73,
+      75,
+      79,
+      80,
+      81,
+      83,
+      85,
+      86,
+      87
+     ],
+     "terraces": [
+      1,
+      2,
+      3
+     ],
+     "m": 1,
+     "boxTiles": 3591,
+     "walkable": 2803,
+     "void": 0,
+     "notWalkable": 788,
+     "homeRoomStillExists": true,
+     "roomsTotal": 88
+    },
+    "5": {
+     "rooms": [
+      {
+       "id": 79,
+       "tilesInBox": 1296
+      },
+      {
+       "id": 83,
+       "tilesInBox": 594
+      },
+      {
+       "id": 85,
+       "tilesInBox": 538
+      },
+      {
+       "id": 63,
+       "tilesInBox": 440
+      },
+      {
+       "id": 80,
+       "tilesInBox": 162
+      },
+      {
+       "id": 60,
+       "tilesInBox": 131
+      },
+      {
+       "id": 65,
+       "tilesInBox": 125
+      },
+      {
+       "id": 81,
+       "tilesInBox": 100
+      },
+      {
+       "id": 75,
+       "tilesInBox": 82
+      },
+      {
+       "id": 67,
+       "tilesInBox": 53
+      },
+      {
+       "id": 86,
+       "tilesInBox": 49
+      },
+      {
+       "id": 87,
+       "tilesInBox": 13
+      },
+      {
+       "id": 70,
+       "tilesInBox": 7
+      },
+      {
+       "id": 73,
+       "tilesInBox": 1
+      }
+     ],
+     "roomIds": [
+      60,
+      63,
+      65,
+      67,
+      70,
+      73,
+      75,
+      79,
+      80,
+      81,
+      83,
+      85,
+      86,
+      87
+     ],
+     "terraces": [
+      1,
+      2,
+      3,
+      4
+     ],
+     "m": 1,
+     "boxTiles": 3591,
+     "walkable": 2490,
+     "void": 0,
+     "notWalkable": 1101,
+     "homeRoomStillExists": true,
+     "roomsTotal": 88
+    },
+    "7": {
+     "rooms": [
+      {
+       "id": 79,
+       "tilesInBox": 1296
+      },
+      {
+       "id": 83,
+       "tilesInBox": 594
+      },
+      {
+       "id": 85,
+       "tilesInBox": 538
+      },
+      {
+       "id": 63,
+       "tilesInBox": 440
+      },
+      {
+       "id": 80,
+       "tilesInBox": 162
+      },
+      {
+       "id": 60,
+       "tilesInBox": 131
+      },
+      {
+       "id": 65,
+       "tilesInBox": 125
+      },
+      {
+       "id": 81,
+       "tilesInBox": 100
+      },
+      {
+       "id": 75,
+       "tilesInBox": 82
+      },
+      {
+       "id": 67,
+       "tilesInBox": 53
+      },
+      {
+       "id": 86,
+       "tilesInBox": 49
+      },
+      {
+       "id": 87,
+       "tilesInBox": 13
+      },
+      {
+       "id": 70,
+       "tilesInBox": 7
+      },
+      {
+       "id": 73,
+       "tilesInBox": 1
+      }
+     ],
+     "roomIds": [
+      60,
+      63,
+      65,
+      67,
+      70,
+      73,
+      75,
+      79,
+      80,
+      81,
+      83,
+      85,
+      86,
+      87
+     ],
+     "terraces": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "m": 2,
+     "boxTiles": 3591,
+     "walkable": 2208,
+     "void": 0,
+     "notWalkable": 1383,
+     "homeRoomStillExists": true,
+     "roomsTotal": 88
+    },
+    "9": {
+     "rooms": [
+      {
+       "id": 79,
+       "tilesInBox": 1296
+      },
+      {
+       "id": 83,
+       "tilesInBox": 594
+      },
+      {
+       "id": 85,
+       "tilesInBox": 538
+      },
+      {
+       "id": 63,
+       "tilesInBox": 440
+      },
+      {
+       "id": 80,
+       "tilesInBox": 162
+      },
+      {
+       "id": 60,
+       "tilesInBox": 131
+      },
+      {
+       "id": 65,
+       "tilesInBox": 125
+      },
+      {
+       "id": 81,
+       "tilesInBox": 100
+      },
+      {
+       "id": 75,
+       "tilesInBox": 82
+      },
+      {
+       "id": 67,
+       "tilesInBox": 53
+      },
+      {
+       "id": 86,
+       "tilesInBox": 49
+      },
+      {
+       "id": 87,
+       "tilesInBox": 13
+      },
+      {
+       "id": 70,
+       "tilesInBox": 7
+      },
+      {
+       "id": 73,
+       "tilesInBox": 1
+      }
+     ],
+     "roomIds": [
+      60,
+      63,
+      65,
+      67,
+      70,
+      73,
+      75,
+      79,
+      80,
+      81,
+      83,
+      85,
+      86,
+      87
+     ],
+     "terraces": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "m": 2,
+     "boxTiles": 3591,
+     "walkable": 1592,
+     "void": 0,
+     "notWalkable": 1999,
+     "homeRoomStillExists": true,
+     "roomsTotal": 88
+    }
+   }
+  },
+  {
+   "id": "u2_balanced3",
+   "name": "u2 (DAC 29, Cake) of Balanced 3",
+   "preset": "Balanced",
+   "home": 3,
+   "room": 29,
+   "box": [
+    93,
+    113,
+    117,
+    134
+   ],
+   "cases": {
+    "3": {
+     "rooms": [
+      {
+       "id": 29,
+       "tilesInBox": 344
+      },
+      {
+       "id": 30,
+       "tilesInBox": 86
+      },
+      {
+       "id": 47,
+       "tilesInBox": 56
+      },
+      {
+       "id": 20,
+       "tilesInBox": 25
+      },
+      {
+       "id": 65,
+       "tilesInBox": 15
+      },
+      {
+       "id": 32,
+       "tilesInBox": 13
+      },
+      {
+       "id": 27,
+       "tilesInBox": 11
+      }
+     ],
+     "roomIds": [
+      20,
+      27,
+      29,
+      30,
+      32,
+      47,
+      65
+     ],
+     "terraces": [
+      2,
+      3
+     ],
+     "m": 2,
+     "boxTiles": 550,
+     "walkable": 419,
+     "void": 0,
+     "notWalkable": 131,
+     "homeRoomStillExists": true,
+     "roomsTotal": 88
+    },
+    "5": {
+     "rooms": [
+      {
+       "id": 29,
+       "tilesInBox": 344
+      },
+      {
+       "id": 30,
+       "tilesInBox": 86
+      },
+      {
+       "id": 47,
+       "tilesInBox": 56
+      },
+      {
+       "id": 20,
+       "tilesInBox": 25
+      },
+      {
+       "id": 65,
+       "tilesInBox": 15
+      },
+      {
+       "id": 32,
+       "tilesInBox": 13
+      },
+      {
+       "id": 27,
+       "tilesInBox": 11
+      }
+     ],
+     "roomIds": [
+      20,
+      27,
+      29,
+      30,
+      32,
+      47,
+      65
+     ],
+     "terraces": [
+      3,
+      4
+     ],
+     "m": 3,
+     "boxTiles": 550,
+     "walkable": 403,
+     "void": 0,
+     "notWalkable": 147,
+     "homeRoomStillExists": true,
+     "roomsTotal": 88
+    },
+    "7": {
+     "rooms": [
+      {
+       "id": 29,
+       "tilesInBox": 344
+      },
+      {
+       "id": 30,
+       "tilesInBox": 86
+      },
+      {
+       "id": 47,
+       "tilesInBox": 56
+      },
+      {
+       "id": 20,
+       "tilesInBox": 25
+      },
+      {
+       "id": 65,
+       "tilesInBox": 15
+      },
+      {
+       "id": 32,
+       "tilesInBox": 13
+      },
+      {
+       "id": 27,
+       "tilesInBox": 11
+      }
+     ],
+     "roomIds": [
+      20,
+      27,
+      29,
+      30,
+      32,
+      47,
+      65
+     ],
+     "terraces": [
+      3,
+      4,
+      5,
+      6
+     ],
+     "m": 3,
+     "boxTiles": 550,
+     "walkable": 345,
+     "void": 0,
+     "notWalkable": 205,
+     "homeRoomStillExists": true,
+     "roomsTotal": 88
+    },
+    "9": {
+     "rooms": [
+      {
+       "id": 29,
+       "tilesInBox": 344
+      },
+      {
+       "id": 30,
+       "tilesInBox": 86
+      },
+      {
+       "id": 47,
+       "tilesInBox": 56
+      },
+      {
+       "id": 20,
+       "tilesInBox": 25
+      },
+      {
+       "id": 65,
+       "tilesInBox": 15
+      },
+      {
+       "id": 32,
+       "tilesInBox": 13
+      },
+      {
+       "id": 27,
+       "tilesInBox": 11
+      }
+     ],
+     "roomIds": [
+      20,
+      27,
+      29,
+      30,
+      32,
+      47,
+      65
+     ],
+     "terraces": [
+      4,
+      6,
+      7
+     ],
+     "m": 3,
+     "boxTiles": 550,
+     "walkable": 86,
+     "void": 0,
+     "notWalkable": 464,
+     "homeRoomStillExists": true,
+     "roomsTotal": 88
+    }
+   }
+  }
+ ]
+}
