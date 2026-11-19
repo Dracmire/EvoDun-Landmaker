@@ -1,0 +1,27 @@
+{
+ "perfil_u1|90": {
+  "yawNow": 90,
+  "ascFaces": 93,
+  "ringTiles": 0,
+  "errors": 0
+ },
+ "perfil_u1|270": {
+  "yawNow": 270,
+  "ascFaces": 93,
+  "ringTiles": 0,
+  "errors": 0
+ },
+ "perfil_u2|90": {
+  "yawNow": 90,
+  "ascFaces": 0,
+  "ringTiles": 207,
+  "errors": 0
+ },
+ "perfil_u2|270": {
+  "yawNow": 270,
+  "ascFaces": 0,
+  "ringTiles": 207,
+  "errors": 0
+ },
+ "pageErrors": 0
+}
