@@ -40,7 +40,7 @@
       }
     });
     if (tm.touchFootprint) for (const i of fp) if (i % 7 === 0) moves.set(i, { h: S.levelH[S.fine[i]] + 0.5, meta: { ter: S.ter[i], sub: 0, bridge: false, deco: true } }); // (MUTATION touchFootprint: a footprint tile moved)
-    const before = S.levelH.length, added = moves.size ? E.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
+    const before = S.levelH.length, added = moves.size ? E.s3.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
     return (S.stageVolumes = { list: list.map((v) => Object.assign({}, v)), tilesPerH: tph, exag: opts.exag === undefined ? 1 : opts.exag, grid: GRID, volumes: vols, tiles, skipped, levelsBefore: before, levelsAdded: added });
   }
   E.volumes = { GRID, MARGIN, apply };

@@ -111,7 +111,7 @@
   /* the terrace steps of the window in H (min, max over consecutive terraces; equal with spread 1) */
   function terraceSteps(S, P, tilesPerH) {
     const N = P.terraces; let lo = 1e9, hi = -1e9;
-    for (let t = 1; t < N; t++) { const d = E.terBase(t, P, S.center) - E.terBase(t - 1, P, S.center); lo = Math.min(lo, d); hi = Math.max(hi, d); }
+    for (let t = 1; t < N; t++) { const d = E.s3.terBase(t, P, S.center) - E.s3.terBase(t - 1, P, S.center); lo = Math.min(lo, d); hi = Math.max(hi, d); }
     return N < 2 ? null : { min: lo / tilesPerH, max: hi / tilesPerH };
   }
 
@@ -131,7 +131,7 @@
   function buildZones(S, P, pack, ks) {
     const tb = zoneTable(pack), z = pack.fields.zone, ids = z.sliceIds, W = S.W, H = S.H, zm = new Int32Array(S.n);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const px = S.ox + x, py = S.oy + y; if (px < 0 || py < 0 || px >= pack.width || py >= pack.height) continue; zm[y * W + x] = tb.toK.get(ids[py * pack.width + px]) || 0; }
-    const nb = E.walkGraph(S, P), vd = S.void, walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0, info = { zones: tb.order.length, window: ks.slice(), raw: ks.map((k) => tb.order[k - 1]), discarded: {}, total: 0 };
+    const nb = E.s3.walkGraph(S, P), vd = S.void, walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0, info = { zones: tb.order.length, window: ks.slice(), raw: ks.map((k) => tb.order[k - 1]), discarded: {}, total: 0 };
     for (const k of ks) {
       const seen = new Uint8Array(S.n); let best = null; const pieces = [];
       for (let i = 0; i < S.n; i++) { if (zm[i] !== k || !walk(i) || seen[i]) continue; const c = [i]; seen[i] = 1; for (let h = 0; h < c.length; h++) for (const j of nb(c[h])) if (zm[j] === k && walk(j) && !seen[j]) { seen[j] = 1; c.push(j); } pieces.push(c); if (!best || c.length > best.length) best = c; }

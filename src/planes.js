@@ -56,7 +56,7 @@
     if (!T.noFront) { const target = low - HYP.frontDrop * tp; for (let i = 0; i < S.n; i++) { if (C.cls[i] !== FRONT) continue; const d = C.near.get(C.Pc[i]) - C.A[i]; if (d < 1 || d > HYP.frontDepth) continue; if (hOf(i) <= low + 1e-9 || moves.has(i)) continue; moves.set(i, { h: target, meta: meta('front') }); front++; } }
     // P1: a void tile that gets a wall / column becomes a drawn, blocked tile (own copies: `S.void` and `S.block` are shared with the quantization cached on the pack, the same care as src/backdrop.js)
     if (voidMoved.size) { S.void = Uint8Array.from(S.void); S.block = Uint8Array.from(S.block); for (const i of voidMoved) { S.void[i] = 0; S.block[i] = 1; } }
-    const before = S.levelH.length, added = moves.size ? E.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
+    const before = S.levelH.length, added = moves.size ? E.s3.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
     return (S.stagePlanes = { voidTiles: voidMoved.size, room: o.room.id, yaw: o.yaw, tilesPerH: tp, exag: o.exag === undefined ? 1 : o.exag, counts: C.counts, wall, cols, front, colRows, skipped, levelsBefore: before, levelsAdded: added, floorLow: low, floorHigh: high });
   }
   E.planes = { HYP, AVOID, BACK, SIDE, FRONT, classify, apply };

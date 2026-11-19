@@ -5,7 +5,7 @@
      node tools/perfiles_clasificacion.js [out.json] */
 const fs = require('fs'), path = require('path'), vm = require('vm');
 global.window = global;
-for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes', 'stage', 'orient']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
+for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes', 's3/shape', 's3/rooms', 's3/roomtypes', 'stage', 'orient']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
 const E = window.EVO, TP = 1.5, TYPE = { 1: 'Cake', 2: 'Diorama', 3: 'Ascension' };
 /* THE TABLE of perfiles_forma.md section 2 (H). One shot = 18 H wide x 17 H useful depth at the hero's depth (the doc's own reference). Corridor widths: P1 3-5, P2 6-12 (the gap 5-6 is on the limit). Length of P1 / P2: more than ONE shot ("varias tomas"): > 17 H along the view. P3 / P4: one shot, <= 18 across x <= 17 deep. */
 const TABLE = { shotW: 18, shotD: 17, p1: [3, 5], p2: [6, 12] };

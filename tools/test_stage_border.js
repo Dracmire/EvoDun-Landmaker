@@ -7,7 +7,7 @@
      node tools/test_stage_border.js */
 const fs = require('fs'), path = require('path'), vm = require('vm'), crypto = require('crypto');
 global.window = global;
-for (const f of ['fields', 'shape', 'tech', 'rooms', 'roomtypes', 'border']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
+for (const f of ['fields', 'shape', 'tech', 'rooms', 'roomtypes', 's3/shape', 's3/rooms', 's3/roomtypes', 'border']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'));
 const E = window.EVO; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : extra); } };
 const P = { terraces: 5, subs: 3, terH: 1, subH: 0.22, minPlateau: 5, minSub: 3, pre: 1, smooth: 2, radius: 0.9, passGap: 8, climb: 2 };
