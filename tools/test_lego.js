@@ -53,6 +53,13 @@ const topo = (S) => sha(S, TOPO) + '|' + crypto.createHash('sha1').update(JSON.s
     ok(`Up: the planes wall sits ${((up.wallTop - up.high) / E1).toFixed(2)} E over the new top of the room (2-3 E)`, up.wallN > 0 && (up.wallTop - up.high) / E1 >= 2 - 1e-6 && (up.wallTop - up.high) / E1 <= 3 + 1e-6, { up: [up.wallTop, up.high, up.wallN] });
     ok(`Down: the wall falls to m * E = ${dn.r.m * E1} below the top of the room (${(dn.wallTop - dn.high).toFixed(3)}), ${dn.sc.lowered} tiles lowered; Mid keeps the wall at 3 H (${(mid.wallTop - mid.high).toFixed(3)} = ${3 * tp})`, dn.wallN === 0 || (Math.abs((dn.wallTop - dn.high) + dn.r.m * E1) < 0.02 && dn.sc.lowered > 0) && Math.abs((mid.wallTop - mid.high) - 3 * tp) < 0.02, { dn: [dn.wallTop, dn.high, dn.wallN, dn.sc], mid: [mid.wallTop, mid.high] });
   }
+  // (7) PR lego2 (A531): a jump that crosses D terraces measures m * E * D
+  { const Eh = 1.875, base = (t) => t * Eh, mk2 = (ts) => ts.map((t) => ({ t, base: base(t), top: base(t) + 0.4125, n: 10, u: t })), f = E.s3.lego.newBases;
+    const a = f(mk2([0, 2]), 1, Eh, 'up'), b = f(mk2([0, 1, 3]), 2, Eh, 'up'), c = f(mk2([1, 3]), 3, Eh, 'down'), d = f(mk2([0, 1]), 2, Eh, 'up');
+    ok(`Up, m = 1, terraces 1 and 3 (D = 2): the jump is m * E * D = 2 E (${(a[1] - a[0]).toFixed(3)}), not squeezed to E`, Math.abs(a[1] - a[0] - 2 * Eh) < 1e-9, a);
+    ok(`Up, m = 2, terraces 1, 2, 4: jumps m * E * D = 2 E (D = 1) and 4 E (D = 2) (${(b[1] - b[0]).toFixed(3)}, ${(b[2] - b[1]).toFixed(3)})`, Math.abs(b[1] - b[0] - 2 * Eh) < 1e-9 && Math.abs(b[2] - b[1] - 4 * Eh) < 1e-9, b);
+    ok(`Down, m = 3, terraces 2 and 4 (D = 2): the highest stays (${c[1].toFixed(3)} = ${base(3).toFixed(3)}) and the lower falls m * E * D = 6 E (${(c[1] - c[0]).toFixed(3)})`, Math.abs(c[1] - base(3)) < 1e-9 && Math.abs(c[1] - c[0] - 6 * Eh) < 1e-9, c);
+    ok(`adjacent terraces (D = 1) give the jump of the first pass, m * E (${(d[1] - d[0]).toFixed(3)})`, Math.abs(d[1] - d[0] - 2 * Eh) < 1e-9, d); }
   ok('src/s3/lego.js defines E.s3.lego and nothing on E (the original namespace has no `lego`)', !!E.s3.lego && E.lego === undefined && Object.prototype.hasOwnProperty.call(E.s3, 'lego'));
   console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
