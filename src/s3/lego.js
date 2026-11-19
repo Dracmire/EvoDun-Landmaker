@@ -63,21 +63,20 @@
     }
     // the ends of the ramps that join terraces of the room (the surface is linear between them; the tiles stay the same)
     for (const rec2 of S.stairs || []) { const R = rec2.ramp, pa = rec2.site; if (!R || !pa || !(walk(pa.a) || walk(pa.b)) || R.__lego) continue; R.h0o = R.h0; R.h1o = R.h1; R.h0 = f(R.h0); R.h1 = f(R.h1); R.__lego = true; }
+    if (o.cakeLego === 'scale' && !out.sub && S.cake && S.cake.claim && S.ringTile) { // CAKE SCALE: the ring tiles of the links of this room, m times taller from their anchor
+      const fw = S.mapW, W = S.W, claim = S.cake.claim; let rings = 0; out.cakeScale = { tiles: 0, maxRelief: 0 };
+      for (let i = 0; i < S.n; i++) { if (!S.ringTile[i]) continue; const c = claim.get(((((i / W) | 0) + S.oy) * fw) + (i % W) + S.ox); if (!c || !c.link || c.link.room !== rec.id) continue; const l = c.link, h0 = S.levelH[S.fine[i]], anchor0 = l.coreTop, anchor1 = f(anchor0), h1 = l.down ? anchor1 + (h0 - anchor0) * m : anchor1 - (anchor0 - h0) * m; if (Math.abs(h1 - h0) < 1e-9) continue; moves.set(i, { h: h1, meta: Object.assign({}, S.levelMeta[S.fine[i]], { lego: true, ring: true }) }); rings++; out.cakeScale.maxRelief = Math.max(out.cakeScale.maxRelief, Math.abs(h1 - anchor1)); }
+      out.cakeScale.tiles = rings;
+    }
     if (moves.size) { out.levelsAdded = E.s3.roomTypes.insertLevels(S, moves); out.moved = moves.size; }
     S.cache = {}; return out;
   };
-  /* PR lego3 (A537, A538): the PARAMETERS of the shape of a room with lego. `adjustP(S, P, { room, yaw, treatment, cakeLego })` -> { P2, info } or null (nothing to change): in a room that steps on 2+ terraces with m >= 2,
-     (1) its stairs get HALF the length in Z (the depth, minimum 1 tile) and, for the cross lines of the ramp renderer (round(jump / 0.3), 2-10), the jump is m times higher: the stairs of the room are carved as ramps (`stairStyle` 1) with `rampDepth` = ceil(L / 2), L = the longest stair of the room as it stood (steps: its treads; ramp: its depth);
-     (2) `cakeLego` 'scale' + Cake: `cakeLayers` x m (the same height per ring, so the Cake reaches the high terrace); 'rest' (the default): the rings stay as they were and the terrace alone grows (a rest, then the stair).
-     The caller rebuilds the shape with P2 (a copy of P) ONCE; `info` = the numbers for the table. Nothing is forced: a stair that does not fit is counted by the shape (S.stairInfo.dropped). */
-  L.adjustP = function (S, P, o) {
-    const rec = o.room; if (!rec || (o.treatment !== 'up' && o.treatment !== 'down')) return null;
-    const yaw = o.yaw === undefined ? rec.yaw : o.yaw, terr = L.terraces(S, P, rec, yaw); if (terr.length < 2) return null;
-    const m = L.mOf(terr); if (m < 2) return null; const walk = walkOf(S, rec), P2 = Object.assign({}, P), info = { m, stairs: 0, lenBefore: 0, depthAfter: 0, cakeLayersBefore: null, cakeLayersAfter: null };
-    const mine = (S.stairs || []).filter((r) => r.site && (walk(r.site.a) || walk(r.site.b)));
-    if (mine.length) { const lens = mine.map((r) => (r.ramp ? r.ramp.len : (r.steps ? r.steps.length : 1))); info.stairs = mine.length; info.lenBefore = Math.max(...lens); info.depthAfter = Math.max(1, Math.ceil(info.lenBefore / 2)); P2.stairStyle = 1; P2.rampDepth = info.depthAfter; info.styleBefore = P.stairStyle === 0 ? 'steps' : 'ramp'; }
-    if (P.cake && o.cakeLego === 'scale') { info.cakeLayersBefore = P.cakeLayers === undefined ? 3 : P.cakeLayers; info.cakeLayersAfter = info.cakeLayersBefore * m; P2.cakeLayers = info.cakeLayersAfter; }
-    if (P2.stairStyle === P.stairStyle && P2.rampDepth === P.rampDepth && P2.cakeLayers === P.cakeLayers) return null; return { P2, info };
+  /* CAKE UNDER LEGO, SCALE (t79, A543, rule of [U]: the footprint of Scale on the HIGH terrace must be <= Mid's): done in `apply` as a RE-HEIGHT of the ring tiles of the room's links, NOT as more rings: the SAME tiles (so the footprint on the high terrace is exactly Mid's), each ring m TIMES TALLER from its anchor (Down link, a bowl cut into the high terrace: from the core top up; Up link, a pyramid: from the platform top down), which is what the m-times higher jump leaves room for (checked: m * r <= the new gap). "More rings outward on the low terrace" was not needed. REST = the ring tiles keep their heights (they are never re-heighted).
+     STAIRS (t79, A545): the pass 3 change (a shorter ramp) is GONE: a stair keeps the style of the example (`steps`) and its treads; the m-times taller jump is the height stretch of `apply`. Half the depth with m times more risers cannot be drawn in the tile model (a tread is one tile = one level; more risers in fewer tiles means sub-tile treads: a clone of the step renderer): NOT built, reported. */
+  /* t79: the ring tiles that stand on the HIGH terrace of the room (original terrace of the tile >= the room's highest walkable terrace), for the table of Rest / Scale vs Mid */
+  L.ringsOnHigh = function (S, P, rec, yaw) {
+    const terr = L.terraces(S, P, rec, yaw); if (terr.length < 2 || !S.ringTile) return null; const top = terr[terr.length - 1].t; let n = 0, all = 0, inRoom = 0; const zm = E.stage.zoneMap(S);
+    for (let i = 0; i < S.n; i++) if (S.ringTile[i]) { all++; if (S.ter[i] >= top) n++; if (zm[i] === rec.id) inRoom++; } return { ringTiles: all, onHighTerrace: n, inRoom, highTerrace: top + 1 };
   };
   /* AUTO (A538, counted only, not built): Scale when the Cake is the ONLY ascent to the highest terrace of the room (no stair of the room ends on it), Rest otherwise */
   L.autoPick = function (S, P, rec, yaw) {
