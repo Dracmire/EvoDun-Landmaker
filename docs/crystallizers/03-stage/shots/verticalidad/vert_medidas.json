@@ -1,0 +1,1654 @@
+{
+ "perfil_m1": [
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    38,
+    25
+   ],
+   "rhoAll": 0.39826925263809965,
+   "rhoWalk": 0.030773776252459636,
+   "relAll": 0.37447698744769875,
+   "relWalk": 0.09477124183006536,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1434,
+   "visWalk": 306,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    39,
+    40
+   ],
+   "rhoAll": 0.3995726375471404,
+   "rhoWalk": 0.10415874692688955,
+   "relAll": 0.3338509316770186,
+   "relWalk": 0.09966777408637874,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1288,
+   "visWalk": 301,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    38,
+    49
+   ],
+   "rhoAll": 0.5146083973385822,
+   "rhoWalk": 0.41906087447167384,
+   "relAll": 0.2913553895410886,
+   "relWalk": 0.10204081632653061,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 937,
+   "visWalk": 196,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    38,
+    25
+   ],
+   "rhoAll": 0.39826925263809965,
+   "rhoWalk": 0.030773776252459636,
+   "relAll": 0.37447698744769875,
+   "relWalk": 0.09477124183006536,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1434,
+   "visWalk": 306,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": {
+    "changed": 0,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": 40.23,
+      "tiles": 30
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": 42.48,
+      "tiles": 310
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    39,
+    40
+   ],
+   "rhoAll": 0.3995726375471404,
+   "rhoWalk": 0.10415874692688955,
+   "relAll": 0.3338509316770186,
+   "relWalk": 0.09966777408637874,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1288,
+   "visWalk": 301,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": {
+    "changed": 0,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": 40.23,
+      "tiles": 30
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": 42.48,
+      "tiles": 310
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    38,
+    49
+   ],
+   "rhoAll": 0.5146083973385822,
+   "rhoWalk": 0.41906087447167384,
+   "relAll": 0.2913553895410886,
+   "relWalk": 0.10204081632653061,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 937,
+   "visWalk": 196,
+   "heroH": 1.5250000000000001,
+   "topo": "dd7eba7d",
+   "vert": {
+    "changed": 0,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": 40.23,
+      "tiles": 30
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": 42.48,
+      "tiles": 310
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    38,
+    25
+   ],
+   "rhoAll": -0.5268833785370151,
+   "rhoWalk": null,
+   "relAll": 0.47401247401247404,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 481,
+   "visWalk": 49,
+   "heroH": 1.5250000000000001,
+   "topo": "3df95598",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    39,
+    40
+   ],
+   "rhoAll": -0.3450712957663826,
+   "rhoWalk": 0.045519075675983504,
+   "relAll": 0.30424528301886794,
+   "relWalk": 0.14893617021276595,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 424,
+   "visWalk": 188,
+   "heroH": 1.5250000000000001,
+   "topo": "3df95598",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    38,
+    49
+   ],
+   "rhoAll": -0.37743397600315676,
+   "rhoWalk": -0.42702949471264956,
+   "relAll": 0.25925925925925924,
+   "relWalk": 0.12345679012345678,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 432,
+   "visWalk": 162,
+   "heroH": 1.5250000000000001,
+   "topo": "3df95598",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    38,
+    25
+   ],
+   "rhoAll": -0.44710151196623704,
+   "rhoWalk": null,
+   "relAll": 0.2268041237113402,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 485,
+   "visWalk": 49,
+   "heroH": 1.25,
+   "topo": "3df95598",
+   "vert": {
+    "changed": 340,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -42.48,
+      "tiles": 310
+     },
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -40.23,
+      "tiles": 30
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    39,
+    40
+   ],
+   "rhoAll": -0.2860951844362159,
+   "rhoWalk": -0.04201253403729722,
+   "relAll": 0.09750566893424037,
+   "relWalk": 0,
+   "occluders": 12,
+   "occShare": 0.06417112299465241,
+   "visAll": 441,
+   "visWalk": 187,
+   "heroH": 1.25,
+   "topo": "3df95598",
+   "vert": {
+    "changed": 340,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -42.48,
+      "tiles": 310
+     },
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -40.23,
+      "tiles": 30
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    38,
+    49
+   ],
+   "rhoAll": -0.3574783229160748,
+   "rhoWalk": 0.4348776945024021,
+   "relAll": 0.058823529411764705,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 425,
+   "visWalk": 161,
+   "heroH": 1.25,
+   "topo": "3df95598",
+   "vert": {
+    "changed": 340,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -42.48,
+      "tiles": 310
+     },
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -40.23,
+      "tiles": 30
+     }
+    ]
+   }
+  }
+ ],
+ "perfil_m2": [
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    29,
+    47
+   ],
+   "rhoAll": 0.320014095018799,
+   "rhoWalk": 0.7863926333977002,
+   "relAll": 0.4921077065923863,
+   "relWalk": 0.26811594202898553,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1077,
+   "visWalk": 138,
+   "heroH": 2.5,
+   "topo": "9c1f05ce",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    37,
+    45
+   ],
+   "rhoAll": 0.27685423987651436,
+   "rhoWalk": 0.7674312867870379,
+   "relAll": 0.502606882168926,
+   "relWalk": 0.23880597014925373,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 959,
+   "visWalk": 134,
+   "heroH": 2.5,
+   "topo": "9c1f05ce",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    44,
+    48
+   ],
+   "rhoAll": 0.4851074242693405,
+   "rhoWalk": 0.7460437004583611,
+   "relAll": 0.7994579945799458,
+   "relWalk": 0.9846153846153847,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 738,
+   "visWalk": 130,
+   "heroH": 2.775,
+   "topo": "9c1f05ce",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    29,
+    47
+   ],
+   "rhoAll": 0.320014095018799,
+   "rhoWalk": 0.7863926333977002,
+   "relAll": 0.4921077065923863,
+   "relWalk": 0.26811594202898553,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1077,
+   "visWalk": 138,
+   "heroH": 2.5,
+   "topo": "9c1f05ce",
+   "vert": {
+    "changed": 0,
+    "levels": 4,
+    "conflict": null,
+    "order": [
+     {
+      "level": 11,
+      "h": 1.875,
+      "u": 24.5,
+      "tiles": 1
+     },
+     {
+      "level": 12,
+      "h": 2.2875,
+      "u": 26.47,
+      "tiles": 36
+     },
+     {
+      "level": 18,
+      "h": 3.75,
+      "u": 38.11,
+      "tiles": 100
+     },
+     {
+      "level": 20,
+      "h": 4.1625,
+      "u": 44,
+      "tiles": 4
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    37,
+    45
+   ],
+   "rhoAll": 0.27685423987651436,
+   "rhoWalk": 0.7674312867870379,
+   "relAll": 0.502606882168926,
+   "relWalk": 0.23880597014925373,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 959,
+   "visWalk": 134,
+   "heroH": 2.5,
+   "topo": "9c1f05ce",
+   "vert": {
+    "changed": 0,
+    "levels": 4,
+    "conflict": null,
+    "order": [
+     {
+      "level": 11,
+      "h": 1.875,
+      "u": 24.5,
+      "tiles": 1
+     },
+     {
+      "level": 12,
+      "h": 2.2875,
+      "u": 26.47,
+      "tiles": 36
+     },
+     {
+      "level": 18,
+      "h": 3.75,
+      "u": 38.11,
+      "tiles": 100
+     },
+     {
+      "level": 20,
+      "h": 4.1625,
+      "u": 44,
+      "tiles": 4
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    44,
+    48
+   ],
+   "rhoAll": 0.4851074242693405,
+   "rhoWalk": 0.7460437004583611,
+   "relAll": 0.7994579945799458,
+   "relWalk": 0.9846153846153847,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 738,
+   "visWalk": 130,
+   "heroH": 2.775,
+   "topo": "9c1f05ce",
+   "vert": {
+    "changed": 0,
+    "levels": 4,
+    "conflict": null,
+    "order": [
+     {
+      "level": 11,
+      "h": 1.875,
+      "u": 24.5,
+      "tiles": 1
+     },
+     {
+      "level": 12,
+      "h": 2.2875,
+      "u": 26.47,
+      "tiles": 36
+     },
+     {
+      "level": 18,
+      "h": 3.75,
+      "u": 38.11,
+      "tiles": 100
+     },
+     {
+      "level": 20,
+      "h": 4.1625,
+      "u": 44,
+      "tiles": 4
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    29,
+    47
+   ],
+   "rhoAll": -0.4133070878194688,
+   "rhoWalk": null,
+   "relAll": 0.3472222222222222,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 504,
+   "visWalk": 2,
+   "heroH": -2.225,
+   "topo": "57c81136",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    37,
+    45
+   ],
+   "rhoAll": 0.04670064002089153,
+   "rhoWalk": -0.48075929228447495,
+   "relAll": 0.8358862144420132,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 457,
+   "visWalk": 14,
+   "heroH": 1.252,
+   "topo": "57c81136",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    44,
+    48
+   ],
+   "rhoAll": -0.4272741857226133,
+   "rhoWalk": null,
+   "relAll": 0.27578947368421053,
+   "relWalk": null,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 475,
+   "visWalk": 0,
+   "heroH": -2.225,
+   "topo": "57c81136",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    29,
+    47
+   ],
+   "rhoAll": -0.4133070878194688,
+   "rhoWalk": null,
+   "relAll": 0.3472222222222222,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 504,
+   "visWalk": 2,
+   "heroH": -2.225,
+   "topo": "57c81136",
+   "vert": {
+    "changed": 5,
+    "levels": 4,
+    "conflict": null,
+    "order": [
+     {
+      "level": 23,
+      "h": 4.1625,
+      "u": -29.5,
+      "tiles": 4
+     },
+     {
+      "level": 13,
+      "h": 2.2875,
+      "u": -25.36,
+      "tiles": 36
+     },
+     {
+      "level": 21,
+      "h": 3.75,
+      "u": -25.13,
+      "tiles": 100
+     },
+     {
+      "level": 11,
+      "h": 1.875,
+      "u": -23.5,
+      "tiles": 1
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    37,
+    45
+   ],
+   "rhoAll": 0.04544588769778659,
+   "rhoWalk": 0.2695404556742466,
+   "relAll": 0.8402625820568927,
+   "relWalk": 0.14285714285714285,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 457,
+   "visWalk": 14,
+   "heroH": 1.252,
+   "topo": "57c81136",
+   "vert": {
+    "changed": 5,
+    "levels": 4,
+    "conflict": null,
+    "order": [
+     {
+      "level": 23,
+      "h": 4.1625,
+      "u": -29.5,
+      "tiles": 4
+     },
+     {
+      "level": 13,
+      "h": 2.2875,
+      "u": -25.36,
+      "tiles": 36
+     },
+     {
+      "level": 21,
+      "h": 3.75,
+      "u": -25.13,
+      "tiles": 100
+     },
+     {
+      "level": 11,
+      "h": 1.875,
+      "u": -23.5,
+      "tiles": 1
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    44,
+    48
+   ],
+   "rhoAll": -0.4272741857226133,
+   "rhoWalk": null,
+   "relAll": 0.27578947368421053,
+   "relWalk": null,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 475,
+   "visWalk": 0,
+   "heroH": -2.225,
+   "topo": "57c81136",
+   "vert": {
+    "changed": 5,
+    "levels": 4,
+    "conflict": null,
+    "order": [
+     {
+      "level": 23,
+      "h": 4.1625,
+      "u": -29.5,
+      "tiles": 4
+     },
+     {
+      "level": 13,
+      "h": 2.2875,
+      "u": -25.36,
+      "tiles": 36
+     },
+     {
+      "level": 21,
+      "h": 3.75,
+      "u": -25.13,
+      "tiles": 100
+     },
+     {
+      "level": 11,
+      "h": 1.875,
+      "u": -23.5,
+      "tiles": 1
+     }
+    ]
+   }
+  }
+ ],
+ "perfil_m3": [
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    30,
+    47
+   ],
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    31,
+    41
+   ],
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    30,
+    37
+   ],
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    30,
+    47
+   ],
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": {
+    "changed": 0,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -44.75,
+      "tiles": 8
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -42.28,
+      "tiles": 107
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    31,
+    41
+   ],
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": {
+    "changed": 0,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -44.75,
+      "tiles": 8
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -42.28,
+      "tiles": 107
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    30,
+    37
+   ],
+   "rhoAll": 0.060555747032072636,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.2624212736179146,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1429,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": {
+    "changed": 0,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -44.75,
+      "tiles": 8
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -42.28,
+      "tiles": 107
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    30,
+    47
+   ],
+   "rhoAll": 0.3632223718590386,
+   "rhoWalk": 0.1928164799609902,
+   "relAll": 0.408675799086758,
+   "relWalk": 0.0761904761904762,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 438,
+   "visWalk": 105,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    31,
+    41
+   ],
+   "rhoAll": -0.04570733021138001,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.19742489270386265,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 466,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    30,
+    37
+   ],
+   "rhoAll": -0.167900631644497,
+   "rhoWalk": 0.24334890444177124,
+   "relAll": 0.13646055437100213,
+   "relWalk": 0.02666666666666667,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 469,
+   "visWalk": 75,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    30,
+    47
+   ],
+   "rhoAll": 0.3632223718590386,
+   "rhoWalk": 0.1928164799609902,
+   "relAll": 0.408675799086758,
+   "relWalk": 0.0761904761904762,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 438,
+   "visWalk": 105,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": {
+    "changed": 0,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -44.75,
+      "tiles": 8
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -42.28,
+      "tiles": 107
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    31,
+    41
+   ],
+   "rhoAll": -0.04570733021138001,
+   "rhoWalk": 0.2088525702351253,
+   "relAll": 0.19742489270386265,
+   "relWalk": 0.06956521739130435,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 466,
+   "visWalk": 115,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": {
+    "changed": 0,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -44.75,
+      "tiles": 8
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -42.28,
+      "tiles": 107
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    30,
+    37
+   ],
+   "rhoAll": -0.167900631644497,
+   "rhoWalk": 0.24334890444177124,
+   "relAll": 0.13646055437100213,
+   "relWalk": 0.02666666666666667,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 469,
+   "visWalk": 75,
+   "heroH": 1.5250000000000001,
+   "topo": "9a4d695b",
+   "vert": {
+    "changed": 0,
+    "levels": 2,
+    "conflict": null,
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -44.75,
+      "tiles": 8
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -42.28,
+      "tiles": 107
+     }
+    ]
+   }
+  }
+ ],
+ "perfil_c0": [
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    131,
+    7
+   ],
+   "rhoAll": 0.2973713175491361,
+   "rhoWalk": 0.2559719135538131,
+   "relAll": 0.06326723323890462,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2118,
+   "visWalk": 1181,
+   "heroH": 1.5250000000000001,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    88,
+    11
+   ],
+   "rhoAll": 0.1975021213044683,
+   "rhoWalk": -0.003604208550901901,
+   "relAll": 0.8524788391777509,
+   "relWalk": 0.8259723137771918,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2481,
+   "visWalk": 1517,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    47,
+    16
+   ],
+   "rhoAll": 0.3774247683782149,
+   "rhoWalk": 0.2143236009287332,
+   "relAll": 0.8543570993296771,
+   "relWalk": 0.8803652968036529,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1641,
+   "visWalk": 1095,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": null
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    131,
+    7
+   ],
+   "rhoAll": 0.2973713175491361,
+   "rhoWalk": 0.2559719135538131,
+   "relAll": 0.06326723323890462,
+   "relWalk": 0,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2118,
+   "visWalk": 1181,
+   "heroH": 1.5250000000000001,
+   "topo": "aec64f3b",
+   "vert": {
+    "changed": 0,
+    "levels": 7,
+    "conflict": "the window has stairs / ramps (their records carry the heights of their ends): not forced",
+    "order": [
+     {
+      "level": 5,
+      "h": 2.653125,
+      "u": -90.38,
+      "tiles": 8
+     },
+     {
+      "level": 6,
+      "h": 3.01875,
+      "u": -89.75,
+      "tiles": 8
+     },
+     {
+      "level": 7,
+      "h": 3.384375,
+      "u": -89.13,
+      "tiles": 8
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -86.5,
+      "tiles": 523
+     },
+     {
+      "level": 9,
+      "h": 4.1625,
+      "u": -84.56,
+      "tiles": 264
+     },
+     {
+      "level": 8,
+      "h": 3.75,
+      "u": -71.83,
+      "tiles": 1080
+     },
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -69,
+      "tiles": 2
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    88,
+    11
+   ],
+   "rhoAll": 0.1975021213044683,
+   "rhoWalk": -0.003604208550901901,
+   "relAll": 0.8524788391777509,
+   "relWalk": 0.8259723137771918,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 2481,
+   "visWalk": 1517,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": {
+    "changed": 0,
+    "levels": 7,
+    "conflict": "the window has stairs / ramps (their records carry the heights of their ends): not forced",
+    "order": [
+     {
+      "level": 5,
+      "h": 2.653125,
+      "u": -90.38,
+      "tiles": 8
+     },
+     {
+      "level": 6,
+      "h": 3.01875,
+      "u": -89.75,
+      "tiles": 8
+     },
+     {
+      "level": 7,
+      "h": 3.384375,
+      "u": -89.13,
+      "tiles": 8
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -86.5,
+      "tiles": 523
+     },
+     {
+      "level": 9,
+      "h": 4.1625,
+      "u": -84.56,
+      "tiles": 264
+     },
+     {
+      "level": 8,
+      "h": 3.75,
+      "u": -71.83,
+      "tiles": 1080
+     },
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -69,
+      "tiles": 2
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam6",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    47,
+    16
+   ],
+   "rhoAll": 0.3774247683782149,
+   "rhoWalk": 0.2143236009287332,
+   "relAll": 0.8543570993296771,
+   "relWalk": 0.8803652968036529,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 1641,
+   "visWalk": 1095,
+   "heroH": 2.775,
+   "topo": "aec64f3b",
+   "vert": {
+    "changed": 0,
+    "levels": 7,
+    "conflict": "the window has stairs / ramps (their records carry the heights of their ends): not forced",
+    "order": [
+     {
+      "level": 5,
+      "h": 2.653125,
+      "u": -90.38,
+      "tiles": 8
+     },
+     {
+      "level": 6,
+      "h": 3.01875,
+      "u": -89.75,
+      "tiles": 8
+     },
+     {
+      "level": 7,
+      "h": 3.384375,
+      "u": -89.13,
+      "tiles": 8
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -86.5,
+      "tiles": 523
+     },
+     {
+      "level": 9,
+      "h": 4.1625,
+      "u": -84.56,
+      "tiles": 264
+     },
+     {
+      "level": 8,
+      "h": 3.75,
+      "u": -71.83,
+      "tiles": 1080
+     },
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -69,
+      "tiles": 2
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k0",
+   "tile": [
+    131,
+    7
+   ],
+   "rhoAll": 0.2425037436672263,
+   "rhoWalk": 0.2593005198466873,
+   "relAll": 0.01749271137026239,
+   "relWalk": 0,
+   "occluders": 43,
+   "occShare": 0.30714285714285716,
+   "visAll": 343,
+   "visWalk": 140,
+   "heroH": 1.5250000000000001,
+   "topo": "53384f4e",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k4",
+   "tile": [
+    88,
+    11
+   ],
+   "rhoAll": -0.2432552461750743,
+   "rhoWalk": -0.25873170346151636,
+   "relAll": 0.6094032549728752,
+   "relWalk": 0.5280373831775701,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 553,
+   "visWalk": 428,
+   "heroH": 2.775,
+   "topo": "53384f4e",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": false,
+   "k": "k8",
+   "tile": [
+    47,
+    16
+   ],
+   "rhoAll": -0.15755349862404427,
+   "rhoWalk": -0.13559835172618862,
+   "relAll": 0.8971631205673759,
+   "relWalk": 0.900398406374502,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 564,
+   "visWalk": 502,
+   "heroH": 2.775,
+   "topo": "53384f4e",
+   "vert": null
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k0",
+   "tile": [
+    131,
+    7
+   ],
+   "rhoAll": 0.2425037436672263,
+   "rhoWalk": 0.2593005198466873,
+   "relAll": 0.01749271137026239,
+   "relWalk": 0,
+   "occluders": 43,
+   "occShare": 0.30714285714285716,
+   "visAll": 343,
+   "visWalk": 140,
+   "heroH": 1.5250000000000001,
+   "topo": "53384f4e",
+   "vert": {
+    "changed": 0,
+    "levels": 7,
+    "conflict": "the window has stairs / ramps (their records carry the heights of their ends): not forced",
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -36,
+      "tiles": 2
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -20.14,
+      "tiles": 523
+     },
+     {
+      "level": 7,
+      "h": 3.384375,
+      "u": -17.88,
+      "tiles": 8
+     },
+     {
+      "level": 6,
+      "h": 3.01875,
+      "u": -17.75,
+      "tiles": 8
+     },
+     {
+      "level": 5,
+      "h": 2.653125,
+      "u": -17.63,
+      "tiles": 8
+     },
+     {
+      "level": 8,
+      "h": 3.75,
+      "u": -15.67,
+      "tiles": 1080
+     },
+     {
+      "level": 9,
+      "h": 4.1625,
+      "u": -12.58,
+      "tiles": 264
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k4",
+   "tile": [
+    88,
+    11
+   ],
+   "rhoAll": -0.2432552461750743,
+   "rhoWalk": -0.25873170346151636,
+   "relAll": 0.6094032549728752,
+   "relWalk": 0.5280373831775701,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 553,
+   "visWalk": 428,
+   "heroH": 2.775,
+   "topo": "53384f4e",
+   "vert": {
+    "changed": 0,
+    "levels": 7,
+    "conflict": "the window has stairs / ramps (their records carry the heights of their ends): not forced",
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -36,
+      "tiles": 2
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -20.14,
+      "tiles": 523
+     },
+     {
+      "level": 7,
+      "h": 3.384375,
+      "u": -17.88,
+      "tiles": 8
+     },
+     {
+      "level": 6,
+      "h": 3.01875,
+      "u": -17.75,
+      "tiles": 8
+     },
+     {
+      "level": 5,
+      "h": 2.653125,
+      "u": -17.63,
+      "tiles": 8
+     },
+     {
+      "level": 8,
+      "h": 3.75,
+      "u": -15.67,
+      "tiles": 1080
+     },
+     {
+      "level": 9,
+      "h": 4.1625,
+      "u": -12.58,
+      "tiles": 264
+     }
+    ]
+   }
+  },
+  {
+   "cam": "cam7",
+   "on": true,
+   "k": "k8",
+   "tile": [
+    47,
+    16
+   ],
+   "rhoAll": -0.15755349862404427,
+   "rhoWalk": -0.13559835172618862,
+   "relAll": 0.8971631205673759,
+   "relWalk": 0.900398406374502,
+   "occluders": 0,
+   "occShare": 0,
+   "visAll": 564,
+   "visWalk": 502,
+   "heroH": 2.775,
+   "topo": "53384f4e",
+   "vert": {
+    "changed": 0,
+    "levels": 7,
+    "conflict": "the window has stairs / ramps (their records carry the heights of their ends): not forced",
+    "order": [
+     {
+      "level": 3,
+      "h": 1.875,
+      "u": -36,
+      "tiles": 2
+     },
+     {
+      "level": 4,
+      "h": 2.2875,
+      "u": -20.14,
+      "tiles": 523
+     },
+     {
+      "level": 7,
+      "h": 3.384375,
+      "u": -17.88,
+      "tiles": 8
+     },
+     {
+      "level": 6,
+      "h": 3.01875,
+      "u": -17.75,
+      "tiles": 8
+     },
+     {
+      "level": 5,
+      "h": 2.653125,
+      "u": -17.63,
+      "tiles": 8
+     },
+     {
+      "level": 8,
+      "h": 3.75,
+      "u": -15.67,
+      "tiles": 1080
+     },
+     {
+      "level": 9,
+      "h": 4.1625,
+      "u": -12.58,
+      "tiles": 264
+     }
+    ]
+   }
+  }
+ ]
+}
