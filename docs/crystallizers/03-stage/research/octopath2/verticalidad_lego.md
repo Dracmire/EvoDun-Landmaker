@@ -1,6 +1,6 @@
 # Verticalidad tipo lego en DAC3 (pase de diseño de [R], R2)
 
-Registro A524–A527, T60, T61. Fuentes: `verticalidad.md` (familias A y B, invariantes I1–I4, V1–V7), el resultado del PR #105 (`verticalidad_resultado.md`) y la lectura de [U] del 2026-11-19. Todo lo que no está medido es **[H] hipótesis**.
+Registro A524–A529, T60, T61. Fuentes: `verticalidad.md` (familias A y B, invariantes I1–I4, V1–V7), el resultado del PR #105 (`verticalidad_resultado.md`) y la lectura de [U] del 2026-11-19. Todo lo que no está medido es **[H] hipótesis**.
 
 ## 1. Lo que dijo la medición (A524)
 
@@ -56,13 +56,23 @@ Por ejemplo y por k0/k4/k8, en Cam 6 y en Cam 7:
 
 [U] juzga las capturas.
 
-## 7. Decisiones de [U] antes del brief
+## 7. Decisiones de [U] (2026-11-19, A528)
 
-- **D-L1:** ¿empezamos con 3 tratamientos (Down, Mid, Up)? [R] recomienda 3.
-- **D-L2:** ¿el escalón E es la terraza de la Base (1,25 H)? [R] recomienda sí.
-- **D-L3:** L3 cambia la topología de lo caminable: agrega escaleras y altura dentro de una región. Está permitido en DAC3 (A514), pero conviene confirmarlo.
-- **D-L4:** Cam 7 con yaw. Opción a: clonar la cámara a `src/s3/` (cumple la regla A522 al pie de la letra). Opción b: una entrada opcional de yaw en `makeCam`, que ausente deja el visor byte a byte igual (más simple, pero modifica una herramienta compartida). [R] recomienda a, por la regla.
-- **D-L5:** ¿las uniones A+2 se miden ahora y se construyen después? [R] recomienda medir ahora.
+- **D-L1:** 3 tratamientos (Down, Mid, Up). Aprobado.
+- **D-L2:** E = la terraza de la Base (1,25 H). Aprobado.
+- **D-L3:** aprobado, con una corrección de [U] que **reemplaza a L2 y L3** (ver §7b): DAC se construye sobre terreno natural, así que no se corta lo caminable. Se cambia la **representación**: en Up, las terrazas que ya existen se apilan con un número de legos que depende de la terraza base de la sala.
+- **D-L4:** Cam 7 se reajusta (era un clon en desuso). Las cámaras principales no se tocan: Cam 3 (modo 1), Cam 1 (modo 2), Cam 6 (modo 3) y Cam 5 (cenital, útil para todos). Cam 2 es Cam 1 con el otro ángulo.
+- **D-L5:** las uniones A+2 se miden ahora y se construyen después. Aprobado.
+
+## 7b. L2' · Lego por terraza (reemplaza L2 y L3; interpretación de [R] de la idea de [U])
+
+- **Multiplicador por sala:** m = la terraza base de la sala (la más baja que pisa), acotada a 1–3: terraza 1 → simple, 2 → doble, 3 → triple. Así cada zona reutiliza su altura (el concepto lego de T60) y las salas más altas del mapa (montaña, ciudad alta) suben más.
+- **Up:** cada salto entre terrazas caminables de la sala mide m·E en vez de E. **La topología no cambia**: mismas baldosas, mismas regiones, mismas rampas; solo cambian las alturas de los niveles de la sala. Las rampas quedan más empinadas (la profundidad es fija); las líneas transversales las leen como escalera.
+- **Mid:** m = 1, igual que hoy.
+- **Down:** el mismo m, pero hacia abajo: la terraza más alta de la sala queda donde está y las de abajo caen m·E por salto.
+- **Los `subs`** no cambian (micro relieve).
+- **Límite honesto:** una sala de una sola terraza no gana nada con L2'. Se cuenta cuántas salas quedan así; los cortes en bandas (L2 y L3 originales) quedan como opción para después.
+- L4 (dobles y triples en lo que enmarca), L5, L6 y L7 siguen igual.
 
 ## 8. Tesis
 
