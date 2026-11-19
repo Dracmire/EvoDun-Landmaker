@@ -7,7 +7,7 @@ const { open } = require('./common');
 const out = process.argv[2], SHOTS = !process.argv.includes('--no-shots'), oi = process.argv.indexOf('--only'), ONLY = oi > 0 ? process.argv[oi + 1].split(',') : null;
 if (!out) { console.error('usage: perfiles_walk.js <outDir> [--no-shots] [--only id,id]'); process.exit(2); }
 fs.mkdirSync(out, { recursive: true });
-const EX = ['perfil_m1', 'perfil_m2', 'perfil_m3', 'perfil_c0'].filter((x) => !ONLY || ONLY.includes(x));
+const EX = ONLY || ['perfil_m1', 'perfil_m2', 'perfil_m3', 'perfil_c0']; // PR pend P6: --only accepts ANY example id (perfil_l1, perfil_u1, perfil_u2, perfil_s1...); the default list is the one of PR profiles-mockup
 (async () => {
   const a = await open({ w: 1280, h: 760, modes: true, orient: true }), page = a.page, ev = (f, x) => page.evaluate(f, x);
   await ev(() => window.__evo.setMode('stage')); await a.idle();

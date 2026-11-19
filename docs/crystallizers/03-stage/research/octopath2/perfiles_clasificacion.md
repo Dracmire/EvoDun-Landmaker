@@ -151,3 +151,34 @@ L = largo a lo largo del eje, A = ancho de través, ambos en H (extensión de lo
 | 86 | Cake | Hub | 39.2 | 38.7 | 12.6 | 1.01 | 0.28 | **ninguno** | = | no cabe en una toma (38.7 x 39.2 H) |  |
 | 87 | Ascension | Hub | 7.0 | 5.6 | 3.6 | 1.25 | 0.00 | P3/P4 | = | cabe en una toma |  |
 | 88 | Ascension | Z | 16.3 | 5.6 | 2.3 | 2.92 | 0.27 | **ninguno** | = | ancho 5.6 H entre P1 y P2 | ancho en el hueco 5-6 H de la tabla; ancho a menos del 10 % de un umbral |
+
+
+---
+
+## v2 · T2 por partes (PR pend P6, deuda A500; solo medida, la v1 de arriba queda intacta)
+
+Herramienta `tools/perfiles_partes.js` (datos: `perfiles_partes_balanced3.json`, `perfiles_partes_default9.json`). Cada sala del mapa completo (constructor DAC3) se corta en PARTES y cada parte se clasifica con la tabla v2 de `verticalidad.md` §6 (ancho y largo en H, tilesPerH 1,5). Método (hipótesis de la herramienta, escritas en su cabecera): grosor = distancia euclídea al borde de la sala; **área central** = componentes con ancho ≥ 6 H y ≥ 20 baldosas; su borde de 4,5 baldosas es suyo, no es pasillo; el resto son componentes de **pasillo**, y es **codo** si su caja es en L (lado corto ≥ 60 % del largo y relleno < 55 %); ancho de una parte = (2·percentil 90 de distancias + 1) / tilesPerH.
+
+**Limitaciones (dicho con franqueza):** no recorre entrada → núcleo → salidas como camino; las partes son componentes. El criterio de codo por caja marca como «codo» también los pasillos diagonales (por eso «codo» domina). La primera versión midió el ancho con la media de las distancias y daba todo «< 2,5 H» (la media lee la mitad del ancho); se cambió al percentil 90 antes de entregar, y esa decisión no tiene una medida contra una sala conocida: está por validar.
+
+### Balanced 3 (86 salas con baldosas caminables)
+| Parte | Perfil (tabla v2) | Partes |
+|---|---|---|
+| central | P3/P4 Hub | 30 |
+| codo | P1 | 22 |
+| codo | P1c | 34 |
+| codo | ninguno (< 2,5) | 3 |
+| pasillo | P1 | 8 |
+| pasillo | P1c | 52 |
+| pasillo | ninguno (< 2,5) | 21 |
+
+### Default 9 (31 salas con baldosas caminables)
+| Parte | Perfil (tabla v2) | Partes |
+|---|---|---|
+| central | P3/P4 Hub | 5 |
+| codo | P1 | 23 |
+| codo | P1c | 17 |
+| codo | ninguno (< 2,5) | 6 |
+| pasillo | P1 | 3 |
+| pasillo | P1c | 6 |
+| pasillo | ninguno (< 2,5) | 7 |
