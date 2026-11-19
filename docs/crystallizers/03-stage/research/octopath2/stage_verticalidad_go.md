@@ -24,15 +24,15 @@ Rehace `tools/perfiles_clasificacion.js`:
 
 ## Parte B · Índice de banda en lo que ya existe (solo mide)
 
-Mide ρ (Spearman entre la altura del suelo y la profundidad de vista *u*, sobre las baldosas visibles del pick buffer) y cuenta los oclusores (baldosas caminables más altas que el héroe y delante de él), en k0, k4 y k8 de M1, M2, M3 y C0, **en Cam 6 y en Cam 7**.
+Mide ρ (Spearman entre la altura del suelo y la profundidad de vista *u*, sobre las baldosas visibles del pick buffer), la altura relativa del héroe (fracción de baldosas visibles por debajo de él) y los oclusores caminables (baldosas caminables más altas que el héroe y delante de él), en k0, k4 y k8 de M1, M2, M3 y C0, **en Cam 6 y en Cam 7**.
 
 **Entrega:** una tabla.
 
 ## Parte C · V1–V7 en los mockups M1 y M3 (solo con D-V1)
 
-1. Con la `orient` de cada sala: ordena los niveles caminables por su *u* media y reasígnales altura monótona (V1). Usa los pasos de la Base (terraza 1,25 H, `subs` 2). La topología (caminable, regiones, escaleras) queda **idéntica**: verifícalo por hash de `S.walk` / las regiones / las escaleras antes y después.
+1. Asigna una familia por parte de sala (`verticalidad.md` §3): M1 (pasillo) = A; M3 (Cake Hub) = A. Familia A: ordena los niveles caminables por su *u* media con la `orient` de la sala y reasígnales altura monótona (V1a). Si la sala tiene una parte alta tipo cima, prueba también B (V1b) en esa parte. Siempre se cumple I1. Usa los pasos de la Base (terraza 1,25 H, `subs` 2). La topología (caminable, regiones, escaleras) queda **idéntica**: verifícalo por hash de `S.walk` / las regiones / las escaleras antes y después.
 2. Si la topología obliga a un nivel más alto delante del héroe, prueba la otra orientación. Si tampoco sirve, márcalo como conflicto y no lo fuerces.
-3. Escenario no caminable: V5 (lados en U ≥ 3 H, el fondo lo más alto) y V6 (frente igual o más bajo, con baranda baja de 1,2 H en el borde si cae). V4: baranda en el borde superior de cada subida. Todo como geometría, con los mecanismos de `planes` y `volumes`, **nunca billboards**.
+3. Escenario no caminable: V2 (caras de frente como muro de 2–3 H), V5 (lados en U ≥ 3 H, el fondo lo más alto) y V6 (frente igual o más bajo, con baranda baja de 1,2 H en el borde si cae). V4: baranda en el borde superior de cada subida. Todo como geometría, con los mecanismos de `planes` y `volumes`, **nunca billboards**.
 4. Todo va detrás de un interruptor opcional del modo 3 («Compositional verticality»), apagado por defecto. Apagado, el visor queda byte a byte igual.
 
 **Entrega:**
@@ -41,7 +41,7 @@ Mide ρ (Spearman entre la altura del suelo y la profundidad de vista *u*, sobre
 - conflictos, si hubo;
 - todo en `research/octopath2/verticalidad_resultado.md`.
 
-**Predicción (congelada):** sin reglas, ρ entre −0,2 y 0,2. Con las reglas, ρ ≥ 0,6 y 0 oclusores en k4.
+**Predicción (congelada):** sin reglas, ρ entre −0,2 y 0,2 y algún oclusor caminable. Con las reglas (familia A), ρ ≥ 0,6 y 0 oclusores caminables en k4.
 
 ## Reglas del carril (reducido por el presupuesto)
 

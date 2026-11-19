@@ -40,3 +40,30 @@ Frames taken from the video at 779 x 438 (browser screenshots; the guide's text 
 | 1:09 | `oct2_dun_0069_bridge_top_braziers_side_arcades.jpg` | top of the bridge, braziers pair, arcades on both sides |
 | 1:12 | `oct2_dun_0072_broken_bridge_ladder_pillars_frame.jpg` | the bridge as a ladder down, pillars framing it, party in a line |
 | 1:18 | `oct2_dun_0078_castle_entry_corridor_pillar_pair.jpg` | castle entry corridor, pillar pair in front, lit hotspot ahead |
+
+## Verticality set (user's captures, 2026-11-18; Registro A511)
+
+Third-party frames from YouTube playthroughs, chosen by the user for verticality. "Family" is [R]'s reading: **A** = rising band (front lower, back higher), **B** = lookout (hero on the high ground, everything around drops), **flat** = no level change.
+
+| # | File | Family | What it shows |
+|---|---|---|---|
+| v01 | `oct2_v01_rooftop_terrace_balustrade_facade_drop_ladder.png` | B | hero on a balustraded rooftop; the façade below fills the lower frame; ladder down; palace higher at the back |
+| v02 | `oct2_v02_stair_up_to_hero_market_lower_left_blur_fg.png` | A | stair rising from the camera to the hero; market lower on the left; blurred building in front |
+| v03 | `oct2_v03_fenced_terrace_lower_graves_roof_fg_a.png` | A | fenced mid terrace, lower ground front-left, raised plaza at the back; blurred roof in front |
+| v04 | `oct2_v04_fenced_terrace_lower_graves_roof_fg_b.png` | A | same place, second frame |
+| v05 | `oct2_v05_gallery_through_arches_balustrade_fg.png` | flat | interior seen through a colonnade; balustrade and columns in front |
+| v06 | `oct2_v06_rain_bridge_flat_city_lights_closure.png` | flat | flat bridge, background closed by darkness and lit windows |
+| v07 | `oct2_v07_cave_path_bridge_above_torches_a.png` | A | cave path; bridge higher at the back; lower rocks with torches in front |
+| v08 | `oct2_v08_cave_path_bridge_above_torches_b.png` | A | same cave, second frame |
+| v09 | `oct2_v09_dune_ridge_overlook_distant_city.png` | B | hero on a dune ridge, distant city lower and far (vista) |
+| v10 | `oct2_v10_round_terrace_retaining_wall_stairs_back.png` | A | raised round terrace with a retaining wall; stair up to a gate at the back; lower street front-left |
+| v11 | `oct2_v11_three_stacked_terraces_lateral_stairs_a.png` | A | three stacked terraces; flights running along the retaining walls |
+| v12 | `oct2_v12_three_stacked_terraces_lateral_stairs_b.png` | A | same place, lower plaza with balustrade in front |
+| v13 | `oct2_v13_canal_boat_lowest_band_banners_fg.png` | A | canal as the lowest band; balustraded terrace above; blurred banners in front |
+| v14 | `oct2_v14_landing_stairs_down_to_pier.png` | A | landing; stair down toward the camera to a pier |
+| v15 | `oct2_v15_city_wall_switchback_stairs_face.png` | A | tall city wall facing the camera with switchback flights on its face |
+| v16 | `oct2_v16_wall_top_walkway_flights_roofs_below.png` | B | walkway on top of the wall; roofs lower all around |
+| v17 | `oct2_v17_wall_walkway_corridor_tower_back.png` | B | narrow walkway on the wall with battlements; tower higher at the back |
+| v18 | `oct2_v18_night_city_wall_gate_towers_street.png` | A | street level in front; city wall with gate and towers rising behind |
+| v19 | `oct2_v19_night_mesa_top_drops_camp_below_a.png` | B | hero on a mesa; cliffs drop in front and at the sides; camp below |
+| v20 | `oct2_v20_night_mesa_top_drops_camp_below_b.png` | B | same mesa, second frame |
