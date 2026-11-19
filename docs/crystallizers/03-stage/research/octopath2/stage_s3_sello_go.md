@@ -1,6 +1,6 @@
 # Brief para CC · Sellar DAC3 (constructor del Stage 3, fase 0b)
 
-Registro A520–A521. Sigue a `stage_s3_fork_go.md` (PR #103). **Regla de [U] (2026-11-19), obligatoria desde ahora:**
+Registro A520–A522. Sigue a `stage_s3_fork_go.md` (PR #103). **Regla de [U] (2026-11-19), obligatoria desde ahora:**
 
 - El modo 3 (Stage) usa **solo DAC3** (`src/s3/`, `E.s3`). Nunca la cadena DAC original (`E.shape`, `E.rooms`, `E.roomTypes`, `E.pocket`), que queda para el modo 2 (y 1, 4).
 - Si algo de DAC3 falla, se puede **leer y clonar** del original, pero **no usarlo** desde el modo 3.
@@ -21,7 +21,7 @@ El clon tiene como prototipo `window.EVO`, así que todo lo que no define cae al
 1. **Clonar lo que falte** a `src/s3/` (al menos `pocket.js` → `E.s3.pocket`), copia literal con el encabezado de fork (commit de origen, diverge a propósito). Dentro del clon, toda llamada de la cadena apunta a `E.s3`.
 2. **Cortar la caída por prototipo para la cadena:** en `E.s3`, los nombres `shape`, `rooms`, `roomTypes`, `pocket` (y los que encuentres) deben resolver al clon o lanzar error; nunca al original. Las utilidades que no son cadena DAC (`curves`, `fields`, `png`, cámara, `render`, `tech`) siguen compartidas.
 3. **`src/ui.js`:** en una sesión del modo 3, todas las llamadas a la cadena usan `E.s3.*` (un alias `DAC()` que elige según `stageShape()` basta). Los modos 1, 2 y 4 no cambian de camino.
-4. **CLAUDE.md:** la regla de arriba en la entrada «STAGE CONSTRUCTOR (fork of DAC)» y en «How to work with the user»: «Mode 3 uses only DAC3 (`src/s3/`); the original DAC chain is read-only for mode 3 (read / clone, never call); never edit the original DAC for mode 3 work».
+4. **CLAUDE.md:** la regla de arriba en la entrada «STAGE CONSTRUCTOR (fork of DAC)» y en «How to work with the user»: «Mode 3 uses only DAC3 (`src/s3/`); the original DAC geometry chain is read-only for mode 3 (read / clone, never call) and is never edited for mode 3 work. Other tools (renderer, wall extrusion, dressing, style options) are shared and used as they are; to change one for mode 3, clone it into `src/s3/` as a new version».
 
 ## 3. Prueba (lo único que se mide)
 
@@ -38,6 +38,8 @@ El clon tiene como prototipo `window.EVO`, así que todo lo que no define cae al
 - No corras `test_window_session_ui`. Segundos de cada comando y lo que no corrió. Dos fallos seguidos: PARA y di si es código o test.
 - Rama nueva sobre `main` (con #102 y #103 ya mergeados) y PR. **No mergees: mergea [U].**
 
-## 5. Duda abierta para [U]
+## 5. Alcance de la regla (decisión de [U], A522)
 
-[R] propone que el **renderer** (`render.js`, `tech.js`, `curves.js`) sea infraestructura compartida del visor, no DAC: el modo 3 lo usa sin clonarlo. Si [U] dice que también se clona, va en otra fase.
+- **Intacto y solo de DAC:** el motor core que genera la geometría (la cadena `shape` / `rooms` / `roomTypes` / `pocket`). El modo 3 usa su clon.
+- **Compartido:** las demás herramientas (renderer `render.js` / `tech.js` / `curves.js`, muros con extrusión `wallc.js`, dressing, opciones de estilo, contrato, cámaras). El modo 3 las usa **tal cual**.
+- **Si hay que modificar una herramienta compartida** para el modo 3: se **clona** a `src/s3/` como versión nueva y se cambia el clon. El original no se edita.
