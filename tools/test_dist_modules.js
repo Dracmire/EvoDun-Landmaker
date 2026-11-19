@@ -9,11 +9,11 @@ const ROOT = path.resolve(__dirname, '..'); let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : JSON.stringify(extra).slice(0, 400)); } };
 const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 const index = read('index.html'), dist = read('dist/viewer.html'), build = read('tools/build.py');
-const mods = [...index.matchAll(/<script src="src\/([A-Za-z0-9_]+)\.js"><\/script>/g)].map((m) => m[1]);
+const mods = [...index.matchAll(/<script src="src\/([A-Za-z0-9_\/]+)\.js"><\/script>/g)].map((m) => m[1]);
 const check = (distText) => { const bad = [], pos = []; let last = -1;
   for (const m of mods) { const body = read(`src/${m}.js`), i = distText.indexOf(body); if (i < 0) { bad.push(m + ': content missing'); pos.push(-1); continue; } pos.push(i); if (i < last) bad.push(m + ': out of order'); last = Math.max(last, i); }
   // no module of src/ that index.html does not load may be in dist (each source file's first line is searched)
-  const extra = fs.readdirSync(path.join(ROOT, 'src')).filter((f) => f.endsWith('.js') && !mods.includes(f.slice(0, -3)) && distText.indexOf(read('src/' + f)) >= 0).map((f) => f + ': in dist but not in index.html');
+  const extra = fs.readdirSync(path.join(ROOT, 'src')).filter((f) => f.endsWith('.js')).concat(fs.readdirSync(path.join(ROOT, 'src/s3')).map((f) => 's3/' + f)).filter((f) => !mods.includes(f.slice(0, -3)) && distText.indexOf(read('src/' + f)) >= 0).map((f) => f + ': in dist but not in index.html');
   return bad.concat(extra); };
 ok(`index.html loads ${mods.length} modules (${mods.join(' ')})`, mods.length >= 20 && mods.includes('border') && mods.includes('objects') && mods[mods.length - 1] === 'ui', mods);
 { const bad = check(dist); ok('every module of index.html is in dist/viewer.html with its content, in the same order, and dist has nothing else', bad.length === 0, bad); }

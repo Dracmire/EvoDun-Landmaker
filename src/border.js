@@ -47,7 +47,7 @@
       moves.set(i, { h, meta: r.water ? { ter: 0, sub: 0, bridge: false, water: true } : { ter: S.ter[i], sub: 0, bridge: false, deco: true } }); if (r.water) water++; if (h > S.levelH[S.fine[i]]) up++; else down++; if (nv > 0) toward++;
     }
     if (tm.touchFootprint) for (let i = 0; i < n; i++) if (fp[i] && i % 7 === 0) moves.set(i, { h: S.levelH[S.fine[i]] + 0.5, meta: { ter: S.ter[i], sub: 0, bridge: false, deco: true } }); // (MUTATION touchFootprint: a footprint tile moved)
-    const before = S.levelH.length, added = moves.size ? E.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
+    const before = S.levelH.length, added = moves.size ? E.s3.roomTypes.insertLevels(S, moves) : 0; S.cache = {};
     return (S.stageBorder = { type: opts.type, label: prof.label, TH, tilesPerH: tph, yaw: opts.yaw || 0, footprint: nfp, closure: nC, boundary: bnd.length, tiles: moves.size, water, up, down, towardCamera: toward, levelsBefore: before, levelsAdded: added, grid: gridH });
   }
   E.border = { K, GRID, TYPES, PROFILES, datum, apply };

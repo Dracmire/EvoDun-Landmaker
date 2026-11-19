@@ -10,7 +10,7 @@
   /* compute(S, P, rec, { tilesPerH, last, next, test, noTorches }) -> { room, yaw, noPath, path (tile list), start, end, torches [{ x, y, tile, k, side }], pillars [{ x, y, tile }], goal { x, y, tile, ter, h } | null, aMid } ; x / y = window tile coordinates (continuous), tile = index */
   function compute(S, P, rec, o) {
     const T = o.test || E.propsTest || {}, tp = o.tilesPerH, W = S.W, H = S.H, n = S.n, vd = S.void, look = E.orient.lookOf(rec.yaw), f = [look[0], look[1]], r = [-f[1], f[0]];
-    const walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]), nb = E.walkGraph(S, P);
+    const walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]), nb = E.s3.walkGraph(S, P);
     const A = (i) => (i % W) * f[0] + ((i / W) | 0) * f[1], Pc = (i) => (i % W) * r[0] + ((i / W) | 0) * r[1], hOf = (i) => S.levelH[S.fine[i]];
     const out = { room: rec.id, yaw: rec.yaw, noPath: false, path: [], start: -1, end: -1, torches: [], pillars: [], goal: null, aMid: 0 };
     const zm = E.stage.zoneMap(S), tiles = []; const inRoom = new Uint8Array(n); for (let i = 0; i < n; i++) if (zm[i] === rec.id && walk(i)) { tiles.push(i); inRoom[i] = 1; }

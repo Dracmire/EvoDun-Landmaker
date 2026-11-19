@@ -762,6 +762,7 @@
   const volumesOn = () => !NO_MODES && !!st.win && st.stageRooms.length > 0 && st.modeId === 'stage' && st.stage.volumes === 'on' && st.stage.volumeList.length > 0; // S4b: only in mode 3 with a window session
   const objectsOn = () => !NO_MODES && !!st.win && st.stageRooms.length > 0 && st.modeId === 'stage' && st.stage.objects === 'on'; // S4a: only in mode 3 with a window session
   const stageOn = () => !NO_MODES && st.modeId === 'stage' && st.stageRooms.length > 0;
+  const stageShape = () => !NO_MODES && st.modeId === 'stage'; // the constructor of mode 3 (E.s3.shape): every example of mode 3, the window ones and the legacy ones (a floors package never: mode 5)
   /* C1, ORIENTATION BY ROOM (src/orient.js): the table of the window's rooms is computed lazily from S (it is dropped with S); the camera yaw is the one of the room the hero stands in (a cut on crossing: the smooth transition is for polish) */
   const orientOn = () => !NO_MODES && !!st.win && st.stageRooms.length > 0 && st.modeId === 'stage' && st.stage.orient === 'on';
   const frameRoom = () => !NO_MODES && !!st.win && st.stageRooms.length > 0 && st.modeId === 'stage' && st.stage.frame === 'room' && !(E.orientTest && E.orientTest.noRoomFrame); // (MUTATION noRoomFrame: the framing falls back to the hero's)
@@ -942,7 +943,7 @@
     if (!S) {
       const pack = fl ? E.floorPack(raw, st.floors === 'single' ? st.layer : 0) : raw;
       try {
-        S = E.shape(pack, P, fl ? null : sliceSpec());
+        S = (stageShape() ? E.s3.shape : E.shape)(pack, P, fl ? null : sliceSpec()); // STAGE CONSTRUCTOR (fork of DAC, stage_s3_fork_go.md): mode 3 builds its shape with the clone E.s3.shape; modes 1, 2, 4 (and 5, 6) keep E.shape
         if (!fl && stageZonesOn()) buildStageZones(S); // M2b: the zone map of the PNG, before anything of mode 3 reads the zones
         if (!fl && stageOn() && st.win && st.stage.blockedList && st.stage.blockedList.length) S.stageBlocked = E.stage.applyBlocked(S, st.stage.blockedList); // PR profiles-mockup: the declared blocked rectangles of a mockup, before anything reads the walkable tiles
         if (!fl && borderOn()) E.border.apply(S, { type: st.stage.border, tilesPerH: st.stage.tilesPerH, yaw: baseYaw(), test: E.borderTest }); // S2: right after the shape, before anything reads the levels
@@ -952,7 +953,7 @@
         if (fl) E.floors.prepare(S, raw, P, st.floors === 'single' ? st.layer : 0);
         if (fl && P.backdrop && E.backdrop && st.floors === 'single' && st.layer > 0 && st.preset === 'isoE') E.backdrop.apply(S, P, raw, st.layer); // Floor backdrop (crystallizer 5, Option 2, phase 1): a band of the mountain behind the floor
         if (S.sliceInfo && S.sliceInfo.warnings.length) message([...(pack.warnings || []), ...S.sliceInfo.warnings].join(' '));
-      } catch (e) { message(e.message); S = E.shape(pack, P, null); }
+      } catch (e) { message(e.message); S = (stageShape() ? E.s3.shape : E.shape)(pack, P, null); }
       buildRoomChips(); buildFloorChips(); buildMacroChips();
       if (st.roomsGone) { st.roomsGone = false; applyDacRule(); refreshMessage(); invalidate(true); return; }
       if (S.types && applyDacRule()) { invalidate(true); return; } // the classification of a new source / preset / parameters is known only now: if the rule gives other switches than the ones set before it, one more build (the usual case: nothing changes)
