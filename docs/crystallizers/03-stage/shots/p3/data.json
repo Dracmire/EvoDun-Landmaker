@@ -1,0 +1,2561 @@
+{
+ "r21_default9": {
+  "box": [
+   107,
+   185,
+   136,
+   222
+  ],
+  "preset": "Default",
+  "ks": [
+   [
+    134,
+    202
+   ],
+   [
+    125,
+    195
+   ],
+   [
+    113,
+    202
+   ]
+  ],
+  "pathLen": 76,
+  "shots": [
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 0,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     134,
+     202
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (134, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 4,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     125,
+     195
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (125, 195) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 8,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     113,
+     202
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (113, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 0,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     134,
+     202
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (134, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 4,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     125,
+     195
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (125, 195) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 8,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     113,
+     202
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (113, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 0,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     134,
+     202
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (134, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 4,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     125,
+     195
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (125, 195) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 8,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     113,
+     202
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (113, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 0,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     134,
+     202
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (134, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 4,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     125,
+     195
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (125, 195) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 8,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     113,
+     202
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (113, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 0,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     134,
+     202
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (134, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 4,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     125,
+     195
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (125, 195) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 8,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     113,
+     202
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (113, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 0,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     134,
+     202
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (134, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 4,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     125,
+     195
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (125, 195) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 8,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     113,
+     202
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (113, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 0,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     134,
+     202
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (134, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 4,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     125,
+     195
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (125, 195) · room 21 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 8,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     113,
+     202
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (113, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 0,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     134,
+     202
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (134, 202) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 4,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     125,
+     195
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (125, 195) · room 21 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 8,
+    "win": [
+     21,
+     24,
+     8,
+     12
+    ],
+    "windowSet": true,
+    "hero": [
+     113,
+     202
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (113, 202) · room 21 · following · room"
+   }
+  ]
+ },
+ "r16_default9": {
+  "box": [
+   114,
+   30,
+   119,
+   47
+  ],
+  "preset": "Default",
+  "ks": [
+   [
+    117,
+    43
+   ],
+   [
+    118,
+    45
+   ],
+   [
+    119,
+    47
+   ]
+  ],
+  "pathLen": 7,
+  "shots": [
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 0,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     117,
+     43
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (117, 43) · room 16 · following · room "
+   },
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 4,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     118,
+     45
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (118, 45) · room 16 · following · room "
+   },
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 8,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     119,
+     47
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (119, 47) · room 16 · following · room "
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 0,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     117,
+     43
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (117, 43) · room 16 · following · room "
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 4,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     118,
+     45
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (118, 45) · room 16 · following · room "
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 8,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     119,
+     47
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (119, 47) · room 16 · following · room "
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 0,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     117,
+     43
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (117, 43) · room 16 · following · room "
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 4,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     118,
+     45
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (118, 45) · room 16 · following · room "
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 8,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     119,
+     47
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (119, 47) · room 16 · following · room "
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 0,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     117,
+     43
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (117, 43) · room 16 · following · room "
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 4,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     118,
+     45
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (118, 45) · room 16 · following · room "
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 8,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     119,
+     47
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (119, 47) · room 16 · following · room "
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 0,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     117,
+     43
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (117, 43) · room 16 · following · props"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 4,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     118,
+     45
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (118, 45) · room 16 · following · props"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 8,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     119,
+     47
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (119, 47) · room 16 · following · props"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 0,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     117,
+     43
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (117, 43) · room 16 · following · props"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 4,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     118,
+     45
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (118, 45) · room 16 · following · props"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 8,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     119,
+     47
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (119, 47) · room 16 · following · props"
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 0,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     117,
+     43
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (117, 43) · room 16 · following · room "
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 4,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     118,
+     45
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (118, 45) · room 16 · following · room "
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 8,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     119,
+     47
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (119, 47) · room 16 · following · room "
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 0,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     117,
+     43
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (117, 43) · room 16 · following · room "
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 4,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     118,
+     45
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (118, 45) · room 16 · following · room "
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 8,
+    "win": [
+     16,
+     22,
+     15
+    ],
+    "windowSet": true,
+    "hero": [
+     119,
+     47
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 32,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (119, 47) · room 16 · following · room "
+   }
+  ]
+ },
+ "r79_balanced9": {
+  "box": [
+   142,
+   116,
+   204,
+   172
+  ],
+  "preset": "Balanced",
+  "ks": [
+   [
+    189,
+    157
+   ],
+   [
+    172,
+    150
+   ],
+   [
+    160,
+    144
+   ]
+  ],
+  "pathLen": 61,
+  "shots": [
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 0,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     189,
+     157
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (189, 157) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 4,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     172,
+     150
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (172, 150) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 8,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     160,
+     144
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (160, 144) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 0,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     189,
+     157
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (189, 157) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 4,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     172,
+     150
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (172, 150) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 8,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     160,
+     144
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (160, 144) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 0,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     189,
+     157
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (189, 157) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 4,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     172,
+     150
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (172, 150) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 8,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     160,
+     144
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (160, 144) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 0,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     189,
+     157
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (189, 157) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 4,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     172,
+     150
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (172, 150) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 8,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     160,
+     144
+    ],
+    "m": 1,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (160, 144) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 0,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     189,
+     157
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (189, 157) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 4,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     172,
+     150
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (172, 150) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 8,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     160,
+     144
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (160, 144) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 0,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     189,
+     157
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (189, 157) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 4,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     172,
+     150
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (172, 150) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 8,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     160,
+     144
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (160, 144) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 0,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     189,
+     157
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (189, 157) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 4,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     172,
+     150
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (172, 150) · room 79 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 8,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     160,
+     144
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (160, 144) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 0,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     189,
+     157
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (189, 157) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 4,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     172,
+     150
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (172, 150) · room 79 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 8,
+    "win": [
+     79,
+     83,
+     85,
+     63,
+     80,
+     60,
+     65,
+     81,
+     75,
+     67,
+     86,
+     87
+    ],
+    "windowSet": true,
+    "hero": [
+     160,
+     144
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (160, 144) · room 79 · following · room"
+   }
+  ]
+ },
+ "u2_balanced3": {
+  "box": [
+   93,
+   113,
+   117,
+   134
+  ],
+  "preset": "Balanced",
+  "ks": [
+   [
+    93,
+    131
+   ],
+   [
+    105,
+    124
+   ],
+   [
+    111,
+    130
+   ]
+  ],
+  "pathLen": 46,
+  "shots": [
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "mid",
+    "terraces": 3,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "up",
+    "terraces": 3,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 3,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 3,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 3,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": 2,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "mid",
+    "terraces": 5,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "up",
+    "terraces": 5,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 5,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 5,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 5,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "mid",
+    "terraces": 7,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "up",
+    "terraces": 7,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 7,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 7,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 7,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": 3,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "mid",
+    "terraces": 9,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": null,
+    "flags": [],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": 3,
+    "flags": [
+     "single",
+     "sub"
+    ],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": 3,
+    "flags": [
+     "single",
+     "sub"
+    ],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "up",
+    "terraces": 9,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": 3,
+    "flags": [
+     "single",
+     "sub"
+    ],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 9,
+    "k": 0,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     93,
+     131
+    ],
+    "m": 3,
+    "flags": [
+     "single",
+     "sub"
+    ],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (93, 131) · room 29 · following · room"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 9,
+    "k": 4,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     105,
+     124
+    ],
+    "m": 3,
+    "flags": [
+     "single",
+     "sub"
+    ],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (105, 124) · room 29 · following · roo"
+   },
+   {
+    "treat": "upscale",
+    "terraces": 9,
+    "k": 8,
+    "win": [
+     29,
+     30,
+     47,
+     20,
+     65,
+     32,
+     27
+    ],
+    "windowSet": true,
+    "hero": [
+     111,
+     130
+    ],
+    "m": 3,
+    "flags": [
+     "single",
+     "sub"
+    ],
+    "rooms": 88,
+    "note": "Stage (2D-HD S1): 1 H = 1.5 tiles · terrace step 1.25 H · hero 9.9 % of the panel · near/hero 1.43 · far/hero 0.62 · cell (111, 130) · room 29 · following · roo"
+   }
+  ]
+ },
+ "pageErrors": 0
+}
