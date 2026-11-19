@@ -17,5 +17,11 @@ for (const yaw of [0, 90, 180, 270]) { const S = fakeS(yaw); E.s3.edge.yaw = yaw
   const corners = [[3, 3], [9, 3], [9, 9], [3, 9]], cut = corners.filter((c) => !has(c)).length;
   ok(`yaw ${yaw}: the ends of the square side stay (${has(a) && has(b)}), the other ${cut} corners are cut (smoothed), no gap (longest step ${gap.toFixed(2)} <= 6)`, has(a) && has(b) && cut >= 1 && gap <= 6 + 1e-9 && onSeg.length >= 2, { loop }); }
 { const S = fakeS(0); E.s3.edge.yaw = 0; const l1 = E.s3.edge.loops(S, 1, P); E.s3.edge.yaw = 90; const l2 = E.s3.edge.loops(S, 1, P); ok('the cache is keyed by the yaw (a quarter turn gives another contour)', JSON.stringify(l1) !== JSON.stringify(l2)); }
+// PR pend P2: a Cake ring tile / an Ascension wall face keeps its contour SQUARE and glued, on every side (also the back / sides that Hybrid smooths)
+for (const kind of ['ring', 'asc']) { const S = fakeS(0); E.s3.edge.yaw = 0; const t = 5 * W + 3 + 2; // tile (5,5), inside the block, on a loop corner of the cut 3x3 below
+  const m = (x, y) => y * W + x; if (kind === 'ring') { S.ringTile = new Uint8Array(W * H); S.ringTile[m(8, 3)] = 1; } else S.ascWalls = { faces: [{ i: m(8, 3), j: m(9, 3) }] };
+  const loop = E.s3.edge.loops(S, 1, P)[0], has = (x, y) => loop.some((q) => Math.abs(q[0] - x) < 1e-9 && Math.abs(q[1] - y) < 1e-9);
+  const guarded = has(9, 3), cornerBack = !has(3, 3); // (9,3) is cut without the guard (a side); the corner (3,3) far from the guarded tile is still smoothed
+  ok(`${kind}: the corner (9,3) next to the guarded tile stays exactly where it was and the unguarded back corner is still smoothed`, guarded && cornerBack, { loop }); }
 ok("E.loopsOf('Ah') is the hybrid contour and every other id goes to the original function", E.loopsOf('Ah') === E.s3.edge.loops && E.loopsOf('A') === E.loopsA && E.loopsOf('B') === E.loopsB && E.loopsOf('C') === E.loopsC);
 console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
