@@ -53,6 +53,13 @@
     return out;
   }
 
+  /* DECLARED BLOCKED TILES (PR profiles-mockup, a MOCKUP of level design, never a rule: the hand reduction of a room's walkable area that perfiles_forma.md section 2 / A496 names; declared in the example as `blocked: [{ x, y, w, d }]`, rectangles in MAP coordinates, integer min corner). Every WALKABLE tile of a rectangle becomes blocked ground (S.block = 1, no region, its level untouched, so it is drawn as terrain and S4b volumes may rise on it); the walking graph cache is dropped.
+     Returns { tiles } (the walkable tiles that were blocked). Absent = nothing happens. */
+  function applyBlocked(S, rects) {
+    let n = 0; if (!rects || !rects.length) return { tiles: 0 };
+    for (const r of rects) for (let y = r.y; y < r.y + r.d; y++) for (let x = r.x; x < r.x + r.w; x++) { const wx = x - S.ox, wy = y - S.oy; if (wx < 0 || wy < 0 || wx >= S.W || wy >= S.H) continue; const i = wy * S.W + wx; if (S.block[i] || (S.void && S.void[i])) continue; S.block[i] = 1; if (S.region) S.region[i] = -1; n++; }
+    delete S._walk; return { tiles: n };
+  }
   /* walkable (the hero): not void, not water, inside the slice (S.block) and not a pocket decoration / water (pocketRole 2, 4) */
   const walkable = (S, i) => i >= 0 && !S.block[i] && !(S.pocketRole && (S.pocketRole[i] === 2 || S.pocketRole[i] === 4));
   const cellOf = (S, x, y) => { const cx = Math.floor(x), cy = Math.floor(y); return cx < 0 || cy < 0 || cx >= S.W || cy >= S.H ? -1 : cy * S.W + cx; };
@@ -148,5 +155,5 @@
   const WIN_MAX = 12;
   function zoneList(pack) { const tb = zoneTable(pack); if (!tb) return null; return tb.order.map((raw, i) => ({ k: i + 1, raw, tiles: tb.cnt.get(raw) || 0, elev: tb.mean[i], adj: [...(tb.adj.get(raw) || [])].map((r) => tb.toK.get(r)).sort((a, b) => a - b) })); }
   function windowCheck(ks, list) { const bad = []; for (let q = 1; q < ks.length; q++) { const a = list[ks[q - 1] - 1]; if (!a || !a.adj.includes(ks[q])) bad.push([ks[q - 1], ks[q]]); } return bad; }
-  E.stage = { exag, screenPan, zoneTable, buildZones, zoneMap, poiGoal, POI_MIN, zoneList, windowCheck, WIN_MAX, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, CAM_PROFILES, CAM_PROFILE_OF, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
+  E.stage = { exag, screenPan, zoneTable, buildZones, zoneMap, poiGoal, POI_MIN, zoneList, windowCheck, WIN_MAX, TERRACE_H, SUB_RATIO, derive, FOV, TAN, DEF, RANGE, HERO_W, STEP_H, ROW_NEAR, ROW_FAR, scale, dist, extent, clamp, CAM_PROFILES, CAM_PROFILE_OF, applyBlocked, walkable, cellOf, feetH, roomCentre, move, ratios, depthScale, drawHero, terraceSteps };
 })(window.EVO = window.EVO || {});

@@ -7,7 +7,7 @@
 (function (E) {
   'use strict';
   const HYP = { smoothRows: 1, goalClear: 2, torchSide: 1, torchEvery: 4, torchH: 1.2, gatePillarH: 2, gateSide: 2 };
-  /* compute(S, P, rec, { tilesPerH, last, next, test }) -> { room, yaw, noPath, path (tile list), start, end, torches [{ x, y, tile, k, side }], pillars [{ x, y, tile }], goal { x, y, tile, ter, h } | null, aMid } ; x / y = window tile coordinates (continuous), tile = index */
+  /* compute(S, P, rec, { tilesPerH, last, next, test, noTorches }) -> { room, yaw, noPath, path (tile list), start, end, torches [{ x, y, tile, k, side }], pillars [{ x, y, tile }], goal { x, y, tile, ter, h } | null, aMid } ; x / y = window tile coordinates (continuous), tile = index */
   function compute(S, P, rec, o) {
     const T = o.test || E.propsTest || {}, tp = o.tilesPerH, W = S.W, H = S.H, n = S.n, vd = S.void, look = E.orient.lookOf(rec.yaw), f = [look[0], look[1]], r = [-f[1], f[0]];
     const walk = (i) => !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]), nb = E.walkGraph(S, P);
@@ -66,7 +66,8 @@
     // TORCHES
     const path = out.path, every = T.torchEvery || HYP.torchEvery, side = HYP.torchSide * tp;
     let lastA = path.length ? A(path[0]) - every / 2 : 0; // one pair every `every` rows of view depth along the path (not every N steps: a jog of the path would crowd them)
-    if (path.length) for (let k = 2; k <= path.length - 3; k++) { if (Math.abs(A(path[k]) - lastA) < every) continue; lastA = A(path[k]);
+    // o.noTorches (PR profiles-mockup, Base v2.4 / A470-A471: the torches are a feature of the scene, not of the Base; an example declares `torches: false`): no pair at all
+    if (path.length && !o.noTorches) for (let k = 2; k <= path.length - 3; k++) { if (Math.abs(A(path[k]) - lastA) < every) continue; lastA = A(path[k]);
       const a0 = path[Math.max(0, k - 3)], a1 = path[Math.min(path.length - 1, k + 3)];
       let tx = (a1 % W) - (a0 % W), ty = ((a1 / W) | 0) - ((a0 / W) | 0); const m = Math.hypot(tx, ty); if (m < 1e-9) continue; tx /= m; ty /= m;
       const cx = (path[k] % W) + 0.5, cy = ((path[k] / W) | 0) + 0.5;
