@@ -11,6 +11,13 @@
     for (let i = 0; i < S.n; i++) if (S.carved && S.carved[i]) { const x = i % W, y = (i / W) | 0; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const a = x + dx, b = y + dy; if (a >= 0 && b >= 0 && a < W && b < H) out[b * W + a] = 1; } }
     return (S._edgeNear = out);
   };
+  /* PR pend P2: tiles whose contour stays SQUARE and glued to the tile like the front: the two tiles of every Ascension wall face (the wall is drawn against the tile edge, a smoothed contour would leave it floating on top) and the Cake ring tiles; the stair / ramp tiles are `near` above */
+  const guard = (S) => {
+    if (S._edgeGuard !== undefined) return S._edgeGuard; let m = null;
+    if (S.ascWalls && S.ascWalls.faces && S.ascWalls.faces.length) { m = new Uint8Array(S.n); for (const f of S.ascWalls.faces) { if (f.i >= 0 && f.i < S.n) m[f.i] = 1; if (f.j >= 0 && f.j < S.n) m[f.j] = 1; } }
+    if (S.ringTile) { m = m || new Uint8Array(S.n); for (let i = 0; i < S.n; i++) if (S.ringTile[i]) m[i] = 1; }
+    return (S._edgeGuard = m);
+  };
   /* clone of chaikin() of tech.js: fixed[i] keeps vertex i; segments on the map border are not cut */
   function chaikin(loop, W, H, it, fixed) {
     let pts = loop, fx = fixed;
@@ -41,10 +48,11 @@
   };
   X.loops = function (S, L, P) {
     const yaw = X.yaw, key = 'H' + L + ':' + P.smooth + ':' + yaw; if (S.cache[key]) return S.cache[key];
-    const { W, H } = S, fine = S.fineMask || S.fine, inside = (x, y) => x >= 0 && y >= 0 && x < W && y < H && fine[y * W + x] >= L, look = E.orient ? E.orient.lookOf(yaw) : [0, -1], nr = S.stairs && S.stairs.length && P.anchor !== false ? near(S) : null;
+    const { W, H } = S, fine = S.fineMask || S.fine, inside = (x, y) => x >= 0 && y >= 0 && x < W && y < H && fine[y * W + x] >= L, look = E.orient ? E.orient.lookOf(yaw) : [0, -1], nr = S.stairs && S.stairs.length && P.anchor !== false ? near(S) : null, gd = guard(S);
     const loops = E.maskLoops(W, H, inside).map((l) => {
       const sq = X.classify(l, inside, look), fix = l.map((p, i) => (sq[i] || sq[(i + l.length - 1) % l.length] ? 1 : 0));
       if (nr) for (let i = 0; i < l.length; i++) { const x = l[i][0], y = l[i][1]; for (const [ax, ay] of [[x - 1, y - 1], [x, y - 1], [x - 1, y], [x, y]]) if (ax >= 0 && ay >= 0 && ax < W && ay < H && nr[ay * W + ax]) fix[i] = 1; }
+      if (gd) for (let i = 0; i < l.length; i++) { const x = l[i][0], y = l[i][1]; for (const [ax, ay] of [[x - 1, y - 1], [x, y - 1], [x - 1, y], [x, y]]) if (ax >= 0 && ay >= 0 && ax < W && ay < H && gd[ay * W + ax]) fix[i] = 1; }
       return chaikin(l, W, H, P.smooth, fix);
     });
     return (S.cache[key] = loops);
