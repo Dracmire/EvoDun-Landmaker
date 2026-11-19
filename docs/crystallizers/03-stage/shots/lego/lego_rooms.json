@@ -1,0 +1,1119 @@
+{
+ "P": {
+  "terraces": 3,
+  "roomsMinCore": 100,
+  "rRadius": 5,
+  "minPlateau": 120,
+  "terH": 1.875,
+  "subs": 2
+ },
+ "rooms": 88,
+ "types": {
+  "Cake": 29,
+  "Diorama": 18,
+  "Ascension": 41
+ },
+ "dist": {
+  "single": 35,
+  "multi": 51,
+  "none": 2,
+  "m": {
+   "1": 16,
+   "2": 68,
+   "3": 2
+  },
+  "mMulti": {
+   "1": 16,
+   "2": 35,
+   "3": 0
+  },
+  "byType": {
+   "Ascension": {
+    "rooms": 41,
+    "single": 28,
+    "multi": 11
+   },
+   "Cake": {
+    "rooms": 29,
+    "single": 0,
+    "multi": 29
+   },
+   "Diorama": {
+    "rooms": 18,
+    "single": 7,
+    "multi": 11
+   }
+  },
+  "terrCount": {
+   "0": 2,
+   "1": 35,
+   "2": 41,
+   "3": 10
+  }
+ },
+ "borders": {
+  "A1": {
+   "gap": 1,
+   "roomPairs": 65,
+   "borderFaces": 100,
+   "candidateTiles": 2807,
+   "groups": 1161,
+   "groupsKept": 369,
+   "crossGroupsKept": 25,
+   "pairsWithDoor": 23,
+   "pairs": [
+    {
+     "key": "1-7",
+     "ri": 7,
+     "rj": 1,
+     "tiles": 9,
+     "doors": 1
+    },
+    {
+     "key": "40-48",
+     "ri": 40,
+     "rj": 48,
+     "tiles": 6,
+     "doors": 1
+    },
+    {
+     "key": "14-23",
+     "ri": 14,
+     "rj": 23,
+     "tiles": 6,
+     "doors": 0
+    },
+    {
+     "key": "39-40",
+     "ri": 40,
+     "rj": 39,
+     "tiles": 2,
+     "doors": 0
+    },
+    {
+     "key": "48-50",
+     "ri": 50,
+     "rj": 48,
+     "tiles": 2,
+     "doors": 2
+    },
+    {
+     "key": "82-84",
+     "ri": 82,
+     "rj": 84,
+     "tiles": 2,
+     "doors": 1
+    },
+    {
+     "key": "7-8",
+     "ri": 7,
+     "rj": 8,
+     "tiles": 2,
+     "doors": 1
+    },
+    {
+     "key": "83-85",
+     "ri": 85,
+     "rj": 83,
+     "tiles": 2,
+     "doors": 1
+    },
+    {
+     "key": "10-20",
+     "ri": 10,
+     "rj": 20,
+     "tiles": 2,
+     "doors": 0
+    },
+    {
+     "key": "67-79",
+     "ri": 79,
+     "rj": 67,
+     "tiles": 2,
+     "doors": 1
+    },
+    {
+     "key": "63-67",
+     "ri": 63,
+     "rj": 67,
+     "tiles": 2,
+     "doors": 1
+    },
+    {
+     "key": "4-9",
+     "ri": 9,
+     "rj": 4,
+     "tiles": 2,
+     "doors": 1
+    }
+   ]
+  },
+  "A2": {
+   "gap": 2,
+   "roomPairs": 0,
+   "borderFaces": 0,
+   "candidateTiles": 0,
+   "groups": 0,
+   "groupsKept": 0,
+   "crossGroupsKept": 0,
+   "pairsWithDoor": 0,
+   "pairs": []
+  },
+  "A3": {
+   "gap": 3,
+   "roomPairs": 0,
+   "borderFaces": 0,
+   "candidateTiles": 0,
+   "groups": 0,
+   "groupsKept": 0,
+   "crossGroupsKept": 0,
+   "pairsWithDoor": 0,
+   "pairs": []
+  }
+ },
+ "checkA1": {
+  "mineGroupsKept": 369,
+  "theirs": 369,
+  "crossRoomGroups": 25
+ },
+ "seconds": 1.093,
+ "rows": [
+  {
+   "id": 1,
+   "type": "Ascension",
+   "tiles": 338,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 2,
+   "type": "Cake",
+   "tiles": 281,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 3,
+   "type": "Ascension",
+   "tiles": 278,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 4,
+   "type": "Diorama",
+   "tiles": 162,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 5,
+   "type": "Ascension",
+   "tiles": 184,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 6,
+   "type": "Cake",
+   "tiles": 924,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 7,
+   "type": "Diorama",
+   "tiles": 1181,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 8,
+   "type": "Cake",
+   "tiles": 383,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 9,
+   "type": "Cake",
+   "tiles": 533,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 10,
+   "type": "Diorama",
+   "tiles": 138,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 11,
+   "type": "Cake",
+   "tiles": 865,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 12,
+   "type": "Ascension",
+   "tiles": 75,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 13,
+   "type": "Ascension",
+   "tiles": 8,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 14,
+   "type": "Ascension",
+   "tiles": 340,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 15,
+   "type": "Ascension",
+   "tiles": 6,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 16,
+   "type": "Ascension",
+   "tiles": 57,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 17,
+   "type": "Ascension",
+   "tiles": 322,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 18,
+   "type": "Ascension",
+   "tiles": 137,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 19,
+   "type": "Cake",
+   "tiles": 185,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 20,
+   "type": "Diorama",
+   "tiles": 403,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 21,
+   "type": "Cake",
+   "tiles": 328,
+   "terraces": [
+    1,
+    2,
+    3
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 22,
+   "type": "Diorama",
+   "tiles": 126,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 23,
+   "type": "Cake",
+   "tiles": 1835,
+   "terraces": [
+    1,
+    2,
+    3
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 24,
+   "type": "Ascension",
+   "tiles": 29,
+   "terraces": [
+    3
+   ],
+   "m": 3,
+   "single": true
+  },
+  {
+   "id": 25,
+   "type": "Diorama",
+   "tiles": 25,
+   "terraces": [
+    1,
+    2
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 26,
+   "type": "Ascension",
+   "tiles": 36,
+   "terraces": [
+    1,
+    2
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 27,
+   "type": "Ascension",
+   "tiles": 353,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 28,
+   "type": "Cake",
+   "tiles": 124,
+   "terraces": [
+    1,
+    2
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 29,
+   "type": "Cake",
+   "tiles": 286,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 30,
+   "type": "Diorama",
+   "tiles": 260,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 31,
+   "type": "Diorama",
+   "tiles": 296,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 32,
+   "type": "Ascension",
+   "tiles": 73,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 33,
+   "type": "Ascension",
+   "tiles": 48,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 34,
+   "type": "Diorama",
+   "tiles": 117,
+   "terraces": [
+    1,
+    2
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 35,
+   "type": "Diorama",
+   "tiles": 190,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 36,
+   "type": "Cake",
+   "tiles": 494,
+   "terraces": [
+    1,
+    2,
+    3
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 37,
+   "type": "Ascension",
+   "tiles": 50,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 38,
+   "type": "Diorama",
+   "tiles": 186,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 39,
+   "type": "Ascension",
+   "tiles": 0,
+   "terraces": [],
+   "m": 0,
+   "single": false
+  },
+  {
+   "id": 40,
+   "type": "Ascension",
+   "tiles": 0,
+   "terraces": [],
+   "m": 0,
+   "single": false
+  },
+  {
+   "id": 41,
+   "type": "Ascension",
+   "tiles": 95,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 42,
+   "type": "Ascension",
+   "tiles": 88,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 43,
+   "type": "Cake",
+   "tiles": 357,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 44,
+   "type": "Cake",
+   "tiles": 1888,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 45,
+   "type": "Ascension",
+   "tiles": 27,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 46,
+   "type": "Ascension",
+   "tiles": 227,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 47,
+   "type": "Cake",
+   "tiles": 440,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 48,
+   "type": "Cake",
+   "tiles": 585,
+   "terraces": [
+    1,
+    2,
+    3
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 49,
+   "type": "Diorama",
+   "tiles": 196,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 50,
+   "type": "Ascension",
+   "tiles": 43,
+   "terraces": [
+    1,
+    2,
+    3
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 51,
+   "type": "Ascension",
+   "tiles": 29,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 52,
+   "type": "Cake",
+   "tiles": 277,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 53,
+   "type": "Diorama",
+   "tiles": 170,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 54,
+   "type": "Ascension",
+   "tiles": 115,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 55,
+   "type": "Cake",
+   "tiles": 124,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 56,
+   "type": "Ascension",
+   "tiles": 61,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 57,
+   "type": "Ascension",
+   "tiles": 477,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 58,
+   "type": "Ascension",
+   "tiles": 171,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 59,
+   "type": "Cake",
+   "tiles": 1031,
+   "terraces": [
+    1,
+    2,
+    3
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 60,
+   "type": "Cake",
+   "tiles": 351,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 61,
+   "type": "Ascension",
+   "tiles": 306,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 62,
+   "type": "Ascension",
+   "tiles": 92,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 63,
+   "type": "Cake",
+   "tiles": 487,
+   "terraces": [
+    1,
+    2,
+    3
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 64,
+   "type": "Diorama",
+   "tiles": 1130,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 65,
+   "type": "Cake",
+   "tiles": 766,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 66,
+   "type": "Diorama",
+   "tiles": 447,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 67,
+   "type": "Ascension",
+   "tiles": 37,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 68,
+   "type": "Diorama",
+   "tiles": 159,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 69,
+   "type": "Ascension",
+   "tiles": 153,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 70,
+   "type": "Ascension",
+   "tiles": 81,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 71,
+   "type": "Ascension",
+   "tiles": 74,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 72,
+   "type": "Cake",
+   "tiles": 830,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 73,
+   "type": "Cake",
+   "tiles": 471,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 74,
+   "type": "Diorama",
+   "tiles": 135,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 75,
+   "type": "Ascension",
+   "tiles": 64,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 76,
+   "type": "Ascension",
+   "tiles": 64,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 77,
+   "type": "Ascension",
+   "tiles": 206,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 78,
+   "type": "Ascension",
+   "tiles": 225,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 79,
+   "type": "Cake",
+   "tiles": 1021,
+   "terraces": [
+    1,
+    2,
+    3
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 80,
+   "type": "Diorama",
+   "tiles": 271,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 81,
+   "type": "Ascension",
+   "tiles": 93,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 82,
+   "type": "Cake",
+   "tiles": 4362,
+   "terraces": [
+    1,
+    2,
+    3
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 83,
+   "type": "Cake",
+   "tiles": 496,
+   "terraces": [
+    1,
+    2
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 84,
+   "type": "Cake",
+   "tiles": 330,
+   "terraces": [
+    1,
+    2
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 85,
+   "type": "Cake",
+   "tiles": 775,
+   "terraces": [
+    1,
+    2,
+    3
+   ],
+   "m": 1,
+   "single": false
+  },
+  {
+   "id": 86,
+   "type": "Cake",
+   "tiles": 1274,
+   "terraces": [
+    2,
+    3
+   ],
+   "m": 2,
+   "single": false
+  },
+  {
+   "id": 87,
+   "type": "Ascension",
+   "tiles": 57,
+   "terraces": [
+    2
+   ],
+   "m": 2,
+   "single": true
+  },
+  {
+   "id": 88,
+   "type": "Ascension",
+   "tiles": 83,
+   "terraces": [
+    3
+   ],
+   "m": 3,
+   "single": true
+  }
+ ]
+}
