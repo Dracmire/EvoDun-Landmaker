@@ -105,3 +105,50 @@ Topología: hash de `S.block`, `S.void`, `S.region`, `S.roomMap` y escaleras id�
 ## P2.6 Qué no corrió
 
 Sin `regress` (el diff toca `src/s3/lego.js`, `src/modes.js` y herramientas; `ui.js` no cambió); sin `test_window_session_ui`. Los hashes de los 21 estados s3 previos y los 21 de `m2_hashes` son idénticos; hay 2 estados nuevos (`perfil_u1`, `perfil_u2`).
+
+---
+
+# Pasada 3 (PR `feat/stage-lego3`, brief `stage_lego3_go.md`, commit ddfe0be)
+
+Sin predicciones numéricas: lo que juzga [U] son las láminas de `shots/lego3/` (`lamina_*.png`: Mid a la izquierda y lego a la derecha, k0 / k4 / k8, Cam 6; u1 también en Cam 7; u2 con Mid | Rest | Scale). Los datos salen de `tools/ui/lego3_shots.js` (`lego3_datos.json`) y `tools/lego3_pick.js` (`lego3_pick.json`); las láminas las arma `tools/lego3_sheets.py`.
+
+## P3.1 Escaleras proporcionales (A537)
+
+En una sala con lego y m ≥ 2 que pisa 2+ terrazas, `E.s3.lego.adjustP` devuelve una copia de P y `ui.js` **reconstruye la forma una vez** con ella: las escaleras de la sala se tallan como **rampa** (`stairStyle` 1) con `rampDepth` = ⌈L/2⌉, L = la escalera más larga de la sala tal como estaba (mínimo 1). Mid no cambia (`adjustP` devuelve `null`).
+
+- **Por qué rampa:** la escalera «por pasos» del visor tiene un escalón por baldosa, así que «la mitad de largo y m veces más escalones» no se puede dibujar con pasos de una baldosa. La rampa del visor se lee como escalinata con sus **líneas transversales** (`round(salto/0,3)`, tope 10, `render.js` compartido y sin tocar): con un salto m·E hay más líneas. Aquí el tope de 10 las alcanza ya en m = 2, así que **no se llega a «m veces más»** (Mid tenía 3 escalones, lego dibuja 10 líneas = 3,3×, no 6×). Cambiar el tope pide clonar el renderizador a `src/s3/`.
+- **Si no cabe:** la forma reduce la profundidad en escalera (`depth, depth−1, … 1`); no se fuerza.
+
+| Sala | Escalera Mid | Escalera lego | Líneas transversales |
+|---|---|---|---|
+| u1 (DAC 1) | pasos, 3 de largo, variante `fill` | rampa pedida de 2, **cupo 1** de largo, variante `cut` | 10 (tope) |
+| u2 (DAC 29), Rest y Scale | pasos, 3 | rampa de 2 | 10 (tope) |
+| L1 (Diorama 7, Down) | pasos, 3 | rampa de 2 | 10 (tope) |
+
+**Topología.** Con las escaleras re-talladas, la huella de la escalera cambia, así que el hash completo de #107/#109 ya no se cumple: u1 pasa de 338 a 339 baldosas caminables (1 región en ambos), u2 queda en 295 = 295. **Cambié la expectativa de `test_lego_ui.js`** para u1 y u2: antes comparaba el hash entero (con escaleras), ahora compara mapa de salas, vacío, número de regiones y cuenta caminable con una tolerancia de 4 baldosas (es el diseño de §1, no un síntoma oculto; dilo si no la quieres así). El hash completo sigue exacto en las salas de una terraza (sin escalera que recortar) y en Mid.
+
+## P3.2 «Cake under lego» (A538)
+
+Selector del modo 3 (`#stageCakeLego`, `st.stage.cakeLego`): **Rest** (por defecto) y **Scale**. En las dos, **los anillos del Cake no se re-alturan nunca** (`S.ringTile` exento en `lego.apply`).
+
+| u2 (DAC 29) | Mid | Rest | Scale |
+|---|---|---|---|
+| anillos (baldosas por anillo) | 35 en un anillo | 35 en un anillo (igual que Mid) | 2 / 6 / 22 / 5 en cuatro anillos (`cakeLayers` 3 → 6 = × m) |
+| baldosas de anillo | 207 | 207 | 269 |
+| niveles | 22 | 22 | 26 |
+
+- **Rest:** solo crece la terraza; los anillos quedan al pie y entre el último anillo y la terraza alta queda el descanso y la escalera recortada. **Scale:** n_anillos × m con la misma altura por anillo, los anillos llegan a la terraza alta; la escalera va con §1. En la lámina de u2 se ve la diferencia.
+- **Auto (solo contar, no construido):** Scale cuando el Cake es la única subida hacia la terraza más alta de la sala (ninguna escalera de la sala termina en ella). En las 26 salas de 2+ terrazas (ventana): **Scale 14, Rest 12**; de esas 26, 23 son Cake: **Scale 14, Rest 9**, y las 3 no Cake cuentan Rest. En las que Auto elige Rest hay 1 o 2 escaleras que ya llegan arriba (salas 8, 29, 44, 60, 63, 72, 82, 83, 84).
+
+## P3.3 Lego en los sub-niveles (A539)
+
+En una sala de una sola terraza con m ≥ 2, la altura de los sub-niveles se multiplica por m (Up: el más bajo queda; Down: el más alto). El orden de los niveles y la topología **no cambian** (hash exacto de bloqueo, vacío, regiones, mapa de salas y escaleras, antes y después, en Up y Down: `tools/test_lego.js`).
+
+- `perfil_m1` (DAC 14): 310 baldosas movidas; **`perfil_s1` nuevo = DAC 57** (Ascensión, Hub, 477 baldosas, una terraza, m = 2): 240 baldosas movidas.
+- **Por qué la 57:** en «Balanced types» **todas** las ventanas de una terraza tienen los mismos 2 sub-niveles (`subs` 2), así que no hay una con «más sub-niveles distintos»; elegí por relieve (la parte de la sala que no está en el sub-nivel dominante): la 57 reparte la sala 48 / 52 (M1: 91 / 9), la más equilibrada de las Ascensiones (la 64, un Diorama de 1130 baldosas, es 50 / 50 pero necesita Pocket). Es la misma familia que M1 para comparar.
+
+## P3.4 Qué no corrió / límites
+
+- Sin `regress`: el diff toca `ui.js`, `modes.js` y `controls.js` (compartidos) **solo bajo `legoOn()` / `stageShape()`** y la tabla de hashes con los ejemplos en Mid no cambia: de los 24 estados s3, **los 5 ejemplos con tratamiento declarado cambian** (m1, m3, u1, u2, l1: es lo pedido) y los demás son idénticos; los 21 de `m2_hashes` idénticos. No se corrió `test_window_session_ui`.
+- El tope de 10 líneas transversales limita «m veces más escalones» (ver P3.1).
+- Las láminas muestran Cam 6 en k0 / k4 / k8; Cam 7 solo en u1, con el héroe centrado como en `lego_measure` (Cam 7 no sigue al héroe).

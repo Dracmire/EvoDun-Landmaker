@@ -47,19 +47,44 @@
     const rec = o.room, treatment = o.treatment, out = { treatment, m: 1, E: P.terH, terraces: 0, moved: 0, levelsAdded: 0, single: false, conflict: null, yawFlip: false, jumps: [], tilesPerH: o.tilesPerH };
     S.legoInfo = out; if (!rec || (treatment !== 'up' && treatment !== 'down')) return out;
     const yaw = o.yaw === undefined ? rec.yaw : o.yaw, terr = L.terraces(S, P, rec, yaw); out.terraces = terr.length;
-    if (terr.length < 2) { out.single = true; out.m = L.mOf(terr); return out; }
-    const m = L.mOf(terr), Eh = P.terH, nb = L.newBases(terr, m, Eh, treatment), f = L.heightMap(terr, nb); out.m = m;
-    for (let r = 0; r + 1 < terr.length; r++) out.jumps.push(+(nb[r + 1] - nb[r]).toFixed(4));
-    if (!L.ordered(terr, treatment, false)) { if (L.ordered(terr, treatment, true)) out.yawFlip = true; else out.conflict = 'no yaw orders the walkable terraces of the room as the treatment wants (a higher one stays nearer than a lower one): not forced'; }
+    let f, m;
+    if (terr.length < 2) { // PR lego3 (A539): a room on ONE terrace: the heights of its SUB-LEVELS are multiplied by m (Up: the lowest sub-level stays; Down: the highest stays); the level RANKING is the same, so the topology (which counts sub-levels, not heights) is identical
+      out.single = true; out.m = L.mOf(terr); if (!(terr.length === 1 && out.m >= 2)) return out; const q = terr[0]; m = out.m; out.sub = true;
+      f = treatment === 'up' ? (h) => ((h < q.base - 1e-9 || h > q.top + 1e-9) ? h : q.base + (h - q.base) * m) : (h) => ((h < q.base - 1e-9 || h > q.top + 1e-9) ? h : q.top - (q.top - h) * m);
+    } else {
+      m = L.mOf(terr); const Eh = P.terH, nb = L.newBases(terr, m, Eh, treatment); f = L.heightMap(terr, nb); out.m = m;
+      for (let r = 0; r + 1 < terr.length; r++) out.jumps.push(+(nb[r + 1] - nb[r]).toFixed(4));
+      if (!L.ordered(terr, treatment, false)) { if (L.ordered(terr, treatment, true)) out.yawFlip = true; else out.conflict = 'no yaw orders the walkable terraces of the room as the treatment wants (a higher one stays nearer than a lower one): not forced'; }
+    }
     const walk = walkOf(S, rec), moves = new Map(), cache = new Map();
     for (let i = 0; i < S.n; i++) {
-      if (!walk(i)) continue; const l = S.fine[i], h0 = S.levelH[l]; let h = cache.get(l); if (h === undefined) { h = f(h0); cache.set(l, h); } if (Math.abs(h - h0) < 1e-9) continue;
+      if (!walk(i) || (S.ringTile && S.ringTile[i])) continue; /* PR lego3 (A538): the Cake ring tiles are never re-heighted (Rest: they stay as they were; Scale: they were built m times more numerous, with the same height per ring) */ const l = S.fine[i], h0 = S.levelH[l]; let h = cache.get(l); if (h === undefined) { h = f(h0); cache.set(l, h); } if (Math.abs(h - h0) < 1e-9) continue;
       moves.set(i, { h, meta: Object.assign({}, S.levelMeta[l], { lego: true }) });
     }
     // the ends of the ramps that join terraces of the room (the surface is linear between them; the tiles stay the same)
     for (const rec2 of S.stairs || []) { const R = rec2.ramp, pa = rec2.site; if (!R || !pa || !(walk(pa.a) || walk(pa.b)) || R.__lego) continue; R.h0o = R.h0; R.h1o = R.h1; R.h0 = f(R.h0); R.h1 = f(R.h1); R.__lego = true; }
     if (moves.size) { out.levelsAdded = E.s3.roomTypes.insertLevels(S, moves); out.moved = moves.size; }
     S.cache = {}; return out;
+  };
+  /* PR lego3 (A537, A538): the PARAMETERS of the shape of a room with lego. `adjustP(S, P, { room, yaw, treatment, cakeLego })` -> { P2, info } or null (nothing to change): in a room that steps on 2+ terraces with m >= 2,
+     (1) its stairs get HALF the length in Z (the depth, minimum 1 tile) and, for the cross lines of the ramp renderer (round(jump / 0.3), 2-10), the jump is m times higher: the stairs of the room are carved as ramps (`stairStyle` 1) with `rampDepth` = ceil(L / 2), L = the longest stair of the room as it stood (steps: its treads; ramp: its depth);
+     (2) `cakeLego` 'scale' + Cake: `cakeLayers` x m (the same height per ring, so the Cake reaches the high terrace); 'rest' (the default): the rings stay as they were and the terrace alone grows (a rest, then the stair).
+     The caller rebuilds the shape with P2 (a copy of P) ONCE; `info` = the numbers for the table. Nothing is forced: a stair that does not fit is counted by the shape (S.stairInfo.dropped). */
+  L.adjustP = function (S, P, o) {
+    const rec = o.room; if (!rec || (o.treatment !== 'up' && o.treatment !== 'down')) return null;
+    const yaw = o.yaw === undefined ? rec.yaw : o.yaw, terr = L.terraces(S, P, rec, yaw); if (terr.length < 2) return null;
+    const m = L.mOf(terr); if (m < 2) return null; const walk = walkOf(S, rec), P2 = Object.assign({}, P), info = { m, stairs: 0, lenBefore: 0, depthAfter: 0, cakeLayersBefore: null, cakeLayersAfter: null };
+    const mine = (S.stairs || []).filter((r) => r.site && (walk(r.site.a) || walk(r.site.b)));
+    if (mine.length) { const lens = mine.map((r) => (r.ramp ? r.ramp.len : (r.steps ? r.steps.length : 1))); info.stairs = mine.length; info.lenBefore = Math.max(...lens); info.depthAfter = Math.max(1, Math.ceil(info.lenBefore / 2)); P2.stairStyle = 1; P2.rampDepth = info.depthAfter; info.styleBefore = P.stairStyle === 0 ? 'steps' : 'ramp'; }
+    if (P.cake && o.cakeLego === 'scale') { info.cakeLayersBefore = P.cakeLayers === undefined ? 3 : P.cakeLayers; info.cakeLayersAfter = info.cakeLayersBefore * m; P2.cakeLayers = info.cakeLayersAfter; }
+    if (P2.stairStyle === P.stairStyle && P2.rampDepth === P.rampDepth && P2.cakeLayers === P.cakeLayers) return null; return { P2, info };
+  };
+  /* AUTO (A538, counted only, not built): Scale when the Cake is the ONLY ascent to the highest terrace of the room (no stair of the room ends on it), Rest otherwise */
+  L.autoPick = function (S, P, rec, yaw) {
+    const terr = L.terraces(S, P, rec, yaw); if (terr.length < 2) return { pick: 'n/a', why: 'one terrace' }; const top = terr[terr.length - 1].t, walk = walkOf(S, rec);
+    const tOf = (i) => { const mt = S.levelMeta[S.fine[i]]; return mt ? mt.ter : -1; };
+    const toTop = (S.stairs || []).filter((r) => r.site && (walk(r.site.a) || walk(r.site.b)) && Math.max(tOf(r.site.a), tOf(r.site.b)) >= top).length;
+    return { pick: S.cake && S.cake.links > 0 && toTop === 0 ? 'scale' : 'rest', stairsToTop: toTop, cake: !!(S.cake && S.cake.links > 0) };
   };
   /* DOWN scenery: the closing wall of `planes` (BACK, after planes.apply) falls to m * E below the highest ground of the room */
   L.scenery = function (S, P, o) {

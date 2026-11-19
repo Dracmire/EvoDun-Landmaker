@@ -77,7 +77,7 @@
         { id: 'diorama31_stage', label: 'Diorama 31 · Stage (legacy contract)', src: 'real_map', rooms: true, preset: 'balanced', room: 31, stage: true, tech: 'B', terraces: 3, contract: true }
       ],
       camera: 'stage', cameras: CAMS, tech: 'box', techs: ['box', 'B'], compare: false, compareDefault: false,
-      main: ['contract', 'tilesPerH', 'heroFrac', 'vScale', 'exag', 'stageUnits', 'stageBorder', 'stageObjects', 'stageVolumes', 'stageOrient', 'stagePlanes', 'stageProps', 'stageFrame', 'stageCamSpace', 'stageCamProfile', 'stageVert', 'stageHeight', 'stageReset', 'stageFollow', 'stageWindow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
+      main: ['contract', 'tilesPerH', 'heroFrac', 'vScale', 'exag', 'stageUnits', 'stageBorder', 'stageObjects', 'stageVolumes', 'stageOrient', 'stagePlanes', 'stageProps', 'stageFrame', 'stageCamSpace', 'stageCamProfile', 'stageVert', 'stageHeight', 'stageCakeLego', 'stageReset', 'stageFollow', 'stageWindow', 'stagePrev', 'stageNext'], advanced: [], slice: [], fixed: [], terrain: 'folded',
       common: { shared: SHARED, overlays: true, incursion: true, diagnostics: true }
     },
     {
@@ -334,6 +334,8 @@
     /* PR lego2 (stage_lego2_go.md section 2): the two Up examples on rooms that step on 2+ terraces AS A WINDOW OF ONE ROOM (what the viewer builds: 26 of the 88 rooms; the whole-map shape says 51) and whose path of `props` CLIMBS (the last quarter at least 0.5 terrace over the first; 19 of the 26). u1 = DAC 1, the ONLY Ascension room that steps on 2+ terraces (terraces 2-3, m = 2, a Hub of 15.1 x 18.7 H, the path climbs 0.78 terrace): no Ascension CORRIDOR (P1 / P2) steps on two terraces in "Balanced types", so the type is respected and the corridor is not. u2 = DAC 29, a Cake Hub of one shot (P3: 16.5 x 13.5 H, terraces 2-3, m = 2, the path climbs 0.99 terrace). Same fields as the mockups, no hand reduction, no volumes. */
     prof('perfil_u1', 'U1 · Ascension (Hub, 2 terraces) · DAC 1, height treatment Up (lego 2)', 1, { heightTreatment: 'up', ascWalls: true });
     prof('perfil_u2', 'U2 · Cake Hub P3 (2 terraces) · DAC 29, height treatment Up (lego 2)', 29, { heightTreatment: 'up', cake: true });
+    /* PR lego3 (stage_lego3_go.md section 3, A539): the sub-level lego on a ONE-terrace room. perfil_m1 (DAC 14) already declares Up; the second is DAC 57, an Ascension Hub of 477 tiles on one terrace (m = 2): in "Balanced types" EVERY one-terrace window has the same two sub-levels (subs 2), so the choice is by relief: its two sub-levels split the room 48 / 52 (M1's: 91 / 9), the most balanced of the Ascensions (`tools/lego3_pick.js`). */
+    prof('perfil_s1', 'S1 · Ascension (Hub, one terrace) · DAC 57, sub-level lego Up (lego 3)', 57, { heightTreatment: 'up', ascWalls: true });
   }
   E.modes = { PROTOS, MODES, IDS, COMMON, SOURCES, CAMS, OVERLAYS, DIAGNOSTICS, TERRAIN_MAIN, byId, plan, refresh, resetFolds, docs };
 })(typeof window !== 'undefined' ? (window.EVO = window.EVO || {}) : (globalThis.EVO = globalThis.EVO || {}));

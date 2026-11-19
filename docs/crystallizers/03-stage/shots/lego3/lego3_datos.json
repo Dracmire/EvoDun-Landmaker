@@ -1,0 +1,331 @@
+{
+ "perfil_u1|mid": {
+  "lego": null,
+  "adjust": null,
+  "stairs": 1,
+  "stairDepths": [
+   3
+  ],
+  "stairMode": [
+   "fill"
+  ],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": null,
+  "levels": 11
+ },
+ "perfil_u1|lego": {
+  "lego": {
+   "treatment": "up",
+   "m": 2,
+   "terraces": 2,
+   "single": false,
+   "sub": false,
+   "moved": 126,
+   "jumps": [
+    3.75
+   ],
+   "conflict": null,
+   "yawFlip": false
+  },
+  "adjust": {
+   "m": 2,
+   "stairs": 1,
+   "lenBefore": 3,
+   "depthAfter": 2,
+   "cakeLayersBefore": null,
+   "cakeLayersAfter": null,
+   "styleBefore": "steps"
+  },
+  "stairs": 1,
+  "stairDepths": [
+   1
+  ],
+  "stairMode": [
+   "cut"
+  ],
+  "crossLines": [
+   10
+  ],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": null,
+  "levels": 9
+ },
+ "perfil_u2|mid": {
+  "lego": null,
+  "adjust": null,
+  "stairs": 1,
+  "stairDepths": [
+   3
+  ],
+  "stairMode": [
+   "fill"
+  ],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": {
+   "links": 35,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ],
+   "tiles": 207,
+   "levelsAdded": 6
+  },
+  "levels": 22
+ },
+ "perfil_u2|rest": {
+  "lego": {
+   "treatment": "up",
+   "m": 2,
+   "terraces": 2,
+   "single": false,
+   "sub": false,
+   "moved": 72,
+   "jumps": [
+    3.75
+   ],
+   "conflict": null,
+   "yawFlip": false
+  },
+  "adjust": {
+   "m": 2,
+   "stairs": 1,
+   "lenBefore": 3,
+   "depthAfter": 2,
+   "cakeLayersBefore": null,
+   "cakeLayersAfter": null,
+   "styleBefore": "steps"
+  },
+  "stairs": 1,
+  "stairDepths": [
+   2
+  ],
+  "stairMode": [
+   "fill"
+  ],
+  "crossLines": [
+   10
+  ],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": {
+   "links": 35,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ],
+   "tiles": 207,
+   "levelsAdded": 6
+  },
+  "levels": 22
+ },
+ "perfil_u2|scale": {
+  "lego": {
+   "treatment": "up",
+   "m": 2,
+   "terraces": 2,
+   "single": false,
+   "sub": false,
+   "moved": 59,
+   "jumps": [
+    3.75
+   ],
+   "conflict": null,
+   "yawFlip": false
+  },
+  "adjust": {
+   "m": 2,
+   "stairs": 1,
+   "lenBefore": 3,
+   "depthAfter": 2,
+   "cakeLayersBefore": 3,
+   "cakeLayersAfter": 6,
+   "styleBefore": "steps"
+  },
+  "stairs": 1,
+  "stairDepths": [
+   2
+  ],
+  "stairMode": [
+   "fill"
+  ],
+  "crossLines": [
+   10
+  ],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": {
+   "links": 35,
+   "rings": [
+    0,
+    0,
+    0,
+    2,
+    6,
+    22,
+    5
+   ],
+   "tiles": 269,
+   "levelsAdded": 10
+  },
+  "levels": 26
+ },
+ "perfil_m1|mid": {
+  "lego": null,
+  "adjust": null,
+  "stairs": 0,
+  "stairDepths": [],
+  "stairMode": [],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 0,
+   "dropped": 0
+  },
+  "cake": null,
+  "levels": 14
+ },
+ "perfil_m1|lego": {
+  "lego": {
+   "treatment": "up",
+   "m": 2,
+   "terraces": 1,
+   "single": true,
+   "sub": true,
+   "moved": 310,
+   "jumps": [],
+   "conflict": null,
+   "yawFlip": false
+  },
+  "adjust": null,
+  "stairs": 0,
+  "stairDepths": [],
+  "stairMode": [],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 0,
+   "dropped": 0
+  },
+  "cake": null,
+  "levels": 16
+ },
+ "perfil_s1|mid": {
+  "lego": null,
+  "adjust": null,
+  "stairs": 0,
+  "stairDepths": [],
+  "stairMode": [],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 0,
+   "dropped": 0
+  },
+  "cake": null,
+  "levels": 10
+ },
+ "perfil_s1|lego": {
+  "lego": {
+   "treatment": "up",
+   "m": 2,
+   "terraces": 1,
+   "single": true,
+   "sub": true,
+   "moved": 240,
+   "jumps": [],
+   "conflict": null,
+   "yawFlip": false
+  },
+  "adjust": null,
+  "stairs": 0,
+  "stairDepths": [],
+  "stairMode": [],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 0,
+   "dropped": 0
+  },
+  "cake": null,
+  "levels": 11
+ },
+ "perfil_l1|mid": {
+  "lego": null,
+  "adjust": null,
+  "stairs": 1,
+  "stairDepths": [
+   3
+  ],
+  "stairMode": [
+   "cut"
+  ],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": null,
+  "levels": 15
+ },
+ "perfil_l1|lego": {
+  "lego": {
+   "treatment": "down",
+   "m": 2,
+   "terraces": 2,
+   "single": false,
+   "sub": false,
+   "moved": 934,
+   "jumps": [
+    3.75
+   ],
+   "conflict": null,
+   "yawFlip": false
+  },
+  "adjust": {
+   "m": 2,
+   "stairs": 1,
+   "lenBefore": 3,
+   "depthAfter": 2,
+   "cakeLayersBefore": null,
+   "cakeLayersAfter": null,
+   "styleBefore": "steps"
+  },
+  "stairs": 1,
+  "stairDepths": [
+   2
+  ],
+  "stairMode": [
+   "cut"
+  ],
+  "crossLines": [
+   10
+  ],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": null,
+  "levels": 16
+ }
+}

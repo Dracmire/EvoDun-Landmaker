@@ -1,0 +1,982 @@
+{
+ "single": [
+  {
+   "id": 64,
+   "type": "Diorama",
+   "tiles": 1130,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.5,
+   "m": 2
+  },
+  {
+   "id": 28,
+   "type": "Cake",
+   "tiles": 124,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.5,
+   "m": 2
+  },
+  {
+   "id": 58,
+   "type": "Ascension",
+   "tiles": 171,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.49,
+   "m": 2
+  },
+  {
+   "id": 57,
+   "type": "Ascension",
+   "tiles": 477,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.48,
+   "m": 2
+  },
+  {
+   "id": 78,
+   "type": "Ascension",
+   "tiles": 225,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.48,
+   "m": 2
+  },
+  {
+   "id": 31,
+   "type": "Diorama",
+   "tiles": 296,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.47,
+   "m": 2
+  },
+  {
+   "id": 80,
+   "type": "Diorama",
+   "tiles": 271,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.47,
+   "m": 2
+  },
+  {
+   "id": 53,
+   "type": "Diorama",
+   "tiles": 170,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.47,
+   "m": 2
+  },
+  {
+   "id": 46,
+   "type": "Ascension",
+   "tiles": 227,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.45,
+   "m": 2
+  },
+  {
+   "id": 68,
+   "type": "Diorama",
+   "tiles": 159,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.45,
+   "m": 2
+  },
+  {
+   "id": 5,
+   "type": "Ascension",
+   "tiles": 184,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.42,
+   "m": 2
+  },
+  {
+   "id": 33,
+   "type": "Ascension",
+   "tiles": 48,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.42,
+   "m": 2
+  },
+  {
+   "id": 61,
+   "type": "Ascension",
+   "tiles": 306,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.41,
+   "m": 2
+  },
+  {
+   "id": 35,
+   "type": "Diorama",
+   "tiles": 190,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.38,
+   "m": 2
+  },
+  {
+   "id": 62,
+   "type": "Ascension",
+   "tiles": 92,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.38,
+   "m": 2
+  },
+  {
+   "id": 27,
+   "type": "Ascension",
+   "tiles": 353,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.37,
+   "m": 2
+  },
+  {
+   "id": 66,
+   "type": "Diorama",
+   "tiles": 447,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.35,
+   "m": 2
+  },
+  {
+   "id": 20,
+   "type": "Diorama",
+   "tiles": 403,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.34,
+   "m": 2
+  },
+  {
+   "id": 38,
+   "type": "Diorama",
+   "tiles": 186,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.34,
+   "m": 2
+  },
+  {
+   "id": 12,
+   "type": "Ascension",
+   "tiles": 75,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.33,
+   "m": 2
+  },
+  {
+   "id": 50,
+   "type": "Ascension",
+   "tiles": 43,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.32,
+   "m": 2
+  },
+  {
+   "id": 26,
+   "type": "Ascension",
+   "tiles": 36,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.32,
+   "m": 2
+  },
+  {
+   "id": 10,
+   "type": "Diorama",
+   "tiles": 138,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.31,
+   "m": 2
+  },
+  {
+   "id": 22,
+   "type": "Diorama",
+   "tiles": 126,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.31,
+   "m": 2
+  },
+  {
+   "id": 69,
+   "type": "Ascension",
+   "tiles": 153,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.29,
+   "m": 2
+  },
+  {
+   "id": 55,
+   "type": "Cake",
+   "tiles": 124,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.28,
+   "m": 2
+  },
+  {
+   "id": 34,
+   "type": "Diorama",
+   "tiles": 117,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.27,
+   "m": 2
+  },
+  {
+   "id": 67,
+   "type": "Ascension",
+   "tiles": 37,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.27,
+   "m": 2
+  },
+  {
+   "id": 77,
+   "type": "Ascension",
+   "tiles": 206,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.26,
+   "m": 2
+  },
+  {
+   "id": 4,
+   "type": "Diorama",
+   "tiles": 162,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.25,
+   "m": 2
+  },
+  {
+   "id": 18,
+   "type": "Ascension",
+   "tiles": 137,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.23,
+   "m": 2
+  },
+  {
+   "id": 86,
+   "type": "Cake",
+   "tiles": 1274,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.22,
+   "m": 2
+  },
+  {
+   "id": 54,
+   "type": "Ascension",
+   "tiles": 115,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.19,
+   "m": 2
+  },
+  {
+   "id": 81,
+   "type": "Ascension",
+   "tiles": 93,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.19,
+   "m": 2
+  },
+  {
+   "id": 24,
+   "type": "Ascension",
+   "tiles": 29,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.19,
+   "m": 2
+  },
+  {
+   "id": 56,
+   "type": "Ascension",
+   "tiles": 61,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.18,
+   "m": 2
+  },
+  {
+   "id": 37,
+   "type": "Ascension",
+   "tiles": 50,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.14,
+   "m": 2
+  },
+  {
+   "id": 16,
+   "type": "Ascension",
+   "tiles": 57,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.12,
+   "m": 2
+  },
+  {
+   "id": 43,
+   "type": "Cake",
+   "tiles": 357,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.11,
+   "m": 2
+  },
+  {
+   "id": 17,
+   "type": "Ascension",
+   "tiles": 322,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.1,
+   "m": 2
+  },
+  {
+   "id": 14,
+   "type": "Ascension",
+   "tiles": 340,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.09,
+   "m": 2
+  },
+  {
+   "id": 49,
+   "type": "Diorama",
+   "tiles": 196,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.08,
+   "m": 2
+  },
+  {
+   "id": 71,
+   "type": "Ascension",
+   "tiles": 74,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.08,
+   "m": 2
+  },
+  {
+   "id": 19,
+   "type": "Cake",
+   "tiles": 185,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.07,
+   "m": 2
+  },
+  {
+   "id": 88,
+   "type": "Ascension",
+   "tiles": 83,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.07,
+   "m": 3
+  },
+  {
+   "id": 74,
+   "type": "Diorama",
+   "tiles": 135,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.05,
+   "m": 2
+  },
+  {
+   "id": 3,
+   "type": "Ascension",
+   "tiles": 278,
+   "subLevels": 2,
+   "allLevels": 2,
+   "relief": 0.04,
+   "m": 2
+  },
+  {
+   "id": 2,
+   "type": "Cake",
+   "tiles": 281,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 41,
+   "type": "Ascension",
+   "tiles": 95,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 42,
+   "type": "Ascension",
+   "tiles": 88,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 70,
+   "type": "Ascension",
+   "tiles": 81,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 32,
+   "type": "Ascension",
+   "tiles": 73,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 75,
+   "type": "Ascension",
+   "tiles": 64,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 76,
+   "type": "Ascension",
+   "tiles": 64,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 87,
+   "type": "Ascension",
+   "tiles": 57,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 51,
+   "type": "Ascension",
+   "tiles": 29,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 45,
+   "type": "Ascension",
+   "tiles": 27,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 25,
+   "type": "Diorama",
+   "tiles": 25,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 1
+  },
+  {
+   "id": 13,
+   "type": "Ascension",
+   "tiles": 8,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 15,
+   "type": "Ascension",
+   "tiles": 6,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  },
+  {
+   "id": 39,
+   "type": "Ascension",
+   "tiles": 0,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 3
+  },
+  {
+   "id": 40,
+   "type": "Ascension",
+   "tiles": 0,
+   "subLevels": 1,
+   "allLevels": 1,
+   "relief": 0,
+   "m": 2
+  }
+ ],
+ "auto": [
+  {
+   "id": 1,
+   "type": "Ascension",
+   "pick": "rest",
+   "stairsToTop": 1,
+   "cake": false,
+   "stairs": 1,
+   "rings": null
+  },
+  {
+   "id": 6,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 0,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 7,
+   "type": "Diorama",
+   "pick": "rest",
+   "stairsToTop": 0,
+   "cake": false,
+   "stairs": 1,
+   "rings": null
+  },
+  {
+   "id": 8,
+   "type": "Cake",
+   "pick": "rest",
+   "stairsToTop": 1,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 9,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 11,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 21,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 23,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 2,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 29,
+   "type": "Cake",
+   "pick": "rest",
+   "stairsToTop": 1,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 30,
+   "type": "Diorama",
+   "pick": "rest",
+   "stairsToTop": 0,
+   "cake": false,
+   "stairs": 1,
+   "rings": null
+  },
+  {
+   "id": 36,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 2,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 44,
+   "type": "Cake",
+   "pick": "rest",
+   "stairsToTop": 2,
+   "cake": true,
+   "stairs": 4,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 47,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 48,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 52,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 59,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 3,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 60,
+   "type": "Cake",
+   "pick": "rest",
+   "stairsToTop": 1,
+   "cake": true,
+   "stairs": 2,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 63,
+   "type": "Cake",
+   "pick": "rest",
+   "stairsToTop": 1,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 65,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 72,
+   "type": "Cake",
+   "pick": "rest",
+   "stairsToTop": 1,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 73,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 79,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 2,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 82,
+   "type": "Cake",
+   "pick": "rest",
+   "stairsToTop": 2,
+   "cake": true,
+   "stairs": 7,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 83,
+   "type": "Cake",
+   "pick": "rest",
+   "stairsToTop": 1,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 84,
+   "type": "Cake",
+   "pick": "rest",
+   "stairsToTop": 1,
+   "cake": true,
+   "stairs": 1,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": 85,
+   "type": "Cake",
+   "pick": "scale",
+   "stairsToTop": 0,
+   "cake": true,
+   "stairs": 2,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ]
+  }
+ ]
+}
