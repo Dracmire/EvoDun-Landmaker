@@ -1,10 +1,14 @@
 """LEGO pass 3: one SHEET per room with the shots side by side (Mid | lego, or Mid | Rest | Scale), rows k0 / k4 / k8. Needs Pillow.
-   python3 tools/lego3_sheets.py <shotsDir> <outDir>"""
+   python3 tools/lego3_sheets.py <shotsDir> <outDir> [edge|part0]"""
 import sys, os
 from PIL import Image, ImageDraw
 src, out = sys.argv[1], sys.argv[2]
 os.makedirs(out, exist_ok=True)
 SETS = {'perfil_u1_cam6': ['mid', 'lego'], 'perfil_u1_cam7': ['mid', 'lego'], 'perfil_u2_cam6': ['mid', 'rest', 'scale'], 'perfil_m1_cam6': ['mid', 'lego'], 'perfil_s1_cam6': ['mid', 'lego'], 'perfil_l1_cam6': ['mid', 'lego']}
+if len(sys.argv) > 3 and sys.argv[3] == 'edge':  # PR t79 part 3: Square | Hybrid
+    SETS = {'perfil_u1_cam6': ['square', 'hybrid'], 'perfil_u1_cam7': ['square', 'hybrid'], 'perfil_u2_cam6': ['square', 'hybrid'], 'perfil_m1_cam6': ['square', 'hybrid'], 'perfil_s1_cam6': ['square', 'hybrid'], 'perfil_l1_cam6': ['square', 'hybrid']}
+if len(sys.argv) > 3 and sys.argv[3] == 'part0':  # PR t79 part 0: u1 Mid | lego, u2 Mid | Rest | Scale
+    SETS = {'perfil_u1_cam6': ['mid', 'lego'], 'perfil_u2_cam6': ['mid', 'rest', 'scale']}
 SCALE = 0.5
 for name, variants in SETS.items():
     rows = []
@@ -21,4 +25,4 @@ for name, variants in SETS.items():
     for c, v in enumerate(variants): d.text((pad + c * (w + pad) + 6, 6), f'{name}  ·  {v}', fill=(235, 235, 235))
     for r, ims in enumerate(rows):
         for c, im in enumerate(ims): sheet.paste(im, (pad + c * (w + pad), top + pad + r * (h + pad)))
-    sheet.save(os.path.join(out, f'lamina_{name}.png'), optimize=True); print('wrote', name, sheet.size)
+    sheet.save(os.path.join(out, f'lamina_{name}{"_edge" if len(sys.argv) > 3 and sys.argv[3] == "edge" else ""}.png'), optimize=True); print('wrote', name, sheet.size)

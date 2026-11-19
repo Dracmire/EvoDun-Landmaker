@@ -1,0 +1,167 @@
+{
+ "perfil_u1|mid": {
+  "lego": null,
+  "adjust": null,
+  "stairs": 1,
+  "stairDepths": [
+   3
+  ],
+  "stairMode": [
+   "fill"
+  ],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": null,
+  "levels": 11
+ },
+ "perfil_u1|lego": {
+  "lego": {
+   "treatment": "up",
+   "m": 2,
+   "terraces": 2,
+   "single": false,
+   "sub": false,
+   "moved": 137,
+   "jumps": [
+    3.75
+   ],
+   "conflict": null,
+   "yawFlip": false
+  },
+  "adjust": null,
+  "stairs": 1,
+  "stairDepths": [
+   3
+  ],
+  "stairMode": [
+   "fill"
+  ],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": null,
+  "levels": 15
+ },
+ "perfil_u2|mid": {
+  "lego": null,
+  "adjust": null,
+  "stairs": 1,
+  "stairDepths": [
+   3
+  ],
+  "stairMode": [
+   "fill"
+  ],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": {
+   "links": 35,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ],
+   "tiles": 207,
+   "levelsAdded": 6
+  },
+  "levels": 22
+ },
+ "perfil_u2|rest": {
+  "lego": {
+   "treatment": "up",
+   "m": 2,
+   "terraces": 2,
+   "single": false,
+   "sub": false,
+   "moved": 81,
+   "jumps": [
+    3.75
+   ],
+   "conflict": null,
+   "yawFlip": false
+  },
+  "adjust": null,
+  "stairs": 1,
+  "stairDepths": [
+   3
+  ],
+  "stairMode": [
+   "fill"
+  ],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": {
+   "links": 35,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ],
+   "tiles": 207,
+   "levelsAdded": 6
+  },
+  "levels": 28
+ },
+ "perfil_u2|scale": {
+  "lego": {
+   "treatment": "up",
+   "m": 2,
+   "terraces": 2,
+   "single": false,
+   "sub": false,
+   "moved": 114,
+   "jumps": [
+    3.75
+   ],
+   "conflict": null,
+   "yawFlip": false
+  },
+  "adjust": null,
+  "stairs": 1,
+  "stairDepths": [
+   3
+  ],
+  "stairMode": [
+   "fill"
+  ],
+  "crossLines": [],
+  "stairInfo": {
+   "placed": 1,
+   "dropped": 0
+  },
+  "cake": {
+   "links": 35,
+   "rings": [
+    0,
+    0,
+    0,
+    35,
+    0,
+    0,
+    0
+   ],
+   "tiles": 207,
+   "levelsAdded": 6
+  },
+  "levels": 31
+ }
+}
