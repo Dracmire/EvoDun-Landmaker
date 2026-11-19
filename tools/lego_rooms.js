@@ -1,14 +1,15 @@
 /* LEGO, the 88 rooms of "Balanced types" (stage_lego_go.md section 4; MEASURE ONLY, nothing in src/ changes): how many rooms step on ONE terrace (L2' does not change them), the distribution of m (the base terrace of the room, 1..3), and the borders between rooms whose terraces differ by 2 (A+2) and 3 (A+3): how many room pairs, how many tiles, and how many would have a door if the gate rule accepted two (three) terraces
    (the same rule as `transitions` of src/s3/shape.js on the nominal band of the global range: pos = the LOW tile, slope(low) - slope(high) > gateThr, 4-connected groups, groups under gateMin dropped; gap 1 is the check: it must give the groups of `E.s3.gateTransitions`).
    Uses the DAC3 constructor only. Output: JSON (argv[2]) or stdout; the markdown is written by hand into verticalidad_lego_resultado.md.
-     node tools/lego_rooms.js [out.json] */
+     node tools/lego_rooms.js [out.json] [default] */
 const fs = require('fs'), path = require('path'), vm = require('vm');
 global.window = global;
 for (const f of ['png', 'fields', 'shape', 'tech', 'rooms', 'roomtypes', 's3/ns', 's3/shape', 's3/rooms', 's3/roomtypes', 's3/pocket', 's3/lego', 'stage', 'orient']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8'), { filename: f });
 const E = window.EVO, TYPE = { 1: 'Cake', 2: 'Diorama', 3: 'Ascension' };
 (async () => {
   const { mk } = await require('./real_pack.js').load(E), RT = require('./room_types_table.js'), t0 = Date.now();
-  const P = { ...RT.BASE, terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120, terH: 1.875, subH: 0.4125, subs: 2, stairStyle: 0, tread: 1, rampPreferFill: true };
+  const DEF = process.argv[3] === 'default'; // PR lego2: the Default preset (5 terraces, core 20, radius 9, minPlateau 5) for the A+2 / A+3 count
+  const P = { ...RT.BASE, ...(DEF ? {} : { terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120 }), terH: 1.875, subH: 0.4125, subs: 2, stairStyle: 0, tread: 1, rampPreferFill: true };
   const pack = mk(), S = E.s3.shape(pack, P, null), W = S.W, H = S.H, n = S.n, zm = E.stage.zoneMap(S);
   const ids = [...S.types.rooms.keys()].sort((a, b) => a - b), rows = [], byRoom = new Map();
   // per room: the terraces its walkable tiles step on (the levels that are not bridges), m
@@ -43,7 +44,7 @@ const E = window.EVO, TYPE = { 1: 'Cake', 2: 'Diorama', 3: 'Ascension' };
     return { gap: g, roomPairs: list.length, borderFaces: tiles, candidateTiles: cand.length, groups, groupsKept: kept, crossGroupsKept: crossKept, pairsWithDoor: withDoor.length, pairs: list.sort((a, b) => b.tiles - a.tiles).slice(0, 12) };
   };
   const tr1 = E.s3.gateTransitions(pack, P, 'terrace'), borders = { A1: gap(1), A2: gap(2), A3: gap(3) };
-  const out = { P: { terraces: 3, roomsMinCore: 100, rRadius: 5, minPlateau: 120, terH: P.terH, subs: 2 }, rooms: ids.length, types: { Cake: rows.filter((r) => r.type === 'Cake').length, Diorama: rows.filter((r) => r.type === 'Diorama').length, Ascension: rows.filter((r) => r.type === 'Ascension').length }, dist, borders, checkA1: { mineGroupsKept: borders.A1.groupsKept, theirs: tr1.groups.length, crossRoomGroups: borders.A1.crossGroupsKept }, seconds: (Date.now() - t0) / 1000, rows };
+  const out = { P: { preset: DEF ? 'Default' : 'Balanced types', terraces: P.terraces, roomsMinCore: P.roomsMinCore, rRadius: P.rRadius, minPlateau: P.minPlateau, terH: P.terH, subs: 2 }, rooms: ids.length, types: { Cake: rows.filter((r) => r.type === 'Cake').length, Diorama: rows.filter((r) => r.type === 'Diorama').length, Ascension: rows.filter((r) => r.type === 'Ascension').length }, dist, borders, checkA1: { mineGroupsKept: borders.A1.groupsKept, theirs: tr1.groups.length, crossRoomGroups: borders.A1.crossGroupsKept }, seconds: (Date.now() - t0) / 1000, rows };
   const file = process.argv[2]; if (file) fs.writeFileSync(file, JSON.stringify(out, null, 1)); else console.log(JSON.stringify(out));
   console.error(`rooms ${ids.length}: single-terrace ${dist.single}, multi ${dist.multi}, none ${dist.none}; m (all) ${JSON.stringify(dist.m)}, m (multi) ${JSON.stringify(dist.mMulti)}; A+1 check ${borders.A1.groupsKept} vs ${tr1.groups.length}; A+2 ${JSON.stringify({ pairs: borders.A2.roomPairs, faces: borders.A2.borderFaces, groups: borders.A2.groupsKept, cross: borders.A2.crossGroupsKept, withDoor: borders.A2.pairsWithDoor })}; A+3 ${JSON.stringify({ pairs: borders.A3.roomPairs, faces: borders.A3.borderFaces, groups: borders.A3.groupsKept, cross: borders.A3.crossGroupsKept, withDoor: borders.A3.pairsWithDoor })}; ${out.seconds} s`);
 })().catch((e) => { console.error(e); process.exit(1); });

@@ -25,6 +25,9 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + na
   ok(`Mid removes the treatment (no legoInfo) and the topology hash is the same (${t1} = ${t2}); the level set is the one of today (${f2.levels} levels, ${f1.levels} with Down)`, !f2.li && t1 === t2 && f2.levels < f1.levels, { f1, f2, t1, t2 });
   await setSel('up'); const f3 = await facts(), t3 = await hashTopo(); ok(`Up forces Up on L1 (m ${f3.li && f3.li.m}, jumps ${f3.li && JSON.stringify(f3.li.jumps)}) with the same topology (${t3} = ${t1})`, f3.li && f3.li.t === 'up' && Math.abs(f3.li.jumps[0] - 3.75) < 0.01 && t3 === t1, f3);
   await setSel('auto'); const f4 = await facts(); ok('Auto returns the declared one (Down)', f4.li && f4.li.t === 'down', f4);
+  // (2b) PR lego2: the two Up examples step on 2+ terraces, the treatment ran, the jump is m * E * D, the topology is the one of Mid
+  for (const [id, room] of [['perfil_u1', 1], ['perfil_u2', 29]]) { await clickEx(id); const f = await facts(), ta = await hashTopo(); await setSel('mid'); const fm = await facts(), tm = await hashTopo(); await setSel('auto');
+    ok(`${id} (DAC ${room}): declared up, ${f.li && f.li.terraces} terraces, m ${f.li && f.li.m}, jump ${f.li && JSON.stringify(f.li.jumps)} = m * E * D (3.75), ${f.li && f.li.moved} tiles moved; the topology equals Mid's (${ta} = ${tm}); Mid has no treatment`, f.htEx === 'up' && f.li && f.li.t === 'up' && !f.li.single && f.li.terraces >= 2 && f.li.moved > 0 && f.li.jumps.every((j) => Math.abs(j - f.li.m * 1.875) < 0.01) && ta === tm && !fm.li, { f, fm }); }
   // (3) single terrace
   await clickEx('perfil_m1'); const g1 = await facts(); await setSel('mid'); const g2 = await facts();
   ok(`M1 (room 14, one terrace): single, nothing moved (${g1.li && g1.li.moved}); the canvas is the same with Mid and Auto (${g1.cv} = ${g2.cv})`, g1.li && g1.li.single && g1.li.moved === 0 && g1.cv === g2.cv && g1.levels === g2.levels, { g1, g2 });

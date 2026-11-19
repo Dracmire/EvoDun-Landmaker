@@ -1,7 +1,7 @@
 /* STAGE 3 CONSTRUCTOR (DAC3): LEGO VERTICALITY BY TERRACE, rule L2' (docs/crystallizers/03-stage/research/octopath2/verticalidad_lego.md section 7b, stage_lego_go.md, decisions D-L1..D-L5 of [U]). It lives ONLY in src/s3/ (never in the original DAC chain) and only runs behind the Stage selector "Height treatment" (Mid = this file is never called: identical pixels, byte for byte).
    TREATMENT per room (`down` | `mid` | `up`; `mid` = today):
    - m = the BASE terrace of the room (the lowest terrace its walkable tiles step on, 1-based), clamped to 1..3 (1 simple, 2 double, 3 triple). E = P.terH (one terrace of the Base).
-   - UP: every jump between consecutive walkable terraces of the room measures m * E (instead of what it measures today). The lowest terrace stays where it is, the others rise.
+   - UP: every jump between consecutive walkable terraces of the room measures m * E * D, D = the terraces it crosses (PR lego2, A531; D = 1 for adjacent terraces, so the first pass is unchanged there). The lowest terrace stays where it is, the others rise.
    - DOWN: the same m, downward: the HIGHEST walkable terrace of the room stays where it is and every other falls m * E per jump (the viewpoint stays high, everything falls around the hero).
    - The sub-terraces (micro relief) keep their own steps; the heights BETWEEN terraces (the bridge levels of `steps`, the ends of a ramp) are stretched linearly between the top sub-level of a terrace and the base of the next, so stairs and ramps keep joining the same terraces (a ramp gets steeper: its depth is fixed).
    - THE TOPOLOGY STAYS IDENTICAL: the same tiles, regions, walking graph and stairs; only the heights of the levels of the ROOM's tiles change (their `S.fine` points to new levels inserted with the clone's `insertLevels`; `S.block`, `S.void`, `S.region`, `S.roomMap`, the stairs list and its records' tiles are not touched; the ramp records only get the heights of their two ends mapped by the same function). Checked by hash in tools/test_lego.js. A room that steps on ONE terrace gains nothing: it is returned as `single` (not a conflict, counted).
@@ -23,10 +23,10 @@
   /* m of the room: its lowest walkable terrace (1-based), 1..3 */
   L.mOf = (terr) => (terr.length ? Math.max(1, Math.min(L.M_MAX, terr[0].t + 1)) : 1);
   /* the new base of every terrace (by rank) */
-  L.newBases = function (terr, m, Eh, treatment) {
+  L.newBases = function (terr, m, Eh, treatment) { // PR lego2 (A531): a jump that crosses D terraces measures m * E * D (a jump of two terraces is no longer squeezed to one)
     const R = terr.length, out = new Array(R);
-    if (treatment === 'up') for (let r = 0; r < R; r++) out[r] = terr[0].base + r * m * Eh;
-    else for (let r = 0; r < R; r++) out[r] = terr[R - 1].base - (R - 1 - r) * m * Eh;
+    if (treatment === 'up') for (let r = 0; r < R; r++) out[r] = terr[0].base + m * Eh * (terr[r].t - terr[0].t);
+    else for (let r = 0; r < R; r++) out[r] = terr[R - 1].base - m * Eh * (terr[R - 1].t - terr[r].t);
     return out;
   };
   /* the piecewise-linear height map: anchors (base_r -> nb_r) and (top_r -> nb_r + the same sub offset), linear between; shifted beyond the ends */
