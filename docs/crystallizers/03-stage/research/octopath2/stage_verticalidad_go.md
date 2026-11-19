@@ -11,7 +11,7 @@ Rama R2. **Lee antes de empezar:**
 
 ## Condición previa
 
-La parte C (re-altura de lo caminable) necesita la decisión **D-V1** de [U] (`verticalidad.md` §4). Si este prompt no dice «D-V1 aprobada», haz solo las partes A y B y aplica V1 únicamente al escenario no caminable.
+La parte C (re-altura de lo caminable, D-V1) se construye **solo dentro del constructor propio del Stage** (`src/s3/`, el clon de DAC de `stage_s3_fork_go.md`, decisión de [U] A514), nunca en el DAC original. Si el clon todavía no está en `main`, haz solo las partes A y B.
 
 ## Parte A · T2 por partes (solo mide, sin tocar `src/`)
 

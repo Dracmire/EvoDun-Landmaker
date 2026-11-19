@@ -68,7 +68,7 @@ La altura de DAC es natural (sale de la elevación) y en el proyecto es «casi d
 4. **El escenario no caminable** sigue V5 y V6: lados altos, fondo más alto, frente igual o más bajo. Ya existe en `planes`, que alza el fondo y baja el frente; se completa con los lados en U y las caras transversales.
 5. **Primero se mira en Cam 7** (Classic 3/4, la proyección 16 bits, A503). Si las bandas no se leen ahí, Cam 6 no las va a salvar.
 
-**Decisión de [U] (D-V1):** hoy ninguna regla del modo 3 cambia la altura de lo **caminable**, solo del escenario (`planes`, `border`, `volumes`). Además, las terrazas salen siempre de la elevación (Agreed design). El punto 2 rompe las dos cosas, aunque solo sea visualmente y en el modo 3. Sin la aprobación de [U] no se construye; la alternativa es aplicar V1 solo al escenario y ver cuánto alcanza.
+**Resuelto por [U] (A514): D-V1 se aplica, pero en un constructor propio del Stage, un clon de DAC que se muta, para no romper el DAC puro (`stage_s3_fork_go.md`).** Lo que sigue es el planteamiento original. **Decisión de [U] (D-V1):** hoy ninguna regla del modo 3 cambia la altura de lo **caminable**, solo del escenario (`planes`, `border`, `volumes`). Además, las terrazas salen siempre de la elevación (Agreed design). El punto 2 rompe las dos cosas, aunque solo sea visualmente y en el modo 3. Sin la aprobación de [U] no se construye; la alternativa es aplicar V1 solo al escenario y ver cuánto alcanza.
 
 ## 5. Tesis
 
