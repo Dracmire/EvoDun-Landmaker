@@ -58,6 +58,13 @@ const WINS = [[17, 10, 20, 27, 6, 5], [14], [44]], HYP = E.props.HYP;
     ok('M3c: a zone that is not the last (last: false) has no goal even with a POI', !dnl.goal);
     withPoi(S14, [[0, 1]]); const dout = E.props.compute(S14, P, rec14, { tilesPerH: 2, last: true, next: 0 });
     ok('M3c: a POI outside the footprint = the goal of before', dout.goal && dout.goal.tile === base.goal.tile && dout.end === base.end);
+    { // POI FIRST (user, 2026-11-11): a MIDDLE room (entry and exit gates, not the last) with a POI: the path starts at the entry gate (as before) and ENDS at the POI (not at the exit); no goal (only the last zone has one); the door pillar of its exit stays
+      const L6 = [17, 10, 20, 27, 6, 5], k6 = L6.map((id, k) => [k, k < L6.length - 1 && recs[id].entry && recs[id].exit ? E.props.compute(shapes[L6.join()], P, recs[id], { tilesPerH: 2, last: false, next: L6[k + 1] }).path.length : -1]).sort((p, q) => q[1] - p[1])[0][0], W6 = L6.join(), S6 = shapes[W6], rec6 = recs[L6[k6]], o6 = { tilesPerH: 2, last: false, next: L6[k6 + 1] }, b6 = E.props.compute(S6, P, rec6, o6), pt = b6.path[Math.floor(b6.path.length * 0.4)];
+      withPoi(S6, [[pt, 1]]); const d6 = E.props.compute(S6, P, rec6, o6);
+      ok(`POI FIRST: the middle room ${rec6.id} (of the window of six, the room with an entry AND an exit gate and the longest path) with a POI on its path: the path still starts at ${d6.start} (was ${b6.start}, the entry gate) and ends at the POI (${d6.end} = ${pt}; before: ${b6.end}, the exit); no goal; pillars ${d6.pillars.length} (was ${b6.pillars.length})`, k6 >= 0 && rec6.entry && rec6.exit && d6.start === b6.start && d6.end === pt && b6.end !== pt && !d6.goal && !d6.noPath && d6.pillars.length === b6.pillars.length, { s: d6.start, e: d6.end, be: b6.end, entry: !!rec6.entry, exit: !!rec6.exit, goal: d6.goal, noPath: d6.noPath });
+      const dl = E.props.compute(S6, P, rec6, Object.assign({}, o6, { test: { noPoi: true } })); ok('MUTATION noPoi on the middle room: the path ends at the exit as before (the check above FAILS)', dl.end === b6.end);
+      delete S6.fields.poi; const d0 = E.props.compute(S6, P, rec6, o6); ok('POI FIRST: the same middle room without a POI = the result of before, byte for byte (path, torches, pillars)', JSON.stringify(d0) === JSON.stringify(b6));
+    }
     delete S14.fields.poi; const dnone = E.props.compute(S14, P, rec14, { tilesPerH: 2, last: true, next: 0 });
     ok('M3c: no `poi` in the pack = the goal of before', dnone.goal && dnone.goal.tile === base.goal.tile && JSON.stringify(dnone.torches) === JSON.stringify(base.torches));
   }
