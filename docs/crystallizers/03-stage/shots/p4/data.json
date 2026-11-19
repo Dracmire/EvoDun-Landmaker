@@ -1,0 +1,180 @@
+{
+ "s1": {
+  "ks": [
+   [
+    135,
+    204
+   ],
+   [
+    122,
+    206
+   ],
+   [
+    112,
+    204
+   ]
+  ],
+  "pathLen": 50,
+  "treatment": "auto",
+  "frame": {
+   "neighbours": [
+    28,
+    36,
+    37,
+    38,
+    43,
+    64
+   ],
+   "skipTiles": 2913,
+   "rooms": [
+    {
+     "id": 28,
+     "m": 1,
+     "terraces": 3,
+     "single": false,
+     "moved": 0,
+     "levelsAdded": 0
+    },
+    {
+     "id": 36,
+     "m": 1,
+     "terraces": 3,
+     "single": false,
+     "moved": 0,
+     "levelsAdded": 0
+    },
+    {
+     "id": 37,
+     "m": 2,
+     "terraces": 1,
+     "single": true,
+     "moved": 66,
+     "levelsAdded": 1
+    },
+    {
+     "id": 38,
+     "m": 2,
+     "terraces": 2,
+     "single": false,
+     "moved": 14,
+     "levelsAdded": 1
+    },
+    {
+     "id": 43,
+     "m": 2,
+     "terraces": 2,
+     "single": false,
+     "moved": 74,
+     "levelsAdded": 1
+    },
+    {
+     "id": 64,
+     "m": 2,
+     "terraces": 2,
+     "single": false,
+     "moved": 143,
+     "levelsAdded": 2
+    }
+   ]
+  },
+  "hashes": {
+   "off1": [
+    "5f68aeb63217",
+    "54cd892fcad4",
+    "9dad5481a312"
+   ],
+   "on": [
+    "4179525472d9",
+    "c19700ce4600",
+    "31c2926f086b"
+   ],
+   "off2": [
+    "f0148d0dff22",
+    "7ae7ef842da1",
+    "fdbce9a6358c"
+   ]
+  },
+  "offIdentical": false,
+  "onDiffers": [
+   true,
+   true,
+   true
+  ]
+ },
+ "r21_default9": {
+  "ks": [
+   [
+    134,
+    202
+   ],
+   [
+    125,
+    195
+   ],
+   [
+    113,
+    202
+   ]
+  ],
+  "pathLen": 76,
+  "treatment": "up",
+  "frame": {
+   "neighbours": [
+    8,
+    12,
+    24
+   ],
+   "skipTiles": 4567,
+   "rooms": [
+    {
+     "id": 8,
+     "m": 1,
+     "terraces": 8,
+     "single": false,
+     "moved": 0,
+     "levelsAdded": 0
+    },
+    {
+     "id": 12,
+     "m": 2,
+     "terraces": 8,
+     "single": false,
+     "moved": 675,
+     "levelsAdded": 19
+    },
+    {
+     "id": 24,
+     "m": 3,
+     "terraces": 7,
+     "single": false,
+     "moved": 1697,
+     "levelsAdded": 16
+    }
+   ]
+  },
+  "hashes": {
+   "off1": [
+    "7593fb89c534",
+    "e6481623b240",
+    "6f1b395c68d1"
+   ],
+   "on": [
+    "01c50bf468fc",
+    "a7b7d29aa0d9",
+    "7db4cc5afb0d"
+   ],
+   "off2": [
+    "7593fb89c534",
+    "aedc4fae0a50",
+    "9c90fb0a0f7e"
+   ]
+  },
+  "offIdentical": false,
+  "onDiffers": [
+   true,
+   true,
+   true
+  ]
+ },
+ "pageErrors": 0
+}
