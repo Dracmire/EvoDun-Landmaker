@@ -25,4 +25,16 @@
     S.legoInfo = keepInfo; S.cache = {};
     return (S.frameNb = { ids: N.ids, tiles: N.tiles, rooms, skip: N.skip });
   };
+
+  /* PR Q4 (A571-A572), control "Only rooms in front": the window rooms that lie between the camera and the hero's room are NOT DRAWN. A window room R (not the hero's) is in front when the mean view depth of its tiles (A = x * f0 + y * f1 along the look direction f of the yaw of the room) is smaller than the NEAR END of the hero's room (the smallest A of its footprint) [R]; all its tiles become void (own copies of S.void and S.fineMask, like planes.js does): not drawn, and the neighbours drop to the base. VISUAL ONLY: S.block, S.region, the walking graph, the route and the stairs are not touched (the hero stands in its own room, never in a hidden one; leaving it changes the hero's room and the set is computed again). Returns { hidden: [room ids], tiles }. */
+  F.hideFront = function (S, room, yaw, ids) {
+    const look = E.orient.lookOf(yaw), zm = E.stage.zoneMap(S), W = S.W, vd = S.void, A = (i) => (i % W) * look[0] + ((i / W) | 0) * look[1]; let near = 1e9;
+    for (let i = 0; i < S.n; i++) if (zm[i] === room.id && !S.block[i] && !(vd && vd[i]) && S.region[i] >= 0) near = Math.min(near, A(i));
+    const sum = new Map(), cnt = new Map(); for (let i = 0; i < S.n; i++) { const r = zm[i]; if (!r || r === room.id || !ids.includes(r) || (vd && vd[i])) continue; sum.set(r, (sum.get(r) || 0) + A(i)); cnt.set(r, (cnt.get(r) || 0) + 1); }
+    const hidden = []; for (const [r, v] of sum) if (v / cnt.get(r) < near) hidden.push(r); hidden.sort((a, b) => a - b);
+    if (!hidden.length) return (S.frontHidden = { hidden, tiles: 0, near });
+    const hs = new Set(hidden); S.void = vd ? Uint8Array.from(vd) : new Uint8Array(S.n); let tiles = 0; for (let i = 0; i < S.n; i++) if (hs.has(zm[i]) && !S.void[i]) { S.void[i] = 1; tiles++; }
+    S.fineMask = Int16Array.from(S.fine); for (let i = 0; i < S.n; i++) if (S.void[i]) S.fineMask[i] = -1; S.cache = {};
+    return (S.frontHidden = { hidden, tiles, near });
+  };
 })(window.EVO = window.EVO || {});
