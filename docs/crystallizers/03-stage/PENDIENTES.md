@@ -1,6 +1,6 @@
 # Pendientes del modo 3 (to-do vivo; lo actualiza [R] en cada «guardar»)
 
-Estado al 2026-11-19. Estados: **prueba** (va en el prompt `prompt_pendientes_go.md`), **[U]** (decisión tuya), **[R]** (diseño mío), **espera** (fuera de la línea por ahora), **hecho**.
+**Desde 2026-11-20 todo lo [low] y [mid] es polish y queda postergado (ver `PANORAMA.md`).** Estado al 2026-11-19. Estados: **prueba** (va en el prompt `prompt_pendientes_go.md`), **[U]** (decisión tuya), **[R]** (diseño mío), **espera** (fuera de la línea por ahora), **hecho**.
 
 ## 1. Tu feedback de esta etapa, uno por uno
 
