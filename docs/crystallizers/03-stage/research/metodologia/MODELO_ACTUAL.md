@@ -1,6 +1,6 @@
 # MODELO ACTUAL — nuestra teoría de la vista 2D-HD (modo 3)
 
-**v2.4 · 2026-11-18** · cubre el Registro A001–A499 (los dos chats). **DQ3 cerrado** (A472); segundo juego: **Octopath Traveler 2** (A473), referencias en `refs/oct2/`, medidas en `research/octopath2/medidas_paso1.md`.
+**v2.5 · 2026-11-20** · cubre el Registro A001–A499 y las fuentes de primera mano de §9b (A596–A600) (los dos chats). **DQ3 cerrado** (A472); segundo juego: **Octopath Traveler 2** (A473), referencias en `refs/oct2/`, medidas en `research/octopath2/medidas_paso1.md`.
 **Qué es:** lo mejor que hoy sabemos de cómo se ve y cómo se construye una vista 2D-HD. Es el **resultado incompleto de la metodología**: cada cierre le añade cosas, y **terminamos cuando este modelo genere 2D-HD**. No lleva justificaciones; entre paréntesis va solo el ID del Registro que le da origen, para rastrearlo.
 **Tres partes:**
 1. **Modelo acumulado:** el conocimiento.
@@ -214,6 +214,19 @@
 - **Medir al héroe:** `heroFrac` es la caja de 1 H en el pivote; la figura completa es cabeza + cuerpo + punto (A150, A153). Las tomas de YouTube son ≈ pantalla completa (A148, A151). [V]
 - **Contrastar con la imagen original,** no con un derivado (A061). [V]
 
+## 9b. Lo que dicen los creadores (fuentes de primera mano)
+Fuentes: charla GDC 2019 de Square Enix y Acquire, «The Fusion of Nostalgia and Novelty in the Development of Octopath Traveler» (Takahashi, Iizuka, Miyauchi; transcrito aportado por [U], no se guarda en el repo), y entrevistas de DQ11 S (Hiyama, Uchikawa, Okamoto; ver `PANORAMA.md`).
+- **Método de producción en ambos juegos:** prototipo, luego una demo recorrible con modelos temporales que se camina una y otra vez («escenario, jugabilidad, comprensión»), y recién después el detalle (GDC; DQ11) (A596, A598). [V fuente]
+- **El fallo fatal del primer prototipo de Octopath fue la escala.** Dos arreglos: (1) estrechar el ángulo de visión y agregar un desenfoque suave de perspectiva, porque el FOV de un 3D normal se siente más ancho que un 2D sin perspectiva; (2) la densidad (A598). [V fuente]
+- **La gramática de 16 bits:** el suelo se dibujaba visto desde arriba y los edificios vistos de frente, algo «completamente equivocado» para una escena 3D. Colocar los objetos como en 16 bits dentro de un 3D da un nivel plano y poco denso. **La conversión de los creadores:** paisaje aterrazado, edificios del fondo más altos y casas más pequeñas (como en FF6) (A598). [V fuente] Es la regla «la altura crece con la profundidad de la vista» (A593) como paso de conversión desde una planta top-down.
+- **Escala por espacio:** los interiores van a escala 1:2. En la puerta, el personaje se reduce a la mitad y la cámara se acerca a la vez, así que el héroe mide lo mismo en pantalla. El mismo disparador cambia las luces y oculta o muestra los objetos frente a la casa (A599). [V fuente]
+- **Flujo de nivel:** un editor de baldosas de 1 × 1 m (superficies diagonales, pasos sobre y bajo nivel, senderos pintados). Primero se construye la zona **alrededor de los caminos principales** y después se completa con **conjuntos modulares** armados con piezas del editor; desiertos y nieve con landscape; ríos con splines (A600). [V fuente]
+- **Lo que tapa al héroe:** una máscara alfa circular en pantalla sobre los objetos que están delante del personaje. En el borde del mapa, con la cámara bloqueada, la máscara se desplaza para seguir al héroe (A600). [V fuente]
+- **Objetos 2.5D:** barriles, sacos y árboles como relieves de medio volumen (sin la parte de atrás), para iluminar pixel art sin volverlo 3D completo (A600). [V fuente]
+- **Luz:** sombras horneadas desde arriba a la izquierda en las texturas y luces 3D alineadas con esa dirección; en mazmorras, el foco ilumina al personaje desde el frente de la pantalla. Va a Unity (A600). [V fuente]
+- **Regla del Post-It (diseño):** se rechaza toda idea que no quepa en una nota de 8 × 8 cm o no se pueda explicar en una frase; lo nuevo extiende lo conocido en vez de agregar sistemas ajenos; el balance terminó cerca de 7:3, conocido contra nuevo (A600). [V fuente]
+- **DQ11:** el 2D y el 3D se tradujeron a mano, uno por uno; el criterio era que la ciudad se reconociera por sus hitos; las estructuras que no se leían se cambiaron (techos triangulares → terrazas, escaleras de mano) (A596). [V fuente]
+
 ---
 
 # PARTE II · BASE PRINCIPAL (todas las escenas)
@@ -349,3 +362,4 @@ A3b, A8 (paso por detrás), A416 (encuadre hacia el avance), el modelo de cámar
 | v2.2 | 2026-11-18 | Octopath Traveler 2: medidas de cámara (pitch 14–25, héroe 0,11–0,18, pies 0,61–0,71); los tres espacios y el bloqueo suave de [U] pasan de nunca probados a hipótesis con prueba; perfiles narrow / long / wide; B2, B4 y B13 por perfil | A473–A485 |
 | v2.3 | 2026-11-18 | Prueba del bloqueo suave en el visor (PR #99); long eliminado (solo Z cambia el tamaño); perfiles por familiaridad; sub-cámara deep (hipótesis); banda de primer plano no caminable con baranda baja (B10 precisado) | A487–A492 |
 | v2.4 | 2026-11-18 | Cámaras en espera; HD-2D = Base + hoja de composición por origen (top-down de DQ3, 2.5D de Octopath); A247 limitado a la hoja top-down; perfiles de forma P1–P6 como segundo eje junto al tipo DAC; tesis T1 y T2 | A493–A499 |
+| v2.5 | 2026-11-20 | Fuentes de primera mano (§9b): GDC de Octopath (escala, gramática de 16 bits → terrazas y fondo más alto, interiores 1:2 con el héroe constante, flujo camino primero + conjuntos modulares, máscara alfa, regla del Post-It) y proceso de DQ11 | A596, A598–A600 |

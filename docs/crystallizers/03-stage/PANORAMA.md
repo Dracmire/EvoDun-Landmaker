@@ -160,3 +160,20 @@ Dengeki Online; RPG Site (prototipo de DQ3 en PS4).
 - Cambios por legibilidad en cada modo: techos triangulares → terrazas, escaleras de mano, «estructura muy cambiada»;
   interiores de varios pisos legibles en 3D, ilegibles en 2D plano.
 - Prototipo de DQ3 en PS4 (Aliahan): los pueblos escasos del original se sentían vacíos en 3D → se agregó densidad.
+
+## GDC 2019 de Octopath Traveler: qué responde (A598–A600)
+
+Transcrito aportado por [U] (no se guarda en el repo). Resumen en `MODELO_ACTUAL.md` §9b.
+
+| Hallazgo de los creadores | Qué responde en la cadena |
+|---|---|
+| La gramática de 16 bits (suelo desde arriba, edificios de frente) puesta en 3D sale plana; se convierte con terrazas, fondo más alto y casas más chicas | **Es la mecánica de transformación desde una planta top-down** (top): la familia «la altura crece con la profundidad» deja de ser polish y pasa a ser la regla de conversión M2 → M3 |
+| Primero la zona alrededor de los caminos principales, después conjuntos modulares | Orden de la cadena de Dormans: M0 (camino) → M1 (zona alrededor del camino) → piezas |
+| Interiores 1:2 con el héroe constante en pantalla y los objetos de delante ocultos al entrar | La escala es un atributo del espacio (M1) y el héroe constante es de la toma (M2) |
+| Máscara alfa circular sobre lo que tapa al héroe | Alternativa de pantalla a «vecinos delante» y al corte Zelda: no deforma el mundo |
+| Demo recorrible con modelos temporales antes del detalle (también DQ11) | Nuestro método de caminata k0–k8 es el de ellos |
+| Regla del Post-It: una idea por nota, explicable en una frase | Aplicable a nuestros briefs: un ítem que no cabe en una frase no va |
+
+Lectura: la GDC confirma HT1 en su parte de toma. La conversión de una planta top-down a HD-2D no es una regla
+escondida de Square Enix: es una corrección de escala y densidad hecha a mano (terrazas, fondo alto, casas
+chicas) sobre un nivel construido primero alrededor del camino.

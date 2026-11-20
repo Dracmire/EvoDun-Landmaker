@@ -67,3 +67,7 @@ Third-party frames from YouTube playthroughs, chosen by the user for verticality
 | v18 | `oct2_v18_night_city_wall_gate_towers_street.png` | A | street level in front; city wall with gate and towers rising behind |
 | v19 | `oct2_v19_night_mesa_top_drops_camp_below_a.png` | B | hero on a mesa; cliffs drop in front and at the sides; camp below |
 | v20 | `oct2_v20_night_mesa_top_drops_camp_below_b.png` | B | same mesa, second frame |
+
+## Fuente de primera mano
+
+GDC 2019, «The Fusion of Nostalgia and Novelty in the Development of Octopath Traveler» (Masashi Takahashi, Square Enix; Mika Iizuka y Keisuke Miyauchi, Acquire). Transcrito aportado por [U] el 2026-11-20; no se guarda en el repo (material de terceros). Resumen en `research/metodologia/MODELO_ACTUAL.md` §9b.
