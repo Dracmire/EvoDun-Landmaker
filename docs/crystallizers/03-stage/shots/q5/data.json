@@ -1,0 +1,993 @@
+{
+ "r21": {
+  "T": 3,
+  "window": [
+   21,
+   24,
+   8,
+   12
+  ],
+  "before": {
+   "heroRoom": 21,
+   "stretch": null,
+   "stairs": [
+    {
+     "room": 12,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 12,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 12,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 12,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 12,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 21,
+     "inHero": true,
+     "mode": "fill",
+     "risers": 4,
+     "depth": 3,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 21,
+     "inHero": true,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 21,
+     "inHero": true,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 21,
+     "inHero": true,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    }
+   ],
+   "info": {
+    "placed": 26,
+    "dropped": 0,
+    "narrowed": 7,
+    "sites": 26
+   },
+   "regions": 2,
+   "mainShare": 0.9748,
+   "walk": 7431,
+   "lego": {
+    "m": 2,
+    "terraces": 2
+   }
+  },
+  "after": {
+   "heroRoom": 21,
+   "stretch": {
+    "room": 21,
+    "m": 2
+   },
+   "stairs": [
+    {
+     "room": 12,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 12,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 12,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 12,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 12,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 21,
+     "inHero": true,
+     "mode": "cut",
+     "risers": 6,
+     "depth": 5,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 21,
+     "inHero": true,
+     "mode": "cut",
+     "risers": 6,
+     "depth": 5,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 21,
+     "inHero": true,
+     "mode": "fill",
+     "risers": 6,
+     "depth": 5,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 24,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 8,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    }
+   ],
+   "info": {
+    "placed": 25,
+    "dropped": 1,
+    "narrowed": 6,
+    "sites": 26
+   },
+   "regions": 2,
+   "mainShare": 0.9748,
+   "walk": 7430,
+   "lego": {
+    "m": 2,
+    "terraces": 2
+   }
+  }
+ },
+ "r16_9": {
+  "T": 9,
+  "window": [
+   16,
+   22,
+   15
+  ],
+  "before": {
+   "heroRoom": 16,
+   "stretch": null,
+   "stairs": [
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 4,
+     "depth": 3,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 5,
+     "depth": 4,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 4,
+     "depth": 3,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 4,
+     "depth": 3,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 4,
+     "depth": 3,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 5,
+     "depth": 4,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 5,
+     "depth": 4,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 4,
+     "depth": 3,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 5,
+     "depth": 4,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    }
+   ],
+   "info": {
+    "placed": 24,
+    "dropped": 10,
+    "narrowed": 15,
+    "sites": 35
+   },
+   "regions": 4,
+   "mainShare": 0.5878,
+   "walk": 3025,
+   "lego": {
+    "m": 3,
+    "terraces": 2
+   }
+  },
+  "after": {
+   "heroRoom": 16,
+   "stretch": {
+    "room": 16,
+    "m": 3
+   },
+   "stairs": [
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 4,
+     "depth": 3,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 5,
+     "depth": 4,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 4,
+     "depth": 3,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 4,
+     "depth": 3,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 4,
+     "depth": 3,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 5,
+     "depth": 4,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 5,
+     "depth": 4,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 22,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 4,
+     "depth": 3,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "cut",
+     "risers": 5,
+     "depth": 4,
+     "cols": 3,
+     "narrowed": false
+    },
+    {
+     "room": 15,
+     "inHero": false,
+     "mode": "fill",
+     "risers": 3,
+     "depth": 2,
+     "cols": 1,
+     "narrowed": true
+    }
+   ],
+   "info": {
+    "placed": 24,
+    "dropped": 10,
+    "narrowed": 15,
+    "sites": 35
+   },
+   "regions": 4,
+   "mainShare": 0.5878,
+   "walk": 3025,
+   "lego": {
+    "m": 3,
+    "terraces": 2
+   }
+  }
+ },
+ "pageErrors": 0
+}

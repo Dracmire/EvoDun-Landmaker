@@ -962,6 +962,9 @@
       const pack = fl ? E.floorPack(raw, st.floors === 'single' ? st.layer : 0) : raw;
       try {
         S = (stageShape() ? E.s3.shape : E.shape)(pack, P, fl ? null : sliceSpec()); // STAGE CONSTRUCTOR (fork of DAC, stage_s3_fork_go.md): mode 3 builds its shape with the clone E.s3.shape; modes 1, 2, 4 (and 5, 6) keep E.shape
+        if (!fl && stageShape()) { // PR Q5 (P7): the stairs of the hero's LEGO room get risers 1 / m (longer, never taller); the carve needs m before it runs, so the shape is rebuilt ONCE when it changes (the same pattern as the yaw flip)
+          const sr = legoOn() && !(E.legoTest && E.legoTest.noStairStretch) ? orientRoom() : null, tt = sr ? E.s3.lego.terraces(S, P, sr, baseYaw()) : [], mm = tt.length >= 2 ? E.s3.lego.mOf(tt, P.terraces) : 1, want = mm >= 2 ? { room: sr.id, m: mm } : undefined, have = P.stairStretch;
+          if (!((!want && !have) || (want && have && want.room === have.room && want.m === have.m))) { P.stairStretch = want; S = null; invalidate(true); return; } }
         if (!fl && stageZonesOn()) buildStageZones(S); // M2b: the zone map of the PNG, before anything of mode 3 reads the zones
         if (!fl && stageOn() && st.win && st.stage.blockedList && st.stage.blockedList.length) S.stageBlocked = E.stage.applyBlocked(S, st.stage.blockedList); // PR profiles-mockup: the declared blocked rectangles of a mockup, before anything reads the walkable tiles
         if (!fl && borderOn()) E.border.apply(S, { type: st.stage.border, tilesPerH: st.stage.tilesPerH, yaw: baseYaw(), test: E.borderTest }); // S2: right after the shape, before anything reads the levels

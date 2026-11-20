@@ -12,8 +12,8 @@ const E = window.EVO; let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) { pass++; console.log('PASS ' + name); } else { fail++; console.log('FAIL ' + name, extra === undefined ? '' : JSON.stringify(extra).slice(0, 500)); } };
 // (1) literal
 for (const f of ['shape', 'rooms', 'roomtypes', 'pocket']) {
-  const o = SRC(f), c = SRC('s3/' + f), body = c.slice(c.indexOf('*/') + 3), expect = o.replace('(function (E) {', "(function (E0) {\n  const E = E0.s3 || (E0.s3 = Object.create(E0)); // the clone's namespace (see the header)");
-  ok(`src/s3/${f}.js is a literal copy of src/${f}.js: after its header comment it equals the original with ONLY the opening line of the IIFE changed to the namespace of E.s3`, body === expect && o.split('(function (E) {').length === 2, { lo: o.length, lc: body.length });
+  const o = SRC(f), c0 = SRC('s3/' + f), c = c0.replace(/^[ \t]*\/\/ \[DAC3-DIVERGENCE-BEGIN[^\n]*\n[\s\S]*?^[ \t]*\/\/ \[DAC3-DIVERGENCE-END\]\n/gm, ''), body = c.slice(c.indexOf('*/') + 3), expect = o.replace('(function (E) {', "(function (E0) {\n  const E = E0.s3 || (E0.s3 = Object.create(E0)); // the clone's namespace (see the header)");
+  ok(`src/s3/${f}.js is a literal copy of src/${f}.js: after its header comment it equals the original with ONLY the opening line of the IIFE changed to the namespace of E.s3 (plus the regions between the DAC3-DIVERGENCE-BEGIN / END marker lines: decided divergences, PR Q5)`, body === expect && o.split('(function (E) {').length === 2, { lo: o.length, lc: body.length });
 }
 // (2) identical S
 const ha = (h, v) => { if (v === undefined || v === null) h.update('~'); else if (ArrayBuffer.isView(v)) h.update(Buffer.from(v.buffer, v.byteOffset, v.byteLength)); else h.update(JSON.stringify(v)); };
