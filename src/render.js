@@ -41,6 +41,7 @@
      perspective camera uses them: the facing of a face depends on where it is). */
   function makeCam(S, P, view, w, h) {
     if (view.kind === 'persp') return makePersp(S, P, view, w, h);
+    if (view.kind === 'oblique' && view.depthScale !== undefined && E.s3 && E.s3.obliqueCam) return E.s3.obliqueCam(S, P, view, w, h); // mode 3, Cam 7 with a depth scale (src/s3/camera.js, a clone of the affine branch below); absent = the original code
     const yaw = view.yaw * Math.PI / 180, pit = view.pitch * Math.PI / 180;
     const cy = Math.cos(yaw), sy = Math.sin(yaw), sp = view.kind === 'oblique' ? 1 : Math.sin(pit), cp = view.kind === 'oblique' ? 1 : Math.cos(pit);
     const base = S.baseH !== undefined ? S.baseH : S.levelH[0] - P.terH, top = S.levelH[S.maxFine]; // S.baseH: a pocket over the void has a deep base of its own
