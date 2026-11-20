@@ -123,3 +123,32 @@ son 8 fotogramas en perspectiva, no mapas.
 **La prueba de incremento es la transformación local:** se toma una regla, se escribe como operador y se mira si
 predice el remake que no se usó. Si acierta, sube a lv3; si no, la regla se corrige o se descarta (dos pasadas como
 máximo).
+
+## 6. Corrección de [U] (A609–A610)
+
+**Lo que estaba mal en §5.** Las reglas L1–L5 son reales, pero son una taxonomía de cambios: describen *qué* cambió,
+no *cómo* se transforma. HT1 es sobre transformaciones, y una regla que no se puede ejecutar no prueba transformación
+ni da ganancia. Por la regla de [U] (sin ganancia no se prueba), TL como estaba en §5 no se lleva adelante.
+
+**Lo natural: reproducir la transformación.** Y ya la reproducimos tres veces, a mano, sin verlo así: los scripts
+`refs/dq3/aurheas_fountain/derived/derive_roles.py` (198 líneas), `refs/dq3/forest_plains/annotated/derive_roles.py`
+(218) y `refs/dq3/throne_aliahan/derive_roles.py` (79) toman un mapa viejo top-down y producen el pack que el visor
+convierte en escena. Los tres hacen los mismos pasos:
+
+1. leer el recorte del mapa y su grilla (Aurhea la aprende de los bloques);
+2. clasificar cada baldosa por su firma de color (agua, roca, camino, flor, árbol, pasto);
+3. armar zonas por piezas conectadas (`MIN_PIECE`) o por sectores;
+4. dar altura por clase o zona (agua < tierra < meta: la península de Aurhea a 60, la tarima del trono en subniveles);
+5. marcar camino y meta (POI).
+
+Lo que cada script tiene **a mano y propio** son los umbrales de color, las reglas geométricas de sector y las alturas
+puestas a ojo. Lo **compartido** es la transformación local: firma de la baldosa → clase → rol y altura.
+
+**HT1 a un nivel más:** extraer de los tres scripts un solo operador local, sin reglas por mapa, y comprobar si
+reproduce cada mapa.
+- **Ganancia:** el operador es la herramienta de M6 (relieve automático desde el trazado, hoy «?» por falta de método)
+  y la entrada que el generador de EvoDun puede alimentar con un trazado del mismo tipo.
+- **Juez:** escribir el operador con dos mapas y aplicarlo al tercero; comparar baldosa por baldosa con el pack hecho a
+  mano (clase y altura) y la escena con la toma emparejada del remake (M4 ya existe).
+- **Descarte (fijado antes):** si el operador sin ajustes por mapa no reproduce la mayoría de las baldosas del mapa
+  que quedó fuera, la conversión de DQ3 es autoral por mapa y HT1 se queda en lv2.
