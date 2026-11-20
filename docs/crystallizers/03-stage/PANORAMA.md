@@ -177,3 +177,31 @@ Transcrito aportado por [U] (no se guarda en el repo). Resumen en `MODELO_ACTUAL
 Lectura: la GDC confirma HT1 en su parte de toma. La conversión de una planta top-down a HD-2D no es una regla
 escondida de Square Enix: es una corrección de escala y densidad hecha a mano (terrazas, fondo alto, casas
 chicas) sobre un nivel construido primero alrededor del camino.
+
+## HT1 · lectura completa (A601–A603)
+
+Escenas útiles: 8 de 10 pares (casa de pueblo, cueva con isla, corredor de desierto, sala del trono, posada, guarida
+de Robbin' Ood [`tower_hall` y `throne_hall_columns` son la misma escena], frente de tienda, puerta de castillo).
+`forest_light` es una ilustración de cinemática, no un mapa: fuera. El par de mapas del bosque no se leyó aquí.
+
+| Cambio del remake | Escenas | Predictor en el original | Vive en |
+|---|---|---|---|
+| C1 Se conservan los hitos (estatuas, columnas, trono, mostrador, puerta, árboles) | 8 / 8 (posada parcial) | Objetos distintos sobre el suelo | Lugar (M1) |
+| C2 Marco o recinto a los lados y al frente (columnatas, barandas, cornisas, árboles, muros) | 8 / 8 | Borde de lo caminable o filas de objetos existentes | Lugar (M1) |
+| C3a La meta del fondo sube (trono en tarima, isla del altar, barra de la posada, castillo al final de una subida) | 4 / 8 | Meta en el extremo del eje principal | Lugar (M1) |
+| C3b La zona distinta frente a una puerta pasa a tarima con escalones (porche de la tienda, paseo del pueblo) | 2 / 8 | Parche de suelo distinto frente a una entrada (rasgo 7) | Lugar (M1) |
+| C7 La cámara mira a lo largo del eje principal (alfombra, camino, puente) hacia la meta | 6 / 8 | El eje dominante del trazado | Toma (M2), desde la misión (M0) |
+| C4 Oclusor de primer plano | 7 / 8 | Con predictor en 3 (fila de columnas o árboles en el borde cercano: desierto, guarida, castillo); sin predictor en 4 | Toma (M2) |
+| C6 Más densidad de objetos (mesas, cofres, barriles, macetas) | 4 / 8 | Ninguno en el trazado; depende de la función del lugar (taberna, guarida, tienda) | Semántica del generador |
+| C5 Contexto fuera del mapa (canal, cascada) | 2 / 8 | Ninguno | Toma (M2), fondo |
+
+**Veredicto de HT1: no se descarta.** Cinco tipos de cambio se repiten con el mismo predictor en 3 escenas o más
+(C1, C2, C3a, C7 y C4 con predictor). Lo que queda sin predictor es poco y tiene dueño: la densidad (C6) viene de la
+función del lugar, que el generador tiene que entregar como semántica; el oclusor sin predictor y el contexto (C4, C5)
+los pone la toma.
+
+**Consecuencia para la cadena:** el lugar (M1) se deriva del trazado con cuatro reglas (C1, C2, C3a, C3b) más el eje
+(C7); la toma (M2) agrega el primer plano y el fondo; el generador agrega la función del lugar (densidad).
+
+**Contradicción a revisar por [U]:** el modelo marca «Elevar el POI» como descartado (A083), pero el remake sube la meta
+del fondo en 4 de 8 escenas, y la GDC de Octopath sube el fondo. A083 se midió en el visor; los pares dicen otra cosa.
