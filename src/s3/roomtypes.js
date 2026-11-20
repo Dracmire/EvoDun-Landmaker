@@ -805,6 +805,9 @@
     'rGentle', 'rSteep', 'rExp', 'rHTol', 'rRadius', 'rMinRoom', 'rHardEdge', 'rMinSizeEdge', 'roomsMinCore', 'roomsCross', 'rScanFirst', 'cake', 'cakeLayers', 'cakePer', 'cakeStep', 'cakeSeam', 'cakeMargin', 'cakeCorridor', 'cakeUpV1', 'cakeCoreOpen', 'cakeCut',
     'anchors', 'anchorH', 'chainExtra', 'chainNodes', 'chainJustified', 'dioChain'];
   T.CHAIN_NOT_KEY = {
+    // [DAC3-DIVERGENCE-BEGIN Q5]
+    stairStretch: 'DAC3 only (PR Q5): { room, m } read by the stair carve of src/s3/shape.js AFTER the chain: it changes the carve (the risers of the hero\'s lego room), not the rooms layer, the chain or the plan',
+    // [DAC3-DIVERGENCE-END]
     chainIds: 'derived: the chain the plan is computed for (an output of roomChain)', chainSeqs: 'derived (output of roomChain)', chainGoals: 'derived (output of roomChain)', chainTypes: 'derived (output of chainTypes)', chainBlocked: 'derived (output of roomChain)',
     dioPlan: 'derived: the plan itself', ascRouteFaces: 'derived: the faces crossed by the drawn routes, set after the shape is built (Ascension gates)',
     ascWalls: 'Ascension walls are built from the shape after the plan (S.ascWalls); they change neither S.fine, the regions nor the walking graph', ascHeight: 'height of the Ascension walls (S.ascWalls only)', ascCut: 'low part of the Ascension walls (S.ascWalls only)', ascGate: 'gate width of the Ascension walls (S.ascWalls only)',

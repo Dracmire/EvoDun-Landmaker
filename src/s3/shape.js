@@ -577,6 +577,18 @@
     cands.sort((p, q) => p.h - q.h);
     const pickUp = (h) => { for (let k = cands.length - 1; k >= 0; k--) if (cands[k].h <= h + reach) return cands[k].h > h + EPS ? cands[k] : null; return null; };
     const pickDown = (h) => { for (let k = 0; k < cands.length; k++) if (cands[k].h >= h - reach) return cands[k].h < h - EPS ? cands[k] : null; return null; };
+    // [DAC3-DIVERGENCE-BEGIN Q5] (the test of the clone strips the lines between the markers: tools/test_s3_clone.js)
+    /* PR Q5 (P7, F1 of [U]): a stair of a LEGO room (m >= 2, `P.stairStretch = { room, m }`, set by src/ui.js after the lego is known) is built with risers 1 / m of the Mid ones, so that after the lego stretches the heights of the room by m each riser is again at most the Mid riser; the stair gets LONGER (more treads, up to MAX_TREADS * m) instead of taller. Absent (or m = 1, or a pass outside that room) = the carve of before, byte for byte. */
+    const REACH = new Map(), stretchOf = (pass) => (P.stairStretch && P.stairStretch.m > 1 && S.roomMap && S.roomMap[pass.a] === P.stairStretch.room ? P.stairStretch.m : 1);
+    const reachSet = (m) => {
+      if (m === 1) return { reach, pickUp, pickDown, MAX_TREADS };
+      if (!REACH.has(m)) { const rp = reachPlain / m, rc = rp + EPS, cc = []; for (let L = 0; L <= S.maxFine; L++) cc.push({ h: S.levelH[L], base: L });
+        for (let t = 0; t + 1 < N; t++) { const top = E.terBase(t, P, S.center) + (K - 1) * s, g = E.terBase(t + 1, P, S.center) - top, nb = Math.ceil(g / rp - EPS) - 1; for (let j = 1; j <= nb; j++) cc.push({ h: top + j * g / (nb + 1), base: -1, ter: t, frac: j / (nb + 1) }); }
+        cc.sort((p, q) => p.h - q.h);
+        REACH.set(m, { reach: rc, MAX_TREADS: Math.ceil(MAX_TREADS * m), pickUp: (h) => { for (let k = cc.length - 1; k >= 0; k--) if (cc[k].h <= h + rc) return cc[k].h > h + EPS ? cc[k] : null; return null; }, pickDown: (h) => { for (let k = 0; k < cc.length; k++) if (cc[k].h >= h - rc) return cc[k].h < h - EPS ? cc[k] : null; return null; } }); }
+      return REACH.get(m);
+    };
+    // [DAC3-DIVERGENCE-END]
     const hT = new Float64Array(n); for (let i = 0; i < n; i++) hT[i] = S.levelH[S.fine[i]];
     const used = new Uint8Array(n), carved = new Uint8Array(n), carve = new Map(), stairs = [];
     let dropped = 0, narrowed = 0, fills = 0, shiftedCols = 0;
@@ -628,6 +640,9 @@
       return rec;
     };
     const plan = (pass, mode) => {
+      // [DAC3-DIVERGENCE-BEGIN Q5]
+      const { reach, pickUp, pickDown, MAX_TREADS } = reachSet(stretchOf(pass)); // the risers (and the length cap) of a stretched stair; they shadow the outer ones
+      // [DAC3-DIVERGENCE-END]
       const ax = pass.a % W, ay = (pass.a / W) | 0, bx = pass.b % W, by = (pass.b / W) | 0;
       const dx = bx - ax, dy = by - ay, ex = -dy, ey = dx, cut = mode === 'cut';
       const sx = cut ? bx : ax, sy = cut ? by : ay, sd = cut ? 1 : -1;        // path: b, b+d, ...  (cut)  or  a, a-d, ...  (fill)

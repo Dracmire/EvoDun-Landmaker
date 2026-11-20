@@ -30,7 +30,7 @@ const withKey = (keys, fn) => { const old = T.CHAIN_KEY; T.CHAIN_KEY = keys; try
   // ---- (1) completeness of the audit
   const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`\\])\/\/.*$/gm, '$1');
   const reads = new Map(); for (const f of ['shape', 'rooms', 'roomtypes', 's3/shape', 's3/rooms', 's3/roomtypes', 'pocket']) for (const m of strip(fs.readFileSync(path.join(__dirname, `../src/${f}.js`), 'utf8')).matchAll(/\bP\.([A-Za-z_]\w*)/g)) { if (!reads.has(m[1])) reads.set(m[1], new Set()); reads.get(m[1]).add(f); }
-  const KEY = new Set(T.CHAIN_KEY), NOT = new Set(Object.keys(T.CHAIN_NOT_KEY)), unlisted = [...reads.keys()].filter((k) => !KEY.has(k) && !NOT.has(k) && !/^dio/.test(k)).sort();
+  const KEY = new Set(T.CHAIN_KEY), NOT = new Set([...Object.keys(T.CHAIN_NOT_KEY), ...Object.keys(E.s3.roomTypes.CHAIN_NOT_KEY)]) /* PR Q5: the DAC3 table adds its own audited fields (stairStretch) */, unlisted = [...reads.keys()].filter((k) => !KEY.has(k) && !NOT.has(k) && !/^dio/.test(k)).sort();
   ok(`COMPLETENESS: every P.<name> read of shape.js, rooms.js, roomtypes.js and pocket.js (${reads.size} names) is a key field, an audited NOT-key field or a dio* hook`, unlisted.length === 0, 'unlisted: ' + unlisted.join(', '));
   ok('COMPLETENESS: no field is both a key field and a NOT-key field', [...KEY].every((k) => !NOT.has(k)));
   ok('COMPLETENESS: every NOT-key field carries its reason', Object.values(T.CHAIN_NOT_KEY).every((r) => typeof r === 'string' && r.length > 10));
