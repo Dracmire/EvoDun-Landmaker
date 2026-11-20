@@ -75,3 +75,11 @@ por unidad, escrita en una tabla.
 - Es la herramienta de M6: sin reglas por mapa, de un trazado plano sale el relieve.
 - EvoDun entrega clases, zonas, camino y meta: el operador corre sobre su salida.
 - Potencial lv5 (lectura de [U]): si funciona, el lugar sale de la misión y del trazado, y alimenta la toma.
+
+## 7. Contradicciones = señal de tipos (nota de [U], A613)
+
+Si dos transformadores se contradicen entre mapas (T-A ascenso en el trono contra T-F cuenca en el bosque), no se
+elige uno a la fuerza: puede ser la señal de **varios tipos de lugar o de sala**. La prueba registra qué atributo del
+mapa plano separa a los mapas donde gana cada uno (interior / exterior, recinto cerrado / abierto, agua, posición de
+la meta respecto de lo más alto) y lo propone como **tipo**. Un tipo así sale de la transformación, no de un
+clasificador a priori (como fueron los perfiles P1–P6).
