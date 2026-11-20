@@ -205,3 +205,33 @@ los pone la toma.
 
 **Contradicción a revisar por [U]:** el modelo marca «Elevar el POI» como descartado (A083), pero el remake sube la meta
 del fondo en 4 de 8 escenas, y la GDC de Octopath sube el fondo. A083 se midió en el visor; los pares dicen otra cosa.
+
+## Niveles de hipótesis (A604, escala de [U] 2026-11-20)
+
+Escala: **lv1 entry** (propuesta) · **lv2 existe** (comprobada) · **lv3 applied** (testeada y aplicada al modelo) ·
+**lv4 mature** (madura, dio ganancia) · **lv5 evolved** (se integró y nos subió de nivel).
+
+| Hipótesis | Nivel | Evidencia que lo sostiene | Qué falta para subir |
+|---|---|---|---|
+| HT1 · la conversión DQ3 es reglas locales con predictor (A591, A601) | lv2 | 8 escenas, cinco cambios repetidos | Aplicar las reglas del lugar en el modelo y probarlas |
+| La altura crece con la profundidad de la vista (A593) | lv3 | Rasgo 2 construido (planes, lego); pares C3a 4/8; GDC (terrazas, fondo más alto) | Ganancia medida: hoy tapa con muchas terrazas (A574) |
+| El encuadre siempre está cerrado (A593) | lv3 | Rasgo 3 construido; pares C2 8/8 | Que el cierre salga del lugar y no a mano |
+| El eje del recorrido es el eje de la vista (A593) | lv3 | Rasgo 1 construido (orientación C1); pares C7 6/8 | Ganancia medida |
+| El héroe es la unidad (H) y su tamaño en pantalla se mantiene (A593) | lv4 | Medidas en H en todo el modo 3; GDC interiores 1:2 con el héroe constante | Integrarlo a la cadena como atributo de la toma |
+| Las transiciones se leen desde la cámara (A593) | lv3 | P7, rampas, borde híbrido construidos | Ganancia medida |
+| Más deformación para la cámara (top 6; A427, A572) | lv2 | GDC: casas más chicas, fondo más alto, interiores 1:2 | Aplicarla como regla de la toma |
+| Recinto contra terreno abierto (top 4; A382, A465) | lv2 | Medido en DAC (salas abiertas de 8–61 H); pares C2 8/8 | Construir el lugar (M1) |
+| Cadena de Dormans: camino → lugar (A592) | lv2 | GDC: primero la zona alrededor del camino, después piezas; HT1: el lugar se deriva del trazado | Aplicarla al modelo |
+| La toma como mecánica de transformación (A594, A597) | lv1 | Convergencia del polish; sin prueba directa | Especificarla y probarla |
+| Escena = secuencia de tomas (top 5; A580) | lv1 | Plataformas con punto de vista en el código de [U] | Prueba |
+| HD-2D = 3D + pase de composición (top 1; A497) | lv2 | GDC: materiales y postproceso son «la mayor llave» | Aplicarla (va a Unity) |
+| Hoja por origen: DQ3 top-down contra Octopath 2.5D (top 2; A497) | lv1, debilitada | La GDC dice que Octopath también parte de la gramática de 16 bits (FF6) | Revisar o descartar |
+| El 2.5D como transición (top 3; A503) | lv1 | GDC: objetos 2.5D como puente; la gramática de 16 bits ya es medio 2.5D | Prueba |
+| Elevar la meta del fondo (A083 descartado, A603) | lv1, reabierta | Pares 4/8, GDC | Decisión de [U] y prueba |
+| Hueco de DQ3 detrás de un mirador (A572) | lv1 | Regla de [U]; Q4: 0 de 32 pares | Un caso real |
+| Lo visible / oculto clasifica la plataforma (A580) | lv1 | Caja negra del generador | Prueba |
+| H1–H6, tipos de escenario | lv1 | Test que no sirve (A586) | Rehacerlos desde las reglas del lugar de HT1 |
+| Perfiles de forma P1–P6, T1, T2 | lv1 | Clasificador sin juez | Rehacerlos como tipos de toma |
+| Lego y número de terrazas se sustituyen (A564) | lv2, congelada | P3 | Nada: congelada |
+
+Ninguna está en lv5. Candidata: «la altura crece con la profundidad», que pasó de polish a regla de conversión.
