@@ -133,3 +133,30 @@ Cada polish es un arreglo local de una estructura que falta arriba en la cadena:
 
 Lectura: las cinco familias de polish son síntomas de tres modelos ausentes (M0 proyectado, M1, M2). Por eso
 avanzar en M3 no movía el panorama.
+
+## HT1 · lectura parcial (3 de 10 pares; A595)
+
+Pares leídos: casa de pueblo, cueva con isla, corredor de desierto.
+
+| Cambio | Pares | Predictor en el original | Modelo |
+|---|---|---|---|
+| C1 Se conservan los hitos (estatuas, columnas, mostrador) | 3 / 3 | Objetos distintos sobre el suelo | M1 (identidad del lugar) |
+| C2 Se agrega un marco o recinto a los lados y al frente (columnatas, baranda y arbustos, cornisa de roca) | 3 / 3 | Borde del camino o del suelo caminable | M1 (recinto) |
+| C3 Se eleva la meta o el camino (isla del altar, paseo elevado) | 2 / 3 | Agua alrededor de la meta; camino contra pasto | M1 → M3 |
+| C4 Se agrega un oclusor de primer plano (arbusto borroso, braseros, pórtico) | 3 / 3 | Ninguno | M2 (la toma) |
+| C5 Se agrega contexto fuera del mapa (canal, cascada) | 2 / 3 | Ninguno | M2 (fondo de la toma) |
+
+Lectura provisional: lo que tiene predictor (C1, C2, C3) vive en el lugar; lo que no lo tiene (C4, C5) vive en la
+toma. HT1 no está descartada con 3 pares; faltan 7.
+
+## DQ11, proceso de creación 2D / 3D (A596)
+
+Fuentes: entrevista interna de Square Enix (Hiyama, Uchikawa) vía GoNintendo y 80.lv; Okamoto vía Nintendo Life;
+Dengeki Online; RPG Site (prototipo de DQ3 en PS4).
+- Orden: arte conceptual 2D del pueblo → el 3D se construye con modelos temporales y se recorre una y otra vez
+  («escenario, jugabilidad, comprensión») → detalle → el modo 2D se recrea desde el 3D.
+- La traducción entre modos fue a mano, «uno por uno»; criterio: que la ciudad se reconozca; difícil: qué hitos
+  conservar y cuáles cortar.
+- Cambios por legibilidad en cada modo: techos triangulares → terrazas, escaleras de mano, «estructura muy cambiada»;
+  interiores de varios pisos legibles en 3D, ilegibles en 2D plano.
+- Prototipo de DQ3 en PS4 (Aliahan): los pueblos escasos del original se sentían vacíos en 3D → se agregó densidad.
