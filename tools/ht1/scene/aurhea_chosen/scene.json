@@ -1,0 +1,50 @@
+{
+ "map": "aurhea",
+ "set": [
+  "A",
+  "D",
+  "E"
+ ],
+ "levels": 3,
+ "level_counts": {
+  "0": 171,
+  "1": 96,
+  "2": 261
+ },
+ "window_zones": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "hero_k0": [
+  23,
+  43
+ ],
+ "hero_k4": [
+  23,
+  31
+ ],
+ "axis_len": 12,
+ "terraces_to_set": 3,
+ "fired": {
+  "A": {
+   "bands": 3,
+   "axis_tiles": 12,
+   "band_tiles": [
+    96,
+    96,
+    261
+   ]
+  },
+  "E": {
+   "landmark_tiles": 0,
+   "zones": []
+  },
+  "D": {
+   "segments": 140,
+   "closed": 92
+  }
+ }
+}

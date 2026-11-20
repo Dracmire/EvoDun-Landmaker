@@ -1,0 +1,49 @@
+{
+ "map": "throne",
+ "set": [
+  "C",
+  "D",
+  "E",
+  "F"
+ ],
+ "levels": 3,
+ "level_counts": {
+  "0": 149,
+  "1": 1,
+  "2": 71
+ },
+ "window_zones": [
+  1
+ ],
+ "hero_k0": [
+  17,
+  23
+ ],
+ "hero_k4": [
+  17,
+  15
+ ],
+ "axis_len": 9,
+ "terraces_to_set": 3,
+ "fired": {
+  "C": {
+   "water_tiles": 0
+  },
+  "F": {
+   "basin_zones": [
+    1
+   ],
+   "zone_jumps": {}
+  },
+  "E": {
+   "landmark_tiles": 1,
+   "zones": [
+    1
+   ]
+  },
+  "D": {
+   "segments": 70,
+   "closed": 48
+  }
+ }
+}
