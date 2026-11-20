@@ -5702,7 +5702,8 @@ window.EVO_THRONE_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAACIAAAAaCAYAAADSbo4CAAAAd
 (function (E0) {
   const E = E0.s3 || (E0.s3 = Object.create(E0));
   const L = E.lego = {};
-  L.M_MAX = 3;
+  L.M_MAX = 3; // the cap of m when the number of terraces is not known (the old fixed cap)
+  L.mMax = (T) => (T > 0 ? Math.round(T / 2) + 1 : L.M_MAX); // PR Q2 (D5 of [U], interpretation of [R], to confirm): m <= round(T / 2) + 1, T = the number of terraces (3 -> 3, 5 -> 4, 7 -> 5, 9 -> 6); the ONE place of the cap [R]
   /* the walkable tiles of the room (the same predicate as vert.js) */
   const walkOf = (S, rec) => { const zm = E.stage.zoneMap(S), vd = S.void; return (i) => zm[i] === rec.id && !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]); };
   /* the terraces of the room: { t (0-based), base (old height), top (old height of its last sub-level), n tiles, u (mean view depth) } sorted by t */
@@ -5712,7 +5713,7 @@ window.EVO_THRONE_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAACIAAAAaCAYAAADSbo4CAAAAd
     return [...by.values()].sort((a, b) => a.t - b.t).map((q) => { const base = E.terBase(q.t, P, S.center); return { t: q.t, base, top: base + (K - 1) * s, n: q.n, u: q.su / q.n }; });
   };
   /* m of the room: its lowest walkable terrace (1-based), 1..3 */
-  L.mOf = (terr) => (terr.length ? Math.max(1, Math.min(L.M_MAX, terr[0].t + 1)) : 1);
+  L.mOf = (terr, T) => (terr.length ? Math.max(1, Math.min(L.mMax(T), terr[0].t + 1)) : 1);
   /* the new base of every terrace (by rank) */
   L.newBases = function (terr, m, Eh, treatment) { // PR lego2 (A531): a jump that crosses D terraces measures m * E * D (a jump of two terraces is no longer squeezed to one)
     const R = terr.length, out = new Array(R);
@@ -5740,10 +5741,10 @@ window.EVO_THRONE_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAACIAAAAaCAYAAADSbo4CAAAAd
     const yaw = o.yaw === undefined ? rec.yaw : o.yaw, terr = L.terraces(S, P, rec, yaw); out.terraces = terr.length;
     let f, m;
     if (terr.length < 2) { // PR lego3 (A539): a room on ONE terrace: the heights of its SUB-LEVELS are multiplied by m (Up: the lowest sub-level stays; Down: the highest stays); the level RANKING is the same, so the topology (which counts sub-levels, not heights) is identical
-      out.single = true; out.m = L.mOf(terr); if (!(terr.length === 1 && out.m >= 2)) return out; const q = terr[0]; m = out.m; out.sub = true;
+      out.single = true; out.m = L.mOf(terr, P.terraces); if (!(terr.length === 1 && out.m >= 2)) return out; const q = terr[0]; m = out.m; out.sub = true;
       f = treatment === 'up' ? (h) => ((h < q.base - 1e-9 || h > q.top + 1e-9) ? h : q.base + (h - q.base) * m) : (h) => ((h < q.base - 1e-9 || h > q.top + 1e-9) ? h : q.top - (q.top - h) * m);
     } else {
-      m = L.mOf(terr); const Eh = P.terH, nb = L.newBases(terr, m, Eh, treatment); f = L.heightMap(terr, nb); out.m = m;
+      m = L.mOf(terr, P.terraces); const Eh = P.terH, nb = L.newBases(terr, m, Eh, treatment); f = L.heightMap(terr, nb); out.m = m;
       for (let r = 0; r + 1 < terr.length; r++) out.jumps.push(+(nb[r + 1] - nb[r]).toFixed(4));
       if (!L.ordered(terr, treatment, false)) { if (L.ordered(terr, treatment, true)) out.yawFlip = true; else out.conflict = 'no yaw orders the walkable terraces of the room as the treatment wants (a higher one stays nearer than a lower one): not forced'; }
     }
@@ -5814,7 +5815,8 @@ window.EVO_THRONE_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAACIAAAAaCAYAAADSbo4CAAAAd
   function apply(S, o) {
     const T = o.test || E.planesTest || {}, tp = o.tilesPerH, W = S.W, vd = S.void, C = classify(S, o.room, o.yaw, { skip: o.skip, all: !!T.wallOnWalkable, noVoid: !!T.noVoidWall, chebyshev: !!T.chebyshev, waterOk: !!T.waterEligible });
     if (!C.footprint.length) return (S.stagePlanes = null);
-    let high = -1e9, low = 1e9; for (const i of C.footprint) if (C.walk(i)) { const h = S.levelH[S.fine[i]]; high = Math.max(high, h); low = Math.min(low, h); } if (high < -1e8) { high = low = S.levelH[S.fine[C.footprint[0]]]; }
+    const midH = o.midH, gOf = (i) => (midH ? midH[i] : S.levelH[S.fine[i]]); /* PR Q2: with `midH` (the ground of every tile BEFORE the lego, a Float32Array over the tiles of S) the heights the planes read from the HERO's ROOM (its highest / lowest walkable ground, the edge tile of a column) are the un-lego ones: the lego stretches the base only, the props keep their own height */
+    let high = -1e9, low = 1e9; for (const i of C.footprint) if (C.walk(i)) { const h = gOf(i); high = Math.max(high, h); low = Math.min(low, h); } if (high < -1e8) { high = low = gOf(C.footprint[0]); }
     const avoid = !!o.avoidPath && !T.noAvoidPath, pathV = avoid && S.fields && S.fields.path && S.fields.path.values, moves = new Map(), voidMoved = new Set(), skipped = { higher: 0, void: 0 }, hOf = (i) => S.levelH[S.fine[i]], at = (a, p) => { const x = a * C.f[0] + p * C.r[0], y = a * C.f[1] + p * C.r[1]; return x < 0 || y < 0 || x >= W || y >= S.H ? -1 : y * W + x; };
     const meta = (kind) => ({ ter: 0, sub: 0, bridge: false, deco: true, plane: kind });
     let wall = 0, cols = 0, front = 0; const colRows = { '-1': [], '1': [] };
@@ -5829,7 +5831,7 @@ window.EVO_THRONE_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAACIAAAAaCAYAAADSbo4CAAAAd
       for (let a0 = aMin; a0 <= aMax; a0 += every) { const ts = rowTiles.get(a0); if (!ts) continue; let pMin = 1e9, pMax = -1e9, iMin = -1, iMax = -1; for (const i of ts) { if (C.Pc[i] < pMin) { pMin = C.Pc[i]; iMin = i; } if (C.Pc[i] > pMax) { pMax = C.Pc[i]; iMax = i; } }
         for (const s of [-1, 1]) { const p0 = s > 0 ? pMax : pMin, edge = s > 0 ? iMax : iMin; let placed = false;
           for (let k = 1; k <= HYP.R && !placed; k++) { const j = at(a0, p0 + s * k); if (j < 0) break; const isV = !!(vd && vd[j]); if (isV && T.noVoidWall) { skipped.void++; break; } if (C.walk(j)) continue; if (C.cls[j] !== SIDE) continue;
-            const roof = hOf(edge) + E.stage.exag(HYP.colH, o.exag) * tp; if (!isV && hOf(j) >= roof - 1e-9) { skipped.higher++; placed = true; break; } if (moves.has(j)) { placed = true; break; } if (avoid && shadowHitsPath(a0, p0 + s * k, E.stage.exag(HYP.colH, o.exag) * tp)) { skipped.path++; placed = true; break; } moves.set(j, { h: roof, meta: meta('col') }); if (isV) voidMoved.add(j); cols++; colRows[s].push(a0); placed = true; } } } }
+            const roof = gOf(edge) + E.stage.exag(HYP.colH, o.exag) * tp; if (!isV && hOf(j) >= roof - 1e-9) { skipped.higher++; placed = true; break; } if (moves.has(j)) { placed = true; break; } if (avoid && shadowHitsPath(a0, p0 + s * k, E.stage.exag(HYP.colH, o.exag) * tp)) { skipped.path++; placed = true; break; } moves.set(j, { h: roof, meta: meta('col') }); if (isV) voidMoved.add(j); cols++; colRows[s].push(a0); placed = true; } } } }
     // FRONT: the tiles above the lowest ground of the room are lowered below it
     if (!T.noFront) { const target = low - HYP.frontDrop * tp; for (let i = 0; i < S.n; i++) { if (C.cls[i] !== FRONT) continue; const d = C.near.get(C.Pc[i]) - C.A[i]; if (d < 1 || d > HYP.frontDepth) continue; if (hOf(i) <= low + 1e-9 || moves.has(i)) continue; moves.set(i, { h: target, meta: meta('front') }); front++; } }
     // P1: a void tile that gets a wall / column becomes a drawn, blocked tile (own copies: `S.void` and `S.block` are shared with the quantization cached on the pack, the same care as src/backdrop.js)
@@ -10823,9 +10825,9 @@ window.EVO_THRONE_PNG={height:"iVBORw0KGgoAAAANSUhEUgAAACIAAAAaCAYAAADSbo4CAAAAd
         if (!fl && stageOn() && st.win && st.stage.blockedList && st.stage.blockedList.length) S.stageBlocked = E.stage.applyBlocked(S, st.stage.blockedList); // PR profiles-mockup: the declared blocked rectangles of a mockup, before anything reads the walkable tiles
         if (!fl && borderOn()) E.border.apply(S, { type: st.stage.border, tilesPerH: st.stage.tilesPerH, yaw: baseYaw(), test: E.borderTest }); // S2: right after the shape, before anything reads the levels
         if (!fl && volumesOn()) E.volumes.apply(S, { list: st.stage.volumeList, tilesPerH: st.stage.tilesPerH, exag: st.stage.exag, test: E.volumesTest }); // S4b: after the border (a volume on the border's water is skipped), before anything reads the levels
-        if (!fl && legoOn()) { const lr = orientRoom(); if (lr) S.legoInfo = E.s3.lego.apply(S, P, { room: lr, yaw: baseYaw(), treatment: legoMode(), tilesPerH: st.stage.tilesPerH, cakeLego: st.stage.cakeLego || 'rest' }); if (lr && S.legoInfo && S.legoInfo.yawFlip && st.stage.legoFlip !== lr.id) { st.stage.legoFlip = lr.id; S = null; invalidate(true); return; } } // PR lego (L2'): the heights of the walkable levels of the hero's room by terrace (DAC3 only), BEFORE the planes so the scenery reads the new heights; Mid never gets here
+        if (!fl && legoOn()) { S.legoMidH = Float32Array.from(S.fine, (l) => S.levelH[l]); /* PR Q2: the ground before the lego, for the planes (the lego stretches the base only) */ const lr = orientRoom(); if (lr) S.legoInfo = E.s3.lego.apply(S, P, { room: lr, yaw: baseYaw(), treatment: legoMode(), tilesPerH: st.stage.tilesPerH, cakeLego: st.stage.cakeLego || 'rest' }); if (lr && S.legoInfo && S.legoInfo.yawFlip && st.stage.legoFlip !== lr.id) { st.stage.legoFlip = lr.id; S = null; invalidate(true); return; } } // PR lego (L2'): the heights of the walkable levels of the hero's room by terrace (DAC3 only), BEFORE the planes so the scenery reads the new heights; Mid never gets here
         if (!fl && frameNbOn()) { const fr = orientRoom(); if (fr) E.s3.frame.apply(S, P, { room: fr, yaw: baseYaw(), treatment: legoMode(), tilesPerH: st.stage.tilesPerH }); } // PR pend P4: the neighbouring rooms as real ground (their own lego), before the planes, which then skip their tiles
-        if (!fl && planesOn()) { const pr = orientRoom(); if (pr) (frameNbOn() && S.frameNb ? E.s3.planes : E.planes).apply(S, { room: pr, yaw: baseYaw(), tilesPerH: st.stage.tilesPerH, exag: st.stage.exag, avoidPath: !!st.stage.planesAvoidPath, skip: frameNbOn() && S.frameNb ? S.frameNb.skip : undefined, test: E.planesTest }); } // C2: the planes of the hero's room, after the border and the volumes
+        if (!fl && planesOn()) { const pr = orientRoom(); if (pr) ((frameNbOn() && S.frameNb) || (legoOn() && S.legoMidH) ? E.s3.planes : E.planes).apply(S, { room: pr, yaw: baseYaw(), tilesPerH: st.stage.tilesPerH, exag: st.stage.exag, avoidPath: !!st.stage.planesAvoidPath, skip: frameNbOn() && S.frameNb ? S.frameNb.skip : undefined, midH: legoOn() && S.legoMidH && !(E.legoTest && E.legoTest.planesOnLego) ? S.legoMidH : undefined, test: E.planesTest }); } // C2: the planes of the hero's room, after the border and the volumes
         if (!fl && legoOn() && S.legoInfo) E.s3.lego.scenery(S, P, {}); // PR lego (L4, DOWN): the far wall falls with the room
         if (!fl && vertOn()) { const vr = orientRoom(); if (vr) S.vertInfo = E.s3.vert.apply(S, P, { room: vr, yaw: baseYaw(), tilesPerH: st.stage.tilesPerH }); } // PR verticality (D-V1): re-height of the walkable levels of the hero's room, only in DAC3, after the planes (which read the heights of the room: the multiset does not change)
         if (!fl) S.planeKey = planeKey();

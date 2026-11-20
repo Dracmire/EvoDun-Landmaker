@@ -1,0 +1,688 @@
+{
+ "antes": {
+  "r21_T7": {
+   "T": 7,
+   "ks": [
+    [
+     134,
+     202
+    ],
+    [
+     125,
+     195
+    ],
+    [
+     113,
+     202
+    ]
+   ],
+   "rows": [
+    {
+     "k": 0,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 33.07,
+      "planes": 24.97,
+      "other": 34.27,
+      "volumes": 0,
+      "unclassified": 7.69,
+      "billboards": 0.33
+     },
+     "kinds": {
+      "1": 20784,
+      "2": 444772,
+      "3": 13931,
+      "4": 138444
+     },
+     "lego": {
+      "m": 3,
+      "terraces": 4,
+      "single": false
+     }
+    },
+    {
+     "k": 4,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 98.83,
+      "planes": 0,
+      "other": 0.02,
+      "volumes": 0,
+      "unclassified": 1.15,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 5417,
+      "2": 617383,
+      "3": 294,
+      "4": 3906
+     },
+     "lego": {
+      "m": 3,
+      "terraces": 4,
+      "single": false
+     }
+    },
+    {
+     "k": 8,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 51.13,
+      "planes": 11.9,
+      "other": 26.89,
+      "volumes": 0,
+      "unclassified": 10.07,
+      "billboards": 0.43
+     },
+     "kinds": {
+      "1": 25859,
+      "2": 389603,
+      "3": 22059,
+      "4": 180123
+     },
+     "lego": {
+      "m": 3,
+      "terraces": 4,
+      "single": false
+     }
+    }
+   ]
+  },
+  "r21_T9": {
+   "T": 9,
+   "ks": [
+    [
+     134,
+     202
+    ],
+    [
+     125,
+     195
+    ],
+    [
+     113,
+     202
+    ]
+   ],
+   "rows": [
+    {
+     "k": 0,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 26.67,
+      "planes": 0.52,
+      "other": 63.33,
+      "volumes": 0,
+      "unclassified": 9.47,
+      "billboards": 0.64
+     },
+     "kinds": {
+      "1": 22158,
+      "2": 387161,
+      "3": 18606,
+      "4": 187313
+     },
+     "lego": {
+      "m": 3,
+      "terraces": 4,
+      "single": false
+     }
+    },
+    {
+     "k": 4,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 76.15,
+      "planes": 2.53,
+      "other": 13.68,
+      "volumes": 0,
+      "unclassified": 7.63,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 29951,
+      "2": 520413,
+      "3": 9805,
+      "4": 62879
+     },
+     "lego": {
+      "m": 3,
+      "terraces": 4,
+      "single": false
+     }
+    },
+    {
+     "k": 8,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 57.37,
+      "planes": 18.03,
+      "other": 17.16,
+      "volumes": 0,
+      "unclassified": 7.44,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 23877,
+      "2": 473069,
+      "3": 13612,
+      "4": 111969
+     },
+     "lego": {
+      "m": 3,
+      "terraces": 4,
+      "single": false
+     }
+    }
+   ]
+  },
+  "r16_9_T7": {
+   "T": 7,
+   "ks": [
+    [
+     117,
+     43
+    ],
+    [
+     118,
+     45
+    ],
+    [
+     119,
+     47
+    ]
+   ],
+   "rows": [
+    {
+     "k": 0,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 0,
+      "planes": 5.63,
+      "other": 85.76,
+      "volumes": 0,
+      "unclassified": 8.61,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 10591,
+      "2": 330477,
+      "3": 17472,
+      "4": 250188
+     },
+     "lego": null
+    },
+    {
+     "k": 4,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 0,
+      "planes": 4.11,
+      "other": 87.92,
+      "volumes": 0,
+      "unclassified": 7.96,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 11092,
+      "2": 326797,
+      "3": 16481,
+      "4": 257116
+     },
+     "lego": null
+    },
+    {
+     "k": 8,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 0,
+      "planes": 3.66,
+      "other": 88.14,
+      "volumes": 0,
+      "unclassified": 8.19,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 10982,
+      "2": 362139,
+      "3": 16458,
+      "4": 220063
+     },
+     "lego": null
+    }
+   ]
+  },
+  "r16_9_T9": {
+   "T": 9,
+   "ks": [
+    [
+     117,
+     43
+    ],
+    [
+     118,
+     45
+    ],
+    [
+     119,
+     47
+    ]
+   ],
+   "rows": [
+    {
+     "k": 0,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 1.62,
+      "planes": 13.57,
+      "other": 77.87,
+      "volumes": 0,
+      "unclassified": 6.93,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 11568,
+      "2": 343954,
+      "3": 11602,
+      "4": 244856
+     },
+     "lego": null
+    },
+    {
+     "k": 4,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 0.33,
+      "planes": 7.77,
+      "other": 83.93,
+      "volumes": 0,
+      "unclassified": 7.97,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 11452,
+      "2": 325296,
+      "3": 15040,
+      "4": 258566
+     },
+     "lego": null
+    },
+    {
+     "k": 8,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 0.16,
+      "planes": 6.73,
+      "other": 85.15,
+      "volumes": 0,
+      "unclassified": 7.96,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 11901,
+      "2": 325827,
+      "3": 15318,
+      "4": 257882
+     },
+     "lego": null
+    }
+   ]
+  },
+  "pageErrors": 0
+ },
+ "despues": {
+  "r21_T7": {
+   "T": 7,
+   "ks": [
+    [
+     134,
+     202
+    ],
+    [
+     125,
+     195
+    ],
+    [
+     113,
+     202
+    ]
+   ],
+   "rows": [
+    {
+     "k": 0,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 33.07,
+      "planes": 24.97,
+      "other": 34.27,
+      "volumes": 0,
+      "unclassified": 7.69,
+      "billboards": 0.33
+     },
+     "kinds": {
+      "1": 20784,
+      "2": 444772,
+      "3": 13931,
+      "4": 138444
+     },
+     "lego": {
+      "m": 3,
+      "terraces": 4,
+      "single": false
+     }
+    },
+    {
+     "k": 4,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 98.83,
+      "planes": 0,
+      "other": 0.02,
+      "volumes": 0,
+      "unclassified": 1.15,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 5417,
+      "2": 617383,
+      "3": 294,
+      "4": 3906
+     },
+     "lego": {
+      "m": 3,
+      "terraces": 4,
+      "single": false
+     }
+    },
+    {
+     "k": 8,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 51.13,
+      "planes": 11.9,
+      "other": 26.9,
+      "volumes": 0,
+      "unclassified": 10.08,
+      "billboards": 0.43
+     },
+     "kinds": {
+      "1": 25773,
+      "2": 389477,
+      "3": 22113,
+      "4": 180281
+     },
+     "lego": {
+      "m": 3,
+      "terraces": 4,
+      "single": false
+     }
+    }
+   ]
+  },
+  "r21_T9": {
+   "T": 9,
+   "ks": [
+    [
+     134,
+     202
+    ],
+    [
+     125,
+     195
+    ],
+    [
+     113,
+     202
+    ]
+   ],
+   "rows": [
+    {
+     "k": 0,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 26.71,
+      "planes": 0.52,
+      "other": 63.34,
+      "volumes": 0,
+      "unclassified": 9.44,
+      "billboards": 0.64
+     },
+     "kinds": {
+      "1": 22300,
+      "2": 388352,
+      "3": 18344,
+      "4": 186346
+     },
+     "lego": {
+      "m": 4,
+      "terraces": 4,
+      "single": false
+     }
+    },
+    {
+     "k": 4,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 79.46,
+      "planes": 3.12,
+      "other": 9.43,
+      "volumes": 0,
+      "unclassified": 7.99,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 32449,
+      "2": 525294,
+      "3": 10160,
+      "4": 55616
+     },
+     "lego": {
+      "m": 4,
+      "terraces": 4,
+      "single": false
+     }
+    },
+    {
+     "k": 8,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 65.54,
+      "planes": 12.81,
+      "other": 14.71,
+      "volumes": 0,
+      "unclassified": 6.94,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 23349,
+      "2": 483558,
+      "3": 11414,
+      "4": 104487
+     },
+     "lego": {
+      "m": 4,
+      "terraces": 4,
+      "single": false
+     }
+    }
+   ]
+  },
+  "r16_9_T7": {
+   "T": 7,
+   "ks": [
+    [
+     117,
+     43
+    ],
+    [
+     118,
+     45
+    ],
+    [
+     119,
+     47
+    ]
+   ],
+   "rows": [
+    {
+     "k": 0,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 0,
+      "planes": 5.63,
+      "other": 85.76,
+      "volumes": 0,
+      "unclassified": 8.61,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 10591,
+      "2": 330477,
+      "3": 17472,
+      "4": 250188
+     },
+     "lego": null
+    },
+    {
+     "k": 4,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 0,
+      "planes": 4.11,
+      "other": 87.92,
+      "volumes": 0,
+      "unclassified": 7.96,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 11092,
+      "2": 326797,
+      "3": 16481,
+      "4": 257116
+     },
+     "lego": null
+    },
+    {
+     "k": 8,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 0,
+      "planes": 3.66,
+      "other": 88.14,
+      "volumes": 0,
+      "unclassified": 8.19,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 10982,
+      "2": 362139,
+      "3": 16458,
+      "4": 220063
+     },
+     "lego": null
+    }
+   ]
+  },
+  "r16_9_T9": {
+   "T": 9,
+   "ks": [
+    [
+     117,
+     43
+    ],
+    [
+     118,
+     45
+    ],
+    [
+     119,
+     47
+    ]
+   ],
+   "rows": [
+    {
+     "k": 0,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 1.62,
+      "planes": 13.57,
+      "other": 77.87,
+      "volumes": 0,
+      "unclassified": 6.93,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 11568,
+      "2": 343954,
+      "3": 11602,
+      "4": 244856
+     },
+     "lego": null
+    },
+    {
+     "k": 4,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 0.33,
+      "planes": 7.77,
+      "other": 83.93,
+      "volumes": 0,
+      "unclassified": 7.97,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 11452,
+      "2": 325296,
+      "3": 15040,
+      "4": 258566
+     },
+     "lego": null
+    },
+    {
+     "k": 8,
+     "w": 1000,
+     "h": 627,
+     "share": {
+      "base": 0.16,
+      "planes": 6.73,
+      "other": 85.15,
+      "volumes": 0,
+      "unclassified": 7.96,
+      "billboards": 0
+     },
+     "kinds": {
+      "1": 11901,
+      "2": 325827,
+      "3": 15318,
+      "4": 257882
+     },
+     "lego": null
+    }
+   ]
+  },
+  "pageErrors": 0
+ }
+}

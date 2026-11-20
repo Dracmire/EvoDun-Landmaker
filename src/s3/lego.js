@@ -11,7 +11,8 @@
 (function (E0) {
   const E = E0.s3 || (E0.s3 = Object.create(E0));
   const L = E.lego = {};
-  L.M_MAX = 3;
+  L.M_MAX = 3; // the cap of m when the number of terraces is not known (the old fixed cap)
+  L.mMax = (T) => (T > 0 ? Math.round(T / 2) + 1 : L.M_MAX); // PR Q2 (D5 of [U], interpretation of [R], to confirm): m <= round(T / 2) + 1, T = the number of terraces (3 -> 3, 5 -> 4, 7 -> 5, 9 -> 6); the ONE place of the cap [R]
   /* the walkable tiles of the room (the same predicate as vert.js) */
   const walkOf = (S, rec) => { const zm = E.stage.zoneMap(S), vd = S.void; return (i) => zm[i] === rec.id && !S.block[i] && !(vd && vd[i]) && S.region && S.region[i] >= 0 && !(S.nowalk && S.nowalk[i]); };
   /* the terraces of the room: { t (0-based), base (old height), top (old height of its last sub-level), n tiles, u (mean view depth) } sorted by t */
@@ -21,7 +22,7 @@
     return [...by.values()].sort((a, b) => a.t - b.t).map((q) => { const base = E.terBase(q.t, P, S.center); return { t: q.t, base, top: base + (K - 1) * s, n: q.n, u: q.su / q.n }; });
   };
   /* m of the room: its lowest walkable terrace (1-based), 1..3 */
-  L.mOf = (terr) => (terr.length ? Math.max(1, Math.min(L.M_MAX, terr[0].t + 1)) : 1);
+  L.mOf = (terr, T) => (terr.length ? Math.max(1, Math.min(L.mMax(T), terr[0].t + 1)) : 1);
   /* the new base of every terrace (by rank) */
   L.newBases = function (terr, m, Eh, treatment) { // PR lego2 (A531): a jump that crosses D terraces measures m * E * D (a jump of two terraces is no longer squeezed to one)
     const R = terr.length, out = new Array(R);
@@ -49,10 +50,10 @@
     const yaw = o.yaw === undefined ? rec.yaw : o.yaw, terr = L.terraces(S, P, rec, yaw); out.terraces = terr.length;
     let f, m;
     if (terr.length < 2) { // PR lego3 (A539): a room on ONE terrace: the heights of its SUB-LEVELS are multiplied by m (Up: the lowest sub-level stays; Down: the highest stays); the level RANKING is the same, so the topology (which counts sub-levels, not heights) is identical
-      out.single = true; out.m = L.mOf(terr); if (!(terr.length === 1 && out.m >= 2)) return out; const q = terr[0]; m = out.m; out.sub = true;
+      out.single = true; out.m = L.mOf(terr, P.terraces); if (!(terr.length === 1 && out.m >= 2)) return out; const q = terr[0]; m = out.m; out.sub = true;
       f = treatment === 'up' ? (h) => ((h < q.base - 1e-9 || h > q.top + 1e-9) ? h : q.base + (h - q.base) * m) : (h) => ((h < q.base - 1e-9 || h > q.top + 1e-9) ? h : q.top - (q.top - h) * m);
     } else {
-      m = L.mOf(terr); const Eh = P.terH, nb = L.newBases(terr, m, Eh, treatment); f = L.heightMap(terr, nb); out.m = m;
+      m = L.mOf(terr, P.terraces); const Eh = P.terH, nb = L.newBases(terr, m, Eh, treatment); f = L.heightMap(terr, nb); out.m = m;
       for (let r = 0; r + 1 < terr.length; r++) out.jumps.push(+(nb[r + 1] - nb[r]).toFixed(4));
       if (!L.ordered(terr, treatment, false)) { if (L.ordered(terr, treatment, true)) out.yawFlip = true; else out.conflict = 'no yaw orders the walkable terraces of the room as the treatment wants (a higher one stays nearer than a lower one): not forced'; }
     }
