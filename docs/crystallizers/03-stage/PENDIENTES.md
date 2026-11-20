@@ -41,6 +41,10 @@ Estado al 2026-11-19. Estados: **prueba** (va en el prompt `prompt_pendientes_go
 - Ligar el tratamiento de altura a la temática (F11).
 - Dos resoluciones contra escaleras A+2 (veredicto E.5).
 
+## 3b. Congelado
+
+- **LEGO (decisión de [U], 2026-11-20).** Queda como está en main 67c7495: Mid por defecto; Down / Up y Cake Rest / Scale existen, pero no se tocan; el tope `m <= round(T/2)+1` queda mergeado sin juzgar. Medido en Q2: con 7–9 terrazas lo que tapa es la base de la sala (99 % del panel en r21, T7, k4) y el tope lo empeora (base 57 → 65 %, T9, k8). Ningún brief lo vuelve a tocar salvo que una hipótesis de `HIPOTESIS.md` lo pida por su número.
+
 ## 4. Tangentes abiertas
 
 T29, T43, T44, T46, T47, T49, T55, T57, T58, T59, T61, T62, T63 (detalle en el Registro).
