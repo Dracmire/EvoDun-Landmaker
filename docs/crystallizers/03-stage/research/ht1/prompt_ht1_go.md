@@ -15,7 +15,10 @@ Entrega: UN PR con su ficha `docs/crystallizers/03-stage/entregas/PR-<n>.md` (cu
   cargan los PNG generados por el ejemplo de modo 3 «Your images (PNG + roles)» desde un script de `tools/ui/`.
 - Si un paso falla dos veces: parar e informar.
 
-## Paso 0 · Tablas de verdad, ANTES de correr ningún transformador (commit propio)
+## Paso 0 · Tablas de verdad: HECHO por [R] (A615), congeladas en `tools/ht1/truth_*.json`; CC NO las edita
+Si una fila parece mal, se reporta en la ficha (tabla d); no se corrige. Lo que sigue es la especificación original del paso, como referencia.
+
+## (Especificación original del Paso 0)
 Para cada mapa (trono `refs/dq3/throne_aliahan/`, Aurhea `refs/dq3/aurheas_fountain/`, bosque
 `refs/dq3/forest_plains/`) una tabla `tools/ht1/truth_<mapa>.json` con una fila por unidad del mapa plano:
 unidad, vecina de referencia, cambio en el remake (sube / baja / igual, en saltos; borde cerrado sí / no; hito arriba

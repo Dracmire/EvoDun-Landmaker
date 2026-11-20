@@ -1,0 +1,83 @@
+{
+ "author": "[R] 2026-11-20, Paso 0 of research/ht1/prompt_ht1_go.md, frozen before any transformer runs (A615)",
+ "change_values": "up N = the unit is N jumps above its reference; down N; same; closed / open (edges); top / not_top (landmark); no_data",
+ "rule": "Units are STRUCTURES (zone, band across the axis, edge, axis). Never compare tile by tile. The hand pack is support, NOT truth.",
+ "map": "throne_aliahan",
+ "flat_source": "docs/crystallizers/03-stage/refs/dq3/throne_aliahan/map1.txt (ignore its digits and letters: they are the hand transformation)",
+ "remake": "docs/crystallizers/03-stage/refs/dq3/pairs/p_20261029_192049_throne_room_orig_remake.png (right half)",
+ "units": [
+  {
+   "id": "T1",
+   "unit": "front band of the nave (the third nearest the entry, carpet AND side floor, full width)",
+   "vs": "reference",
+   "remake_change": "level 0",
+   "evidence": "docs/crystallizers/03-stage/refs/dq3/pairs/p_20261029_192049 right half, bottom",
+   "confidence": "high",
+   "hand_pack": "carpet a (0), side floor 0"
+  },
+  {
+   "id": "T2",
+   "unit": "middle band (carpet and side floor, full width)",
+   "vs": "T1",
+   "remake_change": "up 1",
+   "evidence": "a flight of 3 steps crosses the WHOLE width (carpet and the stone side ledges)",
+   "confidence": "high",
+   "hand_pack": "carpet b-d rising by sub-levels, side floor 0",
+   "note": "the hand pack raised only the carpet, gradually; the remake raises the whole band in one step"
+  },
+  {
+   "id": "T3",
+   "unit": "dais: the carpet band around the throne (rows 2-3 of map1.txt), carpet width only",
+   "vs": "T2",
+   "remake_change": "up 1",
+   "evidence": "2 steps around the throne, only in the centre",
+   "confidence": "high",
+   "hand_pack": "carpet e-f, throne band 5"
+  },
+  {
+   "id": "T4",
+   "unit": "side floor of the back half",
+   "vs": "T2",
+   "remake_change": "same",
+   "evidence": "purple floor beside the dais at the level of the middle band",
+   "confidence": "medium",
+   "hand_pack": "5 in the north band, 0 elsewhere"
+  },
+  {
+   "id": "T5",
+   "unit": "edges of the walkable floor (walls)",
+   "vs": "floor",
+   "remake_change": "closed",
+   "evidence": "back wall with banners, side walls behind the columns",
+   "confidence": "high",
+   "hand_pack": "walls 52 (top)"
+  },
+  {
+   "id": "T6",
+   "unit": "pillars",
+   "vs": "floor",
+   "remake_change": "same (columns standing on the floor, not platforms)",
+   "evidence": "the four columns stand on the floor of their band",
+   "confidence": "high",
+   "hand_pack": "loose blocked cells at floor or 5"
+  },
+  {
+   "id": "T7",
+   "unit": "landmark: the throne",
+   "vs": "whole room",
+   "remake_change": "top (highest walkable)",
+   "evidence": "throne on the dais",
+   "confidence": "high",
+   "hand_pack": "throne at 5"
+  },
+  {
+   "id": "AX",
+   "unit": "axis entry -> goal",
+   "vs": "-",
+   "remake_change": "rises in 2 discrete jumps (not gradual)",
+   "evidence": "T1 -> T2 -> T3",
+   "confidence": "high",
+   "hand_pack": "gradual a -> f"
+  }
+ ]
+}

@@ -1,0 +1,73 @@
+{
+ "author": "[R] 2026-11-20, Paso 0 of research/ht1/prompt_ht1_go.md, frozen before any transformer runs (A615)",
+ "change_values": "up N = the unit is N jumps above its reference; down N; same; closed / open (edges); top / not_top (landmark); no_data",
+ "rule": "Units are STRUCTURES (zone, band across the axis, edge, axis). Never compare tile by tile. The hand pack is support, NOT truth.",
+ "map": "aurheas_fountain",
+ "flat_source": "docs/crystallizers/03-stage/refs/dq3/aurheas_fountain/derived/derive_roles.py (classes and sectors; ignore GREY)",
+ "remake": "docs/crystallizers/03-stage/refs/dq3/remake/r_20261030_050039_pond_peninsula.png + docs/crystallizers/03-stage/shots/m4/photo_readings.json",
+ "units": [
+  {
+   "id": "A1",
+   "unit": "water (the pond)",
+   "vs": "all land",
+   "remake_change": "down",
+   "evidence": "water clearly below the banks; rock rim",
+   "confidence": "high",
+   "hand_pack": "water 20 < land 30"
+  },
+  {
+   "id": "A2",
+   "unit": "peninsula (sector 5)",
+   "vs": "water",
+   "remake_change": "up (a mound with slopes into the water)",
+   "evidence": "the party walks on a convex grass mound",
+   "confidence": "high",
+   "hand_pack": "60"
+  },
+  {
+   "id": "A3",
+   "unit": "peninsula",
+   "vs": "north shore (sector 4)",
+   "remake_change": "no_data (distinct height, direction not readable)",
+   "evidence": "photo_readings M1: 3 heights in frame (water, mound, far bank); perspective",
+   "confidence": "low",
+   "hand_pack": "60 vs 30"
+  },
+  {
+   "id": "A4",
+   "unit": "west, east shores and south meadow (sectors 1-3)",
+   "vs": "each other",
+   "remake_change": "no_data",
+   "evidence": "out of the frame",
+   "confidence": "-",
+   "hand_pack": "30 all"
+  },
+  {
+   "id": "A5",
+   "unit": "pond edge (rock rim)",
+   "vs": "land",
+   "remake_change": "open (a low rim, not a wall)",
+   "evidence": "rock border at the waterline of the far bank",
+   "confidence": "medium",
+   "hand_pack": "rock at land height"
+  },
+  {
+   "id": "A6",
+   "unit": "back of the frame",
+   "vs": "-",
+   "remake_change": "closed by terrain (grass up to the top, no void)",
+   "evidence": "photo_readings M3a closed",
+   "confidence": "high",
+   "hand_pack": "-"
+  },
+  {
+   "id": "A7",
+   "unit": "landmark / goal: the tip of the peninsula",
+   "vs": "whole map",
+   "remake_change": "no_data",
+   "evidence": "no landmark in the photo (M4 N/A)",
+   "confidence": "-",
+   "hand_pack": "tip = POI at 60"
+  }
+ ]
+}

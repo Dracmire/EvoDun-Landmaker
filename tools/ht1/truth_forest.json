@@ -1,0 +1,70 @@
+{
+ "author": "[R] 2026-11-20, Paso 0 of research/ht1/prompt_ht1_go.md, frozen before any transformer runs (A615)",
+ "change_values": "up N = the unit is N jumps above its reference; down N; same; closed / open (edges); top / not_top (landmark); no_data",
+ "rule": "Units are STRUCTURES (zone, band across the axis, edge, axis). Never compare tile by tile. The hand pack is support, NOT truth.",
+ "map": "forest_plains",
+ "flat_source": "docs/crystallizers/03-stage/refs/dq3/forest_plains/annotated/derive_roles.py (zones by class; ignore GREY_A / GREY_B)",
+ "remake": [
+  "docs/crystallizers/03-stage/refs/dq3/remake/r_20261030_141929_shrine_of_the_plains_map.png",
+  "docs/crystallizers/03-stage/refs/dq3/remake/Shrine of Plains - 17.17.png",
+  "docs/crystallizers/03-stage/refs/dq3/remake/r_20261030_141837_plains_forest_minimap_a.png"
+ ],
+ "pair_warning": "docs/crystallizers/03-stage/refs/dq3/forest_plains/pair.md: the pair is PLAUSIBLE, not exact (the remake map is much larger); every row is at most medium confidence",
+ "units": [
+  {
+   "id": "F1",
+   "unit": "plateaus (NW, SW, N)",
+   "vs": "valley with the trail",
+   "remake_change": "up 1 (a small bank, about 0.3-0.5 H)",
+   "evidence": "dirt bank beside the party in 17.17; darker raised areas on the remake map",
+   "confidence": "medium",
+   "hand_pack": "45 / 57 vs 20 (B), 0.6 H (A)"
+  },
+  {
+   "id": "F2",
+   "unit": "slope band (main and east)",
+   "vs": "valley",
+   "remake_change": "no_data (the remake map shows no separate slope band)",
+   "evidence": "-",
+   "confidence": "low",
+   "hand_pack": "33 (B), 0.3 H (A)"
+  },
+  {
+   "id": "F3",
+   "unit": "landmark: the tower / shrine",
+   "vs": "its plateau",
+   "remake_change": "top as an object, but a low stone building (about 2-3 H), not a tall tower",
+   "evidence": "shrine with an arched door to the south in 17.17; grey block on the map",
+   "confidence": "medium",
+   "hand_pack": "68 = 6.88 H (B), 3.5 H (A)",
+   "note": "the pack exaggerates the tower"
+  },
+  {
+   "id": "F4",
+   "unit": "map edges",
+   "vs": "walkable ground",
+   "remake_change": "closed by a darker mass of forest / higher ground",
+   "evidence": "dark border of the remake map",
+   "confidence": "medium",
+   "hand_pack": "trees not blocked"
+  },
+  {
+   "id": "F5",
+   "unit": "goal (POI A) and the path to the shrine door",
+   "vs": "surrounding ground",
+   "remake_change": "same (the path reaches the door at ground level)",
+   "evidence": "17.17: dirt path to the door, no stair",
+   "confidence": "low",
+   "hand_pack": "POI on the east slope"
+  },
+  {
+   "id": "F6",
+   "unit": "basin: trail versus the ground away from it",
+   "vs": "-",
+   "remake_change": "yes: the trails run low, banks rise on both sides",
+   "evidence": "remake map shading along the trails; 17.17 bank",
+   "confidence": "medium",
+   "hand_pack": "valley lowest"
+  }
+ ]
+}
