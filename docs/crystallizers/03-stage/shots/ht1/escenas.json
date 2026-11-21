@@ -1,0 +1,111 @@
+{
+ "aurhea_alt": {
+  "window": true,
+  "zones": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "levels": 3,
+  "k0": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 14.7 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (23, 43) · room 1 ·",
+   "levels": 10
+  },
+  "k4": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 14.7 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (23, 31) · room 1 ·",
+   "levels": 10
+  }
+ },
+ "aurhea_chosen": {
+  "window": true,
+  "zones": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "levels": 3,
+  "k0": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 14.7 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (23, 43) · room 0 ·",
+   "levels": 10
+  },
+  "k4": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 14.7 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (23, 31) · room 1 ·",
+   "levels": 10
+  }
+ },
+ "forest_alt": {
+  "window": true,
+  "zones": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "levels": 2,
+  "k0": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (15, 1) · room 3 · ",
+   "levels": 6
+  },
+  "k4": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 15.2 % of the panel · near/hero 1.38 · far/hero 0.60 · cell (13, 25) · room 3 ·",
+   "levels": 6
+  }
+ },
+ "forest_chosen": {
+  "window": true,
+  "zones": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "levels": 3,
+  "k0": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 20.4 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (15, 1) · room 0 · ",
+   "levels": 9
+  },
+  "k4": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 13.8 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (13, 25) · room 3 ·",
+   "levels": 9
+  }
+ },
+ "throne_alt": {
+  "window": true,
+  "zones": [
+   1
+  ],
+  "levels": 5,
+  "k0": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 15.6 % of the panel · near/hero 1.38 · far/hero 0.60 · cell (17, 23) · room 0 ·",
+   "levels": 17
+  },
+  "k4": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 15.6 % of the panel · near/hero 1.38 · far/hero 0.60 · cell (17, 15) · room 0 ·",
+   "levels": 17
+  }
+ },
+ "throne_chosen": {
+  "window": true,
+  "zones": [
+   1
+  ],
+  "levels": 3,
+  "k0": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 20.4 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (17, 23) · room 1 ·",
+   "levels": 11
+  },
+  "k4": {
+   "info": "Stage (2D-HD S1): 1 H = 2 tiles · terrace step 2.00 H · hero 15.7 % of the panel · near/hero 1.39 · far/hero 0.60 · cell (17, 15) · room 1 ·",
+   "levels": 11
+  }
+ },
+ "pageErrors": 0
+}

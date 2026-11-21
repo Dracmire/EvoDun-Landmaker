@@ -1,0 +1,719 @@
+{
+ "runs": {
+  "throne": {
+   "left_out": "throne",
+   "train": [
+    "aurhea",
+    "forest"
+   ],
+   "chosen": [
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "train_hits": [
+    9,
+    9
+   ],
+   "hits": 5,
+   "units": 8,
+   "verdict": "REPLICATES",
+   "rows": [
+    {
+     "id": "T1",
+     "unit": "front band of the nave (the third nearest the entry, carpet AND side floor, full width)",
+     "expected": "level0",
+     "predicted": "level0",
+     "verdict": "ok",
+     "remake": "level 0"
+    },
+    {
+     "id": "T2",
+     "unit": "middle band (carpet and side floor, full width)",
+     "expected": "up1",
+     "predicted": "up 0.0",
+     "verdict": "miss",
+     "remake": "up 1"
+    },
+    {
+     "id": "T3",
+     "unit": "dais: the carpet band around the throne (rows 2-3 of map1.txt), carpet width only",
+     "expected": "up1",
+     "predicted": "up 0.1",
+     "verdict": "miss",
+     "remake": "up 1"
+    },
+    {
+     "id": "T4",
+     "unit": "side floor of the back half",
+     "expected": "same",
+     "predicted": "+0.0",
+     "verdict": "ok",
+     "remake": "same"
+    },
+    {
+     "id": "T5",
+     "unit": "edges of the walkable floor (walls)",
+     "expected": "closed",
+     "predicted": "closed 100% of 48",
+     "verdict": "ok",
+     "remake": "closed"
+    },
+    {
+     "id": "T6",
+     "unit": "pillars",
+     "expected": "same",
+     "predicted": "same (no transformer moves a pillar)",
+     "verdict": "ok",
+     "remake": "same (columns standing on the floor, not platforms)"
+    },
+    {
+     "id": "T7",
+     "unit": "landmark: the throne",
+     "expected": "top",
+     "predicted": "goal 1.0 vs rest max 0.0",
+     "verdict": "ok",
+     "remake": "top (highest walkable)"
+    },
+    {
+     "id": "AX",
+     "unit": "axis entry -> goal",
+     "expected": "jumps2",
+     "predicted": "1 jumps, 0 falls",
+     "verdict": "miss",
+     "remake": "rises in 2 discrete jumps (not gradual)"
+    }
+   ],
+   "fired": {
+    "C": {
+     "water_tiles": 0
+    },
+    "F": {
+     "basin_zones": [
+      1
+     ],
+     "zone_jumps": {}
+    },
+    "E": {
+     "landmark_tiles": 1,
+     "zones": [
+      1
+     ]
+    },
+    "D": {
+     "segments": 70,
+     "closed": 48
+    }
+   },
+   "alternative": {
+    "set": [
+     "A",
+     "C",
+     "D",
+     "E"
+    ],
+    "hits": 6,
+    "units": 8,
+    "rows": [
+     {
+      "id": "T1",
+      "unit": "front band of the nave (the third nearest the entry, carpet AND side floor, full width)",
+      "expected": "level0",
+      "predicted": "level0",
+      "verdict": "ok",
+      "remake": "level 0"
+     },
+     {
+      "id": "T2",
+      "unit": "middle band (carpet and side floor, full width)",
+      "expected": "up1",
+      "predicted": "up 1.0",
+      "verdict": "ok",
+      "remake": "up 1"
+     },
+     {
+      "id": "T3",
+      "unit": "dais: the carpet band around the throne (rows 2-3 of map1.txt), carpet width only",
+      "expected": "up1",
+      "predicted": "up 1.1",
+      "verdict": "ok",
+      "remake": "up 1"
+     },
+     {
+      "id": "T4",
+      "unit": "side floor of the back half",
+      "expected": "same",
+      "predicted": "+1.0",
+      "verdict": "miss",
+      "remake": "same"
+     },
+     {
+      "id": "T5",
+      "unit": "edges of the walkable floor (walls)",
+      "expected": "closed",
+      "predicted": "closed 100% of 48",
+      "verdict": "ok",
+      "remake": "closed"
+     },
+     {
+      "id": "T6",
+      "unit": "pillars",
+      "expected": "same",
+      "predicted": "same (no transformer moves a pillar)",
+      "verdict": "ok",
+      "remake": "same (columns standing on the floor, not platforms)"
+     },
+     {
+      "id": "T7",
+      "unit": "landmark: the throne",
+      "expected": "top",
+      "predicted": "goal 3.0 vs rest max 2.0",
+      "verdict": "ok",
+      "remake": "top (highest walkable)"
+     },
+     {
+      "id": "AX",
+      "unit": "axis entry -> goal",
+      "expected": "jumps2",
+      "predicted": "3 jumps, 0 falls",
+      "verdict": "miss",
+      "remake": "rises in 2 discrete jumps (not gradual)"
+     }
+    ],
+    "train_hits": 8
+   },
+   "oracle": {
+    "hits": 6,
+    "set": [
+     "A",
+     "D"
+    ],
+    "sets_with_that_score": 16
+   }
+  },
+  "aurhea": {
+   "left_out": "aurhea",
+   "train": [
+    "throne",
+    "forest"
+   ],
+   "chosen": [
+    "A",
+    "D",
+    "E"
+   ],
+   "train_hits": [
+    10,
+    13
+   ],
+   "hits": 3,
+   "units": 4,
+   "verdict": "REPLICATES",
+   "rows": [
+    {
+     "id": "A1",
+     "unit": "water (the pond)",
+     "expected": "down",
+     "predicted": "water 0.0 vs lowest land",
+     "verdict": "miss",
+     "remake": "down"
+    },
+    {
+     "id": "A2",
+     "unit": "peninsula (sector 5)",
+     "expected": "up",
+     "predicted": "up 2.0",
+     "verdict": "ok",
+     "remake": "up (a mound with slopes into the water)"
+    },
+    {
+     "id": "A3",
+     "unit": "peninsula",
+     "expected": "no_data",
+     "predicted": "-",
+     "verdict": "no_data",
+     "remake": "no_data (distinct height, direction not readable)"
+    },
+    {
+     "id": "A4",
+     "unit": "west, east shores and south meadow (sectors 1-3)",
+     "expected": "no_data",
+     "predicted": "-",
+     "verdict": "no_data",
+     "remake": "no_data"
+    },
+    {
+     "id": "A5",
+     "unit": "pond edge (rock rim)",
+     "expected": "open",
+     "predicted": "closed 0% of 48",
+     "verdict": "ok",
+     "remake": "open (a low rim, not a wall)"
+    },
+    {
+     "id": "A6",
+     "unit": "back of the frame",
+     "expected": "closed",
+     "predicted": "closed 100% of 24",
+     "verdict": "ok",
+     "remake": "closed by terrain (grass up to the top, no void)"
+    },
+    {
+     "id": "A7",
+     "unit": "landmark / goal: the tip of the peninsula",
+     "expected": "no_data",
+     "predicted": "-",
+     "verdict": "no_data",
+     "remake": "no_data"
+    }
+   ],
+   "fired": {
+    "A": {
+     "bands": 3,
+     "axis_tiles": 12,
+     "band_tiles": [
+      96,
+      96,
+      261
+     ]
+    },
+    "E": {
+     "landmark_tiles": 0,
+     "zones": []
+    },
+    "D": {
+     "segments": 140,
+     "closed": 92
+    }
+   },
+   "alternative": {
+    "set": [
+     "D",
+     "E",
+     "F"
+    ],
+    "hits": 3,
+    "units": 4,
+    "rows": [
+     {
+      "id": "A1",
+      "unit": "water (the pond)",
+      "expected": "down",
+      "predicted": "water 0.0 vs lowest land",
+      "verdict": "miss",
+      "remake": "down"
+     },
+     {
+      "id": "A2",
+      "unit": "peninsula (sector 5)",
+      "expected": "up",
+      "predicted": "up 1.0",
+      "verdict": "ok",
+      "remake": "up (a mound with slopes into the water)"
+     },
+     {
+      "id": "A3",
+      "unit": "peninsula",
+      "expected": "no_data",
+      "predicted": "-",
+      "verdict": "no_data",
+      "remake": "no_data (distinct height, direction not readable)"
+     },
+     {
+      "id": "A4",
+      "unit": "west, east shores and south meadow (sectors 1-3)",
+      "expected": "no_data",
+      "predicted": "-",
+      "verdict": "no_data",
+      "remake": "no_data"
+     },
+     {
+      "id": "A5",
+      "unit": "pond edge (rock rim)",
+      "expected": "open",
+      "predicted": "closed 0% of 48",
+      "verdict": "ok",
+      "remake": "open (a low rim, not a wall)"
+     },
+     {
+      "id": "A6",
+      "unit": "back of the frame",
+      "expected": "closed",
+      "predicted": "closed 100% of 24",
+      "verdict": "ok",
+      "remake": "closed by terrain (grass up to the top, no void)"
+     },
+     {
+      "id": "A7",
+      "unit": "landmark / goal: the tip of the peninsula",
+      "expected": "no_data",
+      "predicted": "-",
+      "verdict": "no_data",
+      "remake": "no_data"
+     }
+    ],
+    "train_hits": 10
+   },
+   "oracle": {
+    "hits": 4,
+    "set": [
+     "C",
+     "D"
+    ],
+    "sets_with_that_score": 16
+   }
+  },
+  "forest": {
+   "left_out": "forest",
+   "train": [
+    "throne",
+    "aurhea"
+   ],
+   "chosen": [
+    "A",
+    "C",
+    "D"
+   ],
+   "train_hits": [
+    10,
+    12
+   ],
+   "hits": 3,
+   "units": 5,
+   "verdict": "REPLICATES",
+   "rows": [
+    {
+     "id": "F1",
+     "unit": "plateaus (NW, SW, N)",
+     "expected": "up1",
+     "predicted": "up -1.1",
+     "verdict": "miss",
+     "remake": "up 1 (a small bank, about 0.3-0.5 H)"
+    },
+    {
+     "id": "F2",
+     "unit": "slope band (main and east)",
+     "expected": "no_data",
+     "predicted": "-",
+     "verdict": "no_data",
+     "remake": "no_data (the remake map shows no separate slope band)"
+    },
+    {
+     "id": "F3",
+     "unit": "landmark: the tower / shrine",
+     "expected": "top",
+     "predicted": "tower 0.9 vs plateau max 2.0",
+     "verdict": "miss",
+     "remake": "top as an object, but a low stone building (about 2-3 H), not a tall tower"
+    },
+    {
+     "id": "F4",
+     "unit": "map edges",
+     "expected": "closed",
+     "predicted": "closed 100% of 98",
+     "verdict": "ok",
+     "remake": "closed by a darker mass of forest / higher ground"
+    },
+    {
+     "id": "F5",
+     "unit": "goal (POI A) and the path to the shrine door",
+     "expected": "same",
+     "predicted": "+0.0 vs ring",
+     "verdict": "ok",
+     "remake": "same (the path reaches the door at ground level)"
+    },
+    {
+     "id": "F6",
+     "unit": "basin: trail versus the ground away from it",
+     "expected": "basin",
+     "predicted": "path -0.2 vs the rest",
+     "verdict": "ok",
+     "remake": "yes: the trails run low, banks rise on both sides"
+    }
+   ],
+   "fired": {
+    "C": {
+     "water_tiles": 0
+    },
+    "A": {
+     "bands": 3,
+     "axis_tiles": 27,
+     "band_tiles": [
+      136,
+      160,
+      257
+     ]
+    },
+    "D": {
+     "segments": 126,
+     "closed": 98
+    }
+   },
+   "alternative": {
+    "set": [
+     "C",
+     "D",
+     "F"
+    ],
+    "hits": 4,
+    "units": 5,
+    "rows": [
+     {
+      "id": "F1",
+      "unit": "plateaus (NW, SW, N)",
+      "expected": "up1",
+      "predicted": "up 1.0",
+      "verdict": "ok",
+      "remake": "up 1 (a small bank, about 0.3-0.5 H)"
+     },
+     {
+      "id": "F2",
+      "unit": "slope band (main and east)",
+      "expected": "no_data",
+      "predicted": "-",
+      "verdict": "no_data",
+      "remake": "no_data (the remake map shows no separate slope band)"
+     },
+     {
+      "id": "F3",
+      "unit": "landmark: the tower / shrine",
+      "expected": "top",
+      "predicted": "tower 1.0 vs plateau max 1.0",
+      "verdict": "miss",
+      "remake": "top as an object, but a low stone building (about 2-3 H), not a tall tower"
+     },
+     {
+      "id": "F4",
+      "unit": "map edges",
+      "expected": "closed",
+      "predicted": "closed 100% of 98",
+      "verdict": "ok",
+      "remake": "closed by a darker mass of forest / higher ground"
+     },
+     {
+      "id": "F5",
+      "unit": "goal (POI A) and the path to the shrine door",
+      "expected": "same",
+      "predicted": "+0.3 vs ring",
+      "verdict": "ok",
+      "remake": "same (the path reaches the door at ground level)"
+     },
+     {
+      "id": "F6",
+      "unit": "basin: trail versus the ground away from it",
+      "expected": "basin",
+      "predicted": "path -0.1 vs the rest",
+      "verdict": "ok",
+      "remake": "yes: the trails run low, banks rise on both sides"
+     }
+    ],
+    "train_hits": 8
+   },
+   "oracle": {
+    "hits": 5,
+    "set": [
+     "D",
+     "E",
+     "F"
+    ],
+    "sets_with_that_score": 2
+   }
+  }
+ },
+ "marginal": {
+  "throne": {
+   "A": [
+    5,
+    8
+   ],
+   "B": [
+    3,
+    8
+   ],
+   "C": [
+    3,
+    8
+   ],
+   "D": [
+    4,
+    8
+   ],
+   "E": [
+    4,
+    8
+   ],
+   "F": [
+    3,
+    8
+   ],
+   "(none)": [
+    3,
+    8
+   ]
+  },
+  "aurhea": {
+   "A": [
+    2,
+    4
+   ],
+   "B": [
+    2,
+    4
+   ],
+   "C": [
+    3,
+    4
+   ],
+   "D": [
+    2,
+    4
+   ],
+   "E": [
+    1,
+    4
+   ],
+   "F": [
+    2,
+    4
+   ],
+   "(none)": [
+    1,
+    4
+   ]
+  },
+  "forest": {
+   "A": [
+    2,
+    5
+   ],
+   "B": [
+    2,
+    5
+   ],
+   "C": [
+    1,
+    5
+   ],
+   "D": [
+    2,
+    5
+   ],
+   "E": [
+    2,
+    5
+   ],
+   "F": [
+    3,
+    5
+   ],
+   "(none)": [
+    1,
+    5
+   ]
+  }
+ },
+ "attributes": {
+  "throne": {
+   "has_water": false,
+   "has_walls": true,
+   "walkable_touches_map_edge": false,
+   "closed_room": true,
+   "zones": 1,
+   "trail_zones": 1,
+   "goal_zone_has_trail": true,
+   "goal_is_solid_landmark_tile": true,
+   "solid_landmark_elsewhere_than_goal": false
+  },
+  "aurhea": {
+   "has_water": true,
+   "has_walls": false,
+   "walkable_touches_map_edge": true,
+   "closed_room": false,
+   "zones": 5,
+   "trail_zones": 1,
+   "goal_zone_has_trail": false,
+   "goal_is_solid_landmark_tile": false,
+   "solid_landmark_elsewhere_than_goal": false
+  },
+  "forest": {
+   "has_water": false,
+   "has_walls": false,
+   "walkable_touches_map_edge": true,
+   "closed_room": false,
+   "zones": 6,
+   "trail_zones": 2,
+   "goal_zone_has_trail": false,
+   "goal_is_solid_landmark_tile": false,
+   "solid_landmark_elsewhere_than_goal": true
+  }
+ },
+ "contradiction": {
+  "base": [
+   "C",
+   "D",
+   "E"
+  ],
+  "per_map": {
+   "throne": {
+    "A": [
+     6,
+     8
+    ],
+    "F": [
+     5,
+     8
+    ],
+    "winner": "A"
+   },
+   "aurhea": {
+    "A": [
+     4,
+     4
+    ],
+    "F": [
+     4,
+     4
+    ],
+    "winner": "tie"
+   },
+   "forest": {
+    "A": [
+     4,
+     5
+    ],
+    "F": [
+     5,
+     5
+    ],
+    "winner": "F"
+   }
+  },
+  "separating_attributes": [
+   [
+    "has_walls",
+    "True where A wins, False where F wins"
+   ],
+   [
+    "walkable_touches_map_edge",
+    "False where A wins, True where F wins"
+   ],
+   [
+    "closed_room",
+    "True where A wins, False where F wins"
+   ],
+   [
+    "goal_zone_has_trail",
+    "True where A wins, False where F wins"
+   ],
+   [
+    "goal_is_solid_landmark_tile",
+    "True where A wins, False where F wins"
+   ],
+   [
+    "solid_landmark_elsewhere_than_goal",
+    "False where A wins, True where F wins"
+   ]
+  ]
+ }
+}

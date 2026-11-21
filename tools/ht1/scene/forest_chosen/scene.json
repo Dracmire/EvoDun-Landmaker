@@ -1,0 +1,50 @@
+{
+ "map": "forest",
+ "set": [
+  "A",
+  "C",
+  "D"
+ ],
+ "levels": 3,
+ "level_counts": {
+  "0": 136,
+  "1": 205,
+  "2": 257
+ },
+ "window_zones": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6
+ ],
+ "hero_k0": [
+  15,
+  1
+ ],
+ "hero_k4": [
+  13,
+  25
+ ],
+ "axis_len": 27,
+ "terraces_to_set": 3,
+ "fired": {
+  "C": {
+   "water_tiles": 0
+  },
+  "A": {
+   "bands": 3,
+   "axis_tiles": 27,
+   "band_tiles": [
+    136,
+    160,
+    257
+   ]
+  },
+  "D": {
+   "segments": 126,
+   "closed": 98
+  }
+ }
+}
