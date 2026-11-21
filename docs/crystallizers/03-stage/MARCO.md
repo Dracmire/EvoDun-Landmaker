@@ -201,3 +201,60 @@ El día avanzó en [high] y [top] (panorama, convergencia, fuentes de los creado
 estructuras, firma de tipo). Los últimos turnos fueron un mini-bucle sobre HT1: cuatro correcciones seguidas de [U]
 (taxonomía, operador por baldosas, rúbrica sin control, prueba [mid]). El patrón: saltar a la prueba antes de cerrar
 la cadena del nivel. El corte: la regla 5 de §7.
+
+## 11. Hipótesis agrupadas por raíz (A625)
+
+Tres raíces. Coinciden con las tres piezas de la cadena de Dormans (§3): las flechas (conversión), el lugar (M1) y la
+toma (M2).
+
+### Raíz C · Conversión: el HD-2D es la imagen de otra representación más simple, por una transformación
+
+Dos ramas, según dónde actúa la transformación:
+
+| Rama | Hipótesis | THML | Nivel |
+|---|---|---|---|
+| C1 · sobre el espacio (cambia la geometría) | HT1 · transformaciones locales | top | lv2 |
+| | HT2 · el tipo de lugar decide el transformador | top | lv1 |
+| | Deformación para la cámara | top | lv2 |
+| | Elevar la meta del fondo (caso particular) | high | lv1 |
+| C2 · sobre la proyección (cambia cómo se mira) | El 2.5D como transición | top | lv1 |
+| | Modelo de sala de 16 bits 2D → 2.5D → HD-2D (T59) | top | lv1 |
+| | HD-2D = 3D + pase de composición | top | lv2 |
+| | Hoja de composición por origen | top | lv1, debilitada |
+
+HT1 y el 2.5D como transición comparten la raíz: las dos dicen que el HD-2D se obtiene transformando algo más simple.
+HT1 transforma el espacio (la altura de las unidades); el 2.5D como transición transforma la proyección (la gramática
+de 16 bits: suelo desde arriba, edificios de frente). La GDC une las dos: la gramática de 16 bits puesta en 3D sale
+plana y se corrige con terrazas y fondo alto, es decir, una conversión de proyección que se paga con una de espacio.
+
+### Raíz L · Lugar: el sitio tiene una estructura antes de la cámara
+
+| Hipótesis | THML | Nivel |
+|---|---|---|
+| Recinto contra terreno abierto | high | lv2 |
+| Cadena camino → lugar (Dormans) | high | lv2 |
+| Visible / oculto clasifica la plataforma | high | lv1 |
+| H1–H6 (tipos de escenario) | high | lv1 |
+| Perfiles P1–P6 | high | lv1 |
+
+### Raíz T · Toma: la cámara es la unidad de composición
+
+| Hipótesis | THML | Nivel |
+|---|---|---|
+| Escena = secuencia de tomas | top | lv1 |
+| La toma como mecánica | high | lv1 |
+| La altura crece con la profundidad | high | lv3 |
+| Encuadre cerrado · eje = vista · transiciones legibles | high | lv3 |
+| El héroe como unidad (H) | high | lv4 |
+
+### Puentes entre raíces
+
+| Hipótesis | Une | Por qué |
+|---|---|---|
+| HT2 | C1 ↔ L | El tipo de lugar decide qué conversión se aplica |
+| Deformación para la cámara | C1 ↔ T | El espacio se deforma para una toma |
+| Elevar la meta del fondo | L ↔ T | Un rasgo del lugar que solo tiene sentido mirado desde la toma |
+| Visible / oculto de la plataforma | L ↔ T | El lugar medido con la cámara |
+
+Lectura: lo más maduro está en T (lv3–lv4, construido a mano como polish); L está en lv2; C está en lv1–lv2 y es
+donde está la mayor ganancia (M6). Las tres raíces se necesitan entre sí: C produce L, y L alimenta T.
