@@ -152,3 +152,52 @@ reproduce cada mapa.
   mano (clase y altura) y la escena con la toma emparejada del remake (M4 ya existe).
 - **Descarte (fijado antes):** si el operador sin ajustes por mapa no reproduce la mayoría de las baldosas del mapa
   que quedó fuera, la conversión de DQ3 es autoral por mapa y HT1 se queda en lv2.
+
+## 7. Submetodología de [U] (A623)
+
+1. Cada hipótesis se clasifica en THML (§1) y tiene un **nivel de integración al modelo** de 1 a 5 (lv1 entry, lv2 existe,
+   lv3 applied, lv4 mature, lv5 evolved).
+2. Subir un nivel exige derivar una **subhipótesis** de ese nivel, con su propia cadena
+   **hipótesis → ganancia → prueba → rúbrica → avance**.
+3. Cada nivel hereda los supuestos de los niveles anteriores y de la ganancia: el área de prueba se achica.
+4. **La prueba tiene que ser de la misma categoría que la hipótesis.** Una prueba [low] o [mid] sobre una hipótesis
+   [high] o [top] cae a polish (ejemplo: contar unidades una por una es contar baldosas a otra escala).
+5. **Un disparo de CC se gasta solo si la cadena del nivel cierra en papel**, eslabón por eslabón: un resultado
+   positivo tiene que cambiar la hipótesis de forma significativa, y uno negativo también tiene que enseñar algo.
+
+## 8. Registro de disparos (A622)
+
+| Hipótesis | Disparo | PR | Resultado | Por qué |
+|---|---|---|---|---|
+| HT1 | 1 | #134 (abierto; las pruebas de HT1 siguen ahí, A620) | fallado | La prueba era [mid] (contar unidades) para una hipótesis [top]; la rúbrica medía etiquetas, no ganancia; la elección empataba; el conjunto sumó solo 2 aciertos sobre el control. Queda en lv2, en competencia, para después |
+
+Lo que dejó el disparo: cada mapa tiene su transformador dominante (A618), de donde nace HT2.
+
+## 9. Matriz de hipótesis (A622)
+
+| Hipótesis | THML | Nivel | Disparos | Estado |
+|---|---|---|---|---|
+| HT1 · la conversión DQ3 son transformaciones locales | top | lv2 | 1 fallado | en competencia, después |
+| HT2 · el tipo de lugar decide el transformador dominante | top | lv1 | 0 | nacida del disparo de HT1 |
+| Deformación para la cámara | top | lv2 | 0 | GDC |
+| Escena = secuencia de tomas | top | lv1 | 0 | — |
+| HD-2D = 3D + pase de composición | top | lv2 | 0 | GDC; va a Unity |
+| Hoja de composición por origen | top | lv1 | 0 | debilitada por la GDC |
+| El 2.5D como transición | top | lv1 | 0 | — |
+| Modelo de sala de 16 bits 2D → 2.5D → HD-2D (T59) | top | lv1 | 0 | — |
+| Recinto contra terreno abierto | high | lv2 | 0 | pares 8/8 |
+| Cadena camino → lugar (Dormans) | high | lv2 | 0 | GDC y pares |
+| La toma como mecánica | high | lv1 | 0 | — |
+| Elevar la meta del fondo | high | lv1 | 0 | reabierta, decide [U] |
+| Visible / oculto clasifica la plataforma | high | lv1 | 0 | caja negra del generador |
+| La altura crece con la profundidad | high | lv3 | polish | sin ganancia medida |
+| Encuadre cerrado · eje = vista · transiciones legibles | high | lv3 | polish | sin ganancia medida |
+| El héroe como unidad (H) | high | lv4 | polish | maduro |
+| H1–H6 · perfiles P1–P6 | high | lv1 | — | el test no servía |
+
+## 10. Reflexión (A624)
+
+El día avanzó en [high] y [top] (panorama, convergencia, fuentes de los creadores, pares, transformación sobre
+estructuras, firma de tipo). Los últimos turnos fueron un mini-bucle sobre HT1: cuatro correcciones seguidas de [U]
+(taxonomía, operador por baldosas, rúbrica sin control, prueba [mid]). El patrón: saltar a la prueba antes de cerrar
+la cadena del nivel. El corte: la regla 5 de §7.
