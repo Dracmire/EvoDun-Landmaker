@@ -202,7 +202,7 @@ estructuras, firma de tipo). Los últimos turnos fueron un mini-bucle sobre HT1:
 (taxonomía, operador por baldosas, rúbrica sin control, prueba [mid]). El patrón: saltar a la prueba antes de cerrar
 la cadena del nivel. El corte: la regla 5 de §7.
 
-## 11. Hipótesis agrupadas por raíz (A625)
+## 11. Hipótesis agrupadas por raíz (A625) · REEMPLAZADA por `MATRIZ_CRUCE.md` (A626): se hizo sin leer las hipótesis
 
 Tres raíces. Coinciden con las tres piezas de la cadena de Dormans (§3): las flechas (conversión), el lugar (M1) y la
 toma (M2).
