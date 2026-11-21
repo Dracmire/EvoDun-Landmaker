@@ -56,3 +56,47 @@ HP-A es de [U].
 Daría a M6 un criterio para derivar transformaciones en vez de un catálogo, uniría la conversión (HT1) con la toma
 (la imagen es lo que ve la cámara) y explicaría por qué el polish hecho a mano no subía de nivel: corregía el espacio sin
 una imagen objetivo.
+
+## R · Reencuadre de [U]: el juez es la cámara (2026-11-21, A633–A635; HP-B asumida)
+
+**Terreno:** una sala con un origen 2D conocido que pasa por una capa 2.5D antes del HD-2D. **Demostrarlo es construir
+ese pipeline.**
+
+**El cambio de cámara es el juez.** En la Torre del Soñador los pisos tienen relieve que no existe en el original y el
+mapa es distinto aunque conserva la estructura: el piso se levantó y la forma se cambió *para que la cámara vea*. Pasar de
+la cámara top-down a una perspectiva es un cambio enorme, y la proyección intermedia (2.5D) es la meta.
+
+**El problema se da vuelta.** No se pregunta cómo transformar: se pregunta qué problemas aparecen al convertir el mapa de
+16 bits a cualquier 2.5D (isométrico, dimétrico tipo beat 'em up como Dragon's Crown). Con el ejercicio más básico,
+«¿cómo sería en isométrico?», todo colapsa:
+- los pasillos estrechos y los muros ahogan el FOV;
+- el negro de relleno de los mapas viejos queda a la vista;
+- el piso limitado no da dónde mirar.
+
+Las soluciones emergen: altura diferida y estructura distinta. El problema no son los mapas planos (eso se soluciona):
+es que el FOV del 2.5D queda ahogado. Hacer fuerza bruta nos saltó este pase de diseño.
+
+**El pase de composición, dado vuelta:** convierte un 2D a una vista 2.5D buscando solución a la pregunta central que
+emerge:
+- corrige el ahogo del FOV al pasar de 2D a 2.5D;
+- corrige los espacios negros del mapa original;
+- el resto se obtiene enumerando y ponderando los problemas.
+
+Después solo cambia la pauta: si la solución 2.5D es X, expandir los mismos puntos lleva al HD-2D.
+
+### Lectura de [R] contra los datos
+
+- **Une HT1 con la toma.** Los cambios de los pares sin predictor en el mapa (C4 primer plano, C5 contexto fuera del
+  mapa, C6 densidad; A601) tienen su predictor en la cámara: son respuestas al vacío y al ahogo.
+- **Problemas ya medidos sin ese nombre:**
+  - negro → vacío en pantalla (borde del bosque A hasta 54 %, A470; `voidShare` de M4);
+  - FOV ahogado → oclusión (cámara tapada con 7–9 terrazas, A574; suelo oculto 2,14 × Δ tras un borde, A572);
+  - pasillo estrecho → proporción de la sala (8 H y 61 H contra ~17 H, A465).
+
+  Buena parte del polish eran soluciones a problemas de conversión nunca enumerados como tales.
+- **La capa 2.5D ya existe en el visor:** Cam 7 con profundidad 0,5 (A576).
+- **Cautelas:**
+  1. Cada problema se mide desde la cámara y va con la transformación que lo resuelve; si no, es otra taxonomía (lección
+     de L1–L5, A609).
+  2. Los pesos cambian entre el isométrico y la perspectiva.
+  3. El negro es a veces no-espacio (borde del mundo) y a veces espacio que el top-down no mostraba; se separan.
