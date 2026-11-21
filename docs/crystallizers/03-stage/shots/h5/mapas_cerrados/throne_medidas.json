@@ -1,0 +1,1372 @@
+{
+ "mode": "throne",
+ "viewport": [
+  1500,
+  900
+ ],
+ "base": {
+  "volumes": 9,
+  "objects": 11,
+  "pillars": 6,
+  "walls": 3
+ },
+ "positions": [
+  [
+   "axis 3 old tiles from the dais",
+   [
+    17,
+    18
+   ]
+  ],
+  [
+   "south edge of the carpet",
+   [
+    17,
+    23
+   ]
+  ],
+  [
+   "4 old tiles off the axis",
+   [
+    9,
+    18
+   ]
+  ],
+  [
+   "k0",
+   [
+    16.5,
+    23.5
+   ]
+  ],
+  [
+   "k4",
+   [
+    17.5,
+    14.5
+   ]
+  ],
+  [
+   "k8",
+   [
+    16.5,
+    6.5
+   ]
+  ]
+ ],
+ "rows": {
+  "TECHO": [
+   {
+    "pos": "axis 3 old tiles from the dais",
+    "hero": [
+     17,
+     18
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 6.41,
+    "Mtotal": 31.86,
+    "Mthirds": [
+     34.28,
+     28.46,
+     32.84
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 154,
+     "share": 23.46
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "a00a5a165ced6b4e25ce375fbde73ebaba5b868bcc80e6f65076af793a5459b5"
+   },
+   {
+    "pos": "south edge of the carpet",
+    "hero": [
+     17,
+     23
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 4.36,
+    "Mtotal": 29.45,
+    "Mthirds": [
+     35.38,
+     21.57,
+     31.4
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 181,
+     "share": 50.61
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "81b5190f2d12c6b9de33a87ea13755c2ac09b8682d6b8547637b93c715cece05"
+   },
+   {
+    "pos": "4 old tiles off the axis",
+    "hero": [
+     9,
+     18
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 5.03,
+    "Mtotal": 44.7,
+    "Mthirds": [
+     58.08,
+     47.86,
+     28.13
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 140,
+     "share": 38.81
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "fd041e362948031bdc4568876d0077ac45e901eabdb0562d3dafa82c77fbf99f"
+   },
+   {
+    "pos": "k0",
+    "hero": [
+     16.5,
+     23.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 1.83,
+    "Bbill": 4.22,
+    "Mtotal": 27.94,
+    "Mthirds": [
+     35.58,
+     19.75,
+     28.51
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 152,
+     "share": 49.74
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "10f11c0b292d15d51c8916dc840809287761c9a7e65403acc9026c162e1673ae"
+   },
+   {
+    "pos": "k4",
+    "hero": [
+     17.5,
+     14.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 7.32,
+    "Mtotal": 27.59,
+    "Mthirds": [
+     27.76,
+     26.37,
+     28.64
+    ],
+    "heroFrac": 0.1256,
+    "heroFracRaw": 0.1256005394112008,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 131,
+     "share": 28.23
+    },
+    "ground": 0.632,
+    "rect": 3920,
+    "sha256": "acc81740ee3da45a909d23e11408d892adc4bf59a2d5dc2ade9c359c867aabc6"
+   },
+   {
+    "pos": "k8",
+    "hero": [
+     16.5,
+     6.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 10.64,
+    "Mtotal": 51.45,
+    "Mthirds": [
+     52.3,
+     50.96,
+     51.09
+    ],
+    "heroFrac": 0.1333,
+    "heroFracRaw": 0.1332576642565885,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 76,
+     "share": 51.45
+    },
+    "ground": 1.579,
+    "rect": 4472,
+    "sha256": "37ebe1967343890c2806d36a2d73614ced3f6ba7e61f1f0b72e29b4077743236"
+   }
+  ],
+  "SUELO": [
+   {
+    "pos": "axis 3 old tiles from the dais",
+    "hero": [
+     17,
+     18
+    ],
+    "F1hidden": 93.05,
+    "F2bg": 0,
+    "Bbill": 0,
+    "Mtotal": 86.62,
+    "Mthirds": [
+     87.52,
+     85.2,
+     87.16
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 137,
+     "share": 75.36
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "6c3328590b2156f6a2e8700b54b16d7ef99fdc630041593216682f1f2cc784ed"
+   },
+   {
+    "pos": "south edge of the carpet",
+    "hero": [
+     17,
+     23
+    ],
+    "F1hidden": 94.82,
+    "F2bg": 4.04,
+    "Bbill": 0,
+    "Mtotal": 89.67,
+    "Mthirds": [
+     90.34,
+     88.55,
+     90.11
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 136,
+     "share": 81.46
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "86c0b0a7f4e4c1620677dc85080f790b514f6eb5ef3946937b743e17056e157a"
+   },
+   {
+    "pos": "4 old tiles off the axis",
+    "hero": [
+     9,
+     18
+    ],
+    "F1hidden": 93.05,
+    "F2bg": 2.04,
+    "Bbill": 0,
+    "Mtotal": 86.18,
+    "Mthirds": [
+     86.2,
+     87.36,
+     84.97
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 147,
+     "share": 77.82
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "bb7937032484da0ecf1225407040b69df91bec150906dd2ff93accfe0d5d6d92"
+   },
+   {
+    "pos": "k0",
+    "hero": [
+     16.5,
+     23.5
+    ],
+    "F1hidden": 100,
+    "F2bg": 6.65,
+    "Bbill": 0,
+    "Mtotal": 87.2,
+    "Mthirds": [
+     87.6,
+     86.54,
+     87.47
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 130,
+     "share": 79.74
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "7da58ab3d486bbfdc7445d1b1713418ecda27d0e89cb98c5466adb2d9d3de344"
+   },
+   {
+    "pos": "k4",
+    "hero": [
+     17.5,
+     14.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0.52,
+    "Bbill": 0,
+    "Mtotal": 52.86,
+    "Mthirds": [
+     52.7,
+     53.04,
+     52.83
+    ],
+    "heroFrac": 0.1256,
+    "heroFracRaw": 0.1256005394112008,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 205,
+     "share": 54.16
+    },
+    "ground": 0.632,
+    "rect": 3920,
+    "sha256": "9cd9eb98ea859d8b064d37b55363c11e64a8c0ea5b299e0fe69165e19163c948"
+   },
+   {
+    "pos": "k8",
+    "hero": [
+     16.5,
+     6.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 15.39,
+    "Bbill": 0,
+    "Mtotal": 35.4,
+    "Mthirds": [
+     35.4,
+     35.4,
+     35.41
+    ],
+    "heroFrac": 0.1333,
+    "heroFracRaw": 0.1332576642565885,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 128,
+     "share": 35.89
+    },
+    "ground": 1.579,
+    "rect": 4472,
+    "sha256": "970604b1d66ca92c6cd939799cde6f45bd3a427b5bda0b512ec1051481de589e"
+   }
+  ],
+  "X1": [
+   {
+    "pos": "axis 3 old tiles from the dais",
+    "hero": [
+     17,
+     18
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 6.43,
+    "Mtotal": 29.85,
+    "Mthirds": [
+     30.69,
+     28.46,
+     30.4
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 155,
+     "share": 20.1
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "92a5aa15f8f1a2f2e04f3971f0621322d530d2dcd1848cbbedac113bcb24e561"
+   },
+   {
+    "pos": "south edge of the carpet",
+    "hero": [
+     17,
+     23
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 4.53,
+    "Mtotal": 22.9,
+    "Mthirds": [
+     23.92,
+     21.57,
+     23.19
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 181,
+     "share": 42.95
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "2da8639363652fa2d32fea4efaaed9a79379365611aa34e6d443c00cf3a0d60f"
+   },
+   {
+    "pos": "4 old tiles off the axis",
+    "hero": [
+     9,
+     18
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 5.18,
+    "Mtotal": 38.83,
+    "Mthirds": [
+     57.66,
+     30.66,
+     28.13
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 139,
+     "share": 32.54
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "6ecefac0ba12af9fbbe7e37b1a360cf03ae1d019607ee0c9daa3eb06ad0c3f3d"
+   },
+   {
+    "pos": "k0",
+    "hero": [
+     16.5,
+     23.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 1.83,
+    "Bbill": 4.31,
+    "Mtotal": 21.58,
+    "Mthirds": [
+     23.16,
+     19.75,
+     21.84
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 161,
+     "share": 42.17
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "2c4019d688dc1f8ac15a065c0ff284ea245e245075652c722865a6da938d576e"
+   },
+   {
+    "pos": "k4",
+    "hero": [
+     17.5,
+     14.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 7.32,
+    "Mtotal": 26.79,
+    "Mthirds": [
+     27.03,
+     26.37,
+     26.97
+    ],
+    "heroFrac": 0.1256,
+    "heroFracRaw": 0.1256005394112008,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 135,
+     "share": 27.57
+    },
+    "ground": 0.632,
+    "rect": 3920,
+    "sha256": "637607bb9686f6122b34fb0cd1cf599651eab52dc7356af70fa3c7ff632f3ebb"
+   },
+   {
+    "pos": "k8",
+    "hero": [
+     16.5,
+     6.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 10.64,
+    "Mtotal": 51.49,
+    "Mthirds": [
+     52.4,
+     50.96,
+     51.09
+    ],
+    "heroFrac": 0.1333,
+    "heroFracRaw": 0.1332576642565885,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 75,
+     "share": 51.49
+    },
+    "ground": 1.579,
+    "rect": 4472,
+    "sha256": "283818b323cf26dc09c45f3a9ce0a80c0ffbecc06ac9fa4fca1a27c033096709"
+   }
+  ],
+  "X2": [
+   {
+    "pos": "axis 3 old tiles from the dais",
+    "hero": [
+     17,
+     18
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 6.5,
+    "Mtotal": 31.86,
+    "Mthirds": [
+     34.28,
+     28.46,
+     32.84
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 154,
+     "share": 23.46
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "6c731a3eadff1844c6d279d7f6c97fe35ab47f2ce0d098d6facb6430f2b7a8ff"
+   },
+   {
+    "pos": "south edge of the carpet",
+    "hero": [
+     17,
+     23
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 4.36,
+    "Mtotal": 29.45,
+    "Mthirds": [
+     35.38,
+     21.57,
+     31.4
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 181,
+     "share": 50.61
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "6022b70892db485fdd7a0c9111b12e7b22fb71380ad96bb1c14f6070303ce7da"
+   },
+   {
+    "pos": "4 old tiles off the axis",
+    "hero": [
+     9,
+     18
+    ],
+    "F1hidden": 0,
+    "F2bg": 2.04,
+    "Bbill": 5.08,
+    "Mtotal": 42.61,
+    "Mthirds": [
+     51.82,
+     47.86,
+     28.13
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 148,
+     "share": 36.69
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "a3a40d2c582a74af25b0dc13d474f0afb718faa7dd4da11b21a33bf409a0b682"
+   },
+   {
+    "pos": "k0",
+    "hero": [
+     16.5,
+     23.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 1.83,
+    "Bbill": 4.23,
+    "Mtotal": 27.94,
+    "Mthirds": [
+     35.58,
+     19.75,
+     28.51
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 152,
+     "share": 49.74
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "aed67a2987743b9d274297bf8cf8a3895e4927dc609547cb72beda9b18d5c07e"
+   },
+   {
+    "pos": "k4",
+    "hero": [
+     17.5,
+     14.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 7.49,
+    "Mtotal": 27.6,
+    "Mthirds": [
+     27.77,
+     26.38,
+     28.64
+    ],
+    "heroFrac": 0.1256,
+    "heroFracRaw": 0.1256005394112008,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 132,
+     "share": 28.23
+    },
+    "ground": 0.632,
+    "rect": 3920,
+    "sha256": "3270c10aad76094ea35a7d00306184d18f80409da7a9c53a6539ed5cde1e7d3c"
+   },
+   {
+    "pos": "k8",
+    "hero": [
+     16.5,
+     6.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 12.16,
+    "Bbill": 10.87,
+    "Mtotal": 39.04,
+    "Mthirds": [
+     40.87,
+     38.09,
+     38.15
+    ],
+    "heroFrac": 0.1333,
+    "heroFracRaw": 0.1332576642565885,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 88,
+     "share": 39.04
+    },
+    "ground": 1.579,
+    "rect": 4472,
+    "sha256": "43e99f11a1fddc06019de773d1e3e2c75f02561f9fc959500397ddf79f1fbca8"
+   }
+  ],
+  "X3": [
+   {
+    "pos": "axis 3 old tiles from the dais",
+    "hero": [
+     17,
+     18
+    ],
+    "F1hidden": 93.05,
+    "F2bg": 0,
+    "Bbill": 4.67,
+    "Mtotal": 87.54,
+    "Mthirds": [
+     89.08,
+     85.2,
+     88.35
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951348,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 143,
+     "share": 78.14
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "a176c1cfef9c52d9cd8a13f7d5fdf7e2457a7bd1c5330a164a46e0f8ad720ffe"
+   },
+   {
+    "pos": "south edge of the carpet",
+    "hero": [
+     17,
+     23
+    ],
+    "F1hidden": 94.82,
+    "F2bg": 4.04,
+    "Bbill": 2.65,
+    "Mtotal": 89.72,
+    "Mthirds": [
+     90.52,
+     88.55,
+     90.09
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 143,
+     "share": 83.67
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "f28384268b9f0e479f35047140613682614fb46861773d4adcb5c1e866a492d2"
+   },
+   {
+    "pos": "4 old tiles off the axis",
+    "hero": [
+     9,
+     18
+    ],
+    "F1hidden": 93.05,
+    "F2bg": 0,
+    "Bbill": 4,
+    "Mtotal": 89.22,
+    "Mthirds": [
+     92.66,
+     90.03,
+     84.97
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951348,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 141,
+     "share": 82.73
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "4228ddddf81eded879326a2bb4d3d9ad8524594dcdd28aa841a77c919a9ac00f"
+   },
+   {
+    "pos": "k0",
+    "hero": [
+     16.5,
+     23.5
+    ],
+    "F1hidden": 100,
+    "F2bg": 6.65,
+    "Bbill": 2.57,
+    "Mtotal": 87.38,
+    "Mthirds": [
+     88.1,
+     86.54,
+     87.49
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 128,
+     "share": 81.85
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "7a0f101ead9a789c6e1e74ef664317bb7b05cfc7880647c2e6a4b03dda910589"
+   },
+   {
+    "pos": "k4",
+    "hero": [
+     17.5,
+     14.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 6.58,
+    "Mtotal": 55.9,
+    "Mthirds": [
+     55.94,
+     54.76,
+     57
+    ],
+    "heroFrac": 0.1256,
+    "heroFracRaw": 0.1256005394112008,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 145,
+     "share": 56.54
+    },
+    "ground": 0.632,
+    "rect": 3920,
+    "sha256": "3ca0aba89ee78ea710fba819f5c6a4fa2291cabb488b2209712e74640ed86812"
+   },
+   {
+    "pos": "k8",
+    "hero": [
+     16.5,
+     6.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 10.64,
+    "Mtotal": 51.45,
+    "Mthirds": [
+     52.3,
+     50.96,
+     51.09
+    ],
+    "heroFrac": 0.1333,
+    "heroFracRaw": 0.1332576642565885,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 76,
+     "share": 51.45
+    },
+    "ground": 1.579,
+    "rect": 4472,
+    "sha256": "48fff65db71ab52e40c49e2887b87de272274a12e6858868b2ccb8a025d54ce3"
+   }
+  ],
+  "X4": [
+   {
+    "pos": "axis 3 old tiles from the dais",
+    "hero": [
+     17,
+     18
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 7.1,
+    "Mtotal": 26.32,
+    "Mthirds": [
+     26.39,
+     26.08,
+     26.48
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 143,
+     "share": 27.82
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "501e7dad94059a57966684c1091670941fbbc7535cf925b396fe322b2929926f"
+   },
+   {
+    "pos": "south edge of the carpet",
+    "hero": [
+     17,
+     23
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 5.62,
+    "Mtotal": 20.29,
+    "Mthirds": [
+     20.76,
+     19.87,
+     20.25
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 150,
+     "share": 49.18
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "9cd405a2d2c54d9770e08563c586558c435c99221fed64411b2f12e64d76dab3"
+   },
+   {
+    "pos": "4 old tiles off the axis",
+    "hero": [
+     9,
+     18
+    ],
+    "F1hidden": 0,
+    "F2bg": 2.04,
+    "Bbill": 6,
+    "Mtotal": 34.09,
+    "Mthirds": [
+     50.01,
+     26.32,
+     25.91
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 154,
+     "share": 36.19
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "2fbde5214d5a22d257b7818e27bea68232a4b477685a7658aa369e24b5a2087d"
+   },
+   {
+    "pos": "k0",
+    "hero": [
+     16.5,
+     23.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 1.83,
+    "Bbill": 5.47,
+    "Mtotal": 19.64,
+    "Mthirds": [
+     20.64,
+     19.03,
+     19.24
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 142,
+     "share": 48.32
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "caa8a15c4e7170b9ca48cc882ad03ecb4cef5b24c09890064ce5bf0a2c44858d"
+   },
+   {
+    "pos": "k4",
+    "hero": [
+     17.5,
+     14.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0.01,
+    "Bbill": 7.93,
+    "Mtotal": 31.66,
+    "Mthirds": [
+     31.76,
+     31.42,
+     31.79
+    ],
+    "heroFrac": 0.1256,
+    "heroFracRaw": 0.1256005394112008,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 102,
+     "share": 32.35
+    },
+    "ground": 0,
+    "rect": 3920,
+    "sha256": "ff79da6e03f88e58c81cc34cf472297c326da3032e9875793f4abd6148442d78"
+   },
+   {
+    "pos": "k8",
+    "hero": [
+     16.5,
+     6.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 3.65,
+    "Bbill": 10.78,
+    "Mtotal": 46.64,
+    "Mthirds": [
+     47.52,
+     46.21,
+     46.2
+    ],
+    "heroFrac": 0.1333,
+    "heroFracRaw": 0.1332576642565885,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 104,
+     "share": 46.64
+    },
+    "ground": 0,
+    "rect": 4472,
+    "sha256": "8988d8610a255673910b2bc65650aab348b7c2ab4872db53f581303d362bd908"
+   }
+  ],
+  "X5": [
+   {
+    "pos": "axis 3 old tiles from the dais",
+    "hero": [
+     17,
+     18
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 0,
+    "Mtotal": 31.86,
+    "Mthirds": [
+     34.28,
+     28.46,
+     32.84
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 154,
+     "share": 23.46
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "074c2b74f2a13924e1bb0c84bf1ff19ef3fb519d8080fae2a2c0725e26b1f781"
+   },
+   {
+    "pos": "south edge of the carpet",
+    "hero": [
+     17,
+     23
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 0,
+    "Mtotal": 29.45,
+    "Mthirds": [
+     35.38,
+     21.57,
+     31.4
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 181,
+     "share": 50.61
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "dfc971970f7edd0f4eb7106684fb845ddbdc7e2485c2d45003ece4057e02d16a"
+   },
+   {
+    "pos": "4 old tiles off the axis",
+    "hero": [
+     9,
+     18
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 0,
+    "Mtotal": 44.7,
+    "Mthirds": [
+     58.08,
+     47.86,
+     28.13
+    ],
+    "heroFrac": 0.1222,
+    "heroFracRaw": 0.12217467192951349,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 140,
+     "share": 38.81
+    },
+    "ground": 0,
+    "rect": 3840,
+    "sha256": "e5e8cae469c6f4fe52935a9c4ce0c86822d5800339e4b7aa4dc73202952d5ed7"
+   },
+   {
+    "pos": "k0",
+    "hero": [
+     16.5,
+     23.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 1.83,
+    "Bbill": 0,
+    "Mtotal": 27.94,
+    "Mthirds": [
+     35.58,
+     19.75,
+     28.51
+    ],
+    "heroFrac": 0.117,
+    "heroFracRaw": 0.11700942122650336,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 152,
+     "share": 49.74
+    },
+    "ground": 0,
+    "rect": 3496,
+    "sha256": "3a8f8d45d8fc07802e14f14b94bafd892d284df861eef3117183ef23a239e09e"
+   },
+   {
+    "pos": "k4",
+    "hero": [
+     17.5,
+     14.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 0,
+    "Mtotal": 27.59,
+    "Mthirds": [
+     27.76,
+     26.37,
+     28.64
+    ],
+    "heroFrac": 0.1256,
+    "heroFracRaw": 0.1256005394112008,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 131,
+     "share": 28.23
+    },
+    "ground": 0.632,
+    "rect": 3920,
+    "sha256": "9089810ab9d06cf08ab6ebcd08f25a5a0f758eefbaac57b9aca997aa82197288"
+   },
+   {
+    "pos": "k8",
+    "hero": [
+     16.5,
+     6.5
+    ],
+    "F1hidden": 0,
+    "F2bg": 0,
+    "Bbill": 0,
+    "Mtotal": 51.45,
+    "Mthirds": [
+     52.3,
+     50.96,
+     51.09
+    ],
+    "heroFrac": 0.1333,
+    "heroFracRaw": 0.1332576642565885,
+    "heroBase": [
+     634.4,
+     475.54
+    ],
+    "enclosure": {
+     "total": 308,
+     "visible": 76,
+     "share": 51.45
+    },
+    "ground": 1.579,
+    "rect": 4472,
+    "sha256": "defc379d5fdfde4f9e854dffd6b5fe0ba586aef4c5337d0ce01e614dc73e687e"
+   }
+  ]
+ },
+ "tilesCheck": {
+  "TECHO": {
+   "changedTiles": 0,
+   "outsideElement": null,
+   "outsideSample": null
+  },
+  "SUELO": {
+   "changedTiles": 296,
+   "outsideElement": null,
+   "outsideSample": null
+  },
+  "X1": {
+   "changedTiles": 20,
+   "outsideElement": 0,
+   "outsideSample": []
+  },
+  "X2": {
+   "changedTiles": 216,
+   "outsideElement": 0,
+   "outsideSample": []
+  },
+  "X3": {
+   "changedTiles": 60,
+   "outsideElement": 0,
+   "outsideSample": []
+  },
+  "X4": {
+   "changedTiles": 488,
+   "outsideElement": 0,
+   "outsideSample": []
+  },
+  "X5": {
+   "changedTiles": 0,
+   "outsideElement": 0,
+   "outsideSample": []
+  }
+ },
+ "mapSha256": "119a59ac8ca0a5dceddc62d3087f320dba794242f000b1b6aa4dddab0389f417",
+ "pageErrors": 0
+}

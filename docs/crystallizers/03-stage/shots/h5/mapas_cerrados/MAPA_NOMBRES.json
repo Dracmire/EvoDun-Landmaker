@@ -1,0 +1,212 @@
+{
+ "c001.png": {
+  "state": "TECHO",
+  "position": "4 old tiles off the axis",
+  "sha256": "fd041e362948031bdc4568876d0077ac45e901eabdb0562d3dafa82c77fbf99f"
+ },
+ "c002.png": {
+  "state": "TECHO",
+  "position": "south edge of the carpet",
+  "sha256": "81b5190f2d12c6b9de33a87ea13755c2ac09b8682d6b8547637b93c715cece05"
+ },
+ "c003.png": {
+  "state": "X5",
+  "position": "axis 3 old tiles from the dais",
+  "sha256": "074c2b74f2a13924e1bb0c84bf1ff19ef3fb519d8080fae2a2c0725e26b1f781"
+ },
+ "c004.png": {
+  "state": "X4",
+  "position": "south edge of the carpet",
+  "sha256": "9cd405a2d2c54d9770e08563c586558c435c99221fed64411b2f12e64d76dab3"
+ },
+ "c005.png": {
+  "state": "TECHO",
+  "position": "k0",
+  "sha256": "10f11c0b292d15d51c8916dc840809287761c9a7e65403acc9026c162e1673ae"
+ },
+ "c006.png": {
+  "state": "SUELO",
+  "position": "4 old tiles off the axis",
+  "sha256": "bb7937032484da0ecf1225407040b69df91bec150906dd2ff93accfe0d5d6d92"
+ },
+ "c007.png": {
+  "state": "TECHO",
+  "position": "k4",
+  "sha256": "acc81740ee3da45a909d23e11408d892adc4bf59a2d5dc2ade9c359c867aabc6"
+ },
+ "c008.png": {
+  "state": "TECHO",
+  "position": "axis 3 old tiles from the dais",
+  "sha256": "a00a5a165ced6b4e25ce375fbde73ebaba5b868bcc80e6f65076af793a5459b5"
+ },
+ "c009.png": {
+  "state": "X5",
+  "position": "south edge of the carpet",
+  "sha256": "dfc971970f7edd0f4eb7106684fb845ddbdc7e2485c2d45003ece4057e02d16a"
+ },
+ "c010.png": {
+  "state": "X1",
+  "position": "4 old tiles off the axis",
+  "sha256": "6ecefac0ba12af9fbbe7e37b1a360cf03ae1d019607ee0c9daa3eb06ad0c3f3d"
+ },
+ "c011.png": {
+  "state": "X4",
+  "position": "k4",
+  "sha256": "ff79da6e03f88e58c81cc34cf472297c326da3032e9875793f4abd6148442d78"
+ },
+ "c012.png": {
+  "state": "X3",
+  "position": "4 old tiles off the axis",
+  "sha256": "4228ddddf81eded879326a2bb4d3d9ad8524594dcdd28aa841a77c919a9ac00f"
+ },
+ "c013.png": {
+  "state": "SUELO",
+  "position": "k0",
+  "sha256": "7da58ab3d486bbfdc7445d1b1713418ecda27d0e89cb98c5466adb2d9d3de344"
+ },
+ "c014.png": {
+  "state": "X2",
+  "position": "k0",
+  "sha256": "aed67a2987743b9d274297bf8cf8a3895e4927dc609547cb72beda9b18d5c07e"
+ },
+ "c015.png": {
+  "state": "SUELO",
+  "position": "south edge of the carpet",
+  "sha256": "86c0b0a7f4e4c1620677dc85080f790b514f6eb5ef3946937b743e17056e157a"
+ },
+ "c016.png": {
+  "state": "X1",
+  "position": "axis 3 old tiles from the dais",
+  "sha256": "92a5aa15f8f1a2f2e04f3971f0621322d530d2dcd1848cbbedac113bcb24e561"
+ },
+ "c017.png": {
+  "state": "X1",
+  "position": "south edge of the carpet",
+  "sha256": "2da8639363652fa2d32fea4efaaed9a79379365611aa34e6d443c00cf3a0d60f"
+ },
+ "c018.png": {
+  "state": "X3",
+  "position": "south edge of the carpet",
+  "sha256": "f28384268b9f0e479f35047140613682614fb46861773d4adcb5c1e866a492d2"
+ },
+ "c019.png": {
+  "state": "X4",
+  "position": "k0",
+  "sha256": "caa8a15c4e7170b9ca48cc882ad03ecb4cef5b24c09890064ce5bf0a2c44858d"
+ },
+ "c020.png": {
+  "state": "SUELO",
+  "position": "axis 3 old tiles from the dais",
+  "sha256": "6c3328590b2156f6a2e8700b54b16d7ef99fdc630041593216682f1f2cc784ed"
+ },
+ "c021.png": {
+  "state": "X3",
+  "position": "k0",
+  "sha256": "7a0f101ead9a789c6e1e74ef664317bb7b05cfc7880647c2e6a4b03dda910589"
+ },
+ "c022.png": {
+  "state": "X5",
+  "position": "4 old tiles off the axis",
+  "sha256": "e5e8cae469c6f4fe52935a9c4ce0c86822d5800339e4b7aa4dc73202952d5ed7"
+ },
+ "c023.png": {
+  "state": "TECHO",
+  "position": "k8",
+  "sha256": "37ebe1967343890c2806d36a2d73614ced3f6ba7e61f1f0b72e29b4077743236"
+ },
+ "c024.png": {
+  "state": "X1",
+  "position": "k8",
+  "sha256": "283818b323cf26dc09c45f3a9ce0a80c0ffbecc06ac9fa4fca1a27c033096709"
+ },
+ "c025.png": {
+  "state": "X1",
+  "position": "k4",
+  "sha256": "637607bb9686f6122b34fb0cd1cf599651eab52dc7356af70fa3c7ff632f3ebb"
+ },
+ "c026.png": {
+  "state": "X1",
+  "position": "k0",
+  "sha256": "2c4019d688dc1f8ac15a065c0ff284ea245e245075652c722865a6da938d576e"
+ },
+ "c027.png": {
+  "state": "SUELO",
+  "position": "k8",
+  "sha256": "970604b1d66ca92c6cd939799cde6f45bd3a427b5bda0b512ec1051481de589e"
+ },
+ "c028.png": {
+  "state": "X2",
+  "position": "k8",
+  "sha256": "43e99f11a1fddc06019de773d1e3e2c75f02561f9fc959500397ddf79f1fbca8"
+ },
+ "c029.png": {
+  "state": "X3",
+  "position": "k4",
+  "sha256": "3ca0aba89ee78ea710fba819f5c6a4fa2291cabb488b2209712e74640ed86812"
+ },
+ "c030.png": {
+  "state": "SUELO",
+  "position": "k4",
+  "sha256": "9cd9eb98ea859d8b064d37b55363c11e64a8c0ea5b299e0fe69165e19163c948"
+ },
+ "c031.png": {
+  "state": "X2",
+  "position": "south edge of the carpet",
+  "sha256": "6022b70892db485fdd7a0c9111b12e7b22fb71380ad96bb1c14f6070303ce7da"
+ },
+ "c032.png": {
+  "state": "X5",
+  "position": "k8",
+  "sha256": "defc379d5fdfde4f9e854dffd6b5fe0ba586aef4c5337d0ce01e614dc73e687e"
+ },
+ "c033.png": {
+  "state": "X2",
+  "position": "4 old tiles off the axis",
+  "sha256": "a3a40d2c582a74af25b0dc13d474f0afb718faa7dd4da11b21a33bf409a0b682"
+ },
+ "c034.png": {
+  "state": "X4",
+  "position": "4 old tiles off the axis",
+  "sha256": "2fbde5214d5a22d257b7818e27bea68232a4b477685a7658aa369e24b5a2087d"
+ },
+ "c035.png": {
+  "state": "X3",
+  "position": "axis 3 old tiles from the dais",
+  "sha256": "a176c1cfef9c52d9cd8a13f7d5fdf7e2457a7bd1c5330a164a46e0f8ad720ffe"
+ },
+ "c036.png": {
+  "state": "X2",
+  "position": "axis 3 old tiles from the dais",
+  "sha256": "6c731a3eadff1844c6d279d7f6c97fe35ab47f2ce0d098d6facb6430f2b7a8ff"
+ },
+ "c037.png": {
+  "state": "X5",
+  "position": "k4",
+  "sha256": "9089810ab9d06cf08ab6ebcd08f25a5a0f758eefbaac57b9aca997aa82197288"
+ },
+ "c038.png": {
+  "state": "X3",
+  "position": "k8",
+  "sha256": "48fff65db71ab52e40c49e2887b87de272274a12e6858868b2ccb8a025d54ce3"
+ },
+ "c039.png": {
+  "state": "X4",
+  "position": "k8",
+  "sha256": "8988d8610a255673910b2bc65650aab348b7c2ab4872db53f581303d362bd908"
+ },
+ "c040.png": {
+  "state": "X2",
+  "position": "k4",
+  "sha256": "3270c10aad76094ea35a7d00306184d18f80409da7a9c53a6539ed5cde1e7d3c"
+ },
+ "c041.png": {
+  "state": "X5",
+  "position": "k0",
+  "sha256": "3a8f8d45d8fc07802e14f14b94bafd892d284df861eef3117183ef23a239e09e"
+ },
+ "c042.png": {
+  "state": "X4",
+  "position": "axis 3 old tiles from the dais",
+  "sha256": "501e7dad94059a57966684c1091670941fbbc7535cf925b396fe322b2929926f"
+ }
+}

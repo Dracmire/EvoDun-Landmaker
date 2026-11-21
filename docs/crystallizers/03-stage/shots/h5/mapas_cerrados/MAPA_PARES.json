@@ -1,0 +1,398 @@
+{
+ "p01.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "k8"
+  },
+  "derecha": {
+   "estado": "X3",
+   "posicion": "k8"
+  },
+  "tipo": "quita-uno X3",
+  "techo_a_la": "izquierda"
+ },
+ "p02.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "k4"
+  },
+  "derecha": {
+   "estado": "X2",
+   "posicion": "k4"
+  },
+  "tipo": "quita-uno X2",
+  "techo_a_la": "izquierda"
+ },
+ "p03.png": {
+  "izquierda": {
+   "estado": "X5",
+   "posicion": "k0"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "k0"
+  },
+  "tipo": "quita-uno X5",
+  "techo_a_la": "derecha"
+ },
+ "p04.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "south edge of the carpet"
+  },
+  "derecha": {
+   "estado": "X5",
+   "posicion": "south edge of the carpet"
+  },
+  "tipo": "quita-uno X5",
+  "techo_a_la": "izquierda"
+ },
+ "p05.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "k4"
+  },
+  "derecha": {
+   "estado": "X1",
+   "posicion": "k4"
+  },
+  "tipo": "quita-uno X1",
+  "techo_a_la": "izquierda"
+ },
+ "p06.png": {
+  "izquierda": {
+   "estado": "X1",
+   "posicion": "k0"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "k0"
+  },
+  "tipo": "quita-uno X1",
+  "techo_a_la": "derecha"
+ },
+ "p07.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "k4"
+  },
+  "derecha": {
+   "estado": "SUELO",
+   "posicion": "k4"
+  },
+  "tipo": "control",
+  "techo_a_la": "izquierda"
+ },
+ "p08.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "k4"
+  },
+  "derecha": {
+   "estado": "X4",
+   "posicion": "k4"
+  },
+  "tipo": "quita-uno X4",
+  "techo_a_la": "izquierda"
+ },
+ "p09.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "south edge of the carpet"
+  },
+  "derecha": {
+   "estado": "X2",
+   "posicion": "south edge of the carpet"
+  },
+  "tipo": "quita-uno X2",
+  "techo_a_la": "izquierda"
+ },
+ "p10.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "derecha": {
+   "estado": "X3",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "tipo": "quita-uno X3",
+  "techo_a_la": "izquierda"
+ },
+ "p11.png": {
+  "izquierda": {
+   "estado": "X3",
+   "posicion": "k0"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "k0"
+  },
+  "tipo": "quita-uno X3",
+  "techo_a_la": "derecha"
+ },
+ "p12.png": {
+  "izquierda": {
+   "estado": "X2",
+   "posicion": "k8"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "k8"
+  },
+  "tipo": "quita-uno X2",
+  "techo_a_la": "derecha"
+ },
+ "p13.png": {
+  "izquierda": {
+   "estado": "X3",
+   "posicion": "south edge of the carpet"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "south edge of the carpet"
+  },
+  "tipo": "quita-uno X3",
+  "techo_a_la": "derecha"
+ },
+ "p14.png": {
+  "izquierda": {
+   "estado": "X4",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "tipo": "quita-uno X4",
+  "techo_a_la": "derecha"
+ },
+ "p15.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "4 old tiles off the axis"
+  },
+  "derecha": {
+   "estado": "X4",
+   "posicion": "4 old tiles off the axis"
+  },
+  "tipo": "quita-uno X4",
+  "techo_a_la": "izquierda"
+ },
+ "p16.png": {
+  "izquierda": {
+   "estado": "X1",
+   "posicion": "k8"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "k8"
+  },
+  "tipo": "quita-uno X1",
+  "techo_a_la": "derecha"
+ },
+ "p17.png": {
+  "izquierda": {
+   "estado": "X3",
+   "posicion": "k4"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "k4"
+  },
+  "tipo": "quita-uno X3",
+  "techo_a_la": "derecha"
+ },
+ "p18.png": {
+  "izquierda": {
+   "estado": "X1",
+   "posicion": "4 old tiles off the axis"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "4 old tiles off the axis"
+  },
+  "tipo": "quita-uno X1",
+  "techo_a_la": "derecha"
+ },
+ "p19.png": {
+  "izquierda": {
+   "estado": "X5",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "tipo": "quita-uno X5",
+  "techo_a_la": "derecha"
+ },
+ "p20.png": {
+  "izquierda": {
+   "estado": "X1",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "tipo": "quita-uno X1",
+  "techo_a_la": "derecha"
+ },
+ "p21.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "k4"
+  },
+  "derecha": {
+   "estado": "X5",
+   "posicion": "k4"
+  },
+  "tipo": "quita-uno X5",
+  "techo_a_la": "izquierda"
+ },
+ "p22.png": {
+  "izquierda": {
+   "estado": "SUELO",
+   "posicion": "4 old tiles off the axis"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "4 old tiles off the axis"
+  },
+  "tipo": "control",
+  "techo_a_la": "derecha"
+ },
+ "p23.png": {
+  "izquierda": {
+   "estado": "X3",
+   "posicion": "4 old tiles off the axis"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "4 old tiles off the axis"
+  },
+  "tipo": "quita-uno X3",
+  "techo_a_la": "derecha"
+ },
+ "p24.png": {
+  "izquierda": {
+   "estado": "X5",
+   "posicion": "k8"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "k8"
+  },
+  "tipo": "quita-uno X5",
+  "techo_a_la": "derecha"
+ },
+ "p25.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "k8"
+  },
+  "derecha": {
+   "estado": "X4",
+   "posicion": "k8"
+  },
+  "tipo": "quita-uno X4",
+  "techo_a_la": "izquierda"
+ },
+ "p26.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "4 old tiles off the axis"
+  },
+  "derecha": {
+   "estado": "X5",
+   "posicion": "4 old tiles off the axis"
+  },
+  "tipo": "quita-uno X5",
+  "techo_a_la": "izquierda"
+ },
+ "p27.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "south edge of the carpet"
+  },
+  "derecha": {
+   "estado": "X1",
+   "posicion": "south edge of the carpet"
+  },
+  "tipo": "quita-uno X1",
+  "techo_a_la": "izquierda"
+ },
+ "p28.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "k0"
+  },
+  "derecha": {
+   "estado": "X2",
+   "posicion": "k0"
+  },
+  "tipo": "quita-uno X2",
+  "techo_a_la": "izquierda"
+ },
+ "p29.png": {
+  "izquierda": {
+   "estado": "X2",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "tipo": "quita-uno X2",
+  "techo_a_la": "derecha"
+ },
+ "p30.png": {
+  "izquierda": {
+   "estado": "X4",
+   "posicion": "south edge of the carpet"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "south edge of the carpet"
+  },
+  "tipo": "quita-uno X4",
+  "techo_a_la": "derecha"
+ },
+ "p31.png": {
+  "izquierda": {
+   "estado": "TECHO",
+   "posicion": "k0"
+  },
+  "derecha": {
+   "estado": "X4",
+   "posicion": "k0"
+  },
+  "tipo": "quita-uno X4",
+  "techo_a_la": "izquierda"
+ },
+ "p32.png": {
+  "izquierda": {
+   "estado": "SUELO",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "axis 3 old tiles from the dais"
+  },
+  "tipo": "control",
+  "techo_a_la": "derecha"
+ },
+ "p33.png": {
+  "izquierda": {
+   "estado": "X2",
+   "posicion": "4 old tiles off the axis"
+  },
+  "derecha": {
+   "estado": "TECHO",
+   "posicion": "4 old tiles off the axis"
+  },
+  "tipo": "quita-uno X2",
+  "techo_a_la": "derecha"
+ }
+}

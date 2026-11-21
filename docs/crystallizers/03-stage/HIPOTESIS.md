@@ -64,10 +64,10 @@ Leyenda: **hecho** = regla construida y mergeada; **falta** = no construido; **C
   - `golden_throne` es la degeneración D1 y **no se imita**: 81 % de billboards.
 - **Referencias.** OT2 `03`, `05`–`07` (cutaway desde fuera y entrando), `09` (sala de juicio, simétrica, balaustrada delante), `20` (biblioteca, escalera grande, alfombra), `v05` (galería entre arcos).
 - **Hecho.** Orientación tipo hub, planos (muro trasero), props (antorchas, pilares), calco de cinta (ribbon), corte bajo de muros (Zelda).
-- **Falta.**
-  - Los muros laterales del salón como volúmenes de `throne_aliahan` (commit 2). Construible: sí.
-  - El corte del muro frontal como regla. Construible: sí, existe para Ascension y no para `planes`.
-- **Descarte.** Se descarta si `throne_aliahan` con volúmenes no baja de 30 % de billboards, o si con el muro frontal cortado el héroe no se ve en k0–k8.
+- **Falta.** Nada de construcción: lo que figuraba aquí **ya existe en main** (corrección de la pasada H5-1, `stage_h5_interior_go.md` §1.3).
+  - Los muros laterales del salón como volúmenes de `throne_aliahan` (commit 2): **hecho**, `src/modes.js` L232–238 (6 pilares y 3 muros `wall`).
+  - El corte del muro frontal como regla: **hecho**, `planes` baja el FRENTE (`src/s3/planes.js` L48, `if (!T.noFront)`; fila 12 de `map1.txt`).
+- **Descarte.** Lo reemplazan los criterios D1–D3 de `research/octopath2/stage_h5_interior_go.md` (§0), fijados antes de medir: D1 presencia del cutaway por regla en < 2/3 de las salas Ascension (H5 cambia: el corte pasa a ser dato declarado); D2 necesidad: si «sin altura» y «sin muros ni pilares» no pierden contra TECHO en ≥ 2/3 de las posiciones, según [U], y la masa alta M no cae ≥ 50 %, el 3D es solo piso (H5 se descarta como composición); D3 fallas: billboards > 30 % o héroe tapado en TECHO paran la pasada.
 
 ## H6 · Mazmorra
 
