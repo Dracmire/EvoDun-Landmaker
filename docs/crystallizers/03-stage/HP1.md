@@ -57,46 +57,50 @@ Daría a M6 un criterio para derivar transformaciones en vez de un catálogo, un
 (la imagen es lo que ve la cámara) y explicaría por qué el polish hecho a mano no subía de nivel: corregía el espacio sin
 una imagen objetivo.
 
-## R · Reencuadre de [U]: el juez es la cámara (2026-11-21, A633–A635; HP-B asumida)
+## R · Solución de [U] a HP1 (verbatim, 2026-11-21, A633; la solución más fuerte a esta hipótesis, A636)
 
-**Terreno:** una sala con un origen 2D conocido que pasa por una capa 2.5D antes del HD-2D. **Demostrarlo es construir
-ese pipeline.**
+Texto de [U] sin editar (ortografía incluida):
 
-**El cambio de cámara es el juez.** En la Torre del Soñador los pisos tienen relieve que no existe en el original y el
-mapa es distinto aunque conserva la estructura: el piso se levantó y la forma se cambió *para que la cámara vea*. Pasar de
-la cámara top-down a una perspectiva es un cambio enorme, y la proyección intermedia (2.5D) es la meta.
+```text
+asumamos Hp-B
 
-**El problema se da vuelta.** No se pregunta cómo transformar: se pregunta qué problemas aparecen al convertir el mapa de
-16 bits a cualquier 2.5D (isométrico, dimétrico tipo beat 'em up como Dragon's Crown). Con el ejercicio más básico,
-«¿cómo sería en isométrico?», todo colapsa:
-- los pasillos estrechos y los muros ahogan el FOV;
-- el negro de relleno de los mapas viejos queda a la vista;
-- el piso limitado no da dónde mirar.
+asi que tenemos hipotesis principal, y sus hipotesis secundarias listas, con ganancia determinada al inicio, todas nos dan ganancia:
 
-Las soluciones emergen: altura diferida y estructura distinta. El problema no son los mapas planos (eso se soluciona):
-es que el FOV del 2.5D queda ahogado. Hacer fuerza bruta nos saltó este pase de diseño.
+la hipotesis:
+una sala con un origen 2D conocido, que pasa por una capa 2.5D antes del HD-2D.
 
-**El pase de composición, dado vuelta:** convierte un 2D a una vista 2.5D buscando solución a la pregunta central que
-emerge:
-- corrige el ahogo del FOV al pasar de 2D a 2.5D;
-- corrige los espacios negros del mapa original;
-- el resto se obtiene enumerando y ponderando los problemas.
+con la base:
+La hoja es una imagen. El HD-2D conserva la imagen 2.5D de su origen. La hoja de composición es esa imagen: oblicua en FF6, top-down con pisos diferenciados en DQ3. Las transformaciones locales del espacio son las que hacen falta para que una cámara en perspectiva siga leyendo esa imagen, y el pase de composición mide y corrige esa conservación
 
-Después solo cambia la pauta: si la solución 2.5D es X, expandir los mismos puntos lleva al HD-2D.
+entonnces
 
-### Lectura de [R] contra los datos
+esto se vuelve simple, como demostramos que
 
-- **Une HT1 con la toma.** Los cambios de los pares sin predictor en el mapa (C4 primer plano, C5 contexto fuera del
-  mapa, C6 densidad; A601) tienen su predictor en la cámara: son respuestas al vacío y al ahogo.
-- **Problemas ya medidos sin ese nombre:**
-  - negro → vacío en pantalla (borde del bosque A hasta 54 %, A470; `voidShare` de M4);
-  - FOV ahogado → oclusión (cámara tapada con 7–9 terrazas, A574; suelo oculto 2,14 × Δ tras un borde, A572);
-  - pasillo estrecho → proporción de la sala (8 H y 61 H contra ~17 H, A465).
+* una sala con un origen 2D conocido, que pasa por una capa 2.5D antes del HD-2D. La unica forma es construyendo un pipeline que haga esto, pero tenemos una linea dada por la base:
+   *  El HD-2D conserva la imagen 2.5D de su origen. La hoja de composición es esa imagen
+   * as transformaciones locales del espacio son las que hacen falta para que una cámara en perspectiva siga leyendo esa imagen
+   * el pase de composición mide y corrige esa conservación
+* ok para que se cumpla la base, tomemos el ejemplo de DQ3. en dreamer tower los pisos tenian relieve que no existe en el original o en 16 bits. es mas el mapa es distinto de 16 bits, aunque tiene la misma estructura
+   * eso significa que : si HD2D conserva la imagen de su origen la hoja de composicion del mapa del remake es el mapa del 2.5D
+   * las transformacionnes locales de espacio se pueden apreciar en los relieves de piso (transformacion) y cambios de estructura (mapa), y estos 2 como resultado deberiann tener como resultado que la camara "perciva" estos pisos al cambiar de top down a Fov perspectiva (que ya tenemos)
+      * pero, si te das cuenta eso implica que el juez es la camara, cambiar de camara top down a perspectiva, es una gran cambio, y esta proyeccion intermedia es nuestra meta.
+      * en simples terminos, el piso se levanto para que la camara "vea" y la forma se cambio para que la camara "vea", y eso tiene sentido si sigues el orden de DQ3, los pasillos sonn estrechos y el piso es limitado, y hay mucha zonna de relleno negra. en el fondo para entender la conversion hay que ver los limited de la camara de originenn (top down), y despues preguntarse "como convertirla end 2d", solo que no nesesitamos las respuestas.
+      * ya sabemos al analizar los pisos, que alturas diferidas y cambio de estructura era nesesario. y solo viendolo del punto de los problemas de conversion desde el mapa originnal 16 bits a 2.5d. y asumamos que el 2.5 es lo mas facil y connocido algo como un isometrico (solo por simplificacion) por que :
+         * por que los bordes negros son reemplazados con mas visibilidad del mismo dungeon si creas perspectiva altura
+         * por que el problema no es que el piso es estrecho es que convertir este mapa en isometrico es una pesadilla de camara, por los muros y los caminos limitados, convertidos a isometrico tu fov es ahogado en esos espacios
+         * con el mas basico ejercicio de "como seria en isometrico", ya todo colapsa y ahi aparecen los problemas
+         * si usas otro medio popular de contraste como beat em up como dragons crown, llegas a un resultado parecido por otra via. en el fondo los problemas no son los metodos sino como solucionar el margen estrecho de los mapas viejos
+         * como nosotros simplemente hicimos brute force, eso nos salvo de todo este pase de diseño, pero en realidad la pregunta de 2d a remake, o de 2d a cualqueir cosa mejor, es una historia de horror, no por los mapas planos, por que eso se solucionna, sino por que FOV de 2.5d es ahogado
+         * de ahi las soluciones, altura y estructura differentes
+   * Dijimos que el "pase de composición mide y corrige esa conservación", pero aca, al voltear el problema todo cambia. si el pase de composicion mide y corrige, entonces cuando conjugas esto con los probblemas que ya describi queda esto:
+      * unn pase de composicion que permite tomar un 2d y convertirlo en isometrico o beat em up (dimetrico) o otro visual 2.5d, copando con las limitaciones del mapa original, o mejor dicho, no copando, sino buscando solucion a la pregunta core que emerge
+      * Composicon que debe corregir el ahogamiento del FOV cuando ocurre la transformacion de 2d a 2.5d
+      * Composicion que debe corregir la gran cantidad de espacios negros de los mapas originales
+      * etc, el resto emerge solo : preguntandose, puedo comvertir el DQ3 en cualquier visual 2.5d moderna ?, o mejor dicho, claro que se puede, pero cuales son las problematicas que emergen, y si las enumeras y ponderas, lo unico que es nesesario despues es cambiar la pauta, si la solucion de 2,5d es X, expandir los mismo puntos te permiten alcanzar hd2d
+   *
+```
 
-  Buena parte del polish eran soluciones a problemas de conversión nunca enumerados como tales.
-- **La capa 2.5D ya existe en el visor:** Cam 7 con profundidad 0,5 (A576).
-- **Cautelas:**
-  1. Cada problema se mide desde la cámara y va con la transformación que lo resuelve; si no, es otra taxonomía (lección
-     de L1–L5, A609).
-  2. Los pesos cambian entre el isométrico y la perspectiva.
-  3. El negro es a veces no-espacio (borde del mundo) y a veces espacio que el top-down no mostraba; se separan.
+**Lectura de [R] retirada (A637).** La versión anterior de esta sección parafraseaba la respuesta y la reducía a
+«oclusión», «vacío» y «proporción de sala»: medidas [mid] que ya teníamos. Eso perdió el hilo: la pregunta es el
+isométrico (la capa 2.5D) como hipótesis, y la solución es dar vuelta el problema (qué emerge al convertir un mapa de
+16 bits a una vista 2.5D), no medir síntomas. Las tres cautelas también se retiran: no respondían a esa pregunta.
