@@ -1,0 +1,8 @@
+# sha256 de las salidas; corrida 1 y corrida 2 dan los mismos hashes (el script y el entorno no se guardan aqui)
+8a4c51635ef9952572c0b6a52edcd376c394cd46e26831ec65b609823933c17d  angulo_escaleras.png
+1dbd411fd4fa69c45a4b2980f2a493e4aecd7e2f5b1e589d79d19dd6430676ea  camara.json
+4e219882f065fce24e3ef04d422cdfb18b2a65968f40024244b29568ed0e1822  lado_theta.png
+6e7edaa77a6c7c4b256620b3ff21bbd5e62da87e61cadaa0638c3c5e39671493  oclusion_theta.png
+0ef1eff1c1ee17d94c04efbd35b69dd3621fb5429c9f41e9103ff1ac405efe1e  tomas_G.png
+74f9fcd9d71a2b6b4c883bcfa69233ac31bb0e34a5b3d2cb7654f0ee12c4cebe  tomas_H.png
+43d47814c31c1b8aba48f9501a23d0155a1d25c82e682ac47dce2df02c802d3e  tomas_I.png

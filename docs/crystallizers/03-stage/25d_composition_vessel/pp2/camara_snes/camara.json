@@ -1,0 +1,436 @@
+{
+ "lectura": {
+  "theta_no_decidido": "se hacen las dos: A = 70 grados, B = 60 grados",
+  "camara": "ortografica a theta sobre el horizonte: x * 1, profundidad del suelo * sen(theta), altura * cos(theta); 1 unidad = 1 px del juego en ancho (tile = 16)",
+  "alturas": "pilar 43 / cos, muro 38 / cos, heroe 22,79 / cos (plano vertical de 16 px de ancho); mock-up: tope + cara 1,67 H / cos, pilar 1,89 H / cos, fachada 1,67 H / cos",
+  "rayos": "oculto = h - d_prima * tan(theta) en el mundo; en pantalla, h_pantalla - d_prima * sen(theta)"
+ },
+ "angulo": {
+  "carteles": [
+   {
+    "letra": "G",
+    "tile_unico": 113,
+    "ancho_px": 14,
+    "alto_px": 16,
+    "ancho_sobre_alto": 0.875
+   },
+   {
+    "letra": "I",
+    "tile_unico": 143,
+    "ancho_px": 14,
+    "alto_px": 14,
+    "ancho_sobre_alto": 1.0
+   },
+   {
+    "letra": "J",
+    "tile_unico": 149,
+    "ancho_px": 14,
+    "alto_px": 14,
+    "ancho_sobre_alto": 1.0
+   },
+   {
+    "letra": "H",
+    "tile_unico": 158,
+    "ancho_px": 14,
+    "alto_px": 16,
+    "ancho_sobre_alto": 0.875
+   }
+  ],
+  "caras_de_muro": [
+   {
+    "id": null,
+    "muro": "W4",
+    "x_px": [
+     280,
+     327
+    ],
+    "y_px": [
+     62,
+     99
+    ],
+    "ancho_px": 48,
+    "alto_mediana_px": 38.0,
+    "alto_min_px": 35,
+    "alto_max_px": 40
+   },
+   {
+    "id": null,
+    "muro": "W3",
+    "x_px": [
+     137,
+     183
+    ],
+    "y_px": [
+     62,
+     99
+    ],
+    "ancho_px": 47,
+    "alto_mediana_px": 38.0,
+    "alto_min_px": 35,
+    "alto_max_px": 41
+   },
+   {
+    "id": null,
+    "muro": "W1",
+    "x_px": [
+     360,
+     391
+    ],
+    "y_px": [
+     622,
+     659
+    ],
+    "ancho_px": 32,
+    "alto_mediana_px": 38.0,
+    "alto_min_px": 35,
+    "alto_max_px": 40
+   }
+  ],
+  "pilares": [
+   {
+    "id": "P23",
+    "muro": "W1",
+    "x_px": [
+     276,
+     292
+    ],
+    "y_px": [
+     689,
+     731
+    ],
+    "ancho_px": 17,
+    "alto_mediana_px": 43.0,
+    "alto_min_px": 42,
+    "alto_max_px": 48
+   },
+   {
+    "id": "P22",
+    "muro": "W1",
+    "x_px": [
+     294,
+     308
+    ],
+    "y_px": [
+     657,
+     699
+    ],
+    "ancho_px": 15,
+    "alto_mediana_px": 43.0,
+    "alto_min_px": 37,
+    "alto_max_px": 47
+   }
+  ],
+  "periodo_del_suelo_px": {
+   "horizontal_picos": [
+    [
+     16,
+     0.903
+    ],
+    [
+     32,
+     0.836
+    ],
+    [
+     48,
+     0.779
+    ],
+    [
+     64,
+     0.728
+    ]
+   ],
+   "vertical_picos": [
+    [
+     6,
+     0.408
+    ],
+    [
+     8,
+     0.401
+    ],
+    [
+     10,
+     0.39
+    ],
+    [
+     12,
+     0.397
+    ],
+    [
+     16,
+     0.76
+    ],
+    [
+     32,
+     0.692
+    ]
+   ],
+   "nota": "fraccion de pares de pixeles de suelo, separados k px, con el mismo color"
+  },
+  "achique_del_tile": {
+   "A": {
+    "theta": 70.0,
+    "16_sen_theta_px": 15.04,
+    "achique_px": 0.96
+   },
+   "B": {
+    "theta": 60.0,
+    "16_sen_theta_px": 13.86,
+    "achique_px": 2.14
+   }
+  },
+  "dispersion": {
+   "alto_de_carteles": {
+    "min": 14,
+    "max": 16,
+    "rango": 2,
+    "desv_tipica": 1.0
+   },
+   "caras_de_muro_rango_de_columnas_px": [
+    35,
+    41
+   ],
+   "pilares_rango_de_columnas_px": [
+    37,
+    48
+   ]
+  },
+  "achique_bajo_la_dispersion": {
+   "A": {
+    "achique_px": 0.96,
+    "rango_de_altos_de_carteles_px": 2,
+    "menor_que_el_rango": true
+   },
+   "B": {
+    "achique_px": 2.14,
+    "rango_de_altos_de_carteles_px": 2,
+    "menor_que_el_rango": false
+   }
+  }
+ },
+ "oclusion": {
+  "A": {
+   "theta": 70.0,
+   "pilar": {
+    "pies al centro del tile de atras": {
+     "altura_real_del_objeto_px": 125.72,
+     "altura_real_del_heroe_px": 66.63,
+     "extension_del_objeto_en_pantalla_px": 58.04,
+     "oculto_mundo_px": 104.2,
+     "oculto_pantalla_px": 35.64,
+     "oculto_pct_de_H": 156.4,
+     "pct_pixeles_del_heroe_tapados": 100.0,
+     "formula_oculto_pantalla_px": 35.48,
+     "16bits_m1_px": 35.0,
+     "diferencia_con_16bits_px": 0.64,
+     "lectura_B_extension_total_oculto_pantalla_px": 20.45
+    },
+    "pies al borde de abajo del tile de atras": {
+     "altura_real_del_objeto_px": 125.72,
+     "altura_real_del_heroe_px": 66.63,
+     "extension_del_objeto_en_pantalla_px": 58.04,
+     "oculto_mundo_px": 126.14,
+     "oculto_pantalla_px": 43.14,
+     "oculto_pct_de_H": 189.3,
+     "pct_pixeles_del_heroe_tapados": 100.0,
+     "formula_oculto_pantalla_px": 43.0,
+     "16bits_m1_px": 43.0,
+     "diferencia_con_16bits_px": 0.14,
+     "lectura_B_extension_total_oculto_pantalla_px": 27.96
+    }
+   },
+   "muro de 1 tile de grueso (5 tiles de largo)": {
+    "pies al centro del tile de atras": {
+     "altura_real_del_objeto_px": 111.1,
+     "altura_real_del_heroe_px": 66.63,
+     "extension_del_objeto_en_pantalla_px": 53.04,
+     "oculto_mundo_px": 89.58,
+     "oculto_pantalla_px": 30.64,
+     "oculto_pct_de_H": 134.4,
+     "pct_pixeles_del_heroe_tapados": 100.0,
+     "formula_oculto_pantalla_px": 30.48,
+     "16bits_m1_px": 30.0,
+     "diferencia_con_16bits_px": 0.64,
+     "lectura_B_extension_total_oculto_pantalla_px": 15.45
+    },
+    "pies al borde de abajo del tile de atras": {
+     "altura_real_del_objeto_px": 111.1,
+     "altura_real_del_heroe_px": 66.63,
+     "extension_del_objeto_en_pantalla_px": 53.04,
+     "oculto_mundo_px": 111.52,
+     "oculto_pantalla_px": 38.14,
+     "oculto_pct_de_H": 167.4,
+     "pct_pixeles_del_heroe_tapados": 100.0,
+     "formula_oculto_pantalla_px": 38.0,
+     "16bits_m1_px": 38.0,
+     "diferencia_con_16bits_px": 0.14,
+     "lectura_B_extension_total_oculto_pantalla_px": 22.96
+    }
+   },
+   "mundo_3d_detras": {
+    "heroe_tiles16": 4.16,
+    "muro_tiles16": 6.94,
+    "pilar_tiles16": 7.86,
+    "heroe_px": 66.6,
+    "muro_px": 111.1,
+    "pilar_px": 125.7
+   }
+  },
+  "B": {
+   "theta": 60.0,
+   "pilar": {
+    "pies al centro del tile de atras": {
+     "altura_real_del_objeto_px": 86.0,
+     "altura_real_del_heroe_px": 45.58,
+     "extension_del_objeto_en_pantalla_px": 56.86,
+     "oculto_mundo_px": 72.28,
+     "oculto_pantalla_px": 36.14,
+     "oculto_pct_de_H": 158.6,
+     "pct_pixeles_del_heroe_tapados": 100.0,
+     "formula_oculto_pantalla_px": 36.07,
+     "16bits_m1_px": 35.0,
+     "diferencia_con_16bits_px": 1.14,
+     "lectura_B_extension_total_oculto_pantalla_px": 22.22
+    },
+    "pies al borde de abajo del tile de atras": {
+     "altura_real_del_objeto_px": 86.0,
+     "altura_real_del_heroe_px": 45.58,
+     "extension_del_objeto_en_pantalla_px": 56.86,
+     "oculto_mundo_px": 86.28,
+     "oculto_pantalla_px": 43.14,
+     "oculto_pct_de_H": 189.3,
+     "pct_pixeles_del_heroe_tapados": 100.0,
+     "formula_oculto_pantalla_px": 43.0,
+     "16bits_m1_px": 43.0,
+     "diferencia_con_16bits_px": 0.14,
+     "lectura_B_extension_total_oculto_pantalla_px": 29.14
+    }
+   },
+   "muro de 1 tile de grueso (5 tiles de largo)": {
+    "pies al centro del tile de atras": {
+     "altura_real_del_objeto_px": 76.0,
+     "altura_real_del_heroe_px": 45.58,
+     "extension_del_objeto_en_pantalla_px": 51.86,
+     "oculto_mundo_px": 62.28,
+     "oculto_pantalla_px": 31.14,
+     "oculto_pct_de_H": 136.6,
+     "pct_pixeles_del_heroe_tapados": 100.0,
+     "formula_oculto_pantalla_px": 31.07,
+     "16bits_m1_px": 30.0,
+     "diferencia_con_16bits_px": 1.14,
+     "lectura_B_extension_total_oculto_pantalla_px": 17.22
+    },
+    "pies al borde de abajo del tile de atras": {
+     "altura_real_del_objeto_px": 76.0,
+     "altura_real_del_heroe_px": 45.58,
+     "extension_del_objeto_en_pantalla_px": 51.86,
+     "oculto_mundo_px": 76.28,
+     "oculto_pantalla_px": 38.14,
+     "oculto_pct_de_H": 167.4,
+     "pct_pixeles_del_heroe_tapados": 100.0,
+     "formula_oculto_pantalla_px": 38.0,
+     "16bits_m1_px": 38.0,
+     "diferencia_con_16bits_px": 0.14,
+     "lectura_B_extension_total_oculto_pantalla_px": 24.14
+    }
+   },
+   "mundo_3d_detras": {
+    "heroe_tiles16": 2.85,
+    "muro_tiles16": 4.75,
+    "pilar_tiles16": 5.37,
+    "heroe_px": 45.6,
+    "muro_px": 76.0,
+    "pilar_px": 86.0
+   }
+  }
+ },
+ "oclusion_en_el_recorte_real": {
+  "pilar": {
+   "id": "P23",
+   "x_px": [
+    276,
+    292
+   ],
+   "y_px": [
+    689,
+    731
+   ]
+  },
+  "pantalla_16bits_profundidad_de_base_16_px": {
+   "pies al centro del tile de atras": {
+    "filas_del_heroe_px": [
+     684.21,
+     707.0
+    ],
+    "filas_del_pilar_px": [
+     689,
+     731
+    ],
+    "oculto_en_pantalla_px": 18.0,
+    "oculto_pct_de_H": 79.0
+   },
+   "pies al borde de abajo del tile de atras": {
+    "filas_del_heroe_px": [
+     692.21,
+     715.0
+    ],
+    "filas_del_pilar_px": [
+     689,
+     731
+    ],
+    "oculto_en_pantalla_px": 22.79,
+    "oculto_pct_de_H": 100.0
+   }
+  }
+ },
+ "tomas": {
+  "G": {
+   "tile_8px": [
+    6,
+    66
+   ],
+   "recorte_real_px": [
+    -75,
+    425,
+    181,
+    649
+   ],
+   "centro_px": [
+    53.0,
+    537.0
+   ]
+  },
+  "H": {
+   "tile_8px": [
+    51,
+    69
+   ],
+   "recorte_real_px": [
+    285,
+    449,
+    541,
+    673
+   ],
+   "centro_px": [
+    413.0,
+    561.0
+   ]
+  },
+  "I": {
+   "tile_8px": [
+    22,
+    63
+   ],
+   "recorte_real_px": [
+    53,
+    401,
+    309,
+    625
+   ],
+   "centro_px": [
+    181.0,
+    513.0
+   ]
+  }
+ }
+}
