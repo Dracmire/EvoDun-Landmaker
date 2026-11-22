@@ -1,0 +1,2091 @@
+{
+ "unidad": "px del juego (tile = 16)",
+ "paso1": {
+  "pilares": [
+   {
+    "id": "P1",
+    "tipo": "pilar",
+    "x_px": [
+     134,
+     136
+    ],
+    "y_px": [
+     63,
+     114
+    ],
+    "total_px": 53,
+    "filas_claras_desde_arriba": [
+     39,
+     45,
+     46
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 38,
+    "R2_techo_px": 10,
+    "R2_cara_px": 43
+   },
+   {
+    "id": "P2",
+    "tipo": "pilar",
+    "x_px": [
+     184,
+     196
+    ],
+    "y_px": [
+     65,
+     107
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P3",
+    "tipo": "pilar",
+    "x_px": [
+     267,
+     279
+    ],
+    "y_px": [
+     65,
+     107
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P4",
+    "tipo": "pilar",
+    "x_px": [
+     120,
+     132
+    ],
+    "y_px": [
+     113,
+     155
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P5",
+    "tipo": "pilar",
+    "x_px": [
+     331,
+     343
+    ],
+    "y_px": [
+     113,
+     155
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P6",
+    "tipo": "pilar",
+    "x_px": [
+     379,
+     389
+    ],
+    "y_px": [
+     145,
+     187
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P7",
+    "tipo": "pilar",
+    "x_px": [
+     440,
+     443
+    ],
+    "y_px": [
+     302,
+     346
+    ],
+    "total_px": 44,
+    "filas_claras_desde_arriba": [
+     12,
+     13,
+     16,
+     18,
+     19,
+     22,
+     24,
+     32
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 29,
+    "R2_techo_px": 10,
+    "R2_cara_px": 34
+   },
+   {
+    "id": "P8",
+    "tipo": "pilar",
+    "x_px": [
+     22,
+     24
+    ],
+    "y_px": [
+     303,
+     354
+    ],
+    "total_px": 53,
+    "filas_claras_desde_arriba": [
+     42,
+     43,
+     44,
+     45,
+     46
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 38,
+    "R2_techo_px": 10,
+    "R2_cara_px": 43
+   },
+   {
+    "id": "P9",
+    "tipo": "pilar",
+    "x_px": [
+     182,
+     184
+    ],
+    "y_px": [
+     303,
+     354
+    ],
+    "total_px": 53,
+    "filas_claras_desde_arriba": [
+     42,
+     43,
+     44,
+     45,
+     46
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 38,
+    "R2_techo_px": 10,
+    "R2_cara_px": 43
+   },
+   {
+    "id": "P10",
+    "tipo": "pilar",
+    "x_px": [
+     294,
+     296
+    ],
+    "y_px": [
+     303,
+     354
+    ],
+    "total_px": 53,
+    "filas_claras_desde_arriba": [
+     42,
+     43,
+     44,
+     45,
+     46
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 38,
+    "R2_techo_px": 10,
+    "R2_cara_px": 43
+   },
+   {
+    "id": "P11",
+    "tipo": "pilar",
+    "x_px": [
+     123,
+     135
+    ],
+    "y_px": [
+     305,
+     347
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P12",
+    "tipo": "pilar",
+    "x_px": [
+     328,
+     340
+    ],
+    "y_px": [
+     305,
+     347
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P13",
+    "tipo": "pilar",
+    "x_px": [
+     445,
+     452
+    ],
+    "y_px": [
+     305,
+     347
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P14",
+    "tipo": "pilar",
+    "x_px": [
+     11,
+     20
+    ],
+    "y_px": [
+     353,
+     395
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P15",
+    "tipo": "pilar",
+    "x_px": [
+     171,
+     180
+    ],
+    "y_px": [
+     353,
+     395
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P16",
+    "tipo": "pilar",
+    "x_px": [
+     283,
+     292
+    ],
+    "y_px": [
+     353,
+     395
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P17",
+    "tipo": "pilar",
+    "x_px": [
+     379,
+     388
+    ],
+    "y_px": [
+     353,
+     395
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P18",
+    "tipo": "pilar",
+    "x_px": [
+     187,
+     199
+    ],
+    "y_px": [
+     465,
+     507
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P19",
+    "tipo": "pilar",
+    "x_px": [
+     59,
+     71
+    ],
+    "y_px": [
+     625,
+     667
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P20",
+    "tipo": "pilar",
+    "x_px": [
+     392,
+     404
+    ],
+    "y_px": [
+     625,
+     667
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P21",
+    "tipo": "pilar",
+    "x_px": [
+     155,
+     168
+    ],
+    "y_px": [
+     657,
+     699
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P22",
+    "tipo": "pilar",
+    "x_px": [
+     294,
+     308
+    ],
+    "y_px": [
+     657,
+     699
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     37,
+     38,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P23",
+    "tipo": "pilar",
+    "x_px": [
+     276,
+     292
+    ],
+    "y_px": [
+     689,
+     731
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     4,
+     9,
+     16,
+     17,
+     18,
+     37,
+     41
+    ],
+    "bandas_del_capitel_en_4_y_9": true,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P24",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     440,
+     445
+    ],
+    "y_px": [
+     718,
+     761
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     12,
+     16,
+     18,
+     19,
+     20,
+     22,
+     24,
+     32
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P25",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     18,
+     23
+    ],
+    "y_px": [
+     719,
+     762
+    ],
+    "total_px": 44,
+    "filas_claras_desde_arriba": [
+     11,
+     43
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 29,
+    "R2_techo_px": 10,
+    "R2_cara_px": 34
+   },
+   {
+    "id": "P26",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     405,
+     407
+    ],
+    "y_px": [
+     719,
+     763
+    ],
+    "total_px": 45,
+    "filas_claras_desde_arriba": [
+     23,
+     43
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 30,
+    "R2_techo_px": 10,
+    "R2_cara_px": 35
+   },
+   {
+    "id": "P27",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     392,
+     397
+    ],
+    "y_px": [
+     750,
+     793
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     12,
+     16,
+     18,
+     19,
+     20,
+     22,
+     24,
+     32
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P28",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     66,
+     71
+    ],
+    "y_px": [
+     751,
+     794
+    ],
+    "total_px": 44,
+    "filas_claras_desde_arriba": [
+     11,
+     43
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 29,
+    "R2_techo_px": 10,
+    "R2_cara_px": 34
+   },
+   {
+    "id": "P29",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     357,
+     359
+    ],
+    "y_px": [
+     751,
+     795
+    ],
+    "total_px": 45,
+    "filas_claras_desde_arriba": [
+     23,
+     43
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 30,
+    "R2_techo_px": 10,
+    "R2_cara_px": 35
+   },
+   {
+    "id": "P31",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     168,
+     173
+    ],
+    "y_px": [
+     782,
+     825
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     12,
+     16,
+     18,
+     19,
+     20,
+     22,
+     24,
+     32
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P32",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     264,
+     269
+    ],
+    "y_px": [
+     782,
+     825
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     12,
+     16,
+     18,
+     19,
+     20,
+     22,
+     24,
+     32
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P33",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     344,
+     349
+    ],
+    "y_px": [
+     782,
+     825
+    ],
+    "total_px": 43,
+    "filas_claras_desde_arriba": [
+     12,
+     16,
+     18,
+     19,
+     20,
+     22,
+     24,
+     32
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 28,
+    "R2_techo_px": 10,
+    "R2_cara_px": 33
+   },
+   {
+    "id": "P34",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     114,
+     119
+    ],
+    "y_px": [
+     783,
+     826
+    ],
+    "total_px": 44,
+    "filas_claras_desde_arriba": [
+     11,
+     43
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 29,
+    "R2_techo_px": 10,
+    "R2_cara_px": 34
+   },
+   {
+    "id": "P35",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     194,
+     199
+    ],
+    "y_px": [
+     783,
+     826
+    ],
+    "total_px": 44,
+    "filas_claras_desde_arriba": [
+     11,
+     43
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 29,
+    "R2_techo_px": 10,
+    "R2_cara_px": 34
+   },
+   {
+    "id": "P36",
+    "tipo": "pilar de fachada",
+    "x_px": [
+     290,
+     295
+    ],
+    "y_px": [
+     783,
+     826
+    ],
+    "total_px": 44,
+    "filas_claras_desde_arriba": [
+     11,
+     43
+    ],
+    "bandas_del_capitel_en_4_y_9": false,
+    "R1_techo_px": 15,
+    "R1_cara_px": 29,
+    "R2_techo_px": 10,
+    "R2_cara_px": 34
+   }
+  ],
+  "resumen_pilares": {
+   "interiores": {
+    "n": 23,
+    "total_px_mediana": 43.0
+   },
+   "de_fachada": {
+    "n": 12,
+    "total_px_mediana": 44.0
+   },
+   "con_las_bandas_del_capitel_a_4_y_9": 18
+  },
+  "muros": [
+   {
+    "muro": "W4",
+    "x_px": [
+     280,
+     327
+    ],
+    "y_cara_px": [
+     62,
+     99
+    ],
+    "ancho_px": 48,
+    "cara_px": {
+     "mediana": 38.0,
+     "min": 35,
+     "max": 40
+    },
+    "techo_px": {
+     "mediana": 22.0,
+     "min": 0,
+     "max": 23
+    }
+   },
+   {
+    "muro": "W3",
+    "x_px": [
+     137,
+     183
+    ],
+    "y_cara_px": [
+     62,
+     99
+    ],
+    "ancho_px": 47,
+    "cara_px": {
+     "mediana": 38.0,
+     "min": 35,
+     "max": 41
+    },
+    "techo_px": {
+     "mediana": 22.0,
+     "min": 0,
+     "max": 23
+    }
+   },
+   {
+    "muro": "W4",
+    "x_px": [
+     344,
+     377
+    ],
+    "y_cara_px": [
+     110,
+     147
+    ],
+    "ancho_px": 34,
+    "cara_px": {
+     "mediana": 38.0,
+     "min": 35,
+     "max": 40
+    },
+    "techo_px": {
+     "mediana": 22.0,
+     "min": 0,
+     "max": 73
+    }
+   },
+   {
+    "muro": "W1",
+    "x_px": [
+     360,
+     391
+    ],
+    "y_cara_px": [
+     622,
+     659
+    ],
+    "ancho_px": 32,
+    "cara_px": {
+     "mediana": 38.0,
+     "min": 35,
+     "max": 40
+    },
+    "techo_px": {
+     "mediana": 182.0,
+     "min": 0,
+     "max": 184
+    }
+   },
+   {
+    "muro": "W3",
+    "x_px": [
+     89,
+     119
+    ],
+    "y_cara_px": [
+     110,
+     147
+    ],
+    "ancho_px": 31,
+    "cara_px": {
+     "mediana": 38.0,
+     "min": 35,
+     "max": 41
+    },
+    "techo_px": {
+     "mediana": 22.0,
+     "min": 0,
+     "max": 73
+    }
+   }
+  ],
+  "cofres": [
+   {
+    "caja_px": [
+     215,
+     242,
+     231,
+     258
+    ],
+    "dibujo_filas": 14,
+    "techo_px": null,
+    "cara_px": 14,
+    "regla": "icono de 1 tile (16 x 16, dibujo de 14 filas, filas 2 a 15): la tapa y el frente van en el mismo dibujo y no se separan por color"
+   },
+   {
+    "caja_px": [
+     247,
+     594,
+     263,
+     610
+    ],
+    "dibujo_filas": 14,
+    "techo_px": null,
+    "cara_px": 14,
+    "regla": "icono de 1 tile (16 x 16, dibujo de 14 filas, filas 2 a 15): la tapa y el frente van en el mismo dibujo y no se separan por color"
+   }
+  ],
+  "escaleras": [
+   {
+    "letra": "G",
+    "ancho_px": 14,
+    "alto_px": 16,
+    "techo_px": 16,
+    "cara_px": 0,
+    "regla": "cuadro plano en el suelo: se ve entero desde arriba"
+   },
+   {
+    "letra": "I",
+    "ancho_px": 14,
+    "alto_px": 14,
+    "techo_px": 14,
+    "cara_px": 0,
+    "regla": "cuadro plano en el suelo: se ve entero desde arriba"
+   },
+   {
+    "letra": "J",
+    "ancho_px": 14,
+    "alto_px": 14,
+    "techo_px": 14,
+    "cara_px": 0,
+    "regla": "cuadro plano en el suelo: se ve entero desde arriba"
+   },
+   {
+    "letra": "H",
+    "ancho_px": 14,
+    "alto_px": 16,
+    "techo_px": 16,
+    "cara_px": 0,
+    "regla": "cuadro plano en el suelo: se ve entero desde arriba"
+   }
+  ],
+  "reglas": {
+   "pilar": "el dibujo del pilar es el mismo en los 35 (capitel filas 0-9 con bandas claras en 4 y 9, fuste 10-27, plinto 28-42, medido en P23). R1 (la que uso): techo = el plinto de 15 filas, la base de 1 tile (la huella que se ve del pilar), cara = lo de arriba. R2 (alternativa): techo = el capitel de 10 filas, cara = el resto.",
+   "muro": "cara = banda oscura de muros.json (sin tope ni borde); techo = filas de tope contiguas sobre el borde de esa columna (el tope entero, que casi nunca es de 1 tile de fondo)",
+   "los_43_px": "los 43 px de muros.json (y los 44 de fachada) son cara mas techo: la banda de la cara oscura medida de arriba del pilar hasta el piso, plinto incluido"
+  }
+ },
+ "paso2": {
+  "pilar_P23": {
+   "tope_del_pilar_y": 689,
+   "pies_del_heroe_y": 715,
+   "tope_del_heroe_y": 692.21,
+   "tope_del_heroe_menos_tope_del_pilar_px": 3.21,
+   "heroe_cubierto_por_el_pilar_px": 22.79,
+   "pilar_sobresale_del_heroe_px": 3.21
+  },
+  "cofre": {
+   "caja_px": [
+    247,
+    594,
+    263,
+    610
+   ],
+   "pies_del_heroe_y": 594,
+   "tope_del_heroe_y": 571.21,
+   "tope_del_cofre_y": 594,
+   "dibujo_del_cofre_empieza_en_y": 596,
+   "heroe_sobre_el_cofre_px": 24.79
+  },
+  "sprite_del_heroe": {
+   "origen": "dq3_5f_snes_cap2.png reducido a px del juego",
+   "tamano_px": [
+    20,
+    27
+   ],
+   "nota": "el recorte incluye la espada, por eso es mas alto que H = 22,79 (pelo a pies)"
+  }
+ },
+ "paso3": {
+  "sensibilidad_cara_del_pilar_(minimos_locales_con_pilar_de_3_a_5_tiles)": {
+   "pilar cara 27": [
+    {
+     "theta": 71.0,
+     "residuo_max": 0.137,
+     "n_pilar_muro_heroe": [
+      4.9,
+      6.9,
+      4.14
+     ]
+    },
+    {
+     "theta": 65.7,
+     "residuo_max": 0.263,
+     "n_pilar_muro_heroe": [
+      3.74,
+      5.26,
+      3.15
+     ]
+    },
+    {
+     "theta": 63.1,
+     "residuo_max": 0.326,
+     "n_pilar_muro_heroe": [
+      3.33,
+      4.68,
+      2.81
+     ]
+    }
+   ],
+   "pilar cara 28": [
+    {
+     "theta": 71.0,
+     "residuo_max": 0.137,
+     "n_pilar_muro_heroe": [
+      5.08,
+      6.9,
+      4.14
+     ]
+    },
+    {
+     "theta": 65.4,
+     "residuo_max": 0.187,
+     "n_pilar_muro_heroe": [
+      3.82,
+      5.19,
+      3.11
+     ]
+    },
+    {
+     "theta": 69.4,
+     "residuo_max": 0.344,
+     "n_pilar_muro_heroe": [
+      4.66,
+      6.32,
+      3.79
+     ]
+    }
+   ],
+   "pilar cara 33": [
+    {
+     "theta": 63.8,
+     "residuo_max": 0.192,
+     "n_pilar_muro_heroe": [
+      4.19,
+      4.83,
+      2.89
+     ]
+    },
+    {
+     "theta": 68.8,
+     "residuo_max": 0.328,
+     "n_pilar_muro_heroe": [
+      5.32,
+      6.12,
+      3.67
+     ]
+    },
+    {
+     "theta": 66.1,
+     "residuo_max": 0.359,
+     "n_pilar_muro_heroe": [
+      4.65,
+      5.36,
+      3.21
+     ]
+    }
+   ]
+  },
+  "t_px": 16.0,
+  "cara_px": {
+   "pilar interior (R1)": 28.0,
+   "pilar de fachada (R1)": 29.0,
+   "muro": 38.0,
+   "heroe": 22.79
+  },
+  "n_a_60_70_80": {
+   "pilar interior (R1)": {
+    "60": 3.031,
+    "70": 4.808,
+    "80": 9.925
+   },
+   "pilar de fachada (R1)": {
+    "60": 3.139,
+    "70": 4.98,
+    "80": 10.279
+   },
+   "muro": {
+    "60": 4.114,
+    "70": 6.525,
+    "80": 13.469
+   },
+   "heroe": {
+    "60": 2.467,
+    "70": 3.913,
+    "80": 8.078
+   }
+  },
+  "barrido": {
+   "paso": 0.1,
+   "rango": [
+    60,
+    85
+   ],
+   "minimos_locales_por_residuo_max": [
+    {
+     "theta": 81.0,
+     "n": {
+      "pilar interior (R1)": 11.049,
+      "muro": 14.995,
+      "heroe": 8.993
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.049,
+      "muro": 0.005,
+      "heroe": 0.007
+     },
+     "residuo_max": 0.049,
+     "residuo_suma": 0.061,
+     "heroe_menor_o_igual_que_pilar": true
+    },
+    {
+     "theta": 73.7,
+     "n": {
+      "pilar interior (R1)": 5.985,
+      "muro": 8.122,
+      "heroe": 4.871
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.015,
+      "muro": 0.122,
+      "heroe": 0.129
+     },
+     "residuo_max": 0.129,
+     "residuo_suma": 0.266,
+     "heroe_menor_o_igual_que_pilar": true
+    },
+    {
+     "theta": 71.0,
+     "n": {
+      "pilar interior (R1)": 5.082,
+      "muro": 6.898,
+      "heroe": 4.137
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.082,
+      "muro": 0.102,
+      "heroe": 0.137
+     },
+     "residuo_max": 0.137,
+     "residuo_suma": 0.322,
+     "heroe_menor_o_igual_que_pilar": true
+    },
+    {
+     "theta": 83.8,
+     "n": {
+      "pilar interior (R1)": 16.109,
+      "muro": 21.862,
+      "heroe": 13.112
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.109,
+      "muro": 0.138,
+      "heroe": 0.112
+     },
+     "residuo_max": 0.138,
+     "residuo_suma": 0.358,
+     "heroe_menor_o_igual_que_pilar": true
+    },
+    {
+     "theta": 65.4,
+     "n": {
+      "pilar interior (R1)": 3.822,
+      "muro": 5.187,
+      "heroe": 3.111
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.178,
+      "muro": 0.187,
+      "heroe": 0.111
+     },
+     "residuo_max": 0.187,
+     "residuo_suma": 0.476,
+     "heroe_menor_o_igual_que_pilar": true
+    },
+    {
+     "theta": 78.8,
+     "n": {
+      "pilar interior (R1)": 8.838,
+      "muro": 11.995,
+      "heroe": 7.194
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.162,
+      "muro": 0.005,
+      "heroe": 0.194
+     },
+     "residuo_max": 0.194,
+     "residuo_suma": 0.361,
+     "heroe_menor_o_igual_que_pilar": true
+    }
+   ],
+   "minimos_locales_por_suma": [
+    {
+     "theta": 81.0,
+     "n": {
+      "pilar interior (R1)": 11.049,
+      "muro": 14.995,
+      "heroe": 8.993
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.049,
+      "muro": 0.005,
+      "heroe": 0.007
+     },
+     "residuo_max": 0.049,
+     "residuo_suma": 0.061,
+     "heroe_menor_o_igual_que_pilar": true
+    },
+    {
+     "theta": 73.7,
+     "n": {
+      "pilar interior (R1)": 5.985,
+      "muro": 8.122,
+      "heroe": 4.871
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.015,
+      "muro": 0.122,
+      "heroe": 0.129
+     },
+     "residuo_max": 0.129,
+     "residuo_suma": 0.266,
+     "heroe_menor_o_igual_que_pilar": true
+    },
+    {
+     "theta": 70.7,
+     "n": {
+      "pilar interior (R1)": 4.997,
+      "muro": 6.782,
+      "heroe": 4.067
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.003,
+      "muro": 0.218,
+      "heroe": 0.067
+     },
+     "residuo_max": 0.218,
+     "residuo_suma": 0.288,
+     "heroe_menor_o_igual_que_pilar": true
+    },
+    {
+     "theta": 84.1,
+     "n": {
+      "pilar interior (R1)": 16.934,
+      "muro": 22.982,
+      "heroe": 13.783
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.066,
+      "muro": 0.018,
+      "heroe": 0.217
+     },
+     "residuo_max": 0.217,
+     "residuo_suma": 0.3,
+     "heroe_menor_o_igual_que_pilar": true
+    },
+    {
+     "theta": 64.6,
+     "n": {
+      "pilar interior (R1)": 3.685,
+      "muro": 5.002,
+      "heroe": 3.0
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.315,
+      "muro": 0.002,
+      "heroe": 0.0
+     },
+     "residuo_max": 0.315,
+     "residuo_suma": 0.317,
+     "heroe_menor_o_igual_que_pilar": true
+    },
+    {
+     "theta": 83.8,
+     "n": {
+      "pilar interior (R1)": 16.109,
+      "muro": 21.862,
+      "heroe": 13.112
+     },
+     "residuo": {
+      "pilar interior (R1)": 0.109,
+      "muro": 0.138,
+      "heroe": 0.112
+     },
+     "residuo_max": 0.138,
+     "residuo_suma": 0.358,
+     "heroe_menor_o_igual_que_pilar": true
+    }
+   ]
+  },
+  "theta_exacto_por_entero": {
+   "pilar interior (R1), 3 tiles": {
+    "theta": 59.74,
+    "n_muro": 4.071,
+    "n_heroe": 2.442
+   },
+   "pilar de fachada (R1), 3 tiles": {
+    "theta": 58.86,
+    "n_muro": 3.931,
+    "n_heroe": 2.358
+   },
+   "pilar interior (R1), 4 tiles": {
+    "theta": 66.37,
+    "n_muro": 5.429,
+    "n_heroe": 3.256
+   },
+   "pilar de fachada (R1), 4 tiles": {
+    "theta": 65.62,
+    "n_muro": 5.241,
+    "n_heroe": 3.143
+   },
+   "pilar interior (R1), 5 tiles": {
+    "theta": 70.71,
+    "n_muro": 6.786,
+    "n_heroe": 4.07
+   },
+   "pilar de fachada (R1), 5 tiles": {
+    "theta": 70.07,
+    "n_muro": 6.552,
+    "n_heroe": 3.929
+   }
+  },
+  "sensibilidad": {
+   "R2_pilar_cara_33": {
+    "60": 3.572,
+    "70": 5.667,
+    "80": 11.697
+   },
+   "t=14 (dibujo del cofre), pilar R1 28": {
+    "60": 3.464,
+    "70": 5.495,
+    "80": 11.343
+   }
+  }
+ },
+ "paso4": {
+  "theta_probados": [
+   71.0,
+   70.0,
+   80.0
+  ],
+  "theta_mejor_ajuste_del_paso_3": 71.0,
+  "real_P23": {
+   "cara_px": 28.0,
+   "techo_px": 15,
+   "heroe_px": 22.79
+  },
+  "familias": {
+   "Godot Basis25D (ortogonal) | 71.0": {
+    "cara_px": 26.05,
+    "techo_px": 15.13,
+    "heroe_px": 20.84,
+    "cofre_techo_px": 15.13,
+    "cofre_cara_px": 5.21,
+    "altura_total_del_pilar_px": 41.17,
+    "altura_en_tiles": {
+     "pilar": 5,
+     "heroe": 4,
+     "muro": 7
+    },
+    "dif_cara_px": -1.95,
+    "dif_techo_px": 0.13,
+    "dif_heroe_px": -1.95
+   },
+   "Godot Basis25D (ortogonal) | 70.0": {
+    "cara_px": 27.36,
+    "techo_px": 15.04,
+    "heroe_px": 21.89,
+    "cofre_techo_px": 15.04,
+    "cofre_cara_px": 5.47,
+    "altura_total_del_pilar_px": 42.4,
+    "altura_en_tiles": {
+     "pilar": 5,
+     "heroe": 4,
+     "muro": 7
+    },
+    "dif_cara_px": -0.64,
+    "dif_techo_px": 0.04,
+    "dif_heroe_px": -0.9
+   },
+   "Godot Basis25D (ortogonal) | 80.0": {
+    "cara_px": 27.78,
+    "techo_px": 15.76,
+    "heroe_px": 22.23,
+    "cofre_techo_px": 15.76,
+    "cofre_cara_px": 2.78,
+    "altura_total_del_pilar_px": 43.54,
+    "altura_en_tiles": {
+     "pilar": 10,
+     "heroe": 8,
+     "muro": 13
+    },
+    "dif_cara_px": -0.22,
+    "dif_techo_px": 0.76,
+    "dif_heroe_px": -0.56
+   },
+   "Godot Basis25D ObliqueZ | 71.0": {
+    "cara_px": 32.0,
+    "techo_px": 11.31,
+    "heroe_px": 16.0,
+    "cofre_techo_px": 11.31,
+    "cofre_cara_px": 16.0,
+    "altura_total_del_pilar_px": 43.31,
+    "altura_en_tiles": {
+     "pilar": 2,
+     "heroe": 1,
+     "muro": 2
+    },
+    "dif_cara_px": 4.0,
+    "dif_techo_px": -3.69,
+    "dif_heroe_px": -6.79
+   },
+   "Godot Basis25D ObliqueZ | 70.0": {
+    "cara_px": 32.0,
+    "techo_px": 11.31,
+    "heroe_px": 16.0,
+    "cofre_techo_px": 11.31,
+    "cofre_cara_px": 16.0,
+    "altura_total_del_pilar_px": 43.31,
+    "altura_en_tiles": {
+     "pilar": 2,
+     "heroe": 1,
+     "muro": 2
+    },
+    "dif_cara_px": 4.0,
+    "dif_techo_px": -3.69,
+    "dif_heroe_px": -6.79
+   },
+   "Godot Basis25D ObliqueZ | 80.0": {
+    "cara_px": 32.0,
+    "techo_px": 11.31,
+    "heroe_px": 16.0,
+    "cofre_techo_px": 11.31,
+    "cofre_cara_px": 16.0,
+    "altura_total_del_pilar_px": 43.31,
+    "altura_en_tiles": {
+     "pilar": 2,
+     "heroe": 1,
+     "muro": 2
+    },
+    "dif_cara_px": 4.0,
+    "dif_techo_px": -3.69,
+    "dif_heroe_px": -6.79
+   },
+   "Foundry Custom, ratio = 1/sen | 71.0": {
+    "cara_px": 32.0,
+    "techo_px": 15.13,
+    "heroe_px": 16.0,
+    "cofre_techo_px": 15.13,
+    "cofre_cara_px": 16.0,
+    "altura_total_del_pilar_px": 47.13,
+    "altura_en_tiles": {
+     "pilar": 2,
+     "heroe": 1,
+     "muro": 2
+    },
+    "dif_cara_px": 4.0,
+    "dif_techo_px": 0.13,
+    "dif_heroe_px": -6.79
+   },
+   "Foundry Custom, ratio = 1/sen | 70.0": {
+    "cara_px": 32.0,
+    "techo_px": 15.04,
+    "heroe_px": 16.0,
+    "cofre_techo_px": 15.04,
+    "cofre_cara_px": 16.0,
+    "altura_total_del_pilar_px": 47.04,
+    "altura_en_tiles": {
+     "pilar": 2,
+     "heroe": 1,
+     "muro": 2
+    },
+    "dif_cara_px": 4.0,
+    "dif_techo_px": 0.04,
+    "dif_heroe_px": -6.79
+   },
+   "Foundry Custom, ratio = 1/sen | 80.0": {
+    "cara_px": 32.0,
+    "techo_px": 15.76,
+    "heroe_px": 16.0,
+    "cofre_techo_px": 15.76,
+    "cofre_cara_px": 16.0,
+    "altura_total_del_pilar_px": 47.76,
+    "altura_en_tiles": {
+     "pilar": 2,
+     "heroe": 1,
+     "muro": 2
+    },
+    "dif_cara_px": 4.0,
+    "dif_techo_px": 0.76,
+    "dif_heroe_px": -6.79
+   },
+   "Foundry Earthbound / Paperboy | 71.0": {
+    "cara_px": 32.0,
+    "techo_px": 10.5,
+    "heroe_px": 16.0,
+    "cofre_techo_px": 10.5,
+    "cofre_cara_px": 16.0,
+    "altura_total_del_pilar_px": 42.5,
+    "altura_en_tiles": {
+     "pilar": 2,
+     "heroe": 1,
+     "muro": 2
+    },
+    "dif_cara_px": 4.0,
+    "dif_techo_px": -4.5,
+    "dif_heroe_px": -6.79
+   },
+   "Foundry Earthbound / Paperboy | 70.0": {
+    "cara_px": 32.0,
+    "techo_px": 10.5,
+    "heroe_px": 16.0,
+    "cofre_techo_px": 10.5,
+    "cofre_cara_px": 16.0,
+    "altura_total_del_pilar_px": 42.5,
+    "altura_en_tiles": {
+     "pilar": 2,
+     "heroe": 1,
+     "muro": 2
+    },
+    "dif_cara_px": 4.0,
+    "dif_techo_px": -4.5,
+    "dif_heroe_px": -6.79
+   },
+   "Foundry Earthbound / Paperboy | 80.0": {
+    "cara_px": 32.0,
+    "techo_px": 10.5,
+    "heroe_px": 16.0,
+    "cofre_techo_px": 10.5,
+    "cofre_cara_px": 16.0,
+    "altura_total_del_pilar_px": 42.5,
+    "altura_en_tiles": {
+     "pilar": 2,
+     "heroe": 1,
+     "muro": 2
+    },
+    "dif_cara_px": 4.0,
+    "dif_techo_px": -4.5,
+    "dif_heroe_px": -6.79
+   },
+   "3D_iso_in_2D, pasos enteros | 71.0": {
+    "cara_px": 25.0,
+    "techo_px": 15.0,
+    "heroe_px": 20.0,
+    "cofre_techo_px": 15.0,
+    "cofre_cara_px": 5.0,
+    "altura_total_del_pilar_px": 40.0,
+    "altura_en_tiles": {
+     "pilar": 5,
+     "heroe": 4,
+     "muro": 7
+    },
+    "dif_cara_px": -3.0,
+    "dif_techo_px": 0.0,
+    "dif_heroe_px": -2.79
+   },
+   "3D_iso_in_2D, pasos enteros | 70.0": {
+    "cara_px": 25.0,
+    "techo_px": 15.0,
+    "heroe_px": 20.0,
+    "cofre_techo_px": 15.0,
+    "cofre_cara_px": 5.0,
+    "altura_total_del_pilar_px": 40.0,
+    "altura_en_tiles": {
+     "pilar": 5,
+     "heroe": 4,
+     "muro": 7
+    },
+    "dif_cara_px": -3.0,
+    "dif_techo_px": 0.0,
+    "dif_heroe_px": -2.79
+   },
+   "3D_iso_in_2D, pasos enteros | 80.0": {
+    "cara_px": 30.0,
+    "techo_px": 16.0,
+    "heroe_px": 24.0,
+    "cofre_techo_px": 16.0,
+    "cofre_cara_px": 3.0,
+    "altura_total_del_pilar_px": 46.0,
+    "altura_en_tiles": {
+     "pilar": 10,
+     "heroe": 8,
+     "muro": 13
+    },
+    "dif_cara_px": 2.0,
+    "dif_techo_px": 1.0,
+    "dif_heroe_px": 1.21
+   }
+  },
+  "notas": {
+   "godot": "Basis25D.cs (godot-demo-projects mono/2.5d): x (1,0); y (0,-cos theta); z (0, sen theta); ObliqueZ = x (1,0), y (0,-1), z (-0.70710678, 0.70710678), sin theta",
+   "foundry": "arlosmolten/isometric-perspective scripts/consts.js: Custom Projection {rotation 0, skew 0, ratio 1}; ratio = 1/sen theta -> la profundidad del suelo * sen theta, las alturas no se achican; Earthbound / Paperboy esta comentado en el archivo y ahi dice skewX -49, ratio 0,373884679484805, rotation 0: aqui solo se usa el skewX (matriz de PIXI, escala 1); el uso de `ratio` vive en otros archivos del modulo que no se leyeron",
+   "fengjiong": "fengjiongmax/3D_iso_in_2D helpers/grid_utils.gd (rama master): SINGLE_X/Y/Z en pasos enteros de (texture_w/2, texture_h/4); adaptado como pidio el encargo: X = (16, 0), Z = (0, round(16 sen theta)), Y = (0, -round(16 cos theta))"
+  }
+ },
+ "paso5": {
+  "modelo": "dpt_beit_large_512",
+  "red": "XChengCode commit 4c37fbb (midas dpt_beit_large_512 + img_seg), CPU, el mismo entorno de pp3/",
+  "kmeans": "N = 4 sobre el mapa inferno a 256 x 224 (sin aplastar a 512 x 512), np.random.seed(0)",
+  "tomas": {
+   "G": {
+    "tile_8px": [
+     6,
+     66
+    ],
+    "recorte_real_px": [
+     -75,
+     425,
+     181,
+     649
+    ],
+    "tamano_px": [
+     256,
+     224
+    ],
+    "bandas": [
+     {
+      "banda": 0,
+      "pct": 24.58,
+      "profundidad_gris_media": 42.4,
+      "fila_media": 44.8,
+      "composicion_pct": {
+       "suelo": 45.6,
+       "tope": 39.0,
+       "cara": 14.8,
+       "objeto": 0.6
+      }
+     },
+     {
+      "banda": 1,
+      "pct": 35.78,
+      "profundidad_gris_media": 91.0,
+      "fila_media": 88.3,
+      "composicion_pct": {
+       "fuera": 4.3,
+       "suelo": 44.1,
+       "tope": 13.8,
+       "cara": 3.7,
+       "objeto": 0.1,
+       "relleno fuera del mapa": 34.1
+      }
+     },
+     {
+      "banda": 2,
+      "pct": 26.17,
+      "profundidad_gris_media": 144.5,
+      "fila_media": 162.5,
+      "composicion_pct": {
+       "fuera": 3.3,
+       "suelo": 28.6,
+       "tope": 26.3,
+       "borde": 0.3,
+       "cara": 7.8,
+       "pilar": 1.4,
+       "objeto": 0.7,
+       "relleno fuera del mapa": 31.7
+      }
+     },
+     {
+      "banda": 3,
+      "pct": 13.47,
+      "profundidad_gris_media": 194.2,
+      "fila_media": 195.7,
+      "composicion_pct": {
+       "fuera": 5.6,
+       "suelo": 1.4,
+       "tope": 11.8,
+       "borde": 0.1,
+       "cara": 12.7,
+       "pilar": 0.1,
+       "objeto": 3.0,
+       "relleno fuera del mapa": 65.4
+      }
+     }
+    ],
+    "px_por_clase_y_banda": {
+     "fuera": [
+      0,
+      874,
+      488,
+      430
+     ],
+     "suelo": [
+      6429,
+      9050,
+      4289,
+      109
+     ],
+     "tope": [
+      5493,
+      2823,
+      3940,
+      909
+     ],
+     "borde": [
+      0,
+      0,
+      41,
+      5
+     ],
+     "cara": [
+      2090,
+      758,
+      1165,
+      980
+     ],
+     "pilar": [
+      0,
+      0,
+      211,
+      10
+     ],
+     "objeto": [
+      84,
+      24,
+      112,
+      230
+     ]
+    },
+    "profundidad_cruda": {
+     "min": 2105.61181640625,
+     "max": 4091.56787109375
+    }
+   },
+   "H": {
+    "tile_8px": [
+     51,
+     69
+    ],
+    "recorte_real_px": [
+     285,
+     449,
+     541,
+     673
+    ],
+    "tamano_px": [
+     256,
+     224
+    ],
+    "bandas": [
+     {
+      "banda": 0,
+      "pct": 31.19,
+      "profundidad_gris_media": 40.1,
+      "fila_media": 39.0,
+      "composicion_pct": {
+       "fuera": 0.3,
+       "suelo": 34.8,
+       "tope": 17.7,
+       "cara": 9.3,
+       "relleno fuera del mapa": 37.9
+      }
+     },
+     {
+      "banda": 1,
+      "pct": 25.48,
+      "profundidad_gris_media": 78.9,
+      "fila_media": 94.6,
+      "composicion_pct": {
+       "fuera": 5.1,
+       "suelo": 46.7,
+       "tope": 17.9,
+       "cara": 4.8,
+       "objeto": 0.1,
+       "relleno fuera del mapa": 25.5
+      }
+     },
+     {
+      "banda": 2,
+      "pct": 23.16,
+      "profundidad_gris_media": 130.6,
+      "fila_media": 151.2,
+      "composicion_pct": {
+       "fuera": 2.8,
+       "suelo": 29.9,
+       "tope": 35.9,
+       "cara": 3.1,
+       "objeto": 0.7,
+       "relleno fuera del mapa": 27.6
+      }
+     },
+     {
+      "banda": 3,
+      "pct": 20.17,
+      "profundidad_gris_media": 185.3,
+      "fila_media": 199.3,
+      "composicion_pct": {
+       "fuera": 3.5,
+       "suelo": 21.2,
+       "tope": 11.0,
+       "borde": 0.4,
+       "cara": 24.9,
+       "pilar": 5.4,
+       "objeto": 5.0,
+       "relleno fuera del mapa": 28.6
+      }
+     }
+    ],
+    "px_por_clase_y_banda": {
+     "fuera": [
+      54,
+      741,
+      370,
+      403
+     ],
+     "suelo": [
+      6223,
+      6818,
+      3972,
+      2451
+     ],
+     "tope": [
+      3164,
+      2618,
+      4765,
+      1278
+     ],
+     "borde": [
+      0,
+      0,
+      0,
+      50
+     ],
+     "cara": [
+      1671,
+      697,
+      412,
+      2878
+     ],
+     "pilar": [
+      0,
+      0,
+      0,
+      623
+     ],
+     "objeto": [
+      0,
+      9,
+      99,
+      576
+     ]
+    },
+    "profundidad_cruda": {
+     "min": 2650.318603515625,
+     "max": 4359.52978515625
+    }
+   },
+   "I": {
+    "tile_8px": [
+     22,
+     63
+    ],
+    "recorte_real_px": [
+     53,
+     401,
+     309,
+     625
+    ],
+    "tamano_px": [
+     256,
+     224
+    ],
+    "bandas": [
+     {
+      "banda": 0,
+      "pct": 22.87,
+      "profundidad_gris_media": 27.8,
+      "fila_media": 49.4,
+      "composicion_pct": {
+       "suelo": 53.1,
+       "tope": 35.3,
+       "cara": 11.5,
+       "pilar": 0.1
+      }
+     },
+     {
+      "banda": 1,
+      "pct": 32.66,
+      "profundidad_gris_media": 63.0,
+      "fila_media": 88.4,
+      "composicion_pct": {
+       "suelo": 46.8,
+       "tope": 41.3,
+       "cara": 10.8,
+       "pilar": 0.4,
+       "objeto": 0.7
+      }
+     },
+     {
+      "banda": 2,
+      "pct": 42.81,
+      "profundidad_gris_media": 99.9,
+      "fila_media": 163.4,
+      "composicion_pct": {
+       "suelo": 43.4,
+       "tope": 42.1,
+       "borde": 0.2,
+       "cara": 11.4,
+       "pilar": 0.4,
+       "objeto": 2.5
+      }
+     },
+     {
+      "banda": 3,
+      "pct": 1.67,
+      "profundidad_gris_media": 196.5,
+      "fila_media": 82.6,
+      "composicion_pct": {
+       "tope": 1.3,
+       "borde": 0.2,
+       "cara": 45.0,
+       "pilar": 30.1,
+       "objeto": 23.5
+      }
+     }
+    ],
+    "px_por_clase_y_banda": {
+     "suelo": [
+      6960,
+      8761,
+      10656,
+      0
+     ],
+     "tope": [
+      4632,
+      7727,
+      10335,
+      12
+     ],
+     "borde": [
+      0,
+      0,
+      44,
+      2
+     ],
+     "cara": [
+      1509,
+      2026,
+      2789,
+      430
+     ],
+     "pilar": [
+      11,
+      73,
+      104,
+      287
+     ],
+     "objeto": [
+      0,
+      140,
+      622,
+      224
+     ]
+    },
+    "profundidad_cruda": {
+     "min": 1843.854736328125,
+     "max": 3227.403076171875
+    }
+   }
+  }
+ }
+}
