@@ -1,0 +1,1002 @@
+{
+ "lectura": {
+  "nodos": "grupos de C; centro = tile del grupo mas cercano a su centroide",
+  "costo_tile": "1 + 50 x sombra (X.visibility, Cam 6, yaw 0), al entrar al tile; A* a 4 vecinos con h = Manhattan",
+  "destino_cofre": "el tile caminable de 4 vecinos del cofre con camino mas barato",
+  "costo_par": "pasos + 0,3 x suma de sombra de todos los tiles del camino (sin sombra: solo pasos)",
+  "ensanchado": "X.widened (maxHalfWidth 6, 1 - r / 7, sin cruzar muros)",
+  "suma": "min(1, A* + arquitectura)",
+  "solape": "tile con A* > 0 y arquitectura > 0"
+ },
+ "sala_de_G": [
+  "pasillo X 3"
+ ],
+ "entrada": {
+  "H": [
+   19,
+   92
+  ]
+ },
+ "deterministico": true,
+ "astar": [
+  {
+   "destino": "salida I",
+   "alcanzable": true,
+   "tile_final": [
+    25,
+    74
+   ],
+   "pasos": 116,
+   "costo": 432.6667,
+   "suma_sombra": 7.0,
+   "cruza": [
+    "pasillo Y 16",
+    "gate (core 112)",
+    "hub 23",
+    "gate (core 102)",
+    "hub 23",
+    "gate (core 106)",
+    "pasillo Y 10",
+    "pasillo X 5",
+    "gate (core 82)",
+    "hub 21",
+    "pasillo X 7",
+    "pasillo Y 14",
+    "hub 19",
+    "gate (core 99)",
+    "hub 19"
+   ],
+   "grupos_cruzados": [
+    16,
+    23,
+    10,
+    5,
+    21,
+    7,
+    14,
+    19
+   ]
+  },
+  {
+   "destino": "salida J",
+   "alcanzable": true,
+   "tile_final": [
+    31,
+    86
+   ],
+   "pasos": 216,
+   "costo": 882.6667,
+   "suma_sombra": 14.0,
+   "cruza": [
+    "pasillo Y 16",
+    "gate (core 112)",
+    "hub 23",
+    "gate (core 102)",
+    "hub 23",
+    "gate (core 106)",
+    "pasillo Y 10",
+    "pasillo X 5",
+    "gate (core 82)",
+    "hub 21",
+    "pasillo X 7",
+    "gate (core 87)",
+    "pasillo X 4",
+    "gate (core 88)",
+    "pasillo X 8",
+    "pasillo X 6",
+    "gate (core 83)",
+    "gate (core 84)",
+    "gate (core 85)",
+    "hub 22",
+    "pasillo Y 11",
+    "gate (core 109)",
+    "hub 24",
+    "gate (core 103)",
+    "hub 24",
+    "gate (core 113)",
+    "pasillo X 9",
+    "gate (core 117)",
+    "hub 25"
+   ],
+   "grupos_cruzados": [
+    16,
+    23,
+    10,
+    5,
+    21,
+    7,
+    4,
+    8,
+    6,
+    22,
+    11,
+    24,
+    9,
+    25
+   ]
+  },
+  {
+   "destino": "cofre 1 (27,30)",
+   "alcanzable": false
+  },
+  {
+   "destino": "cofre 2 (31,74)",
+   "alcanzable": true,
+   "tile_final": [
+    33,
+    74
+   ],
+   "pasos": 142,
+   "costo": 475.3333,
+   "suma_sombra": 7.3333,
+   "cruza": [
+    "pasillo Y 16",
+    "gate (core 112)",
+    "hub 23",
+    "gate (core 102)",
+    "hub 23",
+    "gate (core 106)",
+    "pasillo Y 10",
+    "pasillo X 5",
+    "gate (core 82)",
+    "hub 21",
+    "pasillo X 7",
+    "gate (core 87)",
+    "pasillo X 4",
+    "gate (core 88)",
+    "pasillo X 8",
+    "gate (core 90)",
+    "pasillo Y 15",
+    "gate (core 98)",
+    "hub 20",
+    "gate (core 100)",
+    "hub 20"
+   ],
+   "grupos_cruzados": [
+    16,
+    23,
+    10,
+    5,
+    21,
+    7,
+    4,
+    8,
+    15,
+    20
+   ]
+  }
+ ],
+ "arquitectura_con_sombra": {
+  "nodos_alcanzables": 25,
+  "pares": 300,
+  "caminos": [
+   {
+    "de": "pasillo X 8",
+    "a": "pasillo Y 15",
+    "pasos": 8,
+    "suma_sombra": 0,
+    "costo_par": 8,
+    "cruza": [
+     "pasillo X 8",
+     "gate (core 90)",
+     "pasillo Y 15"
+    ],
+    "grupos_cruzados": [
+     8,
+     15
+    ]
+   },
+   {
+    "de": "pasillo Y 14",
+    "a": "hub 19",
+    "pasos": 9,
+    "suma_sombra": 0.1667,
+    "costo_par": 9.05,
+    "cruza": [
+     "pasillo Y 14",
+     "gate (core 97)",
+     "hub 19"
+    ],
+    "grupos_cruzados": [
+     14,
+     19
+    ]
+   },
+   {
+    "de": "pasillo Y 15",
+    "a": "hub 20",
+    "pasos": 10,
+    "suma_sombra": 0.1667,
+    "costo_par": 10.05,
+    "cruza": [
+     "pasillo Y 15",
+     "gate (core 98)",
+     "hub 20"
+    ],
+    "grupos_cruzados": [
+     15,
+     20
+    ]
+   },
+   {
+    "de": "pasillo X 7",
+    "a": "pasillo Y 14",
+    "pasos": 10,
+    "suma_sombra": 0.5,
+    "costo_par": 10.15,
+    "cruza": [
+     "pasillo X 7",
+     "gate (core 89)",
+     "pasillo Y 14"
+    ],
+    "grupos_cruzados": [
+     7,
+     14
+    ]
+   },
+   {
+    "de": "pasillo X 7",
+    "a": "hub 21",
+    "pasos": 11,
+    "suma_sombra": 0.5,
+    "costo_par": 11.15,
+    "cruza": [
+     "pasillo X 7",
+     "hub 21"
+    ],
+    "grupos_cruzados": [
+     7,
+     21
+    ]
+   },
+   {
+    "de": "pasillo X 6",
+    "a": "pasillo X 8",
+    "pasos": 11,
+    "suma_sombra": 1,
+    "costo_par": 11.3,
+    "cruza": [
+     "pasillo X 6",
+     "pasillo X 8"
+    ],
+    "grupos_cruzados": [
+     6,
+     8
+    ]
+   },
+   {
+    "de": "pasillo X 2",
+    "a": "hub 18",
+    "pasos": 12,
+    "suma_sombra": 1.3333,
+    "costo_par": 12.4,
+    "cruza": [
+     "pasillo X 2",
+     "hub 18"
+    ],
+    "grupos_cruzados": [
+     2,
+     18
+    ]
+   },
+   {
+    "de": "pasillo Y 16",
+    "a": "hub 23",
+    "pasos": 13,
+    "suma_sombra": 1.1667,
+    "costo_par": 13.35,
+    "cruza": [
+     "pasillo Y 16",
+     "gate (core 112)",
+     "hub 23"
+    ],
+    "grupos_cruzados": [
+     16,
+     23
+    ]
+   },
+   {
+    "de": "pasillo X 1",
+    "a": "hub 17",
+    "pasos": 13,
+    "suma_sombra": 1.5,
+    "costo_par": 13.45,
+    "cruza": [
+     "pasillo X 1",
+     "hub 17"
+    ],
+    "grupos_cruzados": [
+     1,
+     17
+    ]
+   },
+   {
+    "de": "pasillo X 6",
+    "a": "pasillo Y 13",
+    "pasos": 14,
+    "suma_sombra": 1.5,
+    "costo_par": 14.45,
+    "cruza": [
+     "pasillo X 6",
+     "gate (core 83)",
+     "pasillo Y 13"
+    ],
+    "grupos_cruzados": [
+     6,
+     13
+    ]
+   },
+   {
+    "de": "pasillo Y 12",
+    "a": "hub 21",
+    "pasos": 15,
+    "suma_sombra": 0,
+    "costo_par": 15,
+    "cruza": [
+     "pasillo Y 12",
+     "hub 21"
+    ],
+    "grupos_cruzados": [
+     12,
+     21
+    ]
+   },
+   {
+    "de": "pasillo X 9",
+    "a": "hub 25",
+    "pasos": 14,
+    "suma_sombra": 4.3333,
+    "costo_par": 15.3,
+    "cruza": [
+     "pasillo X 9",
+     "gate (core 117)",
+     "hub 25"
+    ],
+    "grupos_cruzados": [
+     9,
+     25
+    ]
+   },
+   {
+    "de": "pasillo X 9",
+    "a": "hub 24",
+    "pasos": 15,
+    "suma_sombra": 1.8333,
+    "costo_par": 15.55,
+    "cruza": [
+     "pasillo X 9",
+     "gate (core 113)",
+     "hub 24"
+    ],
+    "grupos_cruzados": [
+     9,
+     24
+    ]
+   },
+   {
+    "de": "pasillo Y 12",
+    "a": "hub 17",
+    "pasos": 17,
+    "suma_sombra": 0,
+    "costo_par": 17,
+    "cruza": [
+     "pasillo Y 12",
+     "gate (core 66)",
+     "hub 17"
+    ],
+    "grupos_cruzados": [
+     12,
+     17
+    ]
+   },
+   {
+    "de": "pasillo X 4",
+    "a": "pasillo X 8",
+    "pasos": 17,
+    "suma_sombra": 0.6667,
+    "costo_par": 17.2,
+    "cruza": [
+     "pasillo X 4",
+     "pasillo X 8"
+    ],
+    "grupos_cruzados": [
+     4,
+     8
+    ]
+   },
+   {
+    "de": "pasillo Y 13",
+    "a": "hub 18",
+    "pasos": 19,
+    "suma_sombra": 0,
+    "costo_par": 19,
+    "cruza": [
+     "pasillo Y 13",
+     "gate (core 67)",
+     "hub 18"
+    ],
+    "grupos_cruzados": [
+     13,
+     18
+    ]
+   },
+   {
+    "de": "pasillo X 4",
+    "a": "pasillo X 7",
+    "pasos": 19,
+    "suma_sombra": 1.1667,
+    "costo_par": 19.35,
+    "cruza": [
+     "pasillo X 4",
+     "gate (core 87)",
+     "pasillo X 7"
+    ],
+    "grupos_cruzados": [
+     4,
+     7
+    ]
+   },
+   {
+    "de": "pasillo Y 13",
+    "a": "hub 22",
+    "pasos": 20,
+    "suma_sombra": 0.6667,
+    "costo_par": 20.2,
+    "cruza": [
+     "pasillo Y 13",
+     "gate (core 84)",
+     "gate (core 85)",
+     "hub 22"
+    ],
+    "grupos_cruzados": [
+     13,
+     22
+    ]
+   },
+   {
+    "de": "pasillo X 5",
+    "a": "pasillo Y 12",
+    "pasos": 20,
+    "suma_sombra": 1.1667,
+    "costo_par": 20.35,
+    "cruza": [
+     "pasillo X 5",
+     "gate (core 82)",
+     "pasillo Y 12"
+    ],
+    "grupos_cruzados": [
+     5,
+     12
+    ]
+   },
+   {
+    "de": "pasillo Y 11",
+    "a": "hub 22",
+    "pasos": 24,
+    "suma_sombra": 0,
+    "costo_par": 24,
+    "cruza": [
+     "pasillo Y 11",
+     "hub 22"
+    ],
+    "grupos_cruzados": [
+     11,
+     22
+    ]
+   },
+   {
+    "de": "pasillo X 5",
+    "a": "pasillo Y 10",
+    "pasos": 25,
+    "suma_sombra": 0.5,
+    "costo_par": 25.15,
+    "cruza": [
+     "pasillo X 5",
+     "gate (core 86)",
+     "pasillo Y 10"
+    ],
+    "grupos_cruzados": [
+     5,
+     10
+    ]
+   },
+   {
+    "de": "pasillo X 0",
+    "a": "hub 17",
+    "pasos": 25,
+    "suma_sombra": 3.5,
+    "costo_par": 26.05,
+    "cruza": [
+     "pasillo X 0",
+     "gate (core 60)",
+     "hub 17",
+     "elbow (core 55)",
+     "hub 17",
+     "gate (core 64)",
+     "hub 17"
+    ],
+    "grupos_cruzados": [
+     0,
+     17
+    ]
+   },
+   {
+    "de": "pasillo Y 11",
+    "a": "hub 24",
+    "pasos": 27,
+    "suma_sombra": 3.1667,
+    "costo_par": 27.95,
+    "cruza": [
+     "pasillo Y 11",
+     "gate (core 109)",
+     "hub 24",
+     "gate (core 103)",
+     "hub 24"
+    ],
+    "grupos_cruzados": [
+     11,
+     24
+    ]
+   },
+   {
+    "de": "pasillo Y 10",
+    "a": "hub 23",
+    "pasos": 30,
+    "suma_sombra": 3.1667,
+    "costo_par": 30.95,
+    "cruza": [
+     "pasillo Y 10",
+     "gate (core 106)",
+     "hub 23",
+     "gate (core 102)",
+     "hub 23"
+    ],
+    "grupos_cruzados": [
+     10,
+     23
+    ]
+   }
+  ]
+ },
+ "arquitectura_sin_sombra": {
+  "nodos_alcanzables": 25,
+  "pares": 300,
+  "caminos": [
+   {
+    "de": "pasillo X 8",
+    "a": "pasillo Y 15",
+    "pasos": 8,
+    "suma_sombra": 0,
+    "costo_par": 8,
+    "cruza": [
+     "pasillo X 8",
+     "gate (core 90)",
+     "pasillo Y 15"
+    ],
+    "grupos_cruzados": [
+     8,
+     15
+    ]
+   },
+   {
+    "de": "pasillo Y 14",
+    "a": "hub 19",
+    "pasos": 9,
+    "suma_sombra": 0.1667,
+    "costo_par": 9,
+    "cruza": [
+     "pasillo Y 14",
+     "gate (core 97)",
+     "hub 19"
+    ],
+    "grupos_cruzados": [
+     14,
+     19
+    ]
+   },
+   {
+    "de": "pasillo X 7",
+    "a": "pasillo Y 14",
+    "pasos": 10,
+    "suma_sombra": 0.5,
+    "costo_par": 10,
+    "cruza": [
+     "pasillo X 7",
+     "gate (core 89)",
+     "pasillo Y 14"
+    ],
+    "grupos_cruzados": [
+     7,
+     14
+    ]
+   },
+   {
+    "de": "pasillo Y 15",
+    "a": "hub 20",
+    "pasos": 10,
+    "suma_sombra": 0.1667,
+    "costo_par": 10,
+    "cruza": [
+     "pasillo Y 15",
+     "gate (core 98)",
+     "hub 20"
+    ],
+    "grupos_cruzados": [
+     15,
+     20
+    ]
+   },
+   {
+    "de": "pasillo X 5",
+    "a": "hub 21",
+    "pasos": 11,
+    "suma_sombra": 3,
+    "costo_par": 11,
+    "cruza": [
+     "pasillo X 5",
+     "hub 21"
+    ],
+    "grupos_cruzados": [
+     5,
+     21
+    ]
+   },
+   {
+    "de": "pasillo X 6",
+    "a": "pasillo X 8",
+    "pasos": 11,
+    "suma_sombra": 1,
+    "costo_par": 11,
+    "cruza": [
+     "pasillo X 6",
+     "pasillo X 8"
+    ],
+    "grupos_cruzados": [
+     6,
+     8
+    ]
+   },
+   {
+    "de": "pasillo X 7",
+    "a": "hub 21",
+    "pasos": 11,
+    "suma_sombra": 1.0,
+    "costo_par": 11,
+    "cruza": [
+     "pasillo X 7",
+     "hub 21"
+    ],
+    "grupos_cruzados": [
+     7,
+     21
+    ]
+   },
+   {
+    "de": "pasillo Y 16",
+    "a": "hub 23",
+    "pasos": 11,
+    "suma_sombra": 1.5,
+    "costo_par": 11,
+    "cruza": [
+     "pasillo Y 16",
+     "gate (core 112)",
+     "hub 23"
+    ],
+    "grupos_cruzados": [
+     16,
+     23
+    ]
+   },
+   {
+    "de": "pasillo X 2",
+    "a": "hub 18",
+    "pasos": 12,
+    "suma_sombra": 1.3333,
+    "costo_par": 12,
+    "cruza": [
+     "pasillo X 2",
+     "hub 18"
+    ],
+    "grupos_cruzados": [
+     2,
+     18
+    ]
+   },
+   {
+    "de": "pasillo X 9",
+    "a": "hub 25",
+    "pasos": 12,
+    "suma_sombra": 4.8333,
+    "costo_par": 12,
+    "cruza": [
+     "pasillo X 9",
+     "gate (core 117)",
+     "hub 25"
+    ],
+    "grupos_cruzados": [
+     9,
+     25
+    ]
+   },
+   {
+    "de": "pasillo X 1",
+    "a": "hub 17",
+    "pasos": 13,
+    "suma_sombra": 1.5,
+    "costo_par": 13,
+    "cruza": [
+     "pasillo X 1",
+     "hub 17"
+    ],
+    "grupos_cruzados": [
+     1,
+     17
+    ]
+   },
+   {
+    "de": "pasillo X 4",
+    "a": "pasillo X 7",
+    "pasos": 13,
+    "suma_sombra": 2.0,
+    "costo_par": 13,
+    "cruza": [
+     "pasillo X 4",
+     "gate (core 87)",
+     "pasillo X 7"
+    ],
+    "grupos_cruzados": [
+     4,
+     7
+    ]
+   },
+   {
+    "de": "pasillo X 4",
+    "a": "pasillo X 8",
+    "pasos": 13,
+    "suma_sombra": 0.8333,
+    "costo_par": 13,
+    "cruza": [
+     "pasillo X 4",
+     "pasillo X 8"
+    ],
+    "grupos_cruzados": [
+     4,
+     8
+    ]
+   },
+   {
+    "de": "pasillo X 9",
+    "a": "hub 24",
+    "pasos": 13,
+    "suma_sombra": 2.1667,
+    "costo_par": 13,
+    "cruza": [
+     "pasillo X 9",
+     "gate (core 113)",
+     "hub 24"
+    ],
+    "grupos_cruzados": [
+     9,
+     24
+    ]
+   },
+   {
+    "de": "pasillo X 6",
+    "a": "pasillo Y 13",
+    "pasos": 14,
+    "suma_sombra": 1.5,
+    "costo_par": 14,
+    "cruza": [
+     "pasillo X 6",
+     "gate (core 83)",
+     "pasillo Y 13"
+    ],
+    "grupos_cruzados": [
+     6,
+     13
+    ]
+   },
+   {
+    "de": "pasillo X 2",
+    "a": "pasillo Y 13",
+    "pasos": 15,
+    "suma_sombra": 1.5,
+    "costo_par": 15,
+    "cruza": [
+     "pasillo X 2",
+     "hub 18",
+     "gate (core 67)",
+     "pasillo Y 13"
+    ],
+    "grupos_cruzados": [
+     2,
+     18,
+     13
+    ]
+   },
+   {
+    "de": "pasillo Y 12",
+    "a": "hub 21",
+    "pasos": 15,
+    "suma_sombra": 0,
+    "costo_par": 15,
+    "cruza": [
+     "pasillo Y 12",
+     "hub 21"
+    ],
+    "grupos_cruzados": [
+     12,
+     21
+    ]
+   },
+   {
+    "de": "pasillo X 1",
+    "a": "pasillo Y 12",
+    "pasos": 16,
+    "suma_sombra": 2,
+    "costo_par": 16,
+    "cruza": [
+     "pasillo X 1",
+     "hub 17",
+     "gate (core 66)",
+     "pasillo Y 12"
+    ],
+    "grupos_cruzados": [
+     1,
+     17,
+     12
+    ]
+   },
+   {
+    "de": "pasillo X 6",
+    "a": "hub 22",
+    "pasos": 16,
+    "suma_sombra": 3.1667,
+    "costo_par": 16,
+    "cruza": [
+     "pasillo X 6",
+     "gate (core 84)",
+     "gate (core 85)",
+     "hub 22"
+    ],
+    "grupos_cruzados": [
+     6,
+     22
+    ]
+   },
+   {
+    "de": "pasillo X 0",
+    "a": "hub 17",
+    "pasos": 21,
+    "suma_sombra": 3.8333,
+    "costo_par": 21,
+    "cruza": [
+     "pasillo X 0",
+     "gate (core 60)",
+     "hub 17",
+     "elbow (core 55)",
+     "hub 17",
+     "gate (core 64)",
+     "hub 17"
+    ],
+    "grupos_cruzados": [
+     0,
+     17
+    ]
+   },
+   {
+    "de": "pasillo Y 11",
+    "a": "hub 22",
+    "pasos": 24,
+    "suma_sombra": 0,
+    "costo_par": 24,
+    "cruza": [
+     "pasillo Y 11",
+     "hub 22"
+    ],
+    "grupos_cruzados": [
+     11,
+     22
+    ]
+   },
+   {
+    "de": "pasillo X 5",
+    "a": "pasillo Y 10",
+    "pasos": 25,
+    "suma_sombra": 0.5,
+    "costo_par": 25,
+    "cruza": [
+     "pasillo X 5",
+     "gate (core 86)",
+     "pasillo Y 10"
+    ],
+    "grupos_cruzados": [
+     5,
+     10
+    ]
+   },
+   {
+    "de": "pasillo Y 11",
+    "a": "hub 24",
+    "pasos": 27,
+    "suma_sombra": 3.1667,
+    "costo_par": 27,
+    "cruza": [
+     "pasillo Y 11",
+     "gate (core 109)",
+     "hub 24",
+     "gate (core 103)",
+     "hub 24"
+    ],
+    "grupos_cruzados": [
+     11,
+     24
+    ]
+   },
+   {
+    "de": "pasillo Y 10",
+    "a": "hub 23",
+    "pasos": 30,
+    "suma_sombra": 3.1667,
+    "costo_par": 30,
+    "cruza": [
+     "pasillo Y 10",
+     "gate (core 106)",
+     "hub 23",
+     "gate (core 102)",
+     "hub 23"
+    ],
+    "grupos_cruzados": [
+     10,
+     23
+    ]
+   }
+  ]
+ },
+ "diferencia_caminos": {
+  "tiles_solo_con_sombra": 66,
+  "tiles_solo_sin_sombra": 40,
+  "tiles_en_los_dos": 314,
+  "aristas_distintas": [
+   [
+    1,
+    12
+   ],
+   [
+    2,
+    13
+   ],
+   [
+    5,
+    12
+   ],
+   [
+    5,
+    21
+   ],
+   [
+    6,
+    22
+   ],
+   [
+    12,
+    17
+   ],
+   [
+    13,
+    18
+   ],
+   [
+    13,
+    22
+   ]
+  ]
+ },
+ "mapas": {
+  "A*_tiles_con_valor_1": 272,
+  "arquitectura_tiles_con_valor": 1092,
+  "arquitectura_sinsombra_tiles_con_valor": 1068,
+  "suma_tiles_con_valor": 1147,
+  "solape_tiles": 217
+ }
+}
