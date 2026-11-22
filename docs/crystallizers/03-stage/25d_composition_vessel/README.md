@@ -24,6 +24,7 @@ Hipótesis a la que sirve: `../HP1.md` (derivación en `../HP1_DERIVACION.md`).
 | `pp3/` | Salidas de PP3: hojas de la red de profundidad de XChengCode (MiDaS) sobre el 5F SNES y dos fotogramas del piso 2, y `RESULTADO_PP3.md` (lo observado, sin veredicto) |
 | `pp2/guias/` | Guías del 5F con el código DAC3: rejilla y clases, plataformas, caminos entre escaleras, manifest y counts, y `RESULTADO_PP2_guias.md` (lo hecho y lo observado, sin veredicto) |
 | `pp2/guias/B/` | Variante B de las guías del 5F: cores por anillos, áreas, puertas, conos, plataformas y rutas entre escaleras, con `RESULTADO_PP2_B.md` (lo hecho y lo observado, sin veredicto) |
+| `pp2/guias/C/` | Variante C de las guías del 5F: los cores de B agrupados en pasillos X / Y y hubs, con gates y elbows como separadores, y `RESULTADO_PP2_C.md` (lecturas tomadas, sin veredicto) |
 
 ## Convención (irán muchas pruebas más)
 
