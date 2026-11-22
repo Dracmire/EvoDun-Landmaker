@@ -1,0 +1,874 @@
+{
+ "rejilla": {
+  "tile_px": 8,
+  "origen_px": [
+   1,
+   5
+  ],
+  "tiles": [
+   57,
+   108
+  ],
+  "tiles_total": 6156
+ },
+ "clases": {
+  "fuera": 483,
+  "suelo": 2126,
+  "muro": 3499,
+  "escalera": 16,
+  "obstaculo": 32
+ },
+ "dudosos": 119,
+ "escaleras": [
+  {
+   "label": "G",
+   "tile": [
+    31,
+    24
+   ],
+   "block": [
+    [
+     31,
+     24
+    ],
+    [
+     32,
+     24
+    ],
+    [
+     31,
+     25
+    ],
+    [
+     32,
+     25
+    ]
+   ],
+   "index": 1399
+  },
+  {
+   "label": "H",
+   "tile": [
+    19,
+    92
+   ],
+   "block": [
+    [
+     19,
+     92
+    ],
+    [
+     20,
+     92
+    ],
+    [
+     19,
+     93
+    ],
+    [
+     20,
+     93
+    ]
+   ],
+   "index": 5263
+  },
+  {
+   "label": "I",
+   "tile": [
+    25,
+    74
+   ],
+   "block": [
+    [
+     25,
+     74
+    ],
+    [
+     26,
+     74
+    ],
+    [
+     25,
+     75
+    ],
+    [
+     26,
+     75
+    ]
+   ],
+   "index": 4243
+  },
+  {
+   "label": "J",
+   "tile": [
+    31,
+    86
+   ],
+   "block": [
+    [
+     31,
+     86
+    ],
+    [
+     32,
+     86
+    ],
+    [
+     31,
+     87
+    ],
+    [
+     32,
+     87
+    ]
+   ],
+   "index": 4933
+  }
+ ],
+ "cofres": [
+  {
+   "label": "S",
+   "kind": "cofre",
+   "letter_px": [
+    223.0,
+    250.5
+   ],
+   "sprite_centre_px": [
+    223.5,
+    250.5
+   ],
+   "tile": [
+    27,
+    30
+   ],
+   "block": [
+    [
+     27,
+     30
+    ],
+    [
+     28,
+     30
+    ],
+    [
+     27,
+     31
+    ],
+    [
+     28,
+     31
+    ]
+   ]
+  },
+  {
+   "label": "S",
+   "kind": "cofre",
+   "letter_px": [
+    255.0,
+    602.5
+   ],
+   "sprite_centre_px": [
+    255.5,
+    602.5
+   ],
+   "tile": [
+    31,
+    74
+   ],
+   "block": [
+    [
+     31,
+     74
+    ],
+    [
+     32,
+     74
+    ],
+    [
+     31,
+     75
+    ],
+    [
+     32,
+     75
+    ]
+   ]
+  }
+ ],
+ "antorchas_tiles": 24,
+ "sombra_x_visibility": {
+  "checks": [
+   {
+    "label": "A: Steep only (muros + obstaculos)",
+    "shadowed": 358,
+    "byClass": {
+     "muro": {
+      "occluderTilesWithFloorBehind": 384,
+      "floorTilesBehind": 354,
+      "ofThoseExcludedFromPlatforms": 354
+     },
+     "obstaculo": {
+      "occluderTilesWithFloorBehind": 8,
+      "floorTilesBehind": 8,
+      "ofThoseExcludedFromPlatforms": 4
+     }
+    }
+   },
+   {
+    "label": "B: Steep + terraza mas alta (muros + obstaculos)",
+    "shadowed": 822,
+    "byClass": {
+     "muro": {
+      "occluderTilesWithFloorBehind": 384,
+      "floorTilesBehind": 354,
+      "ofThoseExcludedFromPlatforms": 354
+     },
+     "obstaculo": {
+      "occluderTilesWithFloorBehind": 8,
+      "floorTilesBehind": 8,
+      "ofThoseExcludedFromPlatforms": 8
+     }
+    }
+   },
+   {
+    "label": "B2: Steep + terraza alta solo muros",
+    "shadowed": 810,
+    "byClass": {
+     "muro": {
+      "occluderTilesWithFloorBehind": 384,
+      "floorTilesBehind": 354,
+      "ofThoseExcludedFromPlatforms": 354
+     },
+     "obstaculo": {
+      "occluderTilesWithFloorBehind": 8,
+      "floorTilesBehind": 8,
+      "ofThoseExcludedFromPlatforms": 6
+     }
+    }
+   },
+   {
+    "label": "A solo muros",
+    "shadowed": 354,
+    "byClass": {
+     "muro": {
+      "occluderTilesWithFloorBehind": 384,
+      "floorTilesBehind": 354,
+      "ofThoseExcludedFromPlatforms": 354
+     },
+     "obstaculo": {
+      "occluderTilesWithFloorBehind": 8,
+      "floorTilesBehind": 8,
+      "ofThoseExcludedFromPlatforms": 0
+     }
+    }
+   },
+   {
+    "label": "A solo obstaculos",
+    "shadowed": 0,
+    "byClass": {
+     "muro": {
+      "occluderTilesWithFloorBehind": 384,
+      "floorTilesBehind": 354,
+      "ofThoseExcludedFromPlatforms": 0
+     },
+     "obstaculo": {
+      "occluderTilesWithFloorBehind": 8,
+      "floorTilesBehind": 8,
+      "ofThoseExcludedFromPlatforms": 0
+     }
+    }
+   }
+  ],
+  "final": {
+   "label": "FINAL variant B",
+   "shadowed": 822,
+   "byClass": {
+    "muro": {
+     "occluderTilesWithFloorBehind": 384,
+     "floorTilesBehind": 354,
+     "ofThoseExcludedFromPlatforms": 354
+    },
+    "obstaculo": {
+     "occluderTilesWithFloorBehind": 8,
+     "floorTilesBehind": 8,
+     "ofThoseExcludedFromPlatforms": 8
+    }
+   }
+  }
+ },
+ "arbol": {
+  "componentes": 2,
+  "tamanos": [
+   3,
+   1
+  ],
+  "caminos": [
+   {
+    "de": "H",
+    "a": "I",
+    "tiles": 105
+   },
+   {
+    "de": "I",
+    "a": "J",
+    "tiles": 133
+   }
+  ]
+ },
+ "corrida_defecto": {
+  "hyp_cambiados": {},
+  "counts": {
+   "widenedTiles": 415,
+   "subsegments": 1,
+   "pruned": 0,
+   "flowSeeds": 0,
+   "roomSeeds": 1,
+   "platforms": 16,
+   "roomPlat": 16,
+   "flowPlat": 0
+  },
+  "tiempos_ms": {
+   "widened": 1,
+   "subsegments": 2,
+   "seeds": 2,
+   "growth": 192,
+   "flowTypes": 192
+  },
+  "determinista": true,
+  "etapas": {
+   "suelo_tiles": 2142,
+   "widened_tiles": 415,
+   "subsegmentos": [
+    "1|1"
+   ],
+   "tiles_por_subsegmento": [
+    2142
+   ],
+   "grosor_maximo": 2,
+   "podados_ok": [],
+   "semillas_flow": [],
+   "semillas_room": [
+    {
+     "room": 1,
+     "terrace": 1,
+     "area": 2036
+    }
+   ],
+   "room_seeds_descartadas_por_clave": [],
+   "suelo_en_sombra(vis>0.15)": 822
+  },
+  "seeds_recorte_y_vantage": [
+   {
+    "seedArea": 2036,
+    "afterTrim": 1424,
+    "trimmedTiles": 612,
+    "platforms": 16,
+    "covered": 1288,
+    "leftOut": 136
+   }
+  ],
+  "suelo_sin_plataforma": 854,
+  "plataformas": [
+   {
+    "id": 0,
+    "src": "room",
+    "area": 222,
+    "centro": [
+     1,
+     49
+    ],
+    "vantage": [
+     1,
+     49
+    ],
+    "recortados": 1066
+   },
+   {
+    "id": 1,
+    "src": "room",
+    "area": 250,
+    "centro": [
+     13,
+     47
+    ],
+    "vantage": [
+     13,
+     47
+    ],
+    "recortados": 816
+   },
+   {
+    "id": 2,
+    "src": "room",
+    "area": 60,
+    "centro": [
+     23,
+     48
+    ],
+    "vantage": [
+     23,
+     48
+    ],
+    "recortados": 756
+   },
+   {
+    "id": 3,
+    "src": "room",
+    "area": 57,
+    "centro": [
+     11,
+     20
+    ],
+    "vantage": [
+     11,
+     20
+    ],
+    "recortados": 699
+   },
+   {
+    "id": 4,
+    "src": "room",
+    "area": 4,
+    "centro": [
+     8,
+     22
+    ],
+    "vantage": [
+     8,
+     22
+    ],
+    "recortados": 695
+   },
+   {
+    "id": 5,
+    "src": "room",
+    "area": 146,
+    "centro": [
+     35,
+     49
+    ],
+    "vantage": [
+     35,
+     49
+    ],
+    "recortados": 549
+   },
+   {
+    "id": 6,
+    "src": "room",
+    "area": 4,
+    "centro": [
+     13,
+     64
+    ],
+    "vantage": [
+     13,
+     64
+    ],
+    "recortados": 545
+   },
+   {
+    "id": 7,
+    "src": "room",
+    "area": 26,
+    "centro": [
+     25,
+     64
+    ],
+    "vantage": [
+     25,
+     64
+    ],
+    "recortados": 519
+   },
+   {
+    "id": 8,
+    "src": "room",
+    "area": 1,
+    "centro": [
+     13,
+     62
+    ],
+    "vantage": [
+     13,
+     62
+    ],
+    "recortados": 518
+   },
+   {
+    "id": 9,
+    "src": "room",
+    "area": 36,
+    "centro": [
+     11,
+     83
+    ],
+    "vantage": [
+     11,
+     83
+    ],
+    "recortados": 482
+   },
+   {
+    "id": 10,
+    "src": "room",
+    "area": 164,
+    "centro": [
+     45,
+     47
+    ],
+    "vantage": [
+     45,
+     47
+    ],
+    "recortados": 318
+   },
+   {
+    "id": 11,
+    "src": "room",
+    "area": 246,
+    "centro": [
+     49,
+     48
+    ],
+    "vantage": [
+     49,
+     48
+    ],
+    "recortados": 72
+   },
+   {
+    "id": 12,
+    "src": "room",
+    "area": 8,
+    "centro": [
+     25,
+     10
+    ],
+    "vantage": [
+     25,
+     10
+    ],
+    "recortados": 64
+   },
+   {
+    "id": 13,
+    "src": "room",
+    "area": 4,
+    "centro": [
+     49,
+     22
+    ],
+    "vantage": [
+     49,
+     22
+    ],
+    "recortados": 60
+   },
+   {
+    "id": 14,
+    "src": "room",
+    "area": 36,
+    "centro": [
+     46,
+     83
+    ],
+    "vantage": [
+     46,
+     83
+    ],
+    "recortados": 24
+   },
+   {
+    "id": 15,
+    "src": "room",
+    "area": 24,
+    "centro": [
+     32,
+     88
+    ],
+    "vantage": [
+     32,
+     88
+    ],
+    "recortados": 0
+   }
+  ],
+  "road_por_camino": [],
+  "codos": 0
+ },
+ "corrida_minThickness2": {
+  "hyp_cambiados": {
+   "minThickness": 2
+  },
+  "counts": {
+   "widenedTiles": 415,
+   "subsegments": 1,
+   "pruned": 1,
+   "flowSeeds": 1,
+   "roomSeeds": 0,
+   "platforms": 14,
+   "roomPlat": 0,
+   "flowPlat": 14
+  },
+  "tiempos_ms": {
+   "widened": 1,
+   "subsegments": 1,
+   "seeds": 1,
+   "growth": 206,
+   "flowTypes": 206
+  },
+  "determinista": true,
+  "etapas": {
+   "suelo_tiles": 2142,
+   "widened_tiles": 415,
+   "subsegmentos": [
+    "1|1"
+   ],
+   "tiles_por_subsegmento": [
+    2142
+   ],
+   "grosor_maximo": 2,
+   "podados_ok": [
+    "1|1"
+   ],
+   "semillas_flow": [
+    {
+     "room": 1,
+     "terrace": 1,
+     "area": 2142
+    }
+   ],
+   "semillas_room": [],
+   "room_seeds_descartadas_por_clave": [],
+   "suelo_en_sombra(vis>0.15)": 822
+  },
+  "seeds_recorte_y_vantage": [
+   {
+    "seedArea": 2142,
+    "afterTrim": 1464,
+    "trimmedTiles": 678,
+    "platforms": 14,
+    "covered": 1320,
+    "leftOut": 144
+   }
+  ],
+  "suelo_sin_plataforma": 822,
+  "plataformas": [
+   {
+    "id": 0,
+    "src": "flow",
+    "area": 222,
+    "centro": [
+     1,
+     49
+    ],
+    "vantage": [
+     1,
+     49
+    ],
+    "recortados": 1098
+   },
+   {
+    "id": 1,
+    "src": "flow",
+    "area": 4,
+    "centro": [
+     5,
+     22
+    ],
+    "vantage": [
+     5,
+     22
+    ],
+    "recortados": 1094
+   },
+   {
+    "id": 2,
+    "src": "flow",
+    "area": 250,
+    "centro": [
+     11,
+     18
+    ],
+    "vantage": [
+     11,
+     18
+    ],
+    "recortados": 844
+   },
+   {
+    "id": 3,
+    "src": "flow",
+    "area": 36,
+    "centro": [
+     11,
+     82
+    ],
+    "vantage": [
+     11,
+     82
+    ],
+    "recortados": 808
+   },
+   {
+    "id": 4,
+    "src": "flow",
+    "area": 88,
+    "centro": [
+     13,
+     62
+    ],
+    "vantage": [
+     13,
+     62
+    ],
+    "recortados": 720
+   },
+   {
+    "id": 5,
+    "src": "flow",
+    "area": 60,
+    "centro": [
+     23,
+     42
+    ],
+    "vantage": [
+     23,
+     42
+    ],
+    "recortados": 660
+   },
+   {
+    "id": 6,
+    "src": "flow",
+    "area": 8,
+    "centro": [
+     25,
+     10
+    ],
+    "vantage": [
+     25,
+     10
+    ],
+    "recortados": 652
+   },
+   {
+    "id": 7,
+    "src": "flow",
+    "area": 32,
+    "centro": [
+     25,
+     24
+    ],
+    "vantage": [
+     25,
+     24
+    ],
+    "recortados": 620
+   },
+   {
+    "id": 8,
+    "src": "flow",
+    "area": 24,
+    "centro": [
+     25,
+     86
+    ],
+    "vantage": [
+     25,
+     86
+    ],
+    "recortados": 596
+   },
+   {
+    "id": 9,
+    "src": "flow",
+    "area": 146,
+    "centro": [
+     31,
+     62
+    ],
+    "vantage": [
+     31,
+     62
+    ],
+    "recortados": 450
+   },
+   {
+    "id": 10,
+    "src": "flow",
+    "area": 164,
+    "centro": [
+     37,
+     12
+    ],
+    "vantage": [
+     37,
+     12
+    ],
+    "recortados": 286
+   },
+   {
+    "id": 11,
+    "src": "flow",
+    "area": 36,
+    "centro": [
+     37,
+     87
+    ],
+    "vantage": [
+     37,
+     87
+    ],
+    "recortados": 250
+   },
+   {
+    "id": 12,
+    "src": "flow",
+    "area": 4,
+    "centro": [
+     49,
+     22
+    ],
+    "vantage": [
+     49,
+     22
+    ],
+    "recortados": 246
+   },
+   {
+    "id": 13,
+    "src": "flow",
+    "area": 246,
+    "centro": [
+     49,
+     42
+    ],
+    "vantage": [
+     49,
+     42
+    ],
+    "recortados": 0
+   }
+  ],
+  "road_por_camino": [
+   [
+    3,
+    0,
+    2,
+    4
+   ],
+   [
+    4,
+    2,
+    5,
+    9,
+    10,
+    13,
+    8
+   ]
+  ],
+  "codos": 5
+ }
+}

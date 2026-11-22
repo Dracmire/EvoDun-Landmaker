@@ -1,0 +1,81 @@
+{
+ "format": "evodun-pack/0.2",
+ "name": "DQ3 Dreamer's Tower 5F - guias (un solo room, sin alturas)",
+ "flipY": false,
+ "roles": {
+  "room": {
+   "image": "pack_room.png",
+   "channel": "R"
+  },
+  "area": {
+   "image": "pack_clases.png",
+   "channel": "R"
+  },
+  "path": {
+   "image": "pack_path.png",
+   "channel": "R"
+  }
+ },
+ "markers": [
+  {
+   "x": 31,
+   "y": 24,
+   "label": "G"
+  },
+  {
+   "x": 19,
+   "y": 92,
+   "label": "H"
+  },
+  {
+   "x": 25,
+   "y": 74,
+   "label": "I"
+  },
+  {
+   "x": 31,
+   "y": 86,
+   "label": "J"
+  }
+ ],
+ "guias": {
+  "fuente": "docs/crystallizers/03-stage/25d_composition_vessel/refs/dq3_dreamers_5f_snes.png (sha256 460cd57927f3409c2a6c3b0157aef74b35194ce316e645bd0923891eeb3c03b6)",
+  "tile_px": 8,
+  "origen_px": [
+   1,
+   5
+  ],
+  "recorte_px": {
+   "izquierda": 1,
+   "arriba": 5,
+   "derecha": 6,
+   "abajo": 7
+  },
+  "mapa_tiles": [
+   57,
+   108
+  ],
+  "clases": {
+   "0": "fuera",
+   "1": "suelo",
+   "2": "muro",
+   "3": "escalera",
+   "4": "obstaculo"
+  },
+  "room_id": 1,
+  "camara": "Cam 6, yaw 0",
+  "plataformas": {
+   "imagen": "pack_plataformas.png",
+   "valor": "id + 1 (0 = ninguna)",
+   "hyp": "X.HYP por defecto"
+  },
+  "plataformas_mt2": {
+   "imagen": "pack_plataformas_mt2.png",
+   "valor": "id + 1 (0 = ninguna)",
+   "hyp": {
+    "minThickness": 2
+   }
+  },
+  "elevation": "no hay: no se puso ninguna altura, por eso el visor no carga este pack hasta que se le asigne un rol elevation"
+ }
+}
