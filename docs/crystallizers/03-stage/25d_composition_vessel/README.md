@@ -28,6 +28,7 @@ Hipótesis a la que sirve: `../HP1.md` (derivación en `../HP1_DERIVACION.md`).
 | `pp2/guias/D/` | Variante D de las guías del 5F: flow sobre los grupos de C (A* desde la entrada a los destinos, flow de la arquitectura con y sin sombra, y su suma), con `RESULTADO_PP2_D.md` (lecturas tomadas, sin veredicto) |
 | `pp2/guias/E/` | Cierre del paso 2 de las guías del 5F: grupos regrupados con las fusiones de [U], gates (corte / puerta / absorbido), sectores, flow de la herradura y camino A*, en un solo objeto, con `RESULTADO_PP2_E.md` (lecturas tomadas y lo que no calzó, sin veredicto) |
 | `pp2/alturas/` | Paso 3 de PP2: mapa de muros del 5F (SNES) con su altura, medida contra el héroe de las capturas de SNES y Switch, y `RESULTADO_PP2_alturas.md` (lecturas tomadas y lo que no calzó, sin veredicto) |
+| `pp2/profundidad/` | Paso 4 de PP2: oclusión del héroe por pilares y muros (M1, método de [U]) y tomas del mock-up del 5F con la red de profundidad (M2, método de [R]), con `RESULTADO_PP2_profundidad.md` (lecturas tomadas, contraste con la predicción de [R], sin veredicto) |
 
 ## Convención (irán muchas pruebas más)
 

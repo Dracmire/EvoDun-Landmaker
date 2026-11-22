@@ -1,0 +1,257 @@
+{
+ "unidad": {
+  "cartel_de_escalera_16x16": true,
+  "carteles": [
+   {
+    "letra": "G",
+    "pixeles_del_cartel_px": [
+     249,
+     196,
+     262,
+     211
+    ],
+    "ancho_px": 14,
+    "alto_px": 16,
+    "tile_de_16_px_(col,fila)": [
+     15,
+     12
+    ],
+    "cabe_en_un_solo_tile_de_16_px": true,
+    "tile_px": [
+     248,
+     196,
+     264,
+     212
+    ]
+   },
+   {
+    "letra": "I",
+    "pixeles_del_cartel_px": [
+     201,
+     597,
+     214,
+     610
+    ],
+    "ancho_px": 14,
+    "alto_px": 14,
+    "tile_de_16_px_(col,fila)": [
+     12,
+     37
+    ],
+    "cabe_en_un_solo_tile_de_16_px": true,
+    "tile_px": [
+     200,
+     596,
+     216,
+     612
+    ]
+   },
+   {
+    "letra": "J",
+    "pixeles_del_cartel_px": [
+     249,
+     693,
+     262,
+     706
+    ],
+    "ancho_px": 14,
+    "alto_px": 14,
+    "tile_de_16_px_(col,fila)": [
+     15,
+     43
+    ],
+    "cabe_en_un_solo_tile_de_16_px": true,
+    "tile_px": [
+     248,
+     692,
+     264,
+     708
+    ]
+   },
+   {
+    "letra": "H",
+    "pixeles_del_cartel_px": [
+     153,
+     740,
+     166,
+     755
+    ],
+    "ancho_px": 14,
+    "alto_px": 16,
+    "tile_de_16_px_(col,fila)": [
+     9,
+     46
+    ],
+    "cabe_en_un_solo_tile_de_16_px": true,
+    "tile_px": [
+     152,
+     740,
+     168,
+     756
+    ]
+   }
+  ],
+  "tile_px": 16,
+  "H_SNES_px": 22.79
+ },
+ "convencion": {
+  "ejes": "x este, y sur (hacia la camara), z arriba; unidad = px del juego",
+  "base_del_objeto": "1 tile = 16 x 16 px, y en [0-16, 0]",
+  "heroe": "billboard de 1 H (22.79 px) x 0,4 H, en el tile de atras",
+  "pies": {
+   "centro del tile de atras": -24.0,
+   "borde de abajo del tile de atras": -16.0
+  },
+  "formula": "altura oculta z* = h - d' * tan(pitch), d' = distancia del pie del heroe al borde de ATRAS de la base (rayos paralelos); Cam 7 oblicua equivale a pitch 45 (tan = 1); Cam 6 pitch 25 (tan = 0,466). % oculto = z* / H_SNES (puede pasar del 100 %)",
+  "cam6": "FOV 30, pitch 25, yaw 0, pivote en el centro del heroe, heroFrac 0,14 (modo 3), panel 800 x 800 (la altura oculta no depende del tamano del panel); NO se aplica la camara de Stage con recortes de ventana"
+ },
+ "tabla": [
+  {
+   "objeto": "pilar interior",
+   "altura_16bits_px": 43.0,
+   "altura_16bits_H_SNES": 1.887,
+   "lecturas": {
+    "centro del tile de atras": {
+     "d_prima_px": 8.0,
+     "oculto_16bits_px_(formula)": 35.0,
+     "oculto_16bits_pct_H_SNES": 153.6,
+     "cam7_render": {
+      "altura_oculta_px": 35.04,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 153.8
+     },
+     "cam6_render_misma_altura": {
+      "altura_oculta_px": 40.1,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 176.0
+     },
+     "formula_cam6_misma_altura_px": 39.27,
+     "cam6_altura_necesaria_H": 1.7,
+     "cam6_altura_necesaria_px": 38.74,
+     "cam6_oculta_con_esa_altura_px": 35.78,
+     "formula_cam6_altura_necesaria_px": 38.73,
+     "cam6_altura_necesaria_vs_16bits_H": -0.19
+    },
+    "borde de abajo del tile de atras": {
+     "d_prima_px": 0.0,
+     "oculto_16bits_px_(formula)": 43.0,
+     "oculto_16bits_pct_H_SNES": 188.7,
+     "cam7_render": {
+      "altura_oculta_px": 43.02,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 188.8
+     },
+     "cam6_render_misma_altura": {
+      "altura_oculta_px": 43.0,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 188.7
+     },
+     "formula_cam6_misma_altura_px": 43.0,
+     "cam6_altura_necesaria_H": 1.9,
+     "cam6_altura_necesaria_px": 43.3,
+     "cam6_oculta_con_esa_altura_px": 43.36,
+     "formula_cam6_altura_necesaria_px": 43.0,
+     "cam6_altura_necesaria_vs_16bits_H": 0.01
+    }
+   }
+  },
+  {
+   "objeto": "pilar de fachada",
+   "altura_16bits_px": 44.0,
+   "altura_16bits_H_SNES": 1.931,
+   "lecturas": {
+    "centro del tile de atras": {
+     "d_prima_px": 8.0,
+     "oculto_16bits_px_(formula)": 36.0,
+     "oculto_16bits_pct_H_SNES": 158.0,
+     "cam7_render": {
+      "altura_oculta_px": 36.0,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 158.0
+     },
+     "cam6_render_misma_altura": {
+      "altura_oculta_px": 41.14,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 180.5
+     },
+     "formula_cam6_misma_altura_px": 40.27,
+     "cam6_altura_necesaria_H": 1.75,
+     "cam6_altura_necesaria_px": 39.88,
+     "cam6_oculta_con_esa_altura_px": 36.94,
+     "formula_cam6_altura_necesaria_px": 39.73,
+     "cam6_altura_necesaria_vs_16bits_H": -0.18
+    },
+    "borde de abajo del tile de atras": {
+     "d_prima_px": 0.0,
+     "oculto_16bits_px_(formula)": 44.0,
+     "oculto_16bits_pct_H_SNES": 193.1,
+     "cam7_render": {
+      "altura_oculta_px": 44.0,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 193.1
+     },
+     "cam6_render_misma_altura": {
+      "altura_oculta_px": 44.02,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 193.2
+     },
+     "formula_cam6_misma_altura_px": 44.0,
+     "cam6_altura_necesaria_H": 1.95,
+     "cam6_altura_necesaria_px": 44.44,
+     "cam6_oculta_con_esa_altura_px": 44.48,
+     "formula_cam6_altura_necesaria_px": 44.0,
+     "cam6_altura_necesaria_vs_16bits_H": 0.02
+    }
+   }
+  },
+  {
+   "objeto": "cara de muro interior (como muro de base de 1 tile)",
+   "altura_16bits_px": 38.0,
+   "altura_16bits_H_SNES": 1.667,
+   "lecturas": {
+    "centro del tile de atras": {
+     "d_prima_px": 8.0,
+     "oculto_16bits_px_(formula)": 30.0,
+     "oculto_16bits_pct_H_SNES": 131.6,
+     "cam7_render": {
+      "altura_oculta_px": 30.0,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 131.6
+     },
+     "cam6_render_misma_altura": {
+      "altura_oculta_px": 34.94,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 153.3
+     },
+     "formula_cam6_misma_altura_px": 34.27,
+     "cam6_altura_necesaria_H": 1.5,
+     "cam6_altura_necesaria_px": 34.19,
+     "cam6_oculta_con_esa_altura_px": 31.04,
+     "formula_cam6_altura_necesaria_px": 33.73,
+     "cam6_altura_necesaria_vs_16bits_H": -0.17
+    },
+    "borde de abajo del tile de atras": {
+     "d_prima_px": 0.0,
+     "oculto_16bits_px_(formula)": 38.0,
+     "oculto_16bits_pct_H_SNES": 166.7,
+     "cam7_render": {
+      "altura_oculta_px": 38.0,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 166.7
+     },
+     "cam6_render_misma_altura": {
+      "altura_oculta_px": 38.04,
+      "pct_pixeles_del_heroe_ocultos": 100.0,
+      "pct_altura_oculta_sobre_H": 166.9
+     },
+     "formula_cam6_misma_altura_px": 38.0,
+     "cam6_altura_necesaria_H": 1.7,
+     "cam6_altura_necesaria_px": 38.74,
+     "cam6_oculta_con_esa_altura_px": 38.82,
+     "formula_cam6_altura_necesaria_px": 38.0,
+     "cam6_altura_necesaria_vs_16bits_H": 0.03
+    }
+   }
+  }
+ ]
+}

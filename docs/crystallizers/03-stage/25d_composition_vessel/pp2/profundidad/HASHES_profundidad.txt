@@ -1,0 +1,7 @@
+# sha256 de las salidas; corrida 1 y corrida 2 completas (render + red de profundidad) dan los mismos hashes (en m2.json se quitaron los segundos de inferencia, que varian)
+fccc7bc389420cda3eaf9e3881d8af643ae2d363aa058616cb88a788fdb1dc79  m1_oclusion.png
+2e40bd5dac53b9afd3c4f557da8ebdf4a31933b323656cd6e8cdf6793bee4af2  m1.json
+97613b713edeab6bd60c31f8e25d1014789ddfc3e256751ec4374fa65f3457a7  m2_G.png
+d6a38f2ee9ad67116516edc0aa9b251c95dafce7c5e57cc7abf94ff5934258f4  m2_H.png
+2df32312087acb9e20eeec35767c6df266383a6cdb1aa4219e7c86652925e931  m2_I.png
+2f8d16428e1fafae9134ec7796b097e9811a9c76e85719386ce2d1321c9f26f2  m2.json
