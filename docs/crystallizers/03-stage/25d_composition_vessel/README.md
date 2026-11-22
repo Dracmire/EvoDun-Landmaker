@@ -16,18 +16,16 @@ Hipótesis a la que sirve: `../HP1.md` (derivación en `../HP1_DERIVACION.md`).
 
 - Teoría, respuestas de [U], predicciones y estado de las pruebas: docs del Proyecto EvoDun en claude.ai
   (`PASE_2_5D.md`, `PASE_2_5D_anexo_2349.md`, `PRUEBAS_PENDIENTES.md`). No se copian aquí para que no diverjan.
-- En esta carpeta: insumos, resultados de CC, scripts y entorno de cada prueba.
+- En esta carpeta: los insumos y las salidas de cada prueba (hojas y conclusiones), nada más.
 
-| Carpeta | Contenido | Estado |
-|---|---|---|
-| `refs/` | Figura 1 de XChengCode (esquema del proceso) y mapa Dreamer's Tower 5F (SNES), con procedencia y hash | listos |
-| `pp3/` | PP3: red de profundidad de XChengCode sobre el mapa 5F y dos fotogramas del remake | corrida hecha por CC; falta subirla aquí |
+| Carpeta | Contenido |
+|---|---|
+| `refs/` | Figura 1 de XChengCode (esquema del proceso) y mapa Dreamer's Tower 5F (SNES), con procedencia y hash |
 
 ## Convención (irán muchas pruebas más)
 
-- Una subcarpeta por prueba (`pp3/`, `pp4/`…): `RESULTADO_PPn.md` (≤ 40 líneas; describe lo observado, el veredicto es
-  de [U]), hojas de comparación (≤ 2500 px, ≤ 2 MB), el script y `ENTORNO.md` (versiones, hashes, tiempos, qué falló).
+- Una subcarpeta por prueba (`pp3/`, `pp4/`…) con solo las salidas (hojas, ≤ 2500 px, ≤ 2 MB) y `RESULTADO_PPn.md`
+  (≤ 40 líneas; describe lo observado, el veredicto es de [U]). Scripts, entornos y archivos pesados no se guardan aquí.
 - Los insumos van en `refs/` con URL o autor, commit, medidas y sha256. No se reemplazan PNG grandes (`.git` pesa ~70 MB).
-- Lo pesado (pesos, .npy, capas) queda fuera del repo; aquí solo su tamaño y su hash.
 - Nombres sin espacios ni acentos. Commits `docs(stage): …`, sin líneas de firma (instrucción de [U], 2026-11-22).
 - Quien añade una subcarpeta añade su fila a la tabla de arriba.
