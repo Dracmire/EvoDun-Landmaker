@@ -1,6 +1,6 @@
-# research/pase_2_5d/
+# 25d_composition_vessel/refs/
 
-Material de referencia del Pase 2.5D (la teoría de [U] está en `PASE_2_5D.md` del Proyecto EvoDun en claude.ai).
+Insumos del pase «25d composition vessel» (índice en `../README.md`). Cada uno con su procedencia; los originales no se tocan.
 
 ## `xchengcode_fig1_pipeline.jpg`
 
