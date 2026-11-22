@@ -21,6 +21,7 @@ Hipótesis a la que sirve: `../HP1.md` (derivación en `../HP1_DERIVACION.md`).
 | Carpeta | Contenido |
 |---|---|
 | `refs/` | Figura 1 de XChengCode (esquema del proceso) y mapa Dreamer's Tower 5F (SNES), con procedencia y hash |
+| `pp3/` | Salidas de PP3: hojas de la red de profundidad de XChengCode (MiDaS) sobre el 5F SNES y dos fotogramas del piso 2, y `RESULTADO_PP3.md` (lo observado, sin veredicto) |
 
 ## Convención (irán muchas pruebas más)
 
