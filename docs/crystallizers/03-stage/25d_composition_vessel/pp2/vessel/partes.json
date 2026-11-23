@@ -1,0 +1,121 @@
+{
+ "partes": {
+  "1 · herradura": {
+   "grupos": [
+    {
+     "id": 16,
+     "nombre": "pasillo Y 16"
+    },
+    {
+     "id": 23,
+     "nombre": "hub 23"
+    },
+    {
+     "id": 10,
+     "nombre": "pasillo Y 10"
+    },
+    {
+     "id": 11,
+     "nombre": "grupo 11"
+    },
+    {
+     "id": 24,
+     "nombre": "hub 24"
+    },
+    {
+     "id": 9,
+     "nombre": "pasillo X 9"
+    },
+    {
+     "id": 25,
+     "nombre": "hub 25"
+    }
+   ],
+   "tiles_de_8px": 744,
+   "altura_para_despues": "baja",
+   "crece": true
+  },
+  "2 · herradura pequeña": {
+   "grupos": [
+    {
+     "id": 5,
+     "nombre": "pasillo X 5"
+    },
+    {
+     "id": 4,
+     "nombre": "pasillo X 4"
+    },
+    {
+     "id": 6,
+     "nombre": "pasillo X 6"
+    }
+   ],
+   "tiles_de_8px": 335,
+   "altura_para_despues": "alta (banda media)",
+   "crece": true
+  },
+  "interior": {
+   "grupos": [
+    {
+     "id": 19,
+     "nombre": "hub 19"
+    },
+    {
+     "id": 20,
+     "nombre": "hub 20"
+    },
+    {
+     "id": 14,
+     "nombre": "pasillo Y 14"
+    },
+    {
+     "id": 15,
+     "nombre": "pasillo Y 15"
+    }
+   ],
+   "tiles_de_8px": 330,
+   "altura_para_despues": "baja; no crece",
+   "crece": false
+  },
+  "fondo": {
+   "grupos": [
+    {
+     "id": 0,
+     "nombre": "pasillo X 0"
+    },
+    {
+     "id": 1,
+     "nombre": "pasillo X 1"
+    },
+    {
+     "id": 2,
+     "nombre": "pasillo X 2"
+    },
+    {
+     "id": 17,
+     "nombre": "hub 17"
+    },
+    {
+     "id": 18,
+     "nombre": "hub 18"
+    },
+    {
+     "id": 12,
+     "nombre": "pasillo Y 12"
+    },
+    {
+     "id": 13,
+     "nombre": "pasillo Y 13"
+    },
+    {
+     "id": 3,
+     "nombre": "pasillo X 3"
+    }
+   ],
+   "tiles_de_8px": 536,
+   "altura_para_despues": "baja",
+   "crece": true
+  }
+ },
+ "cubre_todos_los_grupos": true
+}

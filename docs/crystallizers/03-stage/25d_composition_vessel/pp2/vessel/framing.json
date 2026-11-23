@@ -1,0 +1,1956 @@
+{
+ "ventana_px": [
+  480,
+  270
+ ],
+ "camara": {
+  "theta": 71.0,
+  "cara_de_muro_px": 40.0,
+  "cara_de_pilar_px": 48.0,
+  "heroe_px": [
+   16.0,
+   24.0
+  ]
+ },
+ "tomas": {
+  "g86": {
+   "original": {
+    "ortho": {
+     "escalera_ancho_px": 24.0,
+     "escalera_alto_px": 15.1,
+     "escalera_frac_ancho": 0.05,
+     "escalera_frac_alto": 0.056,
+     "marco_ancho_px": 128.0,
+     "marco_alto_px": 123.6,
+     "marco_frac_ancho": 0.267,
+     "marco_frac_alto": 0.458,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 3,
+      "fondo_tiles": 2,
+      "eje_de_paso": "y",
+      "eje_del_ancho": "x",
+      "caja_tiles": [
+       3,
+       47,
+       5,
+       48
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 4,
+       "vertical": 44,
+       "a_lo_ancho": 4
+      }
+     }
+    },
+    "cenital": {
+     "escalera_ancho_px": 24.0,
+     "escalera_alto_px": 16.0,
+     "escalera_frac_ancho": 0.05,
+     "escalera_frac_alto": 0.059,
+     "marco_ancho_px": 128.0,
+     "marco_alto_px": 80.0,
+     "marco_frac_ancho": 0.267,
+     "marco_frac_alto": 0.296,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 3,
+      "fondo_tiles": 2,
+      "eje_de_paso": "y",
+      "eje_del_ancho": "x",
+      "caja_tiles": [
+       3,
+       47,
+       5,
+       48
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 4,
+       "vertical": 44,
+       "a_lo_ancho": 4
+      }
+     }
+    }
+   },
+   "k2": {
+    "ortho": {
+     "escalera_ancho_px": 24.0,
+     "escalera_alto_px": 15.1,
+     "escalera_frac_ancho": 0.05,
+     "escalera_frac_alto": 0.056,
+     "marco_ancho_px": 128.0,
+     "marco_alto_px": 123.6,
+     "marco_frac_ancho": 0.267,
+     "marco_frac_alto": 0.458,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 3,
+      "fondo_tiles": 2,
+      "eje_de_paso": "y",
+      "eje_del_ancho": "x",
+      "caja_tiles": [
+       3,
+       47,
+       5,
+       48
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 4,
+       "vertical": 51,
+       "a_lo_ancho": 4
+      }
+     }
+    },
+    "cenital": {
+     "escalera_ancho_px": 24.0,
+     "escalera_alto_px": 16.0,
+     "escalera_frac_ancho": 0.05,
+     "escalera_frac_alto": 0.059,
+     "marco_ancho_px": 128.0,
+     "marco_alto_px": 80.0,
+     "marco_frac_ancho": 0.267,
+     "marco_frac_alto": 0.296,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 3,
+      "fondo_tiles": 2,
+      "eje_de_paso": "y",
+      "eje_del_ancho": "x",
+      "caja_tiles": [
+       3,
+       47,
+       5,
+       48
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 4,
+       "vertical": 51,
+       "a_lo_ancho": 4
+      }
+     }
+    }
+   }
+  },
+  "F4": {
+   "original": {
+    "ortho": {
+     "escalera_ancho_px": 32.0,
+     "escalera_alto_px": 45.4,
+     "escalera_frac_ancho": 0.067,
+     "escalera_frac_alto": 0.168,
+     "marco_ancho_px": 64.0,
+     "marco_alto_px": 123.6,
+     "marco_frac_ancho": 0.133,
+     "marco_frac_alto": 0.458,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 6,
+      "fondo_tiles": 4,
+      "eje_de_paso": "x",
+      "eje_del_ancho": "y",
+      "caja_tiles": [
+       43,
+       42,
+       46,
+       47
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 10,
+       "vertical": 36,
+       "a_lo_ancho": 36
+      }
+     }
+    },
+    "cenital": {
+     "escalera_ancho_px": 32.0,
+     "escalera_alto_px": 48.0,
+     "escalera_frac_ancho": 0.067,
+     "escalera_frac_alto": 0.178,
+     "marco_ancho_px": 64.0,
+     "marco_alto_px": 80.0,
+     "marco_frac_ancho": 0.133,
+     "marco_frac_alto": 0.296,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 6,
+      "fondo_tiles": 4,
+      "eje_de_paso": "x",
+      "eje_del_ancho": "y",
+      "caja_tiles": [
+       43,
+       42,
+       46,
+       47
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 10,
+       "vertical": 36,
+       "a_lo_ancho": 36
+      }
+     }
+    }
+   },
+   "k2": {
+    "ortho": {
+     "escalera_ancho_px": 32.0,
+     "escalera_alto_px": 45.4,
+     "escalera_frac_ancho": 0.067,
+     "escalera_frac_alto": 0.168,
+     "marco_ancho_px": 64.0,
+     "marco_alto_px": 123.6,
+     "marco_frac_ancho": 0.133,
+     "marco_frac_alto": 0.458,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 6,
+      "fondo_tiles": 4,
+      "eje_de_paso": "x",
+      "eje_del_ancho": "y",
+      "caja_tiles": [
+       43,
+       42,
+       46,
+       47
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 10,
+       "vertical": 39,
+       "a_lo_ancho": 39
+      }
+     }
+    },
+    "cenital": {
+     "escalera_ancho_px": 32.0,
+     "escalera_alto_px": 48.0,
+     "escalera_frac_ancho": 0.067,
+     "escalera_frac_alto": 0.178,
+     "marco_ancho_px": 64.0,
+     "marco_alto_px": 80.0,
+     "marco_frac_ancho": 0.133,
+     "marco_frac_alto": 0.296,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 6,
+      "fondo_tiles": 4,
+      "eje_de_paso": "x",
+      "eje_del_ancho": "y",
+      "caja_tiles": [
+       43,
+       42,
+       46,
+       47
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 10,
+       "vertical": 39,
+       "a_lo_ancho": 39
+      }
+     }
+    }
+   }
+  },
+  "g89": {
+   "original": {
+    "ortho": {
+     "escalera_ancho_px": 24.0,
+     "escalera_alto_px": 15.1,
+     "escalera_frac_ancho": 0.05,
+     "escalera_frac_alto": 0.056,
+     "marco_ancho_px": 64.0,
+     "marco_alto_px": 176.6,
+     "marco_frac_ancho": 0.133,
+     "marco_frac_alto": 0.654,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 1,
+     "pilares_todos_dentro": false,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 3,
+      "fondo_tiles": 2,
+      "eje_de_paso": "y",
+      "eje_del_ancho": "x",
+      "caja_tiles": [
+       19,
+       54,
+       21,
+       55
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 4,
+       "vertical": 30,
+       "a_lo_ancho": 4
+      }
+     }
+    },
+    "cenital": {
+     "escalera_ancho_px": 24.0,
+     "escalera_alto_px": 16.0,
+     "escalera_frac_ancho": 0.05,
+     "escalera_frac_alto": 0.059,
+     "marco_ancho_px": 64.0,
+     "marco_alto_px": 136.0,
+     "marco_frac_ancho": 0.133,
+     "marco_frac_alto": 0.504,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 3,
+      "fondo_tiles": 2,
+      "eje_de_paso": "y",
+      "eje_del_ancho": "x",
+      "caja_tiles": [
+       19,
+       54,
+       21,
+       55
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 4,
+       "vertical": 30,
+       "a_lo_ancho": 4
+      }
+     }
+    }
+   },
+   "k2": {
+    "ortho": {
+     "escalera_ancho_px": 24.0,
+     "escalera_alto_px": 15.1,
+     "escalera_frac_ancho": 0.05,
+     "escalera_frac_alto": 0.056,
+     "marco_ancho_px": 64.0,
+     "marco_alto_px": 176.6,
+     "marco_frac_ancho": 0.133,
+     "marco_frac_alto": 0.654,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 1,
+     "pilares_todos_dentro": false,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 3,
+      "fondo_tiles": 2,
+      "eje_de_paso": "y",
+      "eje_del_ancho": "x",
+      "caja_tiles": [
+       19,
+       54,
+       21,
+       55
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 4,
+       "vertical": 34,
+       "a_lo_ancho": 4
+      }
+     }
+    },
+    "cenital": {
+     "escalera_ancho_px": 24.0,
+     "escalera_alto_px": 16.0,
+     "escalera_frac_ancho": 0.05,
+     "escalera_frac_alto": 0.059,
+     "marco_ancho_px": 64.0,
+     "marco_alto_px": 136.0,
+     "marco_frac_ancho": 0.133,
+     "marco_frac_alto": 0.504,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": {
+      "ancho_tiles": 3,
+      "fondo_tiles": 2,
+      "eje_de_paso": "y",
+      "eje_del_ancho": "x",
+      "caja_tiles": [
+       19,
+       54,
+       21,
+       55
+      ],
+      "abertura_contigua_tiles": {
+       "horizontal": 4,
+       "vertical": 34,
+       "a_lo_ancho": 4
+      }
+     }
+    }
+   }
+  },
+  "X4": {
+   "original": {
+    "ortho": {
+     "escalera_ancho_px": 8.0,
+     "escalera_alto_px": 7.6,
+     "escalera_frac_ancho": 0.017,
+     "escalera_frac_alto": 0.028,
+     "marco_ancho_px": 104.0,
+     "marco_alto_px": 146.3,
+     "marco_frac_ancho": 0.217,
+     "marco_frac_alto": 0.542,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": null
+    },
+    "cenital": {
+     "escalera_ancho_px": 8.0,
+     "escalera_alto_px": 8.0,
+     "escalera_frac_ancho": 0.017,
+     "escalera_frac_alto": 0.03,
+     "marco_ancho_px": 104.0,
+     "marco_alto_px": 104.0,
+     "marco_frac_ancho": 0.217,
+     "marco_frac_alto": 0.385,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": null
+    }
+   },
+   "k2": {
+    "ortho": {
+     "escalera_ancho_px": 8.0,
+     "escalera_alto_px": 7.6,
+     "escalera_frac_ancho": 0.017,
+     "escalera_frac_alto": 0.028,
+     "marco_ancho_px": 104.0,
+     "marco_alto_px": 146.3,
+     "marco_frac_ancho": 0.217,
+     "marco_frac_alto": 0.542,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": null
+    },
+    "cenital": {
+     "escalera_ancho_px": 8.0,
+     "escalera_alto_px": 8.0,
+     "escalera_frac_ancho": 0.017,
+     "escalera_frac_alto": 0.03,
+     "marco_ancho_px": 104.0,
+     "marco_alto_px": 104.0,
+     "marco_frac_ancho": 0.217,
+     "marco_frac_alto": 0.385,
+     "pilares_que_enmarcan": 2,
+     "pilares_dentro_del_cuadro": 2,
+     "pilares_todos_dentro": true,
+     "heroe_dentro": true,
+     "abertura": null
+    }
+   }
+  }
+ },
+ "prueba_A": {
+  "original": {
+   "1.0": {
+    "objetivo_tiles": {
+     "g86": 3,
+     "F4": 6,
+     "g89": 3
+    },
+    "tallado": {
+     "g86": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 3,
+      "tiles_tallados": 0,
+      "ancho_logrado_tiles": 3,
+      "lados_bloqueados": []
+     },
+     "F4": {
+      "ancho_original_tiles": 6,
+      "objetivo_tiles": 6,
+      "tiles_tallados": 0,
+      "ancho_logrado_tiles": 6,
+      "lados_bloqueados": []
+     },
+     "g89": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 3,
+      "tiles_tallados": 0,
+      "ancho_logrado_tiles": 3,
+      "lados_bloqueados": []
+     }
+    },
+    "medidas": {
+     "g86": {
+      "ortho": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 123.6,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.458,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 44,
+         "a_lo_ancho": 4
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 80.0,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.296,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 44,
+         "a_lo_ancho": 4
+        }
+       }
+      }
+     },
+     "F4": {
+      "ortho": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 45.4,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.168,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 123.6,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.458,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 6,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         47
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 36,
+         "a_lo_ancho": 36
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 48.0,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.178,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 80.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.296,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 6,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         47
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 36,
+         "a_lo_ancho": 36
+        }
+       }
+      }
+     },
+     "g89": {
+      "ortho": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 176.6,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.654,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 1,
+       "pilares_todos_dentro": false,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         19,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 30,
+         "a_lo_ancho": 4
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 136.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.504,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         19,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 30,
+         "a_lo_ancho": 4
+        }
+       }
+      }
+     }
+    },
+    "astar": {
+     "rutas": {
+      "I": {
+       "pasos": 116,
+       "igual_a_la_guia_D": true
+      },
+      "J": {
+       "pasos": 216,
+       "igual_a_la_guia_D": true
+      },
+      "cofre2": {
+       "pasos": 142,
+       "igual_a_la_guia_D": true
+      }
+     },
+     "G_alcanza_la_entrada": false
+    }
+   },
+   "2.0": {
+    "objetivo_tiles": {
+     "g86": 6,
+     "F4": 12,
+     "g89": 6
+    },
+    "tallado": {
+     "g86": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 6,
+      "tiles_tallados": 0,
+      "ancho_logrado_tiles": 3,
+      "lados_bloqueados": [
+       "lo",
+       "hi"
+      ]
+     },
+     "F4": {
+      "ancho_original_tiles": 6,
+      "objetivo_tiles": 12,
+      "tiles_tallados": 12,
+      "ancho_logrado_tiles": 12,
+      "lados_bloqueados": [
+       "lo"
+      ]
+     },
+     "g89": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 6,
+      "tiles_tallados": 6,
+      "ancho_logrado_tiles": 6,
+      "lados_bloqueados": [
+       "hi"
+      ]
+     }
+    },
+    "medidas": {
+     "g86": {
+      "ortho": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 123.6,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.458,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 44,
+         "a_lo_ancho": 4
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 80.0,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.296,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 44,
+         "a_lo_ancho": 4
+        }
+       }
+      }
+     },
+     "F4": {
+      "ortho": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 90.8,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.336,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 161.5,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.598,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 12,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         53
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 36,
+         "a_lo_ancho": 36
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 96.0,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.356,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 120.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.444,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 12,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         53
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 36,
+         "a_lo_ancho": 36
+        }
+       }
+      }
+     },
+     "g89": {
+      "ortho": {
+       "escalera_ancho_px": 48.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.1,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 176.6,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.654,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 1,
+       "pilares_todos_dentro": false,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 6,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         16,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 7,
+         "vertical": 30,
+         "a_lo_ancho": 7
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 48.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.1,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 136.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.504,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 6,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         16,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 7,
+         "vertical": 30,
+         "a_lo_ancho": 7
+        }
+       }
+      }
+     }
+    },
+    "astar": {
+     "rutas": {
+      "I": {
+       "pasos": 116,
+       "igual_a_la_guia_D": true
+      },
+      "J": {
+       "pasos": 214,
+       "igual_a_la_guia_D": true
+      },
+      "cofre2": {
+       "pasos": 142,
+       "igual_a_la_guia_D": true
+      }
+     },
+     "G_alcanza_la_entrada": false
+    }
+   },
+   "3.3": {
+    "objetivo_tiles": {
+     "g86": 10,
+     "F4": 20,
+     "g89": 10
+    },
+    "tallado": {
+     "g86": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 10,
+      "tiles_tallados": 0,
+      "ancho_logrado_tiles": 3,
+      "lados_bloqueados": [
+       "lo",
+       "hi"
+      ]
+     },
+     "F4": {
+      "ancho_original_tiles": 6,
+      "objetivo_tiles": 20,
+      "tiles_tallados": 36,
+      "ancho_logrado_tiles": 18,
+      "lados_bloqueados": [
+       "lo",
+       "hi"
+      ]
+     },
+     "g89": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 10,
+      "tiles_tallados": 14,
+      "ancho_logrado_tiles": 10,
+      "lados_bloqueados": [
+       "hi"
+      ]
+     }
+    },
+    "medidas": {
+     "g86": {
+      "ortho": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 123.6,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.458,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 44,
+         "a_lo_ancho": 4
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 80.0,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.296,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 44,
+         "a_lo_ancho": 4
+        }
+       }
+      }
+     },
+     "F4": {
+      "ortho": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 136.2,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.504,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 206.8,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.766,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 18,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         59
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 42,
+         "a_lo_ancho": 42
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 144.0,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.533,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 168.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.622,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 18,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         59
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 42,
+         "a_lo_ancho": 42
+        }
+       }
+      }
+     },
+     "g89": {
+      "ortho": {
+       "escalera_ancho_px": 80.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.167,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 88.0,
+       "marco_alto_px": 176.6,
+       "marco_frac_ancho": 0.183,
+       "marco_frac_alto": 0.654,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 1,
+       "pilares_todos_dentro": false,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 10,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         12,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 11,
+         "vertical": 30,
+         "a_lo_ancho": 11
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 80.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.167,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 88.0,
+       "marco_alto_px": 136.0,
+       "marco_frac_ancho": 0.183,
+       "marco_frac_alto": 0.504,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 10,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         12,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 11,
+         "vertical": 30,
+         "a_lo_ancho": 11
+        }
+       }
+      }
+     }
+    },
+    "astar": {
+     "rutas": {
+      "I": {
+       "pasos": 116,
+       "igual_a_la_guia_D": true
+      },
+      "J": {
+       "pasos": 214,
+       "igual_a_la_guia_D": true
+      },
+      "cofre2": {
+       "pasos": 142,
+       "igual_a_la_guia_D": true
+      }
+     },
+     "G_alcanza_la_entrada": false
+    }
+   }
+  },
+  "k2": {
+   "1.0": {
+    "objetivo_tiles": {
+     "g86": 3,
+     "F4": 6,
+     "g89": 3
+    },
+    "tallado": {
+     "g86": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 3,
+      "tiles_tallados": 0,
+      "ancho_logrado_tiles": 3,
+      "lados_bloqueados": []
+     },
+     "F4": {
+      "ancho_original_tiles": 6,
+      "objetivo_tiles": 6,
+      "tiles_tallados": 0,
+      "ancho_logrado_tiles": 6,
+      "lados_bloqueados": []
+     },
+     "g89": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 3,
+      "tiles_tallados": 0,
+      "ancho_logrado_tiles": 3,
+      "lados_bloqueados": []
+     }
+    },
+    "medidas": {
+     "g86": {
+      "ortho": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 123.6,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.458,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 51,
+         "a_lo_ancho": 4
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 80.0,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.296,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 51,
+         "a_lo_ancho": 4
+        }
+       }
+      }
+     },
+     "F4": {
+      "ortho": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 45.4,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.168,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 123.6,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.458,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 6,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         47
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 39,
+         "a_lo_ancho": 39
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 48.0,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.178,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 80.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.296,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 6,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         47
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 39,
+         "a_lo_ancho": 39
+        }
+       }
+      }
+     },
+     "g89": {
+      "ortho": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 176.6,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.654,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 1,
+       "pilares_todos_dentro": false,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         19,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 34,
+         "a_lo_ancho": 4
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 136.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.504,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         19,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 34,
+         "a_lo_ancho": 4
+        }
+       }
+      }
+     }
+    },
+    "astar": {
+     "rutas": {
+      "I": {
+       "pasos": 114,
+       "igual_a_la_guia_D": true
+      },
+      "J": {
+       "pasos": 210,
+       "igual_a_la_guia_D": true
+      },
+      "cofre2": {
+       "pasos": 140,
+       "igual_a_la_guia_D": true
+      }
+     },
+     "G_alcanza_la_entrada": false
+    }
+   },
+   "2.0": {
+    "objetivo_tiles": {
+     "g86": 6,
+     "F4": 12,
+     "g89": 6
+    },
+    "tallado": {
+     "g86": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 6,
+      "tiles_tallados": 0,
+      "ancho_logrado_tiles": 3,
+      "lados_bloqueados": [
+       "lo",
+       "hi"
+      ]
+     },
+     "F4": {
+      "ancho_original_tiles": 6,
+      "objetivo_tiles": 12,
+      "tiles_tallados": 12,
+      "ancho_logrado_tiles": 12,
+      "lados_bloqueados": [
+       "lo"
+      ]
+     },
+     "g89": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 6,
+      "tiles_tallados": 6,
+      "ancho_logrado_tiles": 6,
+      "lados_bloqueados": [
+       "hi"
+      ]
+     }
+    },
+    "medidas": {
+     "g86": {
+      "ortho": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 123.6,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.458,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 51,
+         "a_lo_ancho": 4
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 80.0,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.296,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 51,
+         "a_lo_ancho": 4
+        }
+       }
+      }
+     },
+     "F4": {
+      "ortho": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 90.8,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.336,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 161.5,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.598,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 12,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         53
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 39,
+         "a_lo_ancho": 39
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 96.0,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.356,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 120.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.444,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 12,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         53
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 39,
+         "a_lo_ancho": 39
+        }
+       }
+      }
+     },
+     "g89": {
+      "ortho": {
+       "escalera_ancho_px": 48.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.1,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 176.6,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.654,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 1,
+       "pilares_todos_dentro": false,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 6,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         16,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 14,
+         "vertical": 34,
+         "a_lo_ancho": 14
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 48.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.1,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 136.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.504,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 6,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         16,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 14,
+         "vertical": 34,
+         "a_lo_ancho": 14
+        }
+       }
+      }
+     }
+    },
+    "astar": {
+     "rutas": {
+      "I": {
+       "pasos": 114,
+       "igual_a_la_guia_D": true
+      },
+      "J": {
+       "pasos": 198,
+       "igual_a_la_guia_D": true
+      },
+      "cofre2": {
+       "pasos": 140,
+       "igual_a_la_guia_D": true
+      }
+     },
+     "G_alcanza_la_entrada": false
+    }
+   },
+   "3.3": {
+    "objetivo_tiles": {
+     "g86": 10,
+     "F4": 20,
+     "g89": 10
+    },
+    "tallado": {
+     "g86": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 10,
+      "tiles_tallados": 0,
+      "ancho_logrado_tiles": 3,
+      "lados_bloqueados": [
+       "lo",
+       "hi"
+      ]
+     },
+     "F4": {
+      "ancho_original_tiles": 6,
+      "objetivo_tiles": 20,
+      "tiles_tallados": 35,
+      "ancho_logrado_tiles": 18,
+      "lados_bloqueados": [
+       "lo",
+       "hi"
+      ]
+     },
+     "g89": {
+      "ancho_original_tiles": 3,
+      "objetivo_tiles": 10,
+      "tiles_tallados": 7,
+      "ancho_logrado_tiles": 7,
+      "lados_bloqueados": [
+       "lo",
+       "hi"
+      ]
+     }
+    },
+    "medidas": {
+     "g86": {
+      "ortho": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 123.6,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.458,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 51,
+         "a_lo_ancho": 4
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 24.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.05,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 128.0,
+       "marco_alto_px": 80.0,
+       "marco_frac_ancho": 0.267,
+       "marco_frac_alto": 0.296,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 3,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         3,
+         47,
+         5,
+         48
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 4,
+         "vertical": 51,
+         "a_lo_ancho": 4
+        }
+       }
+      }
+     },
+     "F4": {
+      "ortho": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 136.2,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.504,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 206.8,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.766,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 18,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         59
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 45,
+         "a_lo_ancho": 45
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 32.0,
+       "escalera_alto_px": 144.0,
+       "escalera_frac_ancho": 0.067,
+       "escalera_frac_alto": 0.533,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 168.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.622,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 18,
+        "fondo_tiles": 4,
+        "eje_de_paso": "x",
+        "eje_del_ancho": "y",
+        "caja_tiles": [
+         43,
+         42,
+         46,
+         59
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 10,
+         "vertical": 45,
+         "a_lo_ancho": 45
+        }
+       }
+      }
+     },
+     "g89": {
+      "ortho": {
+       "escalera_ancho_px": 56.0,
+       "escalera_alto_px": 15.1,
+       "escalera_frac_ancho": 0.117,
+       "escalera_frac_alto": 0.056,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 176.6,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.654,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 1,
+       "pilares_todos_dentro": false,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 7,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         15,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 14,
+         "vertical": 34,
+         "a_lo_ancho": 14
+        }
+       }
+      },
+      "cenital": {
+       "escalera_ancho_px": 56.0,
+       "escalera_alto_px": 16.0,
+       "escalera_frac_ancho": 0.117,
+       "escalera_frac_alto": 0.059,
+       "marco_ancho_px": 64.0,
+       "marco_alto_px": 136.0,
+       "marco_frac_ancho": 0.133,
+       "marco_frac_alto": 0.504,
+       "pilares_que_enmarcan": 2,
+       "pilares_dentro_del_cuadro": 2,
+       "pilares_todos_dentro": true,
+       "heroe_dentro": true,
+       "abertura": {
+        "ancho_tiles": 7,
+        "fondo_tiles": 2,
+        "eje_de_paso": "y",
+        "eje_del_ancho": "x",
+        "caja_tiles": [
+         15,
+         54,
+         21,
+         55
+        ],
+        "abertura_contigua_tiles": {
+         "horizontal": 14,
+         "vertical": 34,
+         "a_lo_ancho": 14
+        }
+       }
+      }
+     }
+    },
+    "astar": {
+     "rutas": {
+      "I": {
+       "pasos": 114,
+       "igual_a_la_guia_D": true
+      },
+      "J": {
+       "pasos": 198,
+       "igual_a_la_guia_D": true
+      },
+      "cofre2": {
+       "pasos": 140,
+       "igual_a_la_guia_D": true
+      }
+     },
+     "G_alcanza_la_entrada": false
+    }
+   }
+  }
+ }
+}
