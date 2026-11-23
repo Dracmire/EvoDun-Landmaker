@@ -1,0 +1,2062 @@
+{
+ "lectura": {
+  "mapa": "57 x 108 tiles de 8 px (variante B de las guias), Cam 6 yaw 0",
+  "C_a_E": "cores y grupos de C; ids de C conservados salvo en las fusiones, que toman el id mas bajo",
+  "cumulo": "gates con centros a <= 4 tiles (Chebyshev), unidos solo si tienen la misma etiqueta",
+  "flow": "X.widened (+-6, 1 - r/7) del camino A* entrada->salida de D (216 pasos), con forb = todo tile que no sea de un grupo cruzado (los gates absorbidos cuentan como X 0), y puesto a 0 en los pasajes de corte",
+  "H": "1 tile de 8 px = 1 H (hipotesis)",
+  "PERFILES": "guia de COMPARACION (paso 5d, perfil P2): mismos ids de grupo; el mapa tiene 108 filas (la guia E tiene 108): 0 filas nuevas al norte de la silueta; la guia E original no se toco"
+ },
+ "entrada": [
+  19,
+  92
+ ],
+ "salida": [
+  31,
+  86
+ ],
+ "equivalencias_C_a_E": {
+  "0": 0,
+  "1": 1,
+  "2": 2,
+  "3": 3,
+  "4": 4,
+  "5": 5,
+  "6": 6,
+  "7": 5,
+  "8": 6,
+  "9": 9,
+  "10": 10,
+  "11": 11,
+  "12": 12,
+  "13": 13,
+  "14": 14,
+  "15": 15,
+  "16": 16,
+  "17": 17,
+  "18": 18,
+  "19": 19,
+  "20": 20,
+  "21": 5,
+  "22": 11,
+  "23": 23,
+  "24": 24,
+  "25": 25
+ },
+ "fusiones": [
+  {
+   "C": [
+    5,
+    21,
+    7
+   ],
+   "E": 5,
+   "tipo": "pasillo X"
+  },
+  {
+   "C": [
+    8,
+    6
+   ],
+   "E": 6,
+   "tipo": "pasillo X"
+  },
+  {
+   "C": [
+    22,
+    11
+   ],
+   "E": 11,
+   "tipo": "grupo"
+  }
+ ],
+ "regla_gate_codo": [
+  {
+   "codo": 55,
+   "gate": 64,
+   "pasan_a": "pasillo X 0",
+   "cores": [
+    55,
+    121,
+    56,
+    59,
+    62,
+    125,
+    135,
+    137
+   ]
+  },
+  {
+   "codo": 58,
+   "gate": 65,
+   "pasan_a": "pasillo X 0",
+   "cores": [
+    58,
+    122,
+    57,
+    123,
+    124,
+    132,
+    133,
+    63,
+    134,
+    136,
+    138
+   ]
+  },
+  {
+   "codo": 120,
+   "gate": 113,
+   "pasan_a": "pasillo X 9",
+   "cores": [
+    120
+   ]
+  }
+ ],
+ "grupos": [
+  {
+   "id": 0,
+   "tipo": "pasillo X",
+   "nombre": "pasillo X 0",
+   "ids_de_C": [
+    0
+   ],
+   "cores": [
+    13,
+    14,
+    55,
+    56,
+    57,
+    58,
+    59,
+    62,
+    63,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138
+   ],
+   "tiles": 143,
+   "bbox_tiles": {
+    "x0": 17,
+    "y0": 10,
+    "x1": 40,
+    "y1": 17,
+    "ancho": 24,
+    "largo_y": 8
+   },
+   "bbox_H": {
+    "ancho": 24,
+    "largo_y": 8,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.471
+   },
+   "conexo": true,
+   "sector": "S1",
+   "camara_cerrada": false
+  },
+  {
+   "id": 1,
+   "tipo": "pasillo X",
+   "nombre": "pasillo X 1",
+   "ids_de_C": [
+    1
+   ],
+   "cores": [
+    15,
+    16,
+    155,
+    156,
+    157,
+    158
+   ],
+   "tiles": 46,
+   "bbox_tiles": {
+    "x0": 5,
+    "y0": 19,
+    "x1": 10,
+    "y1": 27,
+    "ancho": 6,
+    "largo_y": 9
+   },
+   "bbox_H": {
+    "ancho": 6,
+    "largo_y": 9,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.529
+   },
+   "conexo": true,
+   "sector": "S1",
+   "camara_cerrada": false
+  },
+  {
+   "id": 2,
+   "tipo": "pasillo X",
+   "nombre": "pasillo X 2",
+   "ids_de_C": [
+    2
+   ],
+   "cores": [
+    17,
+    18,
+    161,
+    162,
+    163,
+    164,
+    166,
+    168,
+    170,
+    172,
+    174,
+    176,
+    183
+   ],
+   "tiles": 53,
+   "bbox_tiles": {
+    "x0": 46,
+    "y0": 19,
+    "x1": 52,
+    "y1": 29,
+    "ancho": 7,
+    "largo_y": 11
+   },
+   "bbox_H": {
+    "ancho": 7,
+    "largo_y": 11,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.647
+   },
+   "conexo": true,
+   "sector": "S1",
+   "camara_cerrada": false
+  },
+  {
+   "id": 3,
+   "tipo": "pasillo X",
+   "nombre": "pasillo X 3",
+   "ids_de_C": [
+    3
+   ],
+   "cores": [
+    19,
+    20,
+    71,
+    178,
+    179,
+    180,
+    181,
+    182,
+    185,
+    186,
+    187,
+    190,
+    191,
+    192,
+    195,
+    196,
+    197,
+    198,
+    199,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    209
+   ],
+   "tiles": 94,
+   "bbox_tiles": {
+    "x0": 25,
+    "y0": 23,
+    "x1": 32,
+    "y1": 35,
+    "ancho": 8,
+    "largo_y": 13
+   },
+   "bbox_H": {
+    "ancho": 8,
+    "largo_y": 13,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.765
+   },
+   "conexo": true,
+   "sector": "S2",
+   "camara_cerrada": true
+  },
+  {
+   "id": 4,
+   "tipo": "pasillo X",
+   "nombre": "pasillo X 4",
+   "ids_de_C": [
+    4
+   ],
+   "cores": [
+    22,
+    23,
+    24,
+    233,
+    246,
+    249,
+    252,
+    255,
+    258,
+    259,
+    260,
+    261,
+    262,
+    263,
+    267
+   ],
+   "tiles": 91,
+   "bbox_tiles": {
+    "x0": 23,
+    "y0": 40,
+    "x1": 34,
+    "y1": 48,
+    "ancho": 12,
+    "largo_y": 9
+   },
+   "bbox_H": {
+    "ancho": 12,
+    "largo_y": 9,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.529
+   },
+   "conexo": true,
+   "sector": "S3",
+   "camara_cerrada": false
+  },
+  {
+   "id": 5,
+   "tipo": "pasillo X",
+   "nombre": "pasillo X 5",
+   "ids_de_C": [
+    5,
+    7,
+    21
+   ],
+   "cores": [
+    6,
+    8,
+    21,
+    25,
+    26,
+    30,
+    31,
+    227,
+    228,
+    229,
+    230,
+    231,
+    232,
+    245,
+    248,
+    251,
+    254,
+    257,
+    265,
+    266,
+    275,
+    278,
+    281,
+    284,
+    287,
+    290,
+    294
+   ],
+   "tiles": 211,
+   "bbox_tiles": {
+    "x0": 3,
+    "y0": 37,
+    "x1": 26,
+    "y1": 56,
+    "ancho": 24,
+    "largo_y": 20
+   },
+   "bbox_H": {
+    "ancho": 24,
+    "largo_y": 20,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 1,
+    "cociente": 1.176
+   },
+   "conexo": true,
+   "sector": "S3",
+   "camara_cerrada": false
+  },
+  {
+   "id": 6,
+   "tipo": "pasillo X",
+   "nombre": "pasillo X 6",
+   "ids_de_C": [
+    6,
+    8
+   ],
+   "cores": [
+    27,
+    28,
+    32,
+    33,
+    234,
+    235,
+    236,
+    237,
+    268,
+    269,
+    270,
+    291,
+    295
+   ],
+   "tiles": 121,
+   "bbox_tiles": {
+    "x0": 31,
+    "y0": 37,
+    "x1": 44,
+    "y1": 56,
+    "ancho": 14,
+    "largo_y": 20
+   },
+   "bbox_H": {
+    "ancho": 14,
+    "largo_y": 20,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 1,
+    "cociente": 1.176
+   },
+   "conexo": true,
+   "sector": "S3",
+   "camara_cerrada": false
+  },
+  {
+   "id": 9,
+   "tipo": "pasillo X",
+   "nombre": "pasillo X 9",
+   "ids_de_C": [
+    9
+   ],
+   "cores": [
+    115,
+    118,
+    119,
+    120,
+    423,
+    425,
+    427,
+    435
+   ],
+   "tiles": 32,
+   "bbox_tiles": {
+    "x0": 33,
+    "y0": 79,
+    "x1": 38,
+    "y1": 84,
+    "ancho": 6,
+    "largo_y": 6
+   },
+   "bbox_H": {
+    "ancho": 6,
+    "largo_y": 6,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.353
+   },
+   "conexo": true,
+   "sector": "S4",
+   "camara_cerrada": false
+  },
+  {
+   "id": 10,
+   "tipo": "pasillo Y",
+   "nombre": "pasillo Y 10",
+   "ids_de_C": [
+    10
+   ],
+   "cores": [
+    29,
+    35,
+    37,
+    39,
+    41,
+    43,
+    45,
+    47,
+    49,
+    51,
+    53,
+    274,
+    277,
+    280,
+    283,
+    286,
+    289,
+    293,
+    297,
+    301,
+    305,
+    309,
+    313,
+    317,
+    321,
+    337,
+    339,
+    341,
+    343,
+    345,
+    347,
+    349,
+    351,
+    353,
+    355,
+    359,
+    363,
+    368,
+    373,
+    375,
+    377,
+    379,
+    381,
+    383,
+    385
+   ],
+   "tiles": 263,
+   "bbox_tiles": {
+    "x0": 1,
+    "y0": 49,
+    "x1": 8,
+    "y1": 83,
+    "ancho": 8,
+    "largo_y": 35
+   },
+   "bbox_H": {
+    "ancho": 8,
+    "largo_y": 35,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 2,
+    "cociente": 2.059
+   },
+   "conexo": true,
+   "sector": "S3",
+   "camara_cerrada": false
+  },
+  {
+   "id": 11,
+   "tipo": "grupo",
+   "nombre": "grupo 11",
+   "ids_de_C": [
+    11,
+    22
+   ],
+   "cores": [
+    7,
+    9,
+    34,
+    36,
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    50,
+    52,
+    54,
+    239,
+    240,
+    241,
+    242,
+    243,
+    244,
+    247,
+    250,
+    253,
+    256,
+    264,
+    271,
+    272,
+    273,
+    276,
+    279,
+    282,
+    285,
+    288,
+    292,
+    296,
+    300,
+    304,
+    308,
+    312,
+    316,
+    320,
+    336,
+    338,
+    340,
+    342,
+    344,
+    346,
+    348,
+    350,
+    352,
+    354,
+    358,
+    362,
+    367,
+    372,
+    374,
+    376,
+    378,
+    380,
+    382,
+    384,
+    388,
+    390,
+    392,
+    396
+   ],
+   "tiles": 378,
+   "bbox_tiles": {
+    "x0": 45,
+    "y0": 33,
+    "x1": 56,
+    "y1": 85,
+    "ancho": 12,
+    "largo_y": 53
+   },
+   "bbox_H": {
+    "ancho": 12,
+    "largo_y": 53,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 3,
+    "cociente": 3.118
+   },
+   "conexo": true,
+   "sector": "S4",
+   "camara_cerrada": false
+  },
+  {
+   "id": 12,
+   "tipo": "pasillo Y",
+   "nombre": "pasillo Y 12",
+   "ids_de_C": [
+    12
+   ],
+   "cores": [
+    69,
+    72,
+    74,
+    76,
+    78,
+    80,
+    177,
+    184,
+    189,
+    194,
+    201,
+    211,
+    213,
+    215,
+    217,
+    219,
+    221,
+    223,
+    225
+   ],
+   "tiles": 52,
+   "bbox_tiles": {
+    "x0": 11,
+    "y0": 29,
+    "x1": 14,
+    "y1": 41,
+    "ancho": 4,
+    "largo_y": 13
+   },
+   "bbox_H": {
+    "ancho": 4,
+    "largo_y": 13,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.765
+   },
+   "conexo": true,
+   "sector": null,
+   "camara_cerrada": false
+  },
+  {
+   "id": 13,
+   "tipo": "pasillo Y",
+   "nombre": "pasillo Y 13",
+   "ids_de_C": [
+    13
+   ],
+   "cores": [
+    70,
+    73,
+    75,
+    77,
+    79,
+    81,
+    188,
+    193,
+    200,
+    210,
+    212,
+    214,
+    216,
+    218,
+    220,
+    222,
+    224,
+    226,
+    238
+   ],
+   "tiles": 50,
+   "bbox_tiles": {
+    "x0": 43,
+    "y0": 30,
+    "x1": 46,
+    "y1": 42,
+    "ancho": 4,
+    "largo_y": 13
+   },
+   "bbox_H": {
+    "ancho": 4,
+    "largo_y": 13,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.765
+   },
+   "conexo": true,
+   "sector": null,
+   "camara_cerrada": false
+  },
+  {
+   "id": 14,
+   "tipo": "pasillo Y",
+   "nombre": "pasillo Y 14",
+   "ids_de_C": [
+    14
+   ],
+   "cores": [
+    91,
+    93,
+    95,
+    298,
+    302,
+    306,
+    310,
+    314,
+    318
+   ],
+   "tiles": 24,
+   "bbox_tiles": {
+    "x0": 19,
+    "y0": 56,
+    "x1": 22,
+    "y1": 61,
+    "ancho": 4,
+    "largo_y": 6
+   },
+   "bbox_H": {
+    "ancho": 4,
+    "largo_y": 6,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.353
+   },
+   "conexo": true,
+   "sector": null,
+   "camara_cerrada": false
+  },
+  {
+   "id": 15,
+   "tipo": "pasillo Y",
+   "nombre": "pasillo Y 15",
+   "ids_de_C": [
+    15
+   ],
+   "cores": [
+    92,
+    94,
+    96,
+    299,
+    303,
+    307,
+    311,
+    315,
+    319
+   ],
+   "tiles": 24,
+   "bbox_tiles": {
+    "x0": 35,
+    "y0": 56,
+    "x1": 38,
+    "y1": 61,
+    "ancho": 4,
+    "largo_y": 6
+   },
+   "bbox_H": {
+    "ancho": 4,
+    "largo_y": 6,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.353
+   },
+   "conexo": true,
+   "sector": null,
+   "camara_cerrada": false
+  },
+  {
+   "id": 16,
+   "tipo": "pasillo Y",
+   "nombre": "pasillo Y 16",
+   "ids_de_C": [
+    16
+   ],
+   "cores": [
+    114,
+    116,
+    400,
+    403,
+    412,
+    421,
+    424,
+    426,
+    428
+   ],
+   "tiles": 26,
+   "bbox_tiles": {
+    "x0": 17,
+    "y0": 87,
+    "x1": 21,
+    "y1": 93,
+    "ancho": 5,
+    "largo_y": 7
+   },
+   "bbox_H": {
+    "ancho": 5,
+    "largo_y": 7,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.412
+   },
+   "conexo": true,
+   "sector": "S3",
+   "camara_cerrada": false
+  },
+  {
+   "id": 17,
+   "tipo": "hub",
+   "nombre": "hub 17",
+   "ids_de_C": [
+    17
+   ],
+   "cores": [
+    0,
+    139,
+    140,
+    141,
+    142,
+    143,
+    149,
+    151,
+    153,
+    159,
+    165,
+    167,
+    169,
+    171,
+    173,
+    175
+   ],
+   "tiles": 132,
+   "bbox_tiles": {
+    "x0": 11,
+    "y0": 14,
+    "x1": 22,
+    "y1": 28,
+    "ancho": 12,
+    "largo_y": 15
+   },
+   "bbox_H": {
+    "ancho": 12,
+    "largo_y": 15,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.882
+   },
+   "conexo": true,
+   "sector": "S1",
+   "camara_cerrada": false
+  },
+  {
+   "id": 18,
+   "tipo": "hub",
+   "nombre": "hub 18",
+   "ids_de_C": [
+    18
+   ],
+   "cores": [
+    1,
+    144,
+    145,
+    146,
+    147,
+    148,
+    150,
+    152,
+    154,
+    160
+   ],
+   "tiles": 124,
+   "bbox_tiles": {
+    "x0": 35,
+    "y0": 14,
+    "x1": 46,
+    "y1": 27,
+    "ancho": 12,
+    "largo_y": 14
+   },
+   "bbox_H": {
+    "ancho": 12,
+    "largo_y": 14,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.824
+   },
+   "conexo": true,
+   "sector": "S1",
+   "camara_cerrada": false
+  },
+  {
+   "id": 19,
+   "tipo": "hub",
+   "nombre": "hub 19",
+   "ids_de_C": [
+    19
+   ],
+   "cores": [
+    2,
+    3,
+    101,
+    322,
+    323,
+    324,
+    325,
+    326,
+    327,
+    328,
+    356,
+    360,
+    364,
+    369
+   ],
+   "tiles": 165,
+   "bbox_tiles": {
+    "x0": 13,
+    "y0": 60,
+    "x1": 27,
+    "y1": 75,
+    "ancho": 15,
+    "largo_y": 16
+   },
+   "bbox_H": {
+    "ancho": 15,
+    "largo_y": 16,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.941
+   },
+   "conexo": true,
+   "sector": "S5",
+   "camara_cerrada": false
+  },
+  {
+   "id": 20,
+   "tipo": "hub",
+   "nombre": "hub 20",
+   "ids_de_C": [
+    20
+   ],
+   "cores": [
+    4,
+    5,
+    329,
+    330,
+    331,
+    332,
+    333,
+    334,
+    335,
+    357,
+    361,
+    365,
+    366,
+    370,
+    371
+   ],
+   "tiles": 157,
+   "bbox_tiles": {
+    "x0": 30,
+    "y0": 60,
+    "x1": 44,
+    "y1": 75,
+    "ancho": 15,
+    "largo_y": 16
+   },
+   "bbox_H": {
+    "ancho": 15,
+    "largo_y": 16,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.941
+   },
+   "conexo": true,
+   "sector": "S6",
+   "camara_cerrada": false
+  },
+  {
+   "id": 23,
+   "tipo": "hub",
+   "nombre": "hub 23",
+   "ids_de_C": [
+    23
+   ],
+   "cores": [
+    10,
+    107,
+    386,
+    389,
+    391,
+    393,
+    394,
+    397,
+    406,
+    407,
+    408,
+    409,
+    410,
+    411
+   ],
+   "tiles": 87,
+   "bbox_tiles": {
+    "x0": 8,
+    "y0": 80,
+    "x1": 18,
+    "y1": 89,
+    "ancho": 11,
+    "largo_y": 10
+   },
+   "bbox_H": {
+    "ancho": 11,
+    "largo_y": 10,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.588
+   },
+   "conexo": true,
+   "sector": "S3",
+   "camara_cerrada": false
+  },
+  {
+   "id": 24,
+   "tipo": "hub",
+   "nombre": "hub 24",
+   "ids_de_C": [
+    24
+   ],
+   "cores": [
+    11,
+    108,
+    387,
+    395,
+    399,
+    402,
+    405,
+    414,
+    415,
+    416,
+    417,
+    418,
+    419,
+    420
+   ],
+   "tiles": 90,
+   "bbox_tiles": {
+    "x0": 39,
+    "y0": 80,
+    "x1": 49,
+    "y1": 89,
+    "ancho": 11,
+    "largo_y": 10
+   },
+   "bbox_H": {
+    "ancho": 11,
+    "largo_y": 10,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.588
+   },
+   "conexo": true,
+   "sector": "S4",
+   "camara_cerrada": false
+  },
+  {
+   "id": 25,
+   "tipo": "hub",
+   "nombre": "hub 25",
+   "ids_de_C": [
+    25
+   ],
+   "cores": [
+    12,
+    398,
+    401,
+    404,
+    413,
+    422,
+    429,
+    430,
+    431,
+    432,
+    433,
+    434
+   ],
+   "tiles": 76,
+   "bbox_tiles": {
+    "x0": 25,
+    "y0": 84,
+    "x1": 32,
+    "y1": 93,
+    "ancho": 8,
+    "largo_y": 10
+   },
+   "bbox_H": {
+    "ancho": 8,
+    "largo_y": 10,
+    "hipotesis": "1 tile de 8 px = 1 H"
+   },
+   "fondos_de_17H_en_el_largo": {
+    "caben": 0,
+    "cociente": 0.588
+   },
+   "conexo": true,
+   "sector": "S7",
+   "camara_cerrada": false
+  }
+ ],
+ "gates": [
+  {
+   "id": "60",
+   "cores": [
+    60
+   ],
+   "etiqueta": "absorbido",
+   "corte": null,
+   "centros": [
+    [
+     24,
+     14
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "61",
+   "cores": [
+    61
+   ],
+   "etiqueta": "absorbido",
+   "corte": null,
+   "centros": [
+    [
+     33,
+     14
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "64",
+   "cores": [
+    64
+   ],
+   "etiqueta": "corte",
+   "corte": "F1",
+   "centros": [
+    [
+     18,
+     17
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "65",
+   "cores": [
+    65
+   ],
+   "etiqueta": "corte",
+   "corte": "F2",
+   "centros": [
+    [
+     38,
+     17
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "66",
+   "cores": [
+    66
+   ],
+   "etiqueta": "corte",
+   "corte": "F3",
+   "centros": [
+    [
+     12,
+     28
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "67",
+   "cores": [
+    67
+   ],
+   "etiqueta": "corte",
+   "corte": "F4",
+   "centros": [
+    [
+     44,
+     28
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "68",
+   "cores": [
+    68
+   ],
+   "etiqueta": "puerta",
+   "corte": null,
+   "centros": [
+    [
+     30,
+     29
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "82",
+   "cores": [
+    82
+   ],
+   "etiqueta": "corte",
+   "corte": "F3",
+   "centros": [
+    [
+     12,
+     42
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "83+84+85",
+   "cores": [
+    83,
+    84,
+    85
+   ],
+   "etiqueta": "corte",
+   "corte": "F4",
+   "centros": [
+    [
+     44,
+     42
+    ],
+    [
+     45,
+     44
+    ],
+    [
+     45,
+     46
+    ]
+   ],
+   "unio": true
+  },
+  {
+   "id": "86",
+   "cores": [
+    86
+   ],
+   "etiqueta": "puerta",
+   "corte": null,
+   "centros": [
+    [
+     4,
+     47
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "87",
+   "cores": [
+    87
+   ],
+   "etiqueta": "puerta",
+   "corte": null,
+   "centros": [
+    [
+     24,
+     47
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "88",
+   "cores": [
+    88
+   ],
+   "etiqueta": "puerta",
+   "corte": null,
+   "centros": [
+    [
+     32,
+     47
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "89",
+   "cores": [
+    89
+   ],
+   "etiqueta": "corte",
+   "corte": "F5",
+   "centros": [
+    [
+     20,
+     54
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "90",
+   "cores": [
+    90
+   ],
+   "etiqueta": "corte",
+   "corte": "F6",
+   "centros": [
+    [
+     36,
+     54
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "97",
+   "cores": [
+    97
+   ],
+   "etiqueta": "corte",
+   "corte": "F5",
+   "centros": [
+    [
+     20,
+     62
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "98",
+   "cores": [
+    98
+   ],
+   "etiqueta": "corte",
+   "corte": "F6",
+   "centros": [
+    [
+     36,
+     62
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "99",
+   "cores": [
+    99
+   ],
+   "etiqueta": "puerta",
+   "corte": null,
+   "centros": [
+    [
+     24,
+     72
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "100",
+   "cores": [
+    100
+   ],
+   "etiqueta": "puerta",
+   "corte": null,
+   "centros": [
+    [
+     32,
+     72
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "102+104+105+106",
+   "cores": [
+    102,
+    104,
+    105,
+    106
+   ],
+   "etiqueta": "puerta",
+   "corte": null,
+   "centros": [
+    [
+     10,
+     83
+    ],
+    [
+     2,
+     84
+    ],
+    [
+     4,
+     84
+    ],
+    [
+     6,
+     84
+    ]
+   ],
+   "unio": true
+  },
+  {
+   "id": "103+109+110+111",
+   "cores": [
+    103,
+    109,
+    110,
+    111
+   ],
+   "etiqueta": "puerta",
+   "corte": null,
+   "centros": [
+    [
+     46,
+     83
+    ],
+    [
+     50,
+     84
+    ],
+    [
+     52,
+     84
+    ],
+    [
+     54,
+     84
+    ]
+   ],
+   "unio": true
+  },
+  {
+   "id": "112",
+   "cores": [
+    112
+   ],
+   "etiqueta": "puerta",
+   "corte": null,
+   "centros": [
+    [
+     18,
+     88
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "113",
+   "cores": [
+    113
+   ],
+   "etiqueta": "puerta",
+   "corte": null,
+   "centros": [
+    [
+     38,
+     88
+    ]
+   ],
+   "unio": false
+  },
+  {
+   "id": "117",
+   "cores": [
+    117
+   ],
+   "etiqueta": "corte",
+   "corte": "F7",
+   "centros": [
+    [
+     32,
+     92
+    ]
+   ],
+   "unio": false
+  }
+ ],
+ "cortes": {
+  "F1": {
+   "gates": [
+    "64"
+   ],
+   "pasillo_Y": null
+  },
+  "F2": {
+   "gates": [
+    "65"
+   ],
+   "pasillo_Y": null
+  },
+  "F3": {
+   "gates": [
+    "66",
+    "82"
+   ],
+   "pasillo_Y": 12
+  },
+  "F4": {
+   "gates": [
+    "67",
+    "83+84+85"
+   ],
+   "pasillo_Y": 13
+  },
+  "F5": {
+   "gates": [
+    "89",
+    "97"
+   ],
+   "pasillo_Y": 14
+  },
+  "F6": {
+   "gates": [
+    "90",
+    "98"
+   ],
+   "pasillo_Y": 15
+  },
+  "F7": {
+   "gates": [
+    "117"
+   ],
+   "pasillo_Y": null
+  }
+ },
+ "sectores": [
+  {
+   "grupos": [
+    0,
+    1,
+    2,
+    17,
+    18
+   ],
+   "puertas": [],
+   "absorbidos": [
+    "60",
+    "61"
+   ],
+   "id": "S1",
+   "nombres": [
+    "pasillo X 0",
+    "pasillo X 1",
+    "pasillo X 2",
+    "hub 17",
+    "hub 18"
+   ],
+   "camara_cerrada": false
+  },
+  {
+   "grupos": [
+    3
+   ],
+   "puertas": [
+    "68"
+   ],
+   "absorbidos": [],
+   "id": "S2",
+   "nombres": [
+    "pasillo X 3"
+   ],
+   "camara_cerrada": true
+  },
+  {
+   "grupos": [
+    4,
+    5,
+    6,
+    10,
+    16,
+    23
+   ],
+   "puertas": [
+    "102+104+105+106",
+    "112",
+    "86",
+    "87",
+    "88"
+   ],
+   "absorbidos": [],
+   "id": "S3",
+   "nombres": [
+    "pasillo X 4",
+    "pasillo X 5",
+    "pasillo X 6",
+    "pasillo Y 10",
+    "pasillo Y 16",
+    "hub 23"
+   ],
+   "camara_cerrada": false
+  },
+  {
+   "grupos": [
+    9,
+    11,
+    24
+   ],
+   "puertas": [
+    "103+109+110+111",
+    "113"
+   ],
+   "absorbidos": [],
+   "id": "S4",
+   "nombres": [
+    "pasillo X 9",
+    "grupo 11",
+    "hub 24"
+   ],
+   "camara_cerrada": false
+  },
+  {
+   "grupos": [
+    19
+   ],
+   "puertas": [
+    "99"
+   ],
+   "absorbidos": [],
+   "id": "S5",
+   "nombres": [
+    "hub 19"
+   ],
+   "camara_cerrada": false
+  },
+  {
+   "grupos": [
+    20
+   ],
+   "puertas": [
+    "100"
+   ],
+   "absorbidos": [],
+   "id": "S6",
+   "nombres": [
+    "hub 20"
+   ],
+   "camara_cerrada": false
+  },
+  {
+   "grupos": [
+    25
+   ],
+   "puertas": [],
+   "absorbidos": [],
+   "id": "S7",
+   "nombres": [
+    "hub 25"
+   ],
+   "camara_cerrada": false
+  }
+ ],
+ "sala_de_G": {
+  "grupo": "pasillo X 3",
+  "camara_cerrada": true,
+  "sin_camino_a_pie": true
+ },
+ "flow": {
+  "camino": "H->J de D",
+  "cortes_que_cruza_en_orden": [
+   "F3",
+   "F4",
+   "F7"
+  ],
+  "grupos_cruzados": [
+   "pasillo Y 16",
+   "hub 23",
+   "pasillo Y 10",
+   "pasillo X 5",
+   "pasillo X 4",
+   "pasillo X 6",
+   "grupo 11",
+   "hub 24",
+   "pasillo X 9",
+   "hub 25"
+  ],
+  "tramos": [
+   {
+    "tramo": 1,
+    "desde": [
+     19,
+     92
+    ],
+    "hasta": [
+     11,
+     43
+    ],
+    "pasos": 69,
+    "despues_del_corte": null,
+    "antes_del_corte": "F3",
+    "grupos": [
+     "pasillo Y 16",
+     "hub 23",
+     "pasillo Y 10",
+     "pasillo X 5"
+    ],
+    "grupos_ids": [
+     16,
+     23,
+     10,
+     5
+    ]
+   },
+   {
+    "tramo": 2,
+    "desde": [
+     14,
+     42
+    ],
+    "hasta": [
+     43,
+     43
+    ],
+    "pasos": 58,
+    "despues_del_corte": "F3",
+    "antes_del_corte": "F4",
+    "grupos": [
+     "pasillo X 5",
+     "pasillo X 4",
+     "pasillo X 6"
+    ],
+    "grupos_ids": [
+     5,
+     4,
+     6
+    ]
+   },
+   {
+    "tramo": 3,
+    "desde": [
+     45,
+     48
+    ],
+    "hasta": [
+     34,
+     91
+    ],
+    "pasos": 68,
+    "despues_del_corte": "F4",
+    "antes_del_corte": "F7",
+    "grupos": [
+     "grupo 11",
+     "hub 24",
+     "pasillo X 9"
+    ],
+    "grupos_ids": [
+     11,
+     24,
+     9
+    ]
+   },
+   {
+    "tramo": 4,
+    "desde": [
+     32,
+     90
+    ],
+    "hasta": [
+     31,
+     86
+    ],
+    "pasos": 5,
+    "despues_del_corte": "F7",
+    "antes_del_corte": null,
+    "grupos": [
+     "hub 25"
+    ],
+    "grupos_ids": [
+     25
+    ]
+   }
+  ],
+  "tiles_con_valor_sin_cortar": 216,
+  "tiles_con_valor": 203,
+  "lectura_aparte_room_por_grupo": {
+   "nota": "mismo X.widened pero con el mapa de rooms = el grupo de cada tile (BreakPathByRoom parte el camino en cada cambio de grupo); el ancho ya no lo fija el punto mas estrecho de todo el camino",
+   "tiles_con_valor": 585,
+   "imagen": "pack_flow_por_grupo.png"
+  }
+ },
+ "astar_de_D": [
+  {
+   "destino": "I (25, 74)",
+   "pasos": 116,
+   "costo_D": 432.6667,
+   "grupos_ids": [
+    16,
+    23,
+    10,
+    5,
+    14,
+    19
+   ],
+   "grupos": [
+    "pasillo Y 16",
+    "hub 23",
+    "pasillo Y 10",
+    "pasillo X 5",
+    "pasillo Y 14",
+    "hub 19"
+   ]
+  },
+  {
+   "destino": "salida (31, 86)",
+   "pasos": 216,
+   "costo_D": 882.6667,
+   "grupos_ids": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    11,
+    24,
+    9,
+    25
+   ],
+   "grupos": [
+    "pasillo Y 16",
+    "hub 23",
+    "pasillo Y 10",
+    "pasillo X 5",
+    "pasillo X 4",
+    "pasillo X 6",
+    "grupo 11",
+    "hub 24",
+    "pasillo X 9",
+    "hub 25"
+   ]
+  },
+  {
+   "destino": "cofre 2 (33, 74)",
+   "pasos": 142,
+   "costo_D": 475.3333,
+   "grupos_ids": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    15,
+    20
+   ],
+   "grupos": [
+    "pasillo Y 16",
+    "hub 23",
+    "pasillo Y 10",
+    "pasillo X 5",
+    "pasillo X 4",
+    "pasillo X 6",
+    "pasillo Y 15",
+    "hub 20"
+   ]
+  }
+ ],
+ "no_calzo": [
+  "F1: groups that touch the passage and stay in the same sector: {'S1': ['pasillo X 0', 'hub 17']}",
+  "F2: groups that touch the passage and stay in the same sector: {'S1': ['pasillo X 0', 'hub 18']}",
+  "F4: groups that touch the passage and stay in the same sector: {'S1': ['pasillo X 2', 'hub 18']}",
+  "pasillo X 0 touches hub 17 / hub 18 directly (core pairs, no gate between) in 2 places: [(137, 143, [20, 17], [20, 18]), (138, 144, [40, 17], [40, 18])]"
+ ],
+ "astar_de_D_en_la_variante": {
+  "I": {
+   "alcanzable": true,
+   "pasos": 114,
+   "costo": 405.67,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    14,
+    19
+   ],
+   "igual_a_la_guia_D": true,
+   "grupos_de_D": [
+    16,
+    23,
+    10,
+    5,
+    14,
+    19
+   ]
+  },
+  "J": {
+   "alcanzable": true,
+   "pasos": 208,
+   "costo": 766.33,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    11,
+    24,
+    9,
+    25
+   ],
+   "igual_a_la_guia_D": true,
+   "grupos_de_D": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    11,
+    24,
+    9,
+    25
+   ]
+  },
+  "cofre2": {
+   "alcanzable": true,
+   "pasos": 146,
+   "costo": 462.67,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    15,
+    20
+   ],
+   "igual_a_la_guia_D": true,
+   "grupos_de_D": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    15,
+    20
+   ]
+  }
+ },
+ "G_cerrada_en_la_variante": true
+}
