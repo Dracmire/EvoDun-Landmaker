@@ -1,0 +1,1250 @@
+{
+ "leyenda": "tiles de 8 px; coordenadas (x, y) de tile; el eje sale del gate de entrada hacia dentro del room",
+ "clasificacion": {
+  "0": {
+   "nombre": "pasillo X 0",
+   "tipo_en_la_guia": "pasillo X",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo (RV2): no cambia",
+   "ids_de_C": [
+    0
+   ],
+   "tiles": 107
+  },
+  "1": {
+   "nombre": "pasillo X 1",
+   "tipo_en_la_guia": "pasillo X",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo (RV2): no cambia",
+   "ids_de_C": [
+    1
+   ],
+   "tiles": 34
+  },
+  "2": {
+   "nombre": "pasillo X 2",
+   "tipo_en_la_guia": "pasillo X",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo (RV2): no cambia",
+   "ids_de_C": [
+    2
+   ],
+   "tiles": 41
+  },
+  "3": {
+   "nombre": "pasillo X 3",
+   "tipo_en_la_guia": "pasillo X",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo X 3, la camara de G: no crece",
+   "ids_de_C": [
+    3
+   ],
+   "tiles": 70
+  },
+  "4": {
+   "nombre": "pasillo X 4",
+   "tipo_en_la_guia": "pasillo X",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "banda X5, X4, X6: no crece",
+   "ids_de_C": [
+    4
+   ],
+   "tiles": 67
+  },
+  "5": {
+   "nombre": "pasillo X 5",
+   "tipo_en_la_guia": "pasillo X",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "banda X5, X4, X6: no crece",
+   "ids_de_C": [
+    5,
+    7,
+    21
+   ],
+   "tiles": 179
+  },
+  "6": {
+   "nombre": "pasillo X 6",
+   "tipo_en_la_guia": "pasillo X",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "banda X5, X4, X6: no crece",
+   "ids_de_C": [
+    6,
+    8
+   ],
+   "tiles": 89
+  },
+  "9": {
+   "nombre": "pasillo X 9",
+   "tipo_en_la_guia": "pasillo X",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo (RV2): no cambia",
+   "ids_de_C": [
+    9
+   ],
+   "tiles": 25
+  },
+  "10": {
+   "nombre": "pasillo Y 10",
+   "tipo_en_la_guia": "pasillo Y",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo (RV2): no cambia",
+   "ids_de_C": [
+    10
+   ],
+   "tiles": 209
+  },
+  "11": {
+   "nombre": "grupo 11",
+   "tipo_en_la_guia": "grupo",
+   "clase": "mixto (pasillo Y11 + hub 22 fusionados por [U] en la guia E)",
+   "crece": false,
+   "razon": "la guia E tiene un solo id (11) para Y11 + hub 22 y ningun archivo de la guia separa sus tiles: grupo intacto",
+   "ids_de_C": [
+    11,
+    22
+   ],
+   "tiles": 298
+  },
+  "12": {
+   "nombre": "pasillo Y 12",
+   "tipo_en_la_guia": "pasillo Y",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo (RV2): no cambia",
+   "ids_de_C": [
+    12
+   ],
+   "tiles": 49
+  },
+  "13": {
+   "nombre": "pasillo Y 13",
+   "tipo_en_la_guia": "pasillo Y",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo (RV2): no cambia",
+   "ids_de_C": [
+    13
+   ],
+   "tiles": 49
+  },
+  "14": {
+   "nombre": "pasillo Y 14",
+   "tipo_en_la_guia": "pasillo Y",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo Y del interior: no crece",
+   "ids_de_C": [
+    14
+   ],
+   "tiles": 24
+  },
+  "15": {
+   "nombre": "pasillo Y 15",
+   "tipo_en_la_guia": "pasillo Y",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo Y del interior: no crece",
+   "ids_de_C": [
+    15
+   ],
+   "tiles": 24
+  },
+  "16": {
+   "nombre": "pasillo Y 16",
+   "tipo_en_la_guia": "pasillo Y",
+   "clase": "pasillo",
+   "crece": false,
+   "razon": "pasillo (RV2): no cambia",
+   "ids_de_C": [
+    16
+   ],
+   "tiles": 19
+  },
+  "17": {
+   "nombre": "hub 17",
+   "tipo_en_la_guia": "hub",
+   "clase": "room (hub)",
+   "crece": true,
+   "razon": "hub fuera del interior (herradura o fondo): crece",
+   "ids_de_C": [
+    17
+   ],
+   "tiles": 96
+  },
+  "18": {
+   "nombre": "hub 18",
+   "tipo_en_la_guia": "hub",
+   "clase": "room (hub)",
+   "crece": true,
+   "razon": "hub fuera del interior (herradura o fondo): crece",
+   "ids_de_C": [
+    18
+   ],
+   "tiles": 90
+  },
+  "19": {
+   "nombre": "hub 19",
+   "tipo_en_la_guia": "hub",
+   "clase": "room (hub)",
+   "crece": false,
+   "razon": "interior de la guia E (hubs 19 y 20): no crece",
+   "ids_de_C": [
+    19
+   ],
+   "tiles": 143
+  },
+  "20": {
+   "nombre": "hub 20",
+   "tipo_en_la_guia": "hub",
+   "clase": "room (hub)",
+   "crece": false,
+   "razon": "interior de la guia E (hubs 19 y 20): no crece",
+   "ids_de_C": [
+    20
+   ],
+   "tiles": 139
+  },
+  "23": {
+   "nombre": "hub 23",
+   "tipo_en_la_guia": "hub",
+   "clase": "room (hub)",
+   "crece": true,
+   "razon": "hub fuera del interior (herradura o fondo): crece",
+   "ids_de_C": [
+    23
+   ],
+   "tiles": 65
+  },
+  "24": {
+   "nombre": "hub 24",
+   "tipo_en_la_guia": "hub",
+   "clase": "room (hub)",
+   "crece": true,
+   "razon": "hub fuera del interior (herradura o fondo): crece",
+   "ids_de_C": [
+    24
+   ],
+   "tiles": 68
+  },
+  "25": {
+   "nombre": "hub 25",
+   "tipo_en_la_guia": "hub",
+   "clase": "room (hub)",
+   "crece": true,
+   "razon": "hub fuera del interior (herradura o fondo): crece",
+   "ids_de_C": [
+    25
+   ],
+   "tiles": 60
+  }
+ },
+ "rooms_que_crecen": {
+  "17": {
+   "nombre": "hub 17",
+   "accesos": [
+    {
+     "tipo": "gate",
+     "id": "64",
+     "etiqueta": "corte",
+     "corte": "F1",
+     "une_con": [
+      0
+     ],
+     "tiles_del_gate": [
+      [
+       17,
+       17
+      ],
+      [
+       17,
+       18
+      ],
+      [
+       18,
+       17
+      ],
+      [
+       18,
+       18
+      ],
+      [
+       19,
+       17
+      ],
+      [
+       19,
+       18
+      ]
+     ],
+     "punto_de_acceso": [
+      18,
+      19
+     ],
+     "centro_gate": [
+      18.0,
+      17.5
+     ],
+     "vector_hacia_el_room": [
+      -0.47,
+      2.63
+     ]
+    },
+    {
+     "tipo": "gate",
+     "id": "66",
+     "etiqueta": "corte",
+     "corte": "F3",
+     "une_con": [
+      1,
+      12
+     ],
+     "tiles_del_gate": [
+      [
+       11,
+       28
+      ],
+      [
+       11,
+       29
+      ],
+      [
+       12,
+       28
+      ],
+      [
+       12,
+       29
+      ],
+      [
+       13,
+       28
+      ],
+      [
+       13,
+       29
+      ]
+     ],
+     "punto_de_acceso": [
+      12,
+      27
+     ],
+     "centro_gate": [
+      12.0,
+      28.5
+     ],
+     "vector_hacia_el_room": [
+      0.47,
+      -2.13
+     ]
+    }
+   ],
+   "gate_de_entrada": "66",
+   "porque_ese_gate": "ningun A* pasa por el room: gate mas cercano a la entrada H (19, 92)",
+   "mini_esqueleto_segmentos": [
+    [
+     [
+      12,
+      19
+     ],
+     [
+      12,
+      27
+     ]
+    ],
+    [
+     [
+      12,
+      19
+     ],
+     [
+      18,
+      19
+     ]
+    ]
+   ],
+   "nota_esqueleto": null,
+   "eje": {
+    "origen": [
+     12,
+     27
+    ],
+    "direccion_u": [
+     0,
+     -1
+    ],
+    "direccion_v": [
+     1,
+     0
+    ],
+    "punto_focal": [
+     12,
+     19
+    ],
+    "punto_focal_proyectado_sobre_el_eje": [
+     12,
+     19
+    ],
+    "porque_el_foco": "extremo del tronco",
+    "largo_del_eje_en_tiles": 9,
+    "tronco_sobre_el_eje": [
+     [
+      12,
+      19
+     ],
+     [
+      12,
+      27
+     ]
+    ],
+    "tronco_mas_largo_del_esqueleto": [
+     [
+      12,
+      19
+     ],
+     [
+      12,
+      27
+     ]
+    ],
+    "el_tronco_mas_largo_esta_sobre_el_eje": true,
+    "centrado_del_room_original": {
+     "ancho_a_cada_lado_tiles": {
+      "lado_menos_v": 1,
+      "lado_mas_v": 8
+     },
+     "diferencia": 7,
+     "nota": "tiles de 8 px entre el tile del eje y el borde del room en cada lado; el tile del eje no se cuenta"
+    }
+   }
+  },
+  "18": {
+   "nombre": "hub 18",
+   "accesos": [
+    {
+     "tipo": "gate",
+     "id": "65",
+     "etiqueta": "corte",
+     "corte": "F2",
+     "une_con": [
+      0
+     ],
+     "tiles_del_gate": [
+      [
+       37,
+       17
+      ],
+      [
+       37,
+       18
+      ],
+      [
+       38,
+       17
+      ],
+      [
+       38,
+       18
+      ],
+      [
+       39,
+       17
+      ],
+      [
+       39,
+       18
+      ]
+     ],
+     "punto_de_acceso": [
+      38,
+      19
+     ],
+     "centro_gate": [
+      38.0,
+      17.5
+     ],
+     "vector_hacia_el_room": [
+      0.0,
+      2.6
+     ]
+    },
+    {
+     "tipo": "gate",
+     "id": "67",
+     "etiqueta": "corte",
+     "corte": "F4",
+     "une_con": [
+      2,
+      13
+     ],
+     "tiles_del_gate": [
+      [
+       43,
+       28
+      ],
+      [
+       43,
+       29
+      ],
+      [
+       44,
+       28
+      ],
+      [
+       44,
+       29
+      ],
+      [
+       45,
+       28
+      ],
+      [
+       45,
+       29
+      ]
+     ],
+     "punto_de_acceso": [
+      44,
+      27
+     ],
+     "centro_gate": [
+      44.0,
+      28.5
+     ],
+     "vector_hacia_el_room": [
+      -1.64,
+      -2.14
+     ]
+    }
+   ],
+   "gate_de_entrada": "67",
+   "porque_ese_gate": "ningun A* pasa por el room: gate mas cercano a la entrada H (19, 92)",
+   "mini_esqueleto_segmentos": [
+    [
+     [
+      38,
+      19
+     ],
+     [
+      44,
+      19
+     ]
+    ],
+    [
+     [
+      44,
+      19
+     ],
+     [
+      44,
+      27
+     ]
+    ]
+   ],
+   "nota_esqueleto": null,
+   "eje": {
+    "origen": [
+     44,
+     27
+    ],
+    "direccion_u": [
+     0,
+     -1
+    ],
+    "direccion_v": [
+     1,
+     0
+    ],
+    "punto_focal": [
+     44,
+     19
+    ],
+    "punto_focal_proyectado_sobre_el_eje": [
+     44,
+     19
+    ],
+    "porque_el_foco": "extremo del tronco",
+    "largo_del_eje_en_tiles": 9,
+    "tronco_sobre_el_eje": [
+     [
+      44,
+      19
+     ],
+     [
+      44,
+      27
+     ]
+    ],
+    "tronco_mas_largo_del_esqueleto": [
+     [
+      44,
+      19
+     ],
+     [
+      44,
+      27
+     ]
+    ],
+    "el_tronco_mas_largo_esta_sobre_el_eje": true,
+    "centrado_del_room_original": {
+     "ancho_a_cada_lado_tiles": {
+      "lado_menos_v": 7,
+      "lado_mas_v": 2
+     },
+     "diferencia": 5,
+     "nota": "tiles de 8 px entre el tile del eje y el borde del room en cada lado; el tile del eje no se cuenta"
+    }
+   }
+  },
+  "23": {
+   "nombre": "hub 23",
+   "accesos": [
+    {
+     "tipo": "gate",
+     "id": "102+104+105+106",
+     "etiqueta": "puerta",
+     "corte": null,
+     "une_con": [
+      10
+     ],
+     "tiles_del_gate": [
+      [
+       1,
+       84
+      ],
+      [
+       1,
+       85
+      ],
+      [
+       2,
+       84
+      ],
+      [
+       2,
+       85
+      ],
+      [
+       3,
+       84
+      ],
+      [
+       3,
+       85
+      ],
+      [
+       4,
+       84
+      ],
+      [
+       4,
+       85
+      ],
+      [
+       5,
+       84
+      ],
+      [
+       5,
+       85
+      ],
+      [
+       6,
+       83
+      ],
+      [
+       6,
+       84
+      ],
+      [
+       6,
+       85
+      ],
+      [
+       7,
+       83
+      ],
+      [
+       7,
+       84
+      ],
+      [
+       7,
+       85
+      ],
+      [
+       9,
+       82
+      ],
+      [
+       9,
+       83
+      ],
+      [
+       9,
+       84
+      ],
+      [
+       10,
+       82
+      ],
+      [
+       10,
+       83
+      ],
+      [
+       10,
+       84
+      ]
+     ],
+     "punto_de_acceso": [
+      8,
+      84
+     ],
+     "centro_gate": [
+      5.73,
+      83.95
+     ],
+     "vector_hacia_el_room": [
+      5.95,
+      1.29
+     ]
+    },
+    {
+     "tipo": "gate",
+     "id": "112",
+     "etiqueta": "puerta",
+     "corte": null,
+     "une_con": [
+      16
+     ],
+     "tiles_del_gate": [
+      [
+       17,
+       89
+      ],
+      [
+       18,
+       87
+      ],
+      [
+       18,
+       88
+      ],
+      [
+       18,
+       89
+      ],
+      [
+       19,
+       87
+      ],
+      [
+       19,
+       88
+      ],
+      [
+       19,
+       89
+      ]
+     ],
+     "punto_de_acceso": [
+      17,
+      88
+     ],
+     "centro_gate": [
+      18.29,
+      88.14
+     ],
+     "vector_hacia_el_room": [
+      -2.31,
+      -1.81
+     ]
+    }
+   ],
+   "gate_de_entrada": "112",
+   "porque_ese_gate": "A* J entra desde el grupo 16",
+   "mini_esqueleto_segmentos": [
+    [
+     [
+      8,
+      84
+     ],
+     [
+      8,
+      85
+     ]
+    ],
+    [
+     [
+      8,
+      85
+     ],
+     [
+      11,
+      85
+     ]
+    ],
+    [
+     [
+      11,
+      85
+     ],
+     [
+      11,
+      88
+     ]
+    ],
+    [
+     [
+      11,
+      88
+     ],
+     [
+      17,
+      88
+     ]
+    ]
+   ],
+   "nota_esqueleto": null,
+   "eje": {
+    "origen": [
+     17,
+     88
+    ],
+    "direccion_u": [
+     -1,
+     0
+    ],
+    "direccion_v": [
+     0,
+     -1
+    ],
+    "punto_focal": [
+     11,
+     88
+    ],
+    "punto_focal_proyectado_sobre_el_eje": [
+     11,
+     88
+    ],
+    "porque_el_foco": "extremo del tronco",
+    "largo_del_eje_en_tiles": 7,
+    "tronco_sobre_el_eje": [
+     [
+      11,
+      88
+     ],
+     [
+      17,
+      88
+     ]
+    ],
+    "tronco_mas_largo_del_esqueleto": [
+     [
+      11,
+      88
+     ],
+     [
+      17,
+      88
+     ]
+    ],
+    "el_tronco_mas_largo_esta_sobre_el_eje": true,
+    "centrado_del_room_original": {
+     "ancho_a_cada_lado_tiles": {
+      "lado_menos_v": 1,
+      "lado_mas_v": 6
+     },
+     "diferencia": 5,
+     "nota": "tiles de 8 px entre el tile del eje y el borde del room en cada lado; el tile del eje no se cuenta"
+    }
+   }
+  },
+  "24": {
+   "nombre": "hub 24",
+   "accesos": [
+    {
+     "tipo": "gate",
+     "id": "103+109+110+111",
+     "etiqueta": "puerta",
+     "corte": null,
+     "une_con": [
+      11
+     ],
+     "tiles_del_gate": [
+      [
+       46,
+       82
+      ],
+      [
+       46,
+       83
+      ],
+      [
+       46,
+       84
+      ],
+      [
+       47,
+       82
+      ],
+      [
+       47,
+       83
+      ],
+      [
+       47,
+       84
+      ],
+      [
+       50,
+       83
+      ],
+      [
+       50,
+       84
+      ],
+      [
+       50,
+       85
+      ],
+      [
+       51,
+       84
+      ],
+      [
+       51,
+       85
+      ],
+      [
+       52,
+       84
+      ],
+      [
+       52,
+       85
+      ],
+      [
+       53,
+       84
+      ],
+      [
+       53,
+       85
+      ],
+      [
+       54,
+       84
+      ],
+      [
+       54,
+       85
+      ],
+      [
+       55,
+       84
+      ],
+      [
+       55,
+       85
+      ]
+     ],
+     "punto_de_acceso": [
+      49,
+      84
+     ],
+     "centro_gate": [
+      50.47,
+      83.95
+     ],
+     "vector_hacia_el_room": [
+      -6.7,
+      0.62
+     ]
+    },
+    {
+     "tipo": "gate",
+     "id": "113",
+     "etiqueta": "puerta",
+     "corte": null,
+     "une_con": [
+      9
+     ],
+     "tiles_del_gate": [
+      [
+       37,
+       87
+      ],
+      [
+       37,
+       88
+      ],
+      [
+       37,
+       89
+      ],
+      [
+       38,
+       87
+      ],
+      [
+       38,
+       88
+      ],
+      [
+       38,
+       89
+      ],
+      [
+       39,
+       89
+      ]
+     ],
+     "punto_de_acceso": [
+      39,
+      88
+     ],
+     "centro_gate": [
+      37.71,
+      88.14
+     ],
+     "vector_hacia_el_room": [
+      0.9,
+      -2.4
+     ]
+    }
+   ],
+   "gate_de_entrada": "103+109+110+111",
+   "porque_ese_gate": "A* J entra desde el grupo 11",
+   "mini_esqueleto_segmentos": [
+    [
+     [
+      39,
+      85
+     ],
+     [
+      39,
+      88
+     ]
+    ],
+    [
+     [
+      39,
+      85
+     ],
+     [
+      48,
+      85
+     ]
+    ],
+    [
+     [
+      48,
+      84
+     ],
+     [
+      48,
+      85
+     ]
+    ],
+    [
+     [
+      48,
+      84
+     ],
+     [
+      49,
+      84
+     ]
+    ]
+   ],
+   "nota_esqueleto": null,
+   "eje": {
+    "origen": [
+     49,
+     84
+    ],
+    "direccion_u": [
+     -1,
+     0
+    ],
+    "direccion_v": [
+     0,
+     -1
+    ],
+    "punto_focal": [
+     39,
+     85
+    ],
+    "punto_focal_proyectado_sobre_el_eje": [
+     39,
+     84
+    ],
+    "porque_el_foco": "extremo del tronco",
+    "largo_del_eje_en_tiles": 11,
+    "tronco_sobre_el_eje": [
+     [
+      39,
+      85
+     ],
+     [
+      48,
+      85
+     ]
+    ],
+    "tronco_mas_largo_del_esqueleto": [
+     [
+      39,
+      85
+     ],
+     [
+      48,
+      85
+     ]
+    ],
+    "el_tronco_mas_largo_esta_sobre_el_eje": true,
+    "centrado_del_room_original": {
+     "ancho_a_cada_lado_tiles": {
+      "lado_menos_v": 5,
+      "lado_mas_v": 2
+     },
+     "diferencia": 3,
+     "nota": "tiles de 8 px entre el tile del eje y el borde del room en cada lado; el tile del eje no se cuenta"
+    }
+   }
+  },
+  "25": {
+   "nombre": "hub 25",
+   "accesos": [
+    {
+     "tipo": "gate",
+     "id": "117",
+     "etiqueta": "corte",
+     "corte": "F7",
+     "une_con": [
+      9
+     ],
+     "tiles_del_gate": [
+      [
+       31,
+       93
+      ],
+      [
+       32,
+       91
+      ],
+      [
+       32,
+       92
+      ],
+      [
+       32,
+       93
+      ],
+      [
+       33,
+       91
+      ],
+      [
+       33,
+       92
+      ],
+      [
+       33,
+       93
+      ]
+     ],
+     "punto_de_acceso": [
+      31,
+      92
+     ],
+     "centro_gate": [
+      32.29,
+      92.14
+     ],
+     "vector_hacia_el_room": [
+      -3.17,
+      -0.67
+     ]
+    },
+    {
+     "tipo": "escalera",
+     "id": "J",
+     "punto_de_acceso": [
+      31,
+      86
+     ]
+    }
+   ],
+   "gate_de_entrada": "117",
+   "porque_ese_gate": "A* J entra desde el grupo 9",
+   "mini_esqueleto_segmentos": [
+    [
+     [
+      31,
+      86
+     ],
+     [
+      31,
+      92
+     ]
+    ]
+   ],
+   "nota_esqueleto": null,
+   "eje": {
+    "origen": [
+     31,
+     92
+    ],
+    "direccion_u": [
+     -1,
+     0
+    ],
+    "direccion_v": [
+     0,
+     -1
+    ],
+    "punto_focal": [
+     25,
+     92
+    ],
+    "punto_focal_proyectado_sobre_el_eje": [
+     25,
+     92
+    ],
+    "porque_el_foco": "fondo del room sobre el eje",
+    "largo_del_eje_en_tiles": 7,
+    "tronco_sobre_el_eje": null,
+    "tronco_mas_largo_del_esqueleto": [
+     [
+      31,
+      86
+     ],
+     [
+      31,
+      92
+     ]
+    ],
+    "el_tronco_mas_largo_esta_sobre_el_eje": false,
+    "centrado_del_room_original": {
+     "ancho_a_cada_lado_tiles": {
+      "lado_menos_v": 1,
+      "lado_mas_v": 6
+     },
+     "diferencia": 5,
+     "nota": "tiles de 8 px entre el tile del eje y el borde del room en cada lado; el tile del eje no se cuenta"
+    }
+   }
+  }
+ }
+}

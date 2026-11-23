@@ -1,0 +1,3565 @@
+{
+ "base": "91b2e11",
+ "reglas_aplicadas": "RV1 RV2 RV3 RV4 RV5 RV6 RV8 RV9 (RV7 no aplica)",
+ "rooms_que_crecen": [
+  17,
+  18,
+  23,
+  24,
+  25
+ ],
+ "lectura_de_las_reglas": {
+  "muro_minimo_w8": "1 tile de 8 px entre dos espacios distintos = distancia de Chebyshev >= 2 entre sus suelos",
+  "muro_minimo_w16": "1 tile de 16 px = distancia de Chebyshev >= 3",
+  "espacios": "suelo de cualquier grupo, pilares, suelo sin grupo; tambien el vacio, el cielo y la fachada como borde del mapa (el muro exterior tambien queda en w)",
+  "orden_del_crecimiento": "primero a lo ancho (los dos lados a la vez; si uno choca, ninguno avanza), despues hacia el fondo (+u), despues hacia atras de la entrada (-u)",
+  "lado_entero": "cada paso mueve el borde exterior del room (lo que queda mas afuera en esa direccion) un tile; el paso se hace solo si TODOS los tiles de esa franja son muro libre de la zona del room",
+  "gates_como_muesca": "los tiles de un gate dentro de la franja no se tocan y quedan como muesca (RV6 / RV9); sin esto ningun room crece (ver diagnostico)",
+  "objetos": "las antorchas del muro (clase 7 sin grupo) se pueden cubrir; escaleras y cofres estan dentro de grupos",
+  "nucleo_del_room": "apertura 3x3 del suelo del room: solo el cuerpo grueso mueve sus lados; los brazos de 1-2 tiles quedan como estan"
+ },
+ "w8": {
+  "w_tiles_de_8px": 1,
+  "w_px": 8,
+  "rooms": {
+   "hub 17": {
+    "id": 17,
+    "antes": {
+     "caja": {
+      "x0": 11,
+      "y0": 18,
+      "x1": 20,
+      "y1": 28,
+      "ancho_x": 10,
+      "largo_y": 11
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 10,
+     "largo_sobre_ancho": 1.1,
+     "lado_menos_v": 1,
+     "lado_mas_v": 8,
+     "error_de_simetria_tiles": 7,
+     "posicion_de_la_entrada_en_el_largo": 0.091,
+     "tiles": 96
+    },
+    "despues": {
+     "caja": {
+      "x0": 11,
+      "y0": 18,
+      "x1": 20,
+      "y1": 28,
+      "ancho_x": 10,
+      "largo_y": 11
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 10,
+     "largo_sobre_ancho": 1.1,
+     "lado_menos_v": 1,
+     "lado_mas_v": 8,
+     "error_de_simetria_tiles": 7,
+     "posicion_de_la_entrada_en_el_largo": 0.091,
+     "tiles": 96
+    },
+    "factor_tiles": 1.0,
+    "tiles_ganados": 0,
+    "pasos": {
+     "perp": 0,
+     "adelante": 0,
+     "atras": 0
+    },
+    "frenos": {
+     "perpendicular": {
+      "lado +v ((1, 0))": {
+       "pilar": 1
+      },
+      "lado -v ((-1, 0))": {
+       "muro minimo con suelo sin grupo": 2,
+       "suelo sin grupo": 2,
+       "muro minimo con grupo 1": 1,
+       "grupo 1": 5
+      }
+     },
+     "adelante": {
+      "muro minimo con pilar": 1,
+      "pilar": 2,
+      "gate": 3
+     },
+     "atras": {
+      "gate": 3,
+      "muro minimo con grupo 12": 1
+     }
+    },
+    "zona_de_expansion_tiles": 438,
+    "tiles_de_muro_reclamados": 0
+   },
+   "hub 18": {
+    "id": 18,
+    "antes": {
+     "caja": {
+      "x0": 37,
+      "y0": 18,
+      "x1": 46,
+      "y1": 27,
+      "ancho_x": 10,
+      "largo_y": 10
+     },
+     "largo_en_el_eje": 10,
+     "ancho_perpendicular": 10,
+     "largo_sobre_ancho": 1.0,
+     "lado_menos_v": 7,
+     "lado_mas_v": 2,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.0,
+     "tiles": 90
+    },
+    "despues": {
+     "caja": {
+      "x0": 37,
+      "y0": 18,
+      "x1": 46,
+      "y1": 27,
+      "ancho_x": 10,
+      "largo_y": 10
+     },
+     "largo_en_el_eje": 10,
+     "ancho_perpendicular": 10,
+     "largo_sobre_ancho": 1.0,
+     "lado_menos_v": 7,
+     "lado_mas_v": 2,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.0,
+     "tiles": 90
+    },
+    "factor_tiles": 1.0,
+    "tiles_ganados": 0,
+    "pasos": {
+     "perp": 0,
+     "adelante": 0,
+     "atras": 0
+    },
+    "frenos": {
+     "perpendicular": {
+      "lado +v ((1, 0))": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "grupo 2": 5
+      },
+      "lado -v ((-1, 0))": {
+       "pilar": 1
+      }
+     },
+     "adelante": {
+      "muro minimo con pilar": 1,
+      "gate": 3,
+      "pilar": 2
+     },
+     "atras": {
+      "grupo 2": 1,
+      "gate": 3
+     }
+    },
+    "zona_de_expansion_tiles": 396,
+    "tiles_de_muro_reclamados": 0
+   },
+   "hub 23": {
+    "id": 23,
+    "antes": {
+     "caja": {
+      "x0": 8,
+      "y0": 82,
+      "x1": 18,
+      "y1": 89,
+      "ancho_x": 11,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.375,
+     "lado_menos_v": 1,
+     "lado_mas_v": 6,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.091,
+     "tiles": 65
+    },
+    "despues": {
+     "caja": {
+      "x0": 8,
+      "y0": 82,
+      "x1": 18,
+      "y1": 89,
+      "ancho_x": 11,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.375,
+     "lado_menos_v": 1,
+     "lado_mas_v": 6,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.091,
+     "tiles": 65
+    },
+    "factor_tiles": 1.0,
+    "tiles_ganados": 0,
+    "pasos": {
+     "perp": 0,
+     "adelante": 0,
+     "atras": 0
+    },
+    "frenos": {
+     "perpendicular": {
+      "lado +v ((0, -1))": "libre",
+      "lado -v ((0, 1))": {
+       "gate": 2,
+       "muro minimo con fachada": 1,
+       "muro minimo con grupo 16": 1
+      }
+     },
+     "adelante": {
+      "gate": 3,
+      "muro minimo con fachada": 1,
+      "fachada": 1
+     },
+     "atras": {
+      "muro minimo con pilar": 1,
+      "pilar": 4,
+      "gate": 3
+     }
+    },
+    "zona_de_expansion_tiles": 233,
+    "tiles_de_muro_reclamados": 0
+   },
+   "hub 24": {
+    "id": 24,
+    "antes": {
+     "caja": {
+      "x0": 39,
+      "y0": 82,
+      "x1": 49,
+      "y1": 89,
+      "ancho_x": 11,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.375,
+     "lado_menos_v": 5,
+     "lado_mas_v": 2,
+     "error_de_simetria_tiles": 3,
+     "posicion_de_la_entrada_en_el_largo": 0.0,
+     "tiles": 68
+    },
+    "despues": {
+     "caja": {
+      "x0": 39,
+      "y0": 82,
+      "x1": 49,
+      "y1": 89,
+      "ancho_x": 11,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.375,
+     "lado_menos_v": 5,
+     "lado_mas_v": 2,
+     "error_de_simetria_tiles": 3,
+     "posicion_de_la_entrada_en_el_largo": 0.0,
+     "tiles": 80
+    },
+    "factor_tiles": 1.176,
+    "tiles_ganados": 12,
+    "pasos": {
+     "perp": 0,
+     "adelante": 0,
+     "atras": 3
+    },
+    "frenos": {
+     "perpendicular": {
+      "lado +v ((0, -1))": "libre",
+      "lado -v ((0, 1))": {
+       "gate": 1,
+       "grupo 9": 1,
+       "muro minimo con grupo 9": 1
+      }
+     },
+     "adelante": {
+      "muro minimo con pilar": 1,
+      "suelo sin grupo": 2,
+      "pilar": 2,
+      "gate": 3
+     },
+     "atras": {
+      "gate": 4,
+      "muro minimo con fachada": 2
+     }
+    },
+    "zona_de_expansion_tiles": 261,
+    "tiles_de_muro_reclamados": 12
+   },
+   "hub 25": {
+    "id": 25,
+    "antes": {
+     "caja": {
+      "x0": 25,
+      "y0": 86,
+      "x1": 32,
+      "y1": 93,
+      "ancho_x": 8,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 8,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.0,
+     "lado_menos_v": 1,
+     "lado_mas_v": 6,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.125,
+     "tiles": 60
+    },
+    "despues": {
+     "caja": {
+      "x0": 25,
+      "y0": 84,
+      "x1": 32,
+      "y1": 95,
+      "ancho_x": 8,
+      "largo_y": 12
+     },
+     "largo_en_el_eje": 8,
+     "ancho_perpendicular": 12,
+     "largo_sobre_ancho": 0.667,
+     "lado_menos_v": 3,
+     "lado_mas_v": 8,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.125,
+     "tiles": 88
+    },
+    "factor_tiles": 1.467,
+    "tiles_ganados": 28,
+    "pasos": {
+     "perp": 2,
+     "adelante": 0,
+     "atras": 0
+    },
+    "frenos": {
+     "perpendicular": {
+      "lado +v ((0, -1))": "libre",
+      "lado -v ((0, 1))": {
+       "gate": 2,
+       "muro minimo con fachada": 6
+      }
+     },
+     "adelante": {
+      "muro minimo con fachada": 4,
+      "fachada": 3
+     },
+     "atras": {
+      "muro minimo con fachada": 1,
+      "fachada": 3,
+      "gate": 3
+     }
+    },
+    "zona_de_expansion_tiles": 211,
+    "tiles_de_muro_reclamados": 28
+   }
+  },
+  "suelo_de_los_5_rooms_antes": 379,
+  "suelo_de_los_5_rooms_despues": 419,
+  "factor_suelo_de_los_5_rooms": 1.106,
+  "suelo_de_grupos_antes": 1945,
+  "suelo_de_grupos_despues": 1985,
+  "empates_sin_repartir_entre_rooms_tiles": 260,
+  "condiciones": {
+   "A_estrella_misma_secuencia_de_grupos": true,
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 116,
+     "costo": 432.67,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ]
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 216,
+     "costo": 807.67,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ]
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 142,
+     "costo": 475.33,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ]
+    }
+   },
+   "G_cerrada": true,
+   "pasillos_y_no_rooms_identicos_tile_por_tile": true,
+   "solo_tiles_de_muro_reclamados": [
+    3,
+    5,
+    7
+   ],
+   "no_toca_gates_pilares_ni_fachada": true,
+   "cada_gate_une_los_mismos_grupos": true,
+   "room_original_dentro_del_nuevo": true,
+   "muro_minimo": {
+    "w_en_tiles_de_8px": 1,
+    "pares_de_grupos_por_debajo_de_min(original, w)": [],
+    "rooms_contra_pilar_o_exterior_por_debajo": [],
+    "pares_que_la_guia_original_ya_tenia_por_debajo_de_w_(grupo_a, grupo_b, grosor_de_muro_en_tiles)": [
+     [
+      0,
+      17,
+      0
+     ],
+     [
+      0,
+      18,
+      0
+     ],
+     [
+      1,
+      17,
+      0
+     ],
+     [
+      2,
+      18,
+      0
+     ],
+     [
+      9,
+      24,
+      0
+     ],
+     [
+      12,
+      17,
+      0
+     ],
+     [
+      16,
+      23,
+      0
+     ]
+    ]
+   },
+   "todas_ok": true
+  }
+ },
+ "w16": {
+  "w_tiles_de_8px": 2,
+  "w_px": 16,
+  "rooms": {
+   "hub 17": {
+    "id": 17,
+    "antes": {
+     "caja": {
+      "x0": 11,
+      "y0": 18,
+      "x1": 20,
+      "y1": 28,
+      "ancho_x": 10,
+      "largo_y": 11
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 10,
+     "largo_sobre_ancho": 1.1,
+     "lado_menos_v": 1,
+     "lado_mas_v": 8,
+     "error_de_simetria_tiles": 7,
+     "posicion_de_la_entrada_en_el_largo": 0.091,
+     "tiles": 96
+    },
+    "despues": {
+     "caja": {
+      "x0": 11,
+      "y0": 18,
+      "x1": 20,
+      "y1": 28,
+      "ancho_x": 10,
+      "largo_y": 11
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 10,
+     "largo_sobre_ancho": 1.1,
+     "lado_menos_v": 1,
+     "lado_mas_v": 8,
+     "error_de_simetria_tiles": 7,
+     "posicion_de_la_entrada_en_el_largo": 0.091,
+     "tiles": 96
+    },
+    "factor_tiles": 1.0,
+    "tiles_ganados": 0,
+    "pasos": {
+     "perp": 0,
+     "adelante": 0,
+     "atras": 0
+    },
+    "frenos": {
+     "perpendicular": {
+      "lado +v ((1, 0))": {
+       "pilar": 1,
+       "muro minimo con grupo 0": 1
+      },
+      "lado -v ((-1, 0))": {
+       "muro minimo con suelo sin grupo": 2,
+       "suelo sin grupo": 2,
+       "muro minimo con grupo 1": 1,
+       "grupo 1": 5
+      }
+     },
+     "adelante": {
+      "muro minimo con suelo sin grupo": 2,
+      "muro minimo con pilar": 2,
+      "pilar": 2,
+      "gate": 3
+     },
+     "atras": {
+      "gate": 3,
+      "muro minimo con grupo 12": 2
+     }
+    },
+    "zona_de_expansion_tiles": 230,
+    "tiles_de_muro_reclamados": 0
+   },
+   "hub 18": {
+    "id": 18,
+    "antes": {
+     "caja": {
+      "x0": 37,
+      "y0": 18,
+      "x1": 46,
+      "y1": 27,
+      "ancho_x": 10,
+      "largo_y": 10
+     },
+     "largo_en_el_eje": 10,
+     "ancho_perpendicular": 10,
+     "largo_sobre_ancho": 1.0,
+     "lado_menos_v": 7,
+     "lado_mas_v": 2,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.0,
+     "tiles": 90
+    },
+    "despues": {
+     "caja": {
+      "x0": 37,
+      "y0": 18,
+      "x1": 46,
+      "y1": 27,
+      "ancho_x": 10,
+      "largo_y": 10
+     },
+     "largo_en_el_eje": 10,
+     "ancho_perpendicular": 10,
+     "largo_sobre_ancho": 1.0,
+     "lado_menos_v": 7,
+     "lado_mas_v": 2,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.0,
+     "tiles": 90
+    },
+    "factor_tiles": 1.0,
+    "tiles_ganados": 0,
+    "pasos": {
+     "perp": 0,
+     "adelante": 0,
+     "atras": 0
+    },
+    "frenos": {
+     "perpendicular": {
+      "lado +v ((1, 0))": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "grupo 2": 5
+      },
+      "lado -v ((-1, 0))": {
+       "pilar": 1
+      }
+     },
+     "adelante": {
+      "muro minimo con pilar": 4,
+      "gate": 3,
+      "pilar": 2
+     },
+     "atras": {
+      "grupo 2": 1,
+      "muro minimo con grupo 13": 2,
+      "gate": 3
+     }
+    },
+    "zona_de_expansion_tiles": 217,
+    "tiles_de_muro_reclamados": 0
+   },
+   "hub 23": {
+    "id": 23,
+    "antes": {
+     "caja": {
+      "x0": 8,
+      "y0": 82,
+      "x1": 18,
+      "y1": 89,
+      "ancho_x": 11,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.375,
+     "lado_menos_v": 1,
+     "lado_mas_v": 6,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.091,
+     "tiles": 65
+    },
+    "despues": {
+     "caja": {
+      "x0": 8,
+      "y0": 82,
+      "x1": 18,
+      "y1": 89,
+      "ancho_x": 11,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.375,
+     "lado_menos_v": 1,
+     "lado_mas_v": 6,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.091,
+     "tiles": 65
+    },
+    "factor_tiles": 1.0,
+    "tiles_ganados": 0,
+    "pasos": {
+     "perp": 0,
+     "adelante": 0,
+     "atras": 0
+    },
+    "frenos": {
+     "perpendicular": {
+      "lado +v ((0, -1))": {
+       "muro minimo con pilar": 2
+      },
+      "lado -v ((0, 1))": {
+       "gate": 2,
+       "muro minimo con fachada": 2,
+       "muro minimo con grupo 16": 2
+      }
+     },
+     "adelante": {
+      "gate": 3,
+      "muro minimo con fachada": 2,
+      "fachada": 1
+     },
+     "atras": {
+      "muro minimo con pilar": 1,
+      "pilar": 4,
+      "gate": 3
+     }
+    },
+    "zona_de_expansion_tiles": 119,
+    "tiles_de_muro_reclamados": 0
+   },
+   "hub 24": {
+    "id": 24,
+    "antes": {
+     "caja": {
+      "x0": 39,
+      "y0": 82,
+      "x1": 49,
+      "y1": 89,
+      "ancho_x": 11,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.375,
+     "lado_menos_v": 5,
+     "lado_mas_v": 2,
+     "error_de_simetria_tiles": 3,
+     "posicion_de_la_entrada_en_el_largo": 0.0,
+     "tiles": 68
+    },
+    "despues": {
+     "caja": {
+      "x0": 39,
+      "y0": 82,
+      "x1": 49,
+      "y1": 89,
+      "ancho_x": 11,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 11,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.375,
+     "lado_menos_v": 5,
+     "lado_mas_v": 2,
+     "error_de_simetria_tiles": 3,
+     "posicion_de_la_entrada_en_el_largo": 0.0,
+     "tiles": 76
+    },
+    "factor_tiles": 1.118,
+    "tiles_ganados": 8,
+    "pasos": {
+     "perp": 0,
+     "adelante": 0,
+     "atras": 2
+    },
+    "frenos": {
+     "perpendicular": {
+      "lado +v ((0, -1))": {
+       "muro minimo con pilar": 1,
+       "muro minimo con suelo sin grupo": 1,
+       "gate": 1
+      },
+      "lado -v ((0, 1))": {
+       "gate": 1,
+       "grupo 9": 1,
+       "muro minimo con grupo 9": 2
+      }
+     },
+     "adelante": {
+      "muro minimo con pilar": 1,
+      "suelo sin grupo": 2,
+      "pilar": 2,
+      "gate": 3
+     },
+     "atras": {
+      "gate": 3,
+      "muro minimo con fachada": 3
+     }
+    },
+    "zona_de_expansion_tiles": 143,
+    "tiles_de_muro_reclamados": 8
+   },
+   "hub 25": {
+    "id": 25,
+    "antes": {
+     "caja": {
+      "x0": 25,
+      "y0": 86,
+      "x1": 32,
+      "y1": 93,
+      "ancho_x": 8,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 8,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.0,
+     "lado_menos_v": 1,
+     "lado_mas_v": 6,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.125,
+     "tiles": 60
+    },
+    "despues": {
+     "caja": {
+      "x0": 25,
+      "y0": 86,
+      "x1": 32,
+      "y1": 93,
+      "ancho_x": 8,
+      "largo_y": 8
+     },
+     "largo_en_el_eje": 8,
+     "ancho_perpendicular": 8,
+     "largo_sobre_ancho": 1.0,
+     "lado_menos_v": 1,
+     "lado_mas_v": 6,
+     "error_de_simetria_tiles": 5,
+     "posicion_de_la_entrada_en_el_largo": 0.125,
+     "tiles": 60
+    },
+    "factor_tiles": 1.0,
+    "tiles_ganados": 0,
+    "pasos": {
+     "perp": 0,
+     "adelante": 0,
+     "atras": 0
+    },
+    "frenos": {
+     "perpendicular": {
+      "lado +v ((0, -1))": "libre",
+      "lado -v ((0, 1))": {
+       "gate": 2,
+       "muro minimo con fachada": 2
+      }
+     },
+     "adelante": {
+      "muro minimo con fachada": 5,
+      "fachada": 3
+     },
+     "atras": {
+      "muro minimo con fachada": 2,
+      "fachada": 3,
+      "gate": 3
+     }
+    },
+    "zona_de_expansion_tiles": 79,
+    "tiles_de_muro_reclamados": 0
+   }
+  },
+  "suelo_de_los_5_rooms_antes": 379,
+  "suelo_de_los_5_rooms_despues": 387,
+  "factor_suelo_de_los_5_rooms": 1.021,
+  "suelo_de_grupos_antes": 1945,
+  "suelo_de_grupos_despues": 1953,
+  "empates_sin_repartir_entre_rooms_tiles": 132,
+  "condiciones": {
+   "A_estrella_misma_secuencia_de_grupos": true,
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 116,
+     "costo": 432.67,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ]
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 216,
+     "costo": 832.67,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ]
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 142,
+     "costo": 475.33,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ]
+    }
+   },
+   "G_cerrada": true,
+   "pasillos_y_no_rooms_identicos_tile_por_tile": true,
+   "solo_tiles_de_muro_reclamados": [
+    3
+   ],
+   "no_toca_gates_pilares_ni_fachada": true,
+   "cada_gate_une_los_mismos_grupos": true,
+   "room_original_dentro_del_nuevo": true,
+   "muro_minimo": {
+    "w_en_tiles_de_8px": 2,
+    "pares_de_grupos_por_debajo_de_min(original, w)": [],
+    "rooms_contra_pilar_o_exterior_por_debajo": [],
+    "pares_que_la_guia_original_ya_tenia_por_debajo_de_w_(grupo_a, grupo_b, grosor_de_muro_en_tiles)": [
+     [
+      0,
+      17,
+      0
+     ],
+     [
+      0,
+      18,
+      0
+     ],
+     [
+      1,
+      17,
+      0
+     ],
+     [
+      2,
+      18,
+      0
+     ],
+     [
+      9,
+      24,
+      0
+     ],
+     [
+      9,
+      25,
+      1
+     ],
+     [
+      10,
+      23,
+      1
+     ],
+     [
+      11,
+      24,
+      1
+     ],
+     [
+      12,
+      17,
+      0
+     ],
+     [
+      16,
+      23,
+      0
+     ]
+    ]
+   },
+   "todas_ok": true
+  }
+ },
+ "diagnostico_de_reglas": {
+  "w8": [
+   {
+    "gates_como_muesca": false,
+    "simetria_RV5": true,
+    "margen_w_al_exterior": true,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 68,
+     "25": 60
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 0,
+     "25": 0
+    },
+    "suelo_de_los_5_rooms": 379,
+    "factor_suelo_de_los_5_rooms": 1.0,
+    "pasos_por_room": {
+     "17": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "25": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "pilar": 1
+       },
+       "lado -v ((-1, 0))": {
+        "muro minimo con suelo sin grupo": 2,
+        "suelo sin grupo": 2,
+        "muro minimo con grupo 1": 1,
+        "grupo 1": 5
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 1
+      }
+     },
+     "18": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "muro minimo con pilar": 1,
+        "pilar": 4,
+        "grupo 2": 5
+       },
+       "lado -v ((-1, 0))": {
+        "pilar": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "gate": 3
+      }
+     },
+     "23": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con fachada": 1,
+        "muro minimo con grupo 16": 1
+       }
+      },
+      "adelante": {
+       "gate": 3,
+       "muro minimo con fachada": 1,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "gate": 1
+       },
+       "lado -v ((0, 1))": {
+        "gate": 1,
+        "grupo 9": 1,
+        "muro minimo con grupo 9": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3
+      }
+     },
+     "25": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2
+       }
+      },
+      "adelante": {
+       "muro minimo con fachada": 4,
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 1,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": false,
+    "simetria_RV5": true,
+    "margen_w_al_exterior": false,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 68,
+     "25": 60
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 0,
+     "25": 0
+    },
+    "suelo_de_los_5_rooms": 379,
+    "factor_suelo_de_los_5_rooms": 1.0,
+    "pasos_por_room": {
+     "17": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "25": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "pilar": 1
+       },
+       "lado -v ((-1, 0))": {
+        "muro minimo con suelo sin grupo": 2,
+        "suelo sin grupo": 2,
+        "muro minimo con grupo 1": 1,
+        "grupo 1": 5
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 1
+      }
+     },
+     "18": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "muro minimo con pilar": 1,
+        "pilar": 4,
+        "grupo 2": 5
+       },
+       "lado -v ((-1, 0))": {
+        "pilar": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "gate": 3
+      }
+     },
+     "23": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con grupo 16": 1
+       }
+      },
+      "adelante": {
+       "gate": 3,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "gate": 1
+       },
+       "lado -v ((0, 1))": {
+        "gate": 1,
+        "grupo 9": 1,
+        "muro minimo con grupo 9": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3
+      }
+     },
+     "25": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2
+       }
+      },
+      "adelante": {
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 1,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": false,
+    "simetria_RV5": false,
+    "margen_w_al_exterior": true,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 137,
+     "24": 68,
+     "25": 100
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 72,
+     "24": 0,
+     "25": 40
+    },
+    "suelo_de_los_5_rooms": 491,
+    "factor_suelo_de_los_5_rooms": 1.296,
+    "pasos_por_room": {
+     "17": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "lado +v": 9,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "25": {
+      "lado +v": 5,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "lado +v": {
+       "pilar": 1
+      },
+      "lado -v": {
+       "muro minimo con suelo sin grupo": 2,
+       "suelo sin grupo": 2,
+       "muro minimo con grupo 1": 1,
+       "grupo 1": 5
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 1
+      }
+     },
+     "18": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "grupo 2": 5
+      },
+      "lado -v": {
+       "pilar": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "gate": 3
+      }
+     },
+     "23": {
+      "lado +v": {
+       "muro minimo con grupo 19": 7
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con fachada": 1,
+       "muro minimo con grupo 16": 1
+      },
+      "adelante": {
+       "gate": 3,
+       "muro minimo con fachada": 1,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 3,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "lado +v": {
+       "gate": 1
+      },
+      "lado -v": {
+       "gate": 1,
+       "grupo 9": 1,
+       "muro minimo con grupo 9": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3
+      }
+     },
+     "25": {
+      "lado +v": {
+       "reparto con otro room": 2
+      },
+      "lado -v": {
+       "gate": 2
+      },
+      "adelante": {
+       "reparto con otro room": 1,
+       "muro minimo con fachada": 4,
+       "fachada": 3
+      },
+      "atras": {
+       "reparto con otro room": 1,
+       "muro minimo con fachada": 1,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": false,
+    "simetria_RV5": false,
+    "margen_w_al_exterior": false,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 137,
+     "24": 68,
+     "25": 100
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 72,
+     "24": 0,
+     "25": 40
+    },
+    "suelo_de_los_5_rooms": 491,
+    "factor_suelo_de_los_5_rooms": 1.296,
+    "pasos_por_room": {
+     "17": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "lado +v": 9,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "25": {
+      "lado +v": 5,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "lado +v": {
+       "pilar": 1
+      },
+      "lado -v": {
+       "muro minimo con suelo sin grupo": 2,
+       "suelo sin grupo": 2,
+       "muro minimo con grupo 1": 1,
+       "grupo 1": 5
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 1
+      }
+     },
+     "18": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "grupo 2": 5
+      },
+      "lado -v": {
+       "pilar": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "gate": 3
+      }
+     },
+     "23": {
+      "lado +v": {
+       "muro minimo con grupo 19": 7
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con grupo 16": 1
+      },
+      "adelante": {
+       "gate": 3,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 3,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "lado +v": {
+       "gate": 1
+      },
+      "lado -v": {
+       "gate": 1,
+       "grupo 9": 1,
+       "muro minimo con grupo 9": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3
+      }
+     },
+     "25": {
+      "lado +v": {
+       "reparto con otro room": 2
+      },
+      "lado -v": {
+       "gate": 2
+      },
+      "adelante": {
+       "reparto con otro room": 1,
+       "fachada": 3
+      },
+      "atras": {
+       "reparto con otro room": 1,
+       "muro minimo con fachada": 1,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": true,
+    "simetria_RV5": true,
+    "margen_w_al_exterior": true,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 80,
+     "25": 88
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 12,
+     "25": 28
+    },
+    "suelo_de_los_5_rooms": 419,
+    "factor_suelo_de_los_5_rooms": 1.106,
+    "pasos_por_room": {
+     "17": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 3
+     },
+     "25": {
+      "perp": 2,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "pilar": 1
+       },
+       "lado -v ((-1, 0))": {
+        "muro minimo con suelo sin grupo": 2,
+        "suelo sin grupo": 2,
+        "muro minimo con grupo 1": 1,
+        "grupo 1": 5
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 1
+      }
+     },
+     "18": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "muro minimo con pilar": 1,
+        "pilar": 4,
+        "grupo 2": 5
+       },
+       "lado -v ((-1, 0))": {
+        "pilar": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "gate": 3
+      }
+     },
+     "23": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con fachada": 1,
+        "muro minimo con grupo 16": 1
+       }
+      },
+      "adelante": {
+       "gate": 3,
+       "muro minimo con fachada": 1,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 1,
+        "grupo 9": 1,
+        "muro minimo con grupo 9": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 4,
+       "muro minimo con fachada": 2
+      }
+     },
+     "25": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con fachada": 6
+       }
+      },
+      "adelante": {
+       "muro minimo con fachada": 4,
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 1,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": true,
+    "simetria_RV5": true,
+    "margen_w_al_exterior": false,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 84,
+     "25": 102
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 16,
+     "25": 42
+    },
+    "suelo_de_los_5_rooms": 437,
+    "factor_suelo_de_los_5_rooms": 1.153,
+    "pasos_por_room": {
+     "17": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 4
+     },
+     "25": {
+      "perp": 3,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "pilar": 1
+       },
+       "lado -v ((-1, 0))": {
+        "muro minimo con suelo sin grupo": 2,
+        "suelo sin grupo": 2,
+        "muro minimo con grupo 1": 1,
+        "grupo 1": 5
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 1
+      }
+     },
+     "18": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "muro minimo con pilar": 1,
+        "pilar": 4,
+        "grupo 2": 5
+       },
+       "lado -v ((-1, 0))": {
+        "pilar": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "gate": 3
+      }
+     },
+     "23": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con grupo 16": 1
+       }
+      },
+      "adelante": {
+       "gate": 3,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 1,
+        "grupo 9": 1,
+        "muro minimo con grupo 9": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 4,
+       "fachada": 1
+      }
+     },
+     "25": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "fachada": 6
+       }
+      },
+      "adelante": {
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 1,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": true,
+    "simetria_RV5": false,
+    "margen_w_al_exterior": true,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 137,
+     "24": 157,
+     "25": 112
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 72,
+     "24": 89,
+     "25": 52
+    },
+    "suelo_de_los_5_rooms": 592,
+    "factor_suelo_de_los_5_rooms": 1.562,
+    "pasos_por_room": {
+     "17": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "lado +v": 9,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "lado +v": 9,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 2
+     },
+     "25": {
+      "lado +v": 5,
+      "lado -v": 2,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "lado +v": {
+       "pilar": 1
+      },
+      "lado -v": {
+       "muro minimo con suelo sin grupo": 2,
+       "suelo sin grupo": 2,
+       "muro minimo con grupo 1": 1,
+       "grupo 1": 5
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 1
+      }
+     },
+     "18": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "grupo 2": 5
+      },
+      "lado -v": {
+       "pilar": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "gate": 3
+      }
+     },
+     "23": {
+      "lado +v": {
+       "muro minimo con grupo 19": 7
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con fachada": 1,
+       "muro minimo con grupo 16": 1
+      },
+      "adelante": {
+       "gate": 3,
+       "muro minimo con fachada": 1,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 3,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "lado +v": {
+       "muro minimo con grupo 20": 7,
+       "gate": 1
+      },
+      "lado -v": {
+       "gate": 1,
+       "grupo 9": 1,
+       "muro minimo con grupo 9": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "muro minimo con pilar": 4,
+       "gate": 3
+      }
+     },
+     "25": {
+      "lado +v": {
+       "reparto con otro room": 2
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con fachada": 6
+      },
+      "adelante": {
+       "reparto con otro room": 1,
+       "muro minimo con fachada": 4,
+       "fachada": 3
+      },
+      "atras": {
+       "reparto con otro room": 1,
+       "muro minimo con fachada": 1,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": true,
+    "simetria_RV5": false,
+    "margen_w_al_exterior": false,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 137,
+     "24": 157,
+     "25": 118
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 72,
+     "24": 89,
+     "25": 58
+    },
+    "suelo_de_los_5_rooms": 598,
+    "factor_suelo_de_los_5_rooms": 1.578,
+    "pasos_por_room": {
+     "17": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "lado +v": 9,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "lado +v": 9,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 2
+     },
+     "25": {
+      "lado +v": 5,
+      "lado -v": 3,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "lado +v": {
+       "pilar": 1
+      },
+      "lado -v": {
+       "muro minimo con suelo sin grupo": 2,
+       "suelo sin grupo": 2,
+       "muro minimo con grupo 1": 1,
+       "grupo 1": 5
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 1
+      }
+     },
+     "18": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "grupo 2": 5
+      },
+      "lado -v": {
+       "pilar": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "gate": 3
+      }
+     },
+     "23": {
+      "lado +v": {
+       "muro minimo con grupo 19": 7
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con grupo 16": 1
+      },
+      "adelante": {
+       "gate": 3,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 3,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "lado +v": {
+       "muro minimo con grupo 20": 7,
+       "gate": 1
+      },
+      "lado -v": {
+       "gate": 1,
+       "grupo 9": 1,
+       "muro minimo con grupo 9": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "muro minimo con pilar": 4,
+       "gate": 3
+      }
+     },
+     "25": {
+      "lado +v": {
+       "reparto con otro room": 2
+      },
+      "lado -v": {
+       "gate": 2,
+       "fachada": 6
+      },
+      "adelante": {
+       "reparto con otro room": 1,
+       "fachada": 3
+      },
+      "atras": {
+       "reparto con otro room": 1,
+       "muro minimo con fachada": 1,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   }
+  ],
+  "w16": [
+   {
+    "gates_como_muesca": false,
+    "simetria_RV5": true,
+    "margen_w_al_exterior": true,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 68,
+     "25": 60
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 0,
+     "25": 0
+    },
+    "suelo_de_los_5_rooms": 379,
+    "factor_suelo_de_los_5_rooms": 1.0,
+    "pasos_por_room": {
+     "17": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "25": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "pilar": 1,
+        "muro minimo con grupo 0": 1
+       },
+       "lado -v ((-1, 0))": {
+        "muro minimo con suelo sin grupo": 2,
+        "suelo sin grupo": 2,
+        "muro minimo con grupo 1": 1,
+        "grupo 1": 5
+       }
+      },
+      "adelante": {
+       "muro minimo con suelo sin grupo": 2,
+       "muro minimo con pilar": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 2
+      }
+     },
+     "18": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "muro minimo con pilar": 1,
+        "pilar": 4,
+        "grupo 2": 5
+       },
+       "lado -v ((-1, 0))": {
+        "pilar": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 4,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "muro minimo con grupo 13": 2,
+       "gate": 3
+      }
+     },
+     "23": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "muro minimo con pilar": 2
+       },
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con fachada": 2,
+        "muro minimo con grupo 16": 2
+       }
+      },
+      "adelante": {
+       "gate": 3,
+       "muro minimo con fachada": 2,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "muro minimo con pilar": 1,
+        "muro minimo con suelo sin grupo": 1,
+        "gate": 1
+       },
+       "lado -v ((0, 1))": {
+        "gate": 1,
+        "grupo 9": 1,
+        "muro minimo con grupo 9": 2
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3
+      }
+     },
+     "25": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con fachada": 2
+       }
+      },
+      "adelante": {
+       "muro minimo con fachada": 5,
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 2,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": false,
+    "simetria_RV5": true,
+    "margen_w_al_exterior": false,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 68,
+     "25": 60
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 0,
+     "25": 0
+    },
+    "suelo_de_los_5_rooms": 379,
+    "factor_suelo_de_los_5_rooms": 1.0,
+    "pasos_por_room": {
+     "17": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "25": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "pilar": 1,
+        "muro minimo con grupo 0": 1
+       },
+       "lado -v ((-1, 0))": {
+        "muro minimo con suelo sin grupo": 2,
+        "suelo sin grupo": 2,
+        "muro minimo con grupo 1": 1,
+        "grupo 1": 5
+       }
+      },
+      "adelante": {
+       "muro minimo con suelo sin grupo": 2,
+       "muro minimo con pilar": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 2
+      }
+     },
+     "18": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "muro minimo con pilar": 1,
+        "pilar": 4,
+        "grupo 2": 5
+       },
+       "lado -v ((-1, 0))": {
+        "pilar": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 4,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "muro minimo con grupo 13": 2,
+       "gate": 3
+      }
+     },
+     "23": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "muro minimo con pilar": 2
+       },
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con grupo 16": 2
+       }
+      },
+      "adelante": {
+       "gate": 3,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "muro minimo con pilar": 1,
+        "muro minimo con suelo sin grupo": 1,
+        "gate": 1
+       },
+       "lado -v ((0, 1))": {
+        "gate": 1,
+        "grupo 9": 1,
+        "muro minimo con grupo 9": 2
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3
+      }
+     },
+     "25": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2
+       }
+      },
+      "adelante": {
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 2,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": false,
+    "simetria_RV5": false,
+    "margen_w_al_exterior": true,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 68,
+     "25": 84
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 0,
+     "25": 24
+    },
+    "suelo_de_los_5_rooms": 403,
+    "factor_suelo_de_los_5_rooms": 1.063,
+    "pasos_por_room": {
+     "17": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "25": {
+      "lado +v": 3,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "lado +v": {
+       "pilar": 1,
+       "muro minimo con grupo 0": 1
+      },
+      "lado -v": {
+       "muro minimo con suelo sin grupo": 2,
+       "suelo sin grupo": 2,
+       "muro minimo con grupo 1": 1,
+       "grupo 1": 5
+      },
+      "adelante": {
+       "muro minimo con suelo sin grupo": 2,
+       "muro minimo con pilar": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 2
+      }
+     },
+     "18": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "grupo 2": 5
+      },
+      "lado -v": {
+       "pilar": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 4,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "muro minimo con grupo 13": 2,
+       "gate": 3
+      }
+     },
+     "23": {
+      "lado +v": {
+       "muro minimo con pilar": 2
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con fachada": 2,
+       "muro minimo con grupo 16": 2
+      },
+      "adelante": {
+       "gate": 3,
+       "muro minimo con fachada": 2,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "muro minimo con suelo sin grupo": 1,
+       "gate": 1
+      },
+      "lado -v": {
+       "gate": 1,
+       "grupo 9": 1,
+       "muro minimo con grupo 9": 2
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3
+      }
+     },
+     "25": {
+      "lado +v": {
+       "reparto con otro room": 2
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con fachada": 2
+      },
+      "adelante": {
+       "muro minimo con fachada": 5,
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 2,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": false,
+    "simetria_RV5": false,
+    "margen_w_al_exterior": false,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 68,
+     "25": 84
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 0,
+     "25": 24
+    },
+    "suelo_de_los_5_rooms": 403,
+    "factor_suelo_de_los_5_rooms": 1.063,
+    "pasos_por_room": {
+     "17": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "25": {
+      "lado +v": 3,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "lado +v": {
+       "pilar": 1,
+       "muro minimo con grupo 0": 1
+      },
+      "lado -v": {
+       "muro minimo con suelo sin grupo": 2,
+       "suelo sin grupo": 2,
+       "muro minimo con grupo 1": 1,
+       "grupo 1": 5
+      },
+      "adelante": {
+       "muro minimo con suelo sin grupo": 2,
+       "muro minimo con pilar": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 2
+      }
+     },
+     "18": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "grupo 2": 5
+      },
+      "lado -v": {
+       "pilar": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 4,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "muro minimo con grupo 13": 2,
+       "gate": 3
+      }
+     },
+     "23": {
+      "lado +v": {
+       "muro minimo con pilar": 2
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con grupo 16": 2
+      },
+      "adelante": {
+       "gate": 3,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "muro minimo con suelo sin grupo": 1,
+       "gate": 1
+      },
+      "lado -v": {
+       "gate": 1,
+       "grupo 9": 1,
+       "muro minimo con grupo 9": 2
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3
+      }
+     },
+     "25": {
+      "lado +v": {
+       "reparto con otro room": 2
+      },
+      "lado -v": {
+       "gate": 2
+      },
+      "adelante": {
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 2,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": true,
+    "simetria_RV5": true,
+    "margen_w_al_exterior": true,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 76,
+     "25": 60
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 8,
+     "25": 0
+    },
+    "suelo_de_los_5_rooms": 387,
+    "factor_suelo_de_los_5_rooms": 1.021,
+    "pasos_por_room": {
+     "17": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 2
+     },
+     "25": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "pilar": 1,
+        "muro minimo con grupo 0": 1
+       },
+       "lado -v ((-1, 0))": {
+        "muro minimo con suelo sin grupo": 2,
+        "suelo sin grupo": 2,
+        "muro minimo con grupo 1": 1,
+        "grupo 1": 5
+       }
+      },
+      "adelante": {
+       "muro minimo con suelo sin grupo": 2,
+       "muro minimo con pilar": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 2
+      }
+     },
+     "18": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "muro minimo con pilar": 1,
+        "pilar": 4,
+        "grupo 2": 5
+       },
+       "lado -v ((-1, 0))": {
+        "pilar": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 4,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "muro minimo con grupo 13": 2,
+       "gate": 3
+      }
+     },
+     "23": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "muro minimo con pilar": 2
+       },
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con fachada": 2,
+        "muro minimo con grupo 16": 2
+       }
+      },
+      "adelante": {
+       "gate": 3,
+       "muro minimo con fachada": 2,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "muro minimo con pilar": 1,
+        "muro minimo con suelo sin grupo": 1,
+        "gate": 1
+       },
+       "lado -v ((0, 1))": {
+        "gate": 1,
+        "grupo 9": 1,
+        "muro minimo con grupo 9": 2
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con fachada": 3
+      }
+     },
+     "25": {
+      "perpendicular": {
+       "lado +v ((0, -1))": "libre",
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con fachada": 2
+       }
+      },
+      "adelante": {
+       "muro minimo con fachada": 5,
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 2,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": true,
+    "simetria_RV5": true,
+    "margen_w_al_exterior": false,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 84,
+     "25": 102
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 16,
+     "25": 42
+    },
+    "suelo_de_los_5_rooms": 437,
+    "factor_suelo_de_los_5_rooms": 1.153,
+    "pasos_por_room": {
+     "17": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "perp": 0,
+      "adelante": 0,
+      "atras": 4
+     },
+     "25": {
+      "perp": 3,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "pilar": 1,
+        "muro minimo con grupo 0": 1
+       },
+       "lado -v ((-1, 0))": {
+        "muro minimo con suelo sin grupo": 2,
+        "suelo sin grupo": 2,
+        "muro minimo con grupo 1": 1,
+        "grupo 1": 5
+       }
+      },
+      "adelante": {
+       "muro minimo con suelo sin grupo": 2,
+       "muro minimo con pilar": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 2
+      }
+     },
+     "18": {
+      "perpendicular": {
+       "lado +v ((1, 0))": {
+        "muro minimo con pilar": 1,
+        "pilar": 4,
+        "grupo 2": 5
+       },
+       "lado -v ((-1, 0))": {
+        "pilar": 1
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 4,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "muro minimo con grupo 13": 2,
+       "gate": 3
+      }
+     },
+     "23": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "muro minimo con pilar": 2
+       },
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "muro minimo con grupo 16": 2
+       }
+      },
+      "adelante": {
+       "gate": 3,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "muro minimo con pilar": 1,
+        "muro minimo con suelo sin grupo": 1,
+        "gate": 1
+       },
+       "lado -v ((0, 1))": {
+        "gate": 1,
+        "grupo 9": 1,
+        "muro minimo con grupo 9": 2
+       }
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 4,
+       "fachada": 1
+      }
+     },
+     "25": {
+      "perpendicular": {
+       "lado +v ((0, -1))": {
+        "reparto con otro room": 2
+       },
+       "lado -v ((0, 1))": {
+        "gate": 2,
+        "fachada": 6
+       }
+      },
+      "adelante": {
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 2,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": true,
+    "simetria_RV5": false,
+    "margen_w_al_exterior": true,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 76,
+     "25": 84
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 8,
+     "25": 24
+    },
+    "suelo_de_los_5_rooms": 411,
+    "factor_suelo_de_los_5_rooms": 1.084,
+    "pasos_por_room": {
+     "17": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 2
+     },
+     "25": {
+      "lado +v": 3,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "lado +v": {
+       "pilar": 1,
+       "muro minimo con grupo 0": 1
+      },
+      "lado -v": {
+       "muro minimo con suelo sin grupo": 2,
+       "suelo sin grupo": 2,
+       "muro minimo con grupo 1": 1,
+       "grupo 1": 5
+      },
+      "adelante": {
+       "muro minimo con suelo sin grupo": 2,
+       "muro minimo con pilar": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 2
+      }
+     },
+     "18": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "grupo 2": 5
+      },
+      "lado -v": {
+       "pilar": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 4,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "muro minimo con grupo 13": 2,
+       "gate": 3
+      }
+     },
+     "23": {
+      "lado +v": {
+       "muro minimo con pilar": 2
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con fachada": 2,
+       "muro minimo con grupo 16": 2
+      },
+      "adelante": {
+       "gate": 3,
+       "muro minimo con fachada": 2,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "muro minimo con suelo sin grupo": 1,
+       "gate": 1
+      },
+      "lado -v": {
+       "gate": 1,
+       "grupo 9": 1,
+       "muro minimo con grupo 9": 2
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con fachada": 3
+      }
+     },
+     "25": {
+      "lado +v": {
+       "reparto con otro room": 2
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con fachada": 2
+      },
+      "adelante": {
+       "muro minimo con fachada": 5,
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 2,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   },
+   {
+    "gates_como_muesca": true,
+    "simetria_RV5": false,
+    "margen_w_al_exterior": false,
+    "tiles_por_room": {
+     "17": 96,
+     "18": 90,
+     "23": 65,
+     "24": 84,
+     "25": 102
+    },
+    "tiles_ganados": {
+     "17": 0,
+     "18": 0,
+     "23": 0,
+     "24": 16,
+     "25": 42
+    },
+    "suelo_de_los_5_rooms": 437,
+    "factor_suelo_de_los_5_rooms": 1.153,
+    "pasos_por_room": {
+     "17": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "18": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "23": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 0
+     },
+     "24": {
+      "lado +v": 0,
+      "lado -v": 0,
+      "adelante": 0,
+      "atras": 4
+     },
+     "25": {
+      "lado +v": 3,
+      "lado -v": 3,
+      "adelante": 0,
+      "atras": 0
+     }
+    },
+    "frenos_por_room": {
+     "17": {
+      "lado +v": {
+       "pilar": 1,
+       "muro minimo con grupo 0": 1
+      },
+      "lado -v": {
+       "muro minimo con suelo sin grupo": 2,
+       "suelo sin grupo": 2,
+       "muro minimo con grupo 1": 1,
+       "grupo 1": 5
+      },
+      "adelante": {
+       "muro minimo con suelo sin grupo": 2,
+       "muro minimo con pilar": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 3,
+       "muro minimo con grupo 12": 2
+      }
+     },
+     "18": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "grupo 2": 5
+      },
+      "lado -v": {
+       "pilar": 1
+      },
+      "adelante": {
+       "muro minimo con pilar": 4,
+       "gate": 3,
+       "pilar": 2
+      },
+      "atras": {
+       "grupo 2": 1,
+       "muro minimo con grupo 13": 2,
+       "gate": 3
+      }
+     },
+     "23": {
+      "lado +v": {
+       "muro minimo con pilar": 2
+      },
+      "lado -v": {
+       "gate": 2,
+       "muro minimo con grupo 16": 2
+      },
+      "adelante": {
+       "gate": 3,
+       "fachada": 1
+      },
+      "atras": {
+       "muro minimo con pilar": 1,
+       "pilar": 4,
+       "gate": 3
+      }
+     },
+     "24": {
+      "lado +v": {
+       "muro minimo con pilar": 1,
+       "muro minimo con suelo sin grupo": 1,
+       "gate": 1
+      },
+      "lado -v": {
+       "gate": 1,
+       "grupo 9": 1,
+       "muro minimo con grupo 9": 2
+      },
+      "adelante": {
+       "muro minimo con pilar": 1,
+       "suelo sin grupo": 2,
+       "pilar": 2,
+       "gate": 3
+      },
+      "atras": {
+       "gate": 4,
+       "fachada": 1
+      }
+     },
+     "25": {
+      "lado +v": {
+       "reparto con otro room": 2
+      },
+      "lado -v": {
+       "gate": 2,
+       "fachada": 6
+      },
+      "adelante": {
+       "fachada": 3
+      },
+      "atras": {
+       "muro minimo con fachada": 2,
+       "fachada": 3,
+       "gate": 3
+      }
+     }
+    }
+   }
+  ]
+ },
+ "A_estrella_de_la_guia_original": {
+  "I": {
+   "alcanzable": true,
+   "pasos": 116,
+   "costo": 432.67,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    14,
+    19
+   ],
+   "igual_a_la_guia_D": true,
+   "grupos_de_D": [
+    16,
+    23,
+    10,
+    5,
+    14,
+    19
+   ]
+  },
+  "J": {
+   "alcanzable": true,
+   "pasos": 216,
+   "costo": 882.67,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    11,
+    24,
+    9,
+    25
+   ],
+   "igual_a_la_guia_D": true,
+   "grupos_de_D": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    11,
+    24,
+    9,
+    25
+   ]
+  },
+  "cofre2": {
+   "alcanzable": true,
+   "pasos": 142,
+   "costo": 475.33,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    15,
+    20
+   ],
+   "igual_a_la_guia_D": true,
+   "grupos_de_D": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    15,
+    20
+   ]
+  }
+ }
+}
