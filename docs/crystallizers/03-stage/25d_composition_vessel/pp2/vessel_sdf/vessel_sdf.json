@@ -1,0 +1,2592 @@
+{
+ "base": "1a7cef3",
+ "unidades": "tiles de 8 px de la guia E; muro minimo = 2 unidades (1 tile del SNES); eje de espejo i <-> 57 - i (x = 28,5)",
+ "silueta": {
+  "tiles": 4396,
+  "regla": "tiles de suelo, muro y pilares del 5F (sin fachada ni vacio) encogidos 2 unidades (Chebyshev), mas todo lo que ya era suelo o gate en la guia E (el suelo del borde sale de la silueta encogida en 170 tiles)",
+  "celdas_de_fachada_encerradas_leidas_como_muro": [
+   [
+    24,
+    88
+   ],
+   [
+    33,
+    88
+   ],
+   [
+    33,
+    89
+   ],
+   [
+    33,
+    90
+   ],
+   [
+    10,
+    89
+   ],
+   [
+    24,
+    90
+   ],
+   [
+    24,
+    92
+   ],
+   [
+    16,
+    93
+   ]
+  ]
+ },
+ "gris_muerta_original": {
+  "total": 920,
+  "por_parte": {
+   "norte": 338,
+   "otras (gates)": 40,
+   "islas": 277,
+   "herradura": 265
+  }
+ },
+ "grosor_de_muro_original": {
+  "pares_vecinos_con_muro": 47,
+  "mediana_tiles": 6.0,
+  "minimo_tiles": 1,
+  "pares_que_se_tocan_(gates_y_pasillos)": 17
+ },
+ "error_de_espejo_original": {
+  "H23": {
+   "tiles_A": 65,
+   "tiles_B": 68,
+   "tiles_que_no_coinciden": 9,
+   "fraccion": 0.0677
+  },
+  "N17": {
+   "tiles_A": 130,
+   "tiles_B": 131,
+   "tiles_que_no_coinciden": 5,
+   "fraccion": 0.0192
+  },
+  "I19": {
+   "tiles_A": 143,
+   "tiles_B": 139,
+   "tiles_que_no_coinciden": 10,
+   "fraccion": 0.0355
+  },
+  "X5": {
+   "tiles_A": 179,
+   "tiles_B": 89,
+   "tiles_que_no_coinciden": 96,
+   "fraccion": 0.3582
+  },
+  "Y12": {
+   "tiles_A": 49,
+   "tiles_B": 49,
+   "tiles_que_no_coinciden": 2,
+   "fraccion": 0.0204
+  },
+  "Y14": {
+   "tiles_A": 24,
+   "tiles_B": 24,
+   "tiles_que_no_coinciden": 0,
+   "fraccion": 0.0
+  },
+  "X0 (consigo mismo)": {
+   "tiles_A": 107,
+   "tiles_B": 107,
+   "tiles_que_no_coinciden": 10,
+   "fraccion": 0.0467
+  },
+  "X3 (consigo mismo)": {
+   "tiles_A": 70,
+   "tiles_B": 70,
+   "tiles_que_no_coinciden": 12,
+   "fraccion": 0.0857
+  },
+  "X4 (consigo mismo)": {
+   "tiles_A": 67,
+   "tiles_B": 67,
+   "tiles_que_no_coinciden": 6,
+   "fraccion": 0.0448
+  },
+  "hub 25 (consigo mismo)": {
+   "tiles_A": 60,
+   "tiles_B": 60,
+   "tiles_que_no_coinciden": 8,
+   "fraccion": 0.0667
+  },
+  "Y10 y grupo 11 (las patas)": {
+   "tiles_A": 209,
+   "tiles_B": 298,
+   "tiles_que_no_coinciden": 89,
+   "fraccion": 0.1755
+  }
+ },
+ "A": {
+  "extraidos": [
+   "pasillos Y12, Y13, Y14, Y15, X9 (con los tiles de sus gates)",
+   "hubs 19, 20 y 25 reservados para recolocar"
+  ],
+  "etapas_rondas": {
+   "1_herradura_ext": {
+    "H16": 2,
+    "H23": 2,
+    "H10": 0,
+    "H5": 12,
+    "H4": 6,
+    "H6": 12,
+    "H11": 12,
+    "H24": 2
+   },
+   "2_herradura_int": {
+    "H16": 3,
+    "H23": 9,
+    "H10": 5,
+    "H5": 6,
+    "H4": 0,
+    "H6": 6,
+    "H11": 6,
+    "H24": 12
+   },
+   "3_norte": {
+    "X0": 6,
+    "X3": 6,
+    "N17": 6,
+    "N18": 6
+   },
+   "4_islas": {
+    "I19": 2,
+    "I20": 2,
+    "I25": 10
+   }
+  },
+  "grupos": {
+   "0": {
+    "nombre": "pasillo X 0",
+    "parte": "norte",
+    "tiles_antes": 107,
+    "tiles_despues": 214,
+    "factor": 2.0,
+    "caja_antes": {
+     "x0": 17,
+     "y0": 10,
+     "x1": 40,
+     "y1": 17,
+     "ancho": 24,
+     "largo": 8
+    },
+    "caja_despues": {
+     "x0": 15,
+     "y0": 6,
+     "x1": 42,
+     "y1": 17,
+     "ancho": 28,
+     "largo": 12
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 2,
+     "este": 2,
+     "norte": 4,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 107,
+     "1_herradura_ext": 107,
+     "2_herradura_int": 107,
+     "3_norte": 214,
+     "4_islas": 214,
+     "5_final": 214
+    }
+   },
+   "1": {
+    "nombre": "pasillo X 1",
+    "parte": "norte",
+    "tiles_antes": 34,
+    "tiles_despues": 79,
+    "factor": 2.324,
+    "caja_antes": {
+     "x0": 5,
+     "y0": 22,
+     "x1": 10,
+     "y1": 27,
+     "ancho": 6,
+     "largo": 6
+    },
+    "caja_despues": {
+     "x0": 3,
+     "y0": 16,
+     "x1": 10,
+     "y1": 27,
+     "ancho": 8,
+     "largo": 12
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 2,
+     "este": 0,
+     "norte": 6,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 34,
+     "1_herradura_ext": 34,
+     "2_herradura_int": 34,
+     "3_norte": 79,
+     "4_islas": 79,
+     "5_final": 79
+    }
+   },
+   "2": {
+    "nombre": "pasillo X 2",
+    "parte": "norte",
+    "tiles_antes": 41,
+    "tiles_despues": 79,
+    "factor": 1.927,
+    "caja_antes": {
+     "x0": 46,
+     "y0": 22,
+     "x1": 52,
+     "y1": 29,
+     "ancho": 7,
+     "largo": 8
+    },
+    "caja_despues": {
+     "x0": 46,
+     "y0": 16,
+     "x1": 54,
+     "y1": 29,
+     "ancho": 9,
+     "largo": 14
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 2,
+     "norte": 6,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 41,
+     "1_herradura_ext": 41,
+     "2_herradura_int": 41,
+     "3_norte": 79,
+     "4_islas": 79,
+     "5_final": 79
+    }
+   },
+   "3": {
+    "nombre": "pasillo X 3",
+    "parte": "norte",
+    "tiles_antes": 70,
+    "tiles_despues": 125,
+    "factor": 1.786,
+    "caja_antes": {
+     "x0": 25,
+     "y0": 24,
+     "x1": 32,
+     "y1": 33,
+     "ancho": 8,
+     "largo": 10
+    },
+    "caja_despues": {
+     "x0": 24,
+     "y0": 18,
+     "x1": 33,
+     "y1": 33,
+     "ancho": 10,
+     "largo": 16
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 1,
+     "este": 1,
+     "norte": 6,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 70,
+     "1_herradura_ext": 70,
+     "2_herradura_int": 70,
+     "3_norte": 125,
+     "4_islas": 125,
+     "5_final": 125
+    }
+   },
+   "4": {
+    "nombre": "pasillo X 4",
+    "parte": "herradura",
+    "tiles_antes": 67,
+    "tiles_despues": 139,
+    "factor": 2.075,
+    "caja_antes": {
+     "x0": 23,
+     "y0": 42,
+     "x1": 34,
+     "y1": 48,
+     "ancho": 12,
+     "largo": 7
+    },
+    "caja_despues": {
+     "x0": 23,
+     "y0": 36,
+     "x1": 34,
+     "y1": 48,
+     "ancho": 12,
+     "largo": 13
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 0,
+     "norte": 6,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 67,
+     "1_herradura_ext": 139,
+     "2_herradura_int": 139,
+     "3_norte": 139,
+     "4_islas": 139,
+     "5_final": 139
+    }
+   },
+   "5": {
+    "nombre": "pasillo X 5",
+    "parte": "herradura",
+    "tiles_antes": 179,
+    "tiles_despues": 498,
+    "factor": 2.782,
+    "caja_antes": {
+     "x0": 3,
+     "y0": 42,
+     "x1": 26,
+     "y1": 55,
+     "ancho": 24,
+     "largo": 14
+    },
+    "caja_despues": {
+     "x0": 3,
+     "y0": 30,
+     "x1": 27,
+     "y1": 59,
+     "ancho": 25,
+     "largo": 30
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 1,
+     "norte": 12,
+     "sur": 4
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 179,
+     "1_herradura_ext": 387,
+     "2_herradura_int": 498,
+     "3_norte": 498,
+     "4_islas": 498,
+     "5_final": 498
+    }
+   },
+   "6": {
+    "nombre": "pasillo X 6",
+    "parte": "herradura",
+    "tiles_antes": 89,
+    "tiles_despues": 245,
+    "factor": 2.753,
+    "caja_antes": {
+     "x0": 31,
+     "y0": 42,
+     "x1": 44,
+     "y1": 55,
+     "ancho": 14,
+     "largo": 14
+    },
+    "caja_despues": {
+     "x0": 30,
+     "y0": 30,
+     "x1": 44,
+     "y1": 59,
+     "ancho": 15,
+     "largo": 30
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 1,
+     "este": 0,
+     "norte": 12,
+     "sur": 4
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 89,
+     "1_herradura_ext": 163,
+     "2_herradura_int": 245,
+     "3_norte": 245,
+     "4_islas": 245,
+     "5_final": 245
+    }
+   },
+   "9": {
+    "nombre": "pasillo X 9",
+    "parte": "islas",
+    "tiles_antes": 25,
+    "tiles_despues": 16,
+    "factor": 0.64,
+    "caja_antes": {
+     "x0": 34,
+     "y0": 90,
+     "x1": 40,
+     "y1": 93,
+     "ancho": 7,
+     "largo": 4
+    },
+    "caja_despues": {
+     "x0": 35,
+     "y0": 91,
+     "x1": 38,
+     "y1": 94,
+     "ancho": 4,
+     "largo": 4
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": -1,
+     "este": -2,
+     "norte": -1,
+     "sur": 1
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 0,
+     "1_herradura_ext": 0,
+     "2_herradura_int": 0,
+     "3_norte": 0,
+     "4_islas": 0,
+     "5_final": 16
+    }
+   },
+   "10": {
+    "nombre": "pasillo Y 10",
+    "parte": "herradura",
+    "tiles_antes": 209,
+    "tiles_despues": 298,
+    "factor": 1.426,
+    "caja_antes": {
+     "x0": 1,
+     "y0": 49,
+     "x1": 6,
+     "y1": 83,
+     "ancho": 6,
+     "largo": 35
+    },
+    "caja_despues": {
+     "x0": 1,
+     "y0": 49,
+     "x1": 10,
+     "y1": 83,
+     "ancho": 10,
+     "largo": 35
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 4,
+     "norte": 0,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 209,
+     "1_herradura_ext": 209,
+     "2_herradura_int": 298,
+     "3_norte": 298,
+     "4_islas": 298,
+     "5_final": 298
+    }
+   },
+   "11": {
+    "nombre": "grupo 11",
+    "parte": "herradura",
+    "tiles_antes": 298,
+    "tiles_despues": 533,
+    "factor": 1.789,
+    "caja_antes": {
+     "x0": 45,
+     "y0": 42,
+     "x1": 56,
+     "y1": 85,
+     "ancho": 12,
+     "largo": 44
+    },
+    "caja_despues": {
+     "x0": 43,
+     "y0": 30,
+     "x1": 56,
+     "y1": 85,
+     "ancho": 14,
+     "largo": 56
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 2,
+     "este": 0,
+     "norte": 12,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 298,
+     "1_herradura_ext": 408,
+     "2_herradura_int": 533,
+     "3_norte": 533,
+     "4_islas": 533,
+     "5_final": 533
+    }
+   },
+   "12": {
+    "nombre": "pasillo Y 12",
+    "parte": "islas",
+    "tiles_antes": 49,
+    "tiles_despues": 11,
+    "factor": 0.224,
+    "caja_antes": {
+     "x0": 11,
+     "y0": 29,
+     "x1": 14,
+     "y1": 41,
+     "ancho": 4,
+     "largo": 13
+    },
+    "caja_despues": {
+     "x0": 12,
+     "y0": 28,
+     "x1": 15,
+     "y1": 30,
+     "ancho": 4,
+     "largo": 3
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": -1,
+     "este": 1,
+     "norte": 1,
+     "sur": -11
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 0,
+     "1_herradura_ext": 0,
+     "2_herradura_int": 0,
+     "3_norte": 0,
+     "4_islas": 0,
+     "5_final": 11
+    }
+   },
+   "13": {
+    "nombre": "pasillo Y 13",
+    "parte": "islas",
+    "tiles_antes": 49,
+    "tiles_despues": 8,
+    "factor": 0.163,
+    "caja_antes": {
+     "x0": 43,
+     "y0": 30,
+     "x1": 46,
+     "y1": 42,
+     "ancho": 4,
+     "largo": 13
+    },
+    "caja_despues": {
+     "x0": 39,
+     "y0": 28,
+     "x1": 42,
+     "y1": 29,
+     "ancho": 4,
+     "largo": 2
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 4,
+     "este": -4,
+     "norte": 2,
+     "sur": -13
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 0,
+     "1_herradura_ext": 0,
+     "2_herradura_int": 0,
+     "3_norte": 0,
+     "4_islas": 0,
+     "5_final": 8
+    }
+   },
+   "14": {
+    "nombre": "pasillo Y 14",
+    "parte": "islas",
+    "tiles_antes": 24,
+    "tiles_despues": 8,
+    "factor": 0.333,
+    "caja_antes": {
+     "x0": 19,
+     "y0": 56,
+     "x1": 22,
+     "y1": 61,
+     "ancho": 4,
+     "largo": 6
+    },
+    "caja_despues": {
+     "x0": 19,
+     "y0": 60,
+     "x1": 22,
+     "y1": 61,
+     "ancho": 4,
+     "largo": 2
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 0,
+     "norte": -4,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 0,
+     "1_herradura_ext": 0,
+     "2_herradura_int": 0,
+     "3_norte": 0,
+     "4_islas": 0,
+     "5_final": 8
+    }
+   },
+   "15": {
+    "nombre": "pasillo Y 15",
+    "parte": "islas",
+    "tiles_antes": 24,
+    "tiles_despues": 8,
+    "factor": 0.333,
+    "caja_antes": {
+     "x0": 35,
+     "y0": 56,
+     "x1": 38,
+     "y1": 61,
+     "ancho": 4,
+     "largo": 6
+    },
+    "caja_despues": {
+     "x0": 35,
+     "y0": 60,
+     "x1": 38,
+     "y1": 61,
+     "ancho": 4,
+     "largo": 2
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 0,
+     "norte": -4,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 0,
+     "1_herradura_ext": 0,
+     "2_herradura_int": 0,
+     "3_norte": 0,
+     "4_islas": 0,
+     "5_final": 8
+    }
+   },
+   "16": {
+    "nombre": "pasillo Y 16",
+    "parte": "herradura",
+    "tiles_antes": 19,
+    "tiles_despues": 37,
+    "factor": 1.947,
+    "caja_antes": {
+     "x0": 17,
+     "y0": 87,
+     "x1": 20,
+     "y1": 93,
+     "ancho": 4,
+     "largo": 7
+    },
+    "caja_despues": {
+     "x0": 17,
+     "y0": 87,
+     "x1": 22,
+     "y1": 94,
+     "ancho": 6,
+     "largo": 8
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 2,
+     "norte": 0,
+     "sur": 1
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 19,
+     "1_herradura_ext": 23,
+     "2_herradura_int": 37,
+     "3_norte": 37,
+     "4_islas": 37,
+     "5_final": 37
+    }
+   },
+   "17": {
+    "nombre": "hub 17",
+    "parte": "norte",
+    "tiles_antes": 96,
+    "tiles_despues": 129,
+    "factor": 1.344,
+    "caja_antes": {
+     "x0": 11,
+     "y0": 18,
+     "x1": 20,
+     "y1": 28,
+     "ancho": 10,
+     "largo": 11
+    },
+    "caja_despues": {
+     "x0": 6,
+     "y0": 15,
+     "x1": 21,
+     "y1": 28,
+     "ancho": 16,
+     "largo": 14
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 5,
+     "este": 1,
+     "norte": 3,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 96,
+     "1_herradura_ext": 96,
+     "2_herradura_int": 96,
+     "3_norte": 129,
+     "4_islas": 129,
+     "5_final": 129
+    }
+   },
+   "18": {
+    "nombre": "hub 18",
+    "parte": "norte",
+    "tiles_antes": 90,
+    "tiles_despues": 127,
+    "factor": 1.411,
+    "caja_antes": {
+     "x0": 37,
+     "y0": 18,
+     "x1": 46,
+     "y1": 27,
+     "ancho": 10,
+     "largo": 10
+    },
+    "caja_despues": {
+     "x0": 36,
+     "y0": 15,
+     "x1": 52,
+     "y1": 27,
+     "ancho": 17,
+     "largo": 13
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 1,
+     "este": 6,
+     "norte": 3,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 90,
+     "1_herradura_ext": 90,
+     "2_herradura_int": 90,
+     "3_norte": 127,
+     "4_islas": 127,
+     "5_final": 127
+    }
+   },
+   "19": {
+    "nombre": "hub 19",
+    "parte": "islas",
+    "tiles_antes": 143,
+    "tiles_despues": 158,
+    "factor": 1.105,
+    "caja_antes": {
+     "x0": 13,
+     "y0": 62,
+     "x1": 26,
+     "y1": 75,
+     "ancho": 14,
+     "largo": 14
+    },
+    "caja_despues": {
+     "x0": 13,
+     "y0": 62,
+     "x1": 27,
+     "y1": 75,
+     "ancho": 15,
+     "largo": 14
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 1,
+     "norte": 0,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 143,
+     "1_herradura_ext": 143,
+     "2_herradura_int": 143,
+     "3_norte": 143,
+     "4_islas": 158,
+     "5_final": 158
+    }
+   },
+   "20": {
+    "nombre": "hub 20",
+    "parte": "islas",
+    "tiles_antes": 139,
+    "tiles_despues": 156,
+    "factor": 1.122,
+    "caja_antes": {
+     "x0": 31,
+     "y0": 62,
+     "x1": 44,
+     "y1": 75,
+     "ancho": 14,
+     "largo": 14
+    },
+    "caja_despues": {
+     "x0": 30,
+     "y0": 62,
+     "x1": 44,
+     "y1": 75,
+     "ancho": 15,
+     "largo": 14
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 1,
+     "este": 0,
+     "norte": 0,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 139,
+     "1_herradura_ext": 139,
+     "2_herradura_int": 139,
+     "3_norte": 139,
+     "4_islas": 156,
+     "5_final": 156
+    }
+   },
+   "23": {
+    "nombre": "hub 23",
+    "parte": "herradura",
+    "tiles_antes": 65,
+    "tiles_despues": 178,
+    "factor": 2.738,
+    "caja_antes": {
+     "x0": 8,
+     "y0": 82,
+     "x1": 18,
+     "y1": 89,
+     "ancho": 11,
+     "largo": 8
+    },
+    "caja_despues": {
+     "x0": 8,
+     "y0": 74,
+     "x1": 27,
+     "y1": 90,
+     "ancho": 20,
+     "largo": 17
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 9,
+     "norte": 8,
+     "sur": 1
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 65,
+     "1_herradura_ext": 65,
+     "2_herradura_int": 178,
+     "3_norte": 178,
+     "4_islas": 178,
+     "5_final": 178
+    }
+   },
+   "24": {
+    "nombre": "hub 24",
+    "parte": "herradura",
+    "tiles_antes": 68,
+    "tiles_despues": 196,
+    "factor": 2.882,
+    "caja_antes": {
+     "x0": 39,
+     "y0": 82,
+     "x1": 49,
+     "y1": 89,
+     "ancho": 11,
+     "largo": 8
+    },
+    "caja_despues": {
+     "x0": 30,
+     "y0": 74,
+     "x1": 49,
+     "y1": 90,
+     "ancho": 20,
+     "largo": 17
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 9,
+     "este": 0,
+     "norte": 8,
+     "sur": 1
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 68,
+     "1_herradura_ext": 71,
+     "2_herradura_int": 196,
+     "3_norte": 196,
+     "4_islas": 196,
+     "5_final": 196
+    }
+   },
+   "25": {
+    "nombre": "hub 25",
+    "parte": "islas",
+    "tiles_antes": 60,
+    "tiles_despues": 85,
+    "factor": 1.417,
+    "caja_antes": {
+     "x0": 25,
+     "y0": 86,
+     "x1": 32,
+     "y1": 93,
+     "ancho": 8,
+     "largo": 8
+    },
+    "caja_despues": {
+     "x0": 25,
+     "y0": 86,
+     "x1": 34,
+     "y1": 94,
+     "ancho": 10,
+     "largo": 9
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 2,
+     "norte": 0,
+     "sur": 1
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 60,
+     "1_herradura_ext": 60,
+     "2_herradura_int": 60,
+     "3_norte": 60,
+     "4_islas": 85,
+     "5_final": 85
+    }
+   }
+  },
+  "paso_5": {
+   "Y12": {
+    "corredor": "Y12",
+    "orientacion": "v",
+    "ancho": 4,
+    "isla": "N17",
+    "host": "X5",
+    "desplazamientos_de_la_isla": [],
+    "encogimientos_de_la_isla_unidades": 0,
+    "alineado_a_la_primera": false,
+    "inicio_pedido": 12,
+    "alineacion_lograda_moviendo_o_encogiendo": false,
+    "trazado": "recto",
+    "inicio_ideal_por_el_eje_del_host": 12,
+    "desvio_del_gate_respecto_del_ideal_tiles": 0,
+    "desvio_respecto_del_eje_de_la_isla_tiles": 1.5,
+    "desvio_respecto_del_eje_del_host_tiles": 0.5,
+    "colocado": true,
+    "inicio_final": 12
+   },
+   "Y14": {
+    "corredor": "Y14",
+    "orientacion": "v",
+    "ancho": 4,
+    "isla": "I19",
+    "host": "X5",
+    "desplazamientos_de_la_isla": [],
+    "encogimientos_de_la_isla_unidades": 0,
+    "alineado_a_la_primera": true,
+    "inicio_pedido": 20,
+    "trazado": "recto",
+    "inicio_ideal_por_el_eje_del_host": 20,
+    "desvio_del_gate_respecto_del_ideal_tiles": -1,
+    "desvio_respecto_del_eje_de_la_isla_tiles": -0.5,
+    "desvio_respecto_del_eje_del_host_tiles": -0.5,
+    "colocado": true,
+    "inicio_final": 19
+   },
+   "Y13": {
+    "corredor": "Y13",
+    "orientacion": "v",
+    "ancho": 4,
+    "isla": "N18",
+    "host": "X6",
+    "desplazamientos_de_la_isla": [],
+    "encogimientos_de_la_isla_unidades": 0,
+    "alineado_a_la_primera": false,
+    "inicio_pedido": 42,
+    "alineacion_lograda_moviendo_o_encogiendo": false,
+    "trazado": "recto",
+    "inicio_ideal_por_el_eje_del_host": 42,
+    "desvio_del_gate_respecto_del_ideal_tiles": -3,
+    "desvio_respecto_del_eje_de_la_isla_tiles": -4.5,
+    "desvio_respecto_del_eje_del_host_tiles": -3.5,
+    "colocado": true,
+    "inicio_final": 39
+   },
+   "Y15": {
+    "corredor": "Y15",
+    "orientacion": "v",
+    "ancho": 4,
+    "isla": "I20",
+    "host": "X6",
+    "desplazamientos_de_la_isla": [],
+    "encogimientos_de_la_isla_unidades": 0,
+    "alineado_a_la_primera": true,
+    "inicio_pedido": 35,
+    "trazado": "recto",
+    "inicio_ideal_por_el_eje_del_host": 35,
+    "desvio_del_gate_respecto_del_ideal_tiles": 0,
+    "desvio_respecto_del_eje_de_la_isla_tiles": 0.5,
+    "desvio_respecto_del_eje_del_host_tiles": 0.5,
+    "colocado": true,
+    "inicio_final": 35
+   },
+   "X9": {
+    "corredor": "X9",
+    "orientacion": "h",
+    "ancho": 4,
+    "isla": "I25",
+    "host": "H24",
+    "desplazamientos_de_la_isla": [],
+    "encogimientos_de_la_isla_unidades": 0,
+    "alineado_a_la_primera": false,
+    "inicio_pedido": 87,
+    "alineacion_lograda_moviendo_o_encogiendo": false,
+    "trazado": "brocha 4x4 (recorrido con giros)",
+    "ancho_logrado": 4,
+    "colocado": true,
+    "inicio_final": null
+   }
+  },
+  "suelo_antes": 1945,
+  "suelo_despues": 3327,
+  "suelo_con_gates_antes": 2112,
+  "suelo_con_gates_despues": 3444,
+  "gris_muerta": {
+   "antes": {
+    "total": 920,
+    "por_parte": {
+     "norte": 338,
+     "otras (gates)": 40,
+     "islas": 277,
+     "herradura": 265
+    }
+   },
+   "despues": {
+    "total": 13,
+    "por_parte": {
+     "norte": 8,
+     "herradura": 4,
+     "islas": 1
+    }
+   }
+  },
+  "grosor_de_muro": {
+   "antes": {
+    "pares_vecinos_con_muro": 47,
+    "mediana_tiles": 6.0,
+    "minimo_tiles": 1,
+    "pares_que_se_tocan_(gates_y_pasillos)": 17
+   },
+   "despues": {
+    "pares_vecinos_con_muro": 61,
+    "mediana_tiles": 3.0,
+    "minimo_tiles": 1,
+    "pares_que_se_tocan_(gates_y_pasillos)": 19
+   }
+  },
+  "error_de_espejo": {
+   "antes": {
+    "H23": {
+     "tiles_A": 65,
+     "tiles_B": 68,
+     "tiles_que_no_coinciden": 9,
+     "fraccion": 0.0677
+    },
+    "N17": {
+     "tiles_A": 130,
+     "tiles_B": 131,
+     "tiles_que_no_coinciden": 5,
+     "fraccion": 0.0192
+    },
+    "I19": {
+     "tiles_A": 143,
+     "tiles_B": 139,
+     "tiles_que_no_coinciden": 10,
+     "fraccion": 0.0355
+    },
+    "X5": {
+     "tiles_A": 179,
+     "tiles_B": 89,
+     "tiles_que_no_coinciden": 96,
+     "fraccion": 0.3582
+    },
+    "Y12": {
+     "tiles_A": 49,
+     "tiles_B": 49,
+     "tiles_que_no_coinciden": 2,
+     "fraccion": 0.0204
+    },
+    "Y14": {
+     "tiles_A": 24,
+     "tiles_B": 24,
+     "tiles_que_no_coinciden": 0,
+     "fraccion": 0.0
+    },
+    "X0 (consigo mismo)": {
+     "tiles_A": 107,
+     "tiles_B": 107,
+     "tiles_que_no_coinciden": 10,
+     "fraccion": 0.0467
+    },
+    "X3 (consigo mismo)": {
+     "tiles_A": 70,
+     "tiles_B": 70,
+     "tiles_que_no_coinciden": 12,
+     "fraccion": 0.0857
+    },
+    "X4 (consigo mismo)": {
+     "tiles_A": 67,
+     "tiles_B": 67,
+     "tiles_que_no_coinciden": 6,
+     "fraccion": 0.0448
+    },
+    "hub 25 (consigo mismo)": {
+     "tiles_A": 60,
+     "tiles_B": 60,
+     "tiles_que_no_coinciden": 8,
+     "fraccion": 0.0667
+    },
+    "Y10 y grupo 11 (las patas)": {
+     "tiles_A": 209,
+     "tiles_B": 298,
+     "tiles_que_no_coinciden": 89,
+     "fraccion": 0.1755
+    }
+   },
+   "despues": {
+    "H23": {
+     "tiles_A": 178,
+     "tiles_B": 196,
+     "tiles_que_no_coinciden": 40,
+     "fraccion": 0.107
+    },
+    "N17": {
+     "tiles_A": 208,
+     "tiles_B": 206,
+     "tiles_que_no_coinciden": 14,
+     "fraccion": 0.0338
+    },
+    "I19": {
+     "tiles_A": 158,
+     "tiles_B": 156,
+     "tiles_que_no_coinciden": 10,
+     "fraccion": 0.0318
+    },
+    "X5": {
+     "tiles_A": 498,
+     "tiles_B": 245,
+     "tiles_que_no_coinciden": 273,
+     "fraccion": 0.3674
+    },
+    "Y12": {
+     "tiles_A": 11,
+     "tiles_B": 8,
+     "tiles_que_no_coinciden": 15,
+     "fraccion": 0.7895
+    },
+    "Y14": {
+     "tiles_A": 8,
+     "tiles_B": 8,
+     "tiles_que_no_coinciden": 0,
+     "fraccion": 0.0
+    },
+    "X0 (consigo mismo)": {
+     "tiles_A": 214,
+     "tiles_B": 214,
+     "tiles_que_no_coinciden": 16,
+     "fraccion": 0.0374
+    },
+    "X3 (consigo mismo)": {
+     "tiles_A": 125,
+     "tiles_B": 125,
+     "tiles_que_no_coinciden": 26,
+     "fraccion": 0.104
+    },
+    "X4 (consigo mismo)": {
+     "tiles_A": 139,
+     "tiles_B": 139,
+     "tiles_que_no_coinciden": 6,
+     "fraccion": 0.0216
+    },
+    "hub 25 (consigo mismo)": {
+     "tiles_A": 85,
+     "tiles_B": 85,
+     "tiles_que_no_coinciden": 26,
+     "fraccion": 0.1529
+    },
+    "Y10 y grupo 11 (las patas)": {
+     "tiles_A": 298,
+     "tiles_B": 533,
+     "tiles_que_no_coinciden": 235,
+     "fraccion": 0.2828
+    }
+   }
+  },
+  "condiciones": {
+   "A_estrella_misma_secuencia_de_grupos": true,
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 114,
+     "costo": 322.33,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ]
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 208,
+     "costo": 574.67,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ]
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 140,
+     "costo": 348.33,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ]
+    }
+   },
+   "G_cerrada": true,
+   "escaleras_y_cofre_siguen_en_suelo": true,
+   "muro_minimo_2_unidades": {
+    "pares_por_debajo_de_min(original, 3)": [],
+    "pares_unidos_por_un_pasillo_recolocado_(se_tocan_por_diseno)": [
+     [
+      1,
+      12
+     ],
+     [
+      2,
+      13
+     ],
+     [
+      5,
+      12
+     ],
+     [
+      5,
+      14
+     ],
+     [
+      6,
+      13
+     ],
+     [
+      6,
+      15
+     ],
+     [
+      9,
+      24
+     ],
+     [
+      9,
+      25
+     ],
+     [
+      12,
+      17
+     ],
+     [
+      13,
+      18
+     ],
+     [
+      14,
+      19
+     ],
+     [
+      15,
+      20
+     ]
+    ]
+   },
+   "tiles_nuevos_fuera_de_la_silueta": 0,
+   "tiles_nuevos_sobre_pilares": 0,
+   "todas_ok": true
+  }
+ },
+ "B": {
+  "extraidos": [
+   "pasillos Y12, Y13, Y14, Y15, X9 (con los tiles de sus gates)",
+   "hubs 17, 18, 19, 20 y 25 con X1 y X2 reservados para recolocar"
+  ],
+  "etapas_rondas": {
+   "1_todo_a_la_vez": {
+    "H16": 3,
+    "H23": 9,
+    "H10": 5,
+    "H5": 12,
+    "H4": 3,
+    "H6": 10,
+    "H11": 12,
+    "H24": 12,
+    "X0": 14,
+    "X3": 9
+   },
+   "4_islas": {
+    "N17": 2,
+    "N18": 3,
+    "I19": 2,
+    "I20": 2,
+    "I25": 2
+   }
+  },
+  "grupos": {
+   "0": {
+    "nombre": "pasillo X 0",
+    "parte": "norte",
+    "tiles_antes": 107,
+    "tiles_despues": 347,
+    "factor": 3.243,
+    "caja_antes": {
+     "x0": 17,
+     "y0": 10,
+     "x1": 40,
+     "y1": 17,
+     "ancho": 24,
+     "largo": 8
+    },
+    "caja_despues": {
+     "x0": 3,
+     "y0": 6,
+     "x1": 54,
+     "y1": 19,
+     "ancho": 52,
+     "largo": 14
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 14,
+     "este": 14,
+     "norte": 4,
+     "sur": 2
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 107,
+     "1_todo_a_la_vez": 347,
+     "4_islas": 347,
+     "5_final": 347
+    }
+   },
+   "1": {
+    "nombre": "pasillo X 1",
+    "parte": "norte",
+    "tiles_antes": 34,
+    "tiles_despues": 38,
+    "factor": 1.118,
+    "caja_antes": {
+     "x0": 5,
+     "y0": 22,
+     "x1": 10,
+     "y1": 27,
+     "ancho": 6,
+     "largo": 6
+    },
+    "caja_despues": {
+     "x0": 4,
+     "y0": 22,
+     "x1": 10,
+     "y1": 27,
+     "ancho": 7,
+     "largo": 6
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 1,
+     "este": 0,
+     "norte": 0,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 34,
+     "1_todo_a_la_vez": 34,
+     "4_islas": 47,
+     "5_final": 38
+    }
+   },
+   "2": {
+    "nombre": "pasillo X 2",
+    "parte": "norte",
+    "tiles_antes": 41,
+    "tiles_despues": 53,
+    "factor": 1.293,
+    "caja_antes": {
+     "x0": 46,
+     "y0": 22,
+     "x1": 52,
+     "y1": 29,
+     "ancho": 7,
+     "largo": 8
+    },
+    "caja_despues": {
+     "x0": 46,
+     "y0": 22,
+     "x1": 54,
+     "y1": 29,
+     "ancho": 9,
+     "largo": 8
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 2,
+     "norte": 0,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 41,
+     "1_todo_a_la_vez": 41,
+     "4_islas": 53,
+     "5_final": 53
+    }
+   },
+   "3": {
+    "nombre": "pasillo X 3",
+    "parte": "norte",
+    "tiles_antes": 70,
+    "tiles_despues": 248,
+    "factor": 3.543,
+    "caja_antes": {
+     "x0": 25,
+     "y0": 24,
+     "x1": 32,
+     "y1": 33,
+     "ancho": 8,
+     "largo": 10
+    },
+    "caja_despues": {
+     "x0": 17,
+     "y0": 21,
+     "x1": 40,
+     "y1": 36,
+     "ancho": 24,
+     "largo": 16
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 8,
+     "este": 8,
+     "norte": 3,
+     "sur": 3
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 70,
+     "1_todo_a_la_vez": 248,
+     "4_islas": 248,
+     "5_final": 248
+    }
+   },
+   "4": {
+    "nombre": "pasillo X 4",
+    "parte": "herradura",
+    "tiles_antes": 67,
+    "tiles_despues": 103,
+    "factor": 1.537,
+    "caja_antes": {
+     "x0": 23,
+     "y0": 42,
+     "x1": 34,
+     "y1": 48,
+     "ancho": 12,
+     "largo": 7
+    },
+    "caja_despues": {
+     "x0": 23,
+     "y0": 39,
+     "x1": 34,
+     "y1": 48,
+     "ancho": 12,
+     "largo": 10
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 0,
+     "norte": 3,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 67,
+     "1_todo_a_la_vez": 103,
+     "4_islas": 103,
+     "5_final": 103
+    }
+   },
+   "5": {
+    "nombre": "pasillo X 5",
+    "parte": "herradura",
+    "tiles_antes": 179,
+    "tiles_despues": 442,
+    "factor": 2.469,
+    "caja_antes": {
+     "x0": 3,
+     "y0": 42,
+     "x1": 26,
+     "y1": 55,
+     "ancho": 24,
+     "largo": 14
+    },
+    "caja_despues": {
+     "x0": 3,
+     "y0": 30,
+     "x1": 27,
+     "y1": 59,
+     "ancho": 25,
+     "largo": 30
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 1,
+     "norte": 12,
+     "sur": 4
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 179,
+     "1_todo_a_la_vez": 442,
+     "4_islas": 442,
+     "5_final": 442
+    }
+   },
+   "6": {
+    "nombre": "pasillo X 6",
+    "parte": "herradura",
+    "tiles_antes": 89,
+    "tiles_despues": 220,
+    "factor": 2.472,
+    "caja_antes": {
+     "x0": 31,
+     "y0": 42,
+     "x1": 44,
+     "y1": 55,
+     "ancho": 14,
+     "largo": 14
+    },
+    "caja_despues": {
+     "x0": 30,
+     "y0": 34,
+     "x1": 45,
+     "y1": 59,
+     "ancho": 16,
+     "largo": 26
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 1,
+     "este": 1,
+     "norte": 8,
+     "sur": 4
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 89,
+     "1_todo_a_la_vez": 220,
+     "4_islas": 220,
+     "5_final": 220
+    }
+   },
+   "9": {
+    "nombre": "pasillo X 9",
+    "parte": "islas",
+    "tiles_antes": 25,
+    "tiles_despues": 8,
+    "factor": 0.32,
+    "caja_antes": {
+     "x0": 34,
+     "y0": 90,
+     "x1": 40,
+     "y1": 93,
+     "ancho": 7,
+     "largo": 4
+    },
+    "caja_despues": {
+     "x0": 33,
+     "y0": 91,
+     "x1": 34,
+     "y1": 94,
+     "ancho": 2,
+     "largo": 4
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 1,
+     "este": -6,
+     "norte": -1,
+     "sur": 1
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 0,
+     "1_todo_a_la_vez": 0,
+     "4_islas": 0,
+     "5_final": 8
+    }
+   },
+   "10": {
+    "nombre": "pasillo Y 10",
+    "parte": "herradura",
+    "tiles_antes": 209,
+    "tiles_despues": 298,
+    "factor": 1.426,
+    "caja_antes": {
+     "x0": 1,
+     "y0": 49,
+     "x1": 6,
+     "y1": 83,
+     "ancho": 6,
+     "largo": 35
+    },
+    "caja_despues": {
+     "x0": 1,
+     "y0": 49,
+     "x1": 10,
+     "y1": 83,
+     "ancho": 10,
+     "largo": 35
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 4,
+     "norte": 0,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 209,
+     "1_todo_a_la_vez": 298,
+     "4_islas": 298,
+     "5_final": 298
+    }
+   },
+   "11": {
+    "nombre": "grupo 11",
+    "parte": "herradura",
+    "tiles_antes": 298,
+    "tiles_despues": 502,
+    "factor": 1.685,
+    "caja_antes": {
+     "x0": 45,
+     "y0": 42,
+     "x1": 56,
+     "y1": 85,
+     "ancho": 12,
+     "largo": 44
+    },
+    "caja_despues": {
+     "x0": 43,
+     "y0": 30,
+     "x1": 56,
+     "y1": 85,
+     "ancho": 14,
+     "largo": 56
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 2,
+     "este": 0,
+     "norte": 12,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 298,
+     "1_todo_a_la_vez": 502,
+     "4_islas": 502,
+     "5_final": 502
+    }
+   },
+   "12": {
+    "nombre": "pasillo Y 12",
+    "parte": "islas",
+    "tiles_antes": 49,
+    "tiles_despues": 13,
+    "factor": 0.265,
+    "caja_antes": {
+     "x0": 11,
+     "y0": 29,
+     "x1": 14,
+     "y1": 41,
+     "ancho": 4,
+     "largo": 13
+    },
+    "caja_despues": {
+     "x0": 11,
+     "y0": 28,
+     "x1": 14,
+     "y1": 33,
+     "ancho": 4,
+     "largo": 6
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 0,
+     "norte": 1,
+     "sur": -8
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 0,
+     "1_todo_a_la_vez": 0,
+     "4_islas": 0,
+     "5_final": 13
+    }
+   },
+   "13": {
+    "nombre": "pasillo Y 13",
+    "parte": "islas",
+    "tiles_antes": 49,
+    "tiles_despues": 4,
+    "factor": 0.082,
+    "caja_antes": {
+     "x0": 43,
+     "y0": 30,
+     "x1": 46,
+     "y1": 42,
+     "ancho": 4,
+     "largo": 13
+    },
+    "caja_despues": {
+     "x0": 43,
+     "y0": 32,
+     "x1": 44,
+     "y1": 33,
+     "ancho": 2,
+     "largo": 2
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": -2,
+     "norte": -2,
+     "sur": -9
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 0,
+     "1_todo_a_la_vez": 0,
+     "4_islas": 0,
+     "5_final": 4
+    }
+   },
+   "14": {
+    "nombre": "pasillo Y 14",
+    "parte": "islas",
+    "tiles_antes": 24,
+    "tiles_despues": 8,
+    "factor": 0.333,
+    "caja_antes": {
+     "x0": 19,
+     "y0": 56,
+     "x1": 22,
+     "y1": 61,
+     "ancho": 4,
+     "largo": 6
+    },
+    "caja_despues": {
+     "x0": 19,
+     "y0": 60,
+     "x1": 22,
+     "y1": 61,
+     "ancho": 4,
+     "largo": 2
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 0,
+     "norte": -4,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 0,
+     "1_todo_a_la_vez": 0,
+     "4_islas": 0,
+     "5_final": 8
+    }
+   },
+   "15": {
+    "nombre": "pasillo Y 15",
+    "parte": "islas",
+    "tiles_antes": 24,
+    "tiles_despues": 8,
+    "factor": 0.333,
+    "caja_antes": {
+     "x0": 35,
+     "y0": 56,
+     "x1": 38,
+     "y1": 61,
+     "ancho": 4,
+     "largo": 6
+    },
+    "caja_despues": {
+     "x0": 35,
+     "y0": 60,
+     "x1": 38,
+     "y1": 61,
+     "ancho": 4,
+     "largo": 2
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 0,
+     "norte": -4,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 0,
+     "1_todo_a_la_vez": 0,
+     "4_islas": 0,
+     "5_final": 8
+    }
+   },
+   "16": {
+    "nombre": "pasillo Y 16",
+    "parte": "herradura",
+    "tiles_antes": 19,
+    "tiles_despues": 39,
+    "factor": 2.053,
+    "caja_antes": {
+     "x0": 17,
+     "y0": 87,
+     "x1": 20,
+     "y1": 93,
+     "ancho": 4,
+     "largo": 7
+    },
+    "caja_despues": {
+     "x0": 17,
+     "y0": 87,
+     "x1": 22,
+     "y1": 94,
+     "ancho": 6,
+     "largo": 8
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 2,
+     "norte": 0,
+     "sur": 1
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 19,
+     "1_todo_a_la_vez": 39,
+     "4_islas": 39,
+     "5_final": 39
+    }
+   },
+   "17": {
+    "nombre": "hub 17",
+    "parte": "norte",
+    "tiles_antes": 96,
+    "tiles_despues": 96,
+    "factor": 1.0,
+    "caja_antes": {
+     "x0": 11,
+     "y0": 18,
+     "x1": 20,
+     "y1": 28,
+     "ancho": 10,
+     "largo": 11
+    },
+    "caja_despues": {
+     "x0": 11,
+     "y0": 18,
+     "x1": 20,
+     "y1": 28,
+     "ancho": 10,
+     "largo": 11
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 0,
+     "norte": 0,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 96,
+     "1_todo_a_la_vez": 96,
+     "4_islas": 97,
+     "5_final": 96
+    }
+   },
+   "18": {
+    "nombre": "hub 18",
+    "parte": "norte",
+    "tiles_antes": 90,
+    "tiles_despues": 102,
+    "factor": 1.133,
+    "caja_antes": {
+     "x0": 37,
+     "y0": 18,
+     "x1": 46,
+     "y1": 27,
+     "ancho": 10,
+     "largo": 10
+    },
+    "caja_despues": {
+     "x0": 37,
+     "y0": 18,
+     "x1": 46,
+     "y1": 31,
+     "ancho": 10,
+     "largo": 14
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 0,
+     "norte": 0,
+     "sur": 4
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 90,
+     "1_todo_a_la_vez": 90,
+     "4_islas": 102,
+     "5_final": 102
+    }
+   },
+   "19": {
+    "nombre": "hub 19",
+    "parte": "islas",
+    "tiles_antes": 143,
+    "tiles_despues": 158,
+    "factor": 1.105,
+    "caja_antes": {
+     "x0": 13,
+     "y0": 62,
+     "x1": 26,
+     "y1": 75,
+     "ancho": 14,
+     "largo": 14
+    },
+    "caja_despues": {
+     "x0": 13,
+     "y0": 62,
+     "x1": 27,
+     "y1": 75,
+     "ancho": 15,
+     "largo": 14
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 1,
+     "norte": 0,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 143,
+     "1_todo_a_la_vez": 143,
+     "4_islas": 158,
+     "5_final": 158
+    }
+   },
+   "20": {
+    "nombre": "hub 20",
+    "parte": "islas",
+    "tiles_antes": 139,
+    "tiles_despues": 156,
+    "factor": 1.122,
+    "caja_antes": {
+     "x0": 31,
+     "y0": 62,
+     "x1": 44,
+     "y1": 75,
+     "ancho": 14,
+     "largo": 14
+    },
+    "caja_despues": {
+     "x0": 30,
+     "y0": 62,
+     "x1": 44,
+     "y1": 75,
+     "ancho": 15,
+     "largo": 14
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 1,
+     "este": 0,
+     "norte": 0,
+     "sur": 0
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 139,
+     "1_todo_a_la_vez": 139,
+     "4_islas": 156,
+     "5_final": 156
+    }
+   },
+   "23": {
+    "nombre": "hub 23",
+    "parte": "herradura",
+    "tiles_antes": 65,
+    "tiles_despues": 181,
+    "factor": 2.785,
+    "caja_antes": {
+     "x0": 8,
+     "y0": 82,
+     "x1": 18,
+     "y1": 89,
+     "ancho": 11,
+     "largo": 8
+    },
+    "caja_despues": {
+     "x0": 8,
+     "y0": 74,
+     "x1": 27,
+     "y1": 90,
+     "ancho": 20,
+     "largo": 17
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 9,
+     "norte": 8,
+     "sur": 1
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 65,
+     "1_todo_a_la_vez": 181,
+     "4_islas": 181,
+     "5_final": 181
+    }
+   },
+   "24": {
+    "nombre": "hub 24",
+    "parte": "herradura",
+    "tiles_antes": 68,
+    "tiles_despues": 231,
+    "factor": 3.397,
+    "caja_antes": {
+     "x0": 39,
+     "y0": 82,
+     "x1": 49,
+     "y1": 89,
+     "ancho": 11,
+     "largo": 8
+    },
+    "caja_despues": {
+     "x0": 30,
+     "y0": 74,
+     "x1": 49,
+     "y1": 94,
+     "ancho": 20,
+     "largo": 21
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 9,
+     "este": 0,
+     "norte": 8,
+     "sur": 5
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 68,
+     "1_todo_a_la_vez": 231,
+     "4_islas": 231,
+     "5_final": 231
+    }
+   },
+   "25": {
+    "nombre": "hub 25",
+    "parte": "islas",
+    "tiles_antes": 60,
+    "tiles_despues": 75,
+    "factor": 1.25,
+    "caja_antes": {
+     "x0": 25,
+     "y0": 86,
+     "x1": 32,
+     "y1": 93,
+     "ancho": 8,
+     "largo": 8
+    },
+    "caja_despues": {
+     "x0": 25,
+     "y0": 86,
+     "x1": 33,
+     "y1": 94,
+     "ancho": 9,
+     "largo": 9
+    },
+    "crecimiento_de_la_caja_por_lado_tiles": {
+     "oeste": 0,
+     "este": 1,
+     "norte": 0,
+     "sur": 1
+    },
+    "tiles_al_final_de_cada_etapa": {
+     "extraido": 60,
+     "1_todo_a_la_vez": 60,
+     "4_islas": 75,
+     "5_final": 75
+    }
+   }
+  },
+  "paso_5": {
+   "Y12": {
+    "corredor": "Y12",
+    "orientacion": "v",
+    "ancho": 4,
+    "isla": "N17",
+    "host": "X5",
+    "desplazamientos_de_la_isla": [],
+    "encogimientos_de_la_isla_unidades": 1,
+    "alineado_a_la_primera": false,
+    "inicio_pedido": 12,
+    "alineacion_lograda_moviendo_o_encogiendo": true,
+    "trazado": "recto",
+    "inicio_ideal_por_el_eje_del_host": 12,
+    "desvio_del_gate_respecto_del_ideal_tiles": -1,
+    "desvio_respecto_del_eje_de_la_isla_tiles": 0.5,
+    "desvio_respecto_del_eje_del_host_tiles": -0.5,
+    "colocado": true,
+    "inicio_final": 11
+   },
+   "Y14": {
+    "corredor": "Y14",
+    "orientacion": "v",
+    "ancho": 4,
+    "isla": "I19",
+    "host": "X5",
+    "desplazamientos_de_la_isla": [],
+    "encogimientos_de_la_isla_unidades": 0,
+    "alineado_a_la_primera": true,
+    "inicio_pedido": 20,
+    "trazado": "recto",
+    "inicio_ideal_por_el_eje_del_host": 20,
+    "desvio_del_gate_respecto_del_ideal_tiles": -1,
+    "desvio_respecto_del_eje_de_la_isla_tiles": -0.5,
+    "desvio_respecto_del_eje_del_host_tiles": -0.5,
+    "colocado": true,
+    "inicio_final": 19
+   },
+   "Y13": {
+    "corredor": "Y13",
+    "orientacion": "v",
+    "ancho": 4,
+    "isla": "N18",
+    "host": "X6",
+    "desplazamientos_de_la_isla": [],
+    "encogimientos_de_la_isla_unidades": 0,
+    "alineado_a_la_primera": false,
+    "inicio_pedido": 43,
+    "alineacion_lograda_moviendo_o_encogiendo": false,
+    "trazado": "brocha 2x2 (recorrido con giros)",
+    "ancho_logrado": 2,
+    "colocado": true,
+    "inicio_final": null
+   },
+   "Y15": {
+    "corredor": "Y15",
+    "orientacion": "v",
+    "ancho": 4,
+    "isla": "I20",
+    "host": "X6",
+    "desplazamientos_de_la_isla": [],
+    "encogimientos_de_la_isla_unidades": 0,
+    "alineado_a_la_primera": true,
+    "inicio_pedido": 35,
+    "trazado": "recto",
+    "inicio_ideal_por_el_eje_del_host": 35,
+    "desvio_del_gate_respecto_del_ideal_tiles": 0,
+    "desvio_respecto_del_eje_de_la_isla_tiles": 0.5,
+    "desvio_respecto_del_eje_del_host_tiles": 0.0,
+    "colocado": true,
+    "inicio_final": 35
+   },
+   "X9": {
+    "corredor": "X9",
+    "orientacion": "h",
+    "ancho": 4,
+    "isla": "I25",
+    "host": "H24",
+    "desplazamientos_de_la_isla": [],
+    "encogimientos_de_la_isla_unidades": 0,
+    "alineado_a_la_primera": true,
+    "inicio_pedido": 89,
+    "trazado": "recto",
+    "inicio_ideal_por_el_eje_del_host": 89,
+    "desvio_del_gate_respecto_del_ideal_tiles": 2,
+    "desvio_respecto_del_eje_de_la_isla_tiles": 0.5,
+    "desvio_respecto_del_eje_del_host_tiles": 2.5,
+    "colocado": true,
+    "inicio_final": 91
+   }
+  },
+  "suelo_antes": 1945,
+  "suelo_despues": 3330,
+  "suelo_con_gates_antes": 2112,
+  "suelo_con_gates_despues": 3447,
+  "gris_muerta": {
+   "antes": {
+    "total": 920,
+    "por_parte": {
+     "norte": 338,
+     "otras (gates)": 40,
+     "islas": 277,
+     "herradura": 265
+    }
+   },
+   "despues": {
+    "total": 1,
+    "por_parte": {
+     "herradura": 1
+    }
+   }
+  },
+  "grosor_de_muro": {
+   "antes": {
+    "pares_vecinos_con_muro": 47,
+    "mediana_tiles": 6.0,
+    "minimo_tiles": 1,
+    "pares_que_se_tocan_(gates_y_pasillos)": 17
+   },
+   "despues": {
+    "pares_vecinos_con_muro": 64,
+    "mediana_tiles": 2.5,
+    "minimo_tiles": 1,
+    "pares_que_se_tocan_(gates_y_pasillos)": 20
+   }
+  },
+  "error_de_espejo": {
+   "antes": {
+    "H23": {
+     "tiles_A": 65,
+     "tiles_B": 68,
+     "tiles_que_no_coinciden": 9,
+     "fraccion": 0.0677
+    },
+    "N17": {
+     "tiles_A": 130,
+     "tiles_B": 131,
+     "tiles_que_no_coinciden": 5,
+     "fraccion": 0.0192
+    },
+    "I19": {
+     "tiles_A": 143,
+     "tiles_B": 139,
+     "tiles_que_no_coinciden": 10,
+     "fraccion": 0.0355
+    },
+    "X5": {
+     "tiles_A": 179,
+     "tiles_B": 89,
+     "tiles_que_no_coinciden": 96,
+     "fraccion": 0.3582
+    },
+    "Y12": {
+     "tiles_A": 49,
+     "tiles_B": 49,
+     "tiles_que_no_coinciden": 2,
+     "fraccion": 0.0204
+    },
+    "Y14": {
+     "tiles_A": 24,
+     "tiles_B": 24,
+     "tiles_que_no_coinciden": 0,
+     "fraccion": 0.0
+    },
+    "X0 (consigo mismo)": {
+     "tiles_A": 107,
+     "tiles_B": 107,
+     "tiles_que_no_coinciden": 10,
+     "fraccion": 0.0467
+    },
+    "X3 (consigo mismo)": {
+     "tiles_A": 70,
+     "tiles_B": 70,
+     "tiles_que_no_coinciden": 12,
+     "fraccion": 0.0857
+    },
+    "X4 (consigo mismo)": {
+     "tiles_A": 67,
+     "tiles_B": 67,
+     "tiles_que_no_coinciden": 6,
+     "fraccion": 0.0448
+    },
+    "hub 25 (consigo mismo)": {
+     "tiles_A": 60,
+     "tiles_B": 60,
+     "tiles_que_no_coinciden": 8,
+     "fraccion": 0.0667
+    },
+    "Y10 y grupo 11 (las patas)": {
+     "tiles_A": 209,
+     "tiles_B": 298,
+     "tiles_que_no_coinciden": 89,
+     "fraccion": 0.1755
+    }
+   },
+   "despues": {
+    "H23": {
+     "tiles_A": 181,
+     "tiles_B": 231,
+     "tiles_que_no_coinciden": 72,
+     "fraccion": 0.1748
+    },
+    "N17": {
+     "tiles_A": 134,
+     "tiles_B": 155,
+     "tiles_que_no_coinciden": 23,
+     "fraccion": 0.0796
+    },
+    "I19": {
+     "tiles_A": 158,
+     "tiles_B": 156,
+     "tiles_que_no_coinciden": 10,
+     "fraccion": 0.0318
+    },
+    "X5": {
+     "tiles_A": 442,
+     "tiles_B": 220,
+     "tiles_que_no_coinciden": 246,
+     "fraccion": 0.3716
+    },
+    "Y12": {
+     "tiles_A": 13,
+     "tiles_B": 4,
+     "tiles_que_no_coinciden": 13,
+     "fraccion": 0.7647
+    },
+    "Y14": {
+     "tiles_A": 8,
+     "tiles_B": 8,
+     "tiles_que_no_coinciden": 0,
+     "fraccion": 0.0
+    },
+    "X0 (consigo mismo)": {
+     "tiles_A": 347,
+     "tiles_B": 347,
+     "tiles_que_no_coinciden": 18,
+     "fraccion": 0.0259
+    },
+    "X3 (consigo mismo)": {
+     "tiles_A": 248,
+     "tiles_B": 248,
+     "tiles_que_no_coinciden": 16,
+     "fraccion": 0.0323
+    },
+    "X4 (consigo mismo)": {
+     "tiles_A": 103,
+     "tiles_B": 103,
+     "tiles_que_no_coinciden": 6,
+     "fraccion": 0.0291
+    },
+    "hub 25 (consigo mismo)": {
+     "tiles_A": 75,
+     "tiles_B": 75,
+     "tiles_que_no_coinciden": 6,
+     "fraccion": 0.04
+    },
+    "Y10 y grupo 11 (las patas)": {
+     "tiles_A": 298,
+     "tiles_B": 502,
+     "tiles_que_no_coinciden": 204,
+     "fraccion": 0.255
+    }
+   }
+  },
+  "condiciones": {
+   "A_estrella_misma_secuencia_de_grupos": true,
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 114,
+     "costo": 322.33,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ]
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 210,
+     "costo": 560.0,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ]
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 140,
+     "costo": 348.33,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true,
+     "grupos_de_D": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ]
+    }
+   },
+   "G_cerrada": true,
+   "escaleras_y_cofre_siguen_en_suelo": true,
+   "muro_minimo_2_unidades": {
+    "pares_por_debajo_de_min(original, 3)": [],
+    "pares_unidos_por_un_pasillo_recolocado_(se_tocan_por_diseno)": [
+     [
+      1,
+      12
+     ],
+     [
+      2,
+      13
+     ],
+     [
+      5,
+      12
+     ],
+     [
+      5,
+      14
+     ],
+     [
+      6,
+      13
+     ],
+     [
+      6,
+      15
+     ],
+     [
+      9,
+      24
+     ],
+     [
+      9,
+      25
+     ],
+     [
+      12,
+      17
+     ],
+     [
+      13,
+      18
+     ],
+     [
+      14,
+      19
+     ],
+     [
+      15,
+      20
+     ]
+    ]
+   },
+   "tiles_nuevos_fuera_de_la_silueta": 0,
+   "tiles_nuevos_sobre_pilares": 0,
+   "todas_ok": true
+  }
+ }
+}

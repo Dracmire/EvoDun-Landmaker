@@ -33,6 +33,7 @@ Hipótesis a la que sirve: `../HP1.md` (derivación en `../HP1_DERIVACION.md`).
 | `pp2/camara_snes/paso4c/` | Paso 4c de PP2: cara contra techo en el SNES real, ángulo por tiles enteros (θ = 71°), tres familias de cámara (Godot, Foundry, 3D_iso_in_2D) y bandas de profundidad sobre recortes reales, con `RESULTADO_PP2_paso4c.md` (lecturas tomadas, contraste con la predicción de [R], sin veredicto) |
 | `pp2/vessel/` | Paso 5 de PP2: el vessel, mapa expandido del 5F (partes, expansión hacia afuera k = 1, 2, 3 con el overlay de áreas, framing por gates, ensanche de las escaleras y expansión sobre fachada), con `RESULTADO_PP2_vessel_expansion.md` (lecturas tomadas, contraste con la predicción de [R], sin veredicto) |
 | `pp2/vessel_rv/` | Paso 5b de PP2: rooms que crecen con su eje de framing (reglas RV: muro mínimo w8 / w16, crecimiento por lados enteros simétrico al eje, mini esqueleto, guías de comparación), con `RESULTADO_PP2_vessel_rv.md` (lecturas tomadas, contraste con la predicción de [R], sin veredicto); `pp2/vessel/` queda como contraejemplo |
+| `pp2/vessel_sdf/` | Paso 5c de PP2: crecimiento por campo de distancia room por room, con islas y pasillos extraídos y recolocados (modos A «por etapas» y B «todo a la vez»), silueta de la torre y zona gris muerta, con `RESULTADO_PP2_vessel_sdf.md` (lecturas tomadas, contraste con la predicción de [R], sin veredicto) |
 
 ## Convención (irán muchas pruebas más)
 

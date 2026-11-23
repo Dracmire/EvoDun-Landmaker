@@ -1,0 +1,536 @@
+{
+ "Y12": {
+  "id_de_grupo": 12,
+  "orientacion": "vertical",
+  "ancho_tiles": 4,
+  "caja_original": {
+   "x0": 11,
+   "y0": 29,
+   "x1": 14,
+   "y1": 41
+  },
+  "une": [
+   "N17",
+   "X5"
+  ],
+  "gates": {
+   "66": {
+    "une_grupos": [
+     1,
+     12,
+     17
+    ],
+    "tiles_extraidos": [
+     [
+      11,
+      28
+     ],
+     [
+      11,
+      29
+     ],
+     [
+      12,
+      28
+     ],
+     [
+      12,
+      29
+     ],
+     [
+      13,
+      28
+     ],
+     [
+      13,
+      29
+     ]
+    ],
+    "etiqueta": "corte",
+    "corte": "F3"
+   },
+   "82": {
+    "une_grupos": [
+     5,
+     12
+    ],
+    "tiles_extraidos": [
+     [
+      11,
+      42
+     ],
+     [
+      12,
+      42
+     ],
+     [
+      13,
+      42
+     ]
+    ],
+    "etiqueta": "corte",
+    "corte": "F3"
+   }
+  },
+  "posicion_del_gate_respecto_del_eje_de_cada_room": {
+   "N17": 0.0,
+   "X5": -2.0,
+   "nota": "centro del pasillo menos centro de la caja del room, en tiles, sobre el eje perpendicular al pasillo"
+  },
+  "par_espejo": "Y13",
+  "se_extrae_en": [
+   "A",
+   "B"
+  ]
+ },
+ "Y13": {
+  "id_de_grupo": 13,
+  "orientacion": "vertical",
+  "ancho_tiles": 4,
+  "caja_original": {
+   "x0": 43,
+   "y0": 30,
+   "x1": 46,
+   "y1": 42
+  },
+  "une": [
+   "N18",
+   "X6"
+  ],
+  "gates": {
+   "67": {
+    "une_grupos": [
+     2,
+     13,
+     18
+    ],
+    "tiles_extraidos": [
+     [
+      43,
+      28
+     ],
+     [
+      43,
+      29
+     ],
+     [
+      44,
+      28
+     ],
+     [
+      44,
+      29
+     ],
+     [
+      45,
+      28
+     ],
+     [
+      45,
+      29
+     ]
+    ],
+    "etiqueta": "corte",
+    "corte": "F4"
+   },
+   "83+84+85": {
+    "une_grupos": [
+     6,
+     11,
+     13
+    ],
+    "tiles_extraidos": [
+     [
+      43,
+      42
+     ],
+     [
+      44,
+      42
+     ],
+     [
+      45,
+      42
+     ]
+    ],
+    "etiqueta": "corte",
+    "corte": "F4"
+   }
+  },
+  "posicion_del_gate_respecto_del_eje_de_cada_room": {
+   "N18": 0.0,
+   "X6": 7.0,
+   "nota": "centro del pasillo menos centro de la caja del room, en tiles, sobre el eje perpendicular al pasillo"
+  },
+  "par_espejo": "Y12",
+  "se_extrae_en": [
+   "A",
+   "B"
+  ]
+ },
+ "Y14": {
+  "id_de_grupo": 14,
+  "orientacion": "vertical",
+  "ancho_tiles": 4,
+  "caja_original": {
+   "x0": 19,
+   "y0": 56,
+   "x1": 22,
+   "y1": 61
+  },
+  "une": [
+   "X5",
+   "I19"
+  ],
+  "gates": {
+   "89": {
+    "une_grupos": [
+     5,
+     14
+    ],
+    "tiles_extraidos": [
+     [
+      19,
+      54
+     ],
+     [
+      19,
+      55
+     ],
+     [
+      20,
+      54
+     ],
+     [
+      20,
+      55
+     ],
+     [
+      21,
+      54
+     ],
+     [
+      21,
+      55
+     ]
+    ],
+    "etiqueta": "corte",
+    "corte": "F5"
+   },
+   "97": {
+    "une_grupos": [
+     14,
+     19
+    ],
+    "tiles_extraidos": [
+     [
+      19,
+      62
+     ],
+     [
+      20,
+      62
+     ],
+     [
+      21,
+      62
+     ]
+    ],
+    "etiqueta": "corte",
+    "corte": "F5"
+   }
+  },
+  "posicion_del_gate_respecto_del_eje_de_cada_room": {
+   "X5": 6.0,
+   "I19": 1.0,
+   "nota": "centro del pasillo menos centro de la caja del room, en tiles, sobre el eje perpendicular al pasillo"
+  },
+  "par_espejo": "Y15",
+  "se_extrae_en": [
+   "A",
+   "B"
+  ]
+ },
+ "Y15": {
+  "id_de_grupo": 15,
+  "orientacion": "vertical",
+  "ancho_tiles": 4,
+  "caja_original": {
+   "x0": 35,
+   "y0": 56,
+   "x1": 38,
+   "y1": 61
+  },
+  "une": [
+   "X6",
+   "I20"
+  ],
+  "gates": {
+   "90": {
+    "une_grupos": [
+     6,
+     15
+    ],
+    "tiles_extraidos": [
+     [
+      35,
+      54
+     ],
+     [
+      35,
+      55
+     ],
+     [
+      36,
+      54
+     ],
+     [
+      36,
+      55
+     ],
+     [
+      37,
+      54
+     ],
+     [
+      37,
+      55
+     ]
+    ],
+    "etiqueta": "corte",
+    "corte": "F6"
+   },
+   "98": {
+    "une_grupos": [
+     15,
+     20
+    ],
+    "tiles_extraidos": [
+     [
+      35,
+      62
+     ],
+     [
+      36,
+      62
+     ],
+     [
+      37,
+      62
+     ]
+    ],
+    "etiqueta": "corte",
+    "corte": "F6"
+   }
+  },
+  "posicion_del_gate_respecto_del_eje_de_cada_room": {
+   "X6": -1.0,
+   "I20": -1.0,
+   "nota": "centro del pasillo menos centro de la caja del room, en tiles, sobre el eje perpendicular al pasillo"
+  },
+  "par_espejo": "Y14",
+  "se_extrae_en": [
+   "A",
+   "B"
+  ]
+ },
+ "X9": {
+  "id_de_grupo": 9,
+  "orientacion": "horizontal",
+  "ancho_tiles": 4,
+  "caja_original": {
+   "x0": 34,
+   "y0": 90,
+   "x1": 40,
+   "y1": 93
+  },
+  "une": [
+   "I25",
+   "H24"
+  ],
+  "gates": {
+   "113": {
+    "une_grupos": [
+     9,
+     24
+    ],
+    "tiles_extraidos": [
+     [
+      37,
+      87
+     ],
+     [
+      37,
+      88
+     ],
+     [
+      37,
+      89
+     ],
+     [
+      38,
+      87
+     ],
+     [
+      38,
+      88
+     ],
+     [
+      38,
+      89
+     ],
+     [
+      39,
+      89
+     ]
+    ],
+    "etiqueta": "puerta",
+    "corte": null
+   },
+   "117": {
+    "une_grupos": [
+     9,
+     25
+    ],
+    "tiles_extraidos": [
+     [
+      31,
+      93
+     ],
+     [
+      32,
+      91
+     ],
+     [
+      32,
+      92
+     ],
+     [
+      32,
+      93
+     ],
+     [
+      33,
+      91
+     ],
+     [
+      33,
+      92
+     ],
+     [
+      33,
+      93
+     ]
+    ],
+    "etiqueta": "corte",
+    "corte": "F7"
+   }
+  },
+  "posicion_del_gate_respecto_del_eje_de_cada_room": {
+   "I25": 2.0,
+   "H24": 6.0,
+   "nota": "centro del pasillo menos centro de la caja del room, en tiles, sobre el eje perpendicular al pasillo"
+  },
+  "par_espejo": null,
+  "se_extrae_en": [
+   "A",
+   "B"
+  ]
+ },
+ "isla: hub 17 + X1": {
+  "ids": [
+   17,
+   1
+  ],
+  "caja_original": {
+   "x0": 5,
+   "y0": 18,
+   "x1": 20,
+   "y1": 28,
+   "ancho": 16,
+   "largo": 11
+  },
+  "tiles": 130,
+  "se_extrae_en": [
+   "B"
+  ],
+  "par_espejo": "hub 18 + X2"
+ },
+ "isla: hub 18 + X2": {
+  "ids": [
+   18,
+   2
+  ],
+  "caja_original": {
+   "x0": 37,
+   "y0": 18,
+   "x1": 52,
+   "y1": 29,
+   "ancho": 16,
+   "largo": 12
+  },
+  "tiles": 131,
+  "se_extrae_en": [
+   "B"
+  ],
+  "par_espejo": "hub 17 + X1"
+ },
+ "isla: hub 19": {
+  "ids": [
+   19
+  ],
+  "caja_original": {
+   "x0": 13,
+   "y0": 62,
+   "x1": 26,
+   "y1": 75,
+   "ancho": 14,
+   "largo": 14
+  },
+  "tiles": 143,
+  "se_extrae_en": [
+   "A",
+   "B"
+  ],
+  "par_espejo": "hub 20"
+ },
+ "isla: hub 20": {
+  "ids": [
+   20
+  ],
+  "caja_original": {
+   "x0": 31,
+   "y0": 62,
+   "x1": 44,
+   "y1": 75,
+   "ancho": 14,
+   "largo": 14
+  },
+  "tiles": 139,
+  "se_extrae_en": [
+   "A",
+   "B"
+  ],
+  "par_espejo": "hub 19"
+ },
+ "isla: hub 25": {
+  "ids": [
+   25
+  ],
+  "caja_original": {
+   "x0": 25,
+   "y0": 86,
+   "x1": 32,
+   "y1": 93,
+   "ancho": 8,
+   "largo": 8
+  },
+  "tiles": 60,
+  "se_extrae_en": [
+   "A",
+   "B"
+  ],
+  "par_espejo": null
+ },
+ "nota": "las islas se extraen del plano de crecimiento y se recolocan donde estaban: durante las etapas 1 a 3 sus tiles quedan reservados (no se pueden ocupar) para que puedan volver; los pasillos y los tiles de sus gates si se borran (pasan a muro libre)"
+}
