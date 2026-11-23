@@ -35,6 +35,7 @@ Hipótesis a la que sirve: `../HP1.md` (derivación en `../HP1_DERIVACION.md`).
 | `pp2/vessel_rv/` | Paso 5b de PP2: rooms que crecen con su eje de framing (reglas RV: muro mínimo w8 / w16, crecimiento por lados enteros simétrico al eje, mini esqueleto, guías de comparación), con `RESULTADO_PP2_vessel_rv.md` (lecturas tomadas, contraste con la predicción de [R], sin veredicto); `pp2/vessel/` queda como contraejemplo |
 | `pp2/vessel_sdf/` | Paso 5c de PP2: crecimiento por campo de distancia room por room, con islas y pasillos extraídos y recolocados (modos A «por etapas» y B «todo a la vez»), silueta de la torre y zona gris muerta, con `RESULTADO_PP2_vessel_sdf.md` (lecturas tomadas, contraste con la predicción de [R], sin veredicto) |
 | `pp2/vessel_perfiles/` | Paso 5d de PP2: crecimiento con tope del 38 %, por franjas de ≥ 4 celdas, con espejo, por zonas y por pases (exterior, interior, deuda), desplazamiento y puentes recolocados, en dos perfiles (3 zonas y 2 zonas), con `RESULTADO_PP2_vessel_perfiles.md` (lecturas tomadas, contraste con la predicción de [R], sin veredicto) |
+| `pp2/vessel_techos/` | Paso 5e de PP2: tres elementos (muro = solo techos, piso con las caras extraídas, wrapping), empuje de bordes rectos con muro mínimo de 2 celdas, límite externo en escalera, tope ×1,38, puentes fuera y de vuelta, con `RESULTADO_PP2_vessel_techos.md` (lecturas tomadas, contraste con la predicción de [R], sin veredicto) |
 
 ## Convención (irán muchas pruebas más)
 
