@@ -1,0 +1,558 @@
+{
+ "base": "f710409",
+ "reglas": {
+  "objetos": "bloque alto = X4+X5+X6+hub 25 (pisos, muescas de nivel 1, gates de nivel 1, escaleras que no son Y12/Y13, muros de 14 sobre el bloque y baranda); rampas = Y12 y Y13 (peldanos y muesca); muros comunes = muros de 7; piso bajo no se proyecta",
+  "sobra": "subcelda de piso blanco con mas de la mitad de sus pixeles retroproyectados de un objeto cuya huella no la contiene (rojo)",
+  "capas": {
+   "rojo": "sobra",
+   "naranja": "cara sur dentro de su huella",
+   "amarillo": "techo del bloque dentro de su huella",
+   "azul": "rampas 12 y 13"
+  }
+ },
+ "huellas_en_celdas": {
+  "bloque_alto": 870,
+  "piso_de_nivel_1_(sin_rampas)": 619,
+  "otras_escaleras_en_el_bloque": 73,
+  "muros_de_14_sobre_el_bloque": 178,
+  "muros_comunes": 862,
+  "rampas_12_y_13": 63
+ },
+ "por_toma": {
+  "global": {
+   "subceldas_cubiertas": 21001,
+   "subceldas_rojas": 2433,
+   "rojo_por_origen": {
+    "muro comun": 1386,
+    "bloque alto": 562,
+    "muro sobre el bloque": 331,
+    "baranda": 154
+   },
+   "paso8_subceldas_que_sobran": 5348,
+   "diferencia_con_el_paso8": -2915,
+   "razon_con_el_paso8": 0.455,
+   "capas": {
+    "rojo": 2433,
+    "naranja": 1851,
+    "amarillo": 1733,
+    "azul": 157
+   },
+   "cara_sur": {
+    "bloque_alto": {
+     "tramos": 6,
+     "ancho_medio": 2.4,
+     "por_tercio": {
+      "medio": {
+       "tramos": 4,
+       "ancho_medio": 3.1
+      },
+      "abajo": {
+       "tramos": 2,
+       "ancho_medio": 1.0
+      }
+     }
+    },
+    "muros_comunes": {
+     "tramos": 43,
+     "ancho_medio": 1.57,
+     "por_tercio": {
+      "arriba": {
+       "tramos": 15,
+       "ancho_medio": 2.36
+      },
+      "medio": {
+       "tramos": 13,
+       "ancho_medio": 1.28
+      },
+      "abajo": {
+       "tramos": 15,
+       "ancho_medio": 1.04
+      }
+     }
+    }
+   },
+   "techo_corrido": {
+    "medio": {
+     "pixeles": 19479,
+     "corrimiento_medio_celdas": 2.67,
+     "p10": 2.44,
+     "p90": 2.87
+    },
+    "abajo": {
+     "pixeles": 4501,
+     "corrimiento_medio_celdas": 1.39,
+     "p10": 1.26,
+     "p90": 1.52
+    },
+    "total": {
+     "pixeles": 23980,
+     "corrimiento_medio_celdas": 2.43
+    }
+   },
+   "borde_norte_del_bloque": {
+    "con_baranda": {
+     "columnas": 43,
+     "celdas_tapadas_(subceldas/4)": 152.5,
+     "por_columna": 3.55
+    },
+    "sin_baranda": {
+     "columnas": 0,
+     "celdas_tapadas_(subceldas/4)": 0,
+     "por_columna": 0.0
+    }
+   },
+   "rampas_corrimiento": {
+    "Y12": {
+     "inicio_(fila_35,_z_0,7)": {
+      "pixeles": 50,
+      "corrimiento_medio_celdas": 0.3
+     },
+     "mitad_(filas_38_39)": {
+      "pixeles": 179,
+      "corrimiento_medio_celdas": 2.47
+     },
+     "final_(fila_42,_z_7)": {
+      "pixeles": 114,
+      "corrimiento_medio_celdas": 2.83
+     }
+    },
+    "Y13": {
+     "inicio_(fila_35,_z_0,7)": {
+      "pixeles": 54,
+      "corrimiento_medio_celdas": 0.3
+     },
+     "mitad_(filas_38_39)": {
+      "pixeles": 177,
+      "corrimiento_medio_celdas": 2.47
+     },
+     "final_(fila_42,_z_7)": {
+      "pixeles": 156,
+      "corrimiento_medio_celdas": 2.83
+     }
+    }
+   },
+   "celdas_de_rampa_tapadas_por_el_rojo_del_bloque": 32,
+   "celdas_de_rampa": 63,
+   "rojo_del_bloque_por_tipo_de_celda_base_(celdas)": {
+    "piso nivel 0 de sala": 24.0,
+    "banda": 206.8,
+    "piso decorativo": 142.8,
+    "puente, gate o escalera": 28.0,
+    "rampas 12 y 13": 28.0
+   }
+  },
+  "g23_codo": {
+   "subceldas_cubiertas": 5445,
+   "subceldas_rojas": 1108,
+   "rojo_por_origen": {
+    "muro comun": 676,
+    "bloque alto": 169,
+    "muro sobre el bloque": 221,
+    "baranda": 42
+   },
+   "paso8_subceldas_que_sobran": 1624,
+   "diferencia_con_el_paso8": -516,
+   "razon_con_el_paso8": 0.682,
+   "capas": {
+    "rojo": 1108,
+    "naranja": 277,
+    "amarillo": 215,
+    "azul": 0
+   },
+   "cara_sur": {
+    "bloque_alto": {
+     "tramos": 2,
+     "ancho_medio": 0.88,
+     "por_tercio": {
+      "abajo": {
+       "tramos": 2,
+       "ancho_medio": 0.88
+      }
+     }
+    },
+    "muros_comunes": {
+     "tramos": 13,
+     "ancho_medio": 1.12,
+     "por_tercio": {
+      "medio": {
+       "tramos": 8,
+       "ancho_medio": 1.35
+      },
+      "abajo": {
+       "tramos": 5,
+       "ancho_medio": 0.73
+      }
+     }
+    }
+   },
+   "techo_corrido": {
+    "medio": {
+     "pixeles": 9210,
+     "corrimiento_medio_celdas": 2.88,
+     "p10": 2.61,
+     "p90": 3.15
+    },
+    "abajo": {
+     "pixeles": 11343,
+     "corrimiento_medio_celdas": 2.12,
+     "p10": 1.76,
+     "p90": 2.47
+    },
+    "total": {
+     "pixeles": 20553,
+     "corrimiento_medio_celdas": 2.46
+    }
+   },
+   "borde_norte_del_bloque": {
+    "con_baranda": {
+     "columnas": 8,
+     "celdas_tapadas_(subceldas/4)": 54.5,
+     "por_columna": 6.81
+    },
+    "sin_baranda": {
+     "columnas": 0,
+     "celdas_tapadas_(subceldas/4)": 0,
+     "por_columna": 0.0
+    }
+   },
+   "rampas_corrimiento": {
+    "Y12": {},
+    "Y13": {}
+   },
+   "celdas_de_rampa_tapadas_por_el_rojo_del_bloque": 0,
+   "celdas_de_rampa": 63,
+   "rojo_del_bloque_por_tipo_de_celda_base_(celdas)": {
+    "piso nivel 0 de sala": 27.5,
+    "banda": 76.2,
+    "piso decorativo": 49.2,
+    "puente, gate o escalera": 2.2,
+    "rampas 12 y 13": 0.0
+   }
+  },
+  "g10_escalera": {
+   "subceldas_cubiertas": 4417,
+   "subceldas_rojas": 1191,
+   "rojo_por_origen": {
+    "muro comun": 457,
+    "bloque alto": 394,
+    "muro sobre el bloque": 280,
+    "baranda": 60
+   },
+   "paso8_subceldas_que_sobran": 2726,
+   "diferencia_con_el_paso8": -1535,
+   "razon_con_el_paso8": 0.437,
+   "capas": {
+    "rojo": 1191,
+    "naranja": 333,
+    "amarillo": 815,
+    "azul": 74
+   },
+   "cara_sur": {
+    "bloque_alto": {
+     "tramos": 4,
+     "ancho_medio": 1.36,
+     "por_tercio": {
+      "medio": {
+       "tramos": 1,
+       "ancho_medio": 3.0
+      },
+      "abajo": {
+       "tramos": 3,
+       "ancho_medio": 0.82
+      }
+     }
+    },
+    "muros_comunes": {
+     "tramos": 6,
+     "ancho_medio": 0.09,
+     "por_tercio": {
+      "arriba": {
+       "tramos": 4,
+       "ancho_medio": 0.04
+      },
+      "abajo": {
+       "tramos": 2,
+       "ancho_medio": 0.19
+      }
+     }
+    }
+   },
+   "techo_corrido": {
+    "arriba": {
+     "pixeles": 9922,
+     "corrimiento_medio_celdas": 4.25,
+     "p10": 4.1,
+     "p90": 4.41
+    },
+    "medio": {
+     "pixeles": 39333,
+     "corrimiento_medio_celdas": 3.31,
+     "p10": 2.69,
+     "p90": 3.93
+    },
+    "abajo": {
+     "pixeles": 16194,
+     "corrimiento_medio_celdas": 2.27,
+     "p10": 2.04,
+     "p90": 2.49
+    },
+    "total": {
+     "pixeles": 65449,
+     "corrimiento_medio_celdas": 3.2
+    }
+   },
+   "borde_norte_del_bloque": {
+    "con_baranda": {
+     "columnas": 24,
+     "celdas_tapadas_(subceldas/4)": 144.2,
+     "por_columna": 6.01
+    },
+    "sin_baranda": {
+     "columnas": 0,
+     "celdas_tapadas_(subceldas/4)": 0,
+     "por_columna": 0.0
+    }
+   },
+   "rampas_corrimiento": {
+    "Y12": {
+     "inicio_(fila_35,_z_0,7)": {
+      "pixeles": 40,
+      "corrimiento_medio_celdas": 0.46
+     },
+     "mitad_(filas_38_39)": {
+      "pixeles": 478,
+      "corrimiento_medio_celdas": 3.94
+     },
+     "final_(fila_42,_z_7)": {
+      "pixeles": 684,
+      "corrimiento_medio_celdas": 4.06
+     }
+    },
+    "Y13": {}
+   },
+   "celdas_de_rampa_tapadas_por_el_rojo_del_bloque": 19,
+   "celdas_de_rampa": 63,
+   "rojo_del_bloque_por_tipo_de_celda_base_(celdas)": {
+    "piso nivel 0 de sala": 31.0,
+    "banda": 131.5,
+    "piso decorativo": 85.8,
+    "puente, gate o escalera": 21.0,
+    "rampas 12 y 13": 19.0
+   }
+  },
+  "g04_mirador": {
+   "subceldas_cubiertas": 8834,
+   "subceldas_rojas": 1818,
+   "rojo_por_origen": {
+    "muro comun": 990,
+    "bloque alto": 422,
+    "muro sobre el bloque": 346,
+    "baranda": 60
+   },
+   "paso8_subceldas_que_sobran": 3214,
+   "diferencia_con_el_paso8": -1396,
+   "razon_con_el_paso8": 0.566,
+   "capas": {
+    "rojo": 1818,
+    "naranja": 595,
+    "amarillo": 848,
+    "azul": 228
+   },
+   "cara_sur": {
+    "bloque_alto": {
+     "tramos": 0,
+     "ancho_medio": null,
+     "por_tercio": {}
+    },
+    "muros_comunes": {
+     "tramos": 22,
+     "ancho_medio": 1.53,
+     "por_tercio": {
+      "arriba": {
+       "tramos": 13,
+       "ancho_medio": 1.9
+      },
+      "medio": {
+       "tramos": 9,
+       "ancho_medio": 0.99
+      }
+     }
+    }
+   },
+   "techo_corrido": {
+    "abajo": {
+     "pixeles": 64250,
+     "corrimiento_medio_celdas": 1.83,
+     "p10": 1.39,
+     "p90": 2.26
+    },
+    "total": {
+     "pixeles": 64250,
+     "corrimiento_medio_celdas": 1.83
+    }
+   },
+   "borde_norte_del_bloque": {
+    "con_baranda": {
+     "columnas": 35,
+     "celdas_tapadas_(subceldas/4)": 98.2,
+     "por_columna": 2.81
+    },
+    "sin_baranda": {
+     "columnas": 0,
+     "celdas_tapadas_(subceldas/4)": 0,
+     "por_columna": 0.0
+    }
+   },
+   "rampas_corrimiento": {
+    "Y12": {
+     "inicio_(fila_35,_z_0,7)": {
+      "pixeles": 312,
+      "corrimiento_medio_celdas": 0.26
+     },
+     "mitad_(filas_38_39)": {
+      "pixeles": 1026,
+      "corrimiento_medio_celdas": 2.01
+     },
+     "final_(fila_42,_z_7)": {
+      "pixeles": 693,
+      "corrimiento_medio_celdas": 2.05
+     }
+    },
+    "Y13": {
+     "inicio_(fila_35,_z_0,7)": {
+      "pixeles": 313,
+      "corrimiento_medio_celdas": 0.26
+     },
+     "mitad_(filas_38_39)": {
+      "pixeles": 1024,
+      "corrimiento_medio_celdas": 2.0
+     },
+     "final_(fila_42,_z_7)": {
+      "pixeles": 922,
+      "corrimiento_medio_celdas": 2.05
+     }
+    }
+   },
+   "celdas_de_rampa_tapadas_por_el_rojo_del_bloque": 32,
+   "celdas_de_rampa": 63,
+   "rojo_del_bloque_por_tipo_de_celda_base_(celdas)": {
+    "piso nivel 0 de sala": 34.2,
+    "banda": 126.8,
+    "piso decorativo": 98.2,
+    "puente, gate o escalera": 32.0,
+    "rampas 12 y 13": 32.0
+   }
+  },
+  "g24_codo": {
+   "subceldas_cubiertas": 5441,
+   "subceldas_rojas": 1367,
+   "rojo_por_origen": {
+    "muro comun": 810,
+    "bloque alto": 203,
+    "muro sobre el bloque": 302,
+    "baranda": 52
+   },
+   "paso8_subceldas_que_sobran": 1803,
+   "diferencia_con_el_paso8": -436,
+   "razon_con_el_paso8": 0.758,
+   "capas": {
+    "rojo": 1367,
+    "naranja": 321,
+    "amarillo": 223,
+    "azul": 0
+   },
+   "cara_sur": {
+    "bloque_alto": {
+     "tramos": 2,
+     "ancho_medio": 1.21,
+     "por_tercio": {
+      "abajo": {
+       "tramos": 2,
+       "ancho_medio": 1.21
+      }
+     }
+    },
+    "muros_comunes": {
+     "tramos": 12,
+     "ancho_medio": 1.06,
+     "por_tercio": {
+      "arriba": {
+       "tramos": 1,
+       "ancho_medio": 1.0
+      },
+      "medio": {
+       "tramos": 8,
+       "ancho_medio": 1.38
+      },
+      "abajo": {
+       "tramos": 3,
+       "ancho_medio": 0.25
+      }
+     }
+    }
+   },
+   "techo_corrido": {
+    "medio": {
+     "pixeles": 16679,
+     "corrimiento_medio_celdas": 3.03,
+     "p10": 2.65,
+     "p90": 3.43
+    },
+    "abajo": {
+     "pixeles": 8427,
+     "corrimiento_medio_celdas": 2.27,
+     "p10": 2.04,
+     "p90": 2.49
+    },
+    "total": {
+     "pixeles": 25106,
+     "corrimiento_medio_celdas": 2.78
+    }
+   },
+   "borde_norte_del_bloque": {
+    "con_baranda": {
+     "columnas": 8,
+     "celdas_tapadas_(subceldas/4)": 43.8,
+     "por_columna": 5.47
+    },
+    "sin_baranda": {
+     "columnas": 0,
+     "celdas_tapadas_(subceldas/4)": 0,
+     "por_columna": 0.0
+    }
+   },
+   "rampas_corrimiento": {
+    "Y12": {},
+    "Y13": {}
+   },
+   "celdas_de_rampa_tapadas_por_el_rojo_del_bloque": 0,
+   "celdas_de_rampa": 63,
+   "rojo_del_bloque_por_tipo_de_celda_base_(celdas)": {
+    "piso nivel 0 de sala": 48.0,
+    "banda": 68.0,
+    "piso decorativo": 51.2,
+    "puente, gate o escalera": 13.2,
+    "rampas 12 y 13": 0.0
+   }
+  }
+ },
+ "cara_sur_contra_el_snes": {
+  "banda_D_celdas": 5.0,
+  "cara_sur_bloque_alto_medida": 1.72,
+  "razon_con_D": 0.34,
+  "cara_sur_muros_comunes_medida": 1.34,
+  "razon_muros_con_D": 0.27,
+  "prediccion_7_por_cot_71": 2.41,
+  "por_toma_bloque": {
+   "global": 2.4,
+   "g23_codo": 0.88,
+   "g10_escalera": 1.36,
+   "g04_mirador": null,
+   "g24_codo": 1.21
+  }
+ },
+ "tramos_de_cara_sur": {
+  "bloque_alto": 6,
+  "muros_comunes": 43
+ }
+}
