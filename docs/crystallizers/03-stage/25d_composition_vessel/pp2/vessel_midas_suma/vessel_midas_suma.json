@@ -1,0 +1,643 @@
+{
+ "base": "c344a84",
+ "escalas_(parte_0)": {
+  "celda_de_planta_en_unidades_del_mundo_3D": 1.0,
+  "unidad_de_altura_en_unidades_del_mundo_3D": 1.0,
+  "factor_a_igualar": 1.0,
+  "nota": "en vscene.py las tres coordenadas (x, y, z) estan en la misma unidad = 1 celda de planta; la altura ya esta multiplicada por 2 (VS_SCALE = 2, paso 8c: la altura de los pasos 6 a 8b estaba en tiles de 2 celdas); aqui no hay nada que igualar",
+  "alturas_en_celdas": {
+   "heroe": 8.0,
+   "ancho_del_heroe": 3.2,
+   "nivel_1": 14.0,
+   "muro_comun": 14.0,
+   "muro_sobre_la_franja": 28.0,
+   "baranda": 4.0
+  }
+ },
+ "derivacion_de_la_distancia": {
+  "alto_visible_en_celdas_(224_px_a_16_px_por_tile)": 28,
+  "d0_a_lo_largo_del_rayo_a_los_pies": 52.2487,
+  "altura_de_la_camara_sobre_el_piso_d0_sen71": 49.4021,
+  "retroceso_al_sur_d0_cos71": 17.0105,
+  "alto_visible_a_la_distancia_d_(2_d_tan15)": {
+   "d0": 28.0,
+   "D1": 36.96,
+   "D2": 56.0,
+   "D3": 73.92
+  },
+  "chequeo_del_heroe_(alto_en_pantalla_sobre_alto_del_cuadro,_heroe_de_8_celdas)": {
+   "SNES_24_de_224": 0.1071,
+   "d0_(no_se_renderiza)": 0.1088,
+   "D1": 0.0792,
+   "D2": 0.0501,
+   "D3": 0.0373
+  },
+  "distancias": {
+   "D1": {
+    "factor": 1.32,
+    "celdas": 68.9683,
+    "altura_de_la_camara": 65.2108,
+    "retroceso_al_sur": 22.4539
+   },
+   "D2": {
+    "factor": 2.0,
+    "celdas": 104.4974,
+    "altura_de_la_camara": 98.8043,
+    "retroceso_al_sur": 34.021
+   },
+   "D3": {
+    "factor": 2.64,
+    "celdas": 137.9366,
+    "altura_de_la_camara": 130.4216,
+    "retroceso_al_sur": 44.9078
+   }
+  }
+ },
+ "camara": {
+  "tipo": "perspectiva",
+  "fov_vertical_grados": 30,
+  "pitch_grados": 71,
+  "yaw_grados": 0,
+  "desde": "sur",
+  "desplazamiento_de_lente": 0,
+  "tamano_px": [
+   512,
+   448
+  ],
+  "proporcion": "8:7",
+  "apunta_a": "los pies del heroe (heroe centrado en el cuadro)"
+ },
+ "tomas": {
+  "T1": {
+   "celda_(fila,columna)": [
+    85,
+    14
+   ],
+   "sala": 23
+  },
+  "T2": {
+   "celda_(fila,columna)": [
+    66,
+    4
+   ],
+   "sala": 10
+  },
+  "T3": {
+   "celda_(fila,columna)": [
+    66,
+    52
+   ],
+   "sala": 11
+  },
+  "T4": {
+   "celda_(fila,columna)": [
+    85,
+    42
+   ],
+   "sala": 24
+  },
+  "T5": {
+   "celda_(fila,columna)": [
+    85,
+    28
+   ],
+   "sala": 25
+  }
+ },
+ "notas_de_las_celdas": {
+  "T2": "fila media de Y10 (sala 10, filas 49 a 83) y columna del centro del ancho",
+  "T1_T5": "celda del piso con mayor distancia al borde de la sala (empate: la mas cercana al centroide)",
+  "T3_y_T4": {
+   "T3": {
+    "espejo_directo": [
+     66,
+     52
+    ],
+    "usada": [
+     66,
+     52
+    ],
+    "distancia_celdas": 0.0
+   },
+   "T4": {
+    "espejo_directo": [
+     85,
+     42
+    ],
+    "usada": [
+     85,
+     42
+    ],
+    "distancia_celdas": 0.0
+   }
+  }
+ },
+ "tomas_y_camaras": {
+  "T1_D1": {
+   "celda_(fila,columna)": [
+    85,
+    14
+   ],
+   "sala": 23,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    14.5,
+    85.5,
+    0.0
+   ],
+   "camara_C": [
+    14.5,
+    107.954,
+    65.211
+   ],
+   "distancia_a_los_pies": 68.968,
+   "altura_de_la_camara_sobre_los_pies": 65.211,
+   "retroceso_al_sur": 22.454,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 35.5,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0792,
+   "muros_cortados_(fila,columna)": [
+    [
+     90,
+     14
+    ],
+    [
+     90,
+     15
+    ],
+    [
+     90,
+     16
+    ]
+   ],
+   "pixeles_de_toma_cubiertos_en_z0": 191987
+  },
+  "T1_D2": {
+   "celda_(fila,columna)": [
+    85,
+    14
+   ],
+   "sala": 23,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    14.5,
+    85.5,
+    0.0
+   ],
+   "camara_C": [
+    14.5,
+    119.521,
+    98.804
+   ],
+   "distancia_a_los_pies": 104.497,
+   "altura_de_la_camara_sobre_los_pies": 98.804,
+   "retroceso_al_sur": 34.021,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 22.5,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0501,
+   "muros_cortados_(fila,columna)": [
+    [
+     90,
+     14
+    ],
+    [
+     90,
+     15
+    ],
+    [
+     90,
+     16
+    ]
+   ],
+   "pixeles_de_toma_cubiertos_en_z0": 150422
+  },
+  "T1_D3": {
+   "celda_(fila,columna)": [
+    85,
+    14
+   ],
+   "sala": 23,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    14.5,
+    85.5,
+    0.0
+   ],
+   "camara_C": [
+    14.5,
+    130.408,
+    130.422
+   ],
+   "distancia_a_los_pies": 137.937,
+   "altura_de_la_camara_sobre_los_pies": 130.422,
+   "retroceso_al_sur": 44.908,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 16.7,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0373,
+   "muros_cortados_(fila,columna)": [
+    [
+     90,
+     14
+    ],
+    [
+     90,
+     15
+    ],
+    [
+     90,
+     16
+    ]
+   ],
+   "pixeles_de_toma_cubiertos_en_z0": 120564
+  },
+  "T2_D1": {
+   "celda_(fila,columna)": [
+    66,
+    4
+   ],
+   "sala": 10,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    4.5,
+    66.5,
+    0.0
+   ],
+   "camara_C": [
+    4.5,
+    88.954,
+    65.211
+   ],
+   "distancia_a_los_pies": 68.968,
+   "altura_de_la_camara_sobre_los_pies": 65.211,
+   "retroceso_al_sur": 22.454,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 35.5,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0792,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 137684
+  },
+  "T2_D2": {
+   "celda_(fila,columna)": [
+    66,
+    4
+   ],
+   "sala": 10,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    4.5,
+    66.5,
+    0.0
+   ],
+   "camara_C": [
+    4.5,
+    100.521,
+    98.804
+   ],
+   "distancia_a_los_pies": 104.497,
+   "altura_de_la_camara_sobre_los_pies": 98.804,
+   "retroceso_al_sur": 34.021,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 22.5,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0501,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 130232
+  },
+  "T2_D3": {
+   "celda_(fila,columna)": [
+    66,
+    4
+   ],
+   "sala": 10,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    4.5,
+    66.5,
+    0.0
+   ],
+   "camara_C": [
+    4.5,
+    111.408,
+    130.422
+   ],
+   "distancia_a_los_pies": 137.937,
+   "altura_de_la_camara_sobre_los_pies": 130.422,
+   "retroceso_al_sur": 44.908,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 16.7,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0373,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 126568
+  },
+  "T3_D1": {
+   "celda_(fila,columna)": [
+    66,
+    52
+   ],
+   "sala": 11,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    52.5,
+    66.5,
+    0.0
+   ],
+   "camara_C": [
+    52.5,
+    88.954,
+    65.211
+   ],
+   "distancia_a_los_pies": 68.968,
+   "altura_de_la_camara_sobre_los_pies": 65.211,
+   "retroceso_al_sur": 22.454,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 35.5,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0792,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 137684
+  },
+  "T3_D2": {
+   "celda_(fila,columna)": [
+    66,
+    52
+   ],
+   "sala": 11,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    52.5,
+    66.5,
+    0.0
+   ],
+   "camara_C": [
+    52.5,
+    100.521,
+    98.804
+   ],
+   "distancia_a_los_pies": 104.497,
+   "altura_de_la_camara_sobre_los_pies": 98.804,
+   "retroceso_al_sur": 34.021,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 22.5,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0501,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 130232
+  },
+  "T3_D3": {
+   "celda_(fila,columna)": [
+    66,
+    52
+   ],
+   "sala": 11,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    52.5,
+    66.5,
+    0.0
+   ],
+   "camara_C": [
+    52.5,
+    111.408,
+    130.422
+   ],
+   "distancia_a_los_pies": 137.937,
+   "altura_de_la_camara_sobre_los_pies": 130.422,
+   "retroceso_al_sur": 44.908,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 16.7,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0373,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 126568
+  },
+  "T4_D1": {
+   "celda_(fila,columna)": [
+    85,
+    42
+   ],
+   "sala": 24,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    42.5,
+    85.5,
+    0.0
+   ],
+   "camara_C": [
+    42.5,
+    107.954,
+    65.211
+   ],
+   "distancia_a_los_pies": 68.968,
+   "altura_de_la_camara_sobre_los_pies": 65.211,
+   "retroceso_al_sur": 22.454,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 35.5,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0792,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 191987
+  },
+  "T4_D2": {
+   "celda_(fila,columna)": [
+    85,
+    42
+   ],
+   "sala": 24,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    42.5,
+    85.5,
+    0.0
+   ],
+   "camara_C": [
+    42.5,
+    119.521,
+    98.804
+   ],
+   "distancia_a_los_pies": 104.497,
+   "altura_de_la_camara_sobre_los_pies": 98.804,
+   "retroceso_al_sur": 34.021,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 22.5,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0501,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 150422
+  },
+  "T4_D3": {
+   "celda_(fila,columna)": [
+    85,
+    42
+   ],
+   "sala": 24,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    42.5,
+    85.5,
+    0.0
+   ],
+   "camara_C": [
+    42.5,
+    130.408,
+    130.422
+   ],
+   "distancia_a_los_pies": 137.937,
+   "altura_de_la_camara_sobre_los_pies": 130.422,
+   "retroceso_al_sur": 44.908,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 16.7,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0373,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 120564
+  },
+  "T5_D1": {
+   "celda_(fila,columna)": [
+    85,
+    28
+   ],
+   "sala": 25,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    28.5,
+    85.5,
+    14.0
+   ],
+   "camara_C": [
+    28.5,
+    107.954,
+    79.211
+   ],
+   "distancia_a_los_pies": 68.968,
+   "altura_de_la_camara_sobre_los_pies": 65.211,
+   "retroceso_al_sur": 22.454,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 35.5,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0792,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 227934
+  },
+  "T5_D2": {
+   "celda_(fila,columna)": [
+    85,
+    28
+   ],
+   "sala": 25,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    28.5,
+    85.5,
+    14.0
+   ],
+   "camara_C": [
+    28.5,
+    119.521,
+    112.804
+   ],
+   "distancia_a_los_pies": 104.497,
+   "altura_de_la_camara_sobre_los_pies": 98.804,
+   "retroceso_al_sur": 34.021,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 22.5,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0501,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 166200
+  },
+  "T5_D3": {
+   "celda_(fila,columna)": [
+    85,
+    28
+   ],
+   "sala": 25,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    28.5,
+    85.5,
+    14.0
+   ],
+   "camara_C": [
+    28.5,
+    130.408,
+    144.422
+   ],
+   "distancia_a_los_pies": 137.937,
+   "altura_de_la_camara_sobre_los_pies": 130.422,
+   "retroceso_al_sur": 44.908,
+   "pies_en_pantalla": [
+    256.0,
+    224.0
+   ],
+   "alto_del_heroe_en_pantalla_px": 16.7,
+   "alto_del_heroe_sobre_el_alto_del_cuadro": 0.0373,
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_de_toma_cubiertos_en_z0": 114558
+  }
+ },
+ "cobertura_de_subceldas_por_distancia": {
+  "D1": {
+   "subceldas_vistas_por_n_tomas": {
+    "1": 7528,
+    "2": 4726,
+    "3": 828,
+    "4": 0
+   }
+  },
+  "D2": {
+   "subceldas_vistas_por_n_tomas": {
+    "1": 4128,
+    "2": 6480,
+    "3": 3880,
+    "4": 2498
+   }
+  },
+  "D3": {
+   "subceldas_vistas_por_n_tomas": {
+    "1": 1116,
+    "2": 4666,
+    "3": 5002,
+    "4": 8482
+   }
+  }
+ },
+ "sumas": {
+  "suma_total": "S = suma de x",
+  "promedio": "S / n",
+  "raiz_de_la_suma_de_cuadrados": "Q = sqrt(suma de x^2)",
+  "x": "valor del mapa de MiDaS (0 a 1, 1 = mas cerca) promediado por subcelda de 2 x 2 por celda; n = tomas del grupo que ven la subcelda; escalas de las imagenes: S 0 a 4, promedio 0 a 1, Q 0 a 2"
+ }
+}
