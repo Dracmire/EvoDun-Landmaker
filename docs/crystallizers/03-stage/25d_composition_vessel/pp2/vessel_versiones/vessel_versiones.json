@@ -1,0 +1,4514 @@
+{
+ "base": "c8349e7",
+ "objetivo": 1.38,
+ "relleno_P": 14,
+ "recorte_en_celdas_acolchadas": [
+  17,
+  123,
+  12,
+  74
+ ],
+ "P1_V1": {
+  "zonas": {
+   "herradura": {
+    "area_E": 994,
+    "vuelta": 1,
+    "area_por_vuelta": [
+     994,
+     1348,
+     1684,
+     2009
+    ],
+    "area_sola": 1348,
+    "grupos": [
+     16,
+     23,
+     10,
+     5,
+     4,
+     6,
+     11,
+     24
+    ],
+    "area_compuesta": 1342,
+    "razon_sobre_la_guia_E": 1.35,
+    "razon_sola": 1.356
+   },
+   "norte": {
+    "area_E": 438,
+    "vuelta": 1,
+    "area_por_vuelta": [
+     438,
+     622,
+     777,
+     931
+    ],
+    "area_sola": 622,
+    "grupos": [
+     0,
+     3,
+     17,
+     1,
+     18,
+     2
+    ],
+    "area_compuesta": 622,
+    "razon_sobre_la_guia_E": 1.42,
+    "razon_sola": 1.42
+   },
+   "islas": {
+    "area_E": 342,
+    "vuelta": 1,
+    "area_por_vuelta": [
+     342,
+     502,
+     653,
+     812
+    ],
+    "area_sola": 502,
+    "grupos": [
+     19,
+     20,
+     25
+    ],
+    "area_compuesta": 501,
+    "razon_sobre_la_guia_E": 1.465,
+    "razon_sola": 1.468
+   }
+  },
+  "grupos": {
+   "0": {
+    "nombre": "pasillo X 0",
+    "piso_guia_E": 107,
+    "piso_final": 162,
+    "razon_sobre_la_guia_E": 1.514
+   },
+   "1": {
+    "nombre": "pasillo X 1",
+    "piso_guia_E": 34,
+    "piso_final": 49,
+    "razon_sobre_la_guia_E": 1.441
+   },
+   "2": {
+    "nombre": "pasillo X 2",
+    "piso_guia_E": 41,
+    "piso_final": 63,
+    "razon_sobre_la_guia_E": 1.537
+   },
+   "3": {
+    "nombre": "pasillo X 3",
+    "piso_guia_E": 70,
+    "piso_final": 114,
+    "razon_sobre_la_guia_E": 1.629
+   },
+   "4": {
+    "nombre": "pasillo X 4",
+    "piso_guia_E": 67,
+    "piso_final": 81,
+    "razon_sobre_la_guia_E": 1.209
+   },
+   "5": {
+    "nombre": "pasillo X 5",
+    "piso_guia_E": 179,
+    "piso_final": 242,
+    "razon_sobre_la_guia_E": 1.352
+   },
+   "6": {
+    "nombre": "pasillo X 6",
+    "piso_guia_E": 89,
+    "piso_final": 125,
+    "razon_sobre_la_guia_E": 1.404
+   },
+   "9": {
+    "nombre": "pasillo X 9",
+    "piso_guia_E": 25,
+    "piso_final": 26,
+    "razon_sobre_la_guia_E": 1.04
+   },
+   "10": {
+    "nombre": "pasillo Y 10",
+    "piso_guia_E": 209,
+    "piso_final": 275,
+    "razon_sobre_la_guia_E": 1.316
+   },
+   "11": {
+    "nombre": "grupo 11",
+    "piso_guia_E": 298,
+    "piso_final": 394,
+    "razon_sobre_la_guia_E": 1.322
+   },
+   "12": {
+    "nombre": "pasillo Y 12",
+    "piso_guia_E": 49,
+    "piso_final": 49,
+    "razon_sobre_la_guia_E": 1.0
+   },
+   "13": {
+    "nombre": "pasillo Y 13",
+    "piso_guia_E": 49,
+    "piso_final": 50,
+    "razon_sobre_la_guia_E": 1.02
+   },
+   "14": {
+    "nombre": "pasillo Y 14",
+    "piso_guia_E": 24,
+    "piso_final": 22,
+    "razon_sobre_la_guia_E": 0.917
+   },
+   "15": {
+    "nombre": "pasillo Y 15",
+    "piso_guia_E": 24,
+    "piso_final": 22,
+    "razon_sobre_la_guia_E": 0.917
+   },
+   "16": {
+    "nombre": "pasillo Y 16",
+    "piso_guia_E": 19,
+    "piso_final": 33,
+    "razon_sobre_la_guia_E": 1.737
+   },
+   "17": {
+    "nombre": "hub 17",
+    "piso_guia_E": 96,
+    "piso_final": 123,
+    "razon_sobre_la_guia_E": 1.281
+   },
+   "18": {
+    "nombre": "hub 18",
+    "piso_guia_E": 90,
+    "piso_final": 111,
+    "razon_sobre_la_guia_E": 1.233
+   },
+   "19": {
+    "nombre": "hub 19",
+    "piso_guia_E": 143,
+    "piso_final": 207,
+    "razon_sobre_la_guia_E": 1.448
+   },
+   "20": {
+    "nombre": "hub 20",
+    "piso_guia_E": 139,
+    "piso_final": 199,
+    "razon_sobre_la_guia_E": 1.432
+   },
+   "23": {
+    "nombre": "hub 23",
+    "piso_guia_E": 65,
+    "piso_final": 88,
+    "razon_sobre_la_guia_E": 1.354
+   },
+   "24": {
+    "nombre": "hub 24",
+    "piso_guia_E": 68,
+    "piso_final": 104,
+    "razon_sobre_la_guia_E": 1.529
+   },
+   "25": {
+    "nombre": "hub 25",
+    "piso_guia_E": 60,
+    "piso_final": 95,
+    "razon_sobre_la_guia_E": 1.583
+   }
+  },
+  "piso_total_salas": 2465,
+  "piso_total_con_puentes": 2634,
+  "dobles_muros_(4_o_mas_con_los_pisos_pegados_a_la_linea)": 0,
+  "escalones_de_3_celdas_entre_pisos_pegados": 5,
+  "muro_externo": {
+   "salas_con_el_muro_mas_delgado_que_en_el_SNES": {},
+   "celdas_de_wrapping_pasadas_a_muro": 92
+  },
+  "silueta": {
+   "filas_antes": 104,
+   "columnas_antes": 56,
+   "filas_despues": 104,
+   "columnas_despues": 58
+  },
+  "contactos_diagonales_entre_salas": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "contactos_diagonales_de_la_guia_E": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "pares_bajo_el_muro_minimo": [],
+  "dientes": {
+   "total": 25,
+   "original": 25
+  },
+  "error_de_espejo": {
+   "X5 / X6": {
+    "tiles_A": 242,
+    "tiles_B": 125,
+    "celdas_que_no_coinciden": 131
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 88,
+    "tiles_B": 104,
+    "celdas_que_no_coinciden": 22
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 275,
+    "tiles_B": 394,
+    "celdas_que_no_coinciden": 121
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 207,
+    "tiles_B": 199,
+    "celdas_que_no_coinciden": 18
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 123,
+    "tiles_B": 111,
+    "celdas_que_no_coinciden": 16
+   },
+   "X1 / X2": {
+    "tiles_A": 49,
+    "tiles_B": 63,
+    "celdas_que_no_coinciden": 14
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 162,
+    "tiles_B": 162,
+    "celdas_que_no_coinciden": 12
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 114,
+    "tiles_B": 114,
+    "celdas_que_no_coinciden": 12
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 81,
+    "tiles_B": 81,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 95,
+    "tiles_B": 95,
+    "celdas_que_no_coinciden": 6
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 50,
+    "celdas_que_no_coinciden": 11
+   },
+   "Y14 / Y15": {
+    "tiles_A": 22,
+    "tiles_B": 22,
+    "celdas_que_no_coinciden": 12
+   }
+  },
+  "error_de_espejo_guia_E": {
+   "X5 / X6": {
+    "tiles_A": 179,
+    "tiles_B": 89,
+    "celdas_que_no_coinciden": 96
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 65,
+    "tiles_B": 68,
+    "celdas_que_no_coinciden": 9
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 209,
+    "tiles_B": 298,
+    "celdas_que_no_coinciden": 89
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 143,
+    "tiles_B": 139,
+    "celdas_que_no_coinciden": 10
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 96,
+    "tiles_B": 90,
+    "celdas_que_no_coinciden": 8
+   },
+   "X1 / X2": {
+    "tiles_A": 34,
+    "tiles_B": 41,
+    "celdas_que_no_coinciden": 7
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 107,
+    "tiles_B": 107,
+    "celdas_que_no_coinciden": 10
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 70,
+    "tiles_B": 70,
+    "celdas_que_no_coinciden": 12
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 67,
+    "tiles_B": 67,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 60,
+    "tiles_B": 60,
+    "celdas_que_no_coinciden": 8
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 49,
+    "celdas_que_no_coinciden": 2
+   },
+   "Y14 / Y15": {
+    "tiles_A": 24,
+    "tiles_B": 24,
+    "celdas_que_no_coinciden": 0
+   }
+  },
+  "puentes": {
+   "12": {
+    "nombre": "Y12",
+    "une": [
+     "N17",
+     "X5"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     13,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 49,
+    "toca_las_dos_salas": true
+   },
+   "13": {
+    "nombre": "Y13",
+    "une": [
+     "N18",
+     "X6"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     14,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 50,
+    "toca_las_dos_salas": true
+   },
+   "14": {
+    "nombre": "Y14",
+    "une": [
+     "X5",
+     "I19"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     7,
+     7,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 22,
+    "toca_las_dos_salas": true
+   },
+   "15": {
+    "nombre": "Y15",
+    "une": [
+     "X6",
+     "I20"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     7,
+     7,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 22,
+    "toca_las_dos_salas": true
+   },
+   "9": {
+    "nombre": "X9",
+    "une": [
+     "I25",
+     "H24"
+    ],
+    "largo_antes": 7,
+    "largo_despues_por_columna": [
+     26
+    ],
+    "celdas_antes": 25,
+    "celdas_despues": 26,
+    "toca_las_dos_salas": true
+   }
+  },
+  "muro_muerto_a_mas_de_3_celdas": {
+   "techo_y_cara": 437,
+   "todo_el_espacio_sin_piso": 437
+  },
+  "a_estrella": {
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 114,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 208,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 138,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true
+    }
+   },
+   "G_cerrada": true
+  },
+  "detalle_de_la_version": {
+   "lineas_del_muro_minimo": {
+    "celdas": 826,
+    "tramos_conexos": 11,
+    "celdas_de_piso_de_sala_sobre_la_linea": 0,
+    "celdas_de_puente_o_gate_sobre_la_linea": 103,
+    "hoyos_compartimentos_de_muro_muerto_cerrados_por_la_linea": 1,
+    "celdas_en_esos_hoyos": 1,
+    "celdas_con_grosor_3_(escalones)": 270
+   },
+   "celdas_quitadas_por_el_muro_minimo_(red_de_seguridad)": 0
+  },
+  "condiciones": {
+   "linea_minima_sin_hoyos": false,
+   "sin_escalones_de_3": false,
+   "0_dobles_muros": true,
+   "sin_contactos_diagonales_nuevos": true,
+   "ningun_muro_externo_mas_delgado": true,
+   "cada_puente_une_las_dos_salas": true,
+   "muro_minimo_respetado": true,
+   "a_estrella_igual": true,
+   "G_cerrada": true
+  }
+ },
+ "P2_V1": {
+  "zonas": {
+   "herradura": {
+    "area_E": 1171,
+    "vuelta": 1,
+    "area_por_vuelta": [
+     1171,
+     1636,
+     2098,
+     2557
+    ],
+    "area_sola": 1636,
+    "grupos": [
+     16,
+     23,
+     10,
+     5,
+     4,
+     6,
+     11,
+     24,
+     0,
+     3
+    ],
+    "area_compuesta": 1618,
+    "razon_sobre_la_guia_E": 1.382,
+    "razon_sola": 1.397
+   },
+   "islas": {
+    "area_E": 603,
+    "vuelta": 1,
+    "area_por_vuelta": [
+     603,
+     861,
+     1128,
+     1422
+    ],
+    "area_sola": 861,
+    "grupos": [
+     19,
+     20,
+     25,
+     17,
+     1,
+     18,
+     2
+    ],
+    "area_compuesta": 847,
+    "razon_sobre_la_guia_E": 1.405,
+    "razon_sola": 1.428
+   }
+  },
+  "grupos": {
+   "0": {
+    "nombre": "pasillo X 0",
+    "piso_guia_E": 107,
+    "piso_final": 162,
+    "razon_sobre_la_guia_E": 1.514
+   },
+   "1": {
+    "nombre": "pasillo X 1",
+    "piso_guia_E": 34,
+    "piso_final": 49,
+    "razon_sobre_la_guia_E": 1.441
+   },
+   "2": {
+    "nombre": "pasillo X 2",
+    "piso_guia_E": 41,
+    "piso_final": 63,
+    "razon_sobre_la_guia_E": 1.537
+   },
+   "3": {
+    "nombre": "pasillo X 3",
+    "piso_guia_E": 70,
+    "piso_final": 114,
+    "razon_sobre_la_guia_E": 1.629
+   },
+   "4": {
+    "nombre": "pasillo X 4",
+    "piso_guia_E": 67,
+    "piso_final": 81,
+    "razon_sobre_la_guia_E": 1.209
+   },
+   "5": {
+    "nombre": "pasillo X 5",
+    "piso_guia_E": 179,
+    "piso_final": 242,
+    "razon_sobre_la_guia_E": 1.352
+   },
+   "6": {
+    "nombre": "pasillo X 6",
+    "piso_guia_E": 89,
+    "piso_final": 125,
+    "razon_sobre_la_guia_E": 1.404
+   },
+   "9": {
+    "nombre": "pasillo X 9",
+    "piso_guia_E": 25,
+    "piso_final": 26,
+    "razon_sobre_la_guia_E": 1.04
+   },
+   "10": {
+    "nombre": "pasillo Y 10",
+    "piso_guia_E": 209,
+    "piso_final": 275,
+    "razon_sobre_la_guia_E": 1.316
+   },
+   "11": {
+    "nombre": "grupo 11",
+    "piso_guia_E": 298,
+    "piso_final": 394,
+    "razon_sobre_la_guia_E": 1.322
+   },
+   "12": {
+    "nombre": "pasillo Y 12",
+    "piso_guia_E": 49,
+    "piso_final": 49,
+    "razon_sobre_la_guia_E": 1.0
+   },
+   "13": {
+    "nombre": "pasillo Y 13",
+    "piso_guia_E": 49,
+    "piso_final": 50,
+    "razon_sobre_la_guia_E": 1.02
+   },
+   "14": {
+    "nombre": "pasillo Y 14",
+    "piso_guia_E": 24,
+    "piso_final": 22,
+    "razon_sobre_la_guia_E": 0.917
+   },
+   "15": {
+    "nombre": "pasillo Y 15",
+    "piso_guia_E": 24,
+    "piso_final": 22,
+    "razon_sobre_la_guia_E": 0.917
+   },
+   "16": {
+    "nombre": "pasillo Y 16",
+    "piso_guia_E": 19,
+    "piso_final": 33,
+    "razon_sobre_la_guia_E": 1.737
+   },
+   "17": {
+    "nombre": "hub 17",
+    "piso_guia_E": 96,
+    "piso_final": 123,
+    "razon_sobre_la_guia_E": 1.281
+   },
+   "18": {
+    "nombre": "hub 18",
+    "piso_guia_E": 90,
+    "piso_final": 111,
+    "razon_sobre_la_guia_E": 1.233
+   },
+   "19": {
+    "nombre": "hub 19",
+    "piso_guia_E": 143,
+    "piso_final": 207,
+    "razon_sobre_la_guia_E": 1.448
+   },
+   "20": {
+    "nombre": "hub 20",
+    "piso_guia_E": 139,
+    "piso_final": 199,
+    "razon_sobre_la_guia_E": 1.432
+   },
+   "23": {
+    "nombre": "hub 23",
+    "piso_guia_E": 65,
+    "piso_final": 88,
+    "razon_sobre_la_guia_E": 1.354
+   },
+   "24": {
+    "nombre": "hub 24",
+    "piso_guia_E": 68,
+    "piso_final": 104,
+    "razon_sobre_la_guia_E": 1.529
+   },
+   "25": {
+    "nombre": "hub 25",
+    "piso_guia_E": 60,
+    "piso_final": 95,
+    "razon_sobre_la_guia_E": 1.583
+   }
+  },
+  "piso_total_salas": 2465,
+  "piso_total_con_puentes": 2634,
+  "dobles_muros_(4_o_mas_con_los_pisos_pegados_a_la_linea)": 0,
+  "escalones_de_3_celdas_entre_pisos_pegados": 5,
+  "muro_externo": {
+   "salas_con_el_muro_mas_delgado_que_en_el_SNES": {},
+   "celdas_de_wrapping_pasadas_a_muro": 92
+  },
+  "silueta": {
+   "filas_antes": 104,
+   "columnas_antes": 56,
+   "filas_despues": 104,
+   "columnas_despues": 58
+  },
+  "contactos_diagonales_entre_salas": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "contactos_diagonales_de_la_guia_E": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "pares_bajo_el_muro_minimo": [],
+  "dientes": {
+   "total": 25,
+   "original": 25
+  },
+  "error_de_espejo": {
+   "X5 / X6": {
+    "tiles_A": 242,
+    "tiles_B": 125,
+    "celdas_que_no_coinciden": 131
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 88,
+    "tiles_B": 104,
+    "celdas_que_no_coinciden": 22
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 275,
+    "tiles_B": 394,
+    "celdas_que_no_coinciden": 121
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 207,
+    "tiles_B": 199,
+    "celdas_que_no_coinciden": 18
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 123,
+    "tiles_B": 111,
+    "celdas_que_no_coinciden": 16
+   },
+   "X1 / X2": {
+    "tiles_A": 49,
+    "tiles_B": 63,
+    "celdas_que_no_coinciden": 14
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 162,
+    "tiles_B": 162,
+    "celdas_que_no_coinciden": 12
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 114,
+    "tiles_B": 114,
+    "celdas_que_no_coinciden": 12
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 81,
+    "tiles_B": 81,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 95,
+    "tiles_B": 95,
+    "celdas_que_no_coinciden": 6
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 50,
+    "celdas_que_no_coinciden": 11
+   },
+   "Y14 / Y15": {
+    "tiles_A": 22,
+    "tiles_B": 22,
+    "celdas_que_no_coinciden": 12
+   }
+  },
+  "error_de_espejo_guia_E": {
+   "X5 / X6": {
+    "tiles_A": 179,
+    "tiles_B": 89,
+    "celdas_que_no_coinciden": 96
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 65,
+    "tiles_B": 68,
+    "celdas_que_no_coinciden": 9
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 209,
+    "tiles_B": 298,
+    "celdas_que_no_coinciden": 89
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 143,
+    "tiles_B": 139,
+    "celdas_que_no_coinciden": 10
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 96,
+    "tiles_B": 90,
+    "celdas_que_no_coinciden": 8
+   },
+   "X1 / X2": {
+    "tiles_A": 34,
+    "tiles_B": 41,
+    "celdas_que_no_coinciden": 7
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 107,
+    "tiles_B": 107,
+    "celdas_que_no_coinciden": 10
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 70,
+    "tiles_B": 70,
+    "celdas_que_no_coinciden": 12
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 67,
+    "tiles_B": 67,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 60,
+    "tiles_B": 60,
+    "celdas_que_no_coinciden": 8
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 49,
+    "celdas_que_no_coinciden": 2
+   },
+   "Y14 / Y15": {
+    "tiles_A": 24,
+    "tiles_B": 24,
+    "celdas_que_no_coinciden": 0
+   }
+  },
+  "puentes": {
+   "12": {
+    "nombre": "Y12",
+    "une": [
+     "N17",
+     "X5"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     13,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 49,
+    "toca_las_dos_salas": true
+   },
+   "13": {
+    "nombre": "Y13",
+    "une": [
+     "N18",
+     "X6"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     14,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 50,
+    "toca_las_dos_salas": true
+   },
+   "14": {
+    "nombre": "Y14",
+    "une": [
+     "X5",
+     "I19"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     7,
+     7,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 22,
+    "toca_las_dos_salas": true
+   },
+   "15": {
+    "nombre": "Y15",
+    "une": [
+     "X6",
+     "I20"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     7,
+     7,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 22,
+    "toca_las_dos_salas": true
+   },
+   "9": {
+    "nombre": "X9",
+    "une": [
+     "I25",
+     "H24"
+    ],
+    "largo_antes": 7,
+    "largo_despues_por_columna": [
+     26
+    ],
+    "celdas_antes": 25,
+    "celdas_despues": 26,
+    "toca_las_dos_salas": true
+   }
+  },
+  "muro_muerto_a_mas_de_3_celdas": {
+   "techo_y_cara": 437,
+   "todo_el_espacio_sin_piso": 437
+  },
+  "a_estrella": {
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 114,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 208,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 138,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true
+    }
+   },
+   "G_cerrada": true
+  },
+  "detalle_de_la_version": {
+   "lineas_del_muro_minimo": {
+    "celdas": 826,
+    "tramos_conexos": 11,
+    "celdas_de_piso_de_sala_sobre_la_linea": 0,
+    "celdas_de_puente_o_gate_sobre_la_linea": 103,
+    "hoyos_compartimentos_de_muro_muerto_cerrados_por_la_linea": 1,
+    "celdas_en_esos_hoyos": 1,
+    "celdas_con_grosor_3_(escalones)": 270
+   },
+   "celdas_quitadas_por_el_muro_minimo_(red_de_seguridad)": 0
+  },
+  "condiciones": {
+   "linea_minima_sin_hoyos": false,
+   "sin_escalones_de_3": false,
+   "0_dobles_muros": true,
+   "sin_contactos_diagonales_nuevos": true,
+   "ningun_muro_externo_mas_delgado": true,
+   "cada_puente_une_las_dos_salas": true,
+   "muro_minimo_respetado": true,
+   "a_estrella_igual": true,
+   "G_cerrada": true
+  }
+ },
+ "P1_V2a": {
+  "zonas": {
+   "herradura": {
+    "area_E": 994,
+    "vuelta_externa": 1,
+    "area_tras_la_externa": 1162,
+    "vuelta_interna": 1,
+    "area_por_vuelta_externa": [
+     994,
+     1162,
+     1359,
+     1570
+    ],
+    "area_por_vuelta_interna": [
+     1162,
+     1348,
+     1487,
+     1601
+    ],
+    "area_sola": 1348,
+    "grupos": [
+     16,
+     23,
+     10,
+     5,
+     4,
+     6,
+     11,
+     24
+    ],
+    "area_compuesta": 1264,
+    "razon_sobre_la_guia_E": 1.272,
+    "razon_sola": 1.356
+   },
+   "norte": {
+    "area_E": 438,
+    "vuelta_externa": 1,
+    "area_tras_la_externa": 530,
+    "vuelta_interna": 1,
+    "area_por_vuelta_externa": [
+     438,
+     530,
+     647,
+     778
+    ],
+    "area_por_vuelta_interna": [
+     530,
+     622,
+     660,
+     683
+    ],
+    "area_sola": 622,
+    "grupos": [
+     0,
+     3,
+     17,
+     1,
+     18,
+     2
+    ],
+    "area_compuesta": 563,
+    "razon_sobre_la_guia_E": 1.285,
+    "razon_sola": 1.42
+   },
+   "islas": {
+    "area_E": 342,
+    "vuelta_externa": 1,
+    "area_tras_la_externa": 451,
+    "vuelta_interna": 0,
+    "area_por_vuelta_externa": [
+     342,
+     451,
+     588,
+     736
+    ],
+    "area_por_vuelta_interna": [
+     451,
+     502,
+     516
+    ],
+    "area_sola": 451,
+    "grupos": [
+     19,
+     20,
+     25
+    ],
+    "area_compuesta": 417,
+    "razon_sobre_la_guia_E": 1.219,
+    "razon_sola": 1.319
+   }
+  },
+  "grupos": {
+   "0": {
+    "nombre": "pasillo X 0",
+    "piso_guia_E": 107,
+    "piso_final": 146,
+    "razon_sobre_la_guia_E": 1.364
+   },
+   "1": {
+    "nombre": "pasillo X 1",
+    "piso_guia_E": 34,
+    "piso_final": 41,
+    "razon_sobre_la_guia_E": 1.206
+   },
+   "2": {
+    "nombre": "pasillo X 2",
+    "piso_guia_E": 41,
+    "piso_final": 59,
+    "razon_sobre_la_guia_E": 1.439
+   },
+   "3": {
+    "nombre": "pasillo X 3",
+    "piso_guia_E": 70,
+    "piso_final": 100,
+    "razon_sobre_la_guia_E": 1.429
+   },
+   "4": {
+    "nombre": "pasillo X 4",
+    "piso_guia_E": 67,
+    "piso_final": 69,
+    "razon_sobre_la_guia_E": 1.03
+   },
+   "5": {
+    "nombre": "pasillo X 5",
+    "piso_guia_E": 179,
+    "piso_final": 225,
+    "razon_sobre_la_guia_E": 1.257
+   },
+   "6": {
+    "nombre": "pasillo X 6",
+    "piso_guia_E": 89,
+    "piso_final": 118,
+    "razon_sobre_la_guia_E": 1.326
+   },
+   "9": {
+    "nombre": "pasillo X 9",
+    "piso_guia_E": 25,
+    "piso_final": 26,
+    "razon_sobre_la_guia_E": 1.04
+   },
+   "10": {
+    "nombre": "pasillo Y 10",
+    "piso_guia_E": 209,
+    "piso_final": 275,
+    "razon_sobre_la_guia_E": 1.316
+   },
+   "11": {
+    "nombre": "grupo 11",
+    "piso_guia_E": 298,
+    "piso_final": 374,
+    "razon_sobre_la_guia_E": 1.255
+   },
+   "12": {
+    "nombre": "pasillo Y 12",
+    "piso_guia_E": 49,
+    "piso_final": 49,
+    "razon_sobre_la_guia_E": 1.0
+   },
+   "13": {
+    "nombre": "pasillo Y 13",
+    "piso_guia_E": 49,
+    "piso_final": 50,
+    "razon_sobre_la_guia_E": 1.02
+   },
+   "14": {
+    "nombre": "pasillo Y 14",
+    "piso_guia_E": 24,
+    "piso_final": 24,
+    "razon_sobre_la_guia_E": 1.0
+   },
+   "15": {
+    "nombre": "pasillo Y 15",
+    "piso_guia_E": 24,
+    "piso_final": 24,
+    "razon_sobre_la_guia_E": 1.0
+   },
+   "16": {
+    "nombre": "pasillo Y 16",
+    "piso_guia_E": 19,
+    "piso_final": 33,
+    "razon_sobre_la_guia_E": 1.737
+   },
+   "17": {
+    "nombre": "hub 17",
+    "piso_guia_E": 96,
+    "piso_final": 116,
+    "razon_sobre_la_guia_E": 1.208
+   },
+   "18": {
+    "nombre": "hub 18",
+    "piso_guia_E": 90,
+    "piso_final": 101,
+    "razon_sobre_la_guia_E": 1.122
+   },
+   "19": {
+    "nombre": "hub 19",
+    "piso_guia_E": 143,
+    "piso_final": 162,
+    "razon_sobre_la_guia_E": 1.133
+   },
+   "20": {
+    "nombre": "hub 20",
+    "piso_guia_E": 139,
+    "piso_final": 170,
+    "razon_sobre_la_guia_E": 1.223
+   },
+   "23": {
+    "nombre": "hub 23",
+    "piso_guia_E": 65,
+    "piso_final": 78,
+    "razon_sobre_la_guia_E": 1.2
+   },
+   "24": {
+    "nombre": "hub 24",
+    "piso_guia_E": 68,
+    "piso_final": 92,
+    "razon_sobre_la_guia_E": 1.353
+   },
+   "25": {
+    "nombre": "hub 25",
+    "piso_guia_E": 60,
+    "piso_final": 85,
+    "razon_sobre_la_guia_E": 1.417
+   }
+  },
+  "piso_total_salas": 2244,
+  "piso_total_con_puentes": 2417,
+  "dobles_muros_(4_o_mas_con_los_pisos_pegados_a_la_linea)": 0,
+  "escalones_de_3_celdas_entre_pisos_pegados": 4,
+  "muro_externo": {
+   "salas_con_el_muro_mas_delgado_que_en_el_SNES": {},
+   "celdas_de_wrapping_pasadas_a_muro": 85
+  },
+  "silueta": {
+   "filas_antes": 104,
+   "columnas_antes": 56,
+   "filas_despues": 104,
+   "columnas_despues": 58
+  },
+  "contactos_diagonales_entre_salas": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "contactos_diagonales_de_la_guia_E": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "pares_bajo_el_muro_minimo": [],
+  "dientes": {
+   "total": 63,
+   "original": 25
+  },
+  "error_de_espejo": {
+   "X5 / X6": {
+    "tiles_A": 225,
+    "tiles_B": 118,
+    "celdas_que_no_coinciden": 121
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 78,
+    "tiles_B": 92,
+    "celdas_que_no_coinciden": 22
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 275,
+    "tiles_B": 374,
+    "celdas_que_no_coinciden": 121
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 162,
+    "tiles_B": 170,
+    "celdas_que_no_coinciden": 34
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 116,
+    "tiles_B": 101,
+    "celdas_que_no_coinciden": 19
+   },
+   "X1 / X2": {
+    "tiles_A": 41,
+    "tiles_B": 59,
+    "celdas_que_no_coinciden": 18
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 146,
+    "tiles_B": 146,
+    "celdas_que_no_coinciden": 12
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 100,
+    "tiles_B": 100,
+    "celdas_que_no_coinciden": 24
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 69,
+    "tiles_B": 69,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 85,
+    "tiles_B": 85,
+    "celdas_que_no_coinciden": 10
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 50,
+    "celdas_que_no_coinciden": 11
+   },
+   "Y14 / Y15": {
+    "tiles_A": 24,
+    "tiles_B": 24,
+    "celdas_que_no_coinciden": 16
+   }
+  },
+  "error_de_espejo_guia_E": {
+   "X5 / X6": {
+    "tiles_A": 179,
+    "tiles_B": 89,
+    "celdas_que_no_coinciden": 96
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 65,
+    "tiles_B": 68,
+    "celdas_que_no_coinciden": 9
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 209,
+    "tiles_B": 298,
+    "celdas_que_no_coinciden": 89
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 143,
+    "tiles_B": 139,
+    "celdas_que_no_coinciden": 10
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 96,
+    "tiles_B": 90,
+    "celdas_que_no_coinciden": 8
+   },
+   "X1 / X2": {
+    "tiles_A": 34,
+    "tiles_B": 41,
+    "celdas_que_no_coinciden": 7
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 107,
+    "tiles_B": 107,
+    "celdas_que_no_coinciden": 10
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 70,
+    "tiles_B": 70,
+    "celdas_que_no_coinciden": 12
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 67,
+    "tiles_B": 67,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 60,
+    "tiles_B": 60,
+    "celdas_que_no_coinciden": 8
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 49,
+    "celdas_que_no_coinciden": 2
+   },
+   "Y14 / Y15": {
+    "tiles_A": 24,
+    "tiles_B": 24,
+    "celdas_que_no_coinciden": 0
+   }
+  },
+  "puentes": {
+   "12": {
+    "nombre": "Y12",
+    "une": [
+     "N17",
+     "X5"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     13,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 49,
+    "toca_las_dos_salas": true
+   },
+   "13": {
+    "nombre": "Y13",
+    "une": [
+     "N18",
+     "X6"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     14,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 50,
+    "toca_las_dos_salas": true
+   },
+   "14": {
+    "nombre": "Y14",
+    "une": [
+     "X5",
+     "I19"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     8,
+     8,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 24,
+    "toca_las_dos_salas": true
+   },
+   "15": {
+    "nombre": "Y15",
+    "une": [
+     "X6",
+     "I20"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     8,
+     8,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 24,
+    "toca_las_dos_salas": true
+   },
+   "9": {
+    "nombre": "X9",
+    "une": [
+     "I25",
+     "H24"
+    ],
+    "largo_antes": 7,
+    "largo_despues_por_columna": [
+     26
+    ],
+    "celdas_antes": 25,
+    "celdas_despues": 26,
+    "toca_las_dos_salas": true
+   }
+  },
+  "muro_muerto_a_mas_de_3_celdas": {
+   "techo_y_cara": 524,
+   "todo_el_espacio_sin_piso": 524
+  },
+  "a_estrella": {
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 114,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 208,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 138,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true
+    }
+   },
+   "G_cerrada": true
+  },
+  "detalle_de_la_version": {
+   "celdas_de_cara_recuperadas": 171,
+   "lineas_del_muro_minimo": {
+    "celdas": 826,
+    "tramos_conexos": 11,
+    "celdas_de_piso_de_sala_sobre_la_linea": 0,
+    "celdas_de_puente_o_gate_sobre_la_linea": 103,
+    "hoyos_compartimentos_de_muro_muerto_cerrados_por_la_linea": 1,
+    "celdas_en_esos_hoyos": 1,
+    "celdas_con_grosor_3_(escalones)": 270
+   },
+   "celdas_quitadas_por_el_muro_minimo_(red_de_seguridad)": 0
+  },
+  "condiciones": {
+   "linea_minima_sin_hoyos": false,
+   "sin_escalones_de_3": false,
+   "0_dobles_muros": true,
+   "sin_contactos_diagonales_nuevos": true,
+   "ningun_muro_externo_mas_delgado": true,
+   "cada_puente_une_las_dos_salas": true,
+   "muro_minimo_respetado": true,
+   "a_estrella_igual": true,
+   "G_cerrada": true
+  }
+ },
+ "P2_V2a": {
+  "zonas": {
+   "herradura": {
+    "area_E": 1171,
+    "vuelta_externa": 1,
+    "area_tras_la_externa": 1413,
+    "vuelta_interna": 1,
+    "area_por_vuelta_externa": [
+     1171,
+     1413,
+     1697,
+     2004
+    ],
+    "area_por_vuelta_interna": [
+     1413,
+     1636,
+     1811,
+     1954
+    ],
+    "area_sola": 1636,
+    "grupos": [
+     16,
+     23,
+     10,
+     5,
+     4,
+     6,
+     11,
+     24,
+     0,
+     3
+    ],
+    "area_compuesta": 1510,
+    "razon_sobre_la_guia_E": 1.289,
+    "razon_sola": 1.397
+   },
+   "islas": {
+    "area_E": 603,
+    "vuelta_externa": 1,
+    "area_tras_la_externa": 760,
+    "vuelta_interna": 1,
+    "area_por_vuelta_externa": [
+     603,
+     760,
+     962,
+     1191
+    ],
+    "area_por_vuelta_interna": [
+     760,
+     861,
+     922,
+     975
+    ],
+    "area_sola": 861,
+    "grupos": [
+     19,
+     20,
+     25,
+     17,
+     1,
+     18,
+     2
+    ],
+    "area_compuesta": 771,
+    "razon_sobre_la_guia_E": 1.279,
+    "razon_sola": 1.428
+   }
+  },
+  "grupos": {
+   "0": {
+    "nombre": "pasillo X 0",
+    "piso_guia_E": 107,
+    "piso_final": 146,
+    "razon_sobre_la_guia_E": 1.364
+   },
+   "1": {
+    "nombre": "pasillo X 1",
+    "piso_guia_E": 34,
+    "piso_final": 41,
+    "razon_sobre_la_guia_E": 1.206
+   },
+   "2": {
+    "nombre": "pasillo X 2",
+    "piso_guia_E": 41,
+    "piso_final": 59,
+    "razon_sobre_la_guia_E": 1.439
+   },
+   "3": {
+    "nombre": "pasillo X 3",
+    "piso_guia_E": 70,
+    "piso_final": 100,
+    "razon_sobre_la_guia_E": 1.429
+   },
+   "4": {
+    "nombre": "pasillo X 4",
+    "piso_guia_E": 67,
+    "piso_final": 69,
+    "razon_sobre_la_guia_E": 1.03
+   },
+   "5": {
+    "nombre": "pasillo X 5",
+    "piso_guia_E": 179,
+    "piso_final": 225,
+    "razon_sobre_la_guia_E": 1.257
+   },
+   "6": {
+    "nombre": "pasillo X 6",
+    "piso_guia_E": 89,
+    "piso_final": 118,
+    "razon_sobre_la_guia_E": 1.326
+   },
+   "9": {
+    "nombre": "pasillo X 9",
+    "piso_guia_E": 25,
+    "piso_final": 26,
+    "razon_sobre_la_guia_E": 1.04
+   },
+   "10": {
+    "nombre": "pasillo Y 10",
+    "piso_guia_E": 209,
+    "piso_final": 275,
+    "razon_sobre_la_guia_E": 1.316
+   },
+   "11": {
+    "nombre": "grupo 11",
+    "piso_guia_E": 298,
+    "piso_final": 374,
+    "razon_sobre_la_guia_E": 1.255
+   },
+   "12": {
+    "nombre": "pasillo Y 12",
+    "piso_guia_E": 49,
+    "piso_final": 49,
+    "razon_sobre_la_guia_E": 1.0
+   },
+   "13": {
+    "nombre": "pasillo Y 13",
+    "piso_guia_E": 49,
+    "piso_final": 50,
+    "razon_sobre_la_guia_E": 1.02
+   },
+   "14": {
+    "nombre": "pasillo Y 14",
+    "piso_guia_E": 24,
+    "piso_final": 22,
+    "razon_sobre_la_guia_E": 0.917
+   },
+   "15": {
+    "nombre": "pasillo Y 15",
+    "piso_guia_E": 24,
+    "piso_final": 22,
+    "razon_sobre_la_guia_E": 0.917
+   },
+   "16": {
+    "nombre": "pasillo Y 16",
+    "piso_guia_E": 19,
+    "piso_final": 33,
+    "razon_sobre_la_guia_E": 1.737
+   },
+   "17": {
+    "nombre": "hub 17",
+    "piso_guia_E": 96,
+    "piso_final": 116,
+    "razon_sobre_la_guia_E": 1.208
+   },
+   "18": {
+    "nombre": "hub 18",
+    "piso_guia_E": 90,
+    "piso_final": 101,
+    "razon_sobre_la_guia_E": 1.122
+   },
+   "19": {
+    "nombre": "hub 19",
+    "piso_guia_E": 143,
+    "piso_final": 189,
+    "razon_sobre_la_guia_E": 1.322
+   },
+   "20": {
+    "nombre": "hub 20",
+    "piso_guia_E": 139,
+    "piso_final": 180,
+    "razon_sobre_la_guia_E": 1.295
+   },
+   "23": {
+    "nombre": "hub 23",
+    "piso_guia_E": 65,
+    "piso_final": 78,
+    "razon_sobre_la_guia_E": 1.2
+   },
+   "24": {
+    "nombre": "hub 24",
+    "piso_guia_E": 68,
+    "piso_final": 92,
+    "razon_sobre_la_guia_E": 1.353
+   },
+   "25": {
+    "nombre": "hub 25",
+    "piso_guia_E": 60,
+    "piso_final": 85,
+    "razon_sobre_la_guia_E": 1.417
+   }
+  },
+  "piso_total_salas": 2281,
+  "piso_total_con_puentes": 2450,
+  "dobles_muros_(4_o_mas_con_los_pisos_pegados_a_la_linea)": 0,
+  "escalones_de_3_celdas_entre_pisos_pegados": 4,
+  "muro_externo": {
+   "salas_con_el_muro_mas_delgado_que_en_el_SNES": {},
+   "celdas_de_wrapping_pasadas_a_muro": 85
+  },
+  "silueta": {
+   "filas_antes": 104,
+   "columnas_antes": 56,
+   "filas_despues": 104,
+   "columnas_despues": 58
+  },
+  "contactos_diagonales_entre_salas": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "contactos_diagonales_de_la_guia_E": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "pares_bajo_el_muro_minimo": [],
+  "dientes": {
+   "total": 63,
+   "original": 25
+  },
+  "error_de_espejo": {
+   "X5 / X6": {
+    "tiles_A": 225,
+    "tiles_B": 118,
+    "celdas_que_no_coinciden": 121
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 78,
+    "tiles_B": 92,
+    "celdas_que_no_coinciden": 22
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 275,
+    "tiles_B": 374,
+    "celdas_que_no_coinciden": 121
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 189,
+    "tiles_B": 180,
+    "celdas_que_no_coinciden": 31
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 116,
+    "tiles_B": 101,
+    "celdas_que_no_coinciden": 19
+   },
+   "X1 / X2": {
+    "tiles_A": 41,
+    "tiles_B": 59,
+    "celdas_que_no_coinciden": 18
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 146,
+    "tiles_B": 146,
+    "celdas_que_no_coinciden": 12
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 100,
+    "tiles_B": 100,
+    "celdas_que_no_coinciden": 24
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 69,
+    "tiles_B": 69,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 85,
+    "tiles_B": 85,
+    "celdas_que_no_coinciden": 10
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 50,
+    "celdas_que_no_coinciden": 11
+   },
+   "Y14 / Y15": {
+    "tiles_A": 22,
+    "tiles_B": 22,
+    "celdas_que_no_coinciden": 12
+   }
+  },
+  "error_de_espejo_guia_E": {
+   "X5 / X6": {
+    "tiles_A": 179,
+    "tiles_B": 89,
+    "celdas_que_no_coinciden": 96
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 65,
+    "tiles_B": 68,
+    "celdas_que_no_coinciden": 9
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 209,
+    "tiles_B": 298,
+    "celdas_que_no_coinciden": 89
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 143,
+    "tiles_B": 139,
+    "celdas_que_no_coinciden": 10
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 96,
+    "tiles_B": 90,
+    "celdas_que_no_coinciden": 8
+   },
+   "X1 / X2": {
+    "tiles_A": 34,
+    "tiles_B": 41,
+    "celdas_que_no_coinciden": 7
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 107,
+    "tiles_B": 107,
+    "celdas_que_no_coinciden": 10
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 70,
+    "tiles_B": 70,
+    "celdas_que_no_coinciden": 12
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 67,
+    "tiles_B": 67,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 60,
+    "tiles_B": 60,
+    "celdas_que_no_coinciden": 8
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 49,
+    "celdas_que_no_coinciden": 2
+   },
+   "Y14 / Y15": {
+    "tiles_A": 24,
+    "tiles_B": 24,
+    "celdas_que_no_coinciden": 0
+   }
+  },
+  "puentes": {
+   "12": {
+    "nombre": "Y12",
+    "une": [
+     "N17",
+     "X5"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     13,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 49,
+    "toca_las_dos_salas": true
+   },
+   "13": {
+    "nombre": "Y13",
+    "une": [
+     "N18",
+     "X6"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     14,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 50,
+    "toca_las_dos_salas": true
+   },
+   "14": {
+    "nombre": "Y14",
+    "une": [
+     "X5",
+     "I19"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     7,
+     7,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 22,
+    "toca_las_dos_salas": true
+   },
+   "15": {
+    "nombre": "Y15",
+    "une": [
+     "X6",
+     "I20"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     7,
+     7,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 22,
+    "toca_las_dos_salas": true
+   },
+   "9": {
+    "nombre": "X9",
+    "une": [
+     "I25",
+     "H24"
+    ],
+    "largo_antes": 7,
+    "largo_despues_por_columna": [
+     26
+    ],
+    "celdas_antes": 25,
+    "celdas_despues": 26,
+    "toca_las_dos_salas": true
+   }
+  },
+  "muro_muerto_a_mas_de_3_celdas": {
+   "techo_y_cara": 522,
+   "todo_el_espacio_sin_piso": 522
+  },
+  "a_estrella": {
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 114,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 208,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 138,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true
+    }
+   },
+   "G_cerrada": true
+  },
+  "detalle_de_la_version": {
+   "celdas_de_cara_recuperadas": 188,
+   "lineas_del_muro_minimo": {
+    "celdas": 826,
+    "tramos_conexos": 11,
+    "celdas_de_piso_de_sala_sobre_la_linea": 0,
+    "celdas_de_puente_o_gate_sobre_la_linea": 103,
+    "hoyos_compartimentos_de_muro_muerto_cerrados_por_la_linea": 1,
+    "celdas_en_esos_hoyos": 1,
+    "celdas_con_grosor_3_(escalones)": 270
+   },
+   "celdas_quitadas_por_el_muro_minimo_(red_de_seguridad)": 0
+  },
+  "condiciones": {
+   "linea_minima_sin_hoyos": false,
+   "sin_escalones_de_3": false,
+   "0_dobles_muros": true,
+   "sin_contactos_diagonales_nuevos": true,
+   "ningun_muro_externo_mas_delgado": true,
+   "cada_puente_une_las_dos_salas": true,
+   "muro_minimo_respetado": true,
+   "a_estrella_igual": true,
+   "G_cerrada": true
+  }
+ },
+ "P1_V2b": {
+  "zonas": {
+   "herradura": {
+    "area_E": 994,
+    "vuelta_externa": 1,
+    "area_tras_la_externa": 1125,
+    "vuelta_interna": 2,
+    "area_por_vuelta_externa": [
+     994,
+     1125,
+     1283,
+     1457
+    ],
+    "area_por_vuelta_interna": [
+     1125,
+     1269,
+     1383,
+     1477,
+     1551
+    ],
+    "area_sola": 1383,
+    "grupos": [
+     16,
+     23,
+     10,
+     5,
+     4,
+     6,
+     11,
+     24
+    ],
+    "area_compuesta": 1372,
+    "razon_sobre_la_guia_E": 1.38,
+    "razon_sola": 1.391
+   },
+   "norte": {
+    "area_E": 438,
+    "vuelta_externa": 1,
+    "area_tras_la_externa": 504,
+    "vuelta_interna": 3,
+    "area_por_vuelta_externa": [
+     438,
+     504,
+     592,
+     693
+    ],
+    "area_por_vuelta_interna": [
+     504,
+     563,
+     586,
+     603,
+     607,
+     607
+    ],
+    "area_sola": 603,
+    "grupos": [
+     0,
+     3,
+     17,
+     1,
+     18,
+     2
+    ],
+    "area_compuesta": 603,
+    "razon_sobre_la_guia_E": 1.377,
+    "razon_sola": 1.377
+   },
+   "islas": {
+    "area_E": 342,
+    "vuelta_externa": 1,
+    "area_tras_la_externa": 418,
+    "vuelta_interna": 3,
+    "area_por_vuelta_externa": [
+     342,
+     418,
+     528,
+     652
+    ],
+    "area_por_vuelta_interna": [
+     418,
+     455,
+     467,
+     475,
+     479,
+     479
+    ],
+    "area_sola": 475,
+    "grupos": [
+     19,
+     20,
+     25
+    ],
+    "area_compuesta": 473,
+    "razon_sobre_la_guia_E": 1.383,
+    "razon_sola": 1.389
+   }
+  },
+  "grupos": {
+   "0": {
+    "nombre": "pasillo X 0",
+    "piso_guia_E": 107,
+    "piso_final": 170,
+    "razon_sobre_la_guia_E": 1.589
+   },
+   "1": {
+    "nombre": "pasillo X 1",
+    "piso_guia_E": 34,
+    "piso_final": 41,
+    "razon_sobre_la_guia_E": 1.206
+   },
+   "2": {
+    "nombre": "pasillo X 2",
+    "piso_guia_E": 41,
+    "piso_final": 61,
+    "razon_sobre_la_guia_E": 1.488
+   },
+   "3": {
+    "nombre": "pasillo X 3",
+    "piso_guia_E": 70,
+    "piso_final": 100,
+    "razon_sobre_la_guia_E": 1.429
+   },
+   "4": {
+    "nombre": "pasillo X 4",
+    "piso_guia_E": 67,
+    "piso_final": 69,
+    "razon_sobre_la_guia_E": 1.03
+   },
+   "5": {
+    "nombre": "pasillo X 5",
+    "piso_guia_E": 179,
+    "piso_final": 249,
+    "razon_sobre_la_guia_E": 1.391
+   },
+   "6": {
+    "nombre": "pasillo X 6",
+    "piso_guia_E": 89,
+    "piso_final": 134,
+    "razon_sobre_la_guia_E": 1.506
+   },
+   "9": {
+    "nombre": "pasillo X 9",
+    "piso_guia_E": 25,
+    "piso_final": 23,
+    "razon_sobre_la_guia_E": 0.92
+   },
+   "10": {
+    "nombre": "pasillo Y 10",
+    "piso_guia_E": 209,
+    "piso_final": 299,
+    "razon_sobre_la_guia_E": 1.431
+   },
+   "11": {
+    "nombre": "grupo 11",
+    "piso_guia_E": 298,
+    "piso_final": 405,
+    "razon_sobre_la_guia_E": 1.359
+   },
+   "12": {
+    "nombre": "pasillo Y 12",
+    "piso_guia_E": 49,
+    "piso_final": 49,
+    "razon_sobre_la_guia_E": 1.0
+   },
+   "13": {
+    "nombre": "pasillo Y 13",
+    "piso_guia_E": 49,
+    "piso_final": 41,
+    "razon_sobre_la_guia_E": 0.837
+   },
+   "14": {
+    "nombre": "pasillo Y 14",
+    "piso_guia_E": 24,
+    "piso_final": 18,
+    "razon_sobre_la_guia_E": 0.75
+   },
+   "15": {
+    "nombre": "pasillo Y 15",
+    "piso_guia_E": 24,
+    "piso_final": 18,
+    "razon_sobre_la_guia_E": 0.75
+   },
+   "16": {
+    "nombre": "pasillo Y 16",
+    "piso_guia_E": 19,
+    "piso_final": 33,
+    "razon_sobre_la_guia_E": 1.737
+   },
+   "17": {
+    "nombre": "hub 17",
+    "piso_guia_E": 96,
+    "piso_final": 127,
+    "razon_sobre_la_guia_E": 1.323
+   },
+   "18": {
+    "nombre": "hub 18",
+    "piso_guia_E": 90,
+    "piso_final": 104,
+    "razon_sobre_la_guia_E": 1.156
+   },
+   "19": {
+    "nombre": "hub 19",
+    "piso_guia_E": 143,
+    "piso_final": 201,
+    "razon_sobre_la_guia_E": 1.406
+   },
+   "20": {
+    "nombre": "hub 20",
+    "piso_guia_E": 139,
+    "piso_final": 185,
+    "razon_sobre_la_guia_E": 1.331
+   },
+   "23": {
+    "nombre": "hub 23",
+    "piso_guia_E": 65,
+    "piso_final": 82,
+    "razon_sobre_la_guia_E": 1.262
+   },
+   "24": {
+    "nombre": "hub 24",
+    "piso_guia_E": 68,
+    "piso_final": 101,
+    "razon_sobre_la_guia_E": 1.485
+   },
+   "25": {
+    "nombre": "hub 25",
+    "piso_guia_E": 60,
+    "piso_final": 87,
+    "razon_sobre_la_guia_E": 1.45
+   }
+  },
+  "piso_total_salas": 2448,
+  "piso_total_con_puentes": 2597,
+  "dobles_muros_(4_o_mas_con_los_pisos_pegados_a_la_linea)": 0,
+  "escalones_de_3_celdas_entre_pisos_pegados": 9,
+  "muro_externo": {
+   "salas_con_el_muro_mas_delgado_que_en_el_SNES": {},
+   "celdas_de_wrapping_pasadas_a_muro": 85
+  },
+  "silueta": {
+   "filas_antes": 104,
+   "columnas_antes": 56,
+   "filas_despues": 104,
+   "columnas_despues": 58
+  },
+  "contactos_diagonales_entre_salas": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "contactos_diagonales_de_la_guia_E": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "pares_bajo_el_muro_minimo": [],
+  "dientes": {
+   "total": 63,
+   "original": 25
+  },
+  "error_de_espejo": {
+   "X5 / X6": {
+    "tiles_A": 249,
+    "tiles_B": 134,
+    "celdas_que_no_coinciden": 127
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 82,
+    "tiles_B": 101,
+    "celdas_que_no_coinciden": 35
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 299,
+    "tiles_B": 405,
+    "celdas_que_no_coinciden": 128
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 201,
+    "tiles_B": 185,
+    "celdas_que_no_coinciden": 42
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 127,
+    "tiles_B": 104,
+    "celdas_que_no_coinciden": 27
+   },
+   "X1 / X2": {
+    "tiles_A": 41,
+    "tiles_B": 61,
+    "celdas_que_no_coinciden": 20
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 170,
+    "tiles_B": 170,
+    "celdas_que_no_coinciden": 16
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 100,
+    "tiles_B": 100,
+    "celdas_que_no_coinciden": 24
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 69,
+    "tiles_B": 69,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 87,
+    "tiles_B": 87,
+    "celdas_que_no_coinciden": 14
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 41,
+    "celdas_que_no_coinciden": 12
+   },
+   "Y14 / Y15": {
+    "tiles_A": 18,
+    "tiles_B": 18,
+    "celdas_que_no_coinciden": 8
+   }
+  },
+  "error_de_espejo_guia_E": {
+   "X5 / X6": {
+    "tiles_A": 179,
+    "tiles_B": 89,
+    "celdas_que_no_coinciden": 96
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 65,
+    "tiles_B": 68,
+    "celdas_que_no_coinciden": 9
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 209,
+    "tiles_B": 298,
+    "celdas_que_no_coinciden": 89
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 143,
+    "tiles_B": 139,
+    "celdas_que_no_coinciden": 10
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 96,
+    "tiles_B": 90,
+    "celdas_que_no_coinciden": 8
+   },
+   "X1 / X2": {
+    "tiles_A": 34,
+    "tiles_B": 41,
+    "celdas_que_no_coinciden": 7
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 107,
+    "tiles_B": 107,
+    "celdas_que_no_coinciden": 10
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 70,
+    "tiles_B": 70,
+    "celdas_que_no_coinciden": 12
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 67,
+    "tiles_B": 67,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 60,
+    "tiles_B": 60,
+    "celdas_que_no_coinciden": 8
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 49,
+    "celdas_que_no_coinciden": 2
+   },
+   "Y14 / Y15": {
+    "tiles_A": 24,
+    "tiles_B": 24,
+    "celdas_que_no_coinciden": 0
+   }
+  },
+  "puentes": {
+   "12": {
+    "nombre": "Y12",
+    "une": [
+     "N17",
+     "X5"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     13,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 49,
+    "toca_las_dos_salas": true
+   },
+   "13": {
+    "nombre": "Y13",
+    "une": [
+     "N18",
+     "X6"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     9,
+     10,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 41,
+    "toca_las_dos_salas": true
+   },
+   "14": {
+    "nombre": "Y14",
+    "une": [
+     "X5",
+     "I19"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     6,
+     4,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 18,
+    "toca_las_dos_salas": true
+   },
+   "15": {
+    "nombre": "Y15",
+    "une": [
+     "X6",
+     "I20"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     6,
+     4,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 18,
+    "toca_las_dos_salas": true
+   },
+   "9": {
+    "nombre": "X9",
+    "une": [
+     "I25",
+     "H24"
+    ],
+    "largo_antes": 7,
+    "largo_despues_por_columna": [
+     23
+    ],
+    "celdas_antes": 25,
+    "celdas_despues": 23,
+    "toca_las_dos_salas": true
+   }
+  },
+  "muro_muerto_a_mas_de_3_celdas": {
+   "techo_y_cara": 466,
+   "todo_el_espacio_sin_piso": 466
+  },
+  "a_estrella": {
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 114,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 208,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 138,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true
+    }
+   },
+   "G_cerrada": true
+  },
+  "detalle_de_la_version": {
+   "celdas_de_techo_consumidas_por_las_salas": 578,
+   "celdas_de_muro_empujadas": 6,
+   "lineas_del_muro_minimo": {
+    "celdas": 826,
+    "tramos_conexos": 11,
+    "celdas_de_piso_de_sala_sobre_la_linea": 0,
+    "celdas_de_puente_o_gate_sobre_la_linea": 96,
+    "hoyos_compartimentos_de_muro_muerto_cerrados_por_la_linea": 1,
+    "celdas_en_esos_hoyos": 1,
+    "celdas_con_grosor_3_(escalones)": 270
+   },
+   "celdas_quitadas_por_el_muro_minimo_(red_de_seguridad)": 0
+  },
+  "condiciones": {
+   "linea_minima_sin_hoyos": false,
+   "sin_escalones_de_3": false,
+   "0_dobles_muros": true,
+   "sin_contactos_diagonales_nuevos": true,
+   "ningun_muro_externo_mas_delgado": true,
+   "cada_puente_une_las_dos_salas": true,
+   "muro_minimo_respetado": true,
+   "a_estrella_igual": true,
+   "G_cerrada": true
+  }
+ },
+ "P2_V2b": {
+  "zonas": {
+   "herradura": {
+    "area_E": 1171,
+    "vuelta_externa": 1,
+    "area_tras_la_externa": 1357,
+    "vuelta_interna": 2,
+    "area_por_vuelta_externa": [
+     1171,
+     1357,
+     1572,
+     1812
+    ],
+    "area_por_vuelta_interna": [
+     1357,
+     1527,
+     1667,
+     1782,
+     1868
+    ],
+    "area_sola": 1667,
+    "grupos": [
+     16,
+     23,
+     10,
+     5,
+     4,
+     6,
+     11,
+     24,
+     0,
+     3
+    ],
+    "area_compuesta": 1636,
+    "razon_sobre_la_guia_E": 1.397,
+    "razon_sola": 1.424
+   },
+   "islas": {
+    "area_E": 603,
+    "vuelta_externa": 1,
+    "area_tras_la_externa": 707,
+    "vuelta_interna": 2,
+    "area_por_vuelta_externa": [
+     603,
+     707,
+     866,
+     1060
+    ],
+    "area_por_vuelta_interna": [
+     707,
+     782,
+     835,
+     878,
+     912
+    ],
+    "area_sola": 835,
+    "grupos": [
+     19,
+     20,
+     25,
+     17,
+     1,
+     18,
+     2
+    ],
+    "area_compuesta": 798,
+    "razon_sobre_la_guia_E": 1.323,
+    "razon_sola": 1.385
+   }
+  },
+  "grupos": {
+   "0": {
+    "nombre": "pasillo X 0",
+    "piso_guia_E": 107,
+    "piso_final": 161,
+    "razon_sobre_la_guia_E": 1.505
+   },
+   "1": {
+    "nombre": "pasillo X 1",
+    "piso_guia_E": 34,
+    "piso_final": 41,
+    "razon_sobre_la_guia_E": 1.206
+   },
+   "2": {
+    "nombre": "pasillo X 2",
+    "piso_guia_E": 41,
+    "piso_final": 59,
+    "razon_sobre_la_guia_E": 1.439
+   },
+   "3": {
+    "nombre": "pasillo X 3",
+    "piso_guia_E": 70,
+    "piso_final": 103,
+    "razon_sobre_la_guia_E": 1.471
+   },
+   "4": {
+    "nombre": "pasillo X 4",
+    "piso_guia_E": 67,
+    "piso_final": 69,
+    "razon_sobre_la_guia_E": 1.03
+   },
+   "5": {
+    "nombre": "pasillo X 5",
+    "piso_guia_E": 179,
+    "piso_final": 249,
+    "razon_sobre_la_guia_E": 1.391
+   },
+   "6": {
+    "nombre": "pasillo X 6",
+    "piso_guia_E": 89,
+    "piso_final": 134,
+    "razon_sobre_la_guia_E": 1.506
+   },
+   "9": {
+    "nombre": "pasillo X 9",
+    "piso_guia_E": 25,
+    "piso_final": 23,
+    "razon_sobre_la_guia_E": 0.92
+   },
+   "10": {
+    "nombre": "pasillo Y 10",
+    "piso_guia_E": 209,
+    "piso_final": 299,
+    "razon_sobre_la_guia_E": 1.431
+   },
+   "11": {
+    "nombre": "grupo 11",
+    "piso_guia_E": 298,
+    "piso_final": 405,
+    "razon_sobre_la_guia_E": 1.359
+   },
+   "12": {
+    "nombre": "pasillo Y 12",
+    "piso_guia_E": 49,
+    "piso_final": 47,
+    "razon_sobre_la_guia_E": 0.959
+   },
+   "13": {
+    "nombre": "pasillo Y 13",
+    "piso_guia_E": 49,
+    "piso_final": 50,
+    "razon_sobre_la_guia_E": 1.02
+   },
+   "14": {
+    "nombre": "pasillo Y 14",
+    "piso_guia_E": 24,
+    "piso_final": 18,
+    "razon_sobre_la_guia_E": 0.75
+   },
+   "15": {
+    "nombre": "pasillo Y 15",
+    "piso_guia_E": 24,
+    "piso_final": 16,
+    "razon_sobre_la_guia_E": 0.667
+   },
+   "16": {
+    "nombre": "pasillo Y 16",
+    "piso_guia_E": 19,
+    "piso_final": 33,
+    "razon_sobre_la_guia_E": 1.737
+   },
+   "17": {
+    "nombre": "hub 17",
+    "piso_guia_E": 96,
+    "piso_final": 124,
+    "razon_sobre_la_guia_E": 1.292
+   },
+   "18": {
+    "nombre": "hub 18",
+    "piso_guia_E": 90,
+    "piso_final": 106,
+    "razon_sobre_la_guia_E": 1.178
+   },
+   "19": {
+    "nombre": "hub 19",
+    "piso_guia_E": 143,
+    "piso_final": 196,
+    "razon_sobre_la_guia_E": 1.371
+   },
+   "20": {
+    "nombre": "hub 20",
+    "piso_guia_E": 139,
+    "piso_final": 186,
+    "razon_sobre_la_guia_E": 1.338
+   },
+   "23": {
+    "nombre": "hub 23",
+    "piso_guia_E": 65,
+    "piso_final": 82,
+    "razon_sobre_la_guia_E": 1.262
+   },
+   "24": {
+    "nombre": "hub 24",
+    "piso_guia_E": 68,
+    "piso_final": 101,
+    "razon_sobre_la_guia_E": 1.485
+   },
+   "25": {
+    "nombre": "hub 25",
+    "piso_guia_E": 60,
+    "piso_final": 86,
+    "razon_sobre_la_guia_E": 1.433
+   }
+  },
+  "piso_total_salas": 2434,
+  "piso_total_con_puentes": 2588,
+  "dobles_muros_(4_o_mas_con_los_pisos_pegados_a_la_linea)": 0,
+  "escalones_de_3_celdas_entre_pisos_pegados": 9,
+  "muro_externo": {
+   "salas_con_el_muro_mas_delgado_que_en_el_SNES": {},
+   "celdas_de_wrapping_pasadas_a_muro": 85
+  },
+  "silueta": {
+   "filas_antes": 104,
+   "columnas_antes": 56,
+   "filas_despues": 104,
+   "columnas_despues": 58
+  },
+  "contactos_diagonales_entre_salas": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "contactos_diagonales_de_la_guia_E": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "pares_bajo_el_muro_minimo": [],
+  "dientes": {
+   "total": 61,
+   "original": 25
+  },
+  "error_de_espejo": {
+   "X5 / X6": {
+    "tiles_A": 249,
+    "tiles_B": 134,
+    "celdas_que_no_coinciden": 127
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 82,
+    "tiles_B": 101,
+    "celdas_que_no_coinciden": 35
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 299,
+    "tiles_B": 405,
+    "celdas_que_no_coinciden": 128
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 196,
+    "tiles_B": 186,
+    "celdas_que_no_coinciden": 38
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 124,
+    "tiles_B": 106,
+    "celdas_que_no_coinciden": 22
+   },
+   "X1 / X2": {
+    "tiles_A": 41,
+    "tiles_B": 59,
+    "celdas_que_no_coinciden": 18
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 161,
+    "tiles_B": 161,
+    "celdas_que_no_coinciden": 10
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 103,
+    "tiles_B": 103,
+    "celdas_que_no_coinciden": 30
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 69,
+    "tiles_B": 69,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 86,
+    "tiles_B": 86,
+    "celdas_que_no_coinciden": 12
+   },
+   "Y12 / Y13": {
+    "tiles_A": 47,
+    "tiles_B": 50,
+    "celdas_que_no_coinciden": 13
+   },
+   "Y14 / Y15": {
+    "tiles_A": 18,
+    "tiles_B": 16,
+    "celdas_que_no_coinciden": 10
+   }
+  },
+  "error_de_espejo_guia_E": {
+   "X5 / X6": {
+    "tiles_A": 179,
+    "tiles_B": 89,
+    "celdas_que_no_coinciden": 96
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 65,
+    "tiles_B": 68,
+    "celdas_que_no_coinciden": 9
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 209,
+    "tiles_B": 298,
+    "celdas_que_no_coinciden": 89
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 143,
+    "tiles_B": 139,
+    "celdas_que_no_coinciden": 10
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 96,
+    "tiles_B": 90,
+    "celdas_que_no_coinciden": 8
+   },
+   "X1 / X2": {
+    "tiles_A": 34,
+    "tiles_B": 41,
+    "celdas_que_no_coinciden": 7
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 107,
+    "tiles_B": 107,
+    "celdas_que_no_coinciden": 10
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 70,
+    "tiles_B": 70,
+    "celdas_que_no_coinciden": 12
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 67,
+    "tiles_B": 67,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 60,
+    "tiles_B": 60,
+    "celdas_que_no_coinciden": 8
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 49,
+    "celdas_que_no_coinciden": 2
+   },
+   "Y14 / Y15": {
+    "tiles_A": 24,
+    "tiles_B": 24,
+    "celdas_que_no_coinciden": 0
+   }
+  },
+  "puentes": {
+   "12": {
+    "nombre": "Y12",
+    "une": [
+     "N17",
+     "X5"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     13,
+     10,
+     10
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 47,
+    "toca_las_dos_salas": true
+   },
+   "13": {
+    "nombre": "Y13",
+    "une": [
+     "N18",
+     "X6"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     14,
+     14,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 50,
+    "toca_las_dos_salas": true
+   },
+   "14": {
+    "nombre": "Y14",
+    "une": [
+     "X5",
+     "I19"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     6,
+     4,
+     4,
+     4
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 18,
+    "toca_las_dos_salas": true
+   },
+   "15": {
+    "nombre": "Y15",
+    "une": [
+     "X6",
+     "I20"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     6,
+     4,
+     3,
+     3
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 16,
+    "toca_las_dos_salas": true
+   },
+   "9": {
+    "nombre": "X9",
+    "une": [
+     "I25",
+     "H24"
+    ],
+    "largo_antes": 7,
+    "largo_despues_por_columna": [
+     23
+    ],
+    "celdas_antes": 25,
+    "celdas_despues": 23,
+    "toca_las_dos_salas": true
+   }
+  },
+  "muro_muerto_a_mas_de_3_celdas": {
+   "techo_y_cara": 466,
+   "todo_el_espacio_sin_piso": 466
+  },
+  "a_estrella": {
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 114,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 208,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 138,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true
+    }
+   },
+   "G_cerrada": true
+  },
+  "detalle_de_la_version": {
+   "celdas_de_techo_consumidas_por_las_salas": 564,
+   "celdas_de_muro_empujadas": 6,
+   "lineas_del_muro_minimo": {
+    "celdas": 826,
+    "tramos_conexos": 11,
+    "celdas_de_piso_de_sala_sobre_la_linea": 0,
+    "celdas_de_puente_o_gate_sobre_la_linea": 103,
+    "hoyos_compartimentos_de_muro_muerto_cerrados_por_la_linea": 1,
+    "celdas_en_esos_hoyos": 1,
+    "celdas_con_grosor_3_(escalones)": 270
+   },
+   "celdas_quitadas_por_el_muro_minimo_(red_de_seguridad)": 0
+  },
+  "condiciones": {
+   "linea_minima_sin_hoyos": false,
+   "sin_escalones_de_3": false,
+   "0_dobles_muros": true,
+   "sin_contactos_diagonales_nuevos": true,
+   "ningun_muro_externo_mas_delgado": true,
+   "cada_puente_une_las_dos_salas": true,
+   "muro_minimo_respetado": true,
+   "a_estrella_igual": true,
+   "G_cerrada": true
+  }
+ },
+ "P1_V3": {
+  "zonas": {
+   "herradura": {
+    "area_E": 994,
+    "vuelta": 2,
+    "area_por_vuelta": [
+     994,
+     1203,
+     1398,
+     1580,
+     1687
+    ],
+    "area_sola": 1398,
+    "grupos": [
+     16,
+     23,
+     10,
+     5,
+     4,
+     6,
+     11,
+     24
+    ],
+    "area_compuesta": 1392,
+    "razon_sobre_la_guia_E": 1.4,
+    "razon_sola": 1.406
+   },
+   "norte": {
+    "area_E": 438,
+    "vuelta": 1,
+    "area_por_vuelta": [
+     438,
+     567,
+     684,
+     832
+    ],
+    "area_sola": 567,
+    "grupos": [
+     0,
+     3,
+     17,
+     1,
+     18,
+     2
+    ],
+    "area_compuesta": 567,
+    "razon_sobre_la_guia_E": 1.295,
+    "razon_sola": 1.295
+   },
+   "islas": {
+    "area_E": 342,
+    "vuelta": 1,
+    "area_por_vuelta": [
+     342,
+     459,
+     580,
+     693
+    ],
+    "area_sola": 459,
+    "grupos": [
+     19,
+     20,
+     25
+    ],
+    "area_compuesta": 459,
+    "razon_sobre_la_guia_E": 1.342,
+    "razon_sola": 1.342
+   }
+  },
+  "grupos": {
+   "0": {
+    "nombre": "pasillo X 0",
+    "piso_guia_E": 107,
+    "piso_final": 143,
+    "razon_sobre_la_guia_E": 1.336
+   },
+   "1": {
+    "nombre": "pasillo X 1",
+    "piso_guia_E": 34,
+    "piso_final": 41,
+    "razon_sobre_la_guia_E": 1.206
+   },
+   "2": {
+    "nombre": "pasillo X 2",
+    "piso_guia_E": 41,
+    "piso_final": 59,
+    "razon_sobre_la_guia_E": 1.439
+   },
+   "3": {
+    "nombre": "pasillo X 3",
+    "piso_guia_E": 70,
+    "piso_final": 102,
+    "razon_sobre_la_guia_E": 1.457
+   },
+   "4": {
+    "nombre": "pasillo X 4",
+    "piso_guia_E": 67,
+    "piso_final": 77,
+    "razon_sobre_la_guia_E": 1.149
+   },
+   "5": {
+    "nombre": "pasillo X 5",
+    "piso_guia_E": 179,
+    "piso_final": 267,
+    "razon_sobre_la_guia_E": 1.492
+   },
+   "6": {
+    "nombre": "pasillo X 6",
+    "piso_guia_E": 89,
+    "piso_final": 146,
+    "razon_sobre_la_guia_E": 1.64
+   },
+   "9": {
+    "nombre": "pasillo X 9",
+    "piso_guia_E": 25,
+    "piso_final": 20,
+    "razon_sobre_la_guia_E": 0.8
+   },
+   "10": {
+    "nombre": "pasillo Y 10",
+    "piso_guia_E": 209,
+    "piso_final": 265,
+    "razon_sobre_la_guia_E": 1.268
+   },
+   "11": {
+    "nombre": "grupo 11",
+    "piso_guia_E": 298,
+    "piso_final": 367,
+    "razon_sobre_la_guia_E": 1.232
+   },
+   "12": {
+    "nombre": "pasillo Y 12",
+    "piso_guia_E": 49,
+    "piso_final": 44,
+    "razon_sobre_la_guia_E": 0.898
+   },
+   "13": {
+    "nombre": "pasillo Y 13",
+    "piso_guia_E": 49,
+    "piso_final": 48,
+    "razon_sobre_la_guia_E": 0.98
+   },
+   "14": {
+    "nombre": "pasillo Y 14",
+    "piso_guia_E": 24,
+    "piso_final": 16,
+    "razon_sobre_la_guia_E": 0.667
+   },
+   "15": {
+    "nombre": "pasillo Y 15",
+    "piso_guia_E": 24,
+    "piso_final": 16,
+    "razon_sobre_la_guia_E": 0.667
+   },
+   "16": {
+    "nombre": "pasillo Y 16",
+    "piso_guia_E": 19,
+    "piso_final": 42,
+    "razon_sobre_la_guia_E": 2.211
+   },
+   "17": {
+    "nombre": "hub 17",
+    "piso_guia_E": 96,
+    "piso_final": 118,
+    "razon_sobre_la_guia_E": 1.229
+   },
+   "18": {
+    "nombre": "hub 18",
+    "piso_guia_E": 90,
+    "piso_final": 104,
+    "razon_sobre_la_guia_E": 1.156
+   },
+   "19": {
+    "nombre": "hub 19",
+    "piso_guia_E": 143,
+    "piso_final": 191,
+    "razon_sobre_la_guia_E": 1.336
+   },
+   "20": {
+    "nombre": "hub 20",
+    "piso_guia_E": 139,
+    "piso_final": 180,
+    "razon_sobre_la_guia_E": 1.295
+   },
+   "23": {
+    "nombre": "hub 23",
+    "piso_guia_E": 65,
+    "piso_final": 100,
+    "razon_sobre_la_guia_E": 1.538
+   },
+   "24": {
+    "nombre": "hub 24",
+    "piso_guia_E": 68,
+    "piso_final": 128,
+    "razon_sobre_la_guia_E": 1.882
+   },
+   "25": {
+    "nombre": "hub 25",
+    "piso_guia_E": 60,
+    "piso_final": 88,
+    "razon_sobre_la_guia_E": 1.467
+   }
+  },
+  "piso_total_salas": 2418,
+  "piso_total_con_puentes": 2562,
+  "dobles_muros_(4_o_mas_con_los_pisos_pegados_a_la_linea)": 0,
+  "escalones_de_3_celdas_entre_pisos_pegados": 0,
+  "muro_externo": {
+   "salas_con_el_muro_mas_delgado_que_en_el_SNES": {},
+   "celdas_de_wrapping_pasadas_a_muro": 137
+  },
+  "silueta": {
+   "filas_antes": 104,
+   "columnas_antes": 56,
+   "filas_despues": 104,
+   "columnas_despues": 60
+  },
+  "contactos_diagonales_entre_salas": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "contactos_diagonales_de_la_guia_E": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "pares_bajo_el_muro_minimo": [],
+  "dientes": {
+   "total": 61,
+   "original": 25
+  },
+  "error_de_espejo": {
+   "X5 / X6": {
+    "tiles_A": 267,
+    "tiles_B": 146,
+    "celdas_que_no_coinciden": 133
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 100,
+    "tiles_B": 128,
+    "celdas_que_no_coinciden": 36
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 265,
+    "tiles_B": 367,
+    "celdas_que_no_coinciden": 128
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 191,
+    "tiles_B": 180,
+    "celdas_que_no_coinciden": 33
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 118,
+    "tiles_B": 104,
+    "celdas_que_no_coinciden": 18
+   },
+   "X1 / X2": {
+    "tiles_A": 41,
+    "tiles_B": 59,
+    "celdas_que_no_coinciden": 18
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 143,
+    "tiles_B": 143,
+    "celdas_que_no_coinciden": 14
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 102,
+    "tiles_B": 102,
+    "celdas_que_no_coinciden": 24
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 77,
+    "tiles_B": 77,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 88,
+    "tiles_B": 88,
+    "celdas_que_no_coinciden": 8
+   },
+   "Y12 / Y13": {
+    "tiles_A": 44,
+    "tiles_B": 48,
+    "celdas_que_no_coinciden": 14
+   },
+   "Y14 / Y15": {
+    "tiles_A": 16,
+    "tiles_B": 16,
+    "celdas_que_no_coinciden": 8
+   }
+  },
+  "error_de_espejo_guia_E": {
+   "X5 / X6": {
+    "tiles_A": 179,
+    "tiles_B": 89,
+    "celdas_que_no_coinciden": 96
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 65,
+    "tiles_B": 68,
+    "celdas_que_no_coinciden": 9
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 209,
+    "tiles_B": 298,
+    "celdas_que_no_coinciden": 89
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 143,
+    "tiles_B": 139,
+    "celdas_que_no_coinciden": 10
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 96,
+    "tiles_B": 90,
+    "celdas_que_no_coinciden": 8
+   },
+   "X1 / X2": {
+    "tiles_A": 34,
+    "tiles_B": 41,
+    "celdas_que_no_coinciden": 7
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 107,
+    "tiles_B": 107,
+    "celdas_que_no_coinciden": 10
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 70,
+    "tiles_B": 70,
+    "celdas_que_no_coinciden": 12
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 67,
+    "tiles_B": 67,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 60,
+    "tiles_B": 60,
+    "celdas_que_no_coinciden": 8
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 49,
+    "celdas_que_no_coinciden": 2
+   },
+   "Y14 / Y15": {
+    "tiles_A": 24,
+    "tiles_B": 24,
+    "celdas_que_no_coinciden": 0
+   }
+  },
+  "puentes": {
+   "12": {
+    "nombre": "Y12",
+    "une": [
+     "N17",
+     "X5"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     13,
+     11,
+     10,
+     10
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 44,
+    "toca_las_dos_salas": true
+   },
+   "13": {
+    "nombre": "Y13",
+    "une": [
+     "N18",
+     "X6"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     13,
+     13,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 48,
+    "toca_las_dos_salas": true
+   },
+   "14": {
+    "nombre": "Y14",
+    "une": [
+     "X5",
+     "I19"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     6,
+     4,
+     3,
+     3
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 16,
+    "toca_las_dos_salas": true
+   },
+   "15": {
+    "nombre": "Y15",
+    "une": [
+     "X6",
+     "I20"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     6,
+     4,
+     3,
+     3
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 16,
+    "toca_las_dos_salas": true
+   },
+   "9": {
+    "nombre": "X9",
+    "une": [
+     "I25",
+     "H24"
+    ],
+    "largo_antes": 7,
+    "largo_despues_por_columna": [
+     20
+    ],
+    "celdas_antes": 25,
+    "celdas_despues": 20,
+    "toca_las_dos_salas": true
+   }
+  },
+  "muro_muerto_a_mas_de_3_celdas": {
+   "techo_y_cara": 416,
+   "todo_el_espacio_sin_piso": 416
+  },
+  "a_estrella": {
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 114,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 208,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 138,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true
+    }
+   },
+   "G_cerrada": true
+  },
+  "detalle_de_la_version": {
+   "columnas_con_cara": 171,
+   "celdas_de_muro_en_los_pies": 311,
+   "celdas_de_linea_a_media_distancia": 334,
+   "celdas_de_linea_fusionadas_en_los_pies": 433,
+   "muros_paralelos_fusionados": 19,
+   "celdas_de_techo_originales_en_el_interior": 2244,
+   "espacio_libre_(techo_y_cara_sin_linea_ni_sala)": 2256,
+   "lineas_del_muro_minimo": {
+    "celdas": 954,
+    "tramos_conexos": 40,
+    "celdas_de_piso_de_sala_sobre_la_linea": 0,
+    "celdas_de_puente_o_gate_sobre_la_linea": 40,
+    "hoyos_compartimentos_de_muro_muerto_cerrados_por_la_linea": 5,
+    "celdas_en_esos_hoyos": 15,
+    "celdas_con_grosor_3_(escalones)": 221
+   },
+   "celdas_quitadas_por_el_muro_minimo_(red_de_seguridad)": 0
+  },
+  "condiciones": {
+   "linea_minima_sin_hoyos": false,
+   "sin_escalones_de_3": false,
+   "0_dobles_muros": true,
+   "sin_contactos_diagonales_nuevos": true,
+   "ningun_muro_externo_mas_delgado": true,
+   "cada_puente_une_las_dos_salas": true,
+   "muro_minimo_respetado": true,
+   "a_estrella_igual": true,
+   "G_cerrada": true
+  }
+ },
+ "P2_V3": {
+  "zonas": {
+   "herradura": {
+    "area_E": 1171,
+    "vuelta": 2,
+    "area_por_vuelta": [
+     1171,
+     1457,
+     1746,
+     2039,
+     2208
+    ],
+    "area_sola": 1746,
+    "grupos": [
+     16,
+     23,
+     10,
+     5,
+     4,
+     6,
+     11,
+     24,
+     0,
+     3
+    ],
+    "area_compuesta": 1692,
+    "razon_sobre_la_guia_E": 1.445,
+    "razon_sola": 1.491
+   },
+   "islas": {
+    "area_E": 603,
+    "vuelta": 1,
+    "area_por_vuelta": [
+     603,
+     788,
+     1006,
+     1247
+    ],
+    "area_sola": 788,
+    "grupos": [
+     19,
+     20,
+     25,
+     17,
+     1,
+     18,
+     2
+    ],
+    "area_compuesta": 780,
+    "razon_sobre_la_guia_E": 1.294,
+    "razon_sola": 1.307
+   }
+  },
+  "grupos": {
+   "0": {
+    "nombre": "pasillo X 0",
+    "piso_guia_E": 107,
+    "piso_final": 176,
+    "razon_sobre_la_guia_E": 1.645
+   },
+   "1": {
+    "nombre": "pasillo X 1",
+    "piso_guia_E": 34,
+    "piso_final": 41,
+    "razon_sobre_la_guia_E": 1.206
+   },
+   "2": {
+    "nombre": "pasillo X 2",
+    "piso_guia_E": 41,
+    "piso_final": 59,
+    "razon_sobre_la_guia_E": 1.439
+   },
+   "3": {
+    "nombre": "pasillo X 3",
+    "piso_guia_E": 70,
+    "piso_final": 124,
+    "razon_sobre_la_guia_E": 1.771
+   },
+   "4": {
+    "nombre": "pasillo X 4",
+    "piso_guia_E": 67,
+    "piso_final": 77,
+    "razon_sobre_la_guia_E": 1.149
+   },
+   "5": {
+    "nombre": "pasillo X 5",
+    "piso_guia_E": 179,
+    "piso_final": 267,
+    "razon_sobre_la_guia_E": 1.492
+   },
+   "6": {
+    "nombre": "pasillo X 6",
+    "piso_guia_E": 89,
+    "piso_final": 146,
+    "razon_sobre_la_guia_E": 1.64
+   },
+   "9": {
+    "nombre": "pasillo X 9",
+    "piso_guia_E": 25,
+    "piso_final": 20,
+    "razon_sobre_la_guia_E": 0.8
+   },
+   "10": {
+    "nombre": "pasillo Y 10",
+    "piso_guia_E": 209,
+    "piso_final": 265,
+    "razon_sobre_la_guia_E": 1.268
+   },
+   "11": {
+    "nombre": "grupo 11",
+    "piso_guia_E": 298,
+    "piso_final": 367,
+    "razon_sobre_la_guia_E": 1.232
+   },
+   "12": {
+    "nombre": "pasillo Y 12",
+    "piso_guia_E": 49,
+    "piso_final": 44,
+    "razon_sobre_la_guia_E": 0.898
+   },
+   "13": {
+    "nombre": "pasillo Y 13",
+    "piso_guia_E": 49,
+    "piso_final": 48,
+    "razon_sobre_la_guia_E": 0.98
+   },
+   "14": {
+    "nombre": "pasillo Y 14",
+    "piso_guia_E": 24,
+    "piso_final": 16,
+    "razon_sobre_la_guia_E": 0.667
+   },
+   "15": {
+    "nombre": "pasillo Y 15",
+    "piso_guia_E": 24,
+    "piso_final": 16,
+    "razon_sobre_la_guia_E": 0.667
+   },
+   "16": {
+    "nombre": "pasillo Y 16",
+    "piso_guia_E": 19,
+    "piso_final": 42,
+    "razon_sobre_la_guia_E": 2.211
+   },
+   "17": {
+    "nombre": "hub 17",
+    "piso_guia_E": 96,
+    "piso_final": 118,
+    "razon_sobre_la_guia_E": 1.229
+   },
+   "18": {
+    "nombre": "hub 18",
+    "piso_guia_E": 90,
+    "piso_final": 103,
+    "razon_sobre_la_guia_E": 1.144
+   },
+   "19": {
+    "nombre": "hub 19",
+    "piso_guia_E": 143,
+    "piso_final": 191,
+    "razon_sobre_la_guia_E": 1.336
+   },
+   "20": {
+    "nombre": "hub 20",
+    "piso_guia_E": 139,
+    "piso_final": 180,
+    "razon_sobre_la_guia_E": 1.295
+   },
+   "23": {
+    "nombre": "hub 23",
+    "piso_guia_E": 65,
+    "piso_final": 100,
+    "razon_sobre_la_guia_E": 1.538
+   },
+   "24": {
+    "nombre": "hub 24",
+    "piso_guia_E": 68,
+    "piso_final": 128,
+    "razon_sobre_la_guia_E": 1.882
+   },
+   "25": {
+    "nombre": "hub 25",
+    "piso_guia_E": 60,
+    "piso_final": 88,
+    "razon_sobre_la_guia_E": 1.467
+   }
+  },
+  "piso_total_salas": 2472,
+  "piso_total_con_puentes": 2616,
+  "dobles_muros_(4_o_mas_con_los_pisos_pegados_a_la_linea)": 0,
+  "escalones_de_3_celdas_entre_pisos_pegados": 0,
+  "muro_externo": {
+   "salas_con_el_muro_mas_delgado_que_en_el_SNES": {},
+   "celdas_de_wrapping_pasadas_a_muro": 147
+  },
+  "silueta": {
+   "filas_antes": 104,
+   "columnas_antes": 56,
+   "filas_despues": 104,
+   "columnas_despues": 60
+  },
+  "contactos_diagonales_entre_salas": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "contactos_diagonales_de_la_guia_E": {
+   "6-11": [
+    1,
+    0
+   ],
+   "16-23": [
+    1,
+    0
+   ]
+  },
+  "pares_bajo_el_muro_minimo": [],
+  "dientes": {
+   "total": 54,
+   "original": 25
+  },
+  "error_de_espejo": {
+   "X5 / X6": {
+    "tiles_A": 267,
+    "tiles_B": 146,
+    "celdas_que_no_coinciden": 133
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 100,
+    "tiles_B": 128,
+    "celdas_que_no_coinciden": 36
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 265,
+    "tiles_B": 367,
+    "celdas_que_no_coinciden": 128
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 191,
+    "tiles_B": 180,
+    "celdas_que_no_coinciden": 33
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 118,
+    "tiles_B": 103,
+    "celdas_que_no_coinciden": 19
+   },
+   "X1 / X2": {
+    "tiles_A": 41,
+    "tiles_B": 59,
+    "celdas_que_no_coinciden": 18
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 176,
+    "tiles_B": 176,
+    "celdas_que_no_coinciden": 12
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 124,
+    "tiles_B": 124,
+    "celdas_que_no_coinciden": 24
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 77,
+    "tiles_B": 77,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 88,
+    "tiles_B": 88,
+    "celdas_que_no_coinciden": 8
+   },
+   "Y12 / Y13": {
+    "tiles_A": 44,
+    "tiles_B": 48,
+    "celdas_que_no_coinciden": 14
+   },
+   "Y14 / Y15": {
+    "tiles_A": 16,
+    "tiles_B": 16,
+    "celdas_que_no_coinciden": 8
+   }
+  },
+  "error_de_espejo_guia_E": {
+   "X5 / X6": {
+    "tiles_A": 179,
+    "tiles_B": 89,
+    "celdas_que_no_coinciden": 96
+   },
+   "hub 23 / hub 24": {
+    "tiles_A": 65,
+    "tiles_B": 68,
+    "celdas_que_no_coinciden": 9
+   },
+   "Y10 / grupo 11 (sin espejo)": {
+    "tiles_A": 209,
+    "tiles_B": 298,
+    "celdas_que_no_coinciden": 89
+   },
+   "hub 19 / hub 20": {
+    "tiles_A": 143,
+    "tiles_B": 139,
+    "celdas_que_no_coinciden": 10
+   },
+   "hub 17 / hub 18": {
+    "tiles_A": 96,
+    "tiles_B": 90,
+    "celdas_que_no_coinciden": 8
+   },
+   "X1 / X2": {
+    "tiles_A": 34,
+    "tiles_B": 41,
+    "celdas_que_no_coinciden": 7
+   },
+   "X0 consigo mismo": {
+    "tiles_A": 107,
+    "tiles_B": 107,
+    "celdas_que_no_coinciden": 10
+   },
+   "X3 consigo mismo": {
+    "tiles_A": 70,
+    "tiles_B": 70,
+    "celdas_que_no_coinciden": 12
+   },
+   "X4 consigo mismo": {
+    "tiles_A": 67,
+    "tiles_B": 67,
+    "celdas_que_no_coinciden": 6
+   },
+   "hub 25 consigo mismo": {
+    "tiles_A": 60,
+    "tiles_B": 60,
+    "celdas_que_no_coinciden": 8
+   },
+   "Y12 / Y13": {
+    "tiles_A": 49,
+    "tiles_B": 49,
+    "celdas_que_no_coinciden": 2
+   },
+   "Y14 / Y15": {
+    "tiles_A": 24,
+    "tiles_B": 24,
+    "celdas_que_no_coinciden": 0
+   }
+  },
+  "puentes": {
+   "12": {
+    "nombre": "Y12",
+    "une": [
+     "N17",
+     "X5"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     13,
+     11,
+     10,
+     10
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 44,
+    "toca_las_dos_salas": true
+   },
+   "13": {
+    "nombre": "Y13",
+    "une": [
+     "N18",
+     "X6"
+    ],
+    "largo_antes": 13,
+    "largo_despues_por_columna": [
+     13,
+     13,
+     11,
+     11
+    ],
+    "celdas_antes": 49,
+    "celdas_despues": 48,
+    "toca_las_dos_salas": true
+   },
+   "14": {
+    "nombre": "Y14",
+    "une": [
+     "X5",
+     "I19"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     6,
+     4,
+     3,
+     3
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 16,
+    "toca_las_dos_salas": true
+   },
+   "15": {
+    "nombre": "Y15",
+    "une": [
+     "X6",
+     "I20"
+    ],
+    "largo_antes": 6,
+    "largo_despues_por_columna": [
+     6,
+     4,
+     3,
+     3
+    ],
+    "celdas_antes": 24,
+    "celdas_despues": 16,
+    "toca_las_dos_salas": true
+   },
+   "9": {
+    "nombre": "X9",
+    "une": [
+     "I25",
+     "H24"
+    ],
+    "largo_antes": 7,
+    "largo_despues_por_columna": [
+     20
+    ],
+    "celdas_antes": 25,
+    "celdas_despues": 20,
+    "toca_las_dos_salas": true
+   }
+  },
+  "muro_muerto_a_mas_de_3_celdas": {
+   "techo_y_cara": 363,
+   "todo_el_espacio_sin_piso": 363
+  },
+  "a_estrella": {
+   "rutas": {
+    "I": {
+     "alcanzable": true,
+     "pasos": 114,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      14,
+      19
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "J": {
+     "alcanzable": true,
+     "pasos": 208,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      11,
+      24,
+      9,
+      25
+     ],
+     "igual_a_la_guia_D": true
+    },
+    "cofre2": {
+     "alcanzable": true,
+     "pasos": 138,
+     "grupos": [
+      16,
+      23,
+      10,
+      5,
+      4,
+      6,
+      15,
+      20
+     ],
+     "igual_a_la_guia_D": true
+    }
+   },
+   "G_cerrada": true
+  },
+  "detalle_de_la_version": {
+   "columnas_con_cara": 171,
+   "celdas_de_muro_en_los_pies": 311,
+   "celdas_de_linea_a_media_distancia": 334,
+   "celdas_de_linea_fusionadas_en_los_pies": 433,
+   "muros_paralelos_fusionados": 19,
+   "celdas_de_techo_originales_en_el_interior": 2244,
+   "espacio_libre_(techo_y_cara_sin_linea_ni_sala)": 2256,
+   "lineas_del_muro_minimo": {
+    "celdas": 954,
+    "tramos_conexos": 40,
+    "celdas_de_piso_de_sala_sobre_la_linea": 0,
+    "celdas_de_puente_o_gate_sobre_la_linea": 40,
+    "hoyos_compartimentos_de_muro_muerto_cerrados_por_la_linea": 5,
+    "celdas_en_esos_hoyos": 15,
+    "celdas_con_grosor_3_(escalones)": 221
+   },
+   "celdas_quitadas_por_el_muro_minimo_(red_de_seguridad)": 2
+  },
+  "condiciones": {
+   "linea_minima_sin_hoyos": false,
+   "sin_escalones_de_3": false,
+   "0_dobles_muros": true,
+   "sin_contactos_diagonales_nuevos": true,
+   "ningun_muro_externo_mas_delgado": true,
+   "cada_puente_une_las_dos_salas": true,
+   "muro_minimo_respetado": true,
+   "a_estrella_igual": true,
+   "G_cerrada": true
+  }
+ },
+ "P1_contra_P2": {
+  "V1": {
+   "celdas_distintas": 0,
+   "piso_P1": 2634,
+   "piso_P2": 2634
+  },
+  "V2a": {
+   "celdas_distintas": 37,
+   "piso_P1": 2417,
+   "piso_P2": 2450
+  },
+  "V2b": {
+   "celdas_distintas": 45,
+   "piso_P1": 2597,
+   "piso_P2": 2588
+  },
+  "V3": {
+   "celdas_distintas": 56,
+   "piso_P1": 2562,
+   "piso_P2": 2616
+  }
+ },
+ "v3_canvas": {
+  "columnas_con_cara": 171,
+  "celdas_de_muro_en_los_pies": 311,
+  "celdas_de_linea_a_media_distancia": 334,
+  "celdas_de_linea_fusionadas_en_los_pies": 433,
+  "muros_paralelos_fusionados": 19,
+  "detalle_de_fusiones": [
+   {
+    "celdas": 13,
+    "caja_x": [
+     12,
+     16
+    ],
+    "caja_y": [
+     14,
+     17
+    ]
+   },
+   {
+    "celdas": 13,
+    "caja_x": [
+     41,
+     44
+    ],
+    "caja_y": [
+     14,
+     18
+    ]
+   },
+   {
+    "celdas": 16,
+    "caja_x": [
+     6,
+     10
+    ],
+    "caja_y": [
+     17,
+     22
+    ]
+   },
+   {
+    "celdas": 70,
+    "caja_x": [
+     22,
+     36
+    ],
+    "caja_y": [
+     17,
+     32
+    ]
+   },
+   {
+    "celdas": 15,
+    "caja_x": [
+     47,
+     51
+    ],
+    "caja_y": [
+     18,
+     22
+    ]
+   },
+   {
+    "celdas": 6,
+    "caja_x": [
+     8,
+     10
+    ],
+    "caja_y": [
+     29,
+     31
+    ]
+   },
+   {
+    "celdas": 12,
+    "caja_x": [
+     40,
+     44
+    ],
+    "caja_y": [
+     29,
+     32
+    ]
+   },
+   {
+    "celdas": 58,
+    "caja_x": [
+     18,
+     39
+    ],
+    "caja_y": [
+     37,
+     43
+    ]
+   },
+   {
+    "celdas": 13,
+    "caja_x": [
+     45,
+     47
+    ],
+    "caja_y": [
+     38,
+     43
+    ]
+   },
+   {
+    "celdas": 15,
+    "caja_x": [
+     28,
+     30
+    ],
+    "caja_y": [
+     49,
+     54
+    ]
+   },
+   {
+    "celdas": 12,
+    "caja_x": [
+     42,
+     44
+    ],
+    "caja_y": [
+     49,
+     54
+    ]
+   },
+   {
+    "celdas": 27,
+    "caja_x": [
+     10,
+     20
+    ],
+    "caja_y": [
+     58,
+     72
+    ]
+   },
+   {
+    "celdas": 75,
+    "caja_x": [
+     23,
+     46
+    ],
+    "caja_y": [
+     58,
+     74
+    ]
+   },
+   {
+    "celdas": 16,
+    "caja_x": [
+     48,
+     48
+    ],
+    "caja_y": [
+     60,
+     75
+    ]
+   },
+   {
+    "celdas": 8,
+    "caja_x": [
+     16,
+     20
+    ],
+    "caja_y": [
+     77,
+     79
+    ]
+   },
+   {
+    "celdas": 10,
+    "caja_x": [
+     36,
+     40
+    ],
+    "caja_y": [
+     77,
+     79
+    ]
+   },
+   {
+    "celdas": 15,
+    "caja_x": [
+     7,
+     11
+    ],
+    "caja_y": [
+     78,
+     82
+    ]
+   },
+   {
+    "celdas": 15,
+    "caja_x": [
+     46,
+     50
+    ],
+    "caja_y": [
+     78,
+     82
+    ]
+   },
+   {
+    "celdas": 10,
+    "caja_x": [
+     22,
+     23
+    ],
+    "caja_y": [
+     82,
+     87
+    ]
+   }
+  ],
+  "celdas_de_techo_originales_en_el_interior": 2244,
+  "espacio_libre_(techo_y_cara_sin_linea_ni_sala)": 2256,
+  "celdas_de_linea": 645
+ }
+}
