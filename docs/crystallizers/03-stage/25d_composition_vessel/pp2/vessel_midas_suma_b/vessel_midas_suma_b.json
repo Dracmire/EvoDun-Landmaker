@@ -1,0 +1,639 @@
+{
+ "base": "7834212",
+ "escena": "la del paso 8e, sin cambios (VS_SCALE = 2: 1 celda de planta = 1 unidad, 1 unidad de altura = 1 unidad)",
+ "camara": {
+  "tipo": "ortografica",
+  "pitch_grados": 71,
+  "yaw_grados": 0,
+  "desde": "sur",
+  "apunta_a": "los pies del heroe (heroe centrado en el cuadro)",
+  "tamano_px": [
+   512,
+   448
+  ],
+  "retroceso_de_los_rayos_(celdas)": 400.0,
+  "alto_visible_del_cuadro_en_el_plano_de_la_vista_(celdas)": {
+   "D1": 36.96,
+   "D2": 56.0,
+   "D3": 73.92
+  },
+  "base_celdas": 28,
+  "factores": {
+   "D1": 1.32,
+   "D2": 2.0,
+   "D3": 2.64
+  },
+  "ancho_visible_(alto x 512 / 448)": {
+   "D1": 42.24,
+   "D2": 64.0,
+   "D3": 84.48
+  }
+ },
+ "tomas": {
+  "G25": {
+   "celda_(fila,columna)": [
+    85,
+    28
+   ],
+   "sala": 25,
+   "nivel": "1"
+  },
+  "G10": {
+   "celda_(fila,columna)": [
+    66,
+    4
+   ],
+   "sala": 10,
+   "nivel": "0"
+  },
+  "G11": {
+   "celda_(fila,columna)": [
+    62,
+    52
+   ],
+   "sala": 11,
+   "nivel": "0"
+  },
+  "G5": {
+   "celda_(fila,columna)": [
+    47,
+    15
+   ],
+   "sala": 5,
+   "nivel": "1"
+  },
+  "G6": {
+   "celda_(fila,columna)": [
+    44,
+    40
+   ],
+   "sala": 6,
+   "nivel": "1"
+  },
+  "G17": {
+   "celda_(fila,columna)": [
+    23,
+    14
+   ],
+   "sala": 17,
+   "nivel": "0"
+  },
+  "G18": {
+   "celda_(fila,columna)": [
+    23,
+    44
+   ],
+   "sala": 18,
+   "nivel": "0"
+  }
+ },
+ "regla_de_la_celda": "grupos 10 y 11 (pasillos largos): fila media del grupo (10: filas 49 a 83; 11: filas 40 a 85) y columna del centro del ancho; el resto (25, 5, 6, 17, 18): la celda del piso mas lejana al borde de su sala (empate: la mas cercana al centroide)",
+ "tomas_y_camaras": {
+  "G25_D1": {
+   "celda_(fila,columna)": [
+    85,
+    28
+   ],
+   "sala": 25,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    28.5,
+    85.5,
+    14.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    28.5,
+    215.727,
+    392.207
+   ],
+   "alto_visible_celdas": 36.96,
+   "ancho_visible_celdas": 42.24,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G25_D2": {
+   "celda_(fila,columna)": [
+    85,
+    28
+   ],
+   "sala": 25,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    28.5,
+    85.5,
+    14.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    28.5,
+    215.727,
+    392.207
+   ],
+   "alto_visible_celdas": 56.0,
+   "ancho_visible_celdas": 64.0,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G25_D3": {
+   "celda_(fila,columna)": [
+    85,
+    28
+   ],
+   "sala": 25,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    28.5,
+    85.5,
+    14.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    28.5,
+    215.727,
+    392.207
+   ],
+   "alto_visible_celdas": 73.92,
+   "ancho_visible_celdas": 84.48,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G10_D1": {
+   "celda_(fila,columna)": [
+    66,
+    4
+   ],
+   "sala": 10,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    4.5,
+    66.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    4.5,
+    196.727,
+    378.207
+   ],
+   "alto_visible_celdas": 36.96,
+   "ancho_visible_celdas": 42.24,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G10_D2": {
+   "celda_(fila,columna)": [
+    66,
+    4
+   ],
+   "sala": 10,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    4.5,
+    66.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    4.5,
+    196.727,
+    378.207
+   ],
+   "alto_visible_celdas": 56.0,
+   "ancho_visible_celdas": 64.0,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G10_D3": {
+   "celda_(fila,columna)": [
+    66,
+    4
+   ],
+   "sala": 10,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    4.5,
+    66.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    4.5,
+    196.727,
+    378.207
+   ],
+   "alto_visible_celdas": 73.92,
+   "ancho_visible_celdas": 84.48,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G11_D1": {
+   "celda_(fila,columna)": [
+    62,
+    52
+   ],
+   "sala": 11,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    52.5,
+    62.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    52.5,
+    192.727,
+    378.207
+   ],
+   "alto_visible_celdas": 36.96,
+   "ancho_visible_celdas": 42.24,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G11_D2": {
+   "celda_(fila,columna)": [
+    62,
+    52
+   ],
+   "sala": 11,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    52.5,
+    62.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    52.5,
+    192.727,
+    378.207
+   ],
+   "alto_visible_celdas": 56.0,
+   "ancho_visible_celdas": 64.0,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G11_D3": {
+   "celda_(fila,columna)": [
+    62,
+    52
+   ],
+   "sala": 11,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    52.5,
+    62.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    52.5,
+    192.727,
+    378.207
+   ],
+   "alto_visible_celdas": 73.92,
+   "ancho_visible_celdas": 84.48,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G5_D1": {
+   "celda_(fila,columna)": [
+    47,
+    15
+   ],
+   "sala": 5,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    15.5,
+    47.5,
+    14.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    15.5,
+    177.727,
+    392.207
+   ],
+   "alto_visible_celdas": 36.96,
+   "ancho_visible_celdas": 42.24,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G5_D2": {
+   "celda_(fila,columna)": [
+    47,
+    15
+   ],
+   "sala": 5,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    15.5,
+    47.5,
+    14.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    15.5,
+    177.727,
+    392.207
+   ],
+   "alto_visible_celdas": 56.0,
+   "ancho_visible_celdas": 64.0,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G5_D3": {
+   "celda_(fila,columna)": [
+    47,
+    15
+   ],
+   "sala": 5,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    15.5,
+    47.5,
+    14.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    15.5,
+    177.727,
+    392.207
+   ],
+   "alto_visible_celdas": 73.92,
+   "ancho_visible_celdas": 84.48,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G6_D1": {
+   "celda_(fila,columna)": [
+    44,
+    40
+   ],
+   "sala": 6,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    40.5,
+    44.5,
+    14.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    40.5,
+    174.727,
+    392.207
+   ],
+   "alto_visible_celdas": 36.96,
+   "ancho_visible_celdas": 42.24,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G6_D2": {
+   "celda_(fila,columna)": [
+    44,
+    40
+   ],
+   "sala": 6,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    40.5,
+    44.5,
+    14.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    40.5,
+    174.727,
+    392.207
+   ],
+   "alto_visible_celdas": 56.0,
+   "ancho_visible_celdas": 64.0,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G6_D3": {
+   "celda_(fila,columna)": [
+    44,
+    40
+   ],
+   "sala": 6,
+   "z_de_los_pies": 14.0,
+   "objetivo_(pies)": [
+    40.5,
+    44.5,
+    14.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    40.5,
+    174.727,
+    392.207
+   ],
+   "alto_visible_celdas": 73.92,
+   "ancho_visible_celdas": 84.48,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G17_D1": {
+   "celda_(fila,columna)": [
+    23,
+    14
+   ],
+   "sala": 17,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    14.5,
+    23.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    14.5,
+    153.727,
+    378.207
+   ],
+   "alto_visible_celdas": 36.96,
+   "ancho_visible_celdas": 42.24,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G17_D2": {
+   "celda_(fila,columna)": [
+    23,
+    14
+   ],
+   "sala": 17,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    14.5,
+    23.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    14.5,
+    153.727,
+    378.207
+   ],
+   "alto_visible_celdas": 56.0,
+   "ancho_visible_celdas": 64.0,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G17_D3": {
+   "celda_(fila,columna)": [
+    23,
+    14
+   ],
+   "sala": 17,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    14.5,
+    23.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    14.5,
+    153.727,
+    378.207
+   ],
+   "alto_visible_celdas": 73.92,
+   "ancho_visible_celdas": 84.48,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G18_D1": {
+   "celda_(fila,columna)": [
+    23,
+    44
+   ],
+   "sala": 18,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    44.5,
+    23.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    44.5,
+    153.727,
+    378.207
+   ],
+   "alto_visible_celdas": 36.96,
+   "ancho_visible_celdas": 42.24,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G18_D2": {
+   "celda_(fila,columna)": [
+    23,
+    44
+   ],
+   "sala": 18,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    44.5,
+    23.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    44.5,
+    153.727,
+    378.207
+   ],
+   "alto_visible_celdas": 56.0,
+   "ancho_visible_celdas": 64.0,
+   "muros_cortados_(fila,columna)": []
+  },
+  "G18_D3": {
+   "celda_(fila,columna)": [
+    23,
+    44
+   ],
+   "sala": 18,
+   "z_de_los_pies": 0.0,
+   "objetivo_(pies)": [
+    44.5,
+    23.5,
+    0.0
+   ],
+   "origen_de_los_rayos_(centro)": [
+    44.5,
+    153.727,
+    378.207
+   ],
+   "alto_visible_celdas": 73.92,
+   "ancho_visible_celdas": 84.48,
+   "muros_cortados_(fila,columna)": []
+  }
+ },
+ "cobertura_de_subceldas_por_caso": {
+  "D1": {
+   "subceldas_vistas_por_n_tomas": {
+    "1": 7952,
+    "2": 10544,
+    "3": 1540,
+    "4": 1050,
+    "5": 20,
+    "6": 0,
+    "7": 0
+   }
+  },
+  "D2": {
+   "subceldas_vistas_por_n_tomas": {
+    "1": 3972,
+    "2": 7142,
+    "3": 4838,
+    "4": 4924,
+    "5": 2480,
+    "6": 1108,
+    "7": 160
+   }
+  },
+  "D3": {
+   "subceldas_vistas_por_n_tomas": {
+    "1": 620,
+    "2": 2486,
+    "3": 4144,
+    "4": 6186,
+    "5": 4384,
+    "6": 3634,
+    "7": 3170
+   }
+  }
+ },
+ "sumas": {
+  "S": "suma de x",
+  "promedio": "S / n",
+  "Q": "sqrt(suma de x^2)",
+  "x": "mapa de MiDaS (0 a 1, 1 = mas cerca) promediado por subcelda de 2 x 2 por celda; n = tomas que ven la subcelda; escalas de las imagenes: S 0 a 7, promedio 0 a 1, Q 0 a 2.65"
+ },
+ "kmeans_de_las_tomas_D1": {
+  "N": 4,
+  "seed": 0,
+  "entrada": "mapa de MiDaS -> gris uint8 -> inferno -> K-means sobre el color, como en los pasos 7b a 8c",
+  "orden": "banda 0 = la de mayor gris medio (mas cercana), banda 3 = la mas lejana",
+  "por_toma": {
+   "G25_D1": {
+    "gris_medio_por_banda_(orden_de_las_bandas)": [
+     233.3,
+     196.5,
+     120.1,
+     67.9
+    ]
+   },
+   "G10_D1": {
+    "gris_medio_por_banda_(orden_de_las_bandas)": [
+     234.8,
+     189.5,
+     144.5,
+     84.8
+    ]
+   },
+   "G11_D1": {
+    "gris_medio_por_banda_(orden_de_las_bandas)": [
+     241.2,
+     203.0,
+     141.2,
+     70.6
+    ]
+   },
+   "G5_D1": {
+    "gris_medio_por_banda_(orden_de_las_bandas)": [
+     230.5,
+     203.1,
+     173.8,
+     138.9
+    ]
+   },
+   "G6_D1": {
+    "gris_medio_por_banda_(orden_de_las_bandas)": [
+     242.4,
+     223.6,
+     203.5,
+     113.4
+    ]
+   },
+   "G17_D1": {
+    "gris_medio_por_banda_(orden_de_las_bandas)": [
+     224.7,
+     189.1,
+     150.1,
+     73.8
+    ]
+   },
+   "G18_D1": {
+    "gris_medio_por_banda_(orden_de_las_bandas)": [
+     229.6,
+     192.8,
+     151.5,
+     93.3
+    ]
+   }
+  }
+ }
+}
