@@ -635,5 +635,73 @@
     ]
    }
   }
+ },
+ "kmeans_de_las_sumas_D1": {
+  "N": 4,
+  "seed": 0,
+  "entrada": "valores numericos de la suma, el promedio y la raiz de la suma de cuadrados de las 7 tomas de D1, solo subceldas con n >= 1 (una dimension)",
+  "orden": "banda 0 = el centro mas alto, banda 3 = el mas bajo",
+  "sumas_reconstruidas_desde": "los mapas de MiDaS guardados fuera del repo, la geometria de la camara y los pixeles del heroe de las tomas guardadas; sin render ni red nuevos",
+  "coincidencia_con_las_imagenes_del_8f_(pixeles_distintos)": {
+   "suma": {
+    "misma_forma": true,
+    "pixeles_distintos": 0
+   },
+   "promedio": {
+    "misma_forma": true,
+    "pixeles_distintos": 0
+   },
+   "cuadrados": {
+    "misma_forma": true,
+    "pixeles_distintos": 0
+   }
+  },
+  "por_suma": {
+   "suma": {
+    "subceldas_con_dato": 21106,
+    "centros_de_las_bandas_(banda_0_la_mas_alta)": [
+     3.012523,
+     1.830898,
+     1.311892,
+     0.717275
+    ],
+    "subceldas_por_banda": [
+     1423,
+     4201,
+     6588,
+     8894
+    ]
+   },
+   "promedio": {
+    "subceldas_con_dato": 21106,
+    "centros_de_las_bandas_(banda_0_la_mas_alta)": [
+     0.85965,
+     0.7147,
+     0.57845,
+     0.373643
+    ],
+    "subceldas_por_banda": [
+     6752,
+     7338,
+     5625,
+     1391
+    ]
+   },
+   "cuadrados": {
+    "subceldas_con_dato": 21106,
+    "centros_de_las_bandas_(banda_0_la_mas_alta)": [
+     1.558887,
+     1.213084,
+     0.932185,
+     0.61765
+    ],
+    "subceldas_por_banda": [
+     1448,
+     4769,
+     8657,
+     6232
+    ]
+   }
+  }
  }
 }

@@ -55,3 +55,15 @@ N = 4, `seed 0`, sobre el mapa de MiDaS de cada una de las 7 tomas de D1, por se
 - `vessel_midas_suma_b.json` y `HASHES_vessel_midas_suma_b.txt` (dos corridas completas, mismos hashes).
 
 Los scripts, el entorno, los pesos y los mapas de MiDaS en bruto quedan fuera del repo.
+
+## 8g · K-means de las sumas a × 1,32
+
+K-means con N = 4 (`seed 0`) sobre cada una de las 3 sumas de D1 (S, promedio y Q de las 7 tomas), por separado, sobre los **valores numéricos** y solo en las subceldas con dato (n ≥ 1: 21106). Una dimensión (el valor de la suma). Bandas de la más alta (0) a la más baja (3). No se renderizó ni se pasó la red de nuevo: las sumas se reconstruyeron con los mapas de MiDaS guardados, la geometría de la cámara y los píxeles del héroe de las tomas guardadas, y las 3 imágenes de suma regeneradas coinciden con las del 8f en 0 píxeles distintos.
+
+| Suma | Centros de las bandas 0 a 3 | Subceldas por banda |
+|---|---|---|
+| S | 3.0125, 1.8309, 1.3119, 0.7173 | 1423 / 4201 / 6588 / 8894 |
+| promedio | 0.8597, 0.7147, 0.5785, 0.3736 | 6752 / 7338 / 5625 / 1391 |
+| Q | 1.5589, 1.2131, 0.9322, 0.6177 | 1448 / 4769 / 8657 / 6232 |
+
+Imágenes en `kmeans_sumas/`: `kmeans_suma_D1.png`, `kmeans_promedio_D1.png` y `kmeans_cuadrados_D1.png` (la suma original a la izquierda; las 4 bandas sobre la planta a la derecha, con el centro de cada una). Los centros también están en `vessel_midas_suma_b.json` (`kmeans_de_las_sumas_D1`). Sin veredicto.

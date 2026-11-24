@@ -37,4 +37,9 @@ f52afcf4f68153aa1d58681c9ba7d18fc8ab69081f12b8010e9e4b0a84c8d42f  ./tomas/G5_D3.
 193cc885d8582134edd2a9f824dae8da002c9403160f4386eb4a49c0feef9bea  ./tomas/G6_D1.png
 fca08fd6cbac20774048bcf213417e79bb2d0284babd01090816d1cba29a702f  ./tomas/G6_D2.png
 8dedf682a8948e2d867d79dc69ce7777a3ceb2f9e4a355f5c03c9d6ed3bb1f60  ./tomas/G6_D3.png
-b8c4f24e76f651b0666c9638f748f7c28a22a9be9e4876db1bc08288528c5279  ./vessel_midas_suma_b.json
+64dfd8a22aeebc337a8eab562086f29c5d865491c31f12269568a22ba269e8e2  ./vessel_midas_suma_b.json
+# paso 8g: la linea de vessel_midas_suma_b.json de arriba es la del json con kmeans_de_las_sumas_D1 agregado
+# paso 8g: K-means de las sumas a x 1,32; dos corridas dieron los mismos hashes (sha256)
+35620dd257761047ba1e2b534f7996bb4ed026c5071be26f909abe94d5a95d6a  ./kmeans_sumas/kmeans_cuadrados_D1.png
+a22c6f545e78e5265c4b9f94e82d20eee6c889e1a5c419184973cbb165344aaf  ./kmeans_sumas/kmeans_promedio_D1.png
+3e766fe89bac6ac4c305a5ce65c68ee6fbfd3e39250a5065a8bb9675ff266465  ./kmeans_sumas/kmeans_suma_D1.png
