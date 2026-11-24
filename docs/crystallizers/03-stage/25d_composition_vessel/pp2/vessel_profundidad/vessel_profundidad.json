@@ -1,0 +1,1159 @@
+{
+ "base": "0c21631",
+ "nuevas_a71": {
+  "global": {
+   "camara": "perspectiva FOV 30, pitch 71, yaw 0, desde el sur, encuadre del nivel entero",
+   "distancia": 226,
+   "tam": [
+    450,
+    800
+   ],
+   "porcentaje_por_banda": [
+    30.23,
+    31.4,
+    24.04,
+    14.33
+   ],
+   "gris_medio_por_banda": [
+    213.4,
+    176.1,
+    125.0,
+    54.1
+   ],
+   "bandas_claras_(>=5 %)": 4,
+   "banda_del_heroe": null,
+   "pixeles_del_heroe": 0,
+   "celdas_visibles": 4479,
+   "celdas_caminables_visibles": 2680,
+   "fila_media_de_la_planta_por_banda": [
+    84.2,
+    53.3,
+    19.8,
+    4.0
+   ],
+   "celdas_por_banda": [
+    1170,
+    2099,
+    1207,
+    3
+   ],
+   "franja_alta_por_banda": [
+    90,
+    476,
+    0,
+    0
+   ],
+   "hub25_por_banda": [
+    90,
+    0,
+    0,
+    0
+   ]
+  },
+  "g23_codo": {
+   "id": "H1",
+   "tipo": "codo",
+   "nota": "codo sur-oeste: en hub 23, junto a la entrada de Y10",
+   "celda_del_heroe": [
+    84,
+    12
+   ],
+   "grupo": 23,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "h23",
+   "camara": "perspectiva FOV 30, pitch 71, yaw 0, desde el sur, heroe a 0,14 de la altura de la toma, desplazamiento de lente 0,4",
+   "distancia": 53.31501153669824,
+   "tam": [
+    800,
+    450
+   ],
+   "heroe_en_la_toma": true,
+   "pixeles_del_heroe_esperados_sin_muros": 530,
+   "pixeles_del_heroe_con_muros_completos": 530,
+   "pixeles_del_heroe_final": 530,
+   "corte_del_muro_externo": false,
+   "celdas_del_muro_externo_cortadas": 0,
+   "porcentaje_por_banda": [
+    11.01,
+    23.82,
+    35.71,
+    29.46
+   ],
+   "gris_medio_por_banda": [
+    209.0,
+    145.0,
+    86.2,
+    33.4
+   ],
+   "bandas_claras_(>=5 %)": 4,
+   "banda_del_heroe": 2,
+   "pixeles_del_heroe": 530,
+   "celdas_visibles": 1127,
+   "celdas_caminables_visibles": 758,
+   "salas_de_la_herradura": {
+    "Y16": {
+     "celdas_vistas": 22,
+     "celdas_por_banda": [
+      0,
+      22,
+      0,
+      0
+     ],
+     "bandas_que_toca": 1
+    },
+    "h23": {
+     "celdas_vistas": 90,
+     "celdas_por_banda": [
+      0,
+      56,
+      34,
+      0
+     ],
+     "bandas_que_toca": 2
+    },
+    "Y10": {
+     "celdas_vistas": 195,
+     "celdas_por_banda": [
+      0,
+      0,
+      94,
+      101
+     ],
+     "bandas_que_toca": 2
+    },
+    "X5": null,
+    "X4": null,
+    "X6": null,
+    "g11": null,
+    "h24": {
+     "celdas_vistas": 1,
+     "celdas_por_banda": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "bandas_que_toca": 1
+    }
+   }
+  },
+  "g10_escalera": {
+   "id": "H2",
+   "tipo": "escalera",
+   "nota": "pie de la escalera Y10 -> X5, en Y10",
+   "celda_del_heroe": [
+    51,
+    4
+   ],
+   "grupo": 10,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "Y10",
+   "camara": "perspectiva FOV 30, pitch 71, yaw 0, desde el sur, heroe a 0,14 de la altura de la toma, desplazamiento de lente 0,4",
+   "distancia": 53.31501153669824,
+   "tam": [
+    800,
+    450
+   ],
+   "heroe_en_la_toma": true,
+   "pixeles_del_heroe_esperados_sin_muros": 530,
+   "pixeles_del_heroe_con_muros_completos": 530,
+   "pixeles_del_heroe_final": 530,
+   "corte_del_muro_externo": false,
+   "celdas_del_muro_externo_cortadas": 0,
+   "porcentaje_por_banda": [
+    27.06,
+    28.88,
+    29.78,
+    14.28
+   ],
+   "gris_medio_por_banda": [
+    181.8,
+    134.2,
+    77.0,
+    25.6
+   ],
+   "bandas_claras_(>=5 %)": 4,
+   "banda_del_heroe": 1,
+   "pixeles_del_heroe": 530,
+   "celdas_visibles": 748,
+   "celdas_caminables_visibles": 557,
+   "salas_de_la_herradura": {
+    "Y16": null,
+    "h23": null,
+    "Y10": {
+     "celdas_vistas": 85,
+     "celdas_por_banda": [
+      51,
+      29,
+      5,
+      0
+     ],
+     "bandas_que_toca": 3
+    },
+    "X5": {
+     "celdas_vistas": 234,
+     "celdas_por_banda": [
+      107,
+      124,
+      3,
+      0
+     ],
+     "bandas_que_toca": 3
+    },
+    "X4": {
+     "celdas_vistas": 32,
+     "celdas_por_banda": [
+      2,
+      30,
+      0,
+      0
+     ],
+     "bandas_que_toca": 2
+    },
+    "X6": null,
+    "g11": null,
+    "h24": null
+   }
+  },
+  "g04_mirador": {
+   "id": "H3",
+   "tipo": "mirador",
+   "nota": "mirador de X4, centro del borde norte",
+   "celda_del_heroe": [
+    40,
+    28
+   ],
+   "grupo": 4,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "X4",
+   "camara": "perspectiva FOV 30, pitch 71, yaw 0, desde el sur, heroe a 0,14 de la altura de la toma, desplazamiento de lente 0,4",
+   "distancia": 53.31501153669824,
+   "tam": [
+    800,
+    450
+   ],
+   "heroe_en_la_toma": true,
+   "pixeles_del_heroe_esperados_sin_muros": 530,
+   "pixeles_del_heroe_con_muros_completos": 530,
+   "pixeles_del_heroe_final": 530,
+   "corte_del_muro_externo": false,
+   "celdas_del_muro_externo_cortadas": 0,
+   "porcentaje_por_banda": [
+    5.68,
+    29.97,
+    30.58,
+    33.78
+   ],
+   "gris_medio_por_banda": [
+    203.4,
+    108.4,
+    60.4,
+    23.0
+   ],
+   "bandas_claras_(>=5 %)": 4,
+   "banda_del_heroe": 2,
+   "pixeles_del_heroe": 530,
+   "celdas_visibles": 1707,
+   "celdas_caminables_visibles": 990,
+   "salas_de_la_herradura": {
+    "Y16": null,
+    "h23": null,
+    "Y10": null,
+    "X5": {
+     "celdas_vistas": 130,
+     "celdas_por_banda": [
+      0,
+      109,
+      21,
+      0
+     ],
+     "bandas_que_toca": 2
+    },
+    "X4": {
+     "celdas_vistas": 87,
+     "celdas_por_banda": [
+      0,
+      78,
+      9,
+      0
+     ],
+     "bandas_que_toca": 2
+    },
+    "X6": {
+     "celdas_vistas": 76,
+     "celdas_por_banda": [
+      1,
+      75,
+      0,
+      0
+     ],
+     "bandas_que_toca": 2
+    },
+    "g11": {
+     "celdas_vistas": 8,
+     "celdas_por_banda": [
+      8,
+      0,
+      0,
+      0
+     ],
+     "bandas_que_toca": 1
+    },
+    "h24": null
+   }
+  },
+  "g24_codo": {
+   "id": "H4",
+   "tipo": "codo",
+   "nota": "codo sur-este: en hub 24, entre la entrada de g11 y la cabeza de X9",
+   "celda_del_heroe": [
+    86,
+    44
+   ],
+   "grupo": 24,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "h24",
+   "camara": "perspectiva FOV 30, pitch 71, yaw 0, desde el sur, heroe a 0,14 de la altura de la toma, desplazamiento de lente 0,4",
+   "distancia": 53.31501153669824,
+   "tam": [
+    800,
+    450
+   ],
+   "heroe_en_la_toma": true,
+   "pixeles_del_heroe_esperados_sin_muros": 530,
+   "pixeles_del_heroe_con_muros_completos": 530,
+   "pixeles_del_heroe_final": 530,
+   "corte_del_muro_externo": false,
+   "celdas_del_muro_externo_cortadas": 0,
+   "porcentaje_por_banda": [
+    21.99,
+    23.61,
+    28.47,
+    25.92
+   ],
+   "gris_medio_por_banda": [
+    192.8,
+    141.1,
+    90.0,
+    38.1
+   ],
+   "bandas_claras_(>=5 %)": 4,
+   "banda_del_heroe": 1,
+   "pixeles_del_heroe": 530,
+   "celdas_visibles": 1107,
+   "celdas_caminables_visibles": 744,
+   "salas_de_la_herradura": {
+    "Y16": null,
+    "h23": null,
+    "Y10": null,
+    "X5": null,
+    "X4": null,
+    "X6": null,
+    "g11": {
+     "celdas_vistas": 176,
+     "celdas_por_banda": [
+      0,
+      0,
+      91,
+      85
+     ],
+     "bandas_que_toca": 2
+    },
+    "h24": {
+     "celdas_vistas": 99,
+     "celdas_por_banda": [
+      2,
+      64,
+      33,
+      0
+     ],
+     "bandas_que_toca": 3
+    }
+   }
+  }
+ },
+ "comparacion_con_la_muestra": {
+  "H2": {
+   "muestra": "T07_escalera_X5-Y10",
+   "pitch_de_la_muestra": 55,
+   "celdas_vistas_en_la_muestra": 863,
+   "celdas_vistas_a_71": 748,
+   "celdas_vistas_en_las_dos": 603,
+   "celdas_que_cambian_de_banda": 135,
+   "porcentaje_que_cambia": 22.4,
+   "banda_del_heroe_muestra_recalculada": 1,
+   "misma_celda_del_heroe": true,
+   "porcentaje_por_banda_recalculado": [
+    22.83,
+    33.5,
+    26.92,
+    16.75
+   ]
+  },
+  "H3": {
+   "muestra": "T02_mirador_X4",
+   "pitch_de_la_muestra": 55,
+   "celdas_vistas_en_la_muestra": 1609,
+   "celdas_vistas_a_71": 1707,
+   "celdas_vistas_en_las_dos": 1418,
+   "celdas_que_cambian_de_banda": 518,
+   "porcentaje_que_cambia": 36.5,
+   "banda_del_heroe_muestra_recalculada": 1,
+   "misma_celda_del_heroe": true,
+   "porcentaje_por_banda_recalculado": [
+    10.86,
+    31.45,
+    31.02,
+    26.66
+   ]
+  },
+  "H4": {
+   "muestra": "T16_codo_rutaJ",
+   "pitch_de_la_muestra": 45,
+   "celdas_vistas_en_la_muestra": 1100,
+   "celdas_vistas_a_71": 1107,
+   "celdas_vistas_en_las_dos": 651,
+   "celdas_que_cambian_de_banda": 456,
+   "porcentaje_que_cambia": 70.0,
+   "banda_del_heroe_muestra_recalculada": null,
+   "misma_celda_del_heroe": false,
+   "porcentaje_por_banda_recalculado": [
+    17.75,
+    29.64,
+    36.2,
+    16.41
+   ]
+  }
+ },
+ "H3_quebrada": {
+  "X4_por_banda": [
+   0,
+   78,
+   9,
+   0
+  ],
+  "franja_alta_por_banda": [
+   1,
+   262,
+   30,
+   0
+  ],
+  "cara_norte_de_la_franja_(filas_35_39)_por_banda": [
+   0,
+   13,
+   67,
+   0
+  ],
+  "bloque_norte_(pisos_filas_<35)_por_banda": [
+   0,
+   0,
+   211,
+   331
+  ]
+ },
+ "global_a25_de_la_muestra_recalculado_sin_volver_a_correr_la_red": {
+  "porcentaje_por_banda": [
+   13.6,
+   13.42,
+   35.75,
+   37.24
+  ],
+  "celdas_caminables_visibles": 1109,
+  "celdas_vistas": 2321,
+  "fila_media_por_banda": [
+   75.9,
+   37.8,
+   12.8,
+   null
+  ],
+  "celdas_por_banda": [
+   1004,
+   1269,
+   48,
+   0
+  ],
+  "franja_alta_por_banda": [
+   90,
+   376,
+   0,
+   0
+  ],
+  "hub25_por_banda": [
+   90,
+   0,
+   0,
+   0
+  ]
+ },
+ "muestra": [
+  {
+   "archivo": "a55/g05_mirador.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T01_mirador_X5",
+   "numero_en_la_muestra": 1,
+   "pitch": 55,
+   "tipo": "mirador",
+   "celda_del_heroe": [
+    40,
+    7
+   ],
+   "grupo": 5,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "X5",
+   "sha256": "7ab5987acd0872e5afd1bfacca3d7f77900081e667a38a7cc5fc3841456089a3",
+   "porcentaje_por_banda": [
+    13.94,
+    23.54,
+    41.74,
+    20.78
+   ],
+   "gris_medio_por_banda": [
+    185.8,
+    128.5,
+    67.4,
+    17.2
+   ],
+   "banda_del_heroe": 1,
+   "celdas_caminables_visibles": 557,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 271,
+    "35": 361,
+    "45": 454,
+    "55": 544
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a55/g04_mirador.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T02_mirador_X4",
+   "numero_en_la_muestra": 2,
+   "pitch": 55,
+   "tipo": "mirador",
+   "celda_del_heroe": [
+    40,
+    28
+   ],
+   "grupo": 4,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "X4",
+   "sha256": "325aec93f9aabb4536936efc804fbf29aedc87c2576e0f611b0b78dd06d5a2b0",
+   "porcentaje_por_banda": [
+    10.86,
+    31.45,
+    31.02,
+    26.66
+   ],
+   "gris_medio_por_banda": [
+    188.5,
+    119.0,
+    50.0,
+    19.9
+   ],
+   "banda_del_heroe": 1,
+   "celdas_caminables_visibles": 870,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 383,
+    "35": 511,
+    "45": 710,
+    "55": 851
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a55/g06_mirador.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T03_mirador_X6",
+   "numero_en_la_muestra": 3,
+   "pitch": 55,
+   "tipo": "mirador",
+   "celda_del_heroe": [
+    40,
+    39
+   ],
+   "grupo": 6,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "X6",
+   "sha256": "a069905310e3fa9c1c2ac3b95076b6db4cc9021b9d85fe21576d2291d11f43f6",
+   "porcentaje_por_banda": [
+    13.51,
+    24.84,
+    45.82,
+    15.83
+   ],
+   "gris_medio_por_banda": [
+    201.3,
+    131.4,
+    58.8,
+    19.8
+   ],
+   "banda_del_heroe": 1,
+   "celdas_caminables_visibles": 788,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 256,
+    "35": 450,
+    "45": 634,
+    "55": 767
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a45/g25_mirador.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T04_mirador_hub25",
+   "numero_en_la_muestra": 4,
+   "pitch": 45,
+   "tipo": "mirador",
+   "celda_del_heroe": [
+    81,
+    28
+   ],
+   "grupo": 25,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "h25",
+   "sha256": "02d7048362e0551f38611ca003a004050913456971fd76ce9bfe4840a579b430",
+   "porcentaje_por_banda": [
+    13.92,
+    21.31,
+    51.17,
+    13.6
+   ],
+   "gris_medio_por_banda": [
+    201.6,
+    151.7,
+    80.6,
+    28.6
+   ],
+   "banda_del_heroe": 1,
+   "celdas_caminables_visibles": 1409,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 799,
+    "35": 1119,
+    "45": 1392,
+    "55": 1325
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a45/g19_escalera.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T05_escalera_Y14",
+   "numero_en_la_muestra": 5,
+   "pitch": 45,
+   "tipo": "escalera",
+   "celda_del_heroe": [
+    63,
+    20
+   ],
+   "grupo": 19,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "h19",
+   "sha256": "ea6c02a89587c6e2cd48ef834b8b3bada25fdf5096af6211f82321a319eef773",
+   "porcentaje_por_banda": [
+    8.18,
+    29.16,
+    43.43,
+    19.22
+   ],
+   "gris_medio_por_banda": [
+    212.2,
+    122.5,
+    86.7,
+    42.4
+   ],
+   "banda_del_heroe": 2,
+   "celdas_caminables_visibles": 1033,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 684,
+    "35": 839,
+    "45": 1018,
+    "55": 967
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a45/g20_escalera.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T06_escalera_Y15",
+   "numero_en_la_muestra": 6,
+   "pitch": 45,
+   "tipo": "escalera",
+   "celda_del_heroe": [
+    63,
+    36
+   ],
+   "grupo": 20,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "h20",
+   "sha256": "9a2d059cd906e07bcbf623f05b1e81c138642757e221a28b69429228cdbe4362",
+   "porcentaje_por_banda": [
+    6.8,
+    36.37,
+    46.59,
+    10.23
+   ],
+   "gris_medio_por_banda": [
+    227.0,
+    124.9,
+    86.4,
+    31.2
+   ],
+   "banda_del_heroe": 2,
+   "celdas_caminables_visibles": 1036,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 661,
+    "35": 850,
+    "45": 1019,
+    "55": 1001
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a55/g10_escalera.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T07_escalera_X5-Y10",
+   "numero_en_la_muestra": 7,
+   "pitch": 55,
+   "tipo": "escalera",
+   "celda_del_heroe": [
+    51,
+    4
+   ],
+   "grupo": 10,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "Y10",
+   "sha256": "210a204dae73a974889d37762e33e1206884be84769ed62469baa1e46a14e76b",
+   "porcentaje_por_banda": [
+    22.83,
+    33.5,
+    26.92,
+    16.75
+   ],
+   "gris_medio_por_banda": [
+    198.4,
+    148.7,
+    86.6,
+    28.8
+   ],
+   "banda_del_heroe": 1,
+   "celdas_caminables_visibles": 565,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 447,
+    "35": 433,
+    "45": 505,
+    "55": 563
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a55/g11_escalera.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T08_escalera_X6-g11",
+   "numero_en_la_muestra": 8,
+   "pitch": 55,
+   "tipo": "escalera",
+   "celda_del_heroe": [
+    50,
+    48
+   ],
+   "grupo": 11,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "g11",
+   "sha256": "4aef45c99941b90a4e6554d277f247cdc5cc7b489969f64dcfbc4d6558678add",
+   "porcentaje_por_banda": [
+    16.73,
+    33.19,
+    32.7,
+    17.38
+   ],
+   "gris_medio_por_banda": [
+    181.9,
+    128.1,
+    77.5,
+    23.2
+   ],
+   "banda_del_heroe": 2,
+   "celdas_caminables_visibles": 583,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 344,
+    "35": 315,
+    "45": 439,
+    "55": 577
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a55/g12_escalera.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T09_escalera_Y12",
+   "numero_en_la_muestra": 9,
+   "pitch": 55,
+   "tipo": "escalera",
+   "celda_del_heroe": [
+    41,
+    12
+   ],
+   "grupo": 12,
+   "grupo_de_puente_o_gate": true,
+   "tipo_de_celda": "puente",
+   "sala": "puente/gate",
+   "sha256": "484674e349608c56931e2de502627564a6ee0145fdd465ad2faaeedee1ff459d",
+   "porcentaje_por_banda": [
+    12.41,
+    29.47,
+    40.03,
+    18.09
+   ],
+   "gris_medio_por_banda": [
+    196.4,
+    126.2,
+    64.8,
+    16.2
+   ],
+   "banda_del_heroe": 1,
+   "celdas_caminables_visibles": 677,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 323,
+    "35": 405,
+    "45": 543,
+    "55": 673
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a55/g13_escalera.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T10_escalera_Y13",
+   "numero_en_la_muestra": 10,
+   "pitch": 55,
+   "tipo": "escalera",
+   "celda_del_heroe": [
+    41,
+    44
+   ],
+   "grupo": 13,
+   "grupo_de_puente_o_gate": true,
+   "tipo_de_celda": "puente",
+   "sala": "puente/gate",
+   "sha256": "973218d9291f7cb5b192dc50ac52cea8ec6c2bd3c588381332a6acd77536f66a",
+   "porcentaje_por_banda": [
+    12.69,
+    26.89,
+    42.65,
+    17.77
+   ],
+   "gris_medio_por_banda": [
+    188.2,
+    117.4,
+    53.8,
+    17.9
+   ],
+   "banda_del_heroe": 1,
+   "celdas_caminables_visibles": 649,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 178,
+    "35": 326,
+    "45": 497,
+    "55": 645
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a45/g09_escalera.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T11_escalera_X9",
+   "numero_en_la_muestra": 11,
+   "pitch": 45,
+   "tipo": "escalera",
+   "celda_del_heroe": [
+    88,
+    35
+   ],
+   "grupo": 9,
+   "grupo_de_puente_o_gate": true,
+   "tipo_de_celda": "puente",
+   "sala": "escalera",
+   "sha256": "36e56c212d60cf3367706232985b07dcdec4f6df4894b237dea0f7bd4e7cf12b",
+   "porcentaje_por_banda": [
+    11.37,
+    15.85,
+    29.59,
+    43.19
+   ],
+   "gris_medio_por_banda": [
+    238.7,
+    175.6,
+    115.5,
+    40.0
+   ],
+   "banda_del_heroe": 1,
+   "celdas_caminables_visibles": 1036,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 628,
+    "35": 918,
+    "45": 1022,
+    "55": 914
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a35/g10_codo.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T12_codo_rutaI_J_cofre2",
+   "numero_en_la_muestra": 12,
+   "pitch": 35,
+   "tipo": "codo",
+   "celda_del_heroe": [
+    83,
+    6
+   ],
+   "grupo": 10,
+   "grupo_de_puente_o_gate": true,
+   "tipo_de_celda": "gate (grupo de la sala vecina de menor numero: [10, 23])",
+   "sala": "puente/gate",
+   "sha256": "24fd773efecbb3cff6cd30f5737f564ec12a0410cb2e9386997c2d6793b33e43",
+   "porcentaje_por_banda": [
+    16.68,
+    17.77,
+    24.52,
+    41.03
+   ],
+   "gris_medio_por_banda": [
+    224.5,
+    147.5,
+    80.3,
+    29.0
+   ],
+   "banda_del_heroe": null,
+   "celdas_caminables_visibles": 741,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 561,
+    "35": 733,
+    "45": 693,
+    "55": 615
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a35/g16_gate.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T13_gate_rutaI_J_cofre2",
+   "numero_en_la_muestra": 13,
+   "pitch": 35,
+   "tipo": "gate",
+   "celda_del_heroe": [
+    88,
+    19
+   ],
+   "grupo": 16,
+   "grupo_de_puente_o_gate": true,
+   "tipo_de_celda": "gate (grupo de la sala vecina de menor numero: [16, 23])",
+   "sala": "puente/gate",
+   "sha256": "637090662afe11ee85b06ce7308cf2a273da9eb662bb259ba47b072b71175738",
+   "porcentaje_por_banda": [
+    15.58,
+    14.09,
+    29.61,
+    40.71
+   ],
+   "gris_medio_por_banda": [
+    237.4,
+    201.1,
+    119.0,
+    37.3
+   ],
+   "banda_del_heroe": 2,
+   "celdas_caminables_visibles": 842,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 545,
+    "35": 827,
+    "45": 718,
+    "55": 768
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a45/g19_gate.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T14_gate_rutaI_cofre2",
+   "numero_en_la_muestra": 14,
+   "pitch": 45,
+   "tipo": "gate",
+   "celda_del_heroe": [
+    72,
+    25
+   ],
+   "grupo": 19,
+   "grupo_de_puente_o_gate": true,
+   "tipo_de_celda": "gate (grupo de la sala vecina de menor numero: [19])",
+   "sala": "puente/gate",
+   "sha256": "5f142e89ed121c9457099814a5af1d302421cd25f899fe37f6e32f70e5e87e7e",
+   "porcentaje_por_banda": [
+    16.25,
+    19.19,
+    46.97,
+    17.58
+   ],
+   "gris_medio_por_banda": [
+    201.2,
+    144.5,
+    68.4,
+    23.4
+   ],
+   "banda_del_heroe": 2,
+   "celdas_caminables_visibles": 1114,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 659,
+    "35": 943,
+    "45": 1111,
+    "55": 995
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a55/g06_codo.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T15_codo_rutaJ_cofre2",
+   "numero_en_la_muestra": 15,
+   "pitch": 55,
+   "tipo": "codo",
+   "celda_del_heroe": [
+    49,
+    31
+   ],
+   "grupo": 6,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "X6",
+   "sha256": "799bcaee202d13feff55eb036e9f4e2cef26c0c6afaefa3e2d11ee4aaf59e73e",
+   "porcentaje_por_banda": [
+    8.04,
+    28.42,
+    28.44,
+    35.1
+   ],
+   "gris_medio_por_banda": [
+    211.8,
+    151.5,
+    89.8,
+    16.7
+   ],
+   "banda_del_heroe": 1,
+   "celdas_caminables_visibles": 1044,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 477,
+    "35": 620,
+    "45": 843,
+    "55": 1033
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a45/g11_codo.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "T16_codo_rutaJ",
+   "numero_en_la_muestra": 16,
+   "pitch": 45,
+   "tipo": "codo",
+   "celda_del_heroe": [
+    83,
+    51
+   ],
+   "grupo": 11,
+   "grupo_de_puente_o_gate": false,
+   "tipo_de_celda": "piso de sala",
+   "sala": "g11",
+   "sha256": "1c7f9e0627c340f3f00e680fd3d660ac2020de6bc2fabc9a1595848e6bbe8570",
+   "porcentaje_por_banda": [
+    17.75,
+    29.64,
+    36.2,
+    16.41
+   ],
+   "gris_medio_por_banda": [
+    192.3,
+    102.4,
+    50.9,
+    20.0
+   ],
+   "banda_del_heroe": null,
+   "celdas_caminables_visibles": 735,
+   "cuenta_celdas_visibles_por_pitch": {
+    "25": 540,
+    "35": 705,
+    "45": 727,
+    "55": 659
+   },
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "a25/global.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "G0_cam6",
+   "pitch": 25,
+   "camara": "Cam 6 (FOV 30, pitch 25, yaw 0, desde el sur), encuadre del nivel entero",
+   "sha256": "cd53af03f26d12acb1b0543f9a3a9a6ae6c7517dec72372a08adbf7064266a65",
+   "porcentaje_por_banda": [
+    13.6,
+    13.42,
+    35.75,
+    37.24
+   ],
+   "gris_medio_por_banda": [
+    211.4,
+    136.8,
+    65.2,
+    15.9
+   ],
+   "celdas_caminables_visibles": 1109,
+   "corridas": "una sola (sin hash de dos corridas)"
+  },
+  {
+   "archivo": "snes/global.png",
+   "origen": "muestra paso 7, prompt anterior",
+   "clave_original": "G0_snes",
+   "pitch": 71,
+   "camara": "ortografica 71 grados, yaw 0, desde el sur",
+   "sha256": "c53a2a6e5d4164a66e6f99967b30024277890123effe839dd44c76d39d2340d4",
+   "porcentaje_por_banda": [
+    15.45,
+    14.91,
+    37.25,
+    32.39
+   ],
+   "gris_medio_por_banda": [
+    237.7,
+    186.4,
+    151.5,
+    122.4
+   ],
+   "celdas_caminables_visibles": 2646,
+   "corridas": "una sola (sin hash de dos corridas)"
+  }
+ ],
+ "tomas_de_la_muestra_perdidas": [],
+ "composicion_de_la_muestra": {
+  "celdas_base": 2321,
+  "celdas_de_tomas_locales": 2465,
+  "celdas_que_cambian_de_banda": 1705
+ },
+ "entorno": {
+  "torch": "2.14.1+cu130",
+  "timm": "0.6.12",
+  "numpy": "2.2.6",
+  "cv2": "5.1.0"
+ },
+ "aviso": "la muestra se corrio una vez; las 5 tomas a 71 grados se corrieron dos veces con los mismos hashes (HASHES_vessel_profundidad.txt)"
+}
