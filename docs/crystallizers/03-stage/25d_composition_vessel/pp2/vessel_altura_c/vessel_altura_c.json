@@ -1,0 +1,669 @@
+{
+ "base": "02fb290",
+ "lectura": {
+  "hub_25": "sube a nivel 1, se traslada 4 celdas al norte (piso entero, 90 celdas); X9 se reencamina en recto: hueco nuevo filas 87-89, columnas 32-36 y los gates del lado de hub 24 se conservan; la escalera ocupa todo el pasillo (7 x 3) y baja de oeste a este",
+  "altura": "H = 4 celdas; nivel 1 = 6 de estructura + 1 de adornos = 7; baranda 2; banda en planta 5",
+  "destino_J": "la salida de J se mueve con el piso de hub 25 (31, 86) -> (31, 82)"
+ },
+ "celdas_de_piso_que_cambian": {
+  "total": 80,
+  "solo_hub_25": true,
+  "salas_distintas_de_25_con_celdas_cambiadas": 0
+ },
+ "hub_25": {
+  "celdas_antes": 90,
+  "celdas_despues": 90,
+  "desplazamiento_hacia_el_norte_(celdas)": 4,
+  "filas_antes": [
+   85,
+   94
+  ],
+  "filas_despues": [
+   81,
+   90
+  ],
+  "columnas": [
+   24,
+   33
+  ],
+  "forma_igual_trasladada": true
+ },
+ "por_que_4": {
+  "fila_del_muro_externo_al_sur_de_25": 95,
+  "fila_inferior_de_25_antes": 94,
+  "filas_libres_al_sur_antes": 0,
+  "desplazamiento_necesario_para_5_celdas_de_banda": 5,
+  "tope_del_brief": 4,
+  "filas_libres_al_sur_con_4": 4,
+  "banda_sur_que_falta_con_4": 1
+ },
+ "distancia_cheb_de_25_a_cada_sala_antes_despues": {
+  "Y16": [
+   3,
+   3
+  ],
+  "h19": [
+   9,
+   5
+  ],
+  "h20": [
+   9,
+   5
+  ],
+  "h23": [
+   4,
+   4
+  ],
+  "h24": [
+   4,
+   4
+  ]
+ },
+ "muro_exterior_igual": {
+  "OUTER_cambia": 0,
+  "WRAP_cambia": 0
+ },
+ "escalera_X9": {
+  "filas": [
+   87,
+   89
+  ],
+  "columnas": [
+   32,
+   38
+  ],
+  "largo": 7,
+  "ancho": 3,
+  "eje": "horizontal",
+  "sentido_de_bajada": "de oeste (hub 25, nivel 1, columna 32) a este (hub 24, nivel 0, columna 38)",
+  "rectangular": true,
+  "celdas": 21,
+  "antes": "hueco L de 25 celdas + 14 de gates (filas 87-93, columnas 31-40)",
+  "despues_hueco_nuevo": "filas 87-89, columnas 32-36 + gates del lado de hub 24 (filas 87-89, columnas 37-39)"
+ },
+ "otros_gates_de_25": [],
+ "escaleras_despues": [
+  {
+   "n": 1,
+   "nombre": "Y12",
+   "eje": "vertical",
+   "largo": 5,
+   "ancho": 4,
+   "caja_y": [
+    35,
+    39
+   ],
+   "caja_x": [
+    11,
+    14
+   ],
+   "rectangular": true
+  },
+  {
+   "n": 2,
+   "nombre": "Y13",
+   "eje": "vertical",
+   "largo": 5,
+   "ancho": 4,
+   "caja_y": [
+    35,
+    39
+   ],
+   "caja_x": [
+    43,
+    46
+   ],
+   "rectangular": true
+  },
+  {
+   "n": 3,
+   "nombre": "X6-g11",
+   "eje": "vertical",
+   "largo": 2,
+   "ancho": 3,
+   "caja_y": [
+    46,
+    47
+   ],
+   "caja_x": [
+    47,
+    49
+   ],
+   "rectangular": true
+  },
+  {
+   "n": 4,
+   "nombre": "X5-Y10",
+   "eje": "vertical",
+   "largo": 2,
+   "ancho": 3,
+   "caja_y": [
+    47,
+    48
+   ],
+   "caja_x": [
+    3,
+    5
+   ],
+   "rectangular": true
+  },
+  {
+   "n": 5,
+   "nombre": "Y14",
+   "eje": "vertical",
+   "largo": 5,
+   "ancho": 4,
+   "caja_y": [
+    56,
+    60
+   ],
+   "caja_x": [
+    19,
+    22
+   ],
+   "rectangular": true
+  },
+  {
+   "n": 6,
+   "nombre": "Y15",
+   "eje": "vertical",
+   "largo": 5,
+   "ancho": 4,
+   "caja_y": [
+    56,
+    60
+   ],
+   "caja_x": [
+    35,
+    38
+   ],
+   "rectangular": true
+  },
+  {
+   "n": 7,
+   "nombre": "X9",
+   "eje": "horizontal",
+   "largo": 7,
+   "ancho": 3,
+   "caja_y": [
+    87,
+    89
+   ],
+   "caja_x": [
+    32,
+    38
+   ],
+   "rectangular": true
+  }
+ ],
+ "pares_de_escaleras_despues": [
+  {
+   "par": "Y12 (1) - Y13 (2)",
+   "celdas_libres_entre_cajas": 28,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y12 (1) - X6-g11 (3)",
+   "celdas_libres_entre_cajas": 32,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y12 (1) - X5-Y10 (4)",
+   "celdas_libres_entre_cajas": 7,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y12 (1) - Y14 (5)",
+   "celdas_libres_entre_cajas": 16,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y12 (1) - Y15 (6)",
+   "celdas_libres_entre_cajas": 20,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y12 (1) - X9 (7)",
+   "celdas_libres_entre_cajas": 47,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y13 (2) - X6-g11 (3)",
+   "celdas_libres_entre_cajas": 6,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y13 (2) - X5-Y10 (4)",
+   "celdas_libres_entre_cajas": 37,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y13 (2) - Y14 (5)",
+   "celdas_libres_entre_cajas": 20,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y13 (2) - Y15 (6)",
+   "celdas_libres_entre_cajas": 16,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y13 (2) - X9 (7)",
+   "celdas_libres_entre_cajas": 47,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "X6-g11 (3) - X5-Y10 (4)",
+   "celdas_libres_entre_cajas": 41,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "X6-g11 (3) - Y14 (5)",
+   "celdas_libres_entre_cajas": 24,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "X6-g11 (3) - Y15 (6)",
+   "celdas_libres_entre_cajas": 8,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "X6-g11 (3) - X9 (7)",
+   "celdas_libres_entre_cajas": 39,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "X5-Y10 (4) - Y14 (5)",
+   "celdas_libres_entre_cajas": 13,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "X5-Y10 (4) - Y15 (6)",
+   "celdas_libres_entre_cajas": 29,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "X5-Y10 (4) - X9 (7)",
+   "celdas_libres_entre_cajas": 38,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y14 (5) - Y15 (6)",
+   "celdas_libres_entre_cajas": 12,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y14 (5) - X9 (7)",
+   "celdas_libres_entre_cajas": 26,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y15 (6) - X9 (7)",
+   "celdas_libres_entre_cajas": 26,
+   "se_miran": false,
+   "pegadas": false
+  }
+ ],
+ "pares_que_se_miran_o_estan_pegados": [],
+ "separacion_minima_entre_cajas_de_escalera": 6,
+ "X9_vs_otras_escaleras": [
+  {
+   "par": "Y12 (1) - X9 (7)",
+   "celdas_libres_entre_cajas": 47,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y13 (2) - X9 (7)",
+   "celdas_libres_entre_cajas": 47,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "X6-g11 (3) - X9 (7)",
+   "celdas_libres_entre_cajas": 39,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "X5-Y10 (4) - X9 (7)",
+   "celdas_libres_entre_cajas": 38,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y14 (5) - X9 (7)",
+   "celdas_libres_entre_cajas": 26,
+   "se_miran": false,
+   "pegadas": false
+  },
+  {
+   "par": "Y15 (6) - X9 (7)",
+   "celdas_libres_entre_cajas": 26,
+   "se_miran": false,
+   "pegadas": false
+  }
+ ],
+ "ninguna_escalera_diagonal_ni_sobre_muro_minimo": {
+  "rectangulares": true,
+  "sobre_muro_minimo": 0
+ },
+ "banda_pisa_piso_puente_o_gate": 0,
+ "banda_de_25_por_lado": {
+  "N": {
+   "aristas_con_banda": 8,
+   "profundidad_minima": 4,
+   "profundidad_maxima": 5,
+   "aristas_con_banda_corta": 6,
+   "falta_celdas_(max)": 1,
+   "otras_aristas": {
+    "muro_minimo": 2
+   }
+  },
+  "S": {
+   "aristas_con_banda": 7,
+   "profundidad_minima": 4,
+   "profundidad_maxima": 4,
+   "aristas_con_banda_corta": 7,
+   "falta_celdas_(max)": 1,
+   "otras_aristas": {
+    "escalera_o_gate": 3
+   }
+  },
+  "W": {
+   "aristas_con_banda": 0,
+   "profundidad_minima": null,
+   "profundidad_maxima": null,
+   "aristas_con_banda_corta": 0,
+   "falta_celdas_(max)": 0,
+   "otras_aristas": {
+    "muro_minimo": 10
+   }
+  },
+  "E": {
+   "aristas_con_banda": 7,
+   "profundidad_minima": 1,
+   "profundidad_maxima": 5,
+   "aristas_con_banda_corta": 6,
+   "falta_celdas_(max)": 4,
+   "otras_aristas": {
+    "escalera_o_gate": 3
+   }
+  }
+ },
+ "celdas_de_banda": {
+  "total_despues": 471,
+  "total_antes_6b": 313,
+  "banda_nueva_alrededor_de_25": 158
+ },
+ "piso_decorativo_restante": {
+  "antes": 695,
+  "despues": 619
+ },
+ "espejo_de_la_banda": {
+  "total_antes_despues": [
+   102,
+   150
+  ],
+  "zona_de_25_(filas_76+)_antes_despues": [
+   0,
+   48
+  ],
+  "piso_de_25_vs_su_espejo_antes_despues": [
+   20,
+   20
+  ],
+  "centro_de_25_columna": [
+   28.08888888888889,
+   28.08888888888889
+  ],
+  "eje": 28.5
+ },
+ "perimetro_de_25": {
+  "perimetro": 40,
+  "por_clase": {
+   "escalera": 4,
+   "gate_o_muesca": 2,
+   "cerrado": 34
+  },
+  "fraccion_cerrada": 0.85
+ },
+ "astar_antes_(6b)": {
+  "I": {
+   "alcanzable": true,
+   "pasos": 116,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    14,
+    19
+   ],
+   "igual_a_la_guia_D": true,
+   "cambios_de_nivel": 2,
+   "por_escalera": 2,
+   "celdas_de_escalera_en_la_ruta": 7,
+   "cambios_directos_sin_escalera": [],
+   "cruza_X9": null
+  },
+  "J": {
+   "alcanzable": true,
+   "pasos": 216,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    11,
+    24,
+    9,
+    25
+   ],
+   "igual_a_la_guia_D": true,
+   "cambios_de_nivel": 2,
+   "por_escalera": 2,
+   "celdas_de_escalera_en_la_ruta": 4,
+   "cambios_directos_sin_escalera": [],
+   "cruza_X9": true
+  },
+  "cofre2": {
+   "alcanzable": true,
+   "pasos": 142,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    15,
+    20
+   ],
+   "igual_a_la_guia_D": true,
+   "cambios_de_nivel": 2,
+   "por_escalera": 2,
+   "celdas_de_escalera_en_la_ruta": 7,
+   "cambios_directos_sin_escalera": [],
+   "cruza_X9": null
+  }
+ },
+ "astar_despues": {
+  "I": {
+   "alcanzable": true,
+   "pasos": 116,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    14,
+    19
+   ],
+   "igual_a_la_guia_D": true,
+   "cambios_de_nivel": 2,
+   "por_escalera": 2,
+   "celdas_de_escalera_en_la_ruta": 7,
+   "cambios_directos_sin_escalera": [],
+   "cruza_X9": null
+  },
+  "J": {
+   "alcanzable": true,
+   "pasos": 212,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    11,
+    24,
+    9,
+    25
+   ],
+   "igual_a_la_guia_D": true,
+   "cambios_de_nivel": 3,
+   "por_escalera": 3,
+   "celdas_de_escalera_en_la_ruta": 9,
+   "cambios_directos_sin_escalera": [],
+   "cruza_X9": true
+  },
+  "cofre2": {
+   "alcanzable": true,
+   "pasos": 142,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    15,
+    20
+   ],
+   "igual_a_la_guia_D": true,
+   "cambios_de_nivel": 2,
+   "por_escalera": 2,
+   "celdas_de_escalera_en_la_ruta": 7,
+   "cambios_directos_sin_escalera": [],
+   "cruza_X9": null
+  }
+ },
+ "astar_despues_con_el_destino_J_sin_mover_(31,86)": {
+  "I": {
+   "alcanzable": true,
+   "pasos": 116,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    14,
+    19
+   ],
+   "igual_a_la_guia_D": true,
+   "cambios_de_nivel": 2,
+   "por_escalera": 2,
+   "celdas_de_escalera_en_la_ruta": 7,
+   "cambios_directos_sin_escalera": [],
+   "cruza_X9": null
+  },
+  "J": {
+   "alcanzable": true,
+   "pasos": 208,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    11,
+    24,
+    9,
+    25
+   ],
+   "igual_a_la_guia_D": true,
+   "cambios_de_nivel": 3,
+   "por_escalera": 3,
+   "celdas_de_escalera_en_la_ruta": 9,
+   "cambios_directos_sin_escalera": [],
+   "cruza_X9": true
+  },
+  "cofre2": {
+   "alcanzable": true,
+   "pasos": 142,
+   "grupos": [
+    16,
+    23,
+    10,
+    5,
+    4,
+    6,
+    15,
+    20
+   ],
+   "igual_a_la_guia_D": true,
+   "cambios_de_nivel": 2,
+   "por_escalera": 2,
+   "celdas_de_escalera_en_la_ruta": 7,
+   "cambios_directos_sin_escalera": [],
+   "cruza_X9": null
+  }
+ },
+ "G_cerrada_antes_despues": [
+  true,
+  true
+ ],
+ "astar_guia_D": {
+  "I": 116,
+  "J": 216,
+  "cofre2": 142
+ },
+ "destino_J": {
+  "antes": [
+   31,
+   86
+  ],
+  "despues": [
+   31,
+   82
+  ],
+  "nota": "la salida se mueve con el piso de hub 25"
+ },
+ "nivel_1": {
+  "pisos": 594,
+  "muescas": 48
+ },
+ "altura": {
+  "H_celdas": 4,
+  "nivel_1_estructura": 6,
+  "adornos": 1,
+  "total": 7,
+  "baranda": 2,
+  "banda_en_planta": 5
+ }
+}
