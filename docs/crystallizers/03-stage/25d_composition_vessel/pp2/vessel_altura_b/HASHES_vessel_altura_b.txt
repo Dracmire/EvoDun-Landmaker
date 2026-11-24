@@ -1,0 +1,5 @@
+# dos corridas del script dieron los mismos hashes (sha256)
+c5cbfd75cbff6e8f4bb00a0b0a43f0372c16e26f69632aa8c6ac46e723852a99  planta.png
+4cec4ea1c09fc2c084e40042f5b02556390df531583c19e9434cb8595007477a  vista.png
+ab52dbc33d10af9d19cc425b3ce6f50473f9b391f77a3974497d5ee1587857dc  detalle_ala_derecha.png
+c544a4f9425b72c0cecefc98bc7707580be6e0782f1c7f95b39dcb0b1a803d92  vessel_altura_b.json
