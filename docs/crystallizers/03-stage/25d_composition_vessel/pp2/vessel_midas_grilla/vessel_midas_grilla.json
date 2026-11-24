@@ -1,0 +1,2766 @@
+{
+ "base": "46a8add",
+ "escena": "la del paso 8e / 8i, sin cambios",
+ "camara": {
+  "tipo": "perspectiva",
+  "fov_vertical_grados": 30,
+  "pitch_grados": 71,
+  "yaw_grados": 0,
+  "desde": "sur",
+  "desplazamiento_de_lente": 0,
+  "tamano_px": [
+   512,
+   448
+  ],
+  "apunta_a": "los pies del heroe (heroe centrado)",
+  "distancia_D1_celdas": 68.9683,
+  "factor": 1.32
+ },
+ "grilla": {
+  "paso_celdas": 8,
+  "inicio": [
+   4,
+   4
+  ],
+  "puntos": 91,
+  "filas": [
+   4,
+   12,
+   20,
+   28,
+   36,
+   44,
+   52,
+   60,
+   68,
+   76,
+   84,
+   92,
+   100
+  ],
+  "columnas": [
+   4,
+   12,
+   20,
+   28,
+   36,
+   44,
+   52
+  ],
+  "caminable": "celdas de piso de nivel 0 o 1, muesca, gate, puente y escalera (WALK de la escena)",
+  "casos": {
+   "en_su_celda": 47,
+   "movido": 20,
+   "saltado": 24
+  },
+  "tomas": 67,
+  "regla": "en su celda si es caminable; si no, la celda caminable mas cercana a <= 3 celdas (Chebyshev; empate: menor distancia euclidiana, luego fila y columna menores); si no hay ninguna, se salta"
+ },
+ "puntos": {
+  "P12_20": {
+   "punto_(fila,columna)": [
+    12,
+    20
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    12,
+    20
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 0,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    20.5,
+    34.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P12_28": {
+   "punto_(fila,columna)": [
+    12,
+    28
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    12,
+    28
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 0,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    28.5,
+    34.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P12_36": {
+   "punto_(fila,columna)": [
+    12,
+    36
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    12,
+    36
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 0,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    36.5,
+    34.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     17,
+     34
+    ],
+    [
+     17,
+     35
+    ],
+    [
+     17,
+     36
+    ]
+   ]
+  },
+  "P12_44": {
+   "punto_(fila,columna)": [
+    12,
+    44
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    11,
+    41
+   ],
+   "distancia_chebyshev": 3,
+   "sala": 0,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    41.5,
+    33.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     12,
+     41
+    ],
+    [
+     12,
+     42
+    ],
+    [
+     12,
+     43
+    ],
+    [
+     12,
+     44
+    ],
+    [
+     12,
+     45
+    ],
+    [
+     13,
+     41
+    ],
+    [
+     13,
+     42
+    ],
+    [
+     13,
+     43
+    ],
+    [
+     13,
+     44
+    ],
+    [
+     13,
+     45
+    ],
+    [
+     14,
+     41
+    ],
+    [
+     14,
+     42
+    ],
+    [
+     15,
+     41
+    ],
+    [
+     15,
+     42
+    ],
+    [
+     16,
+     41
+    ],
+    [
+     16,
+     42
+    ]
+   ]
+  },
+  "P20_4": {
+   "punto_(fila,columna)": [
+    20,
+    4
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    21,
+    4
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 17,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    4.5,
+    43.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P20_12": {
+   "punto_(fila,columna)": [
+    20,
+    12
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    20,
+    12
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 17,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    12.5,
+    42.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P20_20": {
+   "punto_(fila,columna)": [
+    20,
+    20
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    20,
+    20
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 17,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    20.5,
+    42.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P20_28": {
+   "punto_(fila,columna)": [
+    20,
+    28
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    23,
+    28
+   ],
+   "distancia_chebyshev": 3,
+   "sala": 3,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    28.5,
+    45.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P20_36": {
+   "punto_(fila,columna)": [
+    20,
+    36
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    20,
+    36
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 18,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    36.5,
+    42.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P20_44": {
+   "punto_(fila,columna)": [
+    20,
+    44
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    20,
+    44
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 18,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    44.5,
+    42.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P20_52": {
+   "punto_(fila,columna)": [
+    20,
+    52
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    21,
+    52
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 18,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    52.5,
+    43.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P28_4": {
+   "punto_(fila,columna)": [
+    28,
+    4
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    28,
+    4
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 17,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    4.5,
+    50.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P28_12": {
+   "punto_(fila,columna)": [
+    28,
+    12
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    28,
+    12
+   ],
+   "distancia_chebyshev": 0,
+   "sala": -1,
+   "tipo_de_celda": 4,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    12.5,
+    50.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P28_20": {
+   "punto_(fila,columna)": [
+    28,
+    20
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    28,
+    20
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 17,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    20.5,
+    50.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P28_28": {
+   "punto_(fila,columna)": [
+    28,
+    28
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    28,
+    28
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 3,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    28.5,
+    50.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P28_36": {
+   "punto_(fila,columna)": [
+    28,
+    36
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    28,
+    36
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 18,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    36.5,
+    50.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P28_44": {
+   "punto_(fila,columna)": [
+    28,
+    44
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    28,
+    44
+   ],
+   "distancia_chebyshev": 0,
+   "sala": -1,
+   "tipo_de_celda": 4,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    44.5,
+    50.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P28_52": {
+   "punto_(fila,columna)": [
+    28,
+    52
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    28,
+    52
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 18,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    52.5,
+    50.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P36_12": {
+   "punto_(fila,columna)": [
+    36,
+    12
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    36,
+    12
+   ],
+   "distancia_chebyshev": 0,
+   "sala": -1,
+   "tipo_de_celda": 6,
+   "z_de_los_pies": 4.200000000000001,
+   "camara_C": [
+    12.5,
+    58.954,
+    69.411
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P36_28": {
+   "punto_(fila,columna)": [
+    36,
+    28
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    34,
+    28
+   ],
+   "distancia_chebyshev": 2,
+   "sala": 3,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    28.5,
+    56.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P36_36": {
+   "punto_(fila,columna)": [
+    36,
+    36
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    34,
+    33
+   ],
+   "distancia_chebyshev": 3,
+   "sala": 3,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    33.5,
+    56.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P36_44": {
+   "punto_(fila,columna)": [
+    36,
+    44
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    36,
+    44
+   ],
+   "distancia_chebyshev": 0,
+   "sala": -1,
+   "tipo_de_celda": 6,
+   "z_de_los_pies": 4.200000000000001,
+   "camara_C": [
+    44.5,
+    58.954,
+    69.411
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P44_4": {
+   "punto_(fila,columna)": [
+    44,
+    4
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    44,
+    4
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 5,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    4.5,
+    66.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P44_12": {
+   "punto_(fila,columna)": [
+    44,
+    12
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    44,
+    12
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 5,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    12.5,
+    66.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P44_20": {
+   "punto_(fila,columna)": [
+    44,
+    20
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    44,
+    20
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 5,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    20.5,
+    66.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P44_28": {
+   "punto_(fila,columna)": [
+    44,
+    28
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    44,
+    28
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 4,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    28.5,
+    66.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     48,
+     27
+    ],
+    [
+     48,
+     28
+    ],
+    [
+     48,
+     29
+    ],
+    [
+     48,
+     30
+    ],
+    [
+     49,
+     27
+    ],
+    [
+     49,
+     28
+    ],
+    [
+     49,
+     29
+    ],
+    [
+     49,
+     30
+    ]
+   ]
+  },
+  "P44_36": {
+   "punto_(fila,columna)": [
+    44,
+    36
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    44,
+    37
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 6,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    37.5,
+    66.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P44_44": {
+   "punto_(fila,columna)": [
+    44,
+    44
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    44,
+    44
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 6,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    44.5,
+    66.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     48,
+     41
+    ],
+    [
+     48,
+     42
+    ],
+    [
+     48,
+     43
+    ],
+    [
+     48,
+     44
+    ],
+    [
+     49,
+     41
+    ],
+    [
+     49,
+     42
+    ],
+    [
+     49,
+     43
+    ],
+    [
+     49,
+     44
+    ]
+   ]
+  },
+  "P44_52": {
+   "punto_(fila,columna)": [
+    44,
+    52
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    44,
+    52
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 11,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    52.5,
+    66.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P52_4": {
+   "punto_(fila,columna)": [
+    52,
+    4
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    52,
+    4
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 10,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    4.5,
+    74.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P52_12": {
+   "punto_(fila,columna)": [
+    52,
+    12
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    52,
+    12
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 5,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    12.5,
+    74.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P52_20": {
+   "punto_(fila,columna)": [
+    52,
+    20
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    52,
+    20
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 5,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    20.5,
+    74.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P52_28": {
+   "punto_(fila,columna)": [
+    52,
+    28
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    52,
+    27
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 5,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    27.5,
+    74.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P52_36": {
+   "punto_(fila,columna)": [
+    52,
+    36
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    52,
+    36
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 6,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    36.5,
+    74.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P52_44": {
+   "punto_(fila,columna)": [
+    52,
+    44
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    52,
+    44
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 11,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    44.5,
+    74.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     57,
+     43
+    ],
+    [
+     57,
+     44
+    ],
+    [
+     57,
+     45
+    ],
+    [
+     57,
+     46
+    ],
+    [
+     57,
+     47
+    ],
+    [
+     57,
+     48
+    ]
+   ]
+  },
+  "P52_52": {
+   "punto_(fila,columna)": [
+    52,
+    52
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    52,
+    52
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 11,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    52.5,
+    74.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P60_4": {
+   "punto_(fila,columna)": [
+    60,
+    4
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    60,
+    4
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 10,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    4.5,
+    82.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P60_12": {
+   "punto_(fila,columna)": [
+    60,
+    12
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    61,
+    12
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 19,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    12.5,
+    83.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P60_20": {
+   "punto_(fila,columna)": [
+    60,
+    20
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    60,
+    20
+   ],
+   "distancia_chebyshev": 0,
+   "sala": -1,
+   "tipo_de_celda": 6,
+   "z_de_los_pies": 1.3999999999999997,
+   "camara_C": [
+    20.5,
+    82.954,
+    66.611
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P60_28": {
+   "punto_(fila,columna)": [
+    60,
+    28
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    61,
+    27
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 19,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    27.5,
+    83.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P60_36": {
+   "punto_(fila,columna)": [
+    60,
+    36
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    60,
+    36
+   ],
+   "distancia_chebyshev": 0,
+   "sala": -1,
+   "tipo_de_celda": 6,
+   "z_de_los_pies": 1.3999999999999997,
+   "camara_C": [
+    36.5,
+    82.954,
+    66.611
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P60_44": {
+   "punto_(fila,columna)": [
+    60,
+    44
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    61,
+    44
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 20,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    44.5,
+    83.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P60_52": {
+   "punto_(fila,columna)": [
+    60,
+    52
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    60,
+    52
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 11,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    52.5,
+    82.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P68_4": {
+   "punto_(fila,columna)": [
+    68,
+    4
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    68,
+    4
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 10,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    4.5,
+    90.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P68_12": {
+   "punto_(fila,columna)": [
+    68,
+    12
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    68,
+    12
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 19,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    12.5,
+    90.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P68_20": {
+   "punto_(fila,columna)": [
+    68,
+    20
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    68,
+    20
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 19,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    20.5,
+    90.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P68_28": {
+   "punto_(fila,columna)": [
+    68,
+    28
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    68,
+    27
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 19,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    27.5,
+    90.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P68_36": {
+   "punto_(fila,columna)": [
+    68,
+    36
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    68,
+    36
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 20,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    36.5,
+    90.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P68_44": {
+   "punto_(fila,columna)": [
+    68,
+    44
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    68,
+    44
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 20,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    44.5,
+    90.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P68_52": {
+   "punto_(fila,columna)": [
+    68,
+    52
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    68,
+    52
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 11,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    52.5,
+    90.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P76_4": {
+   "punto_(fila,columna)": [
+    76,
+    4
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    76,
+    4
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 10,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    4.5,
+    98.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P76_20": {
+   "punto_(fila,columna)": [
+    76,
+    20
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    76,
+    22
+   ],
+   "distancia_chebyshev": 2,
+   "sala": 19,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    22.5,
+    98.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     81,
+     22
+    ],
+    [
+     81,
+     23
+    ],
+    [
+     84,
+     22
+    ],
+    [
+     84,
+     23
+    ],
+    [
+     85,
+     22
+    ],
+    [
+     85,
+     23
+    ],
+    [
+     86,
+     22
+    ],
+    [
+     86,
+     23
+    ]
+   ]
+  },
+  "P76_28": {
+   "punto_(fila,columna)": [
+    76,
+    28
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    76,
+    27
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 19,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    27.5,
+    98.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P76_36": {
+   "punto_(fila,columna)": [
+    76,
+    36
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    76,
+    35
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 20,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    35.5,
+    98.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     81,
+     35
+    ]
+   ]
+  },
+  "P76_52": {
+   "punto_(fila,columna)": [
+    76,
+    52
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    76,
+    52
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 11,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    52.5,
+    98.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P84_4": {
+   "punto_(fila,columna)": [
+    84,
+    4
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    84,
+    4
+   ],
+   "distancia_chebyshev": 0,
+   "sala": -1,
+   "tipo_de_celda": 4,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    4.5,
+    106.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     86,
+     1
+    ],
+    [
+     86,
+     2
+    ],
+    [
+     86,
+     3
+    ],
+    [
+     86,
+     4
+    ],
+    [
+     86,
+     5
+    ],
+    [
+     86,
+     6
+    ],
+    [
+     86,
+     7
+    ],
+    [
+     87,
+     1
+    ],
+    [
+     87,
+     2
+    ],
+    [
+     87,
+     3
+    ],
+    [
+     87,
+     4
+    ],
+    [
+     87,
+     5
+    ],
+    [
+     87,
+     6
+    ],
+    [
+     87,
+     7
+    ],
+    [
+     87,
+     8
+    ],
+    [
+     88,
+     1
+    ],
+    [
+     88,
+     2
+    ],
+    [
+     88,
+     3
+    ],
+    [
+     88,
+     4
+    ],
+    [
+     88,
+     5
+    ],
+    [
+     88,
+     6
+    ],
+    [
+     88,
+     7
+    ],
+    [
+     88,
+     8
+    ]
+   ]
+  },
+  "P84_12": {
+   "punto_(fila,columna)": [
+    84,
+    12
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    84,
+    12
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 23,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    12.5,
+    106.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P84_20": {
+   "punto_(fila,columna)": [
+    84,
+    20
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    84,
+    20
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 23,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    20.5,
+    106.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     85,
+     19
+    ],
+    [
+     85,
+     20
+    ],
+    [
+     85,
+     21
+    ],
+    [
+     86,
+     19
+    ],
+    [
+     86,
+     20
+    ],
+    [
+     86,
+     21
+    ]
+   ]
+  },
+  "P84_28": {
+   "punto_(fila,columna)": [
+    84,
+    28
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    84,
+    28
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 25,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    28.5,
+    106.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P84_36": {
+   "punto_(fila,columna)": [
+    84,
+    36
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    84,
+    37
+   ],
+   "distancia_chebyshev": 1,
+   "sala": 24,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    37.5,
+    106.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P84_44": {
+   "punto_(fila,columna)": [
+    84,
+    44
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    84,
+    44
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 24,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    44.5,
+    106.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P84_52": {
+   "punto_(fila,columna)": [
+    84,
+    52
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    84,
+    52
+   ],
+   "distancia_chebyshev": 0,
+   "sala": -1,
+   "tipo_de_celda": 4,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    52.5,
+    106.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     86,
+     50
+    ],
+    [
+     86,
+     51
+    ],
+    [
+     86,
+     52
+    ],
+    [
+     86,
+     53
+    ],
+    [
+     86,
+     54
+    ],
+    [
+     86,
+     55
+    ],
+    [
+     86,
+     56
+    ],
+    [
+     87,
+     49
+    ],
+    [
+     87,
+     50
+    ],
+    [
+     87,
+     51
+    ],
+    [
+     87,
+     52
+    ],
+    [
+     87,
+     53
+    ],
+    [
+     87,
+     54
+    ],
+    [
+     87,
+     55
+    ],
+    [
+     87,
+     56
+    ],
+    [
+     88,
+     49
+    ],
+    [
+     88,
+     50
+    ],
+    [
+     88,
+     51
+    ],
+    [
+     88,
+     52
+    ],
+    [
+     88,
+     53
+    ],
+    [
+     88,
+     54
+    ],
+    [
+     88,
+     55
+    ],
+    [
+     88,
+     56
+    ]
+   ]
+  },
+  "P92_12": {
+   "punto_(fila,columna)": [
+    92,
+    12
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    90,
+    12
+   ],
+   "distancia_chebyshev": 2,
+   "sala": 23,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    12.5,
+    112.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     91,
+     7
+    ],
+    [
+     91,
+     8
+    ],
+    [
+     91,
+     9
+    ],
+    [
+     91,
+     10
+    ],
+    [
+     91,
+     11
+    ],
+    [
+     91,
+     12
+    ],
+    [
+     91,
+     13
+    ],
+    [
+     91,
+     14
+    ],
+    [
+     91,
+     15
+    ],
+    [
+     91,
+     16
+    ],
+    [
+     92,
+     7
+    ],
+    [
+     92,
+     8
+    ],
+    [
+     92,
+     9
+    ],
+    [
+     92,
+     10
+    ],
+    [
+     92,
+     11
+    ],
+    [
+     92,
+     12
+    ],
+    [
+     92,
+     13
+    ],
+    [
+     92,
+     14
+    ],
+    [
+     92,
+     15
+    ]
+   ]
+  },
+  "P92_20": {
+   "punto_(fila,columna)": [
+    92,
+    20
+   ],
+   "caso": "en_su_celda",
+   "celda_usada_(fila,columna)": [
+    92,
+    20
+   ],
+   "distancia_chebyshev": 0,
+   "sala": 16,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    20.5,
+    114.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     95,
+     13
+    ],
+    [
+     95,
+     14
+    ],
+    [
+     95,
+     15
+    ],
+    [
+     95,
+     16
+    ],
+    [
+     95,
+     17
+    ],
+    [
+     95,
+     18
+    ],
+    [
+     95,
+     19
+    ],
+    [
+     95,
+     20
+    ],
+    [
+     95,
+     21
+    ],
+    [
+     95,
+     22
+    ],
+    [
+     95,
+     23
+    ],
+    [
+     95,
+     24
+    ],
+    [
+     95,
+     25
+    ],
+    [
+     95,
+     26
+    ],
+    [
+     95,
+     27
+    ],
+    [
+     95,
+     28
+    ],
+    [
+     95,
+     29
+    ],
+    [
+     95,
+     30
+    ],
+    [
+     95,
+     31
+    ],
+    [
+     95,
+     32
+    ],
+    [
+     95,
+     33
+    ],
+    [
+     95,
+     34
+    ],
+    [
+     95,
+     35
+    ],
+    [
+     95,
+     36
+    ],
+    [
+     95,
+     37
+    ],
+    [
+     95,
+     38
+    ],
+    [
+     95,
+     39
+    ],
+    [
+     95,
+     40
+    ],
+    [
+     95,
+     41
+    ],
+    [
+     95,
+     42
+    ],
+    [
+     95,
+     43
+    ],
+    [
+     95,
+     44
+    ],
+    [
+     96,
+     13
+    ],
+    [
+     96,
+     14
+    ],
+    [
+     96,
+     15
+    ],
+    [
+     96,
+     16
+    ],
+    [
+     96,
+     17
+    ],
+    [
+     96,
+     18
+    ],
+    [
+     96,
+     19
+    ],
+    [
+     96,
+     20
+    ],
+    [
+     96,
+     21
+    ],
+    [
+     96,
+     22
+    ],
+    [
+     96,
+     23
+    ],
+    [
+     96,
+     24
+    ],
+    [
+     96,
+     25
+    ],
+    [
+     96,
+     26
+    ],
+    [
+     96,
+     27
+    ],
+    [
+     96,
+     28
+    ],
+    [
+     96,
+     29
+    ],
+    [
+     96,
+     30
+    ],
+    [
+     96,
+     31
+    ],
+    [
+     96,
+     32
+    ],
+    [
+     96,
+     33
+    ],
+    [
+     96,
+     34
+    ],
+    [
+     96,
+     35
+    ],
+    [
+     96,
+     36
+    ],
+    [
+     96,
+     37
+    ],
+    [
+     96,
+     38
+    ],
+    [
+     96,
+     39
+    ],
+    [
+     96,
+     40
+    ],
+    [
+     96,
+     41
+    ],
+    [
+     96,
+     42
+    ],
+    [
+     96,
+     43
+    ],
+    [
+     96,
+     44
+    ]
+   ]
+  },
+  "P92_28": {
+   "punto_(fila,columna)": [
+    92,
+    28
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    90,
+    28
+   ],
+   "distancia_chebyshev": 2,
+   "sala": 25,
+   "tipo_de_celda": 2,
+   "z_de_los_pies": 14.0,
+   "camara_C": [
+    28.5,
+    112.954,
+    79.211
+   ],
+   "muros_cortados_(fila,columna)": []
+  },
+  "P92_36": {
+   "punto_(fila,columna)": [
+    92,
+    36
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    89,
+    36
+   ],
+   "distancia_chebyshev": 3,
+   "sala": -1,
+   "tipo_de_celda": 6,
+   "z_de_los_pies": 4.999999999999999,
+   "camara_C": [
+    36.5,
+    111.954,
+    70.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     90,
+     36
+    ]
+   ]
+  },
+  "P92_44": {
+   "punto_(fila,columna)": [
+    92,
+    44
+   ],
+   "caso": "movido",
+   "celda_usada_(fila,columna)": [
+    90,
+    44
+   ],
+   "distancia_chebyshev": 2,
+   "sala": 24,
+   "tipo_de_celda": 1,
+   "z_de_los_pies": 0.0,
+   "camara_C": [
+    44.5,
+    112.954,
+    65.211
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     91,
+     43
+    ],
+    [
+     91,
+     44
+    ],
+    [
+     91,
+     45
+    ],
+    [
+     91,
+     46
+    ],
+    [
+     91,
+     47
+    ],
+    [
+     91,
+     48
+    ],
+    [
+     91,
+     49
+    ],
+    [
+     91,
+     50
+    ],
+    [
+     92,
+     43
+    ],
+    [
+     92,
+     44
+    ],
+    [
+     92,
+     45
+    ],
+    [
+     92,
+     46
+    ],
+    [
+     92,
+     47
+    ],
+    [
+     92,
+     48
+    ],
+    [
+     92,
+     49
+    ],
+    [
+     92,
+     50
+    ],
+    [
+     93,
+     43
+    ],
+    [
+     93,
+     44
+    ],
+    [
+     94,
+     43
+    ],
+    [
+     94,
+     44
+    ],
+    [
+     95,
+     13
+    ],
+    [
+     95,
+     14
+    ],
+    [
+     95,
+     15
+    ],
+    [
+     95,
+     16
+    ],
+    [
+     95,
+     17
+    ],
+    [
+     95,
+     18
+    ],
+    [
+     95,
+     19
+    ],
+    [
+     95,
+     20
+    ],
+    [
+     95,
+     21
+    ],
+    [
+     95,
+     22
+    ],
+    [
+     95,
+     23
+    ],
+    [
+     95,
+     24
+    ],
+    [
+     95,
+     25
+    ],
+    [
+     95,
+     26
+    ],
+    [
+     95,
+     27
+    ],
+    [
+     95,
+     28
+    ],
+    [
+     95,
+     29
+    ],
+    [
+     95,
+     30
+    ],
+    [
+     95,
+     31
+    ],
+    [
+     95,
+     32
+    ],
+    [
+     95,
+     33
+    ],
+    [
+     95,
+     34
+    ],
+    [
+     95,
+     35
+    ],
+    [
+     95,
+     36
+    ],
+    [
+     95,
+     37
+    ],
+    [
+     95,
+     38
+    ],
+    [
+     95,
+     39
+    ],
+    [
+     95,
+     40
+    ],
+    [
+     95,
+     41
+    ],
+    [
+     95,
+     42
+    ],
+    [
+     95,
+     43
+    ],
+    [
+     95,
+     44
+    ]
+   ]
+  }
+ },
+ "puntos_saltados": [
+  [
+   4,
+   4
+  ],
+  [
+   4,
+   12
+  ],
+  [
+   4,
+   20
+  ],
+  [
+   4,
+   28
+  ],
+  [
+   4,
+   36
+  ],
+  [
+   4,
+   44
+  ],
+  [
+   4,
+   52
+  ],
+  [
+   12,
+   4
+  ],
+  [
+   12,
+   12
+  ],
+  [
+   12,
+   52
+  ],
+  [
+   36,
+   4
+  ],
+  [
+   36,
+   20
+  ],
+  [
+   36,
+   52
+  ],
+  [
+   76,
+   12
+  ],
+  [
+   76,
+   44
+  ],
+  [
+   92,
+   4
+  ],
+  [
+   92,
+   52
+  ],
+  [
+   100,
+   4
+  ],
+  [
+   100,
+   12
+  ],
+  [
+   100,
+   20
+  ],
+  [
+   100,
+   28
+  ],
+  [
+   100,
+   36
+  ],
+  [
+   100,
+   44
+  ],
+  [
+   100,
+   52
+  ]
+ ],
+ "muros_cortados_total": 14,
+ "cobertura": {
+  "subceldas_con_dato": 24624,
+  "n_max": 31,
+  "histograma_de_n_(subceldas_por_n)": {
+   "1": 42,
+   "2": 240,
+   "3": 465,
+   "4": 522,
+   "5": 618,
+   "6": 486,
+   "7": 1000,
+   "8": 581,
+   "9": 1217,
+   "10": 1026,
+   "11": 449,
+   "12": 710,
+   "13": 1545,
+   "14": 1027,
+   "15": 1168,
+   "16": 1209,
+   "17": 934,
+   "18": 1348,
+   "19": 695,
+   "20": 1055,
+   "21": 948,
+   "22": 1067,
+   "23": 1259,
+   "24": 803,
+   "25": 1232,
+   "26": 1291,
+   "27": 704,
+   "28": 527,
+   "29": 290,
+   "30": 156,
+   "31": 10
+  }
+ },
+ "sumas": {
+  "S": "suma de x",
+  "promedio": "S / n",
+  "Q": "sqrt(suma de x^2)",
+  "cobertura": "n = tomas que ven la subcelda",
+  "arrays": "suma.npy, promedio.npy, cuadrados.npy y cobertura.npy de 216 x 114 (NaN = n 0)",
+  "escalas_de_las_imagenes": {
+   "S": [
+    0,
+    31
+   ],
+   "promedio": [
+    0,
+    1
+   ],
+   "Q": [
+    0,
+    5.57
+   ],
+   "cobertura": [
+    0,
+    31
+   ]
+  }
+ },
+ "kmeans_de_las_sumas": {
+  "N": 4,
+  "seed": 0,
+  "entrada": "valores de la suma, una dimension, solo subceldas con n >= 1",
+  "orden": "banda 0 = el centro mas alto",
+  "por_suma": {
+   "suma": {
+    "subceldas_con_dato": 24624,
+    "centros_de_las_bandas_(banda_0_la_mas_alta)": [
+     13.332509,
+     8.575121,
+     5.467806,
+     2.67714
+    ],
+    "subceldas_por_banda": [
+     2545,
+     6637,
+     7383,
+     8059
+    ]
+   },
+   "promedio": {
+    "subceldas_con_dato": 24624,
+    "centros_de_las_bandas_(banda_0_la_mas_alta)": [
+     0.752473,
+     0.534774,
+     0.375125,
+     0.210338
+    ],
+    "subceldas_por_banda": [
+     2416,
+     5544,
+     9201,
+     7463
+    ]
+   },
+   "cuadrados": {
+    "subceldas_con_dato": 24624,
+    "centros_de_las_bandas_(banda_0_la_mas_alta)": [
+     2.816064,
+     2.126521,
+     1.4877,
+     0.918237
+    ],
+    "subceldas_por_banda": [
+     3518,
+     7061,
+     7283,
+     6762
+    ]
+   }
+  }
+ },
+ "superposicion_sobre_la_base_del_8c": {
+  "base_igual_a_base_muros_piso_c.png": true,
+  "recorte_A": "banda de muro si mas de la mitad de sus subceldas cae sobre gris; rojo = sus subceldas blancas conectadas (4-vecinas) con sus subceldas grises",
+  "por_suma": {
+   "suma": {
+    "fraccion_de_gris_por_banda": [
+     {
+      "banda": 0,
+      "subceldas": 2545,
+      "sobre_gris": 1412,
+      "sobre_blanco": 1133,
+      "fraccion_gris": 0.5548
+     },
+     {
+      "banda": 1,
+      "subceldas": 6637,
+      "sobre_gris": 2629,
+      "sobre_blanco": 3762,
+      "fraccion_gris": 0.3961
+     },
+     {
+      "banda": 2,
+      "subceldas": 7383,
+      "sobre_gris": 1755,
+      "sobre_blanco": 4696,
+      "fraccion_gris": 0.2377
+     },
+     {
+      "banda": 3,
+      "subceldas": 8059,
+      "sobre_gris": 840,
+      "sobre_blanco": 3461,
+      "fraccion_gris": 0.1042
+     }
+    ],
+    "recorte_A": {
+     "bandas_de_muro_(mas_de_la_mitad_sobre_gris)": [
+      0
+     ],
+     "subceldas_rojas": 1105
+    }
+   },
+   "promedio": {
+    "fraccion_de_gris_por_banda": [
+     {
+      "banda": 0,
+      "subceldas": 2416,
+      "sobre_gris": 949,
+      "sobre_blanco": 607,
+      "fraccion_gris": 0.3928
+     },
+     {
+      "banda": 1,
+      "subceldas": 5544,
+      "sobre_gris": 2151,
+      "sobre_blanco": 2202,
+      "fraccion_gris": 0.388
+     },
+     {
+      "banda": 2,
+      "subceldas": 9201,
+      "sobre_gris": 2558,
+      "sobre_blanco": 4543,
+      "fraccion_gris": 0.278
+     },
+     {
+      "banda": 3,
+      "subceldas": 7463,
+      "sobre_gris": 978,
+      "sobre_blanco": 5700,
+      "fraccion_gris": 0.131
+     }
+    ],
+    "recorte_A": {
+     "bandas_de_muro_(mas_de_la_mitad_sobre_gris)": [],
+     "subceldas_rojas": 0
+    }
+   },
+   "cuadrados": {
+    "fraccion_de_gris_por_banda": [
+     {
+      "banda": 0,
+      "subceldas": 3518,
+      "sobre_gris": 1854,
+      "sobre_blanco": 1625,
+      "fraccion_gris": 0.527
+     },
+     {
+      "banda": 1,
+      "subceldas": 7061,
+      "sobre_gris": 2503,
+      "sobre_blanco": 3822,
+      "fraccion_gris": 0.3545
+     },
+     {
+      "banda": 2,
+      "subceldas": 7283,
+      "sobre_gris": 1621,
+      "sobre_blanco": 4356,
+      "fraccion_gris": 0.2226
+     },
+     {
+      "banda": 3,
+      "subceldas": 6762,
+      "sobre_gris": 658,
+      "sobre_blanco": 3249,
+      "fraccion_gris": 0.0973
+     }
+    ],
+    "recorte_A": {
+     "bandas_de_muro_(mas_de_la_mitad_sobre_gris)": [
+      0
+     ],
+     "subceldas_rojas": 1609
+    }
+   }
+  }
+ }
+}
