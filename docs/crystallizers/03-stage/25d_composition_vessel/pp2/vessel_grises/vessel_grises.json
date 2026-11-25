@@ -1,0 +1,674 @@
+{
+ "base": "793e8d9",
+ "escena": "la del 8l con el muro de X3, sin luces; solo cambia el material",
+ "camara": {
+  "tipo": "perspectiva",
+  "fov_vertical_grados": 30,
+  "pitch_grados": 71,
+  "yaw_grados": 0,
+  "desde": "sur",
+  "distancia_celdas": 68.9683,
+  "tamano_px": [
+   256,
+   224
+  ],
+  "nota": "las 15 tomas por sala del metodo 1 del 8l: misma celda del heroe y mismos cortes de muro"
+ },
+ "tabla_de_grises": {
+  "base_dentro_de_la_silueta": 0.1,
+  "base_fuera": 0.0,
+  "formula": "gris = (base + h) / 12",
+  "h": {
+   "piso_nivel_0": 0.0,
+   "muro_sobre_piso_bajo": 5.0,
+   "pilar_o_esquina_sobre_piso_bajo": 6.0,
+   "plataforma_2do_piso": 5.0,
+   "muralla_sobre_2do_piso": 8.0,
+   "pilar_o_esquina_sobre_2do_piso": 11.0,
+   "techo": 12.0
+  },
+  "curvas": {
+   "piso_y_plataforma_y_peldanos_y_caras_de_nivel_1": "h = 5 z / 14 (z en celdas; el piso es 0, la plataforma del 2.o piso 5)",
+   "muro_sobre_piso_bajo": "h sube de 0 a 5 entre z = 0 y 14",
+   "muralla_sobre_2do_piso": "h sube de 0 a 5 entre z = 0 y 14 y de 5 a 8 entre z = 14 y 28",
+   "pilar_o_esquina_sobre_piso_bajo": "h sube de 0 a 6 entre z = 0 y 14",
+   "pilar_o_esquina_sobre_2do_piso": "h sube de 0 a 5 entre z = 0 y 14 y de 5 a 11 entre z = 14 y 28",
+   "baranda": "de 5 (z = 14) a 6 (z = 18)",
+   "muros_con_otras_alturas": "se interpola con las mismas curvas por su z de tope",
+   "heroe": "blanco (1,0)",
+   "fuera_de_la_torre_y_fondo_vacio": "0"
+  },
+  "suave": "en cada cara vertical visible h sigue la curva por la z del punto; las tapas llevan h de su tope",
+  "escalonada": "caras y tapa de cada objeto llevan h de su tope; cada peldano es un objeto",
+  "muros_sin_cara_visible": "su unica parte visible es la tapa, que ya lleva el valor de su tope en las dos variantes"
+ },
+ "esquinas_y_pilares": {
+  "celdas_de_esquina_o_pilar_en_el_vessel": 272,
+  "celdas_de_muro": 1060,
+  "regla": "celdas de muro donde se cruzan un brazo horizontal (tramo de 3 o mas celdas de muro) y uno vertical (tramo de 3 o mas): las uniones en L, T y cruz; no se distinguen los pilares del pase de muros, todo se trata como esquina (clase 8)",
+  "esquinas_sobre_piso_bajo_(Z = 14)": 247,
+  "esquinas_sobre_el_2do_piso_(Z = 28)": 25
+ },
+ "midas": {
+  "entrada": "la imagen de 256 x 224 tal cual (normalizacion y orden de canales del modelo, sin el redimensionado: el tensor es 224 x 256); mismo modelo y pesos",
+  "tiempos": "tiempos_midas.json"
+ },
+ "color_50": "la toma a color del 8l (tomas/color/m1_habitaciones/persp71_D1/R<sala>.png, panel izquierdo de 512 x 448) reducida a 256 x 224 con promedio de area; ids y celda de esta variante salen del mismo trazado de rayos a 256 x 224 y gris = NaN",
+ "clases_de_ids": "0 nada, 1 piso nivel 0, 2 piso nivel 1, 3 cara o banda, 4 peldano, 5 muro, 6 baranda, 7 heroe, 8 pilar o esquina",
+ "tomas": {
+  "R0": {
+   "celda_del_heroe_(fila,columna)": [
+    13,
+    28
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 8811,
+    "1": 21971,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 21387,
+    "6": 0,
+    "7": 372,
+    "8": 4803
+   }
+  },
+  "R3": {
+   "celda_del_heroe_(fila,columna)": [
+    28,
+    28
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     33,
+     22
+    ],
+    [
+     33,
+     23
+    ],
+    [
+     33,
+     24
+    ],
+    [
+     33,
+     25
+    ],
+    [
+     33,
+     26
+    ],
+    [
+     33,
+     27
+    ],
+    [
+     33,
+     28
+    ],
+    [
+     33,
+     29
+    ],
+    [
+     33,
+     30
+    ],
+    [
+     33,
+     31
+    ],
+    [
+     33,
+     32
+    ],
+    [
+     33,
+     33
+    ],
+    [
+     33,
+     34
+    ],
+    [
+     33,
+     35
+    ]
+   ],
+   "pixeles_por_clase": {
+    "0": 661,
+    "1": 15743,
+    "2": 10399,
+    "3": 434,
+    "4": 624,
+    "5": 24954,
+    "6": 1261,
+    "7": 372,
+    "8": 2896
+   }
+  },
+  "R4": {
+   "celda_del_heroe_(fila,columna)": [
+    43,
+    29
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     48,
+     27
+    ],
+    [
+     48,
+     28
+    ],
+    [
+     48,
+     29
+    ],
+    [
+     48,
+     30
+    ]
+   ],
+   "pixeles_por_clase": {
+    "0": 19,
+    "1": 10454,
+    "2": 15161,
+    "3": 3349,
+    "4": 1939,
+    "5": 21897,
+    "6": 1415,
+    "7": 372,
+    "8": 2738
+   }
+  },
+  "R5": {
+   "celda_del_heroe_(fila,columna)": [
+    48,
+    15
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 8641,
+    "1": 9812,
+    "2": 9937,
+    "3": 3495,
+    "4": 2377,
+    "5": 19593,
+    "6": 1452,
+    "7": 372,
+    "8": 1665
+   }
+  },
+  "R6": {
+   "celda_del_heroe_(fila,columna)": [
+    47,
+    39
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 8474,
+    "1": 12690,
+    "2": 7540,
+    "3": 2193,
+    "4": 2242,
+    "5": 20745,
+    "6": 1181,
+    "7": 363,
+    "8": 1916
+   }
+  },
+  "R10": {
+   "celda_del_heroe_(fila,columna)": [
+    66,
+    4
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 23897,
+    "1": 16906,
+    "2": 781,
+    "3": 3864,
+    "4": 2326,
+    "5": 8091,
+    "6": 0,
+    "7": 372,
+    "8": 1107
+   }
+  },
+  "R11": {
+   "celda_del_heroe_(fila,columna)": [
+    61,
+    52
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 22563,
+    "1": 17800,
+    "2": 320,
+    "3": 1078,
+    "4": 2215,
+    "5": 10251,
+    "6": 0,
+    "7": 372,
+    "8": 2745
+   }
+  },
+  "R16": {
+   "celda_del_heroe_(fila,columna)": [
+    91,
+    19
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     95,
+     13
+    ],
+    [
+     95,
+     14
+    ],
+    [
+     95,
+     15
+    ],
+    [
+     95,
+     16
+    ],
+    [
+     95,
+     17
+    ],
+    [
+     95,
+     18
+    ],
+    [
+     95,
+     19
+    ],
+    [
+     95,
+     20
+    ],
+    [
+     95,
+     21
+    ],
+    [
+     95,
+     22
+    ],
+    [
+     95,
+     23
+    ],
+    [
+     95,
+     24
+    ],
+    [
+     95,
+     25
+    ],
+    [
+     95,
+     26
+    ],
+    [
+     95,
+     27
+    ],
+    [
+     95,
+     28
+    ],
+    [
+     95,
+     29
+    ],
+    [
+     95,
+     30
+    ],
+    [
+     95,
+     31
+    ],
+    [
+     95,
+     32
+    ],
+    [
+     95,
+     33
+    ],
+    [
+     95,
+     34
+    ],
+    [
+     95,
+     35
+    ],
+    [
+     95,
+     36
+    ],
+    [
+     95,
+     37
+    ],
+    [
+     95,
+     38
+    ],
+    [
+     95,
+     39
+    ],
+    [
+     95,
+     40
+    ],
+    [
+     95,
+     41
+    ],
+    [
+     95,
+     42
+    ],
+    [
+     95,
+     43
+    ],
+    [
+     95,
+     44
+    ],
+    [
+     96,
+     13
+    ],
+    [
+     96,
+     14
+    ],
+    [
+     96,
+     15
+    ],
+    [
+     96,
+     16
+    ],
+    [
+     96,
+     17
+    ],
+    [
+     96,
+     18
+    ],
+    [
+     96,
+     19
+    ],
+    [
+     96,
+     20
+    ],
+    [
+     96,
+     21
+    ],
+    [
+     96,
+     22
+    ],
+    [
+     96,
+     23
+    ],
+    [
+     96,
+     24
+    ],
+    [
+     96,
+     25
+    ],
+    [
+     96,
+     26
+    ],
+    [
+     96,
+     27
+    ],
+    [
+     96,
+     28
+    ],
+    [
+     96,
+     29
+    ],
+    [
+     96,
+     30
+    ],
+    [
+     96,
+     31
+    ],
+    [
+     96,
+     32
+    ],
+    [
+     96,
+     33
+    ],
+    [
+     96,
+     34
+    ],
+    [
+     96,
+     35
+    ],
+    [
+     96,
+     36
+    ],
+    [
+     96,
+     37
+    ],
+    [
+     96,
+     38
+    ],
+    [
+     96,
+     39
+    ],
+    [
+     96,
+     40
+    ],
+    [
+     96,
+     41
+    ],
+    [
+     96,
+     42
+    ],
+    [
+     96,
+     43
+    ],
+    [
+     96,
+     44
+    ]
+   ],
+   "pixeles_por_clase": {
+    "0": 17963,
+    "1": 4581,
+    "2": 3792,
+    "3": 3488,
+    "4": 1016,
+    "5": 19413,
+    "6": 463,
+    "7": 372,
+    "8": 6256
+   }
+  },
+  "R17": {
+   "celda_del_heroe_(fila,columna)": [
+    23,
+    13
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 7559,
+    "1": 13766,
+    "2": 3381,
+    "3": 2019,
+    "4": 702,
+    "5": 25054,
+    "6": 704,
+    "7": 372,
+    "8": 3787
+   }
+  },
+  "R18": {
+   "celda_del_heroe_(fila,columna)": [
+    23,
+    44
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 12015,
+    "1": 14984,
+    "2": 2546,
+    "3": 2081,
+    "4": 702,
+    "5": 20993,
+    "6": 489,
+    "7": 372,
+    "8": 3162
+   }
+  },
+  "R19": {
+   "celda_del_heroe_(fila,columna)": [
+    67,
+    20
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 2147,
+    "1": 20459,
+    "2": 3881,
+    "3": 7727,
+    "4": 3959,
+    "5": 16108,
+    "6": 346,
+    "7": 372,
+    "8": 2345
+   }
+  },
+  "R20": {
+   "celda_del_heroe_(fila,columna)": [
+    67,
+    37
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 2205,
+    "1": 21301,
+    "2": 4146,
+    "3": 5318,
+    "4": 3635,
+    "5": 16633,
+    "6": 403,
+    "7": 372,
+    "8": 3331
+   }
+  },
+  "R23": {
+   "celda_del_heroe_(fila,columna)": [
+    85,
+    14
+   ],
+   "muros_cortados_(fila,columna)": [
+    [
+     90,
+     14
+    ],
+    [
+     90,
+     15
+    ],
+    [
+     90,
+     16
+    ]
+   ],
+   "pixeles_por_clase": {
+    "0": 16157,
+    "1": 7786,
+    "2": 2629,
+    "3": 1624,
+    "4": 201,
+    "5": 21702,
+    "6": 269,
+    "7": 372,
+    "8": 6604
+   }
+  },
+  "R24": {
+   "celda_del_heroe_(fila,columna)": [
+    85,
+    43
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 15599,
+    "1": 7944,
+    "2": 3397,
+    "3": 2120,
+    "4": 1425,
+    "5": 18573,
+    "6": 618,
+    "7": 372,
+    "8": 7296
+   }
+  },
+  "R25": {
+   "celda_del_heroe_(fila,columna)": [
+    85,
+    28
+   ],
+   "muros_cortados_(fila,columna)": [],
+   "pixeles_por_clase": {
+    "0": 5555,
+    "1": 14061,
+    "2": 2775,
+    "3": 3463,
+    "4": 1796,
+    "5": 22135,
+    "6": 490,
+    "7": 372,
+    "8": 6697
+   }
+  }
+ }
+}
