@@ -53,6 +53,4 @@ Las 15 tomas por sala del método 1 del 8l: misma celda del héroe, perspectiva 
 | `gris` | float16 (224, 256) | Valor de gris asignado por píxel (el héroe 1; el fondo 0). En `color50` es NaN: no hay gris asignado. |
 | `sala`, `heroe` | int16 | Sala y celda del héroe. |
 
-(Nota: la clase 2 no aparece en estas tomas, porque ninguna ve la tapa de un piso del 2.º piso; la franja se ve como muros y caras.)
-
 Además `tomas/R<sala>.png`: suave | escalonada | color 50 %, cada una con su MiDaS normalizado debajo (solo para mirar; el MiDaS crudo está en los `.npz`). `vessel_grises.json` guarda la tabla de valores, las esquinas, los cortes y los píxeles por clase de cada toma; los tiempos están en `tiempos_midas.json`. `HASHES_vessel_grises.txt`: dos corridas dieron los mismos hashes (sin `tiempos_midas.json`).
