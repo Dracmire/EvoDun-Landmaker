@@ -1,0 +1,1762 @@
+{
+ "celda": "8 px (un tile de 16 px = 2 celdas); heroe de 2 celdas de ancho por 3 de alto (16 x 24 px)",
+ "marco_plano": {
+  "celdas": [
+   32,
+   28
+  ],
+  "px": [
+   256,
+   224
+  ],
+  "regla": "filas r-14 a r+13 y columnas c-16 a c+15 alrededor de la celda (r, c) del heroe"
+ },
+ "huella_de_camara": {
+  "fov_vertical_grados": 30,
+  "proporcion": "8:7",
+  "pitch_grados": 71,
+  "yaw_grados": 0,
+  "desde": "sur",
+  "d0_celdas": 52.2,
+  "regla": "poligono del plano del suelo que ve la camara con el heroe (la celda) centrado en pantalla; cuenta una celda si su centro esta dentro; sin alturas ni oclusion"
+ },
+ "resultados": {
+  "vessel": {
+   "descripcion": "sala expandida aceptada (P1_R + altura, paso 6c)",
+   "grupos": {
+    "X0": 133,
+    "X3": 114,
+    "X4": 91,
+    "X5": 254,
+    "X6": 159,
+    "X9": 23,
+    "Y10": 270,
+    "g11": 366,
+    "Y12": 58,
+    "Y13": 58,
+    "Y14": 33,
+    "Y15": 33,
+    "Y16": 36,
+    "h17": 176,
+    "h18": 179,
+    "h19": 202,
+    "h20": 194,
+    "h23": 99,
+    "h24": 111,
+    "h25": 90,
+    "gates sueltos": 113
+   },
+   "salas": {
+    "X4": {
+     "geometria": {
+      "caja_filas": [
+       40,
+       48
+      ],
+      "caja_columnas": [
+       23,
+       34
+      ],
+      "alto_celdas": 9,
+      "ancho_celdas": 12,
+      "alto_px": 72,
+      "ancho_px": 96,
+      "celdas_caminables": 91,
+      "lado_mas_corto_celdas": 9,
+      "lado_mas_corto_px": 72,
+      "centroide_(x,y)": [
+       29.005,
+       43.819
+      ]
+     },
+     "heroe_celda_(fila,columna)": [
+      43,
+      29
+     ],
+     "heroe_celda_en_la_sala": true,
+     "marco_plano": {
+      "filas": [
+       29,
+       56
+      ],
+      "columnas": [
+       13,
+       44
+      ],
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 133,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 114,
+        "celdas_dentro": 54,
+        "porcentaje": 47.4
+       },
+       "X4": {
+        "celdas_del_grupo": 91,
+        "celdas_dentro": 91,
+        "porcentaje": 100.0
+       },
+       "X5": {
+        "celdas_del_grupo": 254,
+        "celdas_dentro": 166,
+        "porcentaje": 65.4
+       },
+       "X6": {
+        "celdas_del_grupo": 159,
+        "celdas_dentro": 135,
+        "porcentaje": 84.9
+       },
+       "X9": {
+        "celdas_del_grupo": 23,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 270,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "g11": {
+        "celdas_del_grupo": 366,
+        "celdas_dentro": 12,
+        "porcentaje": 3.3
+       },
+       "Y12": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 27,
+        "porcentaje": 46.6
+       },
+       "Y13": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 28,
+        "porcentaje": 48.3
+       },
+       "Y14": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 10,
+        "porcentaje": 30.3
+       },
+       "Y15": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 10,
+        "porcentaje": 30.3
+       },
+       "Y16": {
+        "celdas_del_grupo": 36,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 176,
+        "celdas_dentro": 1,
+        "porcentaje": 0.6
+       },
+       "h18": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 202,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h20": {
+        "celdas_del_grupo": 194,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 99,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 111,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "gates sueltos": {
+        "celdas_del_grupo": 113,
+        "celdas_dentro": 18,
+        "porcentaje": 15.9
+       }
+      }
+     },
+     "huella": {
+      "poligono_ground_(x,y)": [
+       [
+        11.89,
+        27.2
+       ],
+       [
+        47.11,
+        27.2
+       ],
+       [
+        44.13,
+        57.04
+       ],
+       [
+        14.87,
+        57.04
+       ]
+      ],
+      "ancho_cercano_celdas": 29.27,
+      "ancho_lejano_celdas": 35.22,
+      "profundidad_celdas": 29.84,
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 133,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 114,
+        "celdas_dentro": 74,
+        "porcentaje": 64.9
+       },
+       "X4": {
+        "celdas_del_grupo": 91,
+        "celdas_dentro": 91,
+        "porcentaje": 100.0
+       },
+       "X5": {
+        "celdas_del_grupo": 254,
+        "celdas_dentro": 150,
+        "porcentaje": 59.1
+       },
+       "X6": {
+        "celdas_del_grupo": 159,
+        "celdas_dentro": 135,
+        "porcentaje": 84.9
+       },
+       "X9": {
+        "celdas_del_grupo": 23,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 270,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "g11": {
+        "celdas_del_grupo": 366,
+        "celdas_dentro": 9,
+        "porcentaje": 2.5
+       },
+       "Y12": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 33,
+        "porcentaje": 56.9
+       },
+       "Y13": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 48,
+        "porcentaje": 82.8
+       },
+       "Y14": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 10,
+        "porcentaje": 30.3
+       },
+       "Y15": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 10,
+        "porcentaje": 30.3
+       },
+       "Y16": {
+        "celdas_del_grupo": 36,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 176,
+        "celdas_dentro": 19,
+        "porcentaje": 10.8
+       },
+       "h18": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 20,
+        "porcentaje": 11.2
+       },
+       "h19": {
+        "celdas_del_grupo": 202,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h20": {
+        "celdas_del_grupo": 194,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 99,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 111,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "gates sueltos": {
+        "celdas_del_grupo": 113,
+        "celdas_dentro": 18,
+        "porcentaje": 15.9
+       }
+      }
+     }
+    },
+    "X5": {
+     "geometria": {
+      "caja_filas": [
+       40,
+       56
+      ],
+      "caja_columnas": [
+       3,
+       27
+      ],
+      "alto_celdas": 17,
+      "ancho_celdas": 25,
+      "alto_px": 136,
+      "ancho_px": 200,
+      "celdas_caminables": 254,
+      "lado_mas_corto_celdas": 17,
+      "lado_mas_corto_px": 136,
+      "centroide_(x,y)": [
+       15.472,
+       48.039
+      ]
+     },
+     "heroe_celda_(fila,columna)": [
+      48,
+      15
+     ],
+     "heroe_celda_en_la_sala": true,
+     "marco_plano": {
+      "filas": [
+       34,
+       61
+      ],
+      "columnas": [
+       0,
+       30
+      ],
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 133,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 114,
+        "celdas_dentro": 7,
+        "porcentaje": 6.1
+       },
+       "X4": {
+        "celdas_del_grupo": 91,
+        "celdas_dentro": 62,
+        "porcentaje": 68.1
+       },
+       "X5": {
+        "celdas_del_grupo": 254,
+        "celdas_dentro": 254,
+        "porcentaje": 100.0
+       },
+       "X6": {
+        "celdas_del_grupo": 159,
+        "celdas_dentro": 6,
+        "porcentaje": 3.8
+       },
+       "X9": {
+        "celdas_del_grupo": 23,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 270,
+        "celdas_dentro": 101,
+        "porcentaje": 37.4
+       },
+       "g11": {
+        "celdas_del_grupo": 366,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y12": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 35,
+        "porcentaje": 60.3
+       },
+       "Y13": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y14": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 30,
+        "porcentaje": 90.9
+       },
+       "Y15": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y16": {
+        "celdas_del_grupo": 36,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 176,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h18": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 202,
+        "celdas_dentro": 11,
+        "porcentaje": 5.4
+       },
+       "h20": {
+        "celdas_del_grupo": 194,
+        "celdas_dentro": 1,
+        "porcentaje": 0.5
+       },
+       "h23": {
+        "celdas_del_grupo": 99,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 111,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "gates sueltos": {
+        "celdas_del_grupo": 113,
+        "celdas_dentro": 12,
+        "porcentaje": 10.6
+       }
+      }
+     },
+     "huella": {
+      "poligono_ground_(x,y)": [
+       [
+        -2.11,
+        32.2
+       ],
+       [
+        33.11,
+        32.2
+       ],
+       [
+        30.13,
+        62.04
+       ],
+       [
+        0.87,
+        62.04
+       ]
+      ],
+      "ancho_cercano_celdas": 29.27,
+      "ancho_lejano_celdas": 35.22,
+      "profundidad_celdas": 29.84,
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 133,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 114,
+        "celdas_dentro": 27,
+        "porcentaje": 23.7
+       },
+       "X4": {
+        "celdas_del_grupo": 91,
+        "celdas_dentro": 69,
+        "porcentaje": 75.8
+       },
+       "X5": {
+        "celdas_del_grupo": 254,
+        "celdas_dentro": 254,
+        "porcentaje": 100.0
+       },
+       "X6": {
+        "celdas_del_grupo": 159,
+        "celdas_dentro": 6,
+        "porcentaje": 3.8
+       },
+       "X9": {
+        "celdas_del_grupo": 23,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 270,
+        "celdas_dentro": 101,
+        "porcentaje": 37.4
+       },
+       "g11": {
+        "celdas_del_grupo": 366,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y12": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 43,
+        "porcentaje": 74.1
+       },
+       "Y13": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y14": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 30,
+        "porcentaje": 90.9
+       },
+       "Y15": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y16": {
+        "celdas_del_grupo": 36,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 176,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h18": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 202,
+        "celdas_dentro": 11,
+        "porcentaje": 5.4
+       },
+       "h20": {
+        "celdas_del_grupo": 194,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 99,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 111,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "gates sueltos": {
+        "celdas_del_grupo": 113,
+        "celdas_dentro": 13,
+        "porcentaje": 11.5
+       }
+      }
+     }
+    },
+    "X6": {
+     "geometria": {
+      "caja_filas": [
+       40,
+       56
+      ],
+      "caja_columnas": [
+       30,
+       49
+      ],
+      "alto_celdas": 17,
+      "ancho_celdas": 20,
+      "alto_px": 136,
+      "ancho_px": 160,
+      "celdas_caminables": 159,
+      "lado_mas_corto_celdas": 17,
+      "lado_mas_corto_px": 136,
+      "centroide_(x,y)": [
+       39.393,
+       47.965
+      ]
+     },
+     "heroe_celda_(fila,columna)": [
+      47,
+      39
+     ],
+     "heroe_celda_en_la_sala": true,
+     "marco_plano": {
+      "filas": [
+       33,
+       60
+      ],
+      "columnas": [
+       23,
+       54
+      ],
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 133,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 114,
+        "celdas_dentro": 20,
+        "porcentaje": 17.5
+       },
+       "X4": {
+        "celdas_del_grupo": 91,
+        "celdas_dentro": 91,
+        "porcentaje": 100.0
+       },
+       "X5": {
+        "celdas_del_grupo": 254,
+        "celdas_dentro": 35,
+        "porcentaje": 13.8
+       },
+       "X6": {
+        "celdas_del_grupo": 159,
+        "celdas_dentro": 159,
+        "porcentaje": 100.0
+       },
+       "X9": {
+        "celdas_del_grupo": 23,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 270,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "g11": {
+        "celdas_del_grupo": 366,
+        "celdas_dentro": 146,
+        "porcentaje": 39.9
+       },
+       "Y12": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y13": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 40,
+        "porcentaje": 69.0
+       },
+       "Y14": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y15": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 26,
+        "porcentaje": 78.8
+       },
+       "Y16": {
+        "celdas_del_grupo": 36,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 176,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h18": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 202,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h20": {
+        "celdas_del_grupo": 194,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 99,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 111,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "gates sueltos": {
+        "celdas_del_grupo": 113,
+        "celdas_dentro": 18,
+        "porcentaje": 15.9
+       }
+      }
+     },
+     "huella": {
+      "poligono_ground_(x,y)": [
+       [
+        21.89,
+        31.2
+       ],
+       [
+        57.11,
+        31.2
+       ],
+       [
+        54.13,
+        61.04
+       ],
+       [
+        24.87,
+        61.04
+       ]
+      ],
+      "ancho_cercano_celdas": 29.27,
+      "ancho_lejano_celdas": 35.22,
+      "profundidad_celdas": 29.84,
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 133,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 114,
+        "celdas_dentro": 40,
+        "porcentaje": 35.1
+       },
+       "X4": {
+        "celdas_del_grupo": 91,
+        "celdas_dentro": 91,
+        "porcentaje": 100.0
+       },
+       "X5": {
+        "celdas_del_grupo": 254,
+        "celdas_dentro": 27,
+        "porcentaje": 10.6
+       },
+       "X6": {
+        "celdas_del_grupo": 159,
+        "celdas_dentro": 159,
+        "porcentaje": 100.0
+       },
+       "X9": {
+        "celdas_del_grupo": 23,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 270,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "g11": {
+        "celdas_del_grupo": 366,
+        "celdas_dentro": 149,
+        "porcentaje": 40.7
+       },
+       "Y12": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y13": {
+        "celdas_del_grupo": 58,
+        "celdas_dentro": 48,
+        "porcentaje": 82.8
+       },
+       "Y14": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y15": {
+        "celdas_del_grupo": 33,
+        "celdas_dentro": 26,
+        "porcentaje": 78.8
+       },
+       "Y16": {
+        "celdas_del_grupo": 36,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 176,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h18": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 202,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h20": {
+        "celdas_del_grupo": 194,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 99,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 111,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "gates sueltos": {
+        "celdas_del_grupo": 113,
+        "celdas_dentro": 16,
+        "porcentaje": 14.2
+       }
+      }
+     }
+    }
+   }
+  },
+  "guia_E": {
+   "descripcion": "guia E original (pack_grupos.png)",
+   "grupos": {
+    "X0": 107,
+    "X1": 34,
+    "X2": 41,
+    "X3": 70,
+    "X4": 67,
+    "X5": 179,
+    "X6": 89,
+    "X9": 25,
+    "Y10": 209,
+    "g11": 298,
+    "Y12": 49,
+    "Y13": 49,
+    "Y14": 24,
+    "Y15": 24,
+    "Y16": 19,
+    "h17": 96,
+    "h18": 90,
+    "h19": 143,
+    "h20": 139,
+    "h23": 65,
+    "h24": 68,
+    "h25": 60
+   },
+   "salas": {
+    "X4": {
+     "geometria": {
+      "caja_filas": [
+       42,
+       48
+      ],
+      "caja_columnas": [
+       23,
+       34
+      ],
+      "alto_celdas": 7,
+      "ancho_celdas": 12,
+      "alto_px": 56,
+      "ancho_px": 96,
+      "celdas_caminables": 67,
+      "lado_mas_corto_celdas": 7,
+      "lado_mas_corto_px": 56,
+      "centroide_(x,y)": [
+       29.007,
+       44.828
+      ]
+     },
+     "heroe_celda_(fila,columna)": [
+      44,
+      29
+     ],
+     "heroe_celda_en_la_sala": true,
+     "marco_plano": {
+      "filas": [
+       30,
+       57
+      ],
+      "columnas": [
+       13,
+       44
+      ],
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 107,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X1": {
+        "celdas_del_grupo": 34,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X2": {
+        "celdas_del_grupo": 41,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 70,
+        "celdas_dentro": 25,
+        "porcentaje": 35.7
+       },
+       "X4": {
+        "celdas_del_grupo": 67,
+        "celdas_dentro": 67,
+        "porcentaje": 100.0
+       },
+       "X5": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 125,
+        "porcentaje": 69.8
+       },
+       "X6": {
+        "celdas_del_grupo": 89,
+        "celdas_dentro": 89,
+        "porcentaje": 100.0
+       },
+       "X9": {
+        "celdas_del_grupo": 25,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 209,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "g11": {
+        "celdas_del_grupo": 298,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y12": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 24,
+        "porcentaje": 49.0
+       },
+       "Y13": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 24,
+        "porcentaje": 49.0
+       },
+       "Y14": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 8,
+        "porcentaje": 33.3
+       },
+       "Y15": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 8,
+        "porcentaje": 33.3
+       },
+       "Y16": {
+        "celdas_del_grupo": 19,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 96,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h18": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 143,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h20": {
+        "celdas_del_grupo": 139,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 65,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 68,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 60,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       }
+      }
+     },
+     "huella": {
+      "poligono_ground_(x,y)": [
+       [
+        11.89,
+        28.2
+       ],
+       [
+        47.11,
+        28.2
+       ],
+       [
+        44.13,
+        58.04
+       ],
+       [
+        14.87,
+        58.04
+       ]
+      ],
+      "ancho_cercano_celdas": 29.27,
+      "ancho_lejano_celdas": 35.22,
+      "profundidad_celdas": 29.84,
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 107,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X1": {
+        "celdas_del_grupo": 34,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X2": {
+        "celdas_del_grupo": 41,
+        "celdas_dentro": 2,
+        "porcentaje": 4.9
+       },
+       "X3": {
+        "celdas_del_grupo": 70,
+        "celdas_dentro": 38,
+        "porcentaje": 54.3
+       },
+       "X4": {
+        "celdas_del_grupo": 67,
+        "celdas_dentro": 67,
+        "porcentaje": 100.0
+       },
+       "X5": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 115,
+        "porcentaje": 64.2
+       },
+       "X6": {
+        "celdas_del_grupo": 89,
+        "celdas_dentro": 89,
+        "porcentaje": 100.0
+       },
+       "X9": {
+        "celdas_del_grupo": 25,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 209,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "g11": {
+        "celdas_del_grupo": 298,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y12": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 29,
+        "porcentaje": 59.2
+       },
+       "Y13": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 40,
+        "porcentaje": 81.6
+       },
+       "Y14": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 8,
+        "porcentaje": 33.3
+       },
+       "Y15": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 8,
+        "porcentaje": 33.3
+       },
+       "Y16": {
+        "celdas_del_grupo": 19,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 96,
+        "celdas_dentro": 1,
+        "porcentaje": 1.0
+       },
+       "h18": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 143,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h20": {
+        "celdas_del_grupo": 139,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 65,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 68,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 60,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       }
+      }
+     }
+    },
+    "X5": {
+     "geometria": {
+      "caja_filas": [
+       42,
+       55
+      ],
+      "caja_columnas": [
+       3,
+       26
+      ],
+      "alto_celdas": 14,
+      "ancho_celdas": 24,
+      "alto_px": 112,
+      "ancho_px": 192,
+      "celdas_caminables": 179,
+      "lado_mas_corto_celdas": 14,
+      "lado_mas_corto_px": 112,
+      "centroide_(x,y)": [
+       15.534,
+       47.885
+      ]
+     },
+     "heroe_celda_(fila,columna)": [
+      47,
+      15
+     ],
+     "heroe_celda_en_la_sala": true,
+     "marco_plano": {
+      "filas": [
+       33,
+       60
+      ],
+      "columnas": [
+       0,
+       30
+      ],
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 107,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X1": {
+        "celdas_del_grupo": 34,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X2": {
+        "celdas_del_grupo": 41,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 70,
+        "celdas_dentro": 6,
+        "porcentaje": 8.6
+       },
+       "X4": {
+        "celdas_del_grupo": 67,
+        "celdas_dentro": 46,
+        "porcentaje": 68.7
+       },
+       "X5": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 179,
+        "porcentaje": 100.0
+       },
+       "X6": {
+        "celdas_del_grupo": 89,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X9": {
+        "celdas_del_grupo": 25,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 209,
+        "celdas_dentro": 72,
+        "porcentaje": 34.4
+       },
+       "g11": {
+        "celdas_del_grupo": 298,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y12": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 36,
+        "porcentaje": 73.5
+       },
+       "Y13": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y14": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 20,
+        "porcentaje": 83.3
+       },
+       "Y15": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y16": {
+        "celdas_del_grupo": 19,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 96,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h18": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 143,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h20": {
+        "celdas_del_grupo": 139,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 65,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 68,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 60,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       }
+      }
+     },
+     "huella": {
+      "poligono_ground_(x,y)": [
+       [
+        -2.11,
+        31.2
+       ],
+       [
+        33.11,
+        31.2
+       ],
+       [
+        30.13,
+        61.04
+       ],
+       [
+        0.87,
+        61.04
+       ]
+      ],
+      "ancho_cercano_celdas": 29.27,
+      "ancho_lejano_celdas": 35.22,
+      "profundidad_celdas": 29.84,
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 107,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X1": {
+        "celdas_del_grupo": 34,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X2": {
+        "celdas_del_grupo": 41,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 70,
+        "celdas_dentro": 22,
+        "porcentaje": 31.4
+       },
+       "X4": {
+        "celdas_del_grupo": 67,
+        "celdas_dentro": 51,
+        "porcentaje": 76.1
+       },
+       "X5": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 179,
+        "porcentaje": 100.0
+       },
+       "X6": {
+        "celdas_del_grupo": 89,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X9": {
+        "celdas_del_grupo": 25,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 209,
+        "celdas_dentro": 72,
+        "porcentaje": 34.4
+       },
+       "g11": {
+        "celdas_del_grupo": 298,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y12": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 44,
+        "porcentaje": 89.8
+       },
+       "Y13": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y14": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 20,
+        "porcentaje": 83.3
+       },
+       "Y15": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y16": {
+        "celdas_del_grupo": 19,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 96,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h18": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 143,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h20": {
+        "celdas_del_grupo": 139,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 65,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 68,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 60,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       }
+      }
+     }
+    },
+    "X6": {
+     "geometria": {
+      "caja_filas": [
+       42,
+       55
+      ],
+      "caja_columnas": [
+       31,
+       44
+      ],
+      "alto_celdas": 14,
+      "ancho_celdas": 14,
+      "alto_px": 112,
+      "ancho_px": 112,
+      "celdas_caminables": 89,
+      "lado_mas_corto_celdas": 14,
+      "lado_mas_corto_px": 112,
+      "centroide_(x,y)": [
+       38.017,
+       48.376
+      ]
+     },
+     "heroe_celda_(fila,columna)": [
+      48,
+      38
+     ],
+     "heroe_celda_en_la_sala": true,
+     "marco_plano": {
+      "filas": [
+       34,
+       61
+      ],
+      "columnas": [
+       22,
+       53
+      ],
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 107,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X1": {
+        "celdas_del_grupo": 34,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X2": {
+        "celdas_del_grupo": 41,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 70,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X4": {
+        "celdas_del_grupo": 67,
+        "celdas_dentro": 67,
+        "porcentaje": 100.0
+       },
+       "X5": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 27,
+        "porcentaje": 15.1
+       },
+       "X6": {
+        "celdas_del_grupo": 89,
+        "celdas_dentro": 89,
+        "porcentaje": 100.0
+       },
+       "X9": {
+        "celdas_del_grupo": 25,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 209,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "g11": {
+        "celdas_del_grupo": 298,
+        "celdas_dentro": 106,
+        "porcentaje": 35.6
+       },
+       "Y12": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y13": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 33,
+        "porcentaje": 67.3
+       },
+       "Y14": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 6,
+        "porcentaje": 25.0
+       },
+       "Y15": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 24,
+        "porcentaje": 100.0
+       },
+       "Y16": {
+        "celdas_del_grupo": 19,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 96,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h18": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 143,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h20": {
+        "celdas_del_grupo": 139,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 65,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 68,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 60,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       }
+      }
+     },
+     "huella": {
+      "poligono_ground_(x,y)": [
+       [
+        20.89,
+        32.2
+       ],
+       [
+        56.11,
+        32.2
+       ],
+       [
+        53.13,
+        62.04
+       ],
+       [
+        23.87,
+        62.04
+       ]
+      ],
+      "ancho_cercano_celdas": 29.27,
+      "ancho_lejano_celdas": 35.22,
+      "profundidad_celdas": 29.84,
+      "grupos": {
+       "X0": {
+        "celdas_del_grupo": 107,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X1": {
+        "celdas_del_grupo": 34,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X2": {
+        "celdas_del_grupo": 41,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "X3": {
+        "celdas_del_grupo": 70,
+        "celdas_dentro": 16,
+        "porcentaje": 22.9
+       },
+       "X4": {
+        "celdas_del_grupo": 67,
+        "celdas_dentro": 67,
+        "porcentaje": 100.0
+       },
+       "X5": {
+        "celdas_del_grupo": 179,
+        "celdas_dentro": 20,
+        "porcentaje": 11.2
+       },
+       "X6": {
+        "celdas_del_grupo": 89,
+        "celdas_dentro": 89,
+        "porcentaje": 100.0
+       },
+       "X9": {
+        "celdas_del_grupo": 25,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y10": {
+        "celdas_del_grupo": 209,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "g11": {
+        "celdas_del_grupo": 298,
+        "celdas_dentro": 108,
+        "porcentaje": 36.2
+       },
+       "Y12": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y13": {
+        "celdas_del_grupo": 49,
+        "celdas_dentro": 41,
+        "porcentaje": 83.7
+       },
+       "Y14": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "Y15": {
+        "celdas_del_grupo": 24,
+        "celdas_dentro": 24,
+        "porcentaje": 100.0
+       },
+       "Y16": {
+        "celdas_del_grupo": 19,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h17": {
+        "celdas_del_grupo": 96,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h18": {
+        "celdas_del_grupo": 90,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h19": {
+        "celdas_del_grupo": 143,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h20": {
+        "celdas_del_grupo": 139,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h23": {
+        "celdas_del_grupo": 65,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h24": {
+        "celdas_del_grupo": 68,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       },
+       "h25": {
+        "celdas_del_grupo": 60,
+        "celdas_dentro": 0,
+        "porcentaje": 0.0
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

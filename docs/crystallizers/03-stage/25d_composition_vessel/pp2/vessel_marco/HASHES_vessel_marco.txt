@@ -1,0 +1,5 @@
+# dos corridas del script dieron los mismos hashes (sha256)
+7bd022df954ade6d77ce690ce45c2da164aaeed89b325081c780b9ff832e3956  marco_X4.png
+c54b8018da35f83a79fe39a2e7f3edf554705149b2f94e148bbc633ef344be6f  marco_X5.png
+7053c8d5251dc87b78321a8b608d24e785ac908b5bbd69c3db52ea7c40d83344  marco_X6.png
+dc29aa8ac297e96ea405ed86da9164d56868aabfb289a97551625a8def6c03a1  vessel_marco.json
