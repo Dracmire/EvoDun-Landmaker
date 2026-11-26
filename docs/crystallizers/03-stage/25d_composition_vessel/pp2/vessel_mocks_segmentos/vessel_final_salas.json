@@ -1,0 +1,294 @@
+{
+ "origen": "volcado del plano aceptado del paso 6c (P1_R + altura): GR = id de sala de cada celda de piso (celda de 8 px, x al este, y al sur, 57 x 108); los puentes son la caja de su hueco",
+ "scene_npz_sha256": "d835d463ec2512a704c93caba7aa07faf5b4173fcd6eca804f2b9c875bb47518",
+ "base_commit": "abbecbd4e54caa59410e2069a481400037a6064b",
+ "salas": {
+  "Y10": {
+   "id_en_GR": 10,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    1,
+    49,
+    8,
+    83
+   ],
+   "caja_bordes_l_t_r_b": [
+    1,
+    49,
+    9,
+    84
+   ],
+   "celdas_de_piso": 270
+  },
+  "Y11 (g11)": {
+   "id_en_GR": 11,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    43,
+    40,
+    56,
+    85
+   ],
+   "caja_bordes_l_t_r_b": [
+    43,
+    40,
+    57,
+    86
+   ],
+   "celdas_de_piso": 366
+  },
+  "X5": {
+   "id_en_GR": 5,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    3,
+    40,
+    27,
+    56
+   ],
+   "caja_bordes_l_t_r_b": [
+    3,
+    40,
+    28,
+    57
+   ],
+   "celdas_de_piso": 254
+  },
+  "X4": {
+   "id_en_GR": 4,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    23,
+    40,
+    34,
+    48
+   ],
+   "caja_bordes_l_t_r_b": [
+    23,
+    40,
+    35,
+    49
+   ],
+   "celdas_de_piso": 91
+  },
+  "X6": {
+   "id_en_GR": 6,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    30,
+    40,
+    49,
+    56
+   ],
+   "caja_bordes_l_t_r_b": [
+    30,
+    40,
+    50,
+    57
+   ],
+   "celdas_de_piso": 159
+  },
+  "h23": {
+   "id_en_GR": 23,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    8,
+    80,
+    20,
+    90
+   ],
+   "caja_bordes_l_t_r_b": [
+    8,
+    80,
+    21,
+    91
+   ],
+   "celdas_de_piso": 99
+  },
+  "h24": {
+   "id_en_GR": 24,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    37,
+    80,
+    49,
+    91
+   ],
+   "caja_bordes_l_t_r_b": [
+    37,
+    80,
+    50,
+    92
+   ],
+   "celdas_de_piso": 111
+  },
+  "Y16": {
+   "id_en_GR": 16,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    15,
+    87,
+    21,
+    94
+   ],
+   "caja_bordes_l_t_r_b": [
+    15,
+    87,
+    22,
+    95
+   ],
+   "celdas_de_piso": 36
+  },
+  "h19": {
+   "id_en_GR": 19,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    12,
+    61,
+    27,
+    76
+   ],
+   "caja_bordes_l_t_r_b": [
+    12,
+    61,
+    28,
+    77
+   ],
+   "celdas_de_piso": 202
+  },
+  "h20": {
+   "id_en_GR": 20,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    30,
+    61,
+    45,
+    76
+   ],
+   "caja_bordes_l_t_r_b": [
+    30,
+    61,
+    46,
+    77
+   ],
+   "celdas_de_piso": 194
+  },
+  "h25": {
+   "id_en_GR": 25,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    24,
+    81,
+    33,
+    90
+   ],
+   "caja_bordes_l_t_r_b": [
+    24,
+    81,
+    34,
+    91
+   ],
+   "celdas_de_piso": 90
+  },
+  "h17+X1": {
+   "id_en_GR": 17,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    4,
+    17,
+    21,
+    29
+   ],
+   "caja_bordes_l_t_r_b": [
+    4,
+    17,
+    22,
+    30
+   ],
+   "celdas_de_piso": 176
+  },
+  "h18+X2": {
+   "id_en_GR": 18,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    36,
+    17,
+    53,
+    30
+   ],
+   "caja_bordes_l_t_r_b": [
+    36,
+    17,
+    54,
+    31
+   ],
+   "celdas_de_piso": 179
+  },
+  "X0": {
+   "id_en_GR": 0,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    16,
+    10,
+    41,
+    17
+   ],
+   "caja_bordes_l_t_r_b": [
+    16,
+    10,
+    42,
+    18
+   ],
+   "celdas_de_piso": 133
+  },
+  "X3": {
+   "id_en_GR": 3,
+   "caja_inclusiva_x0_y0_x1_y1": [
+    24,
+    23,
+    33,
+    34
+   ],
+   "caja_bordes_l_t_r_b": [
+    24,
+    23,
+    34,
+    35
+   ],
+   "celdas_de_piso": 114
+  }
+ },
+ "puentes": {
+  "Y12": {
+   "caja_inclusiva_x0_y0_x1_y1": [
+    11,
+    29,
+    14,
+    41
+   ],
+   "celdas": 52
+  },
+  "Y13": {
+   "caja_inclusiva_x0_y0_x1_y1": [
+    43,
+    30,
+    46,
+    42
+   ],
+   "celdas": 52
+  },
+  "Y14": {
+   "caja_inclusiva_x0_y0_x1_y1": [
+    19,
+    56,
+    22,
+    61
+   ],
+   "celdas": 24
+  },
+  "Y15": {
+   "caja_inclusiva_x0_y0_x1_y1": [
+    35,
+    56,
+    38,
+    61
+   ],
+   "celdas": 24
+  },
+  "X9": {
+   "caja_inclusiva_x0_y0_x1_y1": [
+    32,
+    87,
+    38,
+    89
+   ],
+   "celdas": 21
+  }
+ }
+}

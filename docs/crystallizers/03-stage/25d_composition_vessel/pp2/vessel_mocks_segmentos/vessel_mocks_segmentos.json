@@ -1,0 +1,2743 @@
+{
+ "base": "abbecbd4e54caa59410e2069a481400037a6064b",
+ "celda": "8 px; (x, y) ocupa [x, x+1) x [y, y+1); x al este, y al sur",
+ "comparacion_con_BASE": {
+  "10": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    1,
+    49,
+    9,
+    84
+   ],
+   "tabla_BASE": [
+    1,
+    49,
+    9,
+    84
+   ],
+   "coincide": true
+  },
+  "11": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    43,
+    40,
+    57,
+    86
+   ],
+   "tabla_BASE": [
+    43,
+    40,
+    57,
+    86
+   ],
+   "coincide": true
+  },
+  "5": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    3,
+    40,
+    28,
+    57
+   ],
+   "tabla_BASE": [
+    3,
+    40,
+    28,
+    57
+   ],
+   "coincide": true
+  },
+  "4": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    23,
+    40,
+    35,
+    49
+   ],
+   "tabla_BASE": [
+    23,
+    40,
+    35,
+    49
+   ],
+   "coincide": true
+  },
+  "6": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    30,
+    40,
+    50,
+    57
+   ],
+   "tabla_BASE": [
+    30,
+    40,
+    50,
+    57
+   ],
+   "coincide": true
+  },
+  "23": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    8,
+    80,
+    21,
+    91
+   ],
+   "tabla_BASE": [
+    8,
+    80,
+    21,
+    91
+   ],
+   "coincide": true
+  },
+  "24": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    37,
+    80,
+    50,
+    92
+   ],
+   "tabla_BASE": [
+    37,
+    80,
+    50,
+    92
+   ],
+   "coincide": true
+  },
+  "16": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    15,
+    87,
+    22,
+    95
+   ],
+   "tabla_BASE": [
+    15,
+    87,
+    22,
+    95
+   ],
+   "coincide": true
+  },
+  "19": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    12,
+    61,
+    28,
+    77
+   ],
+   "tabla_BASE": [
+    12,
+    61,
+    28,
+    77
+   ],
+   "coincide": true
+  },
+  "20": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    30,
+    61,
+    46,
+    77
+   ],
+   "tabla_BASE": [
+    30,
+    61,
+    46,
+    77
+   ],
+   "coincide": true
+  },
+  "25": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    24,
+    81,
+    34,
+    91
+   ],
+   "tabla_BASE": [
+    24,
+    81,
+    34,
+    91
+   ],
+   "coincide": true
+  },
+  "17+X1": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    4,
+    17,
+    22,
+    30
+   ],
+   "tabla_BASE": [
+    4,
+    17,
+    22,
+    30
+   ],
+   "coincide": true
+  },
+  "18+X2": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    36,
+    17,
+    54,
+    31
+   ],
+   "tabla_BASE": [
+    36,
+    17,
+    54,
+    31
+   ],
+   "coincide": true
+  },
+  "0": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    16,
+    10,
+    42,
+    18
+   ],
+   "tabla_BASE": [
+    16,
+    10,
+    42,
+    18
+   ],
+   "coincide": true
+  },
+  "3": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    24,
+    23,
+    34,
+    35
+   ],
+   "tabla_BASE": [
+    24,
+    23,
+    34,
+    35
+   ],
+   "coincide": true
+  },
+  "12": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    11,
+    29,
+    15,
+    42
+   ],
+   "tabla_BASE": [
+    11,
+    29,
+    15,
+    42
+   ],
+   "coincide": true
+  },
+  "13": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    43,
+    30,
+    47,
+    43
+   ],
+   "tabla_BASE": [
+    43,
+    30,
+    47,
+    43
+   ],
+   "coincide": true
+  },
+  "14": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    19,
+    56,
+    23,
+    62
+   ],
+   "tabla_BASE": [
+    19,
+    56,
+    23,
+    62
+   ],
+   "coincide": true
+  },
+  "15": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    35,
+    56,
+    39,
+    62
+   ],
+   "tabla_BASE": [
+    35,
+    56,
+    39,
+    62
+   ],
+   "coincide": true
+  },
+  "9": {
+   "caja_de_la_mascara_(l,t,r,b)": [
+    32,
+    87,
+    39,
+    90
+   ],
+   "tabla_BASE": [
+    32,
+    87,
+    39,
+    90
+   ],
+   "coincide": true
+  }
+ },
+ "muros": {
+  "regla": "muro minimo = dilatacion de 2 celdas (Chebyshev) de todo piso; donde dos pisos quedan a menos de 5 celdas los muros se funden en uno solo; muro externo = 2 celdas (moda del grosor del muro externo OUTER del vessel final) alrededor de la union piso + muro minimo, solo del lado que da al exterior; las celdas encerradas que no son piso ni muro quedan como terreno sin reclamar",
+  "muro_externo_medido": {
+   "celdas_de_muro_externo_(OUTER)": 474,
+   "histograma_de_largos_de_tramo_(filas_y_columnas)": {
+    "1": 70,
+    "2": 154,
+    "3": 1,
+    "4": 12,
+    "6": 4,
+    "7": 3,
+    "8": 31,
+    "10": 1,
+    "11": 2
+   },
+   "grosor_usado_(moda)": 2
+  },
+  "funcion_5f_5h": "no se usa: su script no esta versionado; se uso la dilatacion simple"
+ },
+ "distancia": "Chebyshev entre las celdas de piso mas cercanas de dos pisos: 1 = pegados (se tocan), 2 = una celda entre ellos, 3 = dos celdas de muro (el minimo); \"a menos de 2 celdas\" = menos de 2 celdas entre ellos = distancia <= 2",
+ "huecos_de_las_salas_en_la_base": {
+  "h19": {
+   "huecos": 1,
+   "celdas_en_huecos": 6
+  },
+  "X3": {
+   "huecos": 1,
+   "celdas_en_huecos": 6
+  }
+ },
+ "salas_con_hueco": [
+  "h19",
+  "X3"
+ ],
+ "conjuntos": {
+  "BASE": {
+   "salas_y_puentes": {
+    "Y10": {
+     "caja_objetivo_(l,t,r,b)": [
+      1.0,
+      49.0,
+      9.0,
+      84.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      1,
+      49,
+      9,
+      84
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      8,
+      35
+     ],
+     "celdas_de_piso": 270,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "Y11 (g11)": {
+     "caja_objetivo_(l,t,r,b)": [
+      43.0,
+      40.0,
+      57.0,
+      86.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      43,
+      40,
+      57,
+      86
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      14,
+      46
+     ],
+     "celdas_de_piso": 366,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X5": {
+     "caja_objetivo_(l,t,r,b)": [
+      3.0,
+      40.0,
+      28.0,
+      57.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      3,
+      40,
+      28,
+      57
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      25,
+      17
+     ],
+     "celdas_de_piso": 254,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X4": {
+     "caja_objetivo_(l,t,r,b)": [
+      23.0,
+      40.0,
+      35.0,
+      49.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      23,
+      40,
+      35,
+      49
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      12,
+      9
+     ],
+     "celdas_de_piso": 91,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X6": {
+     "caja_objetivo_(l,t,r,b)": [
+      30.0,
+      40.0,
+      50.0,
+      57.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      30,
+      40,
+      50,
+      57
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      20,
+      17
+     ],
+     "celdas_de_piso": 159,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h23": {
+     "caja_objetivo_(l,t,r,b)": [
+      8.0,
+      80.0,
+      21.0,
+      91.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      8,
+      80,
+      21,
+      91
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      13,
+      11
+     ],
+     "celdas_de_piso": 99,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h24": {
+     "caja_objetivo_(l,t,r,b)": [
+      37.0,
+      80.0,
+      50.0,
+      92.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      37,
+      80,
+      50,
+      92
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      13,
+      12
+     ],
+     "celdas_de_piso": 111,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "Y16": {
+     "caja_objetivo_(l,t,r,b)": [
+      15.0,
+      87.0,
+      22.0,
+      95.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      15,
+      87,
+      22,
+      95
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      7,
+      8
+     ],
+     "celdas_de_piso": 36,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h19": {
+     "caja_objetivo_(l,t,r,b)": [
+      12.0,
+      61.0,
+      28.0,
+      77.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      12,
+      61,
+      28,
+      77
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      16,
+      16
+     ],
+     "celdas_de_piso": 202,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 1,
+      "celdas_en_huecos": 6
+     }
+    },
+    "h20": {
+     "caja_objetivo_(l,t,r,b)": [
+      30.0,
+      61.0,
+      46.0,
+      77.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      30,
+      61,
+      46,
+      77
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      16,
+      16
+     ],
+     "celdas_de_piso": 194,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h25": {
+     "caja_objetivo_(l,t,r,b)": [
+      24.0,
+      81.0,
+      34.0,
+      91.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      24,
+      81,
+      34,
+      91
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      10,
+      10
+     ],
+     "celdas_de_piso": 90,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h17+X1": {
+     "caja_objetivo_(l,t,r,b)": [
+      4.0,
+      17.0,
+      22.0,
+      30.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      4,
+      17,
+      22,
+      30
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      18,
+      13
+     ],
+     "celdas_de_piso": 176,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h18+X2": {
+     "caja_objetivo_(l,t,r,b)": [
+      36.0,
+      17.0,
+      54.0,
+      31.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      36,
+      17,
+      54,
+      31
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      18,
+      14
+     ],
+     "celdas_de_piso": 179,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X0": {
+     "caja_objetivo_(l,t,r,b)": [
+      16.0,
+      10.0,
+      42.0,
+      18.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      16,
+      10,
+      42,
+      18
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      26,
+      8
+     ],
+     "celdas_de_piso": 133,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X3": {
+     "caja_objetivo_(l,t,r,b)": [
+      24.0,
+      23.0,
+      34.0,
+      35.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      24,
+      23,
+      34,
+      35
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      10,
+      12
+     ],
+     "celdas_de_piso": 114,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": {
+      "huecos": 1,
+      "celdas_en_huecos": 6
+     }
+    },
+    "Y12": {
+     "caja_objetivo_(l,t,r,b)": [
+      11.0,
+      29.0,
+      15.0,
+      42.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      11,
+      29,
+      15,
+      42
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      4,
+      13
+     ],
+     "celdas_de_piso": 52,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": null
+    },
+    "Y13": {
+     "caja_objetivo_(l,t,r,b)": [
+      43.0,
+      30.0,
+      47.0,
+      43.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      43,
+      30,
+      47,
+      43
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      4,
+      13
+     ],
+     "celdas_de_piso": 52,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": null
+    },
+    "Y14": {
+     "caja_objetivo_(l,t,r,b)": [
+      19.0,
+      56.0,
+      23.0,
+      62.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      19,
+      56,
+      23,
+      62
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      4,
+      6
+     ],
+     "celdas_de_piso": 24,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": null
+    },
+    "Y15": {
+     "caja_objetivo_(l,t,r,b)": [
+      35.0,
+      56.0,
+      39.0,
+      62.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      35,
+      56,
+      39,
+      62
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      4,
+      6
+     ],
+     "celdas_de_piso": 24,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": null
+    },
+    "X9": {
+     "caja_objetivo_(l,t,r,b)": [
+      32.0,
+      87.0,
+      39.0,
+      90.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      32,
+      87,
+      39,
+      90
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      7,
+      3
+     ],
+     "celdas_de_piso": 21,
+     "area_real_sobre_la_base": 1.0,
+     "huecos_en_el_piso": null
+    }
+   },
+   "mapa_(con_muro_externo)": {
+    "caja_(l,t,r,b)": [
+     -3,
+     6,
+     61,
+     99
+    ],
+    "celdas": [
+     64,
+     93
+    ],
+    "pantallas_de_32x28": [
+     2.0,
+     3.32
+    ]
+   },
+   "error_de_redondeo_max_de_tamano": {
+    "ancho": 0,
+    "alto": 0,
+    "sala_ancho": "-",
+    "sala_alto": "-"
+   },
+   "pares_a_menos_de_2_celdas_que_no_son_pareja": [],
+   "distancia_de_las_parejas_(cheb)": {
+    "Y10 - X5": 1,
+    "X5 - X4": 1,
+    "X4 - X6": 1,
+    "X6 - Y11 (g11)": 1,
+    "Y10 - h23": 2,
+    "Y11 (g11) - h24": 2,
+    "h23 - Y16": 1,
+    "X0 - h17+X1": 1,
+    "X0 - h18+X2": 1,
+    "Y12 - h17+X1": 1,
+    "Y12 - X5": 1,
+    "Y13 - h18+X2": 1,
+    "Y13 - X6": 1,
+    "Y14 - X5": 1,
+    "Y14 - h19": 1,
+    "Y15 - X6": 1,
+    "Y15 - h20": 1,
+    "X9 - h25": 1,
+    "X9 - h24": 1
+   },
+   "largo_real_de_los_puentes": {
+    "Y12": {
+     "une": [
+      "h17+X1",
+      "X5"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 11,
+     "caja_del_puente_(ancho,alto)": [
+      4,
+      13
+     ]
+    },
+    "Y13": {
+     "une": [
+      "h18+X2",
+      "X6"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 10,
+     "caja_del_puente_(ancho,alto)": [
+      4,
+      13
+     ]
+    },
+    "Y14": {
+     "une": [
+      "X5",
+      "h19"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 5,
+     "caja_del_puente_(ancho,alto)": [
+      4,
+      6
+     ]
+    },
+    "Y15": {
+     "une": [
+      "X6",
+      "h20"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 5,
+     "caja_del_puente_(ancho,alto)": [
+      4,
+      6
+     ]
+    },
+    "X9": {
+     "une": [
+      "h25",
+      "h24"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 4,
+     "caja_del_puente_(ancho,alto)": [
+      7,
+      3
+     ]
+    }
+   }
+  },
+  "A": {
+   "salas_y_puentes": {
+    "Y10": {
+     "caja_objetivo_(l,t,r,b)": [
+      -34.04,
+      58.0,
+      -11.0,
+      170.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -34,
+      58,
+      -11,
+      170
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      23,
+      112
+     ],
+     "celdas_de_piso": 2480,
+     "area_real_sobre_la_base": 9.185,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "Y11 (g11)": {
+     "caja_objetivo_(l,t,r,b)": [
+      57.0,
+      40.0,
+      80.04,
+      172.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      57,
+      40,
+      80,
+      172
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      23,
+      132
+     ],
+     "celdas_de_piso": 1714,
+     "area_real_sobre_la_base": 4.683,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X5": {
+     "caja_objetivo_(l,t,r,b)": [
+      -23.0,
+      40.0,
+      27.0,
+      74.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -23,
+      40,
+      27,
+      74
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      50,
+      34
+     ],
+     "celdas_de_piso": 1016,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X4": {
+     "caja_objetivo_(l,t,r,b)": [
+      17.0,
+      40.0,
+      41.0,
+      58.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      17,
+      40,
+      41,
+      58
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      24,
+      18
+     ],
+     "celdas_de_piso": 364,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X6": {
+     "caja_objetivo_(l,t,r,b)": [
+      31.0,
+      40.0,
+      71.0,
+      74.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      31,
+      40,
+      71,
+      74
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      40,
+      34
+     ],
+     "celdas_de_piso": 636,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h23": {
+     "caja_objetivo_(l,t,r,b)": [
+      -12.0,
+      155.48,
+      14.0,
+      177.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -12,
+      155,
+      14,
+      177
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      26,
+      22
+     ],
+     "celdas_de_piso": 396,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h24": {
+     "caja_objetivo_(l,t,r,b)": [
+      38.0,
+      154.48,
+      64.0,
+      178.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      38,
+      154,
+      64,
+      178
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      26,
+      24
+     ],
+     "celdas_de_piso": 444,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "Y16": {
+     "caja_objetivo_(l,t,r,b)": [
+      2.0,
+      169.48,
+      16.0,
+      185.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      2,
+      169,
+      16,
+      185
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      14,
+      16
+     ],
+     "celdas_de_piso": 144,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h19": {
+     "caja_objetivo_(l,t,r,b)": [
+      -6.0,
+      99.99,
+      26.0,
+      131.99
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -6,
+      100,
+      26,
+      132
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      32,
+      32
+     ],
+     "celdas_de_piso": 808,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 1,
+      "celdas_en_huecos": 6
+     }
+    },
+    "h20": {
+     "caja_objetivo_(l,t,r,b)": [
+      28.0,
+      99.99,
+      60.0,
+      131.99
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      28,
+      100,
+      60,
+      132
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      32,
+      32
+     ],
+     "celdas_de_piso": 776,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h25": {
+     "caja_objetivo_(l,t,r,b)": [
+      18.5,
+      162.48,
+      33.5,
+      177.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      19,
+      162,
+      34,
+      177
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      15,
+      15
+     ],
+     "celdas_de_piso": 201,
+     "area_real_sobre_la_base": 2.233,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h17+X1": {
+     "caja_objetivo_(l,t,r,b)": [
+      -21.0,
+      -6.0,
+      15.0,
+      20.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -21,
+      -6,
+      15,
+      20
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      36,
+      26
+     ],
+     "celdas_de_piso": 704,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h18+X2": {
+     "caja_objetivo_(l,t,r,b)": [
+      43.0,
+      -6.0,
+      79.0,
+      22.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      43,
+      -6,
+      79,
+      22
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      36,
+      28
+     ],
+     "celdas_de_piso": 716,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X0": {
+     "caja_objetivo_(l,t,r,b)": [
+      -3.76,
+      -24.16,
+      61.76,
+      -4.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -4,
+      -24,
+      62,
+      -4
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      66,
+      20
+     ],
+     "celdas_de_piso": 827,
+     "area_real_sobre_la_base": 6.218,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X3": {
+     "caja_objetivo_(l,t,r,b)": [
+      19.0,
+      6.0,
+      39.0,
+      30.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      19,
+      6,
+      39,
+      30
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      20,
+      24
+     ],
+     "celdas_de_piso": 456,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 1,
+      "celdas_en_huecos": 6
+     }
+    },
+    "Y12": {
+     "caja_objetivo_(l,t,r,b)": [
+      -7.0,
+      20.0,
+      1.0,
+      40.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -7,
+      20,
+      1,
+      40
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      8,
+      20
+     ],
+     "celdas_de_piso": 160,
+     "area_real_sobre_la_base": 3.077,
+     "huecos_en_el_piso": null
+    },
+    "Y13": {
+     "caja_objetivo_(l,t,r,b)": [
+      57.0,
+      22.0,
+      65.0,
+      40.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      57,
+      22,
+      65,
+      40
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      8,
+      18
+     ],
+     "celdas_de_piso": 144,
+     "area_real_sobre_la_base": 2.769,
+     "huecos_en_el_piso": null
+    },
+    "Y14": {
+     "caja_objetivo_(l,t,r,b)": [
+      6.0,
+      74.0,
+      14.0,
+      99.99
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      6,
+      74,
+      14,
+      100
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      8,
+      26
+     ],
+     "celdas_de_piso": 208,
+     "area_real_sobre_la_base": 8.667,
+     "huecos_en_el_piso": null
+    },
+    "Y15": {
+     "caja_objetivo_(l,t,r,b)": [
+      40.0,
+      74.0,
+      48.0,
+      99.99
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      40,
+      74,
+      48,
+      100
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      8,
+      26
+     ],
+     "celdas_de_piso": 208,
+     "area_real_sobre_la_base": 8.667,
+     "huecos_en_el_piso": null
+    },
+    "X9": {
+     "caja_objetivo_(l,t,r,b)": [
+      33.5,
+      167.73,
+      38.0,
+      172.23
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      34,
+      168,
+      38,
+      172
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      4,
+      4
+     ],
+     "celdas_de_piso": 16,
+     "area_real_sobre_la_base": 0.762,
+     "huecos_en_el_piso": null
+    }
+   },
+   "mapa_(con_muro_externo)": {
+    "caja_(l,t,r,b)": [
+     -38,
+     -28,
+     84,
+     189
+    ],
+    "celdas": [
+     122,
+     217
+    ],
+    "pantallas_de_32x28": [
+     3.81,
+     7.75
+    ]
+   },
+   "error_de_redondeo_max_de_tamano": {
+    "ancho": 0.5,
+    "alto": 0.5,
+    "sala_ancho": "9",
+    "sala_alto": "9"
+   },
+   "pares_a_menos_de_2_celdas_que_no_son_pareja": [],
+   "distancia_de_las_parejas_(cheb)": {
+    "Y10 - X5": 4,
+    "X5 - X4": 1,
+    "X4 - X6": 1,
+    "X6 - Y11 (g11)": 2,
+    "Y10 - h23": 2,
+    "Y11 (g11) - h24": 6,
+    "h23 - Y16": 1,
+    "X0 - h17+X1": 2,
+    "X0 - h18+X2": 0,
+    "Y12 - h17+X1": 1,
+    "Y12 - X5": 1,
+    "Y13 - h18+X2": 1,
+    "Y13 - X6": 1,
+    "Y14 - X5": 3,
+    "Y14 - h19": 1,
+    "Y15 - X6": 2,
+    "Y15 - h20": 1,
+    "X9 - h25": 1,
+    "X9 - h24": 1
+   },
+   "largo_real_de_los_puentes": {
+    "Y12": {
+     "une": [
+      "h17+X1",
+      "X5"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 21,
+     "caja_del_puente_(ancho,alto)": [
+      8,
+      20
+     ]
+    },
+    "Y13": {
+     "une": [
+      "h18+X2",
+      "X6"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 19,
+     "caja_del_puente_(ancho,alto)": [
+      8,
+      18
+     ]
+    },
+    "Y14": {
+     "une": [
+      "X5",
+      "h19"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 27,
+     "caja_del_puente_(ancho,alto)": [
+      8,
+      26
+     ]
+    },
+    "Y15": {
+     "une": [
+      "X6",
+      "h20"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 27,
+     "caja_del_puente_(ancho,alto)": [
+      8,
+      26
+     ]
+    },
+    "X9": {
+     "une": [
+      "h25",
+      "h24"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 5,
+     "caja_del_puente_(ancho,alto)": [
+      4,
+      4
+     ]
+    }
+   },
+   "parejas_que_dejaron_de_tocarse_(base <= 1, ahora > 1)": [
+    {
+     "par": "Y10 - X5",
+     "base": 1,
+     "ahora": 4
+    },
+    {
+     "par": "X6 - Y11 (g11)",
+     "base": 1,
+     "ahora": 2
+    },
+    {
+     "par": "X0 - h17+X1",
+     "base": 1,
+     "ahora": 2
+    },
+    {
+     "par": "Y14 - X5",
+     "base": 1,
+     "ahora": 3
+    },
+    {
+     "par": "Y15 - X6",
+     "base": 1,
+     "ahora": 2
+    }
+   ],
+   "parejas_que_no_se_tocan_ni_en_la_base_(base > 1)": [
+    {
+     "par": "Y10 - h23",
+     "base": 2,
+     "ahora": 2
+    },
+    {
+     "par": "Y11 (g11) - h24",
+     "base": 2,
+     "ahora": 6
+    }
+   ]
+  },
+  "B": {
+   "salas_y_puentes": {
+    "Y10": {
+     "caja_objetivo_(l,t,r,b)": [
+      -60.04,
+      69.7,
+      -37.0,
+      170.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -60,
+      70,
+      -37,
+      170
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      23,
+      100
+     ],
+     "celdas_de_piso": 2210,
+     "area_real_sobre_la_base": 8.185,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "Y11 (g11)": {
+     "caja_objetivo_(l,t,r,b)": [
+      75.2,
+      40.0,
+      98.24,
+      172.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      75,
+      40,
+      98,
+      172
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      23,
+      132
+     ],
+     "celdas_de_piso": 1714,
+     "area_real_sobre_la_base": 4.683,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X5": {
+     "caja_objetivo_(l,t,r,b)": [
+      -56.8,
+      40.0,
+      25.7,
+      96.1
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -57,
+      40,
+      26,
+      96
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      83,
+      56
+     ],
+     "celdas_de_piso": 2774,
+     "area_real_sobre_la_base": 10.921,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X4": {
+     "caja_objetivo_(l,t,r,b)": [
+      9.2,
+      40.0,
+      48.8,
+      69.7
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      9,
+      40,
+      49,
+      70
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      40,
+      30
+     ],
+     "celdas_de_piso": 1009,
+     "area_real_sobre_la_base": 11.088,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X6": {
+     "caja_objetivo_(l,t,r,b)": [
+      32.3,
+      40.0,
+      98.3,
+      96.1
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      32,
+      40,
+      98,
+      96
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      66,
+      56
+     ],
+     "celdas_de_piso": 1717,
+     "area_real_sobre_la_base": 10.799,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h23": {
+     "caja_objetivo_(l,t,r,b)": [
+      -38.0,
+      147.23,
+      -2.25,
+      177.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -38,
+      147,
+      -2,
+      177
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      36,
+      30
+     ],
+     "celdas_de_piso": 756,
+     "area_real_sobre_la_base": 7.636,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h24": {
+     "caja_objetivo_(l,t,r,b)": [
+      46.45,
+      145.48,
+      82.2,
+      178.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      46,
+      145,
+      82,
+      178
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      36,
+      33
+     ],
+     "celdas_de_piso": 846,
+     "area_real_sobre_la_base": 7.622,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "Y16": {
+     "caja_objetivo_(l,t,r,b)": [
+      -17.88,
+      167.48,
+      -0.38,
+      187.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -18,
+      167,
+      0,
+      187
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      18,
+      20
+     ],
+     "celdas_de_piso": 235,
+     "area_real_sobre_la_base": 6.528,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h19": {
+     "caja_objetivo_(l,t,r,b)": [
+      -22.7,
+      99.48,
+      21.3,
+      143.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -23,
+      99,
+      21,
+      143
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      44,
+      44
+     ],
+     "celdas_de_piso": 1533,
+     "area_real_sobre_la_base": 7.589,
+     "huecos_en_el_piso": {
+      "huecos": 1,
+      "celdas_en_huecos": 6
+     }
+    },
+    "h20": {
+     "caja_objetivo_(l,t,r,b)": [
+      34.2,
+      99.48,
+      78.2,
+      143.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      34,
+      99,
+      78,
+      143
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      44,
+      44
+     ],
+     "celdas_de_piso": 1464,
+     "area_real_sobre_la_base": 7.546,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h25": {
+     "caja_objetivo_(l,t,r,b)": [
+      4.85,
+      145.48,
+      36.85,
+      177.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      5,
+      145,
+      37,
+      177
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      32,
+      32
+     ],
+     "celdas_de_piso": 922,
+     "area_real_sobre_la_base": 10.244,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h17+X1": {
+     "caja_objetivo_(l,t,r,b)": [
+      -60.0,
+      -41.88,
+      4.08,
+      4.4
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -60,
+      -42,
+      4,
+      4
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      64,
+      46
+     ],
+     "celdas_de_piso": 2195,
+     "area_real_sobre_la_base": 12.472,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h18+X2": {
+     "caja_objetivo_(l,t,r,b)": [
+      53.92,
+      -41.88,
+      118.0,
+      7.96
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      54,
+      -42,
+      118,
+      8
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      64,
+      50
+     ],
+     "celdas_de_piso": 2288,
+     "area_real_sobre_la_base": 12.782,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X0": {
+     "caja_objetivo_(l,t,r,b)": [
+      -3.76,
+      -58.48,
+      61.76,
+      -38.32
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -4,
+      -58,
+      62,
+      -38
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      66,
+      20
+     ],
+     "celdas_de_piso": 827,
+     "area_real_sobre_la_base": 6.218,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X3": {
+     "caja_objetivo_(l,t,r,b)": [
+      11.2,
+      -20.52,
+      46.8,
+      22.2
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      11,
+      -21,
+      47,
+      22
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      36,
+      43
+     ],
+     "celdas_de_piso": 1460,
+     "area_real_sobre_la_base": 12.807,
+     "huecos_en_el_piso": {
+      "huecos": 1,
+      "celdas_en_huecos": 6
+     }
+    },
+    "Y12": {
+     "caja_objetivo_(l,t,r,b)": [
+      -35.08,
+      4.4,
+      -20.84,
+      40.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -35,
+      4,
+      -21,
+      40
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      14,
+      36
+     ],
+     "celdas_de_piso": 504,
+     "area_real_sobre_la_base": 9.692,
+     "huecos_en_el_piso": null
+    },
+    "Y13": {
+     "caja_objetivo_(l,t,r,b)": [
+      78.84,
+      7.96,
+      93.08,
+      40.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      79,
+      8,
+      93,
+      40
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      14,
+      32
+     ],
+     "celdas_de_piso": 448,
+     "area_real_sobre_la_base": 8.615,
+     "huecos_en_el_piso": null
+    },
+    "Y14": {
+     "caja_objetivo_(l,t,r,b)": [
+      -6.2,
+      96.1,
+      4.8,
+      99.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -6,
+      96,
+      5,
+      99
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      11,
+      3
+     ],
+     "celdas_de_piso": 33,
+     "area_real_sobre_la_base": 1.375,
+     "huecos_en_el_piso": null
+    },
+    "Y15": {
+     "caja_objetivo_(l,t,r,b)": [
+      50.7,
+      96.1,
+      61.7,
+      99.48
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      51,
+      96,
+      62,
+      99
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      11,
+      3
+     ],
+     "celdas_de_piso": 33,
+     "area_real_sobre_la_base": 1.375,
+     "huecos_en_el_piso": null
+    },
+    "X9": {
+     "caja_objetivo_(l,t,r,b)": [
+      36.85,
+      156.68,
+      46.45,
+      166.28
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      37,
+      157,
+      46,
+      166
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      9,
+      9
+     ],
+     "celdas_de_piso": 81,
+     "area_real_sobre_la_base": 3.857,
+     "huecos_en_el_piso": null
+    }
+   },
+   "mapa_(con_muro_externo)": {
+    "caja_(l,t,r,b)": [
+     -64,
+     -62,
+     122,
+     191
+    ],
+    "celdas": [
+     186,
+     253
+    ],
+    "pantallas_de_32x28": [
+     5.81,
+     9.04
+    ]
+   },
+   "error_de_redondeo_max_de_tamano": {
+    "ancho": 0.6,
+    "alto": 0.78,
+    "sala_ancho": "9",
+    "sala_alto": "10"
+   },
+   "pares_a_menos_de_2_celdas_que_no_son_pareja": [
+    {
+     "par": [
+      "Y11 (g11)",
+      "Y13"
+     ],
+     "distancia_cheb": 1,
+     "celdas_de_muro_entre_ellos": 0
+    }
+   ],
+   "distancia_de_las_parejas_(cheb)": {
+    "Y10 - X5": 1,
+    "X5 - X4": 1,
+    "X4 - X6": 0,
+    "X6 - Y11 (g11)": 0,
+    "Y10 - h23": 0,
+    "Y11 (g11) - h24": 4,
+    "h23 - Y16": 1,
+    "X0 - h17+X1": 4,
+    "X0 - h18+X2": 4,
+    "Y12 - h17+X1": 1,
+    "Y12 - X5": 1,
+    "Y13 - h18+X2": 1,
+    "Y13 - X6": 1,
+    "Y14 - X5": 4,
+    "Y14 - h19": 2,
+    "Y15 - X6": 1,
+    "Y15 - h20": 1,
+    "X9 - h25": 1,
+    "X9 - h24": 1
+   },
+   "largo_real_de_los_puentes": {
+    "Y12": {
+     "une": [
+      "h17+X1",
+      "X5"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 37,
+     "caja_del_puente_(ancho,alto)": [
+      14,
+      36
+     ]
+    },
+    "Y13": {
+     "une": [
+      "h18+X2",
+      "X6"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 33,
+     "caja_del_puente_(ancho,alto)": [
+      14,
+      32
+     ]
+    },
+    "Y14": {
+     "une": [
+      "X5",
+      "h19"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 4,
+     "caja_del_puente_(ancho,alto)": [
+      11,
+      3
+     ]
+    },
+    "Y15": {
+     "une": [
+      "X6",
+      "h20"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 4,
+     "caja_del_puente_(ancho,alto)": [
+      11,
+      3
+     ]
+    },
+    "X9": {
+     "une": [
+      "h25",
+      "h24"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 10,
+     "caja_del_puente_(ancho,alto)": [
+      9,
+      9
+     ]
+    }
+   },
+   "parejas_que_dejaron_de_tocarse_(base <= 1, ahora > 1)": [
+    {
+     "par": "X0 - h17+X1",
+     "base": 1,
+     "ahora": 4
+    },
+    {
+     "par": "X0 - h18+X2",
+     "base": 1,
+     "ahora": 4
+    },
+    {
+     "par": "Y14 - X5",
+     "base": 1,
+     "ahora": 4
+    },
+    {
+     "par": "Y14 - h19",
+     "base": 1,
+     "ahora": 2
+    }
+   ],
+   "parejas_que_no_se_tocan_ni_en_la_base_(base > 1)": [
+    {
+     "par": "Y10 - h23",
+     "base": 2,
+     "ahora": 0
+    },
+    {
+     "par": "Y11 (g11) - h24",
+     "base": 2,
+     "ahora": 4
+    }
+   ]
+  },
+  "U": {
+   "salas_y_puentes": {
+    "Y10": {
+     "caja_objetivo_(l,t,r,b)": [
+      -56.92,
+      62.5,
+      -31.0,
+      187.04
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -57,
+      63,
+      -31,
+      187
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      26,
+      124
+     ],
+     "celdas_de_piso": 3095,
+     "area_real_sobre_la_base": 11.463,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "Y11 (g11)": {
+     "caja_objetivo_(l,t,r,b)": [
+      71.0,
+      40.0,
+      116.36,
+      189.04
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      71,
+      40,
+      116,
+      189
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      45,
+      149
+     ],
+     "celdas_de_piso": 3843,
+     "area_real_sobre_la_base": 10.5,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X5": {
+     "caja_objetivo_(l,t,r,b)": [
+      -49.0,
+      40.0,
+      26.0,
+      82.5
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -49,
+      40,
+      26,
+      83
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      75,
+      43
+     ],
+     "celdas_de_piso": 1899,
+     "area_real_sobre_la_base": 7.476,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X4": {
+     "caja_objetivo_(l,t,r,b)": [
+      11.0,
+      40.0,
+      47.0,
+      62.5
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      11,
+      40,
+      47,
+      63
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      36,
+      23
+     ],
+     "celdas_de_piso": 693,
+     "area_real_sobre_la_base": 7.615,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X6": {
+     "caja_objetivo_(l,t,r,b)": [
+      32.0,
+      40.0,
+      92.0,
+      82.5
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      32,
+      40,
+      92,
+      83
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      60,
+      43
+     ],
+     "celdas_de_piso": 1182,
+     "area_real_sobre_la_base": 7.434,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h23": {
+     "caja_objetivo_(l,t,r,b)": [
+      -32.0,
+      162.14,
+      5.7,
+      194.04
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -32,
+      162,
+      6,
+      194
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      38,
+      32
+     ],
+     "celdas_de_piso": 829,
+     "area_real_sobre_la_base": 8.374,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h24": {
+     "caja_objetivo_(l,t,r,b)": [
+      40.3,
+      160.24,
+      78.0,
+      195.04
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      40,
+      160,
+      78,
+      195
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      38,
+      35
+     ],
+     "celdas_de_piso": 928,
+     "area_real_sobre_la_base": 8.36,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "Y16": {
+     "caja_objetivo_(l,t,r,b)": [
+      -8.55,
+      186.04,
+      5.45,
+      202.04
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -9,
+      186,
+      5,
+      202
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      14,
+      16
+     ],
+     "celdas_de_piso": 144,
+     "area_real_sobre_la_base": 4.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h19": {
+     "caja_objetivo_(l,t,r,b)": [
+      -24.0,
+      99.06,
+      24.0,
+      147.06
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -24,
+      99,
+      24,
+      147
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      48,
+      48
+     ],
+     "celdas_de_piso": 1818,
+     "area_real_sobre_la_base": 9.0,
+     "huecos_en_el_piso": {
+      "huecos": 1,
+      "celdas_en_huecos": 6
+     }
+    },
+    "h20": {
+     "caja_objetivo_(l,t,r,b)": [
+      26.0,
+      99.06,
+      74.0,
+      147.06
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      26,
+      99,
+      74,
+      147
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      48,
+      48
+     ],
+     "celdas_de_piso": 1746,
+     "area_real_sobre_la_base": 9.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h25": {
+     "caja_objetivo_(l,t,r,b)": [
+      7.7,
+      164.04,
+      37.7,
+      194.04
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      8,
+      164,
+      38,
+      194
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      30,
+      30
+     ],
+     "celdas_de_piso": 810,
+     "area_real_sobre_la_base": 9.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h17+X1": {
+     "caja_objetivo_(l,t,r,b)": [
+      -51.0,
+      -33.6,
+      6.6,
+      8.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -51,
+      -34,
+      7,
+      8
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      58,
+      42
+     ],
+     "celdas_de_piso": 1859,
+     "area_real_sobre_la_base": 10.562,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "h18+X2": {
+     "caja_objetivo_(l,t,r,b)": [
+      51.4,
+      -33.6,
+      109.0,
+      11.2
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      51,
+      -34,
+      109,
+      11
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      58,
+      45
+     ],
+     "celdas_de_piso": 1883,
+     "area_real_sobre_la_base": 10.52,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X0": {
+     "caja_objetivo_(l,t,r,b)": [
+      -23.0,
+      -62.4,
+      81.0,
+      -30.4
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -23,
+      -62,
+      81,
+      -30
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      104,
+      32
+     ],
+     "celdas_de_piso": 2128,
+     "area_real_sobre_la_base": 16.0,
+     "huecos_en_el_piso": {
+      "huecos": 0,
+      "celdas_en_huecos": 0
+     }
+    },
+    "X3": {
+     "caja_objetivo_(l,t,r,b)": [
+      9.0,
+      -19.2,
+      49.0,
+      28.8
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      9,
+      -19,
+      49,
+      29
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      40,
+      48
+     ],
+     "celdas_de_piso": 1824,
+     "area_real_sobre_la_base": 16.0,
+     "huecos_en_el_piso": {
+      "huecos": 1,
+      "celdas_en_huecos": 6
+     }
+    },
+    "Y12": {
+     "caja_objetivo_(l,t,r,b)": [
+      -28.6,
+      8.0,
+      -15.8,
+      40.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -29,
+      8,
+      -16,
+      40
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      13,
+      32
+     ],
+     "celdas_de_piso": 416,
+     "area_real_sobre_la_base": 8.0,
+     "huecos_en_el_piso": null
+    },
+    "Y13": {
+     "caja_objetivo_(l,t,r,b)": [
+      73.8,
+      11.2,
+      86.6,
+      40.0
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      74,
+      11,
+      87,
+      40
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      13,
+      29
+     ],
+     "celdas_de_piso": 377,
+     "area_real_sobre_la_base": 7.25,
+     "huecos_en_el_piso": null
+    },
+    "Y14": {
+     "caja_objetivo_(l,t,r,b)": [
+      -6.0,
+      82.5,
+      6.0,
+      99.06
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      -6,
+      83,
+      6,
+      99
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      12,
+      16
+     ],
+     "celdas_de_piso": 192,
+     "area_real_sobre_la_base": 8.0,
+     "huecos_en_el_piso": null
+    },
+    "Y15": {
+     "caja_objetivo_(l,t,r,b)": [
+      44.0,
+      82.5,
+      56.0,
+      99.06
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      44,
+      83,
+      56,
+      99
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      12,
+      16
+     ],
+     "celdas_de_piso": 192,
+     "area_real_sobre_la_base": 8.0,
+     "huecos_en_el_piso": null
+    },
+    "X9": {
+     "caja_objetivo_(l,t,r,b)": [
+      37.7,
+      174.54,
+      40.3,
+      183.54
+     ],
+     "caja_redondeada_(l,t,r,b)": [
+      38,
+      175,
+      40,
+      184
+     ],
+     "tam_piso_real_(caja_de_la_mascara)": [
+      2,
+      9
+     ],
+     "celdas_de_piso": 18,
+     "area_real_sobre_la_base": 0.857,
+     "huecos_en_el_piso": null
+    }
+   },
+   "mapa_(con_muro_externo)": {
+    "caja_(l,t,r,b)": [
+     -61,
+     -66,
+     120,
+     206
+    ],
+    "celdas": [
+     181,
+     272
+    ],
+    "pantallas_de_32x28": [
+     5.66,
+     9.71
+    ]
+   },
+   "error_de_redondeo_max_de_tamano": {
+    "ancho": 0.6,
+    "alto": 0.56,
+    "sala_ancho": "9",
+    "sala_alto": "14"
+   },
+   "pares_a_menos_de_2_celdas_que_no_son_pareja": [],
+   "distancia_de_las_parejas_(cheb)": {
+    "Y10 - X5": 2,
+    "X5 - X4": 1,
+    "X4 - X6": 1,
+    "X6 - Y11 (g11)": 7,
+    "Y10 - h23": 0,
+    "Y11 (g11) - h24": 13,
+    "h23 - Y16": 2,
+    "X0 - h17+X1": 1,
+    "X0 - h18+X2": 0,
+    "Y12 - h17+X1": 1,
+    "Y12 - X5": 1,
+    "Y13 - h18+X2": 1,
+    "Y13 - X6": 1,
+    "Y14 - X5": 4,
+    "Y14 - h19": 1,
+    "Y15 - X6": 4,
+    "Y15 - h20": 1,
+    "X9 - h25": 1,
+    "X9 - h24": 1
+   },
+   "largo_real_de_los_puentes": {
+    "Y12": {
+     "une": [
+      "h17+X1",
+      "X5"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 33,
+     "caja_del_puente_(ancho,alto)": [
+      13,
+      32
+     ]
+    },
+    "Y13": {
+     "une": [
+      "h18+X2",
+      "X6"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 30,
+     "caja_del_puente_(ancho,alto)": [
+      13,
+      29
+     ]
+    },
+    "Y14": {
+     "une": [
+      "X5",
+      "h19"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 17,
+     "caja_del_puente_(ancho,alto)": [
+      12,
+      16
+     ]
+    },
+    "Y15": {
+     "une": [
+      "X6",
+      "h20"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 17,
+     "caja_del_puente_(ancho,alto)": [
+      12,
+      16
+     ]
+    },
+    "X9": {
+     "une": [
+      "h25",
+      "h24"
+     ],
+     "largo_entre_las_dos_salas_(cheb)": 3,
+     "caja_del_puente_(ancho,alto)": [
+      2,
+      9
+     ]
+    }
+   },
+   "parejas_que_dejaron_de_tocarse_(base <= 1, ahora > 1)": [
+    {
+     "par": "Y10 - X5",
+     "base": 1,
+     "ahora": 2
+    },
+    {
+     "par": "X6 - Y11 (g11)",
+     "base": 1,
+     "ahora": 7
+    },
+    {
+     "par": "h23 - Y16",
+     "base": 1,
+     "ahora": 2
+    },
+    {
+     "par": "Y14 - X5",
+     "base": 1,
+     "ahora": 4
+    },
+    {
+     "par": "Y15 - X6",
+     "base": 1,
+     "ahora": 4
+    }
+   ],
+   "parejas_que_no_se_tocan_ni_en_la_base_(base > 1)": [
+    {
+     "par": "Y10 - h23",
+     "base": 2,
+     "ahora": 0
+    },
+    {
+     "par": "Y11 (g11) - h24",
+     "base": 2,
+     "ahora": 13
+    }
+   ]
+  }
+ }
+}

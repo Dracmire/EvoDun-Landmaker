@@ -1,0 +1,9 @@
+# dos corridas del script dieron los mismos hashes (sha256)
+79eb3e87afee2d6da4354ed5de0ac3ea610fd2834a43d5d13cf7eeabdfa31494  ./A_planta.png
+f468ceade60200b4aa3e565e840c8bb224ce2cf9f41bff713f8531f95fc095f2  ./B_planta.png
+3020b553655416c3a9f003be3ac916edb579e6b247271f4edcef15178a0b4070  ./U_planta.png
+952366d8873fcbd6220022c3d23e9679d2b16770f65e874fa6461a3009497252  ./base_k1.png
+24893f75568036a3f5f4422530573d12d34752a49927b26ca5ba09a02a2c9e92  ./comparacion.png
+f9d9c6863afb6cdebcd1cd7fc07a8961b70358426732415cb4a286d51d47bc89  ./vessel_final_salas.json
+28c37f27b901d1791bb470182132ad30001c79cb132fa2afce2b1dbeafdbf708  ./vessel_final_salas.npz
+85c23678512bd8e55f9d0c0112c22246258889a91e26bf37b82294f573ec74a1  ./vessel_mocks_segmentos.json
