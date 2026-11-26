@@ -1,0 +1,8 @@
+# dos corridas del script dieron los mismos hashes (sha256)
+d3fe3fffc2eaad9d41376ae8d331d61f3c1c9e0574b0e887f1d3ddefdf9a8027  ./A_planta.png
+d662fc06b91d0a2ef553ee29a677b30f9d3111f3b1a617e2e1cb2b9b8dc52f04  ./B_planta.png
+9db8744ce9abe0487a9ee05bc1100d5047eaf1ba9a1d80a82e9cef8e9a013be6  ./U_planta.png
+a453a00e253c9f27362f15528066c67abc1163efb72ab47dcb18fef688e10778  ./base_k1.png
+78cc4546564f7de87b482ff79fa8113093fbcf76acbe62d2834a419815528f3a  ./clases_base.npz
+be48dfe29cd556979dfc6e6964024d0b45e093da10477d05c75ea9b2228c54da  ./comparacion.png
+ba4702c17c6c1232c8e89dce891082b8fad920f394bdc53d02fb34a1328c6f01  ./vessel_mocks_segmentos_b.json
