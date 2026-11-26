@@ -1,0 +1,90 @@
+{
+ "niveles": {
+  "Y10": {
+   "id": 10,
+   "nivel": "normal",
+   "supuesto_de_R": false
+  },
+  "Y11 (g11)": {
+   "id": 11,
+   "nivel": "normal",
+   "supuesto_de_R": false
+  },
+  "X5": {
+   "id": 5,
+   "nivel": "superior",
+   "supuesto_de_R": false
+  },
+  "X4": {
+   "id": 4,
+   "nivel": "superior",
+   "supuesto_de_R": false
+  },
+  "X6": {
+   "id": 6,
+   "nivel": "superior",
+   "supuesto_de_R": false
+  },
+  "h23": {
+   "id": 23,
+   "nivel": "sub-terraza",
+   "supuesto_de_R": false
+  },
+  "h24": {
+   "id": 24,
+   "nivel": "sub-terraza",
+   "supuesto_de_R": false
+  },
+  "Y16": {
+   "id": 16,
+   "nivel": "sub-terraza",
+   "supuesto_de_R": false
+  },
+  "h19": {
+   "id": 19,
+   "nivel": "normal",
+   "supuesto_de_R": false
+  },
+  "h20": {
+   "id": 20,
+   "nivel": "normal",
+   "supuesto_de_R": false
+  },
+  "h25": {
+   "id": 25,
+   "nivel": "superior",
+   "supuesto_de_R": false
+  },
+  "h17+X1": {
+   "id": 17,
+   "nivel": "normal",
+   "supuesto_de_R": false
+  },
+  "h18+X2": {
+   "id": 18,
+   "nivel": "normal",
+   "supuesto_de_R": false
+  },
+  "X0": {
+   "id": 0,
+   "nivel": "normal",
+   "supuesto_de_R": false
+  },
+  "X3": {
+   "id": 3,
+   "nivel": "normal",
+   "supuesto_de_R": true
+  },
+  "union H18-X0 (conector X0-h18)": {
+   "id": 104,
+   "nivel": "normal",
+   "supuesto_de_R": true
+  }
+ },
+ "orden": "superior > normal > sub-terraza",
+ "sub_terraza": "1 o 2 escalones mas baja, sin fijar",
+ "pendientes_de_U": [
+  "X3 y la union H18-X0: nivel normal (supuesto de R; A988 las dejo sin asignar)",
+  "Y16: sub-terraza (A988 la anota como 16; R la lee como Y16)"
+ ]
+}
