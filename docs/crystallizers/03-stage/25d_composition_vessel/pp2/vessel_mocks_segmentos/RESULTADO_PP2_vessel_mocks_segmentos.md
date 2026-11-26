@@ -98,7 +98,7 @@ Parejas que no se tocan ni en la base: las que aparecen con distancia > 1 en la 
 ## Lo que no calzó con la predicción de [R]
 
 - **Solapes de caja heredados:** con la forma real **no aparecen como choques**: hub 20 y X6 contra Y11, Y16 contra hub 23 y X0 contra los hubs no dejan ningún par no pareja a menos de 2 celdas ni en la base ni en A, B o U. Coincide con la predicción.
-- **Patas más finas que su caja:** Y10 llena 96% (A), 96% (B) y 96% (U) de su caja; Y11 56%, 56% y 57%. Coincide: no son rectangulares (el piso de Y11 en la base se retira del rincón de X6).
+- **Patas más finas que su caja** (predicción): Y10 llena 96% (A), 96% (B) y 96% (U) de su caja; Y11 56%, 56% y 57%. Coincide solo para Y11 (su piso no es rectangular: la base se retira del rincón de X6); Y10 llena casi toda su caja y se ve igual de ancha que ella.
 - **Choques reales en B, y entre hub 25, Y16 y hub 24 en A y U:** en **B** hay un par no pareja a menos de 2 celdas (el puente Y13 queda pegado al piso de Y11, distancia 1); en A y en U **ninguno**, y no hay choques entre hub 25, Y16 y hub 24 (hub 23 – Y16, que es pareja, pasa de 1 a 2 en U). No coincide en A y U.
 - **Y14 y Y15 de ≈ 3,4 celdas en B:** la caja redondeada queda de 11 × 3 (objetivo 3,38 de alto) y la distancia entre sus dos salas es 4 en los dos puentes (X5 – hub 19 y X6 – hub 20); en el pie de Y14 la distancia a X5 es 4 y a hub 19 es 2, y en Y15 las dos son 1.
 
