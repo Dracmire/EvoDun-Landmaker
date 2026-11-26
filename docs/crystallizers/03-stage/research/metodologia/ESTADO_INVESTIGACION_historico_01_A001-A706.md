@@ -23,13 +23,18 @@ Estado: aprobada por [U] el 2026-11-26 (04:02), con el encuadre «Qué es esto y
 ## Qué es esto y dónde estamos (leer primero)
 
 - **Qué se construye.** Una herramienta online, el visor de EvoDun-Landmaker, no el juego. La rama Cristalizadores busca un visor con HD-2D. Tus palabras (mensaje del 26 nov, 04:02): «este es un pase intermedio para obtener un viewer con hd-2d, no es un juego sino una herramienta online».
-- **Qué ya existe.** El proceso ya tiene un método de generación de rooms: el «modelo actual». Tus palabras (PASE_2_5D §7, punto 4): «como ganancia tubimos el modelo actual que es capaz de reproducir topologia con una %X de fidelidad». Su documento es `MODELO_ACTUAL.md` (v2.5): lo que sabemos de cómo se ve y cómo se construye una vista 2D-HD; la meta es terminar cuando ese modelo genere 2D-HD.
-- **Qué teoriza la rama actual.** Hace falta un pase 2.5D como intermedio, para dar dos saltos: de SNES a 2.5D y de 2.5D a HD-2D. Tus palabras (mismo mensaje del 26 nov): «pase 2.5d como pase intermedio para saltE de snes a 2.5d y de 2.5d a hd-2d». Dentro del pase, el proceso es extraer los datos del SNES, generar el vessel y aplicar los datos (B10, tu mensaje 3 de `PASE_2_5D_muros`).
+- **Dos documentos, dos funciones, sin relación entre sí** (tus palabras, 26 nov, 04:17): «Modelo actual -> como hacemos 3d ahora» y «Pauta 2.5d -> como se genera la para de conversión» (aquí «para» es «pauta»).
+  - **Modelo actual** (`MODELO_ACTUAL.md`): la forma actual con la que se construyen rooms y locaciones. Es nuestro alfa de HD-2D: dice cómo construir con nuestro estilo. No tiene relación con el 2.5D.
+  - **Pauta 2.5D** (`PASE_2_5D*.md`): cómo se genera la pauta de conversión.
+- **Qué teoriza la rama actual.** Hace falta un pase 2.5D como intermedio, para dar dos saltos: de SNES a 2.5D y de 2.5D a HD-2D. Tus palabras (26 nov, 04:02): «pase 2.5d como pase intermedio para saltE de snes a 2.5d y de 2.5d a hd-2d». Dentro del pase, el proceso es extraer los datos del SNES, generar el vessel y aplicar los datos (B10, tu mensaje 3 de `PASE_2_5D_muros`).
 - **Dónde estamos.** Dentro del pase 2.5D estamos en el paso 10, sobre muros (10a muro inventado, 10b muros reales, 10c pisos y conectores, 10d uniones, set U). Tus palabras (26 nov, 04:02): «En ese pase de 2.5d nosotros estamos en el pase 10 sobre muros». Es el eslabón B12.
 
 ```
-SNES 16 bits ──► [ PASE 2.5D, estamos en el paso 10 (muros) ] ──► 2.5D ──► HD-2D (visor online)
-                  extraer datos SNES → generar el vessel → aplicar los datos
+SNES 16 bits ──► [ PASE 2.5D · pauta de conversión · estamos en el paso 10 (muros) ] ──► 2.5D ──► HD-2D (visor online)
+                    extraer datos SNES → generar el vessel → aplicar los datos
+
+Aparte, sin relación con el 2.5D:
+MODELO ACTUAL = cómo construimos rooms y locaciones con nuestro estilo (nuestro alfa de HD-2D)
 ```
 
 ## Parte A. Sumario de lo anterior (A001–A638, 9–21 nov)
