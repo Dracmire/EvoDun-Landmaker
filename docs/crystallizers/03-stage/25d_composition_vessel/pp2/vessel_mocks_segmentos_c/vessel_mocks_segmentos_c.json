@@ -1,0 +1,1463 @@
+{
+ "base": "9e500971dbdb215e4572948fcaa16872050fbb65",
+ "origen_de_las_clases": {
+  "fuente": "escena original (volcado del plano 6c) mas el muro de X3 del 8k",
+  "scene_npz_sha256": "d835d463ec2512a704c93caba7aa07faf5b4173fcd6eca804f2b9c875bb47518",
+  "muro_de_X3": {
+   "filas": [
+    33,
+    34
+   ],
+   "columnas": [
+    24,
+    33
+   ],
+   "celdas": 20,
+   "segun": "muro minimo de 1 tile (2 celdas) que cierra X3 por abajo entre sus muros laterales: filas 33 y 34 (la 34 es la fila del muro inferior de las salas vecinas), columnas 24 a 33, a la altura 14 de ese muro; no habia gate ni escalera en el tramo"
+  },
+  "escena_8k_sin_cambios_en_8l_8m_8n": "el volcado conserva el mismo sha256 y el parche de X3 es el mismo (lit.py)"
+ },
+ "comparacion_con_BASE": {
+  "Y10": {
+   "caja_de_la_clase": [
+    1,
+    49,
+    9,
+    84
+   ],
+   "tabla_BASE": [
+    1,
+    49,
+    9,
+    84
+   ],
+   "coincide": true
+  },
+  "Y11 (g11)": {
+   "caja_de_la_clase": [
+    43,
+    40,
+    57,
+    86
+   ],
+   "tabla_BASE": [
+    43,
+    40,
+    57,
+    86
+   ],
+   "coincide": true
+  },
+  "X5": {
+   "caja_de_la_clase": [
+    3,
+    40,
+    28,
+    57
+   ],
+   "tabla_BASE": [
+    3,
+    40,
+    28,
+    57
+   ],
+   "coincide": true
+  },
+  "X4": {
+   "caja_de_la_clase": [
+    23,
+    40,
+    35,
+    49
+   ],
+   "tabla_BASE": [
+    23,
+    40,
+    35,
+    49
+   ],
+   "coincide": true
+  },
+  "X6": {
+   "caja_de_la_clase": [
+    30,
+    40,
+    50,
+    57
+   ],
+   "tabla_BASE": [
+    30,
+    40,
+    50,
+    57
+   ],
+   "coincide": true
+  },
+  "h23": {
+   "caja_de_la_clase": [
+    8,
+    80,
+    21,
+    91
+   ],
+   "tabla_BASE": [
+    8,
+    80,
+    21,
+    91
+   ],
+   "coincide": true
+  },
+  "h24": {
+   "caja_de_la_clase": [
+    37,
+    80,
+    50,
+    92
+   ],
+   "tabla_BASE": [
+    37,
+    80,
+    50,
+    92
+   ],
+   "coincide": true
+  },
+  "Y16": {
+   "caja_de_la_clase": [
+    15,
+    87,
+    22,
+    95
+   ],
+   "tabla_BASE": [
+    15,
+    87,
+    22,
+    95
+   ],
+   "coincide": true
+  },
+  "h19": {
+   "caja_de_la_clase": [
+    12,
+    61,
+    28,
+    77
+   ],
+   "tabla_BASE": [
+    12,
+    61,
+    28,
+    77
+   ],
+   "coincide": true
+  },
+  "h20": {
+   "caja_de_la_clase": [
+    30,
+    61,
+    46,
+    77
+   ],
+   "tabla_BASE": [
+    30,
+    61,
+    46,
+    77
+   ],
+   "coincide": true
+  },
+  "h25": {
+   "caja_de_la_clase": [
+    24,
+    81,
+    34,
+    91
+   ],
+   "tabla_BASE": [
+    24,
+    81,
+    34,
+    91
+   ],
+   "coincide": true
+  },
+  "h17+X1": {
+   "caja_de_la_clase": [
+    4,
+    17,
+    22,
+    30
+   ],
+   "tabla_BASE": [
+    4,
+    17,
+    22,
+    30
+   ],
+   "coincide": true
+  },
+  "h18+X2": {
+   "caja_de_la_clase": [
+    36,
+    17,
+    54,
+    31
+   ],
+   "tabla_BASE": [
+    36,
+    17,
+    54,
+    31
+   ],
+   "coincide": true
+  },
+  "X0": {
+   "caja_de_la_clase": [
+    16,
+    10,
+    42,
+    18
+   ],
+   "tabla_BASE": [
+    16,
+    10,
+    42,
+    18
+   ],
+   "coincide": true
+  },
+  "X3": {
+   "caja_de_la_clase": [
+    24,
+    23,
+    34,
+    33
+   ],
+   "tabla_BASE": [
+    24,
+    23,
+    34,
+    33
+   ],
+   "coincide": true
+  }
+ },
+ "comparacion_con_la_escena_y_la_imagen_del_8k": {
+  "scene_8k_vs_imagen_k_(muro_gris_fuera_de_los_pisos_de_nivel_1)": {
+   "celdas_distintas": 0
+  },
+  "mis_clases_vs_escena_8k_(muro_minimo+sobrante+muro_externo_visibles)": {
+   "celdas_distintas": 0
+  },
+  "mis_clases_vs_imagen_k_fuera_de_nivel_1": {
+   "celdas_distintas": 0,
+   "dentro_de_X3": 0
+  }
+ },
+ "identidad_k1": {
+  "celdas_distintas_de_clase": 0,
+  "celdas_distintas_de_pieza": 0,
+  "celdas_distintas_de_marcador": 0,
+  "por_clase": {
+   "fondo": 0,
+   "piso de sala 0": 0,
+   "piso de sala 3": 0,
+   "piso de sala 4": 0,
+   "piso de sala 5": 0,
+   "piso de sala 6": 0,
+   "piso de sala 10": 0,
+   "piso de sala 11": 0,
+   "piso de sala 16": 0,
+   "piso de sala 17": 0,
+   "piso de sala 18": 0,
+   "piso de sala 19": 0,
+   "piso de sala 20": 0,
+   "piso de sala 23": 0,
+   "piso de sala 24": 0,
+   "piso de sala 25": 0,
+   "corredor": 0,
+   "escalera_y_muesca": 0,
+   "muro_minimo": 0,
+   "muro_sobrante": 0,
+   "conector": 0
+  }
+ },
+ "muro_base_(minimo + sobrante)": 590,
+ "piso": {
+  "gates_de_un_solo_room": {
+   "1": 0,
+   "2": 0,
+   "7": 3,
+   "10": 19,
+   "11": 20,
+   "12": 23,
+   "13": 24
+  },
+  "gates_en_el_extremo_de_un_pasillo": {
+   "5": 12,
+   "6": 13,
+   "8": 14,
+   "9": 15,
+   "17": 9
+  },
+  "conectores": {
+   "103": 3,
+   "104": 4,
+   "114": 14,
+   "115": 15,
+   "116": 16
+  },
+  "celdas_de_escalera_y_muesca_fuera_de_las_piezas": 24,
+  "celdas_de_marcador": 108,
+  "X3_celdas_de_piso_base_nueva": 100
+ },
+ "conjuntos": {
+  "BASE": {
+   "muro_minimo": 565,
+   "muro_sobrante": 25,
+   "muro_total": 590,
+   "razon_con_la_base": 1.0,
+   "muro_borrado_al_adelgazar": 0,
+   "muro_borrado_sobre_piso_ajeno": 0,
+   "muro_borrado_sobre_piso_propio": 0,
+   "muro_borrado_sobre_escalera": 0,
+   "dibujado_(l,t,r,b)": [
+    1,
+    10,
+    57,
+    95
+   ],
+   "dibujado_celdas": [
+    56,
+    85
+   ],
+   "dibujado_pantallas_32x28": [
+    1.75,
+    3.04
+   ],
+   "piezas_plasticas": {
+    "Y12": {
+     "eje": "v",
+     "une": [
+      "h17+X1",
+      "X5"
+     ],
+     "largo_en_la_base": 15,
+     "largo_en_el_set": 15,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y13": {
+     "eje": "v",
+     "une": [
+      "h18+X2",
+      "X6"
+     ],
+     "largo_en_la_base": 15,
+     "largo_en_el_set": 15,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y14": {
+     "eje": "v",
+     "une": [
+      "X5",
+      "h19"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 9,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y15": {
+     "eje": "v",
+     "une": [
+      "X6",
+      "h20"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 9,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "X9": {
+     "eje": "h",
+     "une": [
+      "h25",
+      "h24"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 9,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector X0-h17": {
+     "eje": "v",
+     "une": [
+      "X0",
+      "h17+X1"
+     ],
+     "largo_en_la_base": 2,
+     "largo_en_el_set": 2,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector X0-h18": {
+     "eje": "v",
+     "une": [
+      "X0",
+      "h18+X2"
+     ],
+     "largo_en_la_base": 2,
+     "largo_en_el_set": 2,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector Y16-h23": {
+     "eje": "h",
+     "une": [
+      "h23",
+      "Y16"
+     ],
+     "largo_en_la_base": 3,
+     "largo_en_el_set": 3,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector Y10-h23": {
+     "eje": "elbow",
+     "une": [
+      "Y10",
+      "h23"
+     ],
+     "largo_en_la_base": null,
+     "largo_en_el_set": null,
+     "estado": "codo: no se estira; queda donde cae (el contacto con Y10 / g11 es por arriba y el de h23 / h24 por el costado: dos ejes)",
+     "alinea": null,
+     "desfase_transversal": 0
+    },
+    "conector Y11-h24": {
+     "eje": "elbow",
+     "une": [
+      "Y11 (g11)",
+      "h24"
+     ],
+     "largo_en_la_base": null,
+     "largo_en_el_set": null,
+     "estado": "codo: no se estira; queda donde cae (el contacto con Y10 / g11 es por arriba y el de h23 / h24 por el costado: dos ejes)",
+     "alinea": null,
+     "desfase_transversal": 0
+    }
+   },
+   "enlaces": {
+    "pares": {
+     "Y10 - X5": {
+      "estado": "unido"
+     },
+     "X5 - X4": {
+      "estado": "unido"
+     },
+     "X4 - X6": {
+      "estado": "unido"
+     },
+     "X6 - Y11 (g11)": {
+      "estado": "unido"
+     },
+     "Y10 - h23": {
+      "estado": "unido"
+     },
+     "Y11 (g11) - h24": {
+      "estado": "unido"
+     },
+     "h23 - Y16": {
+      "estado": "unido"
+     },
+     "X0 - h17+X1": {
+      "estado": "unido"
+     },
+     "X0 - h18+X2": {
+      "estado": "unido"
+     },
+     "Y12 - h17+X1": {
+      "estado": "unido"
+     },
+     "Y12 - X5": {
+      "estado": "unido"
+     },
+     "Y13 - h18+X2": {
+      "estado": "unido"
+     },
+     "Y13 - X6": {
+      "estado": "unido"
+     },
+     "Y14 - X5": {
+      "estado": "unido"
+     },
+     "Y14 - h19": {
+      "estado": "unido"
+     },
+     "Y15 - X6": {
+      "estado": "unido"
+     },
+     "Y15 - h20": {
+      "estado": "unido"
+     },
+     "X9 - h25": {
+      "estado": "unido"
+     },
+     "X9 - h24": {
+      "estado": "unido"
+     }
+    },
+    "piezas_que_no_tocan_sus_dos_pisos": [],
+    "componentes_conexas": [
+     {
+      "celdas": 2672,
+      "salas": [
+       "Y10",
+       "Y11 (g11)",
+       "X5",
+       "X4",
+       "X6",
+       "h23",
+       "h24",
+       "Y16",
+       "h19",
+       "h20",
+       "h25",
+       "h17+X1",
+       "h18+X2",
+       "X0"
+      ],
+      "piezas": [
+       "Y12",
+       "Y13",
+       "Y14",
+       "Y15",
+       "X9",
+       "conector X0-h17",
+       "conector X0-h18",
+       "conector Y16-h23",
+       "conector Y10-h23",
+       "conector Y11-h24"
+      ]
+     },
+     {
+      "celdas": 100,
+      "salas": [
+       "X3"
+      ],
+      "piezas": []
+     }
+    ]
+   },
+   "X3": {
+    "caja_objetivo_usada": [
+     24,
+     23,
+     34,
+     33
+    ],
+    "celdas_de_piso": 100,
+    "cierre_de_muro": {
+     "cerrada_por_los_cuatro_lados": true,
+     "celdas_de_la_region_que_encierra_(piso + hueco entre piso y muro)": 120,
+     "sale_al_borde_del_lienzo": false,
+     "celdas_del_borde_vecino_al_piso_que_no_son_muro": 10,
+     "celdas_de_muro_que_faltan_para_cerrar": 0
+    }
+   }
+  },
+  "A": {
+   "muro_minimo": 1057,
+   "muro_sobrante": 42,
+   "muro_total": 1099,
+   "razon_con_la_base": 1.863,
+   "muro_borrado_al_adelgazar": 671,
+   "muro_borrado_sobre_piso_ajeno": 6,
+   "muro_borrado_sobre_piso_propio": 0,
+   "muro_borrado_sobre_escalera": 0,
+   "dibujado_(l,t,r,b)": [
+    -34,
+    -24,
+    80,
+    185
+   ],
+   "dibujado_celdas": [
+    114,
+    209
+   ],
+   "dibujado_pantallas_32x28": [
+    3.56,
+    7.46
+   ],
+   "piezas_plasticas": {
+    "Y12": {
+     "eje": "v",
+     "une": [
+      "h17+X1",
+      "X5"
+     ],
+     "largo_en_la_base": 15,
+     "largo_en_el_set": 30,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y13": {
+     "eje": "v",
+     "une": [
+      "h18+X2",
+      "X6"
+     ],
+     "largo_en_la_base": 15,
+     "largo_en_el_set": 30,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y14": {
+     "eje": "v",
+     "une": [
+      "X5",
+      "h19"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 32,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y15": {
+     "eje": "v",
+     "une": [
+      "X6",
+      "h20"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 34,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "X9": {
+     "eje": "h",
+     "une": [
+      "h25",
+      "h24"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 11,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector X0-h17": {
+     "eje": "v",
+     "une": [
+      "X0",
+      "h17+X1"
+     ],
+     "largo_en_la_base": 2,
+     "largo_en_el_set": 2,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector X0-h18": {
+     "eje": "v",
+     "une": [
+      "X0",
+      "h18+X2"
+     ],
+     "largo_en_la_base": 2,
+     "largo_en_el_set": 5,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector Y16-h23": {
+     "eje": "h",
+     "une": [
+      "h23",
+      "Y16"
+     ],
+     "largo_en_la_base": 3,
+     "largo_en_el_set": 6,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector Y10-h23": {
+     "eje": "elbow",
+     "une": [
+      "Y10",
+      "h23"
+     ],
+     "largo_en_la_base": null,
+     "largo_en_el_set": null,
+     "estado": "codo: no se estira; queda donde cae (el contacto con Y10 / g11 es por arriba y el de h23 / h24 por el costado: dos ejes)",
+     "alinea": null,
+     "desfase_transversal": 0
+    },
+    "conector Y11-h24": {
+     "eje": "elbow",
+     "une": [
+      "Y11 (g11)",
+      "h24"
+     ],
+     "largo_en_la_base": null,
+     "largo_en_el_set": null,
+     "estado": "codo: no se estira; queda donde cae (el contacto con Y10 / g11 es por arriba y el de h23 / h24 por el costado: dos ejes)",
+     "alinea": null,
+     "desfase_transversal": 0
+    }
+   },
+   "enlaces": {
+    "pares": {
+     "Y10 - X5": {
+      "estado": "roto",
+      "distancia_minima_cheb": 2
+     },
+     "X5 - X4": {
+      "estado": "unido"
+     },
+     "X4 - X6": {
+      "estado": "unido"
+     },
+     "X6 - Y11 (g11)": {
+      "estado": "roto",
+      "distancia_minima_cheb": 2
+     },
+     "Y10 - h23": {
+      "estado": "roto",
+      "distancia_minima_cheb": 2
+     },
+     "Y11 (g11) - h24": {
+      "estado": "roto",
+      "distancia_minima_cheb": 6
+     },
+     "h23 - Y16": {
+      "estado": "unido"
+     },
+     "X0 - h17+X1": {
+      "estado": "unido"
+     },
+     "X0 - h18+X2": {
+      "estado": "unido"
+     },
+     "Y12 - h17+X1": {
+      "estado": "unido"
+     },
+     "Y12 - X5": {
+      "estado": "unido"
+     },
+     "Y13 - h18+X2": {
+      "estado": "unido"
+     },
+     "Y13 - X6": {
+      "estado": "unido"
+     },
+     "Y14 - X5": {
+      "estado": "unido"
+     },
+     "Y14 - h19": {
+      "estado": "unido"
+     },
+     "Y15 - X6": {
+      "estado": "unido"
+     },
+     "Y15 - h20": {
+      "estado": "unido"
+     },
+     "X9 - h25": {
+      "estado": "unido"
+     },
+     "X9 - h24": {
+      "estado": "unido"
+     }
+    },
+    "piezas_que_no_tocan_sus_dos_pisos": [
+     {
+      "pieza": "conector Y10-h23",
+      "toca_A": true,
+      "toca_B": false
+     },
+     {
+      "pieza": "conector Y11-h24",
+      "toca_A": true,
+      "toca_B": false
+     }
+    ],
+    "componentes_conexas": [
+     {
+      "celdas": 6558,
+      "salas": [
+       "X5",
+       "X4",
+       "X6",
+       "h19",
+       "h20",
+       "h17+X1",
+       "h18+X2",
+       "X0"
+      ],
+      "piezas": [
+       "Y12",
+       "Y13",
+       "Y14",
+       "Y15",
+       "conector X0-h17",
+       "conector X0-h18"
+      ]
+     },
+     {
+      "celdas": 400,
+      "salas": [
+       "X3"
+      ],
+      "piezas": []
+     },
+     {
+      "celdas": 1739,
+      "salas": [
+       "Y11 (g11)"
+      ],
+      "piezas": [
+       "conector Y11-h24"
+      ]
+     },
+     {
+      "celdas": 2499,
+      "salas": [
+       "Y10"
+      ],
+      "piezas": [
+       "conector Y10-h23"
+      ]
+     },
+     {
+      "celdas": 694,
+      "salas": [
+       "h24",
+       "h25"
+      ],
+      "piezas": [
+       "X9"
+      ]
+     },
+     {
+      "celdas": 578,
+      "salas": [
+       "h23",
+       "Y16"
+      ],
+      "piezas": [
+       "conector Y16-h23"
+      ]
+     }
+    ]
+   },
+   "X3": {
+    "caja_objetivo_usada": [
+     19,
+     6,
+     39,
+     26
+    ],
+    "celdas_de_piso": 400,
+    "cierre_de_muro": {
+     "cerrada_por_los_cuatro_lados": true,
+     "celdas_de_la_region_que_encierra_(piso + hueco entre piso y muro)": 440,
+     "sale_al_borde_del_lienzo": false,
+     "celdas_del_borde_vecino_al_piso_que_no_son_muro": 20,
+     "celdas_de_muro_que_faltan_para_cerrar": 0
+    }
+   }
+  },
+  "B": {
+   "muro_minimo": 1416,
+   "muro_sobrante": 47,
+   "muro_total": 1463,
+   "razon_con_la_base": 2.48,
+   "muro_borrado_al_adelgazar": 1152,
+   "muro_borrado_sobre_piso_ajeno": 63,
+   "muro_borrado_sobre_piso_propio": 0,
+   "muro_borrado_sobre_escalera": 8,
+   "dibujado_(l,t,r,b)": [
+    -60,
+    -58,
+    118,
+    187
+   ],
+   "dibujado_celdas": [
+    178,
+    245
+   ],
+   "dibujado_pantallas_32x28": [
+    5.56,
+    8.75
+   ],
+   "piezas_plasticas": {
+    "Y12": {
+     "eje": "v",
+     "une": [
+      "h17+X1",
+      "X5"
+     ],
+     "largo_en_la_base": 15,
+     "largo_en_el_set": 53,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y13": {
+     "eje": "v",
+     "une": [
+      "h18+X2",
+      "X6"
+     ],
+     "largo_en_la_base": 15,
+     "largo_en_el_set": 53,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y14": {
+     "eje": "v",
+     "une": [
+      "X5",
+      "h19"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 18,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y15": {
+     "eje": "v",
+     "une": [
+      "X6",
+      "h20"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 16,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "X9": {
+     "eje": "h",
+     "une": [
+      "h25",
+      "h24"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 9,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector X0-h17": {
+     "eje": "v",
+     "une": [
+      "X0",
+      "h17+X1"
+     ],
+     "largo_en_la_base": 2,
+     "largo_en_el_set": 18,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 4
+    },
+    "conector X0-h18": {
+     "eje": "v",
+     "une": [
+      "X0",
+      "h18+X2"
+     ],
+     "largo_en_la_base": 2,
+     "largo_en_el_set": 18,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector Y16-h23": {
+     "eje": "h",
+     "une": [
+      "h23",
+      "Y16"
+     ],
+     "largo_en_la_base": 3,
+     "largo_en_el_set": 5,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector Y10-h23": {
+     "eje": "elbow",
+     "une": [
+      "Y10",
+      "h23"
+     ],
+     "largo_en_la_base": null,
+     "largo_en_el_set": null,
+     "estado": "codo: no se estira; queda donde cae (el contacto con Y10 / g11 es por arriba y el de h23 / h24 por el costado: dos ejes)",
+     "alinea": null,
+     "desfase_transversal": 0
+    },
+    "conector Y11-h24": {
+     "eje": "elbow",
+     "une": [
+      "Y11 (g11)",
+      "h24"
+     ],
+     "largo_en_la_base": null,
+     "largo_en_el_set": null,
+     "estado": "codo: no se estira; queda donde cae (el contacto con Y10 / g11 es por arriba y el de h23 / h24 por el costado: dos ejes)",
+     "alinea": null,
+     "desfase_transversal": 0
+    }
+   },
+   "enlaces": {
+    "pares": {
+     "Y10 - X5": {
+      "estado": "unido"
+     },
+     "X5 - X4": {
+      "estado": "unido"
+     },
+     "X4 - X6": {
+      "estado": "unido"
+     },
+     "X6 - Y11 (g11)": {
+      "estado": "unido"
+     },
+     "Y10 - h23": {
+      "estado": "unido"
+     },
+     "Y11 (g11) - h24": {
+      "estado": "roto",
+      "distancia_minima_cheb": 4
+     },
+     "h23 - Y16": {
+      "estado": "unido"
+     },
+     "X0 - h17+X1": {
+      "estado": "unido"
+     },
+     "X0 - h18+X2": {
+      "estado": "unido"
+     },
+     "Y12 - h17+X1": {
+      "estado": "unido"
+     },
+     "Y12 - X5": {
+      "estado": "unido"
+     },
+     "Y13 - h18+X2": {
+      "estado": "unido"
+     },
+     "Y13 - X6": {
+      "estado": "unido"
+     },
+     "Y14 - X5": {
+      "estado": "unido"
+     },
+     "Y14 - h19": {
+      "estado": "unido"
+     },
+     "Y15 - X6": {
+      "estado": "unido"
+     },
+     "Y15 - h20": {
+      "estado": "unido"
+     },
+     "X9 - h25": {
+      "estado": "unido"
+     },
+     "X9 - h24": {
+      "estado": "unido"
+     }
+    },
+    "piezas_que_no_tocan_sus_dos_pisos": [
+     {
+      "pieza": "conector Y10-h23",
+      "toca_A": true,
+      "toca_B": false
+     },
+     {
+      "pieza": "conector Y11-h24",
+      "toca_A": true,
+      "toca_B": false
+     }
+    ],
+    "componentes_conexas": [
+     {
+      "celdas": 19655,
+      "salas": [
+       "Y10",
+       "Y11 (g11)",
+       "X5",
+       "X4",
+       "X6",
+       "h23",
+       "Y16",
+       "h19",
+       "h20",
+       "h17+X1",
+       "h18+X2",
+       "X0"
+      ],
+      "piezas": [
+       "Y12",
+       "Y13",
+       "Y14",
+       "Y15",
+       "conector X0-h17",
+       "conector X0-h18",
+       "conector Y16-h23",
+       "conector Y10-h23",
+       "conector Y11-h24"
+      ]
+     },
+     {
+      "celdas": 1296,
+      "salas": [
+       "X3"
+      ],
+      "piezas": []
+     },
+     {
+      "celdas": 1836,
+      "salas": [
+       "h24",
+       "h25"
+      ],
+      "piezas": [
+       "X9"
+      ]
+     }
+    ]
+   },
+   "X3": {
+    "caja_objetivo_usada": [
+     11,
+     -21,
+     47,
+     15
+    ],
+    "celdas_de_piso": 1296,
+    "cierre_de_muro": {
+     "cerrada_por_los_cuatro_lados": true,
+     "celdas_de_la_region_que_encierra_(piso + hueco entre piso y muro)": 1368,
+     "sale_al_borde_del_lienzo": false,
+     "celdas_del_borde_vecino_al_piso_que_no_son_muro": 36,
+     "celdas_de_muro_que_faltan_para_cerrar": 0
+    }
+   }
+  },
+  "U": {
+   "muro_minimo": 1478,
+   "muro_sobrante": 66,
+   "muro_total": 1544,
+   "razon_con_la_base": 2.617,
+   "muro_borrado_al_adelgazar": 1639,
+   "muro_borrado_sobre_piso_ajeno": 25,
+   "muro_borrado_sobre_piso_propio": 0,
+   "muro_borrado_sobre_escalera": 0,
+   "dibujado_(l,t,r,b)": [
+    -57,
+    -62,
+    116,
+    202
+   ],
+   "dibujado_celdas": [
+    173,
+    264
+   ],
+   "dibujado_pantallas_32x28": [
+    5.41,
+    9.43
+   ],
+   "piezas_plasticas": {
+    "Y12": {
+     "eje": "v",
+     "une": [
+      "h17+X1",
+      "X5"
+     ],
+     "largo_en_la_base": 15,
+     "largo_en_el_set": 46,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y13": {
+     "eje": "v",
+     "une": [
+      "h18+X2",
+      "X6"
+     ],
+     "largo_en_la_base": 15,
+     "largo_en_el_set": 47,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y14": {
+     "eje": "v",
+     "une": [
+      "X5",
+      "h19"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 25,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "Y15": {
+     "eje": "v",
+     "une": [
+      "X6",
+      "h20"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 27,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "X9": {
+     "eje": "h",
+     "une": [
+      "h25",
+      "h24"
+     ],
+     "largo_en_la_base": 9,
+     "largo_en_el_set": 8,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector X0-h17": {
+     "eje": "v",
+     "une": [
+      "X0",
+      "h17+X1"
+     ],
+     "largo_en_la_base": 2,
+     "largo_en_el_set": 2,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector X0-h18": {
+     "eje": "v",
+     "une": [
+      "X0",
+      "h18+X2"
+     ],
+     "largo_en_la_base": 2,
+     "largo_en_el_set": 6,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector Y16-h23": {
+     "eje": "h",
+     "une": [
+      "h23",
+      "Y16"
+     ],
+     "largo_en_la_base": 3,
+     "largo_en_el_set": 4,
+     "estado": "resuelta",
+     "alinea": true,
+     "desfase_transversal": 0
+    },
+    "conector Y10-h23": {
+     "eje": "elbow",
+     "une": [
+      "Y10",
+      "h23"
+     ],
+     "largo_en_la_base": null,
+     "largo_en_el_set": null,
+     "estado": "codo: no se estira; queda donde cae (el contacto con Y10 / g11 es por arriba y el de h23 / h24 por el costado: dos ejes)",
+     "alinea": null,
+     "desfase_transversal": 0
+    },
+    "conector Y11-h24": {
+     "eje": "elbow",
+     "une": [
+      "Y11 (g11)",
+      "h24"
+     ],
+     "largo_en_la_base": null,
+     "largo_en_el_set": null,
+     "estado": "codo: no se estira; queda donde cae (el contacto con Y10 / g11 es por arriba y el de h23 / h24 por el costado: dos ejes)",
+     "alinea": null,
+     "desfase_transversal": 0
+    }
+   },
+   "enlaces": {
+    "pares": {
+     "Y10 - X5": {
+      "estado": "unido"
+     },
+     "X5 - X4": {
+      "estado": "unido"
+     },
+     "X4 - X6": {
+      "estado": "unido"
+     },
+     "X6 - Y11 (g11)": {
+      "estado": "roto",
+      "distancia_minima_cheb": 6
+     },
+     "Y10 - h23": {
+      "estado": "unido"
+     },
+     "Y11 (g11) - h24": {
+      "estado": "roto",
+      "distancia_minima_cheb": 13
+     },
+     "h23 - Y16": {
+      "estado": "unido"
+     },
+     "X0 - h17+X1": {
+      "estado": "unido"
+     },
+     "X0 - h18+X2": {
+      "estado": "unido"
+     },
+     "Y12 - h17+X1": {
+      "estado": "unido"
+     },
+     "Y12 - X5": {
+      "estado": "unido"
+     },
+     "Y13 - h18+X2": {
+      "estado": "unido"
+     },
+     "Y13 - X6": {
+      "estado": "unido"
+     },
+     "Y14 - X5": {
+      "estado": "unido"
+     },
+     "Y14 - h19": {
+      "estado": "unido"
+     },
+     "Y15 - X6": {
+      "estado": "unido"
+     },
+     "Y15 - h20": {
+      "estado": "unido"
+     },
+     "X9 - h25": {
+      "estado": "unido"
+     },
+     "X9 - h24": {
+      "estado": "unido"
+     }
+    },
+    "piezas_que_no_tocan_sus_dos_pisos": [
+     {
+      "pieza": "conector Y10-h23",
+      "toca_A": true,
+      "toca_B": false
+     },
+     {
+      "pieza": "conector Y11-h24",
+      "toca_A": true,
+      "toca_B": false
+     }
+    ],
+    "componentes_conexas": [
+     {
+      "celdas": 18366,
+      "salas": [
+       "Y10",
+       "X5",
+       "X4",
+       "X6",
+       "h23",
+       "Y16",
+       "h19",
+       "h20",
+       "h17+X1",
+       "h18+X2",
+       "X0"
+      ],
+      "piezas": [
+       "Y12",
+       "Y13",
+       "Y14",
+       "Y15",
+       "conector X0-h17",
+       "conector X0-h18",
+       "conector Y16-h23",
+       "conector Y10-h23"
+      ]
+     },
+     {
+      "celdas": 1600,
+      "salas": [
+       "X3"
+      ],
+      "piezas": []
+     },
+     {
+      "celdas": 3883,
+      "salas": [
+       "Y11 (g11)"
+      ],
+      "piezas": [
+       "conector Y11-h24"
+      ]
+     },
+     {
+      "celdas": 1802,
+      "salas": [
+       "h24",
+       "h25"
+      ],
+      "piezas": [
+       "X9"
+      ]
+     }
+    ]
+   },
+   "X3": {
+    "caja_objetivo_usada": [
+     9,
+     -19,
+     49,
+     21
+    ],
+    "celdas_de_piso": 1600,
+    "cierre_de_muro": {
+     "cerrada_por_los_cuatro_lados": true,
+     "celdas_de_la_region_que_encierra_(piso + hueco entre piso y muro)": 1680,
+     "sale_al_borde_del_lienzo": false,
+     "celdas_del_borde_vecino_al_piso_que_no_son_muro": 40,
+     "celdas_de_muro_que_faltan_para_cerrar": 0
+    }
+   }
+  }
+ }
+}
